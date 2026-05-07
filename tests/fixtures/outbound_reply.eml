@@ -1,0 +1,10 @@
+From: sales@company.com
+To: alice@customer.example
+Date: Mon, 04 May 2026 11:30:00 +0000
+Subject: Re: Question about pricing
+Message-ID: <thread-1-msg-2@company.com>
+In-Reply-To: <thread-1-msg-1@customer.example>
+References: <thread-1-msg-1@customer.example>
+Content-Type: text/plain; charset=utf-8
+
+Hi Alice — happy to help. For 50 seats it's $X/seat/month.

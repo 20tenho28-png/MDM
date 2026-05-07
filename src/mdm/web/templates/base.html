@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MDM — Email Tickets</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      html, body { height: 100%; }
+      body { background: #000; color: #fff; font-family: ui-sans-serif, system-ui, sans-serif; }
+      .card-green  { border-color: #22c55e; box-shadow: 0 0 0 2px #22c55e44; }
+      .card-yellow { border-color: #eab308; box-shadow: 0 0 0 2px #eab30844; }
+      .card-orange { border-color: #f97316; box-shadow: 0 0 0 2px #f9731644; }
+      .card-red    { border-color: #ef4444; box-shadow: 0 0 0 2px #ef4444aa; animation: pulse-red 2s infinite; }
+      @keyframes pulse-red {
+        0%, 100% { box-shadow: 0 0 0 2px #ef4444aa; }
+        50%      { box-shadow: 0 0 0 6px #ef4444; }
+      }
+    </style>
+  </head>
+  <body class="overflow-hidden">
+    {% block body %}{% endblock %}
+  </body>
+</html>

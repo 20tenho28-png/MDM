@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block body %}
+  <div id="board" hx-get="/board" hx-trigger="every {{ wall_refresh_seconds }}s" hx-swap="outerHTML">
+    {% include "partials/board.html" %}
+  </div>
+{% endblock %}

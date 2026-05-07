@@ -1,0 +1,10 @@
+From: Alice Customer <alice@customer.example>
+To: sales@company.com
+Date: Tue, 05 May 2026 09:15:00 +0000
+Subject: Re: Re: Question about pricing
+Message-ID: <thread-1-msg-3@customer.example>
+In-Reply-To: <thread-1-msg-2@company.com>
+References: <thread-1-msg-1@customer.example> <thread-1-msg-2@company.com>
+Content-Type: text/plain; charset=utf-8
+
+Thanks — can you send a quote?

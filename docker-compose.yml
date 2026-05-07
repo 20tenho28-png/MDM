@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: mdm
+      POSTGRES_PASSWORD: mdm
+      POSTGRES_DB: mdm
+    ports:
+      - "5432:5432"
+    volumes:
+      - mdm_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mdm"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mdm_pg:
