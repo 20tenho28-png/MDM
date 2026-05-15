@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#b61918">
+  <meta name="description" content="MDM Assist — assistência técnica em ar condicionado, eletricidade, ventilação e manutenção de edifícios em Lisboa desde 1991.">
+  <title>MDM Assist — Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #faf8f4;
+      --bg-elevated: #ffffff;
+      --bg-subtle: #f0ebe3;
+      --border-soft: #e5ddd0;
+      --border-strong: #2a2825;
+      --text-primary: #2a2825;
+      --text-secondary: #5c5852;
+      --text-tertiary: #8a857d;
+      --accent: #b61918;
+      --accent-hover: #9c1515;
+      --accent-soft: #fbeceb;
+      --whatsapp: #25D366;
+      --whatsapp-dark: #128C7E;
+      --success: #2d6a4f;
+      --focus-ring: #b61918;
+
+      --radius-btn: 10px;
+      --radius-card: 12px;
+      --radius-input: 10px;
+      --radius-pill: 999px;
+
+      --shadow-card: 0 1px 2px rgba(42,40,37,0.04), 0 4px 12px rgba(42,40,37,0.04);
+      --shadow-bar: 0 -2px 12px rgba(0,0,0,0.04);
+
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+      --t-fast: 150ms;
+      --t-med: 220ms;
+
+      --container: 1200px;
+      --pad-x: 20px;
+    }
+
+    @media (min-width: 768px) { :root { --pad-x: 32px; } }
+    @media (min-width: 1024px) { :root { --pad-x: 48px; } }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.55;
+      color: var(--text-primary);
+      background: var(--bg-base);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      padding-bottom: calc(72px + env(safe-area-inset-bottom));
+    }
+    @media (min-width: 1024px) { body { padding-bottom: 0; } }
+
+    h1, h2, h3 {
+      font-family: 'Archivo', system-ui, sans-serif;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    p { margin: 0; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+    img { display: block; max-width: 100%; }
+
+    :focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    .container {
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 0 var(--pad-x);
+    }
+
+    .skip-link {
+      position: absolute;
+      left: -9999px;
+      top: 8px;
+      background: var(--text-primary);
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 8px;
+      z-index: 1000;
+    }
+    .skip-link:focus { left: 8px; }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    /* ─── Top bar ─── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(250, 248, 244, 0.92);
+      backdrop-filter: saturate(180%) blur(12px);
+      -webkit-backdrop-filter: saturate(180%) blur(12px);
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .topbar__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Archivo', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+    .brand__mark {
+      width: 32px; height: 32px;
+      display: grid; place-items: center;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0;
+    }
+    .topbar__link {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      padding: 10px 14px;
+      border-radius: var(--radius-btn);
+    }
+    .topbar__link:hover { background: var(--bg-subtle); }
+
+    /* ─── Buttons ─── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 52px;
+      padding: 0 20px;
+      border-radius: var(--radius-btn);
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: -0.005em;
+      transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+      width: 100%;
+    }
+    .btn--primary { background: var(--accent); color: #fff; }
+    .btn--primary:hover { background: var(--accent-hover); }
+    .btn--outline {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1.5px solid var(--border-strong);
+    }
+    .btn--outline:hover { background: var(--text-primary); color: #fff; }
+    .btn--whatsapp { background: var(--whatsapp); color: #fff; }
+    .btn--whatsapp:hover { background: var(--whatsapp-dark); }
+    .btn:active { transform: scale(0.98); }
+
+    /* ─── Sections ─── */
+    section { padding: 56px 0; }
+    @media (min-width: 1024px) { section { padding: 96px 0; } }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    .eyebrow__dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+    .section-title {
+      font-size: clamp(1.5rem, 5vw, 2.25rem);
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    .section-lead {
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 56ch;
+      margin-bottom: 32px;
+    }
+
+    /* ─── Hero ─── */
+    .hero {
+      padding: 32px 0 48px;
+      background: var(--bg-base);
+    }
+    @media (min-width: 1024px) {
+      .hero { padding: 80px 0 96px; }
+    }
+    .trust-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 14px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .trust-strip__pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: var(--radius-pill);
+      font-weight: 600;
+    }
+    .trust-strip__sep { color: var(--text-tertiary); }
+    .hero__title {
+      font-family: 'Archivo', sans-serif;
+      font-weight: 600;
+      font-size: clamp(1.75rem, 7vw, 2.25rem);
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+    .hero__title .accent { color: var(--accent); }
+    @media (min-width: 1024px) {
+      .hero__title { font-size: clamp(3rem, 6vw, 5.5rem); line-height: 1.05; }
+    }
+    .hero__sub {
+      font-size: 17px;
+      color: var(--text-secondary);
+      max-width: 32ch;
+      margin-bottom: 32px;
+    }
+    @media (min-width: 1024px) {
+      .hero__sub { font-size: 19px; max-width: 48ch; }
+    }
+    .hero__ctas {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 360px;
+    }
+    @media (min-width: 1024px) {
+      .hero__ctas { flex-direction: row; max-width: none; }
+      .hero__ctas .btn { width: auto; padding: 0 28px; }
+    }
+
+    /* ─── Quick contact (mobile-promoted) ─── */
+    .contact-quick { background: var(--bg-subtle); padding: 40px 0; }
+    @media (min-width: 1024px) { .contact-quick { display: none; } }
+    .contact-quick__grid {
+      display: grid;
+      gap: 12px;
+    }
+    .tile {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 18px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
+      transition: transform var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+    }
+    .tile:active { transform: scale(0.99); }
+    .tile:hover { border-color: var(--text-primary); }
+    .tile__icon {
+      flex: 0 0 44px;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      background: var(--bg-subtle);
+      border-radius: 10px;
+      color: var(--text-primary);
+    }
+    .tile--whatsapp .tile__icon { background: var(--whatsapp); color: #fff; }
+    .tile__body { flex: 1; min-width: 0; }
+    .tile__label {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 2px;
+    }
+    .tile__value {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .tile__meta {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .tile__chevron { color: var(--text-tertiary); flex-shrink: 0; }
+
+    /* ─── Services accordion ─── */
+    .services { background: var(--bg-elevated); }
+    .service-list { display: flex; flex-direction: column; gap: 10px; }
+    @media (min-width: 1024px) {
+      .service-list {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+      }
+    }
+    .service {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+    }
+    .service[open], .service:hover { border-color: var(--text-primary); box-shadow: var(--shadow-card); }
+    .service__header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px;
+      width: 100%;
+      text-align: left;
+    }
+    @media (min-width: 1024px) {
+      .service__header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 24px; }
+    }
+    .service__icon {
+      flex: 0 0 44px;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 10px;
+    }
+    .service__title-wrap { flex: 1; min-width: 0; }
+    .service__eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 2px;
+    }
+    .service__title {
+      font-family: 'Archivo', sans-serif;
+      font-weight: 600;
+      font-size: 17px;
+      color: var(--text-primary);
+    }
+    .service__desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+      display: none;
+    }
+    @media (min-width: 1024px) { .service__desc { display: block; } }
+    .service__chevron {
+      color: var(--text-tertiary);
+      transition: transform var(--t-med) var(--ease);
+      flex-shrink: 0;
+    }
+    @media (min-width: 1024px) { .service__chevron { display: none; } }
+    .service[open] .service__chevron { transform: rotate(180deg); }
+    .service__body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height var(--t-med) var(--ease);
+    }
+    @media (min-width: 1024px) {
+      .service__body { max-height: none; }
+    }
+    .service[open] .service__body { max-height: 320px; }
+    .service__body-inner { padding: 0 18px 18px 18px; }
+    @media (min-width: 1024px) { .service__body-inner { padding: 0 24px 24px; } }
+    .service__bullets {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 14px;
+      border-top: 1px solid var(--border-soft);
+      padding-top: 14px;
+    }
+    @media (min-width: 1024px) { .service__bullets { border-top: 0; padding-top: 0; } }
+    .service__bullets li {
+      font-size: 14px;
+      color: var(--text-secondary);
+      padding: 6px 0 6px 18px;
+      position: relative;
+    }
+    .service__bullets li::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 14px;
+      width: 4px; height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+    .service__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+      padding: 8px 0;
+    }
+    .service__cta:hover { color: var(--accent-hover); }
+
+    /* ─── Setores carousel ─── */
+    .setores { background: var(--bg-base); }
+    .setores__scroller {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 12px;
+      margin: 0 calc(var(--pad-x) * -1);
+      padding-left: var(--pad-x);
+      padding-right: var(--pad-x);
+      scrollbar-width: thin;
+    }
+    @media (min-width: 1024px) {
+      .setores__scroller {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        overflow: visible;
+        margin: 0;
+        padding: 0;
+      }
+    }
+    .setor {
+      flex: 0 0 80%;
+      scroll-snap-align: start;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      transition: border-color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+    }
+    @media (min-width: 1024px) { .setor { flex: none; } }
+    .setor:hover { border-color: var(--text-primary); transform: translateY(-2px); }
+    .setor__icon {
+      width: 40px; height: 40px;
+      display: grid; place-items: center;
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+      border-radius: 10px;
+      margin-bottom: 14px;
+    }
+    .setor__title {
+      font-family: 'Archivo', sans-serif;
+      font-weight: 600;
+      font-size: 17px;
+      margin-bottom: 6px;
+    }
+    .setor__desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    /* ─── Empresa ─── */
+    .empresa { background: var(--bg-elevated); }
+    .values {
+      display: grid;
+      gap: 16px;
+    }
+    @media (min-width: 768px) { .values { grid-template-columns: repeat(3, 1fr); } }
+    .value {
+      padding: 24px;
+      background: var(--bg-base);
+      border-radius: var(--radius-card);
+      border-left: 3px solid var(--accent);
+    }
+    .value__title {
+      font-family: 'Archivo', sans-serif;
+      font-weight: 600;
+      font-size: 17px;
+      margin-bottom: 6px;
+    }
+    .value__desc { font-size: 14px; color: var(--text-secondary); }
+    .empresa__proof {
+      margin-top: 32px;
+      padding: 20px;
+      background: var(--bg-base);
+      border-radius: var(--radius-card);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .empresa__proof-num {
+      font-family: 'Archivo', sans-serif;
+      font-weight: 700;
+      font-size: 36px;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .empresa__proof-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      max-width: 28ch;
+    }
+
+    /* ─── Orçamento (form) ─── */
+    .orcamento { background: var(--bg-subtle); }
+    .compose-chrome {
+      display: none;
+    }
+    @media (min-width: 1024px) {
+      .compose-chrome {
+        display: block;
+        max-width: 720px;
+        margin: 0 auto;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-soft);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(42,40,37,0.10), 0 4px 12px rgba(42,40,37,0.04);
+      }
+      .compose-chrome__bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        background: #ecebe6;
+        border-bottom: 1px solid var(--border-soft);
+      }
+      .compose-chrome__dots { display: flex; gap: 6px; }
+      .compose-chrome__dot {
+        width: 12px; height: 12px; border-radius: 50%;
+      }
+      .compose-chrome__dot--red { background: #ff5f57; }
+      .compose-chrome__dot--yellow { background: #febc2e; }
+      .compose-chrome__dot--green { background: #28c840; }
+      .compose-chrome__title {
+        flex: 1;
+        text-align: center;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-secondary);
+      }
+      .compose-chrome__to {
+        padding: 10px 20px;
+        font-size: 13px;
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--border-soft);
+      }
+      .compose-chrome__to strong { color: var(--text-primary); font-weight: 600; }
+    }
+    .form-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
+      padding: 24px;
+    }
+    @media (min-width: 1024px) {
+      .form-card {
+        border: 0;
+        border-radius: 0;
+        padding: 28px 32px;
+        max-width: none;
+      }
+      .compose-chrome .form-card { background: var(--bg-elevated); }
+    }
+    .field { margin-bottom: 18px; }
+    .field__label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .field__required { color: var(--accent); }
+    .field__input,
+    .field__textarea {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 14px;
+      font: inherit;
+      font-size: 16px;
+      color: var(--text-primary);
+      background: var(--bg-base);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-input);
+      transition: border-color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+    }
+    .field__input:focus,
+    .field__textarea:focus {
+      outline: 0;
+      border-color: var(--text-primary);
+      background: var(--bg-elevated);
+      box-shadow: 0 0 0 3px rgba(42,40,37,0.08);
+    }
+    .field__input[aria-invalid="true"],
+    .field__textarea[aria-invalid="true"] {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .field__textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
+    .field__error {
+      display: none;
+      font-size: 13px;
+      color: var(--accent);
+      margin-top: 6px;
+    }
+    .field[data-invalid="true"] .field__error { display: block; }
+
+    /* chips */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      min-height: 40px;
+      background: var(--bg-base);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+    }
+    .chip:hover { border-color: var(--text-primary); }
+    .chip[aria-checked="true"] {
+      background: var(--text-primary);
+      color: #fff;
+      border-color: var(--text-primary);
+    }
+
+    /* honeypot */
+    .hp {
+      position: absolute !important;
+      left: -9999px !important;
+      width: 1px; height: 1px; opacity: 0;
+    }
+
+    /* collapsible B2B section */
+    .b2b-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--bg-base);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-input);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+    .b2b-toggle:hover { border-color: var(--text-primary); }
+    .b2b-toggle__chevron { transition: transform var(--t-med) var(--ease); }
+    .b2b-toggle[aria-expanded="true"] .b2b-toggle__chevron { transform: rotate(180deg); }
+    .b2b-fields {
+      display: none;
+      padding: 18px;
+      background: var(--bg-base);
+      border-radius: var(--radius-input);
+      margin-bottom: 18px;
+    }
+    .b2b-fields[data-open="true"] { display: block; }
+
+    .form-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .form-escape {
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-secondary);
+      padding: 8px 0;
+    }
+    .form-escape a {
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .form-success {
+      display: none;
+      padding: 24px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--success);
+      border-radius: var(--radius-card);
+      text-align: center;
+    }
+    .form-success[data-show="true"] { display: block; }
+    .form-success__icon {
+      width: 56px; height: 56px;
+      margin: 0 auto 16px;
+      background: var(--success);
+      color: #fff;
+      border-radius: 50%;
+      display: grid; place-items: center;
+    }
+    .form-success__title {
+      font-family: 'Archivo', sans-serif;
+      font-weight: 600;
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .form-success__body {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    .form-fineprint {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 14px;
+      text-align: center;
+    }
+
+    /* ─── Contacto completo ─── */
+    .contacto { background: var(--bg-base); }
+    .contacto__grid {
+      display: grid;
+      gap: 14px;
+    }
+    @media (min-width: 768px) { .contacto__grid { grid-template-columns: repeat(3, 1fr); } }
+    .tile--whatsapp {
+      border-left: 4px solid var(--whatsapp);
+    }
+    .map-block {
+      margin-top: 24px;
+      padding: 20px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    @media (min-width: 768px) { .map-block { flex-direction: row; align-items: center; } }
+    .map-block__img {
+      width: 100%;
+      height: 140px;
+      background:
+        linear-gradient(135deg, #e8e3d8 0%, #d4cfc3 100%);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    @media (min-width: 768px) { .map-block__img { width: 240px; height: 120px; flex-shrink: 0; } }
+    .map-block__img::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px),
+        linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .map-block__pin {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -100%);
+      color: var(--accent);
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+    .map-block__title {
+      font-family: 'Archivo', sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    .map-block__sub {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    .map-block__hours {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      padding: 32px 0 24px;
+      background: var(--text-primary);
+      color: #d4d0c9;
+      font-size: 13px;
+    }
+    .footer__grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    @media (min-width: 768px) {
+      .footer__grid { flex-direction: row; align-items: center; justify-content: space-between; }
+    }
+    .footer__brand { color: #fff; font-weight: 600; font-family: 'Archivo', sans-serif; font-size: 15px; }
+    .footer__meta { color: #8a857d; font-size: 12px; }
+
+    /* ─── Sticky bottom action bar ─── */
+    .bottom-bar {
+      position: fixed;
+      left: 0; right: 0;
+      bottom: 0;
+      z-index: 50;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+      background: rgba(250, 248, 244, 0.96);
+      backdrop-filter: saturate(180%) blur(14px);
+      -webkit-backdrop-filter: saturate(180%) blur(14px);
+      border-top: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-bar);
+      transform: translateY(120%);
+      transition: transform var(--t-med) var(--ease), opacity var(--t-med) var(--ease);
+      opacity: 0;
+    }
+    .bottom-bar[data-visible="true"] { transform: translateY(0); opacity: 1; }
+    @media (min-width: 1024px) { .bottom-bar { display: none; } }
+    .bbtn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      min-height: 52px;
+      padding: 8px 6px;
+      background: transparent;
+      color: var(--text-primary);
+      border-radius: var(--radius-btn);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .bbtn:active { background: var(--bg-subtle); }
+    .bbtn--primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .bbtn--primary:active { background: var(--accent-hover); }
+    .bbtn__icon { line-height: 0; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0ms !important;
+        transition-duration: 0ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Saltar para o conteúdo</a>
+
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a href="#topo" class="brand" aria-label="MDM Assist — início">
+        <span class="brand__mark">M</span>
+        MDM Assist
+      </a>
+      <a href="#contacto" class="topbar__link">Contacto</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="topo" aria-labelledby="hero-title">
+      <div class="container">
+        <div class="trust-strip" aria-label="Sinais de confiança">
+          <span class="trust-strip__pill">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            Desde 1991
+          </span>
+          <span>Lisboa</span>
+          <span class="trust-strip__sep" aria-hidden="true">·</span>
+          <span>Mitsubishi Electric authorized</span>
+        </div>
+        <h1 class="hero__title" id="hero-title">
+          O seu ar condicionado,<br>
+          a sua eletricidade,<br>
+          a sua ventilação<span class="accent">.</span>
+        </h1>
+        <p class="hero__sub">
+          Assistência técnica em Lisboa. Resposta no mesmo dia, com transparência e relatório claro.
+        </p>
+        <div class="hero__ctas" id="hero-ctas">
+          <a class="btn btn--primary" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%20Assist%2C%20preciso%20de%20assist%C3%AAncia%20t%C3%A9cnica." rel="noopener" target="_blank" aria-label="Falar no WhatsApp — abre WhatsApp">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            Falar no WhatsApp
+          </a>
+          <a class="btn btn--outline" href="tel:+351910307579" aria-label="Ligar para 910 307 579">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Ligar 910&nbsp;307&nbsp;579
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact-quick" aria-labelledby="contact-quick-title">
+      <div class="container">
+        <h2 id="contact-quick-title" class="sr-only">Contacto rápido</h2>
+        <div class="contact-quick__grid">
+          <a class="tile tile--whatsapp" href="https://wa.me/351910307579" rel="noopener" target="_blank" aria-label="Falar no WhatsApp">
+            <span class="tile__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            </span>
+            <span class="tile__body">
+              <span class="tile__label">WhatsApp · recomendado</span>
+              <span class="tile__value">+351&nbsp;910&nbsp;307&nbsp;579</span>
+              <span class="tile__meta">Tipicamente respondemos em 2h</span>
+            </span>
+            <svg class="tile__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+          <a class="tile" href="tel:+351910307579" aria-label="Ligar para 910 307 579">
+            <span class="tile__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </span>
+            <span class="tile__body">
+              <span class="tile__label">Telefone</span>
+              <span class="tile__value">+351&nbsp;910&nbsp;307&nbsp;579</span>
+              <span class="tile__meta">Seg–Sex 9h–18h</span>
+            </span>
+            <svg class="tile__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="services" id="servicos" aria-labelledby="servicos-title">
+      <div class="container">
+        <span class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Serviços</span>
+        <h2 id="servicos-title" class="section-title">Tudo o que o seu edifício precisa.</h2>
+        <p class="section-lead">Climatização, eletricidade, ventilação e manutenção — uma única equipa para o seu edifício.</p>
+
+        <div class="service-list" id="service-list">
+          <article class="service" data-service="climatizacao">
+            <button class="service__header" type="button" aria-expanded="false" aria-controls="srv-body-climatizacao">
+              <span class="service__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+              </span>
+              <span class="service__title-wrap">
+                <span class="service__eyebrow">Climatização</span>
+                <span class="service__title">Ar Condicionado</span>
+                <span class="service__desc">Instalação, manutenção e reparação multi-marca.</span>
+              </span>
+              <svg class="service__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="service__body" id="srv-body-climatizacao" role="region">
+              <div class="service__body-inner">
+                <ul class="service__bullets">
+                  <li>Diagnóstico técnico</li>
+                  <li>Manutenção programada</li>
+                  <li>Equipamentos multi-marca</li>
+                </ul>
+                <a class="service__cta" href="#orcamento" data-srv-cta="climatizacao">Pedir orçamento <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+              </div>
+            </div>
+          </article>
+
+          <article class="service" data-service="eletricidade">
+            <button class="service__header" type="button" aria-expanded="false" aria-controls="srv-body-eletricidade">
+              <span class="service__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </span>
+              <span class="service__title-wrap">
+                <span class="service__eyebrow">Infraestrutura</span>
+                <span class="service__title">Eletricidade</span>
+                <span class="service__desc">Quadros, avarias e apoio a edifícios.</span>
+              </span>
+              <svg class="service__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="service__body" id="srv-body-eletricidade" role="region">
+              <div class="service__body-inner">
+                <ul class="service__bullets">
+                  <li>Quadros elétricos</li>
+                  <li>Avarias e reparações</li>
+                  <li>Apoio a edifícios</li>
+                </ul>
+                <a class="service__cta" href="#orcamento" data-srv-cta="eletricidade">Pedir orçamento <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+              </div>
+            </div>
+          </article>
+
+          <article class="service" data-service="ventilacao">
+            <button class="service__header" type="button" aria-expanded="false" aria-controls="srv-body-ventilacao">
+              <span class="service__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2"/><path d="M12.59 19.41A2 2 0 1 0 14 16H2"/><path d="M17.73 7.73A2.5 2.5 0 1 1 19.5 12H2"/></svg>
+              </span>
+              <span class="service__title-wrap">
+                <span class="service__eyebrow">Qualidade do ar</span>
+                <span class="service__title">Ventilação</span>
+                <span class="service__desc">Sistemas de extração, condutas e revisão.</span>
+              </span>
+              <svg class="service__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="service__body" id="srv-body-ventilacao" role="region">
+              <div class="service__body-inner">
+                <ul class="service__bullets">
+                  <li>Sistemas de extração</li>
+                  <li>Condutas e unidades</li>
+                  <li>Revisão funcional</li>
+                </ul>
+                <a class="service__cta" href="#orcamento" data-srv-cta="ventilacao">Pedir orçamento <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+              </div>
+            </div>
+          </article>
+
+          <article class="service" data-service="manutencao">
+            <button class="service__header" type="button" aria-expanded="false" aria-controls="srv-body-manutencao">
+              <span class="service__icon" aria-hidden="true">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.121 2.121 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              </span>
+              <span class="service__title-wrap">
+                <span class="service__eyebrow">Assistência</span>
+                <span class="service__title">Manutenção técnica</span>
+                <span class="service__desc">Planos preventivos e resposta técnica.</span>
+              </span>
+              <svg class="service__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="service__body" id="srv-body-manutencao" role="region">
+              <div class="service__body-inner">
+                <ul class="service__bullets">
+                  <li>Planos preventivos</li>
+                  <li>Resposta técnica</li>
+                  <li>Relatórios claros</li>
+                </ul>
+                <a class="service__cta" href="#orcamento" data-srv-cta="manutencao">Pedir orçamento <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="setores" id="setores" aria-labelledby="setores-title">
+      <div class="container">
+        <span class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Setores</span>
+        <h2 id="setores-title" class="section-title">Para quem gere edifícios.</h2>
+        <p class="section-lead">Apoio técnico desenhado para o seu contexto — comparem-se, encontrem o vosso.</p>
+        <div class="setores__scroller" role="region" aria-roledescription="carrossel" aria-label="Setores">
+          <article class="setor">
+            <span class="setor__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22V8l5-3 5 3v14"/><path d="M12 11h10v11"/><path d="M16 15h2M16 19h2"/></svg>
+            </span>
+            <h3 class="setor__title">Indústria</h3>
+            <p class="setor__desc">Apoio onde continuidade, segurança e tempo de resposta são críticos.</p>
+          </article>
+          <article class="setor">
+            <span class="setor__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+            </span>
+            <h3 class="setor__title">Escritórios</h3>
+            <p class="setor__desc">Manutenção responsiva sem disrupção do dia-a-dia da equipa.</p>
+          </article>
+          <article class="setor">
+            <span class="setor__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 9v2M9 14v2M15 9v2M15 14v2"/></svg>
+            </span>
+            <h3 class="setor__title">Condomínios</h3>
+            <p class="setor__desc">Comunicação transparente e intervenção responsável.</p>
+          </article>
+          <article class="setor">
+            <span class="setor__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </span>
+            <h3 class="setor__title">Parque das Nações</h3>
+            <p class="setor__desc">Presença local, próxima de empresas e habitação.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="empresa" id="empresa" aria-labelledby="empresa-title">
+      <div class="container">
+        <span class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Empresa</span>
+        <h2 id="empresa-title" class="section-title">Uma base local com ambição técnica.</h2>
+        <p class="section-lead">MDM — Manuel Domingos Melancia Lda. Assistência técnica desde 1991.</p>
+        <div class="values">
+          <div class="value">
+            <h3 class="value__title">Transparência</h3>
+            <p class="value__desc">Comunicação clara em cada fase do processo técnico.</p>
+          </div>
+          <div class="value">
+            <h3 class="value__title">Versatilidade</h3>
+            <p class="value__desc">Climatização, ventilação, eletricidade e gás — uma única equipa.</p>
+          </div>
+          <div class="value">
+            <h3 class="value__title">Confiança</h3>
+            <p class="value__desc">Relações de longo prazo com empresas, condomínios e habitação.</p>
+          </div>
+        </div>
+        <div class="empresa__proof">
+          <span class="empresa__proof-num">30+</span>
+          <span class="empresa__proof-label">anos a servir Lisboa em climatização, eletricidade e ventilação.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="orcamento" id="orcamento" aria-labelledby="orcamento-title">
+      <div class="container">
+        <span class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Orçamento</span>
+        <h2 id="orcamento-title" class="section-title">Resposta em menos de 24h úteis.</h2>
+        <p class="section-lead">Preencha os essenciais. Os dados de empresa são opcionais — guardamo-los para outra altura.</p>
+
+        <div class="form-success" id="form-success" role="status" aria-live="polite" data-show="false">
+          <div class="form-success__icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h3 class="form-success__title">Pedido recebido</h3>
+          <p class="form-success__body">Resposta tipicamente em 2h em horário útil. Para urgências:</p>
+          <a class="btn btn--whatsapp" href="https://wa.me/351910307579" rel="noopener" target="_blank">Falar no WhatsApp</a>
+        </div>
+
+        <div class="compose-chrome">
+          <div class="compose-chrome__bar">
+            <div class="compose-chrome__dots" aria-hidden="true">
+              <span class="compose-chrome__dot compose-chrome__dot--red"></span>
+              <span class="compose-chrome__dot compose-chrome__dot--yellow"></span>
+              <span class="compose-chrome__dot compose-chrome__dot--green"></span>
+            </div>
+            <span class="compose-chrome__title">Nova mensagem — MDM Assist</span>
+            <span style="width:48px"></span>
+          </div>
+          <div class="compose-chrome__to">Para: <strong>MDM Assist — Assistência Técnica</strong></div>
+          <form class="form-card" id="quote-form" novalidate>
+            <div class="field" data-field="servico">
+              <label class="field__label">Serviço <span class="field__required" aria-label="obrigatório">*</span></label>
+              <div class="chips" role="radiogroup" aria-label="Serviço">
+                <button type="button" class="chip" role="radio" aria-checked="false" data-value="climatizacao">Ar Condicionado</button>
+                <button type="button" class="chip" role="radio" aria-checked="false" data-value="eletricidade">Eletricidade</button>
+                <button type="button" class="chip" role="radio" aria-checked="false" data-value="ventilacao">Ventilação</button>
+                <button type="button" class="chip" role="radio" aria-checked="false" data-value="manutencao">Manutenção</button>
+              </div>
+              <div class="field__error">Escolha um serviço.</div>
+            </div>
+
+            <div class="field" data-field="assunto">
+              <label class="field__label" for="f-assunto">Assunto <span class="field__required" aria-label="obrigatório">*</span></label>
+              <input class="field__input" id="f-assunto" name="assunto" type="text" autocomplete="off" required>
+              <div class="field__error" id="err-assunto">Indique um assunto breve.</div>
+            </div>
+
+            <div class="field" data-field="mensagem">
+              <label class="field__label" for="f-mensagem">Mensagem <span class="field__required" aria-label="obrigatório">*</span></label>
+              <textarea class="field__textarea" id="f-mensagem" name="mensagem" rows="4" required></textarea>
+              <div class="field__error" id="err-mensagem">Descreva brevemente a sua necessidade.</div>
+            </div>
+
+            <div class="field" data-field="nome">
+              <label class="field__label" for="f-nome">Nome <span class="field__required" aria-label="obrigatório">*</span></label>
+              <input class="field__input" id="f-nome" name="nome" type="text" autocomplete="name" required>
+              <div class="field__error" id="err-nome">Indique o seu nome.</div>
+            </div>
+
+            <div class="field" data-field="telefone">
+              <label class="field__label" for="f-telefone">Telefone <span class="field__required" aria-label="obrigatório">*</span></label>
+              <input class="field__input" id="f-telefone" name="telefone" type="tel" inputmode="tel" autocomplete="tel" required>
+              <div class="field__error" id="err-telefone">Telefone para contacto.</div>
+            </div>
+
+            <div class="field" data-field="email">
+              <label class="field__label" for="f-email">Email <span class="field__required" aria-label="obrigatório">*</span></label>
+              <input class="field__input" id="f-email" name="email" type="email" inputmode="email" autocomplete="email" required>
+              <div class="field__error" id="err-email">Email válido para resposta.</div>
+            </div>
+
+            <button class="b2b-toggle" type="button" id="b2b-toggle" aria-expanded="false" aria-controls="b2b-fields">
+              <span>Sou empresa <span style="color:var(--text-tertiary);font-weight:400">(opcional)</span></span>
+              <svg class="b2b-toggle__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="b2b-fields" id="b2b-fields" data-open="false">
+              <div class="field">
+                <label class="field__label" for="f-empresa">Empresa</label>
+                <input class="field__input" id="f-empresa" name="empresa" type="text" autocomplete="organization">
+              </div>
+              <div class="field">
+                <label class="field__label" for="f-nif">NIF</label>
+                <input class="field__input" id="f-nif" name="nif" type="text" inputmode="numeric" pattern="[0-9]{9}" maxlength="9" autocomplete="off">
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <label class="field__label" for="f-localidade">Localidade</label>
+                <input class="field__input" id="f-localidade" name="localidade" type="text" autocomplete="address-level2">
+              </div>
+            </div>
+
+            <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+            <div class="form-actions">
+              <button class="btn btn--primary" type="submit">Enviar pedido</button>
+              <p class="form-escape">Prefere falar agora? <a href="https://wa.me/351910307579" rel="noopener" target="_blank">WhatsApp →</a></p>
+            </div>
+            <p class="form-fineprint">Os seus dados são usados exclusivamente para responder ao pedido de orçamento.</p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="contacto" id="contacto" aria-labelledby="contacto-title">
+      <div class="container">
+        <span class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Contacto</span>
+        <h2 id="contacto-title" class="section-title">Avaria ou pedido? Resposta em minutos.</h2>
+
+        <div class="contacto__grid">
+          <a class="tile tile--whatsapp" href="https://wa.me/351910307579" rel="noopener" target="_blank">
+            <span class="tile__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            </span>
+            <span class="tile__body">
+              <span class="tile__label">WhatsApp</span>
+              <span class="tile__value">+351&nbsp;910&nbsp;307&nbsp;579</span>
+              <span class="tile__meta">Resposta em 2h · 24/7 urgências</span>
+            </span>
+          </a>
+          <a class="tile" href="tel:+351218935050">
+            <span class="tile__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </span>
+            <span class="tile__body">
+              <span class="tile__label">Telefone</span>
+              <span class="tile__value">218&nbsp;935&nbsp;050</span>
+              <span class="tile__meta">Seg–Sex 9h–18h</span>
+            </span>
+          </a>
+          <a class="tile" href="mailto:geral@mdmassist.com">
+            <span class="tile__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </span>
+            <span class="tile__body">
+              <span class="tile__label">Email</span>
+              <span class="tile__value">geral@mdmassist.com</span>
+              <span class="tile__meta">Resposta em 24h úteis</span>
+            </span>
+          </a>
+        </div>
+
+        <a class="map-block" href="https://maps.google.com/?q=Parque+das+Nações+Lisboa" rel="noopener" target="_blank" aria-label="Abrir morada no mapa">
+          <div class="map-block__img" aria-hidden="true">
+            <svg class="map-block__pin" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-4.4 0-8 3.6-8 8 0 5.4 7 13 7.4 13.4.2.2.4.3.6.3s.4-.1.6-.3C13 21 20 13.4 20 8c0-4.4-3.6-8-8-8zm0 11.5c-1.9 0-3.5-1.6-3.5-3.5S10.1 4.5 12 4.5 15.5 6.1 15.5 8 13.9 11.5 12 11.5z"/></svg>
+          </div>
+          <div>
+            <div class="map-block__title">Parque das Nações</div>
+            <div class="map-block__sub">Lisboa, Portugal</div>
+            <div class="map-block__hours">Seg–Sex 9h–18h · Urgências 24/7 via WhatsApp</div>
+          </div>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer__grid">
+      <div>
+        <div class="footer__brand">MDM — Manuel Domingos Melancia Lda.</div>
+        <div class="footer__meta">Assistência técnica desde 1991 · Lisboa</div>
+      </div>
+      <div class="footer__meta">
+        WhatsApp: <a href="https://wa.me/351910307579" style="color:#fff">+351 910 307 579</a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="bottom-bar" id="bottom-bar" role="toolbar" aria-label="Ações rápidas" data-visible="false">
+    <a class="bbtn" href="tel:+351910307579" aria-label="Ligar para 910 307 579">
+      <span class="bbtn__icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </span>
+      Ligar
+    </a>
+    <a class="bbtn bbtn--primary" href="https://wa.me/351910307579" rel="noopener" target="_blank" aria-label="Falar no WhatsApp">
+      <span class="bbtn__icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      </span>
+      WhatsApp
+    </a>
+    <a class="bbtn" href="#orcamento" aria-label="Pedir orçamento">
+      <span class="bbtn__icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </span>
+      Orçamento
+    </a>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ─── Services accordion (one open at a time, mobile only) ───
+      const services = document.querySelectorAll('.service');
+      services.forEach(function (svc) {
+        const btn = svc.querySelector('.service__header');
+        btn.addEventListener('click', function () {
+          if (window.matchMedia('(min-width: 1024px)').matches) return;
+          const open = svc.hasAttribute('open');
+          services.forEach(function (s) {
+            s.removeAttribute('open');
+            s.querySelector('.service__header').setAttribute('aria-expanded', 'false');
+          });
+          if (!open) {
+            svc.setAttribute('open', '');
+            btn.setAttribute('aria-expanded', 'true');
+          }
+        });
+      });
+
+      // ─── Service "Pedir orçamento" → pre-select chip ───
+      document.querySelectorAll('[data-srv-cta]').forEach(function (link) {
+        link.addEventListener('click', function () {
+          const val = link.dataset.srvCta;
+          selectChip(val);
+        });
+      });
+
+      // ─── Chip select (radio behavior) ───
+      const chips = document.querySelectorAll('.chips .chip');
+      function selectChip(val) {
+        chips.forEach(function (c) {
+          const on = c.dataset.value === val;
+          c.setAttribute('aria-checked', on ? 'true' : 'false');
+        });
+        document.querySelector('[data-field="servico"]').removeAttribute('data-invalid');
+      }
+      chips.forEach(function (c) {
+        c.addEventListener('click', function () { selectChip(c.dataset.value); });
+        c.addEventListener('keydown', function (e) {
+          if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); c.click(); }
+        });
+      });
+
+      // Read ?servico= from URL hash if present
+      const hash = window.location.hash;
+      const match = hash.match(/[?&]servico=([^&]+)/);
+      if (match) selectChip(decodeURIComponent(match[1]));
+
+      // ─── B2B toggle ───
+      const b2bBtn = document.getElementById('b2b-toggle');
+      const b2bFields = document.getElementById('b2b-fields');
+      b2bBtn.addEventListener('click', function () {
+        const open = b2bBtn.getAttribute('aria-expanded') === 'true';
+        b2bBtn.setAttribute('aria-expanded', open ? 'false' : 'true');
+        b2bFields.setAttribute('data-open', open ? 'false' : 'true');
+      });
+
+      // ─── Auto-grow textarea ───
+      const ta = document.getElementById('f-mensagem');
+      ta.addEventListener('input', function () {
+        ta.style.height = 'auto';
+        ta.style.height = Math.min(ta.scrollHeight, 320) + 'px';
+      });
+
+      // ─── Form validation ───
+      const form = document.getElementById('quote-form');
+      const success = document.getElementById('form-success');
+
+      function getServico() {
+        const c = document.querySelector('.chip[aria-checked="true"]');
+        return c ? c.dataset.value : '';
+      }
+
+      function setInvalid(name, invalid) {
+        const f = document.querySelector('[data-field="' + name + '"]');
+        if (!f) return;
+        if (invalid) f.setAttribute('data-invalid', 'true');
+        else f.removeAttribute('data-invalid');
+        const input = f.querySelector('.field__input, .field__textarea');
+        if (input) input.setAttribute('aria-invalid', invalid ? 'true' : 'false');
+      }
+
+      // Blur validation per field
+      ['assunto', 'mensagem', 'nome', 'telefone', 'email'].forEach(function (name) {
+        const input = document.getElementById('f-' + name);
+        input.addEventListener('blur', function () {
+          if (!input.value.trim()) setInvalid(name, true);
+          else if (name === 'email' && !input.checkValidity()) setInvalid(name, true);
+          else setInvalid(name, false);
+        });
+      });
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        // honeypot
+        if (form.elements.website && form.elements.website.value) return;
+
+        let ok = true;
+        if (!getServico()) {
+          document.querySelector('[data-field="servico"]').setAttribute('data-invalid', 'true');
+          ok = false;
+        }
+        ['assunto', 'mensagem', 'nome', 'telefone', 'email'].forEach(function (name) {
+          const input = document.getElementById('f-' + name);
+          const bad = !input.value.trim() || (name === 'email' && !input.checkValidity());
+          setInvalid(name, bad);
+          if (bad) ok = false;
+        });
+
+        if (!ok) {
+          const firstBad = document.querySelector('.field[data-invalid="true"]');
+          if (firstBad) firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+
+        // success state
+        form.style.display = 'none';
+        success.setAttribute('data-show', 'true');
+        success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+
+      // ─── Sticky bottom action bar ───
+      const bar = document.getElementById('bottom-bar');
+      const heroCtas = document.getElementById('hero-ctas');
+      const orc = document.getElementById('orcamento');
+      let pastHero = false;
+      let inForm = false;
+      let lastScrollY = window.scrollY;
+      let hidden = false;
+
+      function updateBar() {
+        const show = pastHero && !inForm;
+        bar.setAttribute('data-visible', show && !hidden ? 'true' : 'false');
+      }
+
+      if ('IntersectionObserver' in window) {
+        const heroObs = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) { pastHero = !e.isIntersecting; updateBar(); });
+        }, { threshold: 0 });
+        heroObs.observe(heroCtas);
+
+        const formObs = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) { inForm = e.isIntersecting; updateBar(); });
+        }, { threshold: 0.25 });
+        formObs.observe(orc);
+      } else {
+        pastHero = true; updateBar();
+      }
+
+      // hide-on-scroll-down
+      window.addEventListener('scroll', function () {
+        const y = window.scrollY;
+        if (Math.abs(y - lastScrollY) < 6) return;
+        hidden = y > lastScrollY && y > 200;
+        lastScrollY = y;
+        updateBar();
+      }, { passive: true });
+    })();
+  </script>
+</body>
+</html>
