@@ -1,0 +1,18 @@
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+  <div class="rounded-lg border border-gray-800 bg-gray-900/60 p-4">
+    <div class="text-3xl font-bold">{{ kpis.total_artigos }}</div>
+    <div class="text-sm text-gray-400">Artigos</div>
+  </div>
+  <div class="rounded-lg border {% if kpis.abaixo_minimo %}card-red{% else %}border-gray-800{% endif %} bg-gray-900/60 p-4">
+    <div class="text-3xl font-bold {% if kpis.abaixo_minimo %}text-red-400{% endif %}">{{ kpis.abaixo_minimo }}</div>
+    <div class="text-sm text-gray-400">Alertas de Stock Baixo</div>
+  </div>
+  <div class="rounded-lg border border-gray-800 bg-gray-900/60 p-4">
+    <div class="text-3xl font-bold">{{ kpis.total_unidades }}</div>
+    <div class="text-sm text-gray-400">Unidades em Stock</div>
+  </div>
+  <div class="rounded-lg border border-gray-800 bg-gray-900/60 p-4">
+    <div class="text-3xl font-bold">{{ kpis.movimentos_recentes }}</div>
+    <div class="text-sm text-gray-400">Movimentos</div>
+  </div>
+</div>

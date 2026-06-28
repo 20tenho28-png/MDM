@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block body %}
+  {% include "partials/kpis.html" %}
+
+  <div class="flex items-center justify-between mt-8 mb-3">
+    <h2 class="text-xl font-semibold">Stock Atual</h2>
+    <div class="flex gap-2">
+      <a href="/guias/nova" class="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-sm">+ Nova Guia</a>
+      <a href="/saida" class="px-3 py-1.5 rounded bg-sky-600 hover:bg-sky-500 text-white text-sm">− Registar Saída</a>
+    </div>
+  </div>
+
+  {% include "partials/stock_table.html" %}
+{% endblock %}

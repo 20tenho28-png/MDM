@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block body %}
+  <h2 class="text-xl font-semibold mb-4">Nova Guia de Compras</h2>
+  <p class="text-sm text-gray-400 mb-6">
+    Carregue uma guia em CSV, Excel (.xlsx) ou PDF. As linhas são lidas automaticamente
+    e poderá revê-las antes de atualizar o stock.
+  </p>
+
+  <form action="/guias" method="post" enctype="multipart/form-data"
+        class="max-w-lg space-y-4 rounded-lg border border-gray-800 bg-gray-900/60 p-6">
+    <div>
+      <label class="block text-sm text-gray-300 mb-1">Ficheiro da guia</label>
+      <input type="file" name="ficheiro" accept=".csv,.xlsx,.xlsm,.pdf" required
+             class="block w-full text-sm text-gray-300 file:mr-3 file:py-2 file:px-4
+                    file:rounded file:border-0 file:bg-emerald-600 file:text-white" />
+    </div>
+    <div>
+      <label class="block text-sm text-gray-300 mb-1">Categoria dos artigos</label>
+      <select name="categoria" required
+              class="w-full rounded bg-gray-800 border border-gray-700 px-3 py-2 text-sm">
+        {% for c in categorias %}
+          <option value="{{ c.value }}">{{ categoria_label(c) }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm text-gray-300 mb-1">Fornecedor (opcional)</label>
+      <input type="text" name="fornecedor"
+             class="w-full rounded bg-gray-800 border border-gray-700 px-3 py-2 text-sm" />
+    </div>
+    <button type="submit"
+            class="px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-sm">
+      Ler Guia e Rever
+    </button>
+  </form>
+{% endblock %}

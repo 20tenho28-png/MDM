@@ -1,0 +1,36 @@
+<div id="stock" hx-get="/stock" hx-trigger="every {{ wall_refresh_seconds }}s" hx-swap="outerHTML">
+  {% if artigos %}
+    <div class="overflow-x-auto rounded-lg border border-gray-800">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-900 text-gray-400 text-left">
+          <tr>
+            <th class="px-4 py-2">Referência</th>
+            <th class="px-4 py-2">Descrição</th>
+            <th class="px-4 py-2">Categoria</th>
+            <th class="px-4 py-2 text-right">Stock Atual</th>
+            <th class="px-4 py-2 text-right">Stock Mínimo</th>
+            <th class="px-4 py-2">Unidade</th>
+            <th class="px-4 py-2">Localização</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for artigo in artigos %}
+            <tr class="border-t border-gray-800 {{ artigo | stock_class }}">
+              <td class="px-4 py-2 font-mono">{{ artigo.referencia }}</td>
+              <td class="px-4 py-2">{{ artigo.descricao }}</td>
+              <td class="px-4 py-2 text-gray-400">{{ categoria_label(artigo.categoria) }}</td>
+              <td class="px-4 py-2 text-right font-semibold">{{ artigo.stock_atual }}</td>
+              <td class="px-4 py-2 text-right text-gray-400">{{ artigo.stock_minimo }}</td>
+              <td class="px-4 py-2 text-gray-400">{{ artigo.unidade }}</td>
+              <td class="px-4 py-2 text-gray-400">{{ artigo.localizacao or "—" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="rounded-lg border border-dashed border-gray-700 p-10 text-center text-gray-400">
+      Ainda não há artigos. Comece por <a href="/guias/nova" class="text-emerald-400 underline">carregar uma guia de compras</a>.
+    </div>
+  {% endif %}
+</div>

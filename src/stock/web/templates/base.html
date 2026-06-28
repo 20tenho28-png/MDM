@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MDM — Gestão de Stock</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body { background: #0b0f17; color: #e5e7eb; font-family: ui-sans-serif, system-ui, sans-serif; }
+      .card-green  { border-color: #22c55e; box-shadow: 0 0 0 1px #22c55e44; }
+      .card-yellow { border-color: #eab308; box-shadow: 0 0 0 1px #eab30844; }
+      .card-red    { border-color: #ef4444; box-shadow: 0 0 0 1px #ef4444aa; }
+    </style>
+  </head>
+  <body class="min-h-screen">
+    <header class="border-b border-gray-800 bg-gray-900/60">
+      <nav class="max-w-7xl mx-auto px-6 py-3 flex items-center gap-6 text-sm">
+        <a href="/" class="font-semibold text-lg text-white">📦 Gestão de Stock</a>
+        <a href="/" class="hover:text-white text-gray-300">Stock Atual</a>
+        <a href="/guias/nova" class="hover:text-white text-gray-300">Nova Guia</a>
+        <a href="/saida" class="hover:text-white text-gray-300">Registar Saída</a>
+        <a href="/artigos" class="hover:text-white text-gray-300">Artigos</a>
+      </nav>
+    </header>
+    <main class="max-w-7xl mx-auto px-6 py-6">
+      {% block body %}{% endblock %}
+    </main>
+  </body>
+</html>

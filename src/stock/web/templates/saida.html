@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block body %}
+  <h2 class="text-xl font-semibold mb-4">Registar Saída</h2>
+
+  {% if aviso %}
+    <div class="rounded border card-red bg-red-900/30 p-4 mb-4 text-red-200">
+      ⚠️ {{ aviso }}
+    </div>
+  {% endif %}
+
+  {% if artigos %}
+    <form action="/saida" method="post"
+          class="max-w-lg space-y-4 rounded-lg border border-gray-800 bg-gray-900/60 p-6">
+      <div>
+        <label class="block text-sm text-gray-300 mb-1">Artigo</label>
+        <select name="artigo_id" required
+                class="w-full rounded bg-gray-800 border border-gray-700 px-3 py-2 text-sm">
+          {% for artigo in artigos %}
+            <option value="{{ artigo.id }}">
+              {{ artigo.referencia }} — {{ artigo.descricao }} (stock: {{ artigo.stock_atual }} {{ artigo.unidade }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm text-gray-300 mb-1">Quantidade</label>
+        <input type="number" name="quantidade" min="1" required
+               class="w-full rounded bg-gray-800 border border-gray-700 px-3 py-2 text-sm" />
+      </div>
+      <div>
+        <label class="block text-sm text-gray-300 mb-1">Nota (opcional)</label>
+        <input type="text" name="nota"
+               class="w-full rounded bg-gray-800 border border-gray-700 px-3 py-2 text-sm" />
+      </div>
+      <button type="submit"
+              class="px-4 py-2 rounded bg-sky-600 hover:bg-sky-500 text-white text-sm">
+        Registar Saída
+      </button>
+    </form>
+  {% else %}
+    <div class="rounded-lg border border-dashed border-gray-700 p-10 text-center text-gray-400">
+      Ainda não há artigos em stock.
+    </div>
+  {% endif %}
+{% endblock %}

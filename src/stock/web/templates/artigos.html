@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block body %}
+  <h2 class="text-xl font-semibold mb-4">Artigos</h2>
+
+  <details class="mb-6 rounded-lg border border-gray-800 bg-gray-900/60 p-4">
+    <summary class="cursor-pointer text-sm text-emerald-400">+ Novo Artigo</summary>
+    <form action="/artigos" method="post" class="grid md:grid-cols-2 gap-3 mt-4">
+      <input type="text" name="referencia" placeholder="Referência" required
+             class="rounded bg-gray-800 border border-gray-700 px-3 py-2 text-sm" />
+      <input type="text" name="descricao" placeholder="Descrição"
+             class="rounded bg-gray-800 border border-gray-700 px-3 py-2 text-sm" />
+      <select name="categoria" required
+              class="rounded bg-gray-800 border border-gray-700 px-3 py-2 text-sm">
+        {% for c in categorias %}
+          <option value="{{ c.value }}">{{ categoria_label(c) }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" name="unidade" placeholder="Unidade (un, m, kg)" value="un"
+             class="rounded bg-gray-800 border border-gray-700 px-3 py-2 text-sm" />
+      <input type="number" name="stock_minimo" placeholder="Stock mínimo" value="0"
+             class="rounded bg-gray-800 border border-gray-700 px-3 py-2 text-sm" />
+      <input type="text" name="localizacao" placeholder="Localização"
+             class="rounded bg-gray-800 border border-gray-700 px-3 py-2 text-sm" />
+      <button type="submit"
+              class="md:col-span-2 px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-sm">
+        Criar Artigo
+      </button>
+    </form>
+  </details>
+
+  {% if artigos %}
+    <div class="overflow-x-auto rounded-lg border border-gray-800">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-900 text-gray-400 text-left">
+          <tr>
+            <th class="px-4 py-2">Referência</th>
+            <th class="px-4 py-2">Descrição</th>
+            <th class="px-4 py-2">Categoria</th>
+            <th class="px-4 py-2 text-right">Stock</th>
+            <th class="px-4 py-2 text-right">Mínimo</th>
+            <th class="px-4 py-2">Unidade</th>
+            <th class="px-4 py-2"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for artigo in artigos %}
+            <tr class="border-t border-gray-800">
+              <td class="px-4 py-2 font-mono">{{ artigo.referencia }}</td>
+              <td class="px-4 py-2">{{ artigo.descricao }}</td>
+              <td class="px-4 py-2 text-gray-400">{{ categoria_label(artigo.categoria) }}</td>
+              <td class="px-4 py-2 text-right font-semibold">{{ artigo.stock_atual }}</td>
+              <td class="px-4 py-2 text-right text-gray-400">{{ artigo.stock_minimo }}</td>
+              <td class="px-4 py-2 text-gray-400">{{ artigo.unidade }}</td>
+              <td class="px-4 py-2 text-right">
+                <form action="/artigos/{{ artigo.id }}/eliminar" method="post"
+                      onsubmit="return confirm('Eliminar este artigo?');">
+                  <button type="submit" class="text-red-400 hover:text-red-300 text-xs">Eliminar</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="rounded-lg border border-dashed border-gray-700 p-10 text-center text-gray-400">
+      Ainda não há artigos.
+    </div>
+  {% endif %}
+{% endblock %}

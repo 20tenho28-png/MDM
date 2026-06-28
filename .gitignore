@@ -17,3 +17,6 @@ htmlcov/
 *.sqlite
 *.sqlite3
 .DS_Store
+
+# Uploaded purchase-guide files (stock service)
+uploads_guias/
