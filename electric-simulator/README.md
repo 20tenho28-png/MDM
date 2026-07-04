@@ -9,6 +9,17 @@ Usability features: parts palette with drag & drop, move/rotate placed parts,
 pan & zoom, undo/redo, EU value presets (1.5–24 V, E-series resistors), hover
 readouts (V/A/W), short-circuit warnings, and a first-run guide.
 
+Wiring & colours (designed for new hires without an engineering background):
+
+- One drag draws a whole wire run — it bends around corners automatically,
+  and dragging from any part's terminal starts a wire.
+- Wires use real EU insulation colours (HD 308): brown = feed from +,
+  blue = return to −, green/yellow = safety earth, plus black/grey/red.
+  Recolouring a wire recolours its whole connected run.
+- The "Voltage colours" view tints every conductor from red (near +) to
+  blue (near −) as a teaching aid, and the status bar coaches in plain
+  language ("a switch is open — click it to close it").
+
 ## Run it
 
 - **Via the MDM app:** start the ticket-wall server and open

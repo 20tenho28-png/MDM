@@ -1,11 +1,17 @@
 /**
  * Electric circuit simulator UI — EU edition.
  *
- * Schematic symbols follow IEC 60617 (EU standard): resistor is a rectangle,
- * lamp a crossed circle, battery long/short plates. The editor aims for a
- * Tinkercad-like feel: light theme, parts palette with drag & drop, move and
- * rotate placed parts, pan/zoom, undo/redo, hover readouts and a first-run
- * guide. The circuit is re-solved on every change (solver in circuit.js).
+ * Schematic symbols follow IEC 60617; wire insulation colours follow EU
+ * practice (HD 308: brown = line, blue = neutral, green/yellow = PE).
+ *
+ * Wiring model: wires are unit grid segments (so junctions work anywhere).
+ * A single drag routes an L-shaped run; dragging from any part terminal
+ * starts a wire; duplicate segments are ignored. Recolouring a wire applies
+ * to its whole connected same-colour run.
+ *
+ * The circuit is re-solved on every change (solver in circuit.js). The
+ * optional "Potentials" view tints every conductor by node voltage
+ * (blue = lowest, red = highest) as a teaching aid.
  */
 import { SHORT_AMPS, defaultValue, nodeKey, solveCircuit } from "./circuit.js";
 
@@ -20,12 +26,24 @@ const PART_NAMES = {
   lamp: "Lamp",
   switch: "Switch",
 };
+
 // EU-common quick values shown as preset chips in the property panel.
 const PRESETS = {
   battery: [1.5, 4.5, 9, 12, 24],
   resistor: [10, 47, 100, 220, 470, 1000],
   lamp: [6, 12, 24],
 };
+
+// EU insulation colours (HD 308 S2 / IEC 60446).
+const WIRE_COLORS = {
+  brown: { hex: "#8a4b1f", label: "Brown — the feed wire, from the + side" },
+  blue: { hex: "#2563eb", label: "Blue — the return wire, back to −" },
+  pe: { hex: "#15803d", label: "Green/Yellow — safety earth" },
+  black: { hex: "#1f2937", label: "Black" },
+  grey: { hex: "#9ca3af", label: "Grey" },
+  red: { hex: "#dc2626", label: "Red — DC positive" },
+};
+const DEFAULT_WIRE_COLOR = "brown";
 
 const canvas = document.getElementById("sim-canvas");
 const ctx = canvas.getContext("2d");
@@ -37,10 +55,12 @@ const tooltip = el("sim-tooltip");
 let elements = [];
 let nextId = 1;
 let tool = "select";
+let currentWireColor = DEFAULT_WIRE_COLOR;
 let solution = solveCircuit(elements);
 let selected = null;
 let hovered = null;
 let showLabels = true;
+let potentialView = false;
 
 // View transform: screen = world * scale + offset (in CSS px).
 let scale = 1;
@@ -48,7 +68,7 @@ let offsetX = 0;
 let offsetY = 0;
 
 // Pointer interaction state machine.
-let action = null; // {kind: 'pan'|'place'|'move'|'handle'|'drop', ...}
+let action = null; // {kind: 'pan'|'place'|'move'|'drop', ...}
 const flowPhase = new Map(); // element id -> animated current phase
 
 let history = [];
@@ -65,6 +85,9 @@ function load() {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (!Array.isArray(parsed) || parsed.length === 0) return false;
     elements = parsed;
+    for (const e of elements) {
+      if (e.type === "wire" && !WIRE_COLORS[e.color]) e.color = DEFAULT_WIRE_COLOR;
+    }
     nextId = elements.reduce((m, e) => Math.max(m, e.id), 0) + 1;
     return true;
   } catch {
@@ -109,36 +132,59 @@ function updateUndoButtons() {
 
 // ---------------------------------------------------------------- editing
 
-function addElement(type, x1, y1, x2, y2) {
-  if (type === "wire") {
-    // Split wires into unit segments so junctions work anywhere along them.
-    const steps = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
-    const dx = Math.sign(x2 - x1);
-    const dy = Math.sign(y2 - y1);
-    for (let i = 0; i < steps; i++) {
-      elements.push({
-        id: nextId++,
-        type,
-        x1: x1 + dx * i,
-        y1: y1 + dy * i,
-        x2: x1 + dx * (i + 1),
-        y2: y1 + dy * (i + 1),
-        value: 0,
-        closed: false,
-      });
+/** L-shaped route between two grid points (dominant axis first). */
+function routeL(x1, y1, x2, y2) {
+  if (x1 === x2 || y1 === y2) return [[x1, y1], [x2, y2]];
+  if (Math.abs(x2 - x1) >= Math.abs(y2 - y1)) return [[x1, y1], [x2, y1], [x2, y2]];
+  return [[x1, y1], [x1, y2], [x2, y2]];
+}
+
+function wireSegmentExists(x1, y1, x2, y2) {
+  return elements.some(
+    (e) =>
+      e.type === "wire" &&
+      ((e.x1 === x1 && e.y1 === y1 && e.x2 === x2 && e.y2 === y2) ||
+        (e.x1 === x2 && e.y1 === y2 && e.x2 === x1 && e.y2 === y1)),
+  );
+}
+
+/** Lay unit wire segments along a polyline path, skipping duplicates. */
+function addWirePath(points, color = currentWireColor) {
+  let added = false;
+  for (let i = 0; i < points.length - 1; i++) {
+    const [ax, ay] = points[i];
+    const [bx, by] = points[i + 1];
+    const steps = Math.max(Math.abs(bx - ax), Math.abs(by - ay));
+    const dx = Math.sign(bx - ax);
+    const dy = Math.sign(by - ay);
+    for (let s = 0; s < steps; s++) {
+      const x1 = ax + dx * s;
+      const y1 = ay + dy * s;
+      const x2 = x1 + dx;
+      const y2 = y1 + dy;
+      if (wireSegmentExists(x1, y1, x2, y2)) continue;
+      elements.push({ id: nextId++, type: "wire", x1, y1, x2, y2, value: 0, color });
+      added = true;
     }
-  } else {
-    elements.push({
-      id: nextId++,
-      type,
-      x1,
-      y1,
-      x2,
-      y2,
-      value: defaultValue(type),
-      closed: type === "switch" ? false : undefined,
-    });
   }
+  if (added) {
+    resolve();
+    pushHistory();
+  }
+  return added;
+}
+
+function addPart(type, x1, y1, x2, y2) {
+  elements.push({
+    id: nextId++,
+    type,
+    x1,
+    y1,
+    x2,
+    y2,
+    value: defaultValue(type),
+    closed: type === "switch" ? false : undefined,
+  });
   resolve();
   pushHistory();
 }
@@ -151,7 +197,7 @@ function removeElement(target) {
 }
 
 function rotateSelected() {
-  if (!selected) return;
+  if (!selected || selected.type === "wire") return;
   // Rotate 90° around terminal 1.
   const dx = selected.x2 - selected.x1;
   const dy = selected.y2 - selected.y1;
@@ -161,10 +207,40 @@ function rotateSelected() {
   pushHistory();
 }
 
+/** Recolour a wire and every wire connected to it that shares its colour. */
+function recolorRun(wire, color) {
+  const old = wire.color || DEFAULT_WIRE_COLOR;
+  if (old === color) return;
+  const byNode = new Map();
+  for (const e of elements) {
+    if (e.type !== "wire" || (e.color || DEFAULT_WIRE_COLOR) !== old) continue;
+    for (const k of [nodeKey(e.x1, e.y1), nodeKey(e.x2, e.y2)]) {
+      if (!byNode.has(k)) byNode.set(k, []);
+      byNode.get(k).push(e);
+    }
+  }
+  const stack = [wire];
+  const seen = new Set([wire.id]);
+  while (stack.length) {
+    const w = stack.pop();
+    w.color = color;
+    for (const k of [nodeKey(w.x1, w.y1), nodeKey(w.x2, w.y2)]) {
+      for (const n of byNode.get(k) || []) {
+        if (!seen.has(n.id)) {
+          seen.add(n.id);
+          stack.push(n);
+        }
+      }
+    }
+  }
+  resolve();
+  pushHistory();
+}
+
 function loadExample() {
   elements = [];
   nextId = 1;
-  const put = (type, x1, y1, x2, y2, extra = {}) =>
+  const part = (type, x1, y1, x2, y2) =>
     elements.push({
       id: nextId++,
       type,
@@ -174,22 +250,39 @@ function loadExample() {
       y2,
       value: defaultValue(type),
       closed: type === "switch" ? false : undefined,
-      ...extra,
     });
+  const wire = (x1, y1, x2, y2, color) => addWireSilent(x1, y1, x2, y2, color);
+  function addWireSilent(ax, ay, bx, by, color) {
+    const steps = Math.max(Math.abs(bx - ax), Math.abs(by - ay));
+    const dx = Math.sign(bx - ax);
+    const dy = Math.sign(by - ay);
+    for (let s = 0; s < steps; s++) {
+      elements.push({
+        id: nextId++,
+        type: "wire",
+        x1: ax + dx * s,
+        y1: ay + dy * s,
+        x2: ax + dx * (s + 1),
+        y2: ay + dy * (s + 1),
+        value: 0,
+        color,
+      });
+    }
+  }
   // 9 V battery -> switch -> lamp in parallel with a resistor.
-  put("battery", 6, 8, 6, 5);
-  for (let x = 6; x < 10; x++) put("wire", x, 5, x + 1, 5, { value: 0 });
-  put("switch", 10, 5, 13, 5);
-  for (let x = 13; x < 16; x++) put("wire", x, 5, x + 1, 5, { value: 0 });
-  put("wire", 13, 5, 13, 6, { value: 0 });
-  put("lamp", 13, 6, 13, 9);
-  put("wire", 13, 9, 13, 10, { value: 0 });
-  put("wire", 16, 5, 16, 6, { value: 0 });
-  put("resistor", 16, 6, 16, 9);
-  put("wire", 16, 9, 16, 10, { value: 0 });
-  for (let x = 6; x < 16; x++) put("wire", x, 10, x + 1, 10, { value: 0 });
-  put("wire", 6, 8, 6, 9, { value: 0 });
-  put("wire", 6, 9, 6, 10, { value: 0 });
+  // EU colours: brown feed on the + side, blue return to the - terminal.
+  part("battery", 6, 8, 6, 5);
+  wire(6, 5, 10, 5, "brown");
+  part("switch", 10, 5, 13, 5);
+  wire(13, 5, 16, 5, "brown");
+  wire(13, 5, 13, 6, "brown");
+  part("lamp", 13, 6, 13, 9);
+  wire(13, 9, 13, 10, "blue");
+  wire(16, 5, 16, 6, "brown");
+  part("resistor", 16, 6, 16, 9);
+  wire(16, 9, 16, 10, "blue");
+  wire(16, 10, 6, 10, "blue");
+  wire(6, 10, 6, 8, "blue");
   select(null);
   resolve();
   pushHistory();
@@ -200,31 +293,49 @@ function loadExample() {
 
 function select(target) {
   selected = target;
-  if (!target || target.type === "wire") {
+  if (!target) {
     panel.classList.add("hidden");
     return;
   }
   panel.classList.remove("hidden");
   el("sim-panel-title").textContent = PART_NAMES[target.type];
-  const hasValue = target.type !== "switch";
+  const isWire = target.type === "wire";
+  const hasValue = !isWire && target.type !== "switch";
   el("sim-value-row").classList.toggle("hidden", !hasValue);
+  el("sim-panel-rotate").classList.toggle("hidden", isWire);
   if (hasValue) {
     el("sim-panel-unit").textContent = target.type === "battery" ? "V" : "Ω";
     el("sim-panel-value").value = target.value;
   }
   const chips = el("sim-chips");
   chips.innerHTML = "";
-  for (const v of PRESETS[target.type] || []) {
-    const b = document.createElement("button");
-    b.className = "chip";
-    b.textContent = target.type === "battery" ? `${v} V` : v >= 1000 ? `${v / 1000} kΩ` : `${v} Ω`;
-    b.addEventListener("click", () => {
-      target.value = v;
-      el("sim-panel-value").value = v;
-      resolve();
-      pushHistory();
-    });
-    chips.appendChild(b);
+  if (isWire) {
+    for (const [key, c] of Object.entries(WIRE_COLORS)) {
+      const b = document.createElement("button");
+      b.className = "swatch" + (key === "pe" ? " pe" : "");
+      b.dataset.color = key;
+      b.style.background = key === "pe" ? "" : c.hex;
+      b.title = c.label;
+      if ((target.color || DEFAULT_WIRE_COLOR) === key) b.classList.add("active");
+      b.addEventListener("click", () => {
+        recolorRun(target, key);
+        select(target);
+      });
+      chips.appendChild(b);
+    }
+  } else {
+    for (const v of PRESETS[target.type] || []) {
+      const b = document.createElement("button");
+      b.className = "chip";
+      b.textContent = target.type === "battery" ? `${v} V` : v >= 1000 ? `${v / 1000} kΩ` : `${v} Ω`;
+      b.addEventListener("click", () => {
+        target.value = v;
+        el("sim-panel-value").value = v;
+        resolve();
+        pushHistory();
+      });
+      chips.appendChild(b);
+    }
   }
   if (target.type === "switch") {
     const b = document.createElement("button");
@@ -278,6 +389,10 @@ el("sim-labels").addEventListener("click", (e) => {
   showLabels = !showLabels;
   e.currentTarget.classList.toggle("active", showLabels);
 });
+el("sim-potentials").addEventListener("click", (e) => {
+  potentialView = !potentialView;
+  e.currentTarget.classList.toggle("active", potentialView);
+});
 el("sim-helpbtn").addEventListener("click", () => el("sim-help").classList.remove("hidden"));
 el("sim-help-close").addEventListener("click", () => {
   el("sim-help").classList.add("hidden");
@@ -306,6 +421,16 @@ for (const tile of document.querySelectorAll("[data-tool]")) {
   });
 }
 
+for (const sw of document.querySelectorAll("#sim-wire-colors .swatch")) {
+  sw.addEventListener("click", () => {
+    currentWireColor = sw.dataset.color;
+    for (const s of document.querySelectorAll("#sim-wire-colors .swatch")) {
+      s.classList.toggle("active", s === sw);
+    }
+    setTool("wire");
+  });
+}
+
 window.addEventListener("pointermove", (e) => {
   if (action?.kind !== "drop") return;
   const rect = canvas.getBoundingClientRect();
@@ -326,8 +451,8 @@ window.addEventListener("pointerup", () => {
   const { type, active, gx, gy } = action;
   action = null;
   if (!active) return; // released without reaching the canvas: tool stays armed
-  if (type === "wire") addElement(type, gx - 1, gy, gx + 1, gy);
-  else addElement(type, gx - 1, gy, gx + 1, gy);
+  if (type === "wire") addWirePath([[gx - 1, gy], [gx + 1, gy]]);
+  else addPart(type, gx - 1, gy, gx + 1, gy);
   setTool("select");
 });
 
@@ -405,17 +530,21 @@ function elementAt(wx, wy) {
   return best;
 }
 
-function handleAt(wx, wy) {
-  if (!selected) return 0;
-  if (Math.hypot(wx - selected.x1 * CELL, wy - selected.y1 * CELL) < 10) return 1;
-  if (Math.hypot(wx - selected.x2 * CELL, wy - selected.y2 * CELL) < 10) return 2;
-  return 0;
+/** Part terminal near a world point — dragging from it starts a wire. */
+function terminalAt(wx, wy) {
+  for (const e of elements) {
+    for (const [tx, ty] of [[e.x1, e.y1], [e.x2, e.y2]]) {
+      if (Math.hypot(wx - tx * CELL, wy - ty * CELL) < 11) return { x: tx, y: ty };
+    }
+  }
+  return null;
 }
 
 // ----------------------------------------------------------- canvas input
 
 canvas.addEventListener("pointerdown", (e) => {
   tooltip.classList.add("hidden");
+  if (action?.kind === "drop") return;
   if (e.button === 1 || (e.button === 0 && e.altKey)) {
     action = { kind: "pan", startX: e.clientX, startY: e.clientY, ox: offsetX, oy: offsetY };
     canvas.setPointerCapture(e.pointerId);
@@ -428,9 +557,10 @@ canvas.addEventListener("pointerdown", (e) => {
   const gy = Math.round(w.y / CELL);
 
   if (tool === "select") {
-    const handle = handleAt(w.x, w.y);
-    if (handle) {
-      action = { kind: "handle", el: selected, handle, moved: false };
+    // Dragging from any terminal starts a new wire (Tinkercad-style).
+    const t = terminalAt(w.x, w.y);
+    if (t) {
+      action = { kind: "place", type: "wire", x1: t.x, y1: t.y, x2: t.x, y2: t.y, fromTerminal: true };
       canvas.setPointerCapture(e.pointerId);
       return;
     }
@@ -451,16 +581,14 @@ canvas.addEventListener("pointerdown", (e) => {
     return;
   }
 
-  // Placement tool: drag out a new part between grid points.
+  // Placement tool: drag out a new part / wire run between grid points.
   action = { kind: "place", type: tool, x1: gx, y1: gy, x2: gx, y2: gy };
   canvas.setPointerCapture(e.pointerId);
 });
 
 canvas.addEventListener("pointermove", (e) => {
   const rect = canvas.getBoundingClientRect();
-  const sx = e.clientX - rect.left;
-  const sy = e.clientY - rect.top;
-  const w = screenToWorld(sx, sy);
+  const w = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
   const gx = Math.round(w.x / CELL);
   const gy = Math.round(w.y / CELL);
 
@@ -470,8 +598,12 @@ canvas.addEventListener("pointermove", (e) => {
     return;
   }
   if (action?.kind === "place") {
-    // Straight segments only, along the dominant axis.
-    if (Math.abs(gx - action.x1) >= Math.abs(gy - action.y1)) {
+    if (action.type === "wire") {
+      // Wires route freely with an automatic L-bend.
+      action.x2 = gx;
+      action.y2 = gy;
+    } else if (Math.abs(gx - action.x1) >= Math.abs(gy - action.y1)) {
+      // Parts stay straight along the dominant axis.
       action.x2 = gx;
       action.y2 = action.y1;
     } else {
@@ -491,30 +623,11 @@ canvas.addEventListener("pointermove", (e) => {
     if (action.moved) solution = solveCircuit(elements);
     return;
   }
-  if (action?.kind === "handle") {
-    const a = action.el;
-    const fixed = action.handle === 1 ? { x: a.x2, y: a.y2 } : { x: a.x1, y: a.y1 };
-    let nx = gx;
-    let ny = gy;
-    if (Math.abs(nx - fixed.x) >= Math.abs(ny - fixed.y)) ny = fixed.y;
-    else nx = fixed.x;
-    if (nx === fixed.x && ny === fixed.y) return; // zero length not allowed
-    if (action.handle === 1) {
-      a.x1 = nx;
-      a.y1 = ny;
-    } else {
-      a.x2 = nx;
-      a.y2 = ny;
-    }
-    action.moved = true;
-    solution = solveCircuit(elements);
-    return;
-  }
 
   // Idle: hover feedback.
   hovered = tool === "select" ? elementAt(w.x, w.y) : null;
   canvas.style.cursor =
-    tool !== "select" ? "crosshair" : hovered ? "pointer" : "default";
+    tool !== "select" ? "crosshair" : hovered ? "pointer" : terminalAt(w.x, w.y) ? "crosshair" : "default";
   if (hovered) {
     const r = solution.results.get(hovered.id) || { current: 0, voltage: 0, power: 0 };
     tooltip.classList.remove("hidden");
@@ -535,8 +648,12 @@ canvas.addEventListener("pointerup", (e) => {
   if (!a) return;
   if (a.kind === "place") {
     if (a.x1 !== a.x2 || a.y1 !== a.y2) {
-      addElement(a.type, a.x1, a.y1, a.x2, a.y2);
-      if (a.type !== "wire") setTool("select");
+      if (a.type === "wire") {
+        addWirePath(routeL(a.x1, a.y1, a.x2, a.y2));
+      } else {
+        addPart(a.type, a.x1, a.y1, a.x2, a.y2);
+        setTool("select");
+      }
     }
     return;
   }
@@ -544,22 +661,15 @@ canvas.addEventListener("pointerup", (e) => {
     if (a.moved) {
       resolve();
       pushHistory();
-    } else {
+    } else if (a.el.type === "switch") {
       // A click: toggle switches, select everything else.
-      if (a.el.type === "switch") {
-        a.el.closed = !a.el.closed;
-        resolve();
-        pushHistory();
-        if (selected && selected.id === a.el.id) select(a.el);
-      } else {
-        select(a.el);
-      }
+      a.el.closed = !a.el.closed;
+      resolve();
+      pushHistory();
+      if (selected && selected.id === a.el.id) select(a.el);
+    } else {
+      select(a.el);
     }
-    return;
-  }
-  if (a.kind === "handle" && a.moved) {
-    resolve();
-    pushHistory();
     return;
   }
   if (a.kind === "pan" && a.empty) {
@@ -613,7 +723,7 @@ function label(e) {
     case "switch":
       return e.closed ? "Switch (closed)" : "Switch (open)";
     default:
-      return "Wire";
+      return WIRE_COLORS[e.color || DEFAULT_WIRE_COLOR].label.split(" — ")[0] + " wire";
   }
 }
 
@@ -635,6 +745,7 @@ function resize() {
 window.addEventListener("resize", resize);
 
 let lastTime = performance.now();
+let potentialRange = null; // {min, max} refreshed each frame in potential view
 
 function frame(now) {
   const dt = Math.min((now - lastTime) / 1000, 0.1);
@@ -647,6 +758,18 @@ function frame(now) {
   ctx.scale(scale, scale);
 
   drawGrid();
+
+  if (potentialView) {
+    let min = Infinity;
+    let max = -Infinity;
+    for (const v of solution.voltages.values()) {
+      min = Math.min(min, v);
+      max = Math.max(max, v);
+    }
+    potentialRange = max > min ? { min, max } : null;
+  } else {
+    potentialRange = null;
+  }
 
   const overloaded = new Set();
   for (const e of elements) {
@@ -661,16 +784,19 @@ function frame(now) {
     drawElement(e, r, overloaded.has(e.id), now);
   }
   drawJunctions();
-  if (selected) drawHandles(selected);
 
   if (action?.kind === "place" && (action.x1 !== action.x2 || action.y1 !== action.y2)) {
-    drawElement(
-      { id: -1, type: action.type, x1: action.x1, y1: action.y1, x2: action.x2, y2: action.y2, value: defaultValue(action.type), closed: false },
-      { current: 0, voltage: 0, power: 0 }, false, now, true);
+    if (action.type === "wire") {
+      drawWirePreview(routeL(action.x1, action.y1, action.x2, action.y2));
+    } else {
+      drawElement(
+        { id: -1, type: action.type, x1: action.x1, y1: action.y1, x2: action.x2, y2: action.y2, value: defaultValue(action.type), closed: false },
+        { current: 0, voltage: 0, power: 0 }, false, now, true);
+    }
   }
   if (action?.kind === "drop" && action.active) {
     drawElement(
-      { id: -1, type: action.type, x1: action.gx - 1, y1: action.gy, x2: action.gx + 1, y2: action.gy, value: defaultValue(action.type), closed: false },
+      { id: -1, type: action.type, x1: action.gx - 1, y1: action.gy, x2: action.gx + 1, y2: action.gy, value: defaultValue(action.type), closed: false, color: currentWireColor },
       { current: 0, voltage: 0, power: 0 }, false, now, true);
   }
 
@@ -696,18 +822,27 @@ function drawGrid() {
   }
 }
 
-function terminalCounts() {
+function drawWirePreview(points) {
+  ctx.save();
+  ctx.globalAlpha = 0.55;
+  ctx.strokeStyle = WIRE_COLORS[currentWireColor].hex;
+  ctx.lineWidth = 3;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  ctx.moveTo(points[0][0] * CELL, points[0][1] * CELL);
+  for (const [x, y] of points.slice(1)) ctx.lineTo(x * CELL, y * CELL);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawJunctions() {
   const counts = new Map();
   for (const e of elements) {
     for (const k of [nodeKey(e.x1, e.y1), nodeKey(e.x2, e.y2)]) {
       counts.set(k, (counts.get(k) || 0) + 1);
     }
   }
-  return counts;
-}
-
-function drawJunctions() {
-  const counts = terminalCounts();
   for (const [k, n] of counts) {
     const [x, y] = k.split(",").map(Number);
     ctx.beginPath();
@@ -717,36 +852,45 @@ function drawJunctions() {
   }
 }
 
-function drawHandles(e) {
-  for (const [x, y] of [[e.x1, e.y1], [e.x2, e.y2]]) {
-    ctx.beginPath();
-    ctx.arc(x * CELL, y * CELL, 6, 0, Math.PI * 2);
-    ctx.fillStyle = "#fff";
-    ctx.fill();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "#1577d1";
-    ctx.stroke();
-  }
-}
-
 function drawStatus() {
   if (solution.singular) {
-    setStatus("This circuit has no unique solution — check for conflicting batteries.", "warn");
-  } else if (solution.shorted) {
-    setStatus("⚡ Short circuit! A battery is connected with (almost) no resistance — add a load.", "error");
-  } else {
-    let watts = 0;
-    for (const e of elements) {
-      if (e.type !== "battery") continue;
-      const r = solution.results.get(e.id);
-      if (r) watts += r.power;
-    }
-    setStatus(
-      elements.length === 0
-        ? "Drag a part from the left panel onto the grid to start building."
-        : `Total source power: ${fmt(watts, "W")}`,
-      "ok");
+    setStatus("Two batteries are fighting each other on the same wires — remove one.", "warn");
+    return;
   }
+  if (solution.shorted) {
+    setStatus("⚡ Short circuit! The current found a path with nothing to slow it down — put a lamp or resistor in the loop.", "error");
+    return;
+  }
+  if (potentialView) {
+    setStatus("Voltage colours are on: red wires are near +, blue wires are near −.", "ok");
+    return;
+  }
+  // Plain-language coaching for people without an electrical background.
+  if (elements.length === 0) {
+    setStatus("Drag a part from the left panel onto the grid to start building.", "ok");
+    return;
+  }
+  const hasBattery = elements.some((e) => e.type === "battery");
+  if (!hasBattery) {
+    setStatus("Add a battery — without a power source nothing will flow.", "ok");
+    return;
+  }
+  let watts = 0;
+  for (const e of elements) {
+    if (e.type !== "battery") continue;
+    const r = solution.results.get(e.id);
+    if (r) watts += r.power;
+  }
+  if (watts < 1e-9) {
+    const openSwitch = elements.some((e) => e.type === "switch" && !e.closed);
+    setStatus(
+      openSwitch
+        ? "Nothing is flowing — a switch is open. Click it to close it."
+        : "Nothing is flowing yet — connect the parts in a complete loop from + back to −.",
+      "ok");
+    return;
+  }
+  setStatus(`It works! The battery is delivering ${fmt(watts, "W")} of power.`, "ok");
 }
 
 function setStatus(text, kind) {
@@ -754,7 +898,21 @@ function setStatus(text, kind) {
   statusEl.className = "status-" + kind;
 }
 
-const SYMBOL_HALF = { wire: 0, battery: 14, resistor: 22, lamp: 14, switch: 17 };
+function potentialColor(e) {
+  if (!potentialRange) return "#94a3b8";
+  const v1 = solution.voltages.get(nodeKey(e.x1, e.y1)) ?? 0;
+  const v2 = solution.voltages.get(nodeKey(e.x2, e.y2)) ?? 0;
+  const t = ((v1 + v2) / 2 - potentialRange.min) / (potentialRange.max - potentialRange.min);
+  const lerp = (a, b, u) => Math.round(a + (b - a) * u);
+  const lo = [37, 99, 235]; // blue
+  const mid = [148, 163, 184]; // grey
+  const hi = [220, 38, 38]; // red
+  const c =
+    t < 0.5
+      ? lo.map((v, i) => lerp(v, mid[i], t * 2))
+      : mid.map((v, i) => lerp(v, hi[i], (t - 0.5) * 2));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
 
 function drawElement(e, r, isOverloaded, now, ghost = false) {
   const ax = e.x1 * CELL;
@@ -766,40 +924,72 @@ function drawElement(e, r, isOverloaded, now, ghost = false) {
   const angle = Math.atan2(by - ay, bx - ax);
   const isSel = selected && selected.id === e.id;
   const isHov = hovered && hovered.id === e.id;
+  const isWire = e.type === "wire";
 
   ctx.save();
   ctx.globalAlpha = ghost ? 0.45 : 1;
-  let stroke = "#334155";
-  if (isOverloaded) stroke = now % 460 < 230 ? "#dc2626" : "#f87171";
-  else if (isSel) stroke = "#1577d1";
-  else if (isHov) stroke = "#3b82f6";
-  ctx.strokeStyle = stroke;
-  ctx.lineWidth = 2.4;
+
+  // Conductor colour: EU insulation colour for wires, slate for parts,
+  // node-potential colour in potential view, red flash when overloaded.
+  let lineColor = isWire ? WIRE_COLORS[e.color || DEFAULT_WIRE_COLOR].hex : "#334155";
+  if (potentialView && !ghost) lineColor = potentialColor(e);
+  if (isOverloaded) lineColor = now % 460 < 230 ? "#dc2626" : "#f87171";
   ctx.lineCap = "round";
 
-  // Full-span conductor line (symbol is drawn opaquely on top).
+  // Selection / hover glow under the conductor.
+  if (isSel || isHov) {
+    ctx.strokeStyle = isSel ? "rgba(21,119,209,0.4)" : "rgba(59,130,246,0.22)";
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(bx, by);
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = isWire ? 3 : 2.4;
   ctx.beginPath();
   ctx.moveTo(ax, ay);
   ctx.lineTo(bx, by);
   ctx.stroke();
 
-  // Animated current dots.
+  // Green/yellow PE wires get their yellow stripe.
+  if (isWire && (e.color || DEFAULT_WIRE_COLOR) === "pe" && !potentialView && !isOverloaded) {
+    ctx.strokeStyle = "#eab308";
+    ctx.lineWidth = 3;
+    ctx.setLineDash([5, 7]);
+    ctx.beginPath();
+    ctx.moveTo(ax, ay);
+    ctx.lineTo(bx, by);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Animated current dots (white ring keeps them visible on any colour).
   const len = Math.hypot(bx - ax, by - ay);
   if (!ghost && len > 0 && Math.abs(r.current) > 1e-6 && !(e.type === "switch" && !e.closed)) {
     const ux = (bx - ax) / len;
     const uy = (by - ay) / len;
     const spacing = 15;
     const phase = ((flowPhase.get(e.id) || 0) % spacing + spacing) % spacing;
-    ctx.fillStyle = isOverloaded ? "#ef4444" : "#ff9f1c";
     for (let d = phase; d < len; d += spacing) {
+      const px = ax + ux * d;
+      const py = ay + uy * d;
       ctx.beginPath();
-      ctx.arc(ax + ux * d, ay + uy * d, 3, 0, Math.PI * 2);
+      ctx.arc(px, py, 3.2, 0, Math.PI * 2);
+      ctx.fillStyle = "#fff";
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(px, py, 2.3, 0, Math.PI * 2);
+      ctx.fillStyle = isOverloaded ? "#ef4444" : "#ff9f1c";
       ctx.fill();
     }
   }
 
   // IEC 60617 symbol, drawn over the conductor with an opaque plate.
-  if (e.type !== "wire") {
+  ctx.strokeStyle = isOverloaded ? lineColor : isSel ? "#1577d1" : "#334155";
+  ctx.lineWidth = 2.4;
+  if (!isWire) {
     ctx.translate(mx, my);
     ctx.rotate(angle);
     switch (e.type) {
@@ -820,7 +1010,7 @@ function drawElement(e, r, isOverloaded, now, ghost = false) {
     ctx.translate(-mx, -my);
   }
 
-  if (!ghost && showLabels && e.type !== "wire") {
+  if (!ghost && showLabels && !isWire) {
     ctx.fillStyle = "#5b6b80";
     ctx.font = "600 11px ui-sans-serif, system-ui, sans-serif";
     const horizontal = e.y1 === e.y2;
@@ -905,7 +1095,7 @@ function drawElement(e, r, isOverloaded, now, ghost = false) {
     ctx.moveTo(13, 0);
     ctx.lineTo(17, 0);
     ctx.stroke();
-    ctx.fillStyle = stroke;
+    ctx.fillStyle = ctx.strokeStyle;
     for (const px of [-12, 12]) {
       ctx.beginPath();
       ctx.arc(px, 0, 2.6, 0, Math.PI * 2);
