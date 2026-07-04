@@ -2,20 +2,30 @@
  * Quadro Elétrico — UI de montagem tipo eletricista.
  *
  * Arrasta módulos (geral, diferencial, disjuntores) para a calha DIN,
- * puxa ligações de parafuso a parafuso, liga os manípulos e vê as
- * proteções a dispararem como na vida real. Modelo/física em
- * panel_model.js (testado em Node); solver em circuit.js.
+ * puxa ligações de parafuso a parafuso (com secção em mm²), liga os
+ * manípulos e vê as proteções a dispararem como na vida real: térmico
+ * temporizado, magnético instantâneo, diferencial por corrente residual
+ * (fugas, botão T, neutros trocados) e DCP de potência contratada.
+ * Modelo/física em panel_model.js (testado em Node); solver em circuit.js.
  */
 import {
+  DCP_STEPS,
   DEVICE_TYPES,
+  SECTIONS,
+  SECTION_AMPACITY,
+  V_SUPPLY,
   checkInstallation,
   computeState,
+  defaultEntry,
   deviceName,
+  ensureEntry,
   polesOf,
+  sectionOf,
+  updateThermal,
   ISSUE_TEXT,
 } from "./panel_model.js";
 
-const STORAGE_KEY = "mdm-quadro-eletrico";
+const STORAGE_KEY = "mdm-quadro-eletrico-v2";
 const WELCOME_KEY = "mdm-quadro-eletrico-welcome";
 
 const WORLD_W = 1000;
@@ -32,15 +42,26 @@ const RAILS = [{ y: 168 }, { y: 330 }];
 const RAIL_X0 = 280;
 const RAIL_X1 = 840;
 const DEV_H = 92;
-const SUP = { L: { x: 300, y: 64 }, N: { x: 336, y: 64 } };
-const NBAR = { x: 916, y0: 252, y1: 417, screws: 6 };
+// Entrada da instalação: rede -> contador -> DCP -> terminais do quadro.
+const ENTRY = {
+  meter: { x: 262, y: 42, w: 66, h: 42 },
+  dcp: { x: 334, y: 42, w: 46, h: 42 },
+};
+const SUP = { L: { x: 396, y: 74 }, N: { x: 420, y: 74 } };
+// Duas barras de neutro — uma por grupo diferencial (N1 e N2).
+const NBAR_X = 916;
+const NBARS = [
+  { id: "NBAR", label: "N1", y0: 250, y1: 326, screws: 4 },
+  { id: "NBAR2", label: "N2", y0: 342, y1: 418, screws: 4 },
+];
+const LOAD_Y = 506;
+const LOAD_W = 162;
+const LOAD_H = 112;
+
 // Calhas técnicas (cablagem arrumada, como num quadro real).
 const DUCTS = { D0: 99, D1: 250, D2: 409 };
 const DUCT_H = 24;
 const VDUCT = { x: 856, w: 26, y0: 87, y1: 421 };
-const LOAD_Y = 506;
-const LOAD_W = 162;
-const LOAD_H = 112;
 
 const LOADS_DEF = [
   { id: "luz", icon: "💡", name: "Iluminação", watts: 300 },
@@ -61,11 +82,12 @@ let nextId = 1;
 let state = null; // resultado de computeState
 let wireCurrent = new Map(); // wireId -> corrente (sinal a->b)
 let devCurrent = new Map(); // devId -> corrente no polo L
-let selected = null; // {kind:'device'|'wire'|'load', id}
-let hovered = null; // idem, para tooltip
+let selected = null; // {kind:'device'|'wire'|'load'|'dcp', id}
+let hovered = null;
 let action = null;
 let history = [];
 let histIdx = -1;
+let kwhTotal = 0;
 const flowPhase = new Map();
 
 // vista: escala fixa para caber
@@ -77,6 +99,7 @@ let offsetY = 0;
 
 function freshModel() {
   return {
+    entry: defaultEntry(),
     devices: [],
     wires: [],
     loads: LOADS_DEF.map((l) => ({ ...l, on: false, fault: false })),
@@ -84,7 +107,7 @@ function freshModel() {
 }
 
 function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ model, nextId }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ model, nextId, kwhTotal }));
 }
 
 function loadSaved() {
@@ -92,7 +115,10 @@ function loadSaved() {
     const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (!parsed?.model?.loads?.length) return false;
     model = parsed.model;
+    ensureEntry(model);
+    for (const w of model.wires) if (!w.section) w.section = 2.5;
     nextId = parsed.nextId || 1;
+    kwhTotal = parsed.kwhTotal || 0;
     return true;
   } catch {
     return false;
@@ -100,6 +126,7 @@ function loadSaved() {
 }
 
 function refresh() {
+  ensureEntry(model);
   state = computeState(model);
   wireCurrent = new Map();
   devCurrent = new Map();
@@ -109,6 +136,7 @@ function refresh() {
     if (e.wireId != null) wireCurrent.set(e.wireId, r.current);
     if (e.devId && e.pole === "L") devCurrent.set(e.devId, Math.abs(r.current));
   }
+  if (state.events.length) noteEvents(state.events);
   save();
   updateStatus();
   renderPanel();
@@ -144,6 +172,16 @@ function mutate() {
   pushHistory();
 }
 
+// Disparo térmico: o tempo passa mesmo sem mexer no quadro.
+setInterval(() => {
+  if (!model || !state) return;
+  const events = updateThermal(model, state, 0.4);
+  if (events.length) {
+    noteEvents(events);
+    refresh();
+  }
+}, 400);
+
 // ------------------------------------------------------------- terminais
 
 function deviceWidth(d) {
@@ -153,8 +191,8 @@ function deviceWidth(d) {
 /** Lista de terminais visíveis: {id, x, y, dx, dy, kind, name}. */
 function terminals() {
   const list = [];
-  list.push({ id: "SUP_L", x: SUP.L.x, y: SUP.L.y, dx: 0, dy: 1, kind: "L", name: "Alimentação — fase (L)" });
-  list.push({ id: "SUP_N", x: SUP.N.x, y: SUP.N.y, dx: 0, dy: 1, kind: "N", name: "Alimentação — neutro (N)" });
+  list.push({ id: "SUP_L", x: SUP.L.x, y: SUP.L.y, dx: 0, dy: 1, kind: "L", name: "Saída do DCP — fase (L)" });
+  list.push({ id: "SUP_N", x: SUP.N.x, y: SUP.N.y, dx: 0, dy: 1, kind: "N", name: "Saída do DCP — neutro (N)" });
   for (const d of model.devices) {
     const w = deviceWidth(d);
     const top = RAILS[d.rail].y - DEV_H / 2;
@@ -166,9 +204,14 @@ function terminals() {
       list.push({ id: d.id + ":Nout", x: d.x + 48, y: top + DEV_H - 8, dx: 0, dy: 1, kind: "N", name: "Saída de neutro" });
     }
   }
-  for (let k = 0; k < NBAR.screws; k++) {
-    const y = NBAR.y0 + 14 + k * ((NBAR.y1 - NBAR.y0 - 28) / (NBAR.screws - 1));
-    list.push({ id: "NBAR", pin: k, x: NBAR.x, y, dx: -1, dy: 0, kind: "N", name: "Barra de neutro (N)" });
+  for (const bar of NBARS) {
+    const step = (bar.y1 - bar.y0 - 28) / (bar.screws - 1);
+    for (let k = 0; k < bar.screws; k++) {
+      list.push({
+        id: bar.id, pin: k, x: NBAR_X, y: bar.y0 + 14 + k * step,
+        dx: -1, dy: 0, kind: "N", name: `Barra de neutro ${bar.label}`,
+      });
+    }
   }
   model.loads.forEach((l, i) => {
     const x = loadX(i);
@@ -184,7 +227,7 @@ function loadX(i) {
 
 function terminalPos(id, pinHint) {
   const list = terminals().filter((t) => t.id === id);
-  if (id === "NBAR" && list.length) return list[Math.min(pinHint ?? 0, list.length - 1)];
+  if (id.startsWith("NBAR") && list.length) return list[Math.min(pinHint ?? 0, list.length - 1)];
   return list[0];
 }
 
@@ -201,23 +244,25 @@ function terminalNear(wx, wy) {
   return best;
 }
 
-// Cada ligação à barra de neutro usa um parafuso diferente (visual).
-function nbarPin(wireId) {
-  const ids = model.wires.filter((w) => w.a === "NBAR" || w.b === "NBAR").map((w) => w.id);
-  return ids.indexOf(wireId) % NBAR.screws;
+// Cada ligação a uma barra de neutro usa um parafuso diferente (visual).
+function nbarPin(barId, wireId) {
+  const ids = model.wires.filter((w) => w.a === barId || w.b === barId).map((w) => w.id);
+  const bar = NBARS.find((b) => b.id === barId);
+  return ids.indexOf(wireId) % (bar ? bar.screws : 4);
 }
 
 function wireEnds(w) {
-  const pin = nbarPin(w.id);
-  const a = terminalPos(w.a, pin);
-  const b = terminalPos(w.b, pin);
+  const a = terminalPos(w.a, w.a.startsWith("NBAR") ? nbarPin(w.a, w.id) : 0);
+  const b = terminalPos(w.b, w.b.startsWith("NBAR") ? nbarPin(w.b, w.id) : 0);
   return { a, b };
 }
+
+// ------------------------------------------------------ rotas das ligações
 
 /** Calha horizontal por onde um terminal encaminha o seu cabo. */
 function ductOf(t) {
   if (t.id === "SUP_L" || t.id === "SUP_N") return DUCTS.D0;
-  if (t.id === "NBAR") return null; // liga pela calha vertical
+  if (t.id.startsWith("NBAR")) return null; // liga pela calha vertical
   const dev = model.devices.find((d) => t.id.startsWith(d.id + ":"));
   if (dev) {
     const isTop = t.dy === -1;
@@ -312,6 +357,10 @@ function loadAt(wx, wy) {
   return null;
 }
 
+function inRect(wx, wy, r) {
+  return wx >= r.x && wx <= r.x + r.w && wy >= r.y && wy <= r.y + r.h;
+}
+
 // ---------------------------------------------------------------- edição
 
 function addDevice(type, rail, x) {
@@ -332,7 +381,6 @@ function addDevice(type, rail, x) {
 function snapDeviceX(dLike, rail, x) {
   const w = polesOf(dLike.type) === 2 ? 64 : 34;
   let nx = Math.round(Math.max(RAIL_X0, Math.min(RAIL_X1 - w, x)) / 4) * 4;
-  // evitar sobreposição: empurra para a direita até haver espaço
   const others = model.devices.filter((o) => o.rail === rail && o !== dLike.self);
   for (let guard = 0; guard < 60; guard++) {
     const clash = others.find((o) => nx < o.x + deviceWidth(o) + 4 && o.x < nx + w + 4);
@@ -344,13 +392,14 @@ function snapDeviceX(dLike, rail, x) {
 
 function addWire(aTerm, bTerm) {
   if (!aTerm || !bTerm) return false;
-  if (aTerm.id === bTerm.id && aTerm.id !== "NBAR") return false;
   if (aTerm.id === bTerm.id && aTerm.pin === bTerm.pin) return false;
+  if (aTerm.id === bTerm.id && !aTerm.id.startsWith("NBAR")) return false;
   const dup = model.wires.some(
     (w) => (w.a === aTerm.id && w.b === bTerm.id) || (w.a === bTerm.id && w.b === aTerm.id));
   if (dup) return false;
-  const color = aTerm.kind === "N" || bTerm.id === "NBAR" ? "blue" : aTerm.kind === "L" ? "brown" : "black";
-  model.wires.push({ id: nextId++, a: aTerm.id, b: bTerm.id, color });
+  const color =
+    aTerm.kind === "N" || bTerm.id.startsWith("NBAR") ? "blue" : aTerm.kind === "L" ? "brown" : "black";
+  model.wires.push({ id: nextId++, a: aTerm.id, b: bTerm.id, color, section: 2.5 });
   mutate();
   return true;
 }
@@ -359,11 +408,12 @@ function removeSelected() {
   if (!selected) return;
   if (selected.kind === "device") {
     model.devices = model.devices.filter((d) => d.id !== selected.id);
-    model.wires = model.wires.filter((w) => !w.a.startsWith(selected.id + ":") && !w.b.startsWith(selected.id + ":"));
+    model.wires = model.wires.filter(
+      (w) => !w.a.startsWith(selected.id + ":") && !w.b.startsWith(selected.id + ":"));
   } else if (selected.kind === "wire") {
     model.wires = model.wires.filter((w) => w.id !== selected.id);
   } else {
-    return; // circuitos fixos não se removem
+    return; // circuitos e DCP não se removem
   }
   select(null);
   mutate();
@@ -379,19 +429,20 @@ function loadExample() {
   }));
   model.devices = [g, dif, ...qs];
   let wid = 1;
-  const W = (a, b, color) => model.wires.push({ id: wid++, a, b, color });
-  W("SUP_L", "g:Lin", "brown");
-  W("SUP_N", "g:Nin", "blue");
-  W("g:Lout", "dif:Lin", "brown");
-  W("g:Nout", "dif:Nin", "blue");
-  W("dif:Lout", "q1:Lin", "brown");
-  W("q1:Lin", "q2:Lin", "brown");
-  W("q2:Lin", "q3:Lin", "brown");
-  W("q3:Lin", "q4:Lin", "brown");
-  W("dif:Nout", "NBAR", "blue");
+  const W = (a, b, color, section) => model.wires.push({ id: wid++, a, b, color, section });
+  W("SUP_L", "g:Lin", "brown", 10);
+  W("SUP_N", "g:Nin", "blue", 10);
+  W("g:Lout", "dif:Lin", "brown", 10);
+  W("g:Nout", "dif:Nin", "blue", 10);
+  W("dif:Lout", "q1:Lin", "brown", 10);
+  W("q1:Lin", "q2:Lin", "brown", 10);
+  W("q2:Lin", "q3:Lin", "brown", 10);
+  W("q3:Lin", "q4:Lin", "brown", 10);
+  W("dif:Nout", "NBAR", "blue", 10);
+  const sections = { luz: 1.5, coz: 2.5, maq: 2.5, sala: 2.5 };
   model.loads.forEach((l, i) => {
-    W(qs[i].id + ":Lout", l.id + ":L", "brown");
-    W(l.id + ":N", "NBAR", "blue");
+    W(qs[i].id + ":Lout", l.id + ":L", "brown", sections[l.id]);
+    W(l.id + ":N", "NBAR", "blue", sections[l.id]);
   });
   model.loads[0].on = true;
   model.loads[1].on = true;
@@ -405,6 +456,14 @@ function loadExample() {
 function select(sel) {
   selected = sel;
   renderPanel();
+}
+
+function chipBtn(label, on, fn) {
+  const b = document.createElement("button");
+  b.className = "chip" + (on ? " on" : "");
+  b.textContent = label;
+  b.addEventListener("click", fn);
+  return b;
 }
 
 function renderPanel() {
@@ -422,25 +481,54 @@ function renderPanel() {
   colors.classList.add("hidden");
   el("qd-delete").classList.remove("hidden");
 
-  if (selected.kind === "device") {
+  if (selected.kind === "dcp") {
+    el("qd-panel-title").textContent = "Contador + DCP";
+    for (const s of DCP_STEPS) {
+      chips.appendChild(
+        chipBtn(`${s.kva} kVA (${s.amps} A)`, model.entry.dcpRating === s.amps, () => {
+          model.entry.dcpRating = s.amps;
+          mutate();
+          renderPanel();
+        }));
+    }
+    const amps = devCurrent.get("DCP") || 0;
+    readout.innerHTML =
+      `Potência contratada <b>${(DCP_STEPS.find((s) => s.amps === model.entry.dcpRating)?.kva) ?? "?"} kVA</b><br>` +
+      `Estado <b>${model.entry.dcpTripped ? "disparado 💥" : model.entry.dcpOn ? "ligado" : "desligado"}</b><br>` +
+      `Corrente <b>${amps.toFixed(1)} A</b> / ${model.entry.dcpRating} A<br>` +
+      `Contador <b>${kwhTotal.toFixed(3)} kWh</b>`;
+    el("qd-delete").classList.add("hidden");
+  } else if (selected.kind === "device") {
     const d = model.devices.find((x) => x.id === selected.id);
     if (!d) return panel.classList.add("hidden");
     el("qd-panel-title").textContent = deviceName(d);
     for (const r of DEVICE_TYPES[d.type].ratings) {
-      const b = document.createElement("button");
-      b.className = "chip" + (d.rating === r ? " on" : "");
-      b.textContent = d.type === "mcb" ? `C${r}` : `${r} A`;
-      b.addEventListener("click", () => {
-        d.rating = r;
-        mutate();
-        renderPanel();
-      });
-      chips.appendChild(b);
+      chips.appendChild(
+        chipBtn(d.type === "mcb" ? `C${r}` : `${r} A`, d.rating === r, () => {
+          d.rating = r;
+          mutate();
+          renderPanel();
+        }));
+    }
+    if (d.type === "rcd") {
+      chips.appendChild(
+        chipBtn("T — testar disparo", false, () => {
+          d.testing = true;
+          refresh();
+          delete d.testing;
+          renderPanel();
+        }));
     }
     const amps = devCurrent.get(d.id) || 0;
+    const extra =
+      d.type === "main"
+        ? "<br><small>Aparelho de corte — não dispara.</small>"
+        : d.type === "mcb" && d.heat > 0.05
+          ? `<br>🔥 Térmico a <b>${Math.round(d.heat * 100)} %</b>`
+          : "";
     readout.innerHTML =
       `Estado <b>${d.tripped ? "disparado 💥" : d.on ? "ligado" : "desligado"}</b><br>` +
-      `Corrente <b>${amps.toFixed(1)} A</b> / ${d.rating} A`;
+      `Corrente <b>${amps.toFixed(1)} A</b> / ${d.rating} A${extra}`;
   } else if (selected.kind === "wire") {
     const w = model.wires.find((x) => x.id === selected.id);
     if (!w) return panel.classList.add("hidden");
@@ -459,32 +547,39 @@ function renderPanel() {
       });
       colors.appendChild(b);
     }
+    for (const s of SECTIONS) {
+      chips.appendChild(
+        chipBtn(`${String(s).replace(".", ",")} mm²`, sectionOf(w) === s, () => {
+          w.section = s;
+          mutate();
+          renderPanel();
+        }));
+    }
     const i = Math.abs(wireCurrent.get(w.id) || 0);
-    readout.innerHTML = `Corrente <b>${i < 0.05 ? "0" : i.toFixed(1)} A</b>`;
+    const iz = SECTION_AMPACITY[sectionOf(w)];
+    const hot = state.hotWires.has(w.id);
+    readout.innerHTML =
+      `Secção <b>${String(sectionOf(w)).replace(".", ",")} mm²</b> (Iz ${iz} A)<br>` +
+      `Corrente <b>${i < 0.05 ? "0" : i.toFixed(1)} A</b>` +
+      (hot ? "<br>🔥 <b>Acima da ampacidade — cabo em risco!</b>" : "");
   } else {
     const l = model.loads.find((x) => x.id === selected.id);
     if (!l) return panel.classList.add("hidden");
     el("qd-panel-title").textContent = `${l.icon} ${l.name}`;
     for (const wts of WATT_PRESETS) {
-      const b = document.createElement("button");
-      b.className = "chip" + (l.watts === wts ? " on" : "");
-      b.textContent = wts >= 1000 ? `${wts / 1000} kW` : `${wts} W`;
-      b.addEventListener("click", () => {
-        l.watts = wts;
+      chips.appendChild(
+        chipBtn(wts >= 1000 ? `${wts / 1000} kW` : `${wts} W`, l.watts === wts, () => {
+          l.watts = wts;
+          mutate();
+          renderPanel();
+        }));
+    }
+    chips.appendChild(
+      chipBtn(l.fault ? "⚠ Avaria ativa (fuga à terra)" : "⚠ Simular fuga à terra", l.fault, () => {
+        l.fault = !l.fault;
         mutate();
         renderPanel();
-      });
-      chips.appendChild(b);
-    }
-    const fb = document.createElement("button");
-    fb.className = "chip" + (l.fault ? " on" : "");
-    fb.textContent = l.fault ? "⚠ Avaria ativa (fuga à terra)" : "⚠ Simular fuga à terra";
-    fb.addEventListener("click", () => {
-      l.fault = !l.fault;
-      mutate();
-      renderPanel();
-    });
-    chips.appendChild(fb);
+      }));
     const amps = state.loadAmps.get(l.id) || 0;
     readout.innerHTML =
       `Interruptor <b>${l.on ? "ligado" : "desligado"}</b><br>` +
@@ -517,9 +612,15 @@ el("qd-verify").addEventListener("click", () => {
     const l = model.loads.find((x) => x.id === r.loadId);
     const li = document.createElement("li");
     li.className = r.ok ? "ok" : "bad";
-    li.textContent = r.ok
-      ? `✓ ${l.icon} ${l.name}: protegido como manda a regra (geral → diferencial → disjuntor, neutro na barra).`
-      : `✗ ${l.icon} ${l.name}: ` + r.issues.map((i) => ISSUE_TEXT[i]).join("; ") + ".";
+    if (r.ok) {
+      li.textContent = `✓ ${l.icon} ${l.name}: protegido como manda a regra (geral → diferencial → disjuntor, neutro no grupo certo, cabo bem protegido).`;
+    } else {
+      const parts = r.issues.map((i) =>
+        i === "cabo_subdimensionado" && r.notes.length
+          ? `${ISSUE_TEXT[i]} (${r.notes.join("; ")})`
+          : ISSUE_TEXT[i]);
+      li.textContent = `✗ ${l.icon} ${l.name}: ` + parts.join("; ") + ".";
+    }
     list.appendChild(li);
   }
   if (model.devices.length === 0) {
@@ -595,7 +696,7 @@ canvas.addEventListener("pointerdown", (e) => {
   }
   const dev = deviceAt(w.x, w.y);
   if (dev) {
-    action = { kind: "movedev", dev, startWx: w.x, origX: dev.x, moved: false };
+    action = { kind: "movedev", dev, startWx: w.x, startWy: w.y, origX: dev.x, moved: false };
     canvas.setPointerCapture(e.pointerId);
     return;
   }
@@ -628,17 +729,28 @@ canvas.addEventListener("pointermove", (e) => {
   const dev = !term && deviceAt(w.x, w.y);
   const wire = !term && !dev && wireAt(w.x, w.y);
   const load = !term && !dev && !wire && loadAt(w.x, w.y);
-  hovered = dev ? { kind: "device", id: dev.id } : wire ? { kind: "wire", id: wire.id } : load ? { kind: "load", id: load.id } : null;
-  canvas.style.cursor = term ? "crosshair" : dev || load ? "pointer" : wire ? "pointer" : "default";
+  const dcp = !term && !dev && !wire && !load && (inRect(w.x, w.y, ENTRY.dcp) || inRect(w.x, w.y, ENTRY.meter));
+  hovered = dev
+    ? { kind: "device", id: dev.id }
+    : wire
+      ? { kind: "wire", id: wire.id }
+      : load
+        ? { kind: "load", id: load.id }
+        : null;
+  canvas.style.cursor = term ? "crosshair" : dev || load || dcp || wire ? "pointer" : "default";
   let text = null;
   if (term) text = term.name;
   else if (dev) text = `${deviceName(dev)} · ${(devCurrent.get(dev.id) || 0).toFixed(1)} A`;
   else if (wire) {
     const i = Math.abs(wireCurrent.get(wire.id) || 0);
-    text = `${COLORS[wire.color]?.label || "Ligação"} · ${i < 0.05 ? "0" : i.toFixed(1)} A`;
+    text =
+      `${COLORS[wire.color]?.label || "Ligação"} · ${String(sectionOf(wire)).replace(".", ",")} mm² · ` +
+      `${i < 0.05 ? "0" : i.toFixed(1)} A` + (state.hotWires.has(wire.id) ? " · 🔥" : "");
   } else if (load) {
     const amps = state.loadAmps.get(load.id) || 0;
     text = `${load.name} · ${load.watts} W · ${amps < 0.05 ? "0" : amps.toFixed(1)} A`;
+  } else if (dcp) {
+    text = `Contador ${kwhTotal.toFixed(2)} kWh · DCP ${model.entry.dcpRating} A`;
   }
   if (text) {
     tooltip.textContent = text;
@@ -669,13 +781,22 @@ canvas.addEventListener("pointerup", (e) => {
       mutate();
     } else {
       const d = a.dev;
-      // clique no manípulo liga/desliga/rearma; noutro sítio seleciona
       const top = RAILS[d.rail].y - DEV_H / 2;
+      const cy = RAILS[d.rail].y;
+      // botão de teste do diferencial
+      if (d.type === "rcd" && Math.hypot(w.x - (d.x + deviceWidth(d) - 12), w.y - (cy - 2)) < 8) {
+        d.testing = true;
+        refresh();
+        delete d.testing;
+        renderPanel();
+        return;
+      }
       const inLever = w.y > top + 26 && w.y < top + DEV_H - 26;
       if (inLever) {
         if (d.tripped) {
           d.tripped = false;
           d.on = true;
+          d.heat = 0;
         } else d.on = !d.on;
         mutate();
         if (selected?.id === d.id) renderPanel();
@@ -686,6 +807,22 @@ canvas.addEventListener("pointerup", (e) => {
     return;
   }
   // clique simples
+  if (inRect(w.x, w.y, ENTRY.dcp)) {
+    const lever = { x: ENTRY.dcp.x + 13, y: ENTRY.dcp.y + 16, w: 20, h: 20 };
+    if (inRect(w.x, w.y, lever)) {
+      if (model.entry.dcpTripped) {
+        model.entry.dcpTripped = false;
+        model.entry.dcpOn = true;
+        model.entry.dcpHeat = 0;
+      } else model.entry.dcpOn = !model.entry.dcpOn;
+      mutate();
+      if (selected?.kind === "dcp") renderPanel();
+    } else {
+      select({ kind: "dcp" });
+    }
+    return;
+  }
+  if (inRect(w.x, w.y, ENTRY.meter)) return select({ kind: "dcp" });
   const wire = wireAt(w.x, w.y);
   if (wire) return select({ kind: "wire", id: wire.id });
   const load = loadAt(w.x, w.y);
@@ -727,38 +864,65 @@ window.addEventListener("keydown", (e) => {
 // ---------------------------------------------------------------- estado
 
 const TRIP_TEXT = {
-  sobrecarga: "sobrecarga — corrente a mais",
-  curto: "curto-circuito",
-  fuga: "fuga à terra",
+  sobrecarga: "sobrecarga — o térmico atuou",
+  curto: "curto-circuito — o magnético atuou",
+  fuga: "fuga à terra (corrente residual > 30 mA)",
+  teste: "botão de teste — disparou como devia ✅",
+  desequilibrio: "corrente residual sem fuga — neutros trocados entre grupos?",
+  potencia: "potência contratada excedida",
 };
 
 let lastTripMsg = null;
 
-function updateStatus() {
-  const tripped = model.devices.filter((d) => d.tripped);
-  if (state.events.length) {
-    const ev = state.events[state.events.length - 1];
-    const d = model.devices.find((x) => x.id === ev.devId);
-    lastTripMsg = `💥 ${deviceName(d)} disparou (${TRIP_TEXT[ev.reason]}). Clica no manípulo para rearmar.`;
+function tripName(devId) {
+  if (devId === "DCP") return "O DCP";
+  const d = model.devices.find((x) => x.id === devId);
+  return d ? `${deviceName(d)}` : devId;
+}
+
+function noteEvents(events) {
+  const ev = events[events.length - 1];
+  if (!ev) return;
+  lastTripMsg = `💥 ${tripName(ev.devId)} disparou (${TRIP_TEXT[ev.reason] || ev.reason}). Clica no manípulo para rearmar.`;
+  if (ev.reason === "teste") {
+    lastTripMsg = `✅ Teste do diferencial: disparou como devia. Rearma no manípulo — repete isto todos os meses.`;
   }
-  if (tripped.length) {
+  if (ev.reason === "potencia") {
+    const kva = DCP_STEPS.find((s) => s.amps === model.entry.dcpRating)?.kva;
+    lastTripMsg = `💥 O DCP disparou — excedeste a potência contratada (${kva} kVA). Desliga cargas e rearma, ou aumenta a potência.`;
+  }
+}
+
+function updateStatus() {
+  const anyTripped = model.devices.some((d) => d.tripped) || model.entry.dcpTripped;
+  if (anyTripped) {
     setStatus(lastTripMsg || "💥 Há proteções disparadas — clica no manípulo para rearmar.", "error");
     return;
   }
   lastTripMsg = null;
+  if (state.hotWires.size) {
+    setStatus("🔥 Há um cabo acima da ampacidade — aumenta a secção ou baixa a carga (clica no cabo para ver).", "warn");
+    return;
+  }
+  const heating = model.devices.find((d) => d.type === "mcb" && (d.heat || 0) > 0.08);
+  if (heating || (model.entry.dcpHeat || 0) > 0.08) {
+    const who = heating ? deviceName(heating) : "o DCP";
+    setStatus(`🔥 ${who} está em sobrecarga e a aquecer — vai disparar pelo térmico...`, "warn");
+    return;
+  }
   if (model.devices.length === 0) {
     setStatus("Arrasta os módulos para a calha DIN — primeiro o interruptor geral.", "ok");
     return;
   }
   if (model.wires.length === 0) {
-    setStatus("Agora puxa as ligações: arrasta do parafuso L da alimentação até à entrada do geral.", "ok");
+    setStatus("Agora puxa as ligações: arrasta do parafuso L (saída do DCP) até à entrada do geral.", "ok");
     return;
   }
   const ligados = model.loads.filter((l) => (state.loadAmps.get(l.id) || 0) > 0.05);
   if (ligados.length) {
     const watts = ligados.reduce((s, l) => s + l.watts, 0);
     setStatus(
-      `✅ ${ligados.length} circuito(s) com energia · consumo total ${state.supplyAmps.toFixed(1)} A (${watts} W).`,
+      `✅ ${ligados.length} circuito(s) com energia · ${state.supplyAmps.toFixed(1)} A no contador (${watts} W).`,
       "ok");
     return;
   }
@@ -782,6 +946,7 @@ let lastTime = performance.now();
 function frame(now) {
   const dt = Math.min((now - lastTime) / 1000, 0.1);
   lastTime = now;
+  if (state) kwhTotal += (state.supplyAmps * V_SUPPLY * dt) / 3.6e6;
   ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
   ctx.fillStyle = "#eef2f7";
   ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
@@ -789,8 +954,8 @@ function frame(now) {
   ctx.scale(scale, scale);
 
   drawEnclosure();
-  drawSupply();
-  drawNeutralBar();
+  drawEntry(now);
+  drawNeutralBars();
   for (const [i] of model.loads.entries()) drawLoad(i, now);
   for (const w of model.wires) drawWire(w, dt, now);
   for (const d of model.devices) drawDevice(d, now);
@@ -814,7 +979,8 @@ function frame(now) {
     const w = polesOf(action.type) === 2 ? 64 : 34;
     const rail = Math.abs(action.wy - RAILS[0].y) <= Math.abs(action.wy - RAILS[1].y) ? 0 : 1;
     ctx.globalAlpha = 0.5;
-    drawModuleBody(action.wx - 20, rail, w, action.type, { on: true, tripped: false, rating: action.type === "mcb" ? 16 : action.type === "rcd" ? 40 : 63, type: action.type }, now);
+    drawModuleBody(action.wx - 20, rail, w, action.type,
+      { on: true, tripped: false, rating: action.type === "mcb" ? 16 : action.type === "rcd" ? 40 : 63, type: action.type }, now);
     ctx.globalAlpha = 1;
   }
   requestAnimationFrame(frame);
@@ -860,7 +1026,6 @@ function drawEnclosure() {
     ctx.rect(d.x, d.y, d.w, d.h);
     ctx.fill();
     ctx.stroke();
-    // ranhuras do pente
     ctx.strokeStyle = "rgba(255,255,255,0.35)";
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -908,61 +1073,117 @@ function drawEnclosure() {
   ctx.fillText("TERRA (PE)", 268, 449);
 }
 
-function drawSupply() {
-  // cabo de entrada preto, como o cabo da rede na foto
+function drawEntry(now) {
+  // cabo da rede
   ctx.strokeStyle = "#2e3338";
   ctx.lineWidth = 9;
   ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(SUP.L.x + 18, 4);
-  ctx.lineTo(SUP.L.x + 18, SUP.L.y - 20);
+  ctx.moveTo(ENTRY.meter.x + 20, 4);
+  ctx.lineTo(ENTRY.meter.x + 20, ENTRY.meter.y);
   ctx.stroke();
-  ctx.fillStyle = "#e8e2d4";
+
+  // contador de energia
+  const m = ENTRY.meter;
+  ctx.fillStyle = "#f4f2ec";
   ctx.strokeStyle = "#b3ac9a";
   ctx.lineWidth = 1.5;
-  roundRect(SUP.L.x - 22, SUP.L.y - 22, 80, 42, 5);
+  roundRect(m.x, m.y, m.w, m.h, 4);
   ctx.fill();
   ctx.stroke();
-  ctx.fillStyle = "#475569";
-  ctx.font = "700 9.5px ui-sans-serif, system-ui, sans-serif";
+  ctx.fillStyle = "#1e293b";
+  ctx.beginPath();
+  ctx.rect(m.x + 7, m.y + 8, m.w - 14, 14);
+  ctx.fill();
+  ctx.fillStyle = "#7ef0a0";
+  ctx.font = "700 9px ui-monospace, monospace";
   ctx.textAlign = "center";
-  ctx.fillText("REDE 230 V", SUP.L.x + 18, SUP.L.y - 9);
-  ctx.font = "600 8px ui-sans-serif, system-ui, sans-serif";
-  ctx.fillText("L        N", SUP.L.x + 18, SUP.L.y + 15);
+  ctx.fillText(kwhTotal.toFixed(2).padStart(7, "0"), m.x + m.w / 2, m.y + 18.5);
+  ctx.fillStyle = "#6b7280";
+  ctx.font = "600 7px ui-sans-serif, system-ui, sans-serif";
+  ctx.fillText("CONTADOR kWh", m.x + m.w / 2, m.y + 33);
+
+  // DCP
+  const b = ENTRY.dcp;
+  const isSel = selected?.kind === "dcp";
+  ctx.fillStyle = "#f7f5f0";
+  ctx.strokeStyle = model.entry.dcpTripped
+    ? now % 500 < 250 ? "#ea580c" : "#f97316"
+    : isSel ? "#1577d1" : "#b9bec5";
+  ctx.lineWidth = isSel || model.entry.dcpTripped ? 2.4 : 1.3;
+  roundRect(b.x, b.y, b.w, b.h, 3);
+  ctx.fill();
+  ctx.stroke();
+  const on = model.entry.dcpOn && !model.entry.dcpTripped;
+  ctx.fillStyle = "#5b6470";
+  roundRect(b.x + 14, b.y + (on ? 14 : 20), 18, 12, 2);
+  ctx.fill();
+  ctx.fillStyle = model.entry.dcpTripped ? "#f97316" : on ? "#16a34a" : "#dc2626";
+  ctx.fillRect(b.x + b.w / 2 - 4, b.y + b.h - 8, 8, 4);
+  ctx.fillStyle = "#334155";
+  ctx.font = "700 8px ui-sans-serif, system-ui, sans-serif";
+  ctx.fillText(`${model.entry.dcpRating}A`, b.x + b.w / 2, b.y + 10);
+  // barra térmica do DCP
+  if ((model.entry.dcpHeat || 0) > 0.03) {
+    ctx.fillStyle = "#f97316";
+    const hh = (b.h - 8) * Math.min(1, model.entry.dcpHeat);
+    ctx.fillRect(b.x + 2, b.y + b.h - 4 - hh, 3, hh);
+  }
+  ctx.fillStyle = "#6b7280";
+  ctx.font = "600 7px ui-sans-serif, system-ui, sans-serif";
+  ctx.fillText("DCP", b.x + b.w / 2, b.y + b.h + 9);
+
+  // ligações internas rede->contador->DCP->terminais (fixas, cinzentas)
+  ctx.strokeStyle = "#8a919a";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(m.x + m.w, m.y + m.h / 2);
+  ctx.lineTo(b.x, b.y + b.h / 2);
+  ctx.moveTo(b.x + b.w, b.y + b.h / 2);
+  ctx.lineTo(SUP.L.x - 8, SUP.L.y - 4);
+  ctx.stroke();
+  ctx.fillStyle = "#6b7280";
+  ctx.font = "600 7.5px ui-sans-serif, system-ui, sans-serif";
+  ctx.fillText("L    N", (SUP.L.x + SUP.N.x) / 2, SUP.L.y - 12);
 }
 
-function drawNeutralBar() {
-  // régua de bornes numerados (estilo Weidmüller), corpo bege e mola azul
-  const h = NBAR.y1 - NBAR.y0;
-  ctx.fillStyle = "#d8d2c4";
-  ctx.strokeStyle = "#b3ac9a";
-  ctx.lineWidth = 1.2;
-  roundRect(NBAR.x - 13, NBAR.y0 - 6, 26, h + 12, 3);
-  ctx.fill();
-  ctx.stroke();
-  const step = (h - 28) / (NBAR.screws - 1);
-  for (let k = 0; k < NBAR.screws; k++) {
-    const y = NBAR.y0 + 14 + k * step;
-    ctx.fillStyle = "#2563eb";
-    ctx.fillRect(NBAR.x - 13, y - 9, 26, 3);
-    ctx.fillStyle = "#e8e2d4";
+function drawNeutralBars() {
+  for (const bar of NBARS) {
+    const h = bar.y1 - bar.y0;
+    ctx.fillStyle = "#d8d2c4";
     ctx.strokeStyle = "#b3ac9a";
-    ctx.beginPath();
-    ctx.rect(NBAR.x - 11, y - 6, 22, 15);
+    ctx.lineWidth = 1.2;
+    roundRect(NBAR_X - 13, bar.y0 - 6, 26, h + 12, 3);
     ctx.fill();
     ctx.stroke();
-    ctx.fillStyle = "#6b7280";
-    ctx.font = "600 6.5px ui-sans-serif, system-ui, sans-serif";
-    ctx.textAlign = "left";
-    ctx.fillText(String(k + 1), NBAR.x + 6, y + 3);
+    const step = (h - 28) / (bar.screws - 1);
+    for (let k = 0; k < bar.screws; k++) {
+      const y = bar.y0 + 14 + k * step;
+      ctx.fillStyle = "#2563eb";
+      ctx.fillRect(NBAR_X - 13, y - 9, 26, 3);
+      ctx.fillStyle = "#e8e2d4";
+      ctx.strokeStyle = "#b3ac9a";
+      ctx.beginPath();
+      ctx.rect(NBAR_X - 11, y - 6, 22, 15);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#6b7280";
+      ctx.font = "600 6.5px ui-sans-serif, system-ui, sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText(String(k + 1), NBAR_X + 6, y + 3);
+    }
+    ctx.fillStyle = "#2563eb";
+    ctx.font = "700 8.5px ui-sans-serif, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(bar.label, NBAR_X, bar.y0 - 10);
   }
   ctx.save();
-  ctx.translate(NBAR.x + 26, (NBAR.y0 + NBAR.y1) / 2);
+  ctx.translate(NBAR_X + 26, (NBARS[0].y0 + NBARS[1].y1) / 2);
   ctx.rotate(Math.PI / 2);
   ctx.fillStyle = "#2563eb";
   ctx.font = "700 9px ui-sans-serif, system-ui, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("NEUTRO (N)", 0, 0);
+  ctx.fillText("NEUTROS POR GRUPO", 0, 0);
   ctx.restore();
 }
 
@@ -974,26 +1195,21 @@ function drawModuleBody(x, rail, w, type, d, now) {
   const top = RAILS[rail].y - DEV_H / 2;
   const cy = RAILS[rail].y;
   const isSel = selected?.kind === "device" && selected.id === d.id;
-  // corpo branco-pérola tipo módulo modular real
   ctx.fillStyle = "#f7f5f0";
   ctx.strokeStyle = d.tripped ? (now % 500 < 250 ? "#ea580c" : "#f97316") : isSel ? "#1577d1" : "#b9bec5";
   ctx.lineWidth = isSel || d.tripped ? 2.4 : 1.3;
   roundRect(x, top, w, DEV_H, 3);
   ctx.fill();
   ctx.stroke();
-  // sombras laterais (volume)
   ctx.fillStyle = "rgba(120,130,145,0.14)";
   ctx.fillRect(x + 1.5, top + 1.5, 3, DEV_H - 3);
   ctx.fillRect(x + w - 4.5, top + 1.5, 3, DEV_H - 3);
-  // recessos dos terminais (cima/baixo)
   ctx.fillStyle = "#a9aeb5";
   ctx.fillRect(x + 4, top + 2, w - 8, 12);
   ctx.fillRect(x + 4, top + DEV_H - 14, w - 8, 12);
-  // face central
   ctx.fillStyle = "#fdfcfa";
   roundRect(x + 3.5, top + 17, w - 7, DEV_H - 34, 2);
   ctx.fill();
-  // manípulo cinzento (desliza)
   const on = d.on && !d.tripped;
   const leverY = cy - 8 + (on ? -8 : 4);
   ctx.fillStyle = "#5b6470";
@@ -1001,10 +1217,14 @@ function drawModuleBody(x, rail, w, type, d, now) {
   ctx.fill();
   ctx.fillStyle = "rgba(255,255,255,0.25)";
   ctx.fillRect(x + w / 2 - (w > 40 ? 14 : 7), leverY, w > 40 ? 28 : 14, 4);
-  // bandeira de estado (verde ligado / vermelho desligado / laranja disparado)
   ctx.fillStyle = d.tripped ? "#f97316" : on ? "#16a34a" : "#dc2626";
   ctx.fillRect(x + w / 2 - 4, cy + 14, 8, 6);
-  // janela transparente com o calibre
+  // barra térmica (aquecimento do disjuntor)
+  if (type === "mcb" && (d.heat || 0) > 0.03) {
+    ctx.fillStyle = "#f97316";
+    const hh = (DEV_H - 40) * Math.min(1, d.heat);
+    ctx.fillRect(x + 2, top + DEV_H - 18 - hh, 3, hh);
+  }
   ctx.fillStyle = "#e7edf3";
   ctx.strokeStyle = "#c6cfd8";
   ctx.lineWidth = 0.8;
@@ -1017,7 +1237,6 @@ function drawModuleBody(x, rail, w, type, d, now) {
   ctx.textAlign = "center";
   const tag = type === "mcb" ? `C${d.rating}` : type === "rcd" ? `${d.rating}A 30mA` : `${d.rating}A`;
   ctx.fillText(tag, x + w / 2, top + 27.5);
-  // botão de teste no diferencial (como nos reais)
   if (type === "rcd") {
     ctx.fillStyle = "#334155";
     ctx.beginPath();
@@ -1027,10 +1246,9 @@ function drawModuleBody(x, rail, w, type, d, now) {
     ctx.font = "600 5.5px ui-sans-serif, system-ui, sans-serif";
     ctx.fillText("T", x + w - 12, cy + 9);
   }
-  // tipo do módulo
   ctx.fillStyle = "#8a919a";
   ctx.font = "600 6px ui-sans-serif, system-ui, sans-serif";
-  ctx.fillText(type === "mcb" ? "DISJUNTOR" : type === "rcd" ? "DIFERENCIAL" : "GERAL", x + w / 2, top + DEV_H - 17.5);
+  ctx.fillText(type === "mcb" ? "DISJUNTOR" : type === "rcd" ? "DIFERENCIAL" : "CORTE GERAL", x + w / 2, top + DEV_H - 17.5);
 }
 
 function drawLoad(i, now) {
@@ -1061,7 +1279,6 @@ function drawLoad(i, now) {
   ctx.fillText(
     live ? `ligado · ${amps.toFixed(1)} A · ${l.watts} W` : l.on ? "sem energia" : "desligado — clica para ligar",
     x + LOAD_W / 2, LOAD_Y + 84);
-  // botão de avaria
   ctx.font = "13px ui-sans-serif, system-ui, sans-serif";
   ctx.fillStyle = l.fault ? "#dc2626" : "#cbd5e1";
   ctx.fillText("⚠", x + LOAD_W - 18, LOAD_Y + LOAD_H - 12);
@@ -1072,13 +1289,20 @@ function drawWire(w, dt, now) {
   if (!pts) return;
   const isSel = selected?.kind === "wire" && selected.id === w.id;
   const isHov = hovered?.kind === "wire" && hovered.id === w.id;
+  const hot = state.hotWires.has(w.id);
   if (isSel || isHov) {
     ctx.strokeStyle = isSel ? "rgba(21,119,209,0.4)" : "rgba(59,130,246,0.25)";
+    ctx.lineWidth = 9;
+    drawPath(pts);
+  }
+  if (hot) {
+    ctx.strokeStyle = now % 460 < 230 ? "rgba(220,38,38,0.5)" : "rgba(249,115,22,0.5)";
     ctx.lineWidth = 8;
     drawPath(pts);
   }
+  // espessura proporcional à secção do condutor
   ctx.strokeStyle = COLORS[w.color]?.hex || "#1f2937";
-  ctx.lineWidth = 3.4;
+  ctx.lineWidth = 2 + sectionOf(w) * 0.32;
   drawPath(pts);
   if (w.color === "pe") {
     ctx.strokeStyle = "#eab308";
@@ -1086,7 +1310,6 @@ function drawWire(w, dt, now) {
     drawPath(pts);
     ctx.setLineDash([]);
   }
-  // pontos de corrente ao longo da rota
   const i = wireCurrent.get(w.id) || 0;
   if (Math.abs(i) > 0.05) {
     const len = routeLength(pts);
@@ -1100,7 +1323,7 @@ function drawWire(w, dt, now) {
       ctx.fill();
       ctx.beginPath();
       ctx.arc(p.x, p.y, 2.2, 0, Math.PI * 2);
-      ctx.fillStyle = "#ff9f1c";
+      ctx.fillStyle = hot ? "#ef4444" : "#ff9f1c";
       ctx.fill();
     }
   }
@@ -1118,7 +1341,6 @@ function drawPath(pts) {
 
 function drawTerminals() {
   for (const t of terminals()) {
-    // parafuso de aperto com fenda, anel colorido pela função (L/N)
     ctx.beginPath();
     ctx.arc(t.x, t.y, 5.2, 0, Math.PI * 2);
     ctx.fillStyle = "#d6dade";

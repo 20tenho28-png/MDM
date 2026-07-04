@@ -4,13 +4,19 @@ Two departments, switchable via the tabs in the header:
 
 1. **Esquemas** (`index.html`) — schematic circuit builder (IEC 60617).
 2. **Quadro elétrico** (`panel.html`, in Portuguese) — assemble a real
-   distribution board like an electrician: drag modules (main switch,
-   30 mA RCD, MCBs) onto DIN rails, pull wire connections screw-to-screw
-   (brown = line, blue = neutral, auto-coloured), switch loads on and watch
-   protections trip realistically — overload trips the circuit's MCB,
-   earth faults trip the RCD, short circuits trip the nearest protection
-   (selectivity). The "✓ Verificar instalação" button checks each circuit
-   follows the rule: geral → diferencial → disjuntor, neutral via the bar.
+   distribution board like a certified electrician: energy meter + DCP
+   (contracted power) at the entrance, main isolator, 30 mA RCDs, MCBs on
+   DIN rails, two neutral bars (one per RCD group) and cables with real
+   cross-sections (mm²). Protections behave like the real thing:
+   - MCB/DCP: instant magnetic trip on shorts (~7×In) and time-delayed
+     thermal trip on overloads (they visibly heat up first)
+   - RCD: trips on real measured residual current (>30 mA) — earth
+     faults, the working test (T) button, and swapped neutrals between
+     groups; the main isolator never trips (it is a switch, not a breaker)
+   - cables above their ampacity glow red
+   "✓ Verificar instalação" audits each circuit: geral → diferencial →
+   disjuntor, neutral on the right group, and "the breaker must protect
+   the cable" (rating vs. smallest mm² on the run).
    Model logic lives in `panel_model.js` (DOM-free, Node-tested).
 
 Interactive DC circuit simulator for technicians and new hires. Schematic
