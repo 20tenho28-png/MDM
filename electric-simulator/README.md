@@ -1,5 +1,18 @@
 # Electric Simulator — EU edition
 
+Two departments, switchable via the tabs in the header:
+
+1. **Esquemas** (`index.html`) — schematic circuit builder (IEC 60617).
+2. **Quadro elétrico** (`panel.html`, in Portuguese) — assemble a real
+   distribution board like an electrician: drag modules (main switch,
+   30 mA RCD, MCBs) onto DIN rails, pull wire connections screw-to-screw
+   (brown = line, blue = neutral, auto-coloured), switch loads on and watch
+   protections trip realistically — overload trips the circuit's MCB,
+   earth faults trip the RCD, short circuits trip the nearest protection
+   (selectivity). The "✓ Verificar instalação" button checks each circuit
+   follows the rule: geral → diferencial → disjuntor, neutral via the bar.
+   Model logic lives in `panel_model.js` (DOM-free, Node-tested).
+
 Interactive DC circuit simulator for technicians and new hires. Schematic
 symbols follow **IEC 60617** (EU standard — rectangle resistor, crossed-circle
 lamp), circuits are solved live with Modified Nodal Analysis, and current flow

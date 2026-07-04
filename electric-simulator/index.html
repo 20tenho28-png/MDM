@@ -30,8 +30,15 @@
         box-shadow: 0 1px 4px rgba(30, 41, 59, 0.06);
         z-index: 5;
       }
-      header h1 { font-size: 15px; font-weight: 700; margin-right: 8px; }
+      header h1 { font-size: 15px; font-weight: 700; margin-right: 4px; }
       header h1 span { color: #f59e0b; }
+      nav.tabs { display: flex; gap: 4px; margin-right: 8px; }
+      nav.tabs a {
+        text-decoration: none; font-size: 13px; font-weight: 600;
+        padding: 6px 12px; border-radius: 8px; color: #64748b;
+      }
+      nav.tabs a:hover { background: #f1f5f9; }
+      nav.tabs a.on { background: #e0efff; color: #0b5cab; }
       .tb-btn {
         background: #fff;
         color: #334155;
@@ -216,6 +223,10 @@
   <body>
     <header>
       <h1><span>⚡</span> Electric Simulator</h1>
+      <nav class="tabs">
+        <a href="./" class="on">Esquemas</a>
+        <a href="./panel.html">Quadro elétrico</a>
+      </nav>
       <button class="tb-btn" id="sim-undo" title="Undo (Ctrl+Z)">↩ Undo</button>
       <button class="tb-btn" id="sim-redo" title="Redo (Ctrl+Y)">↪ Redo</button>
       <div class="spacer"></div>

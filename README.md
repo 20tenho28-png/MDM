@@ -52,8 +52,11 @@ Tests use an in-memory SQLite database — no PostgreSQL or IMAP account needed.
 ## Electric simulator
 
 Lives in `electric-simulator/` and is served at `/simulator` by the ticket-wall
-app, or standalone with any static file server. Its physics solver has its own
-Node test suite, also run automatically from pytest. See
+app, or standalone with any static file server. Two departments: schematic
+circuits (`/simulator/`) and the **Quadro Elétrico** distribution-board trainer
+(`/simulator/panel.html`, in Portuguese) where you assemble a breaker panel on
+DIN rails like an electrician. Physics and panel logic have their own Node test
+suites, run automatically from pytest. See
 [`electric-simulator/README.md`](electric-simulator/README.md).
 
 ## Circuit Planner
