@@ -1,0 +1,25 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-9.1276, 38.7107]}, "properties": {"id": 1, "nome": "Chafariz d'El-Rei", "tipo": "fonte", "potavel": "nao", "concelho": "Lisboa"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-9.1405, 38.7118]}, "properties": {"id": 2, "nome": "Chafariz do Carmo", "tipo": "fonte", "potavel": "desconhecido", "concelho": "Lisboa"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-9.1330, 38.7370]}, "properties": {"id": 3, "nome": "Fonte Luminosa", "tipo": "fonte", "potavel": "nao", "concelho": "Lisboa"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-9.1580, 38.7196]}, "properties": {"id": 4, "nome": "Mãe d'Água das Amoreiras", "tipo": "fonte", "potavel": "nao", "concelho": "Lisboa"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-9.1394, 38.7139]}, "properties": {"id": 5, "nome": "Fontes do Rossio", "tipo": "fonte", "potavel": "nao", "concelho": "Lisboa"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-8.6157, 41.1465]}, "properties": {"id": 6, "nome": "Fonte dos Leões", "tipo": "fonte", "potavel": "nao", "concelho": "Porto"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-8.6109, 41.1443]}, "properties": {"id": 7, "nome": "Fonte da Praça da Batalha", "tipo": "fonte", "potavel": "desconhecido", "concelho": "Porto"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-8.4265, 41.5487]}, "properties": {"id": 8, "nome": "Fonte do Ídolo", "tipo": "nascente", "potavel": "nao", "concelho": "Braga"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-8.4210, 41.5503]}, "properties": {"id": 9, "nome": "Fonte do Largo do Paço", "tipo": "fonte", "potavel": "desconhecido", "concelho": "Braga"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-9.3883, 38.7979]}, "properties": {"id": 10, "nome": "Fonte da Vila", "tipo": "fonte", "potavel": "sim", "concelho": "Sintra"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-7.9078, 38.5713]}, "properties": {"id": 11, "nome": "Fonte das Portas de Moura", "tipo": "fonte", "potavel": "nao", "concelho": "Évora"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-8.6560, 40.6412]}, "properties": {"id": 12, "nome": "Fonte Nova", "tipo": "fonte", "potavel": "desconhecido", "concelho": "Aveiro"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-8.4103, 40.2075]}, "properties": {"id": 13, "nome": "Fonte da Manga", "tipo": "fonte", "potavel": "nao", "concelho": "Coimbra"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-8.6870, 39.4560]}, "properties": {"id": 14, "nome": "Olhos de Água do Alviela", "tipo": "nascente", "potavel": "sim", "concelho": "Alcanena"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-7.9946, 37.1889]}, "properties": {"id": 15, "nome": "Fonte da Benémola", "tipo": "nascente", "potavel": "desconhecido", "concelho": "Loulé"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-8.1730, 37.2340]}, "properties": {"id": 16, "nome": "Nascente da Fonte Grande de Alte", "tipo": "nascente", "potavel": "sim", "concelho": "Loulé"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-7.4262, 40.3417]}, "properties": {"id": 17, "nome": "Nascente do Mondego (Serra da Estrela)", "tipo": "nascente", "potavel": "desconhecido", "concelho": "Gouveia"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-8.5570, 41.4460]}, "properties": {"id": 18, "nome": "Fonte de Guimarães (Largo da Oliveira)", "tipo": "fonte", "potavel": "desconhecido", "concelho": "Guimarães"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-16.9250, 32.6480]}, "properties": {"id": 19, "nome": "Fonte do Ribeiro Frio", "tipo": "nascente", "potavel": "sim", "concelho": "Santana"}},
+    {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-25.6680, 37.7730]}, "properties": {"id": 20, "nome": "Nascente da Caldeira Velha", "tipo": "nascente", "potavel": "desconhecido", "concelho": "Ribeira Grande"}}
+  ]
+}

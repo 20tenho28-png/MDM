@@ -13,6 +13,8 @@ from mdm.db import Base as MdmBase
 from mdm import models  # noqa: F401  -- ensure models are imported for autogenerate
 from stock.db import Base as StockBase
 from stock import models as stock_models  # noqa: F401  -- import for autogenerate
+from agua.db import Base as AguaBase
+from agua import models as agua_models  # noqa: F401  -- import for autogenerate
 
 config = context.config
 
@@ -22,8 +24,8 @@ config.set_main_option("sqlalchemy.url", settings.database_url)
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Both apps share one PostgreSQL instance with disjoint table metadata.
-target_metadata = [MdmBase.metadata, StockBase.metadata]
+# All services share one PostgreSQL instance with disjoint table metadata.
+target_metadata = [MdmBase.metadata, StockBase.metadata, AguaBase.metadata]
 
 
 def run_migrations_offline() -> None:

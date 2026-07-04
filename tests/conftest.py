@@ -4,9 +4,10 @@ import os
 from collections.abc import AsyncIterator
 from pathlib import Path
 
-# Force a fresh in-memory DB before mdm/stock modules read settings.
+# Force a fresh in-memory DB before mdm/stock/agua modules read settings.
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 os.environ.setdefault("STOCK_DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+os.environ.setdefault("AGUA_DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 os.environ.setdefault("IMAP_USER", "")
 os.environ.setdefault("IMAP_PASSWORD", "")
 
@@ -23,6 +24,9 @@ import mdm.db as mdm_db
 
 from stock.db import Base as StockBase
 import stock.db as stock_db
+
+from agua.db import Base as AguaBase
+import agua.db as agua_db
 
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures"
@@ -71,6 +75,29 @@ async def stock_sessionmaker() -> AsyncIterator[async_sessionmaker[AsyncSession]
 @pytest_asyncio.fixture
 async def stock_session(stock_sessionmaker) -> AsyncIterator[AsyncSession]:
     async with stock_sessionmaker() as s:
+        yield s
+
+
+@pytest_asyncio.fixture
+async def agua_sessionmaker() -> AsyncIterator[async_sessionmaker[AsyncSession]]:
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:", future=True)
+    sm = async_sessionmaker(engine, expire_on_commit=False)
+
+    # Wire agua.db globals so routes and services see the same engine.
+    agua_db._engine = engine
+    agua_db._sessionmaker = sm
+
+    async with engine.begin() as conn:
+        await conn.run_sync(AguaBase.metadata.create_all)
+    try:
+        yield sm
+    finally:
+        await engine.dispose()
+
+
+@pytest_asyncio.fixture
+async def agua_session(agua_sessionmaker) -> AsyncIterator[AsyncSession]:
+    async with agua_sessionmaker() as s:
         yield s
 
 

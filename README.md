@@ -6,6 +6,8 @@ infraestrutura (FastAPI + SQLAlchemy async + PostgreSQL + Jinja2/HTMX/Tailwind):
 1. **`mdm`** — rastreador de *tickets* de email por IMAP, com mural para TV.
 2. **`stock`** — dashboard de gestão de stock de material elétrico e tubo de cobre,
    com atualização automática a partir de guias de compras.
+3. **`agua`** — mapa interativo (só consulta) de fontes/chafarizes e nascentes em
+   Portugal, com dados do OpenStreetMap.
 
 ## Pré-requisitos
 
@@ -25,7 +27,35 @@ uvicorn mdm.main:app --reload --port 8000
 
 # Dashboard de stock (app stock)
 uvicorn stock.main:app --reload --port 8001
+
+# Mapa de água potável e fontes (app agua)
+uvicorn agua.main:app --reload --port 8002
 ```
+
+## Mapa de Água (`agua`)
+
+Mapa interativo (só consulta) de **fontes/chafarizes** (`amenity=fountain`) e
+**nascentes** (`natural=spring`) em Portugal, com indicação de potabilidade
+(do tag `drinking_water`). Frontend em Leaflet + markercluster.
+
+- **`/`** — mapa com filtros por tipo e potabilidade e pesquisa por nome.
+- **`/api/pontos.geojson`** — pontos em GeoJSON (aceita `?tipo=` e `?potavel=`).
+- **`/api/stats`** — contagens agregadas.
+
+Dados:
+
+```bash
+# Importar de OpenStreetMap (requer rede aberta para o Overpass API):
+python -m agua.importer
+
+# Alternativa para arranque rápido / redes restritas: seed de exemplo:
+python -m agua.seed
+```
+
+> Nota: a importação do Overpass precisa de acesso de saída ao
+> `overpass-api.de`. Em ambientes com rede restrita a importação falha; nesse
+> caso use `python -m agua.seed` para carregar um conjunto de pontos de exemplo.
+> Os tiles do mapa são carregados pelo browser (OpenStreetMap).
 
 ## Dashboard de Stock (`stock`)
 

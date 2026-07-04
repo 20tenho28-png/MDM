@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block body %}
+  <header class="border-b border-gray-800 bg-gray-900/80 px-5 py-3 flex flex-wrap items-center gap-x-6 gap-y-2 z-10">
+    <div class="font-semibold text-lg text-white">💧 Água Potável e Fontes — Portugal</div>
+
+    <div class="flex items-center gap-3 text-sm">
+      <span class="text-gray-400">Tipo:</span>
+      <label class="flex items-center gap-1"><input type="checkbox" class="f-tipo" value="fonte" checked> Fontes/chafarizes</label>
+      <label class="flex items-center gap-1"><input type="checkbox" class="f-tipo" value="nascente" checked> Nascentes</label>
+    </div>
+
+    <div class="flex items-center gap-3 text-sm">
+      <span class="text-gray-400">Potabilidade:</span>
+      <label class="flex items-center gap-1"><input type="checkbox" class="f-pot" value="sim" checked> Potável</label>
+      <label class="flex items-center gap-1"><input type="checkbox" class="f-pot" value="desconhecido" checked> Desconhecido</label>
+      <label class="flex items-center gap-1"><input type="checkbox" class="f-pot" value="nao" checked> Não potável</label>
+    </div>
+
+    <input id="pesquisa" type="search" placeholder="Pesquisar por nome…"
+           class="rounded bg-gray-800 border border-gray-700 px-3 py-1 text-sm w-56" />
+
+    <div id="contador" class="text-sm text-gray-400 ml-auto"></div>
+  </header>
+
+  <div class="flex-1 relative">
+    <div id="map"></div>
+  </div>
+
+  <script>
+    const CENTRO = [{{ map_center_lat }}, {{ map_center_lon }}];
+    const ZOOM = {{ map_zoom }};
+
+    const map = L.map('map').setView(CENTRO, ZOOM);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    const cores = { sim: '#22c55e', nao: '#ef4444', desconhecido: '#9ca3af' };
+    const rotuloPot = { sim: 'Potável', nao: 'Não potável', desconhecido: 'Desconhecido' };
+    const rotuloTipo = { fonte: 'Fonte/chafariz', nascente: 'Nascente' };
+
+    const cluster = L.markerClusterGroup();
+    map.addLayer(cluster);
+
+    let todasFeatures = [];
+
+    function tiposSelecionados() {
+      return Array.from(document.querySelectorAll('.f-tipo:checked')).map(c => c.value);
+    }
+    function potSelecionadas() {
+      return Array.from(document.querySelectorAll('.f-pot:checked')).map(c => c.value);
+    }
+
+    function iconePonto(potavel) {
+      const cor = cores[potavel] || cores.desconhecido;
+      return L.divIcon({
+        className: '',
+        html: `<span style="display:block;width:14px;height:14px;border-radius:50%;background:${cor};border:2px solid #0b0f17;box-shadow:0 0 0 1px ${cor}"></span>`,
+        iconSize: [14, 14],
+      });
+    }
+
+    function render() {
+      const tipos = tiposSelecionados();
+      const pots = potSelecionadas();
+      const termo = (document.getElementById('pesquisa').value || '').toLowerCase().trim();
+
+      cluster.clearLayers();
+      let visiveis = 0;
+      for (const f of todasFeatures) {
+        const p = f.properties;
+        if (!tipos.includes(p.tipo)) continue;
+        if (!pots.includes(p.potavel)) continue;
+        if (termo && !(p.nome || '').toLowerCase().includes(termo)) continue;
+        const [lon, lat] = f.geometry.coordinates;
+        const m = L.marker([lat, lon], { icon: iconePonto(p.potavel) });
+        m.bindPopup(
+          `<strong>${p.nome}</strong><br>${rotuloTipo[p.tipo] || p.tipo}` +
+          `<br>Água: ${rotuloPot[p.potavel] || p.potavel}` +
+          (p.concelho ? `<br>${p.concelho}` : '')
+        );
+        cluster.addLayer(m);
+        visiveis++;
+      }
+      document.getElementById('contador').textContent =
+        `${visiveis} de ${todasFeatures.length} pontos`;
+    }
+
+    async function carregar() {
+      const resp = await fetch('/api/pontos.geojson');
+      const dados = await resp.json();
+      todasFeatures = dados.features || [];
+      render();
+    }
+
+    document.querySelectorAll('.f-tipo, .f-pot').forEach(c => c.addEventListener('change', render));
+    document.getElementById('pesquisa').addEventListener('input', render);
+
+    carregar();
+  </script>
+{% endblock %}
