@@ -86,6 +86,15 @@
       .tile b { font-size: 11.5px; font-weight: 600; color: #334155; }
       .tile small { font-size: 9.5px; color: #94a3b8; }
       .tile.wide { grid-column: span 2; flex-direction: row; justify-content: center; gap: 10px; padding: 8px; }
+      .swatches { display: flex; gap: 7px; flex-wrap: wrap; padding: 2px; }
+      .swatch {
+        width: 25px; height: 25px; border-radius: 50%;
+        border: 2px solid #fff; box-shadow: 0 0 0 1.5px #cbd5e1;
+        cursor: pointer; padding: 0;
+      }
+      .swatch:hover { box-shadow: 0 0 0 2px #93c5fd; }
+      .swatch.active { box-shadow: 0 0 0 2.5px #1577d1; }
+      .swatch.pe { background: repeating-linear-gradient(45deg, #16a34a 0 5px, #facc15 5px 10px) !important; }
       .hint {
         margin-top: 12px;
         font-size: 11px;
@@ -210,6 +219,7 @@
       <button class="tb-btn" id="sim-undo" title="Undo (Ctrl+Z)">↩ Undo</button>
       <button class="tb-btn" id="sim-redo" title="Redo (Ctrl+Y)">↪ Redo</button>
       <div class="spacer"></div>
+      <button class="tb-btn" id="sim-potentials" title="Colour every wire by its voltage: red = near +, blue = near −">Voltage colours</button>
       <button class="tb-btn" id="sim-labels">Labels</button>
       <button class="tb-btn" id="sim-example">Example</button>
       <button class="tb-btn danger" id="sim-clear">Clear all</button>
@@ -227,31 +237,40 @@
         </div>
         <h2>Parts — IEC (EU)</h2>
         <div class="tiles">
-          <div class="tile" data-tool="wire" title="Wire — drag on the grid to draw">
-            <svg width="56" height="34" viewBox="0 0 56 34"><line x1="6" y1="17" x2="50" y2="17" stroke="#334155" stroke-width="2.5" stroke-linecap="round"/><circle cx="6" cy="17" r="3" fill="#334155"/><circle cx="50" cy="17" r="3" fill="#334155"/></svg>
-            <b>Wire</b><small>key 2</small>
+          <div class="tile" data-tool="wire" title="Wire — connects parts. Drag on the grid; it bends around corners by itself.">
+            <svg width="56" height="34" viewBox="0 0 56 34"><line x1="6" y1="17" x2="50" y2="17" stroke="#8a4b1f" stroke-width="3" stroke-linecap="round"/><circle cx="6" cy="17" r="3" fill="#334155"/><circle cx="50" cy="17" r="3" fill="#334155"/></svg>
+            <b>Wire</b><small>connects parts</small>
           </div>
-          <div class="tile" data-tool="battery" title="Battery / DC supply">
+          <div class="tile" data-tool="battery" title="Battery — the power source. + on the marked side.">
             <svg width="56" height="34" viewBox="0 0 56 34"><line x1="4" y1="17" x2="23" y2="17" stroke="#334155" stroke-width="2.5"/><line x1="33" y1="17" x2="52" y2="17" stroke="#334155" stroke-width="2.5"/><line x1="23" y1="11" x2="23" y2="23" stroke="#334155" stroke-width="4"/><line x1="33" y1="4" x2="33" y2="30" stroke="#334155" stroke-width="2"/><text x="40" y="10" font-size="11" fill="#64748b">+</text></svg>
-            <b>Battery</b><small>key 3</small>
+            <b>Battery</b><small>power source</small>
           </div>
-          <div class="tile" data-tool="resistor" title="Resistor — IEC rectangle symbol">
+          <div class="tile" data-tool="resistor" title="Resistor — slows the current down.">
             <svg width="56" height="34" viewBox="0 0 56 34"><line x1="3" y1="17" x2="14" y2="17" stroke="#334155" stroke-width="2.5"/><line x1="42" y1="17" x2="53" y2="17" stroke="#334155" stroke-width="2.5"/><rect x="14" y="10" width="28" height="14" fill="#fff" stroke="#334155" stroke-width="2.5"/></svg>
-            <b>Resistor</b><small>key 4</small>
+            <b>Resistor</b><small>slows current</small>
           </div>
-          <div class="tile" data-tool="lamp" title="Lamp / signal light">
+          <div class="tile" data-tool="lamp" title="Lamp — lights up when current flows through it.">
             <svg width="56" height="34" viewBox="0 0 56 34"><line x1="3" y1="17" x2="17" y2="17" stroke="#334155" stroke-width="2.5"/><line x1="39" y1="17" x2="53" y2="17" stroke="#334155" stroke-width="2.5"/><circle cx="28" cy="17" r="11" fill="#fff" stroke="#334155" stroke-width="2.5"/><line x1="20.2" y1="9.2" x2="35.8" y2="24.8" stroke="#334155" stroke-width="2.5"/><line x1="20.2" y1="24.8" x2="35.8" y2="9.2" stroke="#334155" stroke-width="2.5"/></svg>
-            <b>Lamp</b><small>key 5</small>
+            <b>Lamp</b><small>lights up</small>
           </div>
-          <div class="tile wide" data-tool="switch" title="Switch — click it on the canvas to open/close">
+          <div class="tile wide" data-tool="switch" title="Switch — click it on the canvas to turn the circuit on or off.">
             <svg width="56" height="34" viewBox="0 0 56 34"><line x1="3" y1="20" x2="14" y2="20" stroke="#334155" stroke-width="2.5"/><line x1="42" y1="20" x2="53" y2="20" stroke="#334155" stroke-width="2.5"/><circle cx="16" cy="20" r="2.6" fill="#334155"/><circle cx="40" cy="20" r="2.6" fill="#334155"/><line x1="16" y1="20" x2="38" y2="8" stroke="#334155" stroke-width="2.5" stroke-linecap="round"/></svg>
-            <div><b>Switch</b><br /><small>key 6 · click to toggle</small></div>
+            <div><b>Switch</b><br /><small>turns things on / off</small></div>
           </div>
         </div>
+        <h2 style="margin-top:14px">Wire colours — EU</h2>
+        <div class="swatches" id="sim-wire-colors">
+          <button class="swatch active" data-color="brown" style="background:#8a4b1f" title="Brown — the feed wire, from the + side"></button>
+          <button class="swatch" data-color="blue" style="background:#2563eb" title="Blue — the return wire, back to −"></button>
+          <button class="swatch pe" data-color="pe" title="Green/Yellow — safety earth"></button>
+          <button class="swatch" data-color="black" style="background:#1f2937" title="Black"></button>
+          <button class="swatch" data-color="grey" style="background:#9ca3af" title="Grey"></button>
+          <button class="swatch" data-color="red" style="background:#dc2626" title="Red — DC positive"></button>
+        </div>
         <p class="hint">
-          Drag a part onto the grid, or pick it and draw between two grid
-          points. Click a part to edit it. <b>R</b> rotates,
-          <b>Del</b> removes.
+          Pick a colour, then draw wires — same colours electricians use in
+          the EU. Drag from any part's end point to start a wire. Click a
+          wire to change its colour later.
         </p>
       </aside>
 
@@ -288,18 +307,17 @@
 
     <div id="sim-help" class="hidden">
       <div class="help-card">
-        <h2>⚡ Welcome to the Electric Simulator</h2>
-        <p class="sub">Build DC circuits with EU (IEC 60617) schematic symbols and watch them work in real time. Made for technicians and new hires — nothing here can break.</p>
+        <h2>⚡ Welcome!</h2>
+        <p class="sub">This is a safe playground for building electric circuits. Nothing can break, nothing can hurt you — try everything.</p>
         <div class="help-grid">
-          <b>Add a part</b><span>Drag it from the left panel onto the grid, or pick it and draw between two grid points.</span>
-          <b>Wire it up</b><span>Pick <kbd>Wire</kbd> (key <kbd>2</kbd>) and drag between terminals. Current flows as soon as the loop is closed.</span>
-          <b>Operate</b><span>Click a switch to open or close it. Lamps light up according to real power.</span>
-          <b>Edit</b><span>Click a part to change its value (EU presets included), rotate <kbd>R</kbd>, or remove <kbd>Del</kbd>.</span>
-          <b>Move around</b><span>Drag empty grid to pan · mouse wheel to zoom · <kbd>0</kbd> fits the circuit.</span>
-          <b>Undo</b><span><kbd>Ctrl</kbd>+<kbd>Z</kbd> undo · <kbd>Ctrl</kbd>+<kbd>Y</kbd> redo. Experiment freely.</span>
-          <b>Read values</b><span>Hover any part for volts, amps and watts. A red flash + warning means short circuit.</span>
+          <b>The one rule</b><span>Electricity only flows in a <em>complete loop</em>: from the battery's <kbd>+</kbd>, through your parts, back to <kbd>−</kbd>.</span>
+          <b>Build</b><span>Drag parts from the left panel onto the grid. Connect them by dragging wires from their end points — wires bend around corners by themselves.</span>
+          <b>Try it</b><span>Click the switch in the example circuit. The lamp lights, and the little orange dots show the electricity flowing.</span>
+          <b>Colours</b><span>Use real EU wire colours: <b style="color:#8a4b1f">brown</b> from +, <b style="color:#2563eb">blue</b> back to −, green/yellow for earth.</span>
+          <b>Look inside</b><span>Point at any part to see its numbers. Click a part to change it. The <kbd>Voltage colours</kbd> button paints wires red (near +) to blue (near −).</span>
+          <b>No fear</b><span><kbd>Ctrl</kbd>+<kbd>Z</kbd> undoes anything. If something glows red: that's a short circuit — the current has found a path with nothing to slow it down.</span>
         </div>
-        <button id="sim-help-close">Start building</button>
+        <button id="sim-help-close">Let's build</button>
       </div>
     </div>
 
