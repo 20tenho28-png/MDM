@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from mdm.config import get_settings
 from mdm.db import get_sessionmaker
@@ -30,6 +32,15 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     app = FastAPI(title="MDM — Email Tickets", lifespan=lifespan)
+    # The electric simulator is a standalone static app at the repo root;
+    # serve it under /simulator when running from a source checkout.
+    simulator_dir = Path(__file__).resolve().parents[2] / "electric-simulator"
+    if simulator_dir.is_dir():
+        app.mount(
+            "/simulator",
+            StaticFiles(directory=str(simulator_dir), html=True),
+            name="simulator",
+        )
     app.include_router(router)
     return app
 

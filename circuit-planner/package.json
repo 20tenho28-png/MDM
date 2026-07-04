@@ -1,0 +1,9 @@
+{
+  "name": "circuit-planner",
+  "private": true,
+  "description": "EU electrical/HVAC training app - single-file, photo-real parts",
+  "scripts": {
+    "test": "node test/run.js",
+    "sheets": "node tools/sheets.js"
+  }
+}

@@ -3,6 +3,8 @@
 `GET /`         renders the full kiosk page.
 `GET /board`    returns just the auto-refreshable inner partial (HTMX swap).
 `POST /tickets/{id}/close?as=won|lost` closes a ticket (admin action).
+
+The electric simulator is mounted separately at `/simulator` (see main.py).
 """
 from __future__ import annotations
 

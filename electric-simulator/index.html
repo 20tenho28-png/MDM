@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MDM — Electric Simulator</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E" />
+    <style>
+      * { box-sizing: border-box; margin: 0; }
+      html, body { height: 100%; }
+      body {
+        background: #0b0f14;
+        color: #e2e8f0;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: #111827;
+        border-bottom: 1px solid #1f2937;
+        flex-wrap: wrap;
+      }
+      header h1 { font-size: 15px; font-weight: 600; margin-right: 12px; letter-spacing: 0.03em; }
+      header h1 span { color: #facc15; }
+      button {
+        background: #1f2937;
+        color: #e2e8f0;
+        border: 1px solid #374151;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      button:hover { background: #273244; }
+      button.active { background: #0e7490; border-color: #22d3ee; color: #fff; }
+      button kbd {
+        font-size: 10px;
+        color: #94a3b8;
+        border: 1px solid #374151;
+        border-radius: 3px;
+        padding: 0 3px;
+        margin-left: 5px;
+      }
+      button.active kbd { color: #cffafe; border-color: #67e8f9; }
+      .spacer { flex: 1; }
+      main { flex: 1; position: relative; }
+      #sim-canvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
+      footer {
+        padding: 8px 16px;
+        background: #111827;
+        border-top: 1px solid #1f2937;
+        font-size: 13px;
+      }
+      .status-ok { color: #94a3b8; }
+      .status-warn { color: #eab308; }
+      .status-error { color: #ef4444; font-weight: 600; }
+      #sim-panel {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        background: #111827ee;
+        border: 1px solid #374151;
+        border-radius: 8px;
+        padding: 12px 14px;
+        width: 190px;
+      }
+      #sim-panel h2 { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+      #sim-panel .row { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+      #sim-panel input {
+        width: 100%;
+        background: #0b0f14;
+        color: #e2e8f0;
+        border: 1px solid #374151;
+        border-radius: 5px;
+        padding: 5px 8px;
+        font-size: 13px;
+      }
+      #sim-panel-delete { width: 100%; color: #fca5a5; border-color: #7f1d1d; }
+      #sim-panel-delete:hover { background: #7f1d1d33; }
+      #sim-tooltip {
+        position: fixed;
+        pointer-events: none;
+        background: #111827f2;
+        border: 1px solid #374151;
+        border-radius: 6px;
+        padding: 5px 9px;
+        font-size: 12px;
+        color: #e2e8f0;
+        white-space: nowrap;
+        z-index: 10;
+      }
+      .hidden { display: none; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1><span>⚡</span> Electric Simulator</h1>
+      <button data-tool="select">Select<kbd>1</kbd></button>
+      <button data-tool="wire">Wire<kbd>2</kbd></button>
+      <button data-tool="battery">Battery<kbd>3</kbd></button>
+      <button data-tool="resistor">Resistor<kbd>4</kbd></button>
+      <button data-tool="lamp">Lamp<kbd>5</kbd></button>
+      <button data-tool="switch">Switch<kbd>6</kbd></button>
+      <button data-tool="delete">Delete<kbd>7</kbd></button>
+      <div class="spacer"></div>
+      <button id="sim-labels">Labels</button>
+      <button id="sim-example">Example</button>
+      <button id="sim-clear">Clear</button>
+    </header>
+    <main>
+      <canvas id="sim-canvas"></canvas>
+      <div id="sim-panel" class="hidden">
+        <h2 id="sim-panel-title">Component</h2>
+        <div class="row">
+          <input id="sim-panel-value" type="number" min="0.001" step="any" />
+          <span id="sim-panel-unit">Ω</span>
+        </div>
+        <button id="sim-panel-delete">Remove</button>
+      </div>
+      <div id="sim-tooltip" class="hidden"></div>
+    </main>
+    <footer><span id="sim-status" class="status-ok"></span></footer>
+    <script type="module" src="./simulator.js"></script>
+  </body>
+</html>
