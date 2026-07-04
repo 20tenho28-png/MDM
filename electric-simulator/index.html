@@ -9,122 +9,300 @@
       * { box-sizing: border-box; margin: 0; }
       html, body { height: 100%; }
       body {
-        background: #0b0f14;
-        color: #e2e8f0;
-        font-family: ui-sans-serif, system-ui, sans-serif;
+        background: #eef2f7;
+        color: #1e293b;
+        font-family: ui-sans-serif, system-ui, "Segoe UI", sans-serif;
         display: flex;
         flex-direction: column;
         overflow: hidden;
+        user-select: none;
+        -webkit-user-select: none;
       }
+
+      /* ---------------------------------------------------------- top bar */
       header {
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 10px 16px;
-        background: #111827;
-        border-bottom: 1px solid #1f2937;
-        flex-wrap: wrap;
+        gap: 10px;
+        padding: 8px 16px;
+        background: #fff;
+        border-bottom: 1px solid #dbe3ee;
+        box-shadow: 0 1px 4px rgba(30, 41, 59, 0.06);
+        z-index: 5;
       }
-      header h1 { font-size: 15px; font-weight: 600; margin-right: 12px; letter-spacing: 0.03em; }
-      header h1 span { color: #facc15; }
-      button {
-        background: #1f2937;
-        color: #e2e8f0;
-        border: 1px solid #374151;
-        border-radius: 6px;
+      header h1 { font-size: 15px; font-weight: 700; margin-right: 8px; }
+      header h1 span { color: #f59e0b; }
+      .tb-btn {
+        background: #fff;
+        color: #334155;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
         padding: 6px 12px;
         font-size: 13px;
+        font-weight: 500;
         cursor: pointer;
+        transition: background 0.12s, border-color 0.12s;
       }
-      button:hover { background: #273244; }
-      button.active { background: #0e7490; border-color: #22d3ee; color: #fff; }
-      button kbd {
-        font-size: 10px;
-        color: #94a3b8;
-        border: 1px solid #374151;
-        border-radius: 3px;
-        padding: 0 3px;
-        margin-left: 5px;
-      }
-      button.active kbd { color: #cffafe; border-color: #67e8f9; }
+      .tb-btn:hover { background: #f1f5f9; }
+      .tb-btn:disabled { opacity: 0.4; cursor: default; }
+      .tb-btn.active { background: #e0efff; border-color: #1577d1; color: #0b5cab; }
+      .tb-btn.danger:hover { background: #fef2f2; border-color: #fca5a5; color: #b91c1c; }
       .spacer { flex: 1; }
-      main { flex: 1; position: relative; }
-      #sim-canvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
-      footer {
-        padding: 8px 16px;
-        background: #111827;
-        border-top: 1px solid #1f2937;
-        font-size: 13px;
+
+      /* ------------------------------------------------------ middle area */
+      .middle { flex: 1; display: flex; min-height: 0; }
+
+      aside {
+        width: 196px;
+        background: #fff;
+        border-right: 1px solid #dbe3ee;
+        padding: 12px;
+        overflow-y: auto;
       }
-      .status-ok { color: #94a3b8; }
-      .status-warn { color: #eab308; }
-      .status-error { color: #ef4444; font-weight: 600; }
+      aside h2 {
+        font-size: 11px;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin: 4px 2px 8px;
+      }
+      .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .tile {
+        background: #fff;
+        border: 1.5px solid #dbe3ee;
+        border-radius: 10px;
+        padding: 8px 4px 6px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        cursor: grab;
+        transition: border-color 0.12s, box-shadow 0.12s, transform 0.08s;
+      }
+      .tile:hover { border-color: #93c5fd; box-shadow: 0 2px 8px rgba(21, 119, 209, 0.12); }
+      .tile.active { border-color: #1577d1; background: #f0f7ff; box-shadow: 0 0 0 2px #1577d133; }
+      .tile svg { display: block; }
+      .tile b { font-size: 11.5px; font-weight: 600; color: #334155; }
+      .tile small { font-size: 9.5px; color: #94a3b8; }
+      .tile.wide { grid-column: span 2; flex-direction: row; justify-content: center; gap: 10px; padding: 8px; }
+      .hint {
+        margin-top: 12px;
+        font-size: 11px;
+        line-height: 1.5;
+        color: #94a3b8;
+        padding: 0 2px;
+      }
+
+      main { flex: 1; position: relative; min-width: 0; }
+      #sim-canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+
+      /* --------------------------------------------------- property panel */
       #sim-panel {
         position: absolute;
         top: 14px;
         right: 14px;
-        background: #111827ee;
-        border: 1px solid #374151;
-        border-radius: 8px;
-        padding: 12px 14px;
-        width: 190px;
+        background: #fff;
+        border: 1px solid #dbe3ee;
+        border-radius: 12px;
+        box-shadow: 0 6px 24px rgba(30, 41, 59, 0.12);
+        padding: 14px;
+        width: 216px;
       }
-      #sim-panel h2 { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
-      #sim-panel .row { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+      #sim-panel h2 { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+      #sim-panel .row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
       #sim-panel input {
         width: 100%;
-        background: #0b0f14;
-        color: #e2e8f0;
-        border: 1px solid #374151;
-        border-radius: 5px;
-        padding: 5px 8px;
+        background: #f8fafc;
+        color: #1e293b;
+        border: 1px solid #cbd5e1;
+        border-radius: 7px;
+        padding: 7px 10px;
+        font-size: 14px;
+      }
+      #sim-panel input:focus { outline: 2px solid #93c5fd; border-color: #1577d1; }
+      #sim-panel-unit { font-weight: 600; color: #64748b; }
+      .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+      .chip {
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        color: #475569;
+        border-radius: 999px;
+        padding: 3px 9px;
+        font-size: 11.5px;
+        cursor: pointer;
+      }
+      .chip:hover { border-color: #1577d1; color: #0b5cab; background: #f0f7ff; }
+      #sim-readout {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 12.5px;
+        color: #475569;
+        line-height: 1.7;
+        margin-bottom: 10px;
+      }
+      #sim-readout b { color: #0b5cab; font-variant-numeric: tabular-nums; }
+      .panel-actions { display: flex; gap: 8px; }
+      .panel-actions .tb-btn { flex: 1; }
+
+      /* -------------------------------------------------------- status bar */
+      footer {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 7px 16px;
+        background: #fff;
+        border-top: 1px solid #dbe3ee;
         font-size: 13px;
       }
-      #sim-panel-delete { width: 100%; color: #fca5a5; border-color: #7f1d1d; }
-      #sim-panel-delete:hover { background: #7f1d1d33; }
-      #sim-tooltip {
-        position: fixed;
-        pointer-events: none;
-        background: #111827f2;
-        border: 1px solid #374151;
-        border-radius: 6px;
-        padding: 5px 9px;
-        font-size: 12px;
-        color: #e2e8f0;
-        white-space: nowrap;
-        z-index: 10;
+      #sim-status { flex: 1; }
+      .status-ok { color: #64748b; }
+      .status-warn { color: #b45309; font-weight: 600; }
+      .status-error { color: #dc2626; font-weight: 700; }
+      .zoom-ctl { display: flex; align-items: center; gap: 4px; }
+      .zoom-ctl button {
+        width: 26px; height: 26px;
+        border: 1px solid #cbd5e1; border-radius: 7px; background: #fff;
+        font-size: 14px; cursor: pointer; color: #334155; line-height: 1;
       }
-      .hidden { display: none; }
+      .zoom-ctl button:hover { background: #f1f5f9; }
+      #sim-zoom { min-width: 44px; text-align: center; color: #64748b; font-variant-numeric: tabular-nums; }
+
+      /* ------------------------------------------------------ help overlay */
+      #sim-help {
+        position: fixed; inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 20;
+      }
+      .help-card {
+        background: #fff; border-radius: 16px; padding: 26px 30px;
+        width: min(560px, 92vw); max-height: 86vh; overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(15, 23, 42, 0.3);
+      }
+      .help-card h2 { font-size: 19px; margin-bottom: 4px; }
+      .help-card p.sub { color: #64748b; font-size: 13.5px; margin-bottom: 16px; }
+      .help-grid { display: grid; grid-template-columns: auto 1fr; gap: 7px 14px; font-size: 13.5px; margin-bottom: 18px; }
+      .help-grid b { color: #0b5cab; white-space: nowrap; }
+      .help-card kbd {
+        background: #f1f5f9; border: 1px solid #cbd5e1; border-bottom-width: 2px;
+        border-radius: 5px; padding: 1px 6px; font-size: 12px; font-family: inherit;
+      }
+      #sim-help-close {
+        background: #1577d1; color: #fff; border: none; border-radius: 9px;
+        padding: 10px 22px; font-size: 14px; font-weight: 600; cursor: pointer;
+      }
+      #sim-help-close:hover { background: #0b5cab; }
+
+      #sim-tooltip {
+        position: fixed; pointer-events: none; z-index: 10;
+        background: #1e293b; color: #f1f5f9;
+        border-radius: 8px; padding: 6px 10px; font-size: 12px;
+        white-space: nowrap; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.3);
+      }
+      .hidden { display: none !important; }
     </style>
   </head>
   <body>
     <header>
       <h1><span>⚡</span> Electric Simulator</h1>
-      <button data-tool="select">Select<kbd>1</kbd></button>
-      <button data-tool="wire">Wire<kbd>2</kbd></button>
-      <button data-tool="battery">Battery<kbd>3</kbd></button>
-      <button data-tool="resistor">Resistor<kbd>4</kbd></button>
-      <button data-tool="lamp">Lamp<kbd>5</kbd></button>
-      <button data-tool="switch">Switch<kbd>6</kbd></button>
-      <button data-tool="delete">Delete<kbd>7</kbd></button>
+      <button class="tb-btn" id="sim-undo" title="Undo (Ctrl+Z)">↩ Undo</button>
+      <button class="tb-btn" id="sim-redo" title="Redo (Ctrl+Y)">↪ Redo</button>
       <div class="spacer"></div>
-      <button id="sim-labels">Labels</button>
-      <button id="sim-example">Example</button>
-      <button id="sim-clear">Clear</button>
+      <button class="tb-btn" id="sim-labels">Labels</button>
+      <button class="tb-btn" id="sim-example">Example</button>
+      <button class="tb-btn danger" id="sim-clear">Clear all</button>
+      <button class="tb-btn" id="sim-helpbtn" title="Help">?</button>
     </header>
-    <main>
-      <canvas id="sim-canvas"></canvas>
-      <div id="sim-panel" class="hidden">
-        <h2 id="sim-panel-title">Component</h2>
-        <div class="row">
-          <input id="sim-panel-value" type="number" min="0.001" step="any" />
-          <span id="sim-panel-unit">Ω</span>
+
+    <div class="middle">
+      <aside>
+        <h2>Tools</h2>
+        <div class="tiles" style="margin-bottom:14px">
+          <div class="tile wide active" data-tool="select" title="Select, move and toggle parts. Drag empty space to pan.">
+            <svg width="26" height="26" viewBox="0 0 26 26"><path d="M7 3l13 10-6 1 3.4 6.2-2.8 1.5L11.2 15 7 19.5z" fill="#334155"/></svg>
+            <div><b>Select / Move</b><br /><small>key 1 · drag grid = pan</small></div>
+          </div>
         </div>
-        <button id="sim-panel-delete">Remove</button>
+        <h2>Parts — IEC (EU)</h2>
+        <div class="tiles">
+          <div class="tile" data-tool="wire" title="Wire — drag on the grid to draw">
+            <svg width="56" height="34" viewBox="0 0 56 34"><line x1="6" y1="17" x2="50" y2="17" stroke="#334155" stroke-width="2.5" stroke-linecap="round"/><circle cx="6" cy="17" r="3" fill="#334155"/><circle cx="50" cy="17" r="3" fill="#334155"/></svg>
+            <b>Wire</b><small>key 2</small>
+          </div>
+          <div class="tile" data-tool="battery" title="Battery / DC supply">
+            <svg width="56" height="34" viewBox="0 0 56 34"><line x1="4" y1="17" x2="23" y2="17" stroke="#334155" stroke-width="2.5"/><line x1="33" y1="17" x2="52" y2="17" stroke="#334155" stroke-width="2.5"/><line x1="23" y1="11" x2="23" y2="23" stroke="#334155" stroke-width="4"/><line x1="33" y1="4" x2="33" y2="30" stroke="#334155" stroke-width="2"/><text x="40" y="10" font-size="11" fill="#64748b">+</text></svg>
+            <b>Battery</b><small>key 3</small>
+          </div>
+          <div class="tile" data-tool="resistor" title="Resistor — IEC rectangle symbol">
+            <svg width="56" height="34" viewBox="0 0 56 34"><line x1="3" y1="17" x2="14" y2="17" stroke="#334155" stroke-width="2.5"/><line x1="42" y1="17" x2="53" y2="17" stroke="#334155" stroke-width="2.5"/><rect x="14" y="10" width="28" height="14" fill="#fff" stroke="#334155" stroke-width="2.5"/></svg>
+            <b>Resistor</b><small>key 4</small>
+          </div>
+          <div class="tile" data-tool="lamp" title="Lamp / signal light">
+            <svg width="56" height="34" viewBox="0 0 56 34"><line x1="3" y1="17" x2="17" y2="17" stroke="#334155" stroke-width="2.5"/><line x1="39" y1="17" x2="53" y2="17" stroke="#334155" stroke-width="2.5"/><circle cx="28" cy="17" r="11" fill="#fff" stroke="#334155" stroke-width="2.5"/><line x1="20.2" y1="9.2" x2="35.8" y2="24.8" stroke="#334155" stroke-width="2.5"/><line x1="20.2" y1="24.8" x2="35.8" y2="9.2" stroke="#334155" stroke-width="2.5"/></svg>
+            <b>Lamp</b><small>key 5</small>
+          </div>
+          <div class="tile wide" data-tool="switch" title="Switch — click it on the canvas to open/close">
+            <svg width="56" height="34" viewBox="0 0 56 34"><line x1="3" y1="20" x2="14" y2="20" stroke="#334155" stroke-width="2.5"/><line x1="42" y1="20" x2="53" y2="20" stroke="#334155" stroke-width="2.5"/><circle cx="16" cy="20" r="2.6" fill="#334155"/><circle cx="40" cy="20" r="2.6" fill="#334155"/><line x1="16" y1="20" x2="38" y2="8" stroke="#334155" stroke-width="2.5" stroke-linecap="round"/></svg>
+            <div><b>Switch</b><br /><small>key 6 · click to toggle</small></div>
+          </div>
+        </div>
+        <p class="hint">
+          Drag a part onto the grid, or pick it and draw between two grid
+          points. Click a part to edit it. <b>R</b> rotates,
+          <b>Del</b> removes.
+        </p>
+      </aside>
+
+      <main>
+        <canvas id="sim-canvas"></canvas>
+
+        <div id="sim-panel" class="hidden">
+          <h2 id="sim-panel-title">Component</h2>
+          <div class="row" id="sim-value-row">
+            <input id="sim-panel-value" type="number" min="0.001" step="any" />
+            <span id="sim-panel-unit">Ω</span>
+          </div>
+          <div class="chips" id="sim-chips"></div>
+          <div id="sim-readout"></div>
+          <div class="panel-actions">
+            <button class="tb-btn" id="sim-panel-rotate" title="Rotate 90° (R)">⟳ Rotate</button>
+            <button class="tb-btn danger" id="sim-panel-delete" title="Delete (Del)">🗑 Remove</button>
+          </div>
+        </div>
+
+        <div id="sim-tooltip" class="hidden"></div>
+      </main>
+    </div>
+
+    <footer>
+      <span id="sim-status" class="status-ok"></span>
+      <div class="zoom-ctl">
+        <button id="sim-zoom-out" title="Zoom out (−)">−</button>
+        <span id="sim-zoom">100%</span>
+        <button id="sim-zoom-in" title="Zoom in (+)">+</button>
+        <button id="sim-fit" title="Fit circuit (0)" style="width:auto;padding:0 8px;font-size:12px">Fit</button>
       </div>
-      <div id="sim-tooltip" class="hidden"></div>
-    </main>
-    <footer><span id="sim-status" class="status-ok"></span></footer>
+    </footer>
+
+    <div id="sim-help" class="hidden">
+      <div class="help-card">
+        <h2>⚡ Welcome to the Electric Simulator</h2>
+        <p class="sub">Build DC circuits with EU (IEC 60617) schematic symbols and watch them work in real time. Made for technicians and new hires — nothing here can break.</p>
+        <div class="help-grid">
+          <b>Add a part</b><span>Drag it from the left panel onto the grid, or pick it and draw between two grid points.</span>
+          <b>Wire it up</b><span>Pick <kbd>Wire</kbd> (key <kbd>2</kbd>) and drag between terminals. Current flows as soon as the loop is closed.</span>
+          <b>Operate</b><span>Click a switch to open or close it. Lamps light up according to real power.</span>
+          <b>Edit</b><span>Click a part to change its value (EU presets included), rotate <kbd>R</kbd>, or remove <kbd>Del</kbd>.</span>
+          <b>Move around</b><span>Drag empty grid to pan · mouse wheel to zoom · <kbd>0</kbd> fits the circuit.</span>
+          <b>Undo</b><span><kbd>Ctrl</kbd>+<kbd>Z</kbd> undo · <kbd>Ctrl</kbd>+<kbd>Y</kbd> redo. Experiment freely.</span>
+          <b>Read values</b><span>Hover any part for volts, amps and watts. A red flash + warning means short circuit.</span>
+        </div>
+        <button id="sim-help-close">Start building</button>
+      </div>
+    </div>
+
     <script type="module" src="./simulator.js"></script>
   </body>
 </html>
