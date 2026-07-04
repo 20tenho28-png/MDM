@@ -28,12 +28,16 @@ const COLORS = {
   black: { hex: "#1f2937", label: "Preto" },
 };
 
-const RAILS = [{ y: 158 }, { y: 318 }];
+const RAILS = [{ y: 168 }, { y: 330 }];
 const RAIL_X0 = 280;
-const RAIL_X1 = 860;
+const RAIL_X1 = 840;
 const DEV_H = 92;
 const SUP = { L: { x: 300, y: 64 }, N: { x: 336, y: 64 } };
-const NBAR = { x: 902, y0: 250, y1: 415, screws: 6 };
+const NBAR = { x: 916, y0: 252, y1: 417, screws: 6 };
+// Calhas técnicas (cablagem arrumada, como num quadro real).
+const DUCTS = { D0: 99, D1: 250, D2: 409 };
+const DUCT_H = 24;
+const VDUCT = { x: 856, w: 26, y0: 87, y1: 421 };
 const LOAD_Y = 506;
 const LOAD_W = 162;
 const LOAD_H = 112;
@@ -210,32 +214,82 @@ function wireEnds(w) {
   return { a, b };
 }
 
-function bezierFor(a, b) {
-  const k = 46;
-  return {
-    p0: { x: a.x, y: a.y },
-    p1: { x: a.x + a.dx * k, y: a.y + a.dy * k },
-    p2: { x: b.x + b.dx * k, y: b.y + b.dy * k },
-    p3: { x: b.x, y: b.y },
-  };
+/** Calha horizontal por onde um terminal encaminha o seu cabo. */
+function ductOf(t) {
+  if (t.id === "SUP_L" || t.id === "SUP_N") return DUCTS.D0;
+  if (t.id === "NBAR") return null; // liga pela calha vertical
+  const dev = model.devices.find((d) => t.id.startsWith(d.id + ":"));
+  if (dev) {
+    const isTop = t.dy === -1;
+    return dev.rail === 0 ? (isTop ? DUCTS.D0 : DUCTS.D1) : isTop ? DUCTS.D1 : DUCTS.D2;
+  }
+  return DUCTS.D2; // circuitos em baixo
 }
 
-function bezierPoint(bz, t) {
-  const u = 1 - t;
-  return {
-    x: u * u * u * bz.p0.x + 3 * u * u * t * bz.p1.x + 3 * u * t * t * bz.p2.x + t * t * t * bz.p3.x,
-    y: u * u * u * bz.p0.y + 3 * u * u * t * bz.p1.y + 3 * u * t * t * bz.p2.y + t * t * t * bz.p3.y,
-  };
+/** Rota ortogonal do cabo pelas calhas (com desvio por cabo = feixe). */
+function wireRoute(w) {
+  const { a, b } = wireEnds(w);
+  if (!a || !b) return null;
+  const lane = (((w.id * 7) % 5) - 2) * 3.4;
+  const lv = (((w.id * 3) % 5) - 2) * 3.6;
+  const vx = VDUCT.x + VDUCT.w / 2 + lv;
+  const da = ductOf(a);
+  const db = ductOf(b);
+  const pts = [{ x: a.x, y: a.y }];
+  if (da == null && db == null) {
+    pts.push({ x: vx, y: a.y }, { x: vx, y: b.y });
+  } else if (da == null) {
+    pts.push({ x: vx, y: a.y }, { x: vx, y: db + lane }, { x: b.x, y: db + lane });
+  } else if (db == null) {
+    pts.push({ x: a.x, y: da + lane }, { x: vx, y: da + lane }, { x: vx, y: b.y });
+  } else if (da === db) {
+    pts.push({ x: a.x, y: da + lane }, { x: b.x, y: da + lane });
+  } else {
+    pts.push(
+      { x: a.x, y: da + lane },
+      { x: vx, y: da + lane },
+      { x: vx, y: db + lane },
+      { x: b.x, y: db + lane });
+  }
+  pts.push({ x: b.x, y: b.y });
+  return pts;
+}
+
+function distToSegment(px, py, ax, ay, bx, by) {
+  const dx = bx - ax;
+  const dy = by - ay;
+  const len2 = dx * dx + dy * dy;
+  const t = len2 === 0 ? 0 : Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / len2));
+  return Math.hypot(px - (ax + t * dx), py - (ay + t * dy));
+}
+
+function routePoint(pts, dist) {
+  let acc = 0;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const seg = Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
+    if (acc + seg >= dist && seg > 0) {
+      const t = (dist - acc) / seg;
+      return { x: pts[i].x + (pts[i + 1].x - pts[i].x) * t, y: pts[i].y + (pts[i + 1].y - pts[i].y) * t };
+    }
+    acc += seg;
+  }
+  return pts[pts.length - 1];
+}
+
+function routeLength(pts) {
+  let len = 0;
+  for (let i = 0; i < pts.length - 1; i++) {
+    len += Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
+  }
+  return len;
 }
 
 function wireAt(wx, wy) {
   for (const w of model.wires) {
-    const { a, b } = wireEnds(w);
-    if (!a || !b) continue;
-    const bz = bezierFor(a, b);
-    for (let i = 0; i <= 24; i++) {
-      const p = bezierPoint(bz, i / 24);
-      if (Math.hypot(wx - p.x, wy - p.y) < 8) return w;
+    const pts = wireRoute(w);
+    if (!pts) continue;
+    for (let i = 0; i < pts.length - 1; i++) {
+      if (distToSegment(wx, wy, pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y) < 8) return w;
     }
   }
   return null;
@@ -744,11 +798,16 @@ function frame(now) {
 
   if (action?.kind === "wire") {
     const from = action.from;
-    const bz = bezierFor(from, { x: action.wx, y: action.wy, dx: 0, dy: 0 });
     ctx.strokeStyle = COLORS[from.kind === "N" ? "blue" : "brown"].hex;
     ctx.globalAlpha = 0.6;
     ctx.lineWidth = 3.5;
-    drawBezier(bz);
+    ctx.setLineDash([7, 6]);
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(action.wx, action.wy);
+    ctx.stroke();
+    ctx.setLineDash([]);
     ctx.globalAlpha = 1;
   }
   if (action?.kind === "drop" && action.active) {
@@ -762,64 +821,148 @@ function frame(now) {
 }
 
 function drawEnclosure() {
-  ctx.fillStyle = "#f8fafc";
-  ctx.strokeStyle = "#94a3b8";
-  ctx.lineWidth = 2.5;
-  roundRect(250, 24, 720, 430, 14);
+  // moldura creme do armário
+  ctx.fillStyle = "#e9e3d5";
+  ctx.strokeStyle = "#cfc7b4";
+  ctx.lineWidth = 2;
+  roundRect(240, 14, 740, 462, 10);
   ctx.fill();
   ctx.stroke();
-  ctx.fillStyle = "#94a3b8";
-  ctx.font = "700 12px ui-sans-serif, system-ui, sans-serif";
+  // réguas perfuradas em cima e em baixo (como na foto)
+  for (const py of [22, 456]) {
+    ctx.fillStyle = "#efe9dc";
+    ctx.fillRect(252, py, 716, 14);
+    ctx.fillStyle = "#c6bda8";
+    for (let hx = 260; hx < 962; hx += 12) ctx.fillRect(hx, py + 4, 5, 6);
+  }
+  // placa de montagem interior
+  ctx.fillStyle = "#eceef0";
+  ctx.strokeStyle = "#c8ccd2";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.rect(254, 40, 712, 412);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#a8adb5";
+  ctx.font = "700 11px ui-sans-serif, system-ui, sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText("QUADRO ELÉTRICO · 230 V", 954, 58);
   ctx.textAlign = "left";
-  ctx.fillText("QUADRO ELÉTRICO · 230 V", 268, 46);
+
+  // calhas técnicas cinzentas (a cablagem corre por aqui)
+  const ducts = Object.values(DUCTS).map((y) => ({ x: 266, y: y - DUCT_H / 2, w: VDUCT.x - 266 + VDUCT.w, h: DUCT_H }));
+  ducts.push({ x: VDUCT.x, y: VDUCT.y0, w: VDUCT.w, h: VDUCT.y1 - VDUCT.y0 });
+  for (const d of ducts) {
+    ctx.fillStyle = "#99a0a8";
+    ctx.strokeStyle = "#7e858d";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.rect(d.x, d.y, d.w, d.h);
+    ctx.fill();
+    ctx.stroke();
+    // ranhuras do pente
+    ctx.strokeStyle = "rgba(255,255,255,0.35)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    if (d.w > d.h) {
+      for (let sx = d.x + 5; sx < d.x + d.w - 3; sx += 9) {
+        ctx.moveTo(sx, d.y + 2);
+        ctx.lineTo(sx, d.y + d.h - 2);
+      }
+    } else {
+      for (let sy = d.y + 5; sy < d.y + d.h - 3; sy += 9) {
+        ctx.moveTo(d.x + 2, sy);
+        ctx.lineTo(d.x + d.w - 2, sy);
+      }
+    }
+    ctx.stroke();
+  }
+
+  // calhas DIN metálicas
   for (const rail of RAILS) {
-    ctx.fillStyle = "#d8dee9";
-    ctx.strokeStyle = "#aeb9c9";
-    ctx.lineWidth = 1.5;
+    ctx.fillStyle = "#d4d8dd";
+    ctx.strokeStyle = "#a9afb7";
+    ctx.lineWidth = 1.3;
     ctx.beginPath();
     ctx.rect(RAIL_X0 - 14, rail.y - 8, RAIL_X1 - RAIL_X0 + 42, 16);
     ctx.fill();
     ctx.stroke();
-    ctx.fillStyle = "#aeb9c9";
-    ctx.font = "600 10px ui-sans-serif, system-ui, sans-serif";
-    ctx.fillText("calha DIN", RAIL_X0 - 12, rail.y - 14);
+    ctx.fillStyle = "#b9bfc7";
+    for (let hx = RAIL_X0 - 8; hx < RAIL_X1 + 22; hx += 14) ctx.fillRect(hx, rail.y - 2, 6, 4);
   }
+
+  // barra de terra decorativa (latão + verde/amarelo), como na foto
+  ctx.fillStyle = "#c9a24a";
+  ctx.strokeStyle = "#a3812f";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.rect(266, 428, 108, 9);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#16a34a";
+  ctx.fillRect(266, 424, 108, 3);
+  ctx.fillStyle = "#facc15";
+  for (let sx = 270; sx < 370; sx += 12) ctx.fillRect(sx, 424, 5, 3);
+  ctx.fillStyle = "#8a8f97";
+  ctx.font = "600 8px ui-sans-serif, system-ui, sans-serif";
+  ctx.fillText("TERRA (PE)", 268, 449);
 }
 
 function drawSupply() {
-  ctx.strokeStyle = "#64748b";
-  ctx.lineWidth = 7;
+  // cabo de entrada preto, como o cabo da rede na foto
+  ctx.strokeStyle = "#2e3338";
+  ctx.lineWidth = 9;
+  ctx.lineCap = "round";
   ctx.beginPath();
-  ctx.moveTo(SUP.L.x + 18, 0);
-  ctx.lineTo(SUP.L.x + 18, SUP.L.y - 22);
+  ctx.moveTo(SUP.L.x + 18, 4);
+  ctx.lineTo(SUP.L.x + 18, SUP.L.y - 20);
   ctx.stroke();
-  ctx.fillStyle = "#e2e8f0";
-  ctx.strokeStyle = "#94a3b8";
+  ctx.fillStyle = "#e8e2d4";
+  ctx.strokeStyle = "#b3ac9a";
   ctx.lineWidth = 1.5;
-  roundRect(SUP.L.x - 22, SUP.L.y - 24, 80, 44, 7);
+  roundRect(SUP.L.x - 22, SUP.L.y - 22, 80, 42, 5);
   ctx.fill();
   ctx.stroke();
   ctx.fillStyle = "#475569";
-  ctx.font = "600 10px ui-sans-serif, system-ui, sans-serif";
+  ctx.font = "700 9.5px ui-sans-serif, system-ui, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("REDE 230 V", SUP.L.x + 18, SUP.L.y - 10);
-  ctx.fillText("L      N", SUP.L.x + 18, SUP.L.y + 16);
+  ctx.fillText("REDE 230 V", SUP.L.x + 18, SUP.L.y - 9);
+  ctx.font = "600 8px ui-sans-serif, system-ui, sans-serif";
+  ctx.fillText("L        N", SUP.L.x + 18, SUP.L.y + 15);
 }
 
 function drawNeutralBar() {
-  ctx.fillStyle = "#dbeafe";
-  ctx.strokeStyle = "#2563eb";
-  ctx.lineWidth = 2;
-  roundRect(NBAR.x - 11, NBAR.y0, 22, NBAR.y1 - NBAR.y0, 6);
+  // régua de bornes numerados (estilo Weidmüller), corpo bege e mola azul
+  const h = NBAR.y1 - NBAR.y0;
+  ctx.fillStyle = "#d8d2c4";
+  ctx.strokeStyle = "#b3ac9a";
+  ctx.lineWidth = 1.2;
+  roundRect(NBAR.x - 13, NBAR.y0 - 6, 26, h + 12, 3);
   ctx.fill();
   ctx.stroke();
+  const step = (h - 28) / (NBAR.screws - 1);
+  for (let k = 0; k < NBAR.screws; k++) {
+    const y = NBAR.y0 + 14 + k * step;
+    ctx.fillStyle = "#2563eb";
+    ctx.fillRect(NBAR.x - 13, y - 9, 26, 3);
+    ctx.fillStyle = "#e8e2d4";
+    ctx.strokeStyle = "#b3ac9a";
+    ctx.beginPath();
+    ctx.rect(NBAR.x - 11, y - 6, 22, 15);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#6b7280";
+    ctx.font = "600 6.5px ui-sans-serif, system-ui, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText(String(k + 1), NBAR.x + 6, y + 3);
+  }
   ctx.save();
-  ctx.translate(NBAR.x + 24, (NBAR.y0 + NBAR.y1) / 2);
+  ctx.translate(NBAR.x + 26, (NBAR.y0 + NBAR.y1) / 2);
   ctx.rotate(Math.PI / 2);
   ctx.fillStyle = "#2563eb";
-  ctx.font = "700 10px ui-sans-serif, system-ui, sans-serif";
+  ctx.font = "700 9px ui-sans-serif, system-ui, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("BARRA DE NEUTRO", 0, 0);
+  ctx.fillText("NEUTRO (N)", 0, 0);
   ctx.restore();
 }
 
@@ -829,30 +972,65 @@ function drawDevice(d, now) {
 
 function drawModuleBody(x, rail, w, type, d, now) {
   const top = RAILS[rail].y - DEV_H / 2;
+  const cy = RAILS[rail].y;
   const isSel = selected?.kind === "device" && selected.id === d.id;
-  ctx.fillStyle = "#ffffff";
-  ctx.strokeStyle = d.tripped ? (now % 500 < 250 ? "#ea580c" : "#f97316") : isSel ? "#1577d1" : "#64748b";
-  ctx.lineWidth = isSel ? 2.5 : 1.8;
-  roundRect(x, top, w, DEV_H, 5);
+  // corpo branco-pérola tipo módulo modular real
+  ctx.fillStyle = "#f7f5f0";
+  ctx.strokeStyle = d.tripped ? (now % 500 < 250 ? "#ea580c" : "#f97316") : isSel ? "#1577d1" : "#b9bec5";
+  ctx.lineWidth = isSel || d.tripped ? 2.4 : 1.3;
+  roundRect(x, top, w, DEV_H, 3);
   ctx.fill();
   ctx.stroke();
-  // manípulo
-  const lever = d.tripped ? "#f97316" : d.on ? "#16a34a" : "#94a3b8";
-  ctx.fillStyle = lever;
-  roundRect(x + w / 2 - 9, RAILS[rail].y - 15 + (d.on && !d.tripped ? -4 : 4), 18, 26, 4);
+  // sombras laterais (volume)
+  ctx.fillStyle = "rgba(120,130,145,0.14)";
+  ctx.fillRect(x + 1.5, top + 1.5, 3, DEV_H - 3);
+  ctx.fillRect(x + w - 4.5, top + 1.5, 3, DEV_H - 3);
+  // recessos dos terminais (cima/baixo)
+  ctx.fillStyle = "#a9aeb5";
+  ctx.fillRect(x + 4, top + 2, w - 8, 12);
+  ctx.fillRect(x + 4, top + DEV_H - 14, w - 8, 12);
+  // face central
+  ctx.fillStyle = "#fdfcfa";
+  roundRect(x + 3.5, top + 17, w - 7, DEV_H - 34, 2);
   ctx.fill();
-  ctx.fillStyle = "#fff";
-  ctx.font = "700 8px ui-sans-serif, system-ui, sans-serif";
+  // manípulo cinzento (desliza)
+  const on = d.on && !d.tripped;
+  const leverY = cy - 8 + (on ? -8 : 4);
+  ctx.fillStyle = "#5b6470";
+  roundRect(x + w / 2 - (w > 40 ? 14 : 7), leverY, w > 40 ? 28 : 14, 16, 3);
+  ctx.fill();
+  ctx.fillStyle = "rgba(255,255,255,0.25)";
+  ctx.fillRect(x + w / 2 - (w > 40 ? 14 : 7), leverY, w > 40 ? 28 : 14, 4);
+  // bandeira de estado (verde ligado / vermelho desligado / laranja disparado)
+  ctx.fillStyle = d.tripped ? "#f97316" : on ? "#16a34a" : "#dc2626";
+  ctx.fillRect(x + w / 2 - 4, cy + 14, 8, 6);
+  // janela transparente com o calibre
+  ctx.fillStyle = "#e7edf3";
+  ctx.strokeStyle = "#c6cfd8";
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.rect(x + w / 2 - (w > 40 ? 16 : 10), top + 19, w > 40 ? 32 : 20, 11);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#334155";
+  ctx.font = "700 8.5px ui-sans-serif, system-ui, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText(d.tripped ? "!" : d.on ? "I" : "O", x + w / 2, RAILS[rail].y + (d.on && !d.tripped ? -6 : 2));
-  // etiqueta
-  ctx.fillStyle = "#475569";
-  ctx.font = "700 9.5px ui-sans-serif, system-ui, sans-serif";
   const tag = type === "mcb" ? `C${d.rating}` : type === "rcd" ? `${d.rating}A 30mA` : `${d.rating}A`;
-  ctx.fillText(tag, x + w / 2, top + 24);
-  ctx.font = "600 7.5px ui-sans-serif, system-ui, sans-serif";
-  ctx.fillStyle = "#94a3b8";
-  ctx.fillText(type === "mcb" ? "DISJUNTOR" : type === "rcd" ? "DIFERENCIAL" : "GERAL", x + w / 2, top + DEV_H - 16);
+  ctx.fillText(tag, x + w / 2, top + 27.5);
+  // botão de teste no diferencial (como nos reais)
+  if (type === "rcd") {
+    ctx.fillStyle = "#334155";
+    ctx.beginPath();
+    ctx.arc(x + w - 12, cy - 2, 3.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "600 5.5px ui-sans-serif, system-ui, sans-serif";
+    ctx.fillText("T", x + w - 12, cy + 9);
+  }
+  // tipo do módulo
+  ctx.fillStyle = "#8a919a";
+  ctx.font = "600 6px ui-sans-serif, system-ui, sans-serif";
+  ctx.fillText(type === "mcb" ? "DISJUNTOR" : type === "rcd" ? "DIFERENCIAL" : "GERAL", x + w / 2, top + DEV_H - 17.5);
 }
 
 function drawLoad(i, now) {
@@ -890,68 +1068,70 @@ function drawLoad(i, now) {
 }
 
 function drawWire(w, dt, now) {
-  const { a, b } = wireEnds(w);
-  if (!a || !b) return;
-  const bz = bezierFor(a, b);
+  const pts = wireRoute(w);
+  if (!pts) return;
   const isSel = selected?.kind === "wire" && selected.id === w.id;
   const isHov = hovered?.kind === "wire" && hovered.id === w.id;
   if (isSel || isHov) {
     ctx.strokeStyle = isSel ? "rgba(21,119,209,0.4)" : "rgba(59,130,246,0.25)";
     ctx.lineWidth = 8;
-    drawBezier(bz);
+    drawPath(pts);
   }
   ctx.strokeStyle = COLORS[w.color]?.hex || "#1f2937";
-  ctx.lineWidth = 3.5;
-  drawBezier(bz);
+  ctx.lineWidth = 3.4;
+  drawPath(pts);
   if (w.color === "pe") {
     ctx.strokeStyle = "#eab308";
     ctx.setLineDash([5, 7]);
-    drawBezier(bz);
+    drawPath(pts);
     ctx.setLineDash([]);
   }
-  // pontos de corrente
+  // pontos de corrente ao longo da rota
   const i = wireCurrent.get(w.id) || 0;
   if (Math.abs(i) > 0.05) {
-    const speed = Math.max(-1.6, Math.min(1.6, i * 0.25));
-    flowPhase.set(w.id, ((flowPhase.get(w.id) || 0) + speed * dt) % 1);
-    let phase = flowPhase.get(w.id);
-    if (phase < 0) phase += 1;
-    for (let k = 0; k < 5; k++) {
-      const t = (phase + k / 5) % 1;
-      const p = bezierPoint(bz, t);
+    const len = routeLength(pts);
+    const speed = Math.max(-90, Math.min(90, i * 16));
+    flowPhase.set(w.id, (((flowPhase.get(w.id) || 0) + speed * dt) % 22 + 22) % 22);
+    for (let d = flowPhase.get(w.id); d < len; d += 22) {
+      const p = routePoint(pts, d);
       ctx.beginPath();
-      ctx.arc(p.x, p.y, 3.4, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, 3.2, 0, Math.PI * 2);
       ctx.fillStyle = "#fff";
       ctx.fill();
       ctx.beginPath();
-      ctx.arc(p.x, p.y, 2.4, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, 2.2, 0, Math.PI * 2);
       ctx.fillStyle = "#ff9f1c";
       ctx.fill();
     }
   }
 }
 
-function drawBezier(bz) {
+function drawPath(pts) {
   ctx.lineCap = "round";
+  ctx.lineJoin = "round";
   ctx.beginPath();
-  ctx.moveTo(bz.p0.x, bz.p0.y);
-  ctx.bezierCurveTo(bz.p1.x, bz.p1.y, bz.p2.x, bz.p2.y, bz.p3.x, bz.p3.y);
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length - 1; i++) ctx.arcTo(pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y, 7);
+  ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
   ctx.stroke();
 }
 
 function drawTerminals() {
   for (const t of terminals()) {
+    // parafuso de aperto com fenda, anel colorido pela função (L/N)
     ctx.beginPath();
-    ctx.arc(t.x, t.y, 5, 0, Math.PI * 2);
-    ctx.fillStyle = "#e2e8f0";
+    ctx.arc(t.x, t.y, 5.2, 0, Math.PI * 2);
+    ctx.fillStyle = "#d6dade";
     ctx.fill();
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1.8;
     ctx.strokeStyle = t.kind === "N" ? "#2563eb" : "#8a4b1f";
     ctx.stroke();
+    ctx.strokeStyle = "#767d86";
+    ctx.lineWidth = 1.4;
     ctx.beginPath();
-    ctx.arc(t.x, t.y, 1.6, 0, Math.PI * 2);
-    ctx.fillStyle = "#64748b";
-    ctx.fill();
+    ctx.moveTo(t.x - 3, t.y - 3);
+    ctx.lineTo(t.x + 3, t.y + 3);
+    ctx.stroke();
   }
 }
 
