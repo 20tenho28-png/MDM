@@ -3,7 +3,8 @@
 `GET /`         renders the full kiosk page.
 `GET /board`    returns just the auto-refreshable inner partial (HTMX swap).
 `POST /tickets/{id}/close?as=won|lost` closes a ticket (admin action).
-`GET /simulator` renders the interactive electric circuit simulator.
+
+The electric simulator is mounted separately at `/simulator` (see main.py).
 """
 from __future__ import annotations
 
@@ -106,11 +107,6 @@ async def board_partial(
     closed = await list_recently_closed(session)
     ctx = _board_context(awaiting_us, awaiting_customer, closed, settings)
     return templates.TemplateResponse(request, "partials/board.html", ctx)
-
-
-@router.get("/simulator", response_class=HTMLResponse)
-async def simulator(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(request, "simulator.html", {})
 
 
 @router.post("/tickets/{ticket_id}/close")

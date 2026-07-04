@@ -1,12 +1,22 @@
 # MDM
 
-Team workspace with two apps:
+Team workspace with three apps, one folder each:
 
-| App | Where | What it is |
+| App | Folder | What it is |
 | --- | --- | --- |
 | **Email ticket wall** | `src/mdm/` | IMAP-driven ticket tracking with a TV wall display (FastAPI + PostgreSQL) |
-| **Electric simulator** | `/simulator` route | Interactive DC circuit simulator (canvas editor + live MNA solver) |
-| **Circuit Planner — EU Edition** | `circuit-planner/` | Standalone single-file EU electrical/HVAC training web app |
+| **Electric simulator** | `electric-simulator/` | Interactive DC circuit simulator (canvas editor + live MNA solver) |
+| **Circuit Planner — EU Edition** | `circuit-planner/` | Single-file EU electrical/HVAC training app (the trainer) |
+
+```
+MDM/
+├── src/mdm/            # ticket wall backend + TV wall UI
+├── alembic/            # database migrations for the ticket wall
+├── tests/              # Python test suite (ticket wall + simulator routes)
+├── electric-simulator/ # standalone circuit simulator (HTML/JS + own tests)
+├── circuit-planner/    # standalone trainer app (HTML/JS + own tests)
+└── .github/            # CI workflow, PR and issue templates
+```
 
 ## Email ticket wall + electric simulator
 
@@ -38,9 +48,13 @@ python -m pytest
 ```
 
 Tests use an in-memory SQLite database — no PostgreSQL or IMAP account needed.
-The simulator's physics solver is additionally covered by Node-based tests
-(`tests/js/test_circuit.mjs`), run automatically from pytest when `node` is
-installed.
+
+## Electric simulator
+
+Lives in `electric-simulator/` and is served at `/simulator` by the ticket-wall
+app, or standalone with any static file server. Its physics solver has its own
+Node test suite, also run automatically from pytest. See
+[`electric-simulator/README.md`](electric-simulator/README.md).
 
 ## Circuit Planner
 

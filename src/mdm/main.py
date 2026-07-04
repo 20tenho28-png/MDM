@@ -32,8 +32,15 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     app = FastAPI(title="MDM — Email Tickets", lifespan=lifespan)
-    static_dir = Path(__file__).parent / "web" / "static"
-    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+    # The electric simulator is a standalone static app at the repo root;
+    # serve it under /simulator when running from a source checkout.
+    simulator_dir = Path(__file__).resolve().parents[2] / "electric-simulator"
+    if simulator_dir.is_dir():
+        app.mount(
+            "/simulator",
+            StaticFiles(directory=str(simulator_dir), html=True),
+            name="simulator",
+        )
     app.include_router(router)
     return app
 

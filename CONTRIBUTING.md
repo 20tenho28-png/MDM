@@ -27,7 +27,7 @@ cd circuit-planner && npm test   # if you touched circuit-planner/
 - **Database changes** to the ticket app need an Alembic migration:
   `alembic revision --autogenerate -m "describe change"` and commit the
   generated file under `alembic/versions/`.
-- **The simulator's solver** (`src/mdm/web/static/circuit.js`) must stay
+- **The simulator's solver** (`electric-simulator/circuit.js`) must stay
   DOM-free — it is exercised from Node in tests.
 
 ## Reporting issues

@@ -1,9 +1,9 @@
 /**
- * Solver tests for the electric simulator. Run with:  node tests/js/test_circuit.mjs
+ * Solver tests for the electric simulator. Run with:  node electric-simulator/test/circuit.test.mjs
  * Exits non-zero on the first failing assertion.
  */
 import assert from "node:assert/strict";
-import { solveCircuit, WIRE_R } from "../../src/mdm/web/static/circuit.js";
+import { solveCircuit, WIRE_R } from "../circuit.js";
 
 let id = 0;
 const el = (type, x1, y1, x2, y2, extra = {}) => ({
