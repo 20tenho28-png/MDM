@@ -1,8 +1,13 @@
-# Electric Simulator
+# Electric Simulator — EU edition
 
-Interactive DC circuit simulator: drag batteries, resistors, lamps, switches
-and wires onto a grid; the circuit is solved live with Modified Nodal Analysis
-and current flow is animated in real time.
+Interactive DC circuit simulator for technicians and new hires. Schematic
+symbols follow **IEC 60617** (EU standard — rectangle resistor, crossed-circle
+lamp), circuits are solved live with Modified Nodal Analysis, and current flow
+is animated in real time.
+
+Usability features: parts palette with drag & drop, move/rotate placed parts,
+pan & zoom, undo/redo, EU value presets (1.5–24 V, E-series resistors), hover
+readouts (V/A/W), short-circuit warnings, and a first-run guide.
 
 ## Run it
 
