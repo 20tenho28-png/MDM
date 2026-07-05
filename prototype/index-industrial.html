@@ -98,6 +98,20 @@
   .nav-wa:hover { background: var(--red-dk); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(182,25,24,0.3); }
   .nav-wa svg { width: 15px; height: 15px; }
   .nav-right { display: flex; align-items: center; gap: 14px; }
+  .lang-toggle {
+    display: inline-flex; align-items: center; gap: 2px;
+    border: 1px solid var(--sand); border-radius: 6px;
+    padding: 3px; background: rgba(255,255,255,0.6);
+  }
+  .lang-btn {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 1px; padding: 5px 9px; border-radius: 4px;
+    border: 0; background: transparent; color: var(--slate);
+    cursor: pointer; transition: background .2s, color .2s;
+  }
+  .lang-btn.active { background: var(--red); color: #fff; }
+  .lang-btn:not(.active):hover { color: var(--red); }
+  html[lang="en"] .mini::before { content: '30 SEC'; }
   .nav-phone { font-family: var(--mono); font-size: 13px; color: var(--ink); text-decoration: none; transition: color .2s; }
   .nav-phone:hover { color: var(--red); }
 
@@ -538,6 +552,10 @@
     </span>
   </a>
   <div class="nav-right">
+  <div class="lang-toggle" role="group" aria-label="Idioma / Language">
+    <button type="button" class="lang-btn active" data-lang="pt" aria-pressed="true">PT</button>
+    <button type="button" class="lang-btn" data-lang="en" aria-pressed="false">EN</button>
+  </div>
   <a class="nav-phone" href="tel:+351218935050">218 935 050</a>
   <a class="nav-wa" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%2C%20gostaria%20de%20pedir%20assist%C3%AAncia%20t%C3%A9cnica." target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4-.1-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg>
@@ -617,7 +635,7 @@
 
       <button type="submit" class="mini-submit" id="miniSubmit">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        Pedir orçamento
+        <span id="miniSubmitTxt">Pedir orçamento</span>
       </button>
       <span class="mini-alt">Prefere já? <a href="https://wa.me/351910307579" target="_blank" rel="noopener">WhatsApp →</a></span>
 
@@ -749,7 +767,7 @@
 
     <a href="#topo" class="contact-back" id="scrollToForm">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-      Pedir orçamento agora
+      <span id="cbTxt">Pedir orçamento agora</span>
     </a>
   </div>
 </section>
@@ -773,7 +791,7 @@
   <div class="bottom-bar-inner">
     <a href="tel:+351910307579" class="bb-btn bb-call">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7 12.8 12.8 0 0 0 .7 2.8 2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5 12.8 12.8 0 0 0 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
-      Ligar
+      <span id="bbCallTxt">Ligar</span>
     </a>
     <a href="https://wa.me/351910307579" target="_blank" rel="noopener" class="bb-btn bb-wa">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4-.1-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg>
@@ -781,7 +799,7 @@
     </a>
     <button type="button" class="bb-btn bb-form" id="bbForm">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
-      Orçamento
+      <span id="bbFormTxt">Orçamento</span>
     </button>
   </div>
 </div>
@@ -794,6 +812,27 @@
 /* ═════════════════════════════════════════════════════════════
    MDM Híbrido — 879 aesthetics × v3 conversion
    ═════════════════════════════════════════════════════════════ */
+
+/* i18n dynamic dictionary — static strings swapped by the i18n script at the end */
+const I18N_DYN = {
+  pt: {
+    errNome: 'Nome é obrigatório.', errTel: 'Telefone é obrigatório.',
+    subDefault: 'Pedir orçamento', subHoje: 'Pedir visita hoje', subSemana: 'Marcar visita esta semana',
+    slaHoje: 'Escolheu "Hoje" — retornamos em 2h em horário útil.',
+    slaSemana: 'Escolheu "Esta semana" — retornamos em 24h úteis.',
+    slaSem: 'Sem urgência — retornamos em 48h úteis.',
+    slaDefault: 'Um técnico dá seguimento em 24h úteis.',
+  },
+  en: {
+    errNome: 'Name is required.', errTel: 'Phone is required.',
+    subDefault: 'Request quote', subHoje: 'Book a visit today', subSemana: 'Book a visit this week',
+    slaHoje: 'You chose "Today" — we call back within 2 business hours.',
+    slaSemana: 'You chose "This week" — we call back within 24 business hours.',
+    slaSem: 'No rush — we call back within 48 business hours.',
+    slaDefault: 'A technician follows up within 24 business hours.',
+  },
+};
+const T = k => I18N_DYN[document.documentElement.lang.startsWith('en') ? 'en' : 'pt'][k];
 
 /* Nav + bottom-bar + FAB visibility */
 const nav = document.getElementById('nav');
@@ -845,15 +884,14 @@ function bindChipGroup(chips, onPick) {
   }));
 }
 bindChipGroup(serviceChips, v => { miniServico = v; });
-bindChipGroup(urgencyChips, v => {
-  miniUrgencia = v;
-  /* Dynamic submit label per urgency (Hick's: pre-commit framing) */
-  const btn = document.getElementById('miniSubmit');
-  const label = v === 'Hoje' ? 'Pedir visita hoje'
-              : v === 'Esta semana' ? 'Marcar visita esta semana'
-              : 'Pedir orçamento';
-  btn.innerHTML = btn.querySelector('svg').outerHTML + ' ' + label;
-});
+function updateMiniSubmitLabel() {
+  const label = miniUrgencia === 'Hoje' ? T('subHoje')
+              : miniUrgencia === 'Esta semana' ? T('subSemana')
+              : T('subDefault');
+  document.getElementById('miniSubmitTxt').textContent = label;
+}
+window.updateMiniSubmitLabel = updateMiniSubmitLabel;
+bindChipGroup(urgencyChips, v => { miniUrgencia = v; updateMiniSubmitLabel(); });
 
 function refFor() {
   const t = new Date().toISOString().replace(/[-:TZ.]/g, '').slice(0, 12);
@@ -871,7 +909,7 @@ miniEl.addEventListener('submit', async (e) => {
     wrap.classList.remove('err'); msg.textContent = '';
     if (!inp.value.trim()) {
       wrap.classList.add('err');
-      msg.textContent = inp === nome ? 'Nome é obrigatório.' : 'Telefone é obrigatório.';
+      msg.textContent = inp === nome ? T('errNome') : T('errTel');
       ok = false;
     }
   });
@@ -917,10 +955,10 @@ miniEl.addEventListener('submit', async (e) => {
   done.querySelector('.ref-num').textContent = payload._ref;
   const line = document.getElementById('miniUrgencyLine');
   if (line) {
-    if (payload.urgencia === 'Hoje') line.textContent = 'Escolheu "Hoje" — retornamos em 2h em horário útil.';
-    else if (payload.urgencia === 'Esta semana') line.textContent = 'Escolheu "Esta semana" — retornamos em 24h úteis.';
-    else if (payload.urgencia === 'Sem urgência') line.textContent = 'Sem urgência — retornamos em 48h úteis.';
-    else line.textContent = 'Um técnico dá seguimento em 24h úteis.';
+    if (payload.urgencia === 'Hoje') line.textContent = T('slaHoje');
+    else if (payload.urgencia === 'Esta semana') line.textContent = T('slaSemana');
+    else if (payload.urgencia === 'Sem urgência') line.textContent = T('slaSem');
+    else line.textContent = T('slaDefault');
   }
   done.style.display = 'block';
   miniEl.classList.add('done');
@@ -1053,6 +1091,125 @@ try {
     document.getElementById('waves-fallback').style.display = 'block';
   }
 }
+</script>
+
+
+<script>
+/* ═══ i18n PT/EN — static strings ═══ */
+(function () {
+  const S = [
+    /* [selector, mode, pt, en] — mode: t=textContent, h=innerHTML, p=placeholder */
+    ['.skip', 't', 'Saltar para o conteúdo', 'Skip to content'],
+    ['.brand-txt small', 't', 'Lisboa · desde 1991', 'Lisbon · since 1991'],
+    ['.hero-eyebrow', 't', 'Lisboa · Parque das Nações · Desde 1991', 'Lisbon · Parque das Nações · Since 1991'],
+    ['h1 .ln:nth-child(1) span', 'h', 'Engenharia de', 'Engineering'],
+    ['h1 .ln:nth-child(2) span', 'h', '<em>conforto</em> para edifícios.', '<em>comfort</em> for buildings.'],
+    ['.hero-sub', 't',
+      'Ar condicionado, eletricidade, ventilação e manutenção técnica —\n      35 anos de rigor ao serviço de empresas, condomínios e habitação.',
+      'Air conditioning, electrical, ventilation and technical maintenance — 35 years of rigour serving companies, condominiums and homes.'],
+    ['.hero-cta .btn-red', 't', 'Pedir Orçamento Grátis →', 'Get a Free Quote →'],
+    ['.hero-meta div:nth-child(1) .hm-lbl', 't', 'Fundação', 'Founded'],
+    ['.hero-meta div:nth-child(2) .hm-num', 'h', '<b>35</b> anos', '<b>35</b> yrs'],
+    ['.hero-meta div:nth-child(2) .hm-lbl', 't', 'de experiência', 'of experience'],
+    ['.hero-meta div:nth-child(3) .hm-lbl', 't', 'resposta técnica', 'technical response'],
+    ['.hero-meta div:nth-child(4) .hm-lbl', 't', 'seg. a sex.', 'Mon–Fri'],
+    ['.mini-eyebrow', 't', 'Pedido rápido', 'Quick request'],
+    ['.mini > h3', 'h', 'Diga-nos quando · <em>nós ligamos</em>.', 'Tell us when · <em>we call you</em>.'],
+    ['.mini-sub', 't', 'Nome, telefone, serviço, urgência. Um técnico responde.', 'Name, phone, service, urgency. A technician replies.'],
+    ['label[for="mNome"]', 't', 'Nome', 'Name'],
+    ['label[for="mTel"]', 't', 'Telefone', 'Phone'],
+    ['#mNome', 'p', 'Como se chama', 'Your name'],
+    ['#lbl-servico', 't', 'Serviço', 'Service'],
+    ['#lbl-urgencia', 't', 'Preferência (agendamento)', 'Preference (scheduling)'],
+    ['[data-val="Ar Condicionado"]', 't', 'Ar Condicionado', 'Air Conditioning'],
+    ['[data-val="Eletricidade"]', 't', 'Eletricidade', 'Electrical'],
+    ['[data-val="Ventilação"]', 't', 'Ventilação', 'Ventilation'],
+    ['[data-val="Manutenção"]', 't', 'Manutenção', 'Maintenance'],
+    ['[data-val="Hoje"]', 't', 'Hoje', 'Today'],
+    ['[data-val="Esta semana"]', 't', 'Esta semana', 'This week'],
+    ['[data-val="Sem urgência"]', 't', 'Sem urgência', 'No rush'],
+    ['.mini-alt', 'h',
+      'Prefere já? <a href="https://wa.me/351910307579" target="_blank" rel="noopener">WhatsApp →</a>',
+      'Prefer now? <a href="https://wa.me/351910307579" target="_blank" rel="noopener">WhatsApp →</a>'],
+    ['.mini-done h4', 't', 'Recebido.', 'Received.'],
+    ['.showcase .sec-eyebrow', 't', 'Serviços críticos', 'Critical services'],
+    ['.showcase h2', 'h', 'Quatro especialidades,<br>uma resposta <em>integrada.</em>', 'Four specialties,<br>one <em>integrated</em> response.'],
+    ['.showcase-cap .showcase-tag:nth-child(1)', 't', 'Ar Condicionado', 'Air Conditioning'],
+    ['.showcase-cap .showcase-tag:nth-child(2)', 't', 'Eletricidade', 'Electrical'],
+    ['.showcase-cap .showcase-tag:nth-child(3)', 't', 'Ventilação', 'Ventilation'],
+    ['.showcase-cap .showcase-tag:nth-child(4)', 't', 'Manutenção', 'Maintenance'],
+    ['.processo-inner .sec-eyebrow', 't', 'Como funciona', 'How it works'],
+    ['.processo-inner h2', 'h', 'Da avaliação à conclusão,<br>sem <em>zonas cinzentas.</em>', 'From assessment to completion,<br>no <em>grey areas.</em>'],
+    ['.proc-row .proc:nth-child(1) h3', 't', 'Avaliação', 'Assessment'],
+    ['.proc-row .proc:nth-child(1) p', 't', 'Levantamento técnico e escuta do problema real.', 'Technical survey; we listen to the real problem.'],
+    ['.proc-row .proc:nth-child(2) h3', 't', 'Diagnóstico', 'Diagnosis'],
+    ['.proc-row .proc:nth-child(2) p', 't', 'Orçamento transparente, sem custos escondidos.', 'Transparent quote, no hidden costs.'],
+    ['.proc-row .proc:nth-child(3) h3', 't', 'Intervenção', 'Intervention'],
+    ['.proc-row .proc:nth-child(3) p', 't', 'Execução por equipa própria, com limpeza e segurança.', 'Executed by our own team, clean and safe.'],
+    ['.proc-row .proc:nth-child(4) h3', 't', 'Acompanhamento', 'Follow-up'],
+    ['.proc-row .proc:nth-child(4) p', 't', 'Relatório e relação de confiança de longo prazo.', 'Report and a long-term trust relationship.'],
+    ['.band .sec-eyebrow', 't', 'Confiança comprovada', 'Proven trust'],
+    ['.band h2', 'h', '35 anos de ofício.<br>Confiança <em>comprovada.</em>', '35 years of craft.<br>Trust, <em>proven.</em>'],
+    ['.band .lead-p', 't',
+      'Fundada em 1991 por Manuel Domingos Melancia, a MDM é parceira de manutenção de edifícios exigentes na grande Lisboa.',
+      'Founded in 1991 by Manuel Domingos Melancia, MDM is the maintenance partner of demanding buildings across greater Lisbon.'],
+    ['.band-list li:nth-child(1)', 't', 'Técnicos certificados em AVAC e eletricidade', 'Certified HVAC and electrical technicians'],
+    ['.band-list li:nth-child(2)', 't', 'Certificação APIRAC · Registo IMPIC', 'APIRAC certification · IMPIC registration'],
+    ['.band-list li:nth-child(3)', 't', 'Fornecedor autorizado Mitsubishi Electric', 'Authorised Mitsubishi Electric supplier'],
+    ['.band-list li:nth-child(4)', 't', 'Peças originais, equipamentos multi-marca', 'Original parts, multi-brand equipment'],
+    ['.band-list li:nth-child(5)', 't', 'Clientes ativos há +10 anos: banca, indústria, condomínios, escolas', 'Clients active for 10+ years: banking, industry, condominiums, schools'],
+    ['.setores .sec-eyebrow', 't', 'Onde atuamos', 'Where we operate'],
+    ['#setores-title', 'h', 'Setores que <em>servimos</em>', 'Sectors we <em>serve</em>'],
+    ['.sect-row .sect:nth-child(1)', 't', 'Indústria', 'Industry'],
+    ['.sect-row .sect:nth-child(2)', 't', 'Escritórios', 'Offices'],
+    ['.sect-row .sect:nth-child(3)', 't', 'Condomínios', 'Condominiums'],
+    ['.sect-row .sect:nth-child(4)', 't', 'Habitação', 'Residential'],
+    ['.sect-row .sect:nth-child(5)', 't', 'Banca', 'Banking'],
+    ['.sect-row .sect:nth-child(6)', 't', 'Educação', 'Education'],
+    ['.sect-row .sect:nth-child(7)', 't', 'Restauração', 'Food service'],
+    ['#contacto .sec-eyebrow', 't', 'Fale connosco', 'Talk to us'],
+    ['#contacto-title', 'h', 'Um contacto directo<br>vale mais do que <em>dez cliques.</em>', 'One direct contact<br>beats <em>ten clicks.</em>'],
+    ['#contacto .sub', 't', 'Segunda a sexta, 8h–18h.', 'Monday to Friday, 8am–6pm.'],
+    ['.urg-pill', 'h',
+      '<span class="dot" aria-hidden="true"></span>\n      Urgências fora de horas via WhatsApp — 7 dias',
+      '<span class="dot" aria-hidden="true"></span> After-hours emergencies via WhatsApp — 7 days'],
+    ['.c-cards .c-card:nth-child(1) .c-lbl', 't', 'Telefone', 'Phone'],
+    ['.c-cards .c-card:nth-child(3) .c-lbl', 't', 'Morada', 'Address'],
+    ['#cbTxt', 't', 'Pedir orçamento agora', 'Request a quote now'],
+    ['#bbCallTxt', 't', 'Ligar', 'Call'],
+    ['#bbFormTxt', 't', 'Orçamento', 'Quote'],
+    ['footer nav.flinks a[href="#processo"]', 't', 'Como funciona', 'How it works'],
+    ['footer nav.flinks a[href="#contacto"]', 't', 'Contacto', 'Contact'],
+    ['footer nav.flinks a[href="#privacidade"]', 't', 'Política de privacidade', 'Privacy policy'],
+  ];
+
+  function applyLang(lang) {
+    const idx = lang === 'en' ? 3 : 2;
+    S.forEach(row => {
+      const el = document.querySelector(row[0]);
+      if (!el) return;
+      const val = row[idx];
+      if (row[1] === 't') el.textContent = val;
+      else if (row[1] === 'h') el.innerHTML = val;
+      else if (row[1] === 'p') el.setAttribute('placeholder', val);
+    });
+    document.documentElement.lang = lang === 'en' ? 'en' : 'pt-PT';
+    document.querySelectorAll('.lang-btn').forEach(b => {
+      const on = b.dataset.lang === lang;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    try { localStorage.setItem('mdm-lang', lang); } catch (e) {}
+    if (window.updateMiniSubmitLabel) window.updateMiniSubmitLabel();
+  }
+
+  document.querySelectorAll('.lang-btn').forEach(b =>
+    b.addEventListener('click', () => applyLang(b.dataset.lang)));
+
+  let saved = 'pt';
+  try { saved = localStorage.getItem('mdm-lang') || 'pt'; } catch (e) {}
+  if (saved === 'en') applyLang('en');
+})();
 </script>
 
 </body>
