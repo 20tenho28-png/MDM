@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>MDM Assist — AC, eletricidade e ventilação · Lisboa · desde 1991</title>
+<meta name="description" content="MDM Assist — assistência técnica em ar condicionado, eletricidade, ventilação e manutenção de edifícios em Lisboa. Resposta em 24h úteis. Desde 1991.">
+<meta name="theme-color" content="#B61918">
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  /* ═══ TOKENS ═══ */
+  :root {
+    --cream:  #FAF9F5;
+    --paper:  #F0EEE6;
+    --sand:   #E8E4D9;
+    --ink:    #191919;
+    --slate:  #5C5A54;
+    --mute:   #8A857D;
+    --red:    #B61918;
+    --red-dk: #8E1312;
+    --red-sf: #F7E6E5;
+    --wa:     #25D366;
+    --wa-dk:  #1EB257;
+    --ok:     #2D6A4F;
+
+    --serif: 'Lora', Georgia, serif;
+    --sans:  'Inter', system-ui, sans-serif;
+    --mono:  'JetBrains Mono', ui-monospace, monospace;
+    --ease:  cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: var(--sans);
+    background: var(--cream);
+    color: var(--ink);
+    line-height: 1.55;
+    overflow-x: hidden;
+  }
+  ::selection { background: var(--red-sf); color: var(--red-dk); }
+  a { color: inherit; }
+
+  /* Skip link */
+  .skip { position: absolute; top: -60px; left: 0; background: var(--red); color: #fff; padding: 10px 16px; z-index: 100; }
+  .skip:focus { top: 0; }
+
+  /* ═══ NAV ═══ */
+  nav.top {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 40px;
+    background: rgba(250,249,245,0.86);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid transparent;
+    transition: border-color .3s, padding .3s;
+  }
+  nav.top.scrolled { border-color: var(--sand); padding: 10px 40px; }
+
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    text-decoration: none; color: var(--ink);
+  }
+  .brand-mark {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: var(--red); color: #fff;
+    display: grid; place-items: center;
+    font-family: var(--serif); font-weight: 700; font-style: italic;
+    font-size: 22px; letter-spacing: -0.5px;
+    transition: transform .35s var(--ease);
+  }
+  .brand:hover .brand-mark { transform: rotate(-4deg) scale(1.05); }
+  .brand-txt strong { display: block; font-family: var(--serif); font-weight: 600; font-size: 17px; line-height: 1; }
+  .brand-txt small { display: block; font-size: 11px; color: var(--slate); margin-top: 3px; letter-spacing: 0.15px; }
+
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .nav-call {
+    font-family: var(--mono); font-size: 13px;
+    text-decoration: none; color: var(--ink);
+    padding: 8px 4px;
+    transition: color .2s;
+  }
+  .nav-call:hover { color: var(--red); }
+  .nav-wa {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--red); color: #fff;
+    padding: 10px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 600; text-decoration: none;
+    transition: background .25s, transform .25s var(--ease);
+  }
+  .nav-wa:hover { background: var(--red-dk); transform: translateY(-2px); }
+  .nav-wa svg { width: 15px; height: 15px; }
+
+  /* ═══ SECTION SHELL ═══ */
+  section { position: relative; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 100px 40px; }
+  .s-cream { background: var(--cream); }
+  .s-paper { background: var(--paper); border-top: 1px solid var(--sand); }
+  .s-cream + .s-cream, .s-paper + .s-paper { border-top: 1px solid var(--sand); }
+
+  [data-r] { opacity: 0; transform: translateY(28px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
+  [data-r].in { opacity: 1; transform: none; }
+
+  .sec-head { margin-bottom: 48px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; align-items: end; }
+  .sec-head .lead p { color: var(--slate); font-size: 16px; margin-top: 12px; max-width: 460px; }
+  .sec-head aside { text-align: right; }
+  .sec-anchor {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(52px, 6vw, 76px);
+    line-height: 1; color: var(--red-sf);
+    letter-spacing: -1px;
+  }
+
+  .sec-eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: 2.4px; text-transform: uppercase;
+    color: var(--red); margin-bottom: 16px;
+  }
+  .sec-eyebrow::before { content: ''; width: 26px; height: 1px; background: var(--red); }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: clamp(30px, 4vw, 46px);
+    font-weight: 600; letter-spacing: -0.5px; line-height: 1.14;
+  }
+  h2 em { font-style: italic; color: var(--red); }
+
+  /* ═══ HERO ═══ */
+  .hero { padding: 128px 40px 80px; max-width: 1200px; margin: 0 auto; }
+  .hero-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 56px; align-items: center; }
+
+  .hero-eyebrow {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--red); margin-bottom: 22px;
+    display: inline-flex; align-items: center; gap: 12px;
+    opacity: 0; animation: rise .9s var(--ease) .25s forwards;
+  }
+  .hero-eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--red); }
+
+  .hero-partners {
+    display: flex; align-items: center; gap: 18px;
+    margin-bottom: 22px; flex-wrap: wrap;
+    opacity: 0; animation: rise .9s var(--ease) .35s forwards;
+  }
+  .hp-mark {
+    height: 22px; display: inline-flex; align-items: center; gap: 6px;
+    color: var(--mute);
+    font-family: var(--sans); font-size: 12px; font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+  .hp-mark img { height: 22px; width: auto; opacity: 0.65; filter: grayscale(1); }
+  .hp-mark .pill {
+    display: inline-block; padding: 4px 9px; border-radius: 4px;
+    border: 1px solid var(--sand); background: rgba(255,255,255,0.5);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+    color: var(--slate);
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(46px, 7.2vw, 84px);
+    font-weight: 600; line-height: 1.08;
+    letter-spacing: -1.5px;
+    max-width: 780px;
+  }
+  h1 .ln { display: block; overflow: hidden; }
+  h1 .ln span { display: block; transform: translateY(112%); animation: reveal 1.05s var(--ease) forwards; }
+  h1 .ln:nth-child(1) span { animation-delay: .45s; }
+  h1 .ln:nth-child(2) span { animation-delay: .58s; }
+  h1 em { font-style: italic; color: var(--red); }
+
+  @keyframes reveal { to { transform: translateY(0); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .hero-sub {
+    margin-top: 26px; font-size: 17.5px; color: var(--slate);
+    max-width: 490px; line-height: 1.65;
+    opacity: 0; animation: rise .9s var(--ease) 1s forwards;
+  }
+  .hero-cta {
+    margin-top: 34px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center;
+    opacity: 0; animation: rise .9s var(--ease) 1.15s forwards;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 16px 30px; border-radius: 999px;
+    font-size: 15px; font-weight: 600; text-decoration: none;
+    transition: transform .3s var(--ease), background .25s, box-shadow .3s, border-color .25s;
+    cursor: pointer; border: 0;
+    font-family: inherit;
+  }
+  .btn svg { width: 16px; height: 16px; }
+  .btn-red { background: var(--red); color: #fff; }
+  .btn-red:hover { background: var(--red-dk); transform: translateY(-2px); box-shadow: 0 14px 30px rgba(182,25,24,0.28); }
+  .btn-wa { background: var(--wa); color: #fff; }
+  .btn-wa:hover { background: var(--wa-dk); transform: translateY(-2px); box-shadow: 0 14px 30px rgba(37,211,102,0.3); }
+  .btn-line { color: var(--ink); border: 1.5px solid var(--sand); background: rgba(255,255,255,0.55); }
+  .btn-line:hover { border-color: var(--ink); transform: translateY(-2px); }
+
+  .hero-trust {
+    margin-top: 18px;
+    font-size: 13px; color: var(--slate);
+    display: inline-flex; align-items: center; gap: 8px;
+    opacity: 0; animation: rise .9s var(--ease) 1.3s forwards;
+  }
+  .hero-trust .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--wa); box-shadow: 0 0 0 4px rgba(37,211,102,0.15); }
+  .hero-phones {
+    margin-top: 8px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.6px;
+    color: var(--mute);
+    opacity: 0; animation: rise .9s var(--ease) 1.4s forwards;
+  }
+  .hero-phones a { color: var(--slate); text-decoration: none; border-bottom: 1px dotted transparent; }
+  .hero-phones a:hover { border-bottom-color: var(--red); color: var(--red); }
+
+  .hero-meta {
+    margin-top: 56px; display: grid; grid-template-columns: repeat(4, auto); gap: 42px;
+    opacity: 0; animation: rise 1s var(--ease) 1.55s forwards;
+  }
+  .hm { display: flex; flex-direction: column; }
+  .hm-num {
+    font-family: var(--serif); font-style: italic; font-weight: 500;
+    font-size: 30px; line-height: 1; color: var(--slate);
+  }
+  .hm-num b { color: var(--red); font-weight: 700; font-style: normal; font-size: 40px; letter-spacing: -0.5px; }
+  .hm-lbl { font-size: 12px; color: var(--slate); margin-top: 6px; letter-spacing: 0.2px; }
+
+  /* ═══ HERO MINI-FORM (right column desktop; below CTA mobile) ═══ */
+  .mini {
+    background: #fff;
+    border: 1px solid var(--sand);
+    border-radius: 18px;
+    padding: 26px 26px 22px;
+    box-shadow: 0 30px 60px -35px rgba(25,25,25,0.28);
+    opacity: 0; animation: rise 1s var(--ease) 1.2s forwards;
+    position: relative;
+  }
+  .mini::before {
+    content: 'RÁPIDO'; position: absolute; top: 18px; right: 20px;
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 1.5px;
+    color: var(--red); background: var(--red-sf);
+    padding: 4px 8px; border-radius: 4px;
+  }
+  .mini h3 { font-family: var(--serif); font-size: 22px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 4px; }
+  .mini h3 em { color: var(--red); font-style: italic; }
+  .mini .mini-sub { font-size: 13px; color: var(--slate); margin-bottom: 18px; }
+  .mini-eyebrow {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
+    color: var(--red); text-transform: uppercase;
+    margin-bottom: 10px;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .mini-eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--red); }
+
+  .mini-field { margin-bottom: 12px; }
+  .mini-field label {
+    display: block;
+    font-size: 11.5px; font-weight: 600;
+    color: var(--slate); margin-bottom: 5px; letter-spacing: 0.2px;
+  }
+  .mini-field input {
+    width: 100%; padding: 12px 14px;
+    border: 1px solid var(--sand); border-radius: 10px;
+    background: var(--cream);
+    font-family: inherit; font-size: 15px; color: var(--ink);
+    transition: border-color .2s, background .2s;
+    outline: 0;
+  }
+  .mini-field input:focus { border-color: var(--red); background: #fff; }
+  .mini-field.err input { border-color: var(--red); background: var(--red-sf); }
+  .mini-field .msg { font-size: 11.5px; color: var(--red); margin-top: 4px; min-height: 14px; }
+
+  .mini-chips {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
+    margin-bottom: 16px;
+  }
+  .chip {
+    padding: 10px 12px; border-radius: 8px;
+    border: 1px solid var(--sand); background: var(--cream);
+    font-family: inherit; font-size: 13px; font-weight: 500;
+    color: var(--slate); cursor: pointer;
+    text-align: center;
+    transition: all .2s var(--ease);
+  }
+  .chip:hover { border-color: var(--red); color: var(--red-dk); }
+  .chip[aria-checked="true"] { background: var(--red-sf); border-color: var(--red); color: var(--red-dk); font-weight: 600; }
+
+  .mini-submit {
+    width: 100%; margin-top: 4px;
+    padding: 14px 20px; border-radius: 10px;
+    background: var(--red); color: #fff; border: 0;
+    font-family: inherit; font-size: 14px; font-weight: 600;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: background .25s, transform .25s var(--ease);
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .mini-submit:hover { background: var(--red-dk); transform: translateY(-1px); }
+  .mini-submit svg { width: 15px; height: 15px; }
+  .mini-alt {
+    display: block; text-align: center;
+    margin-top: 12px; font-size: 12px; color: var(--slate);
+    text-decoration: none;
+  }
+  .mini-alt a { color: var(--wa-dk); font-weight: 600; text-decoration: none; }
+  .mini-alt a:hover { text-decoration: underline; }
+
+  .mini.done { background: linear-gradient(180deg, #F4FBF7 0%, #fff 100%); border-color: rgba(45,106,79,0.3); }
+  .mini-done { text-align: center; padding: 12px 4px; }
+  .mini-done .check {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--ok); color: #fff;
+    display: grid; place-items: center; margin: 0 auto 14px;
+    font-size: 24px;
+  }
+  .mini-done h4 { font-family: var(--serif); font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+  .mini-done p { font-size: 13px; color: var(--slate); margin-bottom: 14px; }
+
+  /* ═══ TRUST BAND (moved up) ═══ */
+  .band {
+    background: var(--ink); color: var(--cream);
+    border-radius: 24px;
+    padding: 56px 48px;
+    display: grid; grid-template-columns: 1.15fr 1fr;
+    gap: 48px; align-items: center;
+    position: relative; overflow: hidden;
+  }
+  .band::after {
+    content: ''; position: absolute; right: -100px; top: -100px;
+    width: 380px; height: 380px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(182,25,24,0.35) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .band h2 { color: var(--cream); font-size: clamp(28px, 3.6vw, 42px); }
+  .band h2 em { color: #E89B8A; }
+  .band .lead-p { color: rgba(250,249,245,0.68); font-size: 15px; margin-top: 18px; max-width: 440px; line-height: 1.6; }
+  .band-list { list-style: none; position: relative; z-index: 1; }
+  .band-list li {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 12px 0; font-size: 14.5px;
+    color: rgba(250,249,245,0.9);
+    border-bottom: 1px solid rgba(250,249,245,0.1);
+  }
+  .band-list li::before { content: '◆'; color: var(--red); font-size: 9px; margin-top: 8px; flex: none; }
+  .band-list li:last-child { border-bottom: 0; }
+
+  /* ═══ SERVIÇOS ═══ */
+  .svc-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .svc {
+    background: #fff;
+    border: 1px solid var(--sand);
+    border-radius: 18px;
+    padding: 28px 24px;
+    transition: transform .4s var(--ease), border-color .3s, box-shadow .4s;
+  }
+  .svc:hover { border-color: var(--red); box-shadow: 0 20px 44px rgba(182,25,24,0.1); transform: translateY(-4px); }
+  .svc-ic {
+    width: 42px; height: 42px; border-radius: 10px;
+    background: var(--red-sf);
+    display: grid; place-items: center;
+    margin-bottom: 20px;
+    transition: background .3s, transform .35s var(--ease);
+  }
+  .svc:hover .svc-ic { background: var(--red); transform: rotate(-6deg); }
+  .svc-ic svg { width: 20px; height: 20px; color: var(--red); transition: color .3s; }
+  .svc:hover .svc-ic svg { color: #fff; }
+  .svc h3 {
+    font-family: var(--sans); font-weight: 700;
+    font-size: 16px; letter-spacing: -0.1px;
+    margin-bottom: 8px;
+  }
+  .svc p { font-size: 13px; color: var(--slate); line-height: 1.6; }
+
+  /* ═══ SHOWCASE + PROCESSO merged ═══ */
+  .showcase-wrap {
+    background: var(--paper); border-top: 1px solid var(--sand);
+    padding: 100px 40px 90px;
+  }
+  .showcase-inner { max-width: 1200px; margin: 0 auto; }
+  .showcase-img {
+    position: relative;
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 24px 60px -32px rgba(25,25,25,0.45);
+    border: 1px solid var(--sand);
+    aspect-ratio: 16 / 8;
+    background: linear-gradient(135deg, #2C2A24 0%, #3B3833 100%);
+    display: grid; place-items: center;
+  }
+  .showcase-img::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 25% 30%, rgba(182,25,24,0.28) 0%, transparent 45%),
+      radial-gradient(circle at 75% 70%, rgba(232,155,138,0.22) 0%, transparent 50%);
+  }
+  .showcase-img .center-tag {
+    position: relative; z-index: 1;
+    color: rgba(255,255,255,0.8);
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(22px, 3vw, 34px); letter-spacing: -0.5px;
+    text-align: center;
+  }
+  .showcase-cap {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; flex-wrap: wrap; gap: 8px;
+    padding: 56px 24px 22px;
+    background: linear-gradient(to top, rgba(25,25,25,0.85), rgba(25,25,25,0));
+    z-index: 2;
+  }
+  .showcase-tag {
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.4px;
+    color: #fff; padding: 6px 12px; border-radius: 999px;
+    background: rgba(182,25,24,0.92);
+  }
+
+  #processo { padding-top: 60px; }
+  .proc-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 999px;
+    background: #fff; border: 1px solid var(--sand);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1px;
+    color: var(--red); margin-bottom: 24px;
+  }
+  .proc-pill::before { content: '●'; font-size: 8px; }
+  .proc-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative; margin-top: 40px; }
+  .proc-row::before {
+    content: ''; position: absolute; top: 24px; left: 12%; right: 12%;
+    height: 1px; background: var(--sand);
+  }
+  .proc { text-align: center; padding: 0 16px; position: relative; }
+  .proc-n {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--cream); border: 1.5px solid var(--sand);
+    display: grid; place-items: center;
+    font-family: var(--serif); font-style: italic; font-size: 18px;
+    color: var(--red); margin: 0 auto 20px;
+    position: relative; z-index: 1;
+    transition: background .3s, border-color .3s, color .3s, transform .35s var(--ease);
+  }
+  .proc:hover .proc-n { background: var(--red); border-color: var(--red); color: #fff; transform: scale(1.1); }
+  .proc h3 {
+    font-family: var(--sans); font-weight: 700;
+    font-size: 15px; letter-spacing: -0.1px;
+    margin-bottom: 6px;
+  }
+  .proc p { font-size: 12.5px; color: var(--slate); line-height: 1.55; }
+
+  /* ═══ SETORES inline strip ═══ */
+  .setores-strip {
+    padding: 44px 40px;
+    background: var(--cream); border-top: 1px solid var(--sand);
+    text-align: center;
+  }
+  .setores-strip .inner { max-width: 1000px; margin: 0 auto; }
+  .setores-eyebrow {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 2.4px;
+    color: var(--red); text-transform: uppercase; margin-bottom: 12px;
+  }
+  .setores-line {
+    font-family: var(--serif); font-size: 17px; color: var(--slate);
+    line-height: 1.7;
+  }
+  .setores-line b { color: var(--ink); font-weight: 600; font-style: italic; }
+
+  /* ═══ CONTACTO ═══ */
+  #contacto { }
+  #contacto .head-center {
+    text-align: center; max-width: 640px; margin: 0 auto 44px;
+  }
+  #contacto .head-center h2 { margin-bottom: 14px; }
+  #contacto .sub { color: var(--slate); font-size: 16px; margin-bottom: 22px; }
+
+  .urg-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 18px; border-radius: 999px;
+    background: rgba(37,211,102,0.12); border: 1px solid rgba(37,211,102,0.3);
+    color: var(--wa-dk); font-size: 12.5px; font-weight: 600;
+    margin-bottom: 40px;
+  }
+  .urg-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--wa); }
+
+  .c-cards { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+  .c-card {
+    background: #fff;
+    border: 1px solid var(--sand);
+    border-radius: 16px; padding: 24px 30px;
+    text-align: left; min-width: 220px;
+    transition: transform .3s var(--ease), border-color .3s;
+  }
+  .c-card:hover { transform: translateY(-4px); border-color: var(--red); }
+  .c-lbl { font-family: var(--mono); font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--slate); margin-bottom: 8px; }
+  .c-val { font-family: var(--serif); font-size: 17px; font-weight: 600; }
+  .c-val a { color: var(--ink); text-decoration: none; transition: color .2s; }
+  .c-val a:hover { color: var(--red); }
+
+  /* ═══ QUOTE FORM — email compose window ═══ */
+  .quote-wrap { max-width: 980px; margin: 72px auto 0; }
+  .quote-title {
+    text-align: center; margin-bottom: 34px;
+  }
+  .quote-title h2 { margin: 10px 0; }
+
+  .mailwin {
+    background: #fff;
+    border: 1px solid var(--sand);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 28px 68px -30px rgba(25,25,25,0.32);
+  }
+  .mw-bar {
+    display: flex; align-items: center; gap: 7px;
+    background: var(--ink); padding: 13px 18px;
+  }
+  .mw-dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+  .mw-bar-title {
+    margin-left: 12px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: #cfcdc6;
+  }
+  .mw-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 0 22px;
+    border-bottom: 1px solid var(--paper);
+  }
+  .mw-lbl {
+    flex: none; width: 108px;
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--slate);
+  }
+  .mw-lbl .req { color: var(--red); margin-left: 2px; }
+  .mw-in {
+    flex: 1; min-width: 0;
+    border: 0; outline: 0; background: transparent;
+    font-family: var(--sans); font-size: 15.5px; color: var(--ink);
+    padding: 17px 0;
+  }
+  .mw-in::placeholder { color: #ABA89E; }
+  .mw-row:focus-within { background: #FCFBF8; }
+  .mw-row:focus-within .mw-lbl { color: var(--red); }
+  .mw-row.err { background: var(--red-sf); }
+  .mw-row.err .mw-lbl { color: var(--red-dk); }
+  .mw-err-msg {
+    display: none;
+    font-family: var(--sans); font-size: 12px; color: var(--red-dk);
+    padding: 0 22px 10px calc(108px + 36px);
+    background: var(--red-sf);
+  }
+  .mw-row.err + .mw-err-msg { display: block; }
+
+  .mw-select {
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235C5A54' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 4px center;
+    padding-right: 28px; cursor: pointer;
+  }
+  .mw-row-to { background: #FCFBF8; }
+  .mw-to { font-weight: 600; font-size: 15.5px; padding: 17px 0; }
+  .mw-to-hint { margin-left: auto; font-size: 12.5px; color: var(--slate); white-space: nowrap; }
+
+  /* B2B details toggle */
+  details.mw-b2b { border-bottom: 1px solid var(--paper); }
+  details.mw-b2b > summary {
+    padding: 14px 22px;
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--slate);
+    cursor: pointer; list-style: none;
+    display: flex; align-items: center; gap: 10px;
+    transition: color .2s, background .2s;
+  }
+  details.mw-b2b > summary::-webkit-details-marker { display: none; }
+  details.mw-b2b > summary::before {
+    content: '+'; display: inline-grid; place-items: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--sand); color: var(--slate);
+    font-family: var(--sans); font-weight: 600; font-size: 13px;
+    transition: transform .25s var(--ease), background .25s;
+  }
+  details.mw-b2b[open] > summary::before { transform: rotate(45deg); background: var(--red); color: #fff; }
+  details.mw-b2b > summary:hover { color: var(--red); background: #FCFBF8; }
+  details.mw-b2b[open] > summary { color: var(--red); border-bottom: 1px solid var(--paper); }
+
+  .mw-body { padding: 4px 22px 0; border-bottom: 1px solid var(--paper); }
+  .mw-ta {
+    width: 100%; border: 0; outline: 0; background: transparent; resize: vertical;
+    font-family: var(--sans); font-size: 15.5px; line-height: 1.6; color: var(--ink);
+    padding: 16px 0; min-height: 150px;
+  }
+  .mw-ta::placeholder { color: #ABA89E; }
+
+  .mw-file {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--paper);
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    background: #FCFBF8;
+  }
+  .mw-file label {
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--slate);
+  }
+  .mw-file input[type="file"] {
+    font-family: inherit; font-size: 13px; color: var(--slate);
+    max-width: 100%;
+  }
+  .mw-file input[type="file"]::file-selector-button {
+    padding: 8px 14px; border-radius: 6px; border: 1px solid var(--sand);
+    background: #fff; font-family: inherit; font-size: 12.5px; font-weight: 600;
+    color: var(--ink); cursor: pointer; margin-right: 12px;
+    transition: border-color .2s, background .2s;
+  }
+  .mw-file input[type="file"]::file-selector-button:hover { border-color: var(--red); background: var(--red-sf); }
+  .mw-file .hint { font-size: 11.5px; color: var(--mute); margin-left: auto; }
+
+  .mw-gdpr {
+    padding: 14px 22px;
+    display: flex; align-items: flex-start; gap: 10px;
+    border-bottom: 1px solid var(--paper);
+    font-size: 12.5px; color: var(--slate);
+  }
+  .mw-gdpr input { margin-top: 3px; accent-color: var(--red); }
+  .mw-gdpr a { color: var(--red-dk); border-bottom: 1px dotted var(--red); text-decoration: none; }
+  .mw-gdpr a:hover { border-bottom-style: solid; }
+
+  .mw-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap;
+    padding: 20px 22px;
+  }
+  .mw-note { font-size: 12.5px; line-height: 1.55; color: var(--slate); margin: 0; }
+  .mw-actions { display: flex; gap: 12px; flex: none; }
+  .mw-send, .mw-wa {
+    display: inline-flex; align-items: center; gap: 9px;
+    border: 0; cursor: pointer;
+    font-family: var(--mono); font-size: 12.5px; letter-spacing: 1.4px; text-transform: uppercase;
+    padding: 15px 24px; border-radius: 8px;
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease), background .25s;
+  }
+  .mw-send { background: var(--red); color: #fff; }
+  .mw-send:hover { background: var(--red-dk); transform: translateY(-2px); box-shadow: 0 10px 24px -10px rgba(182,25,24,0.6); }
+  .mw-wa { background: var(--wa); color: #fff; }
+  .mw-wa:hover { background: var(--wa-dk); transform: translateY(-2px); box-shadow: 0 10px 24px -10px rgba(37,211,102,0.5); }
+
+  /* Success state (replaces mailwin) */
+  .mw-success {
+    display: none;
+    background: #fff;
+    border: 1px solid rgba(45,106,79,0.25);
+    border-left: 4px solid var(--ok);
+    border-radius: 14px; padding: 40px 32px;
+    text-align: center;
+    box-shadow: 0 28px 68px -30px rgba(25,25,25,0.28);
+  }
+  .mw-success.show { display: block; }
+  .mw-success .check {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--ok); color: #fff;
+    display: grid; place-items: center; margin: 0 auto 18px;
+    font-size: 30px;
+  }
+  .mw-success h3 { font-family: var(--serif); font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+  .mw-success p { font-size: 14px; color: var(--slate); margin-bottom: 8px; }
+  .mw-success .ref { font-family: var(--mono); font-size: 11.5px; color: var(--mute); margin-bottom: 20px; }
+  .mw-success .wa-escape {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; color: var(--wa-dk); font-weight: 600;
+    text-decoration: none; padding: 10px 18px; border-radius: 999px;
+    border: 1px solid rgba(37,211,102,0.35); background: rgba(37,211,102,0.08);
+    transition: background .2s;
+  }
+  .mw-success .wa-escape:hover { background: rgba(37,211,102,0.14); }
+
+  .quote-perks {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    margin-top: 22px;
+  }
+  .perk {
+    display: flex; align-items: center; gap: 16px;
+    background: var(--paper); border: 1px solid var(--sand); border-radius: 12px;
+    padding: 20px 22px;
+  }
+  .perk-big {
+    font-family: var(--serif); font-weight: 700; font-size: 26px; color: var(--red);
+    flex: none;
+  }
+  .perk p { font-size: 13px; line-height: 1.5; color: var(--slate); margin: 0; }
+
+  /* ═══ FOOTER ═══ */
+  footer {
+    background: var(--ink); color: rgba(250,249,245,0.7);
+    padding: 44px 40px;
+    text-align: center;
+    font-size: 12.5px;
+  }
+  footer strong { font-family: var(--serif); color: var(--cream); }
+  footer .fline { margin-top: 8px; opacity: 0.75; }
+
+  /* Floating WhatsApp */
+  .fab {
+    position: fixed; right: 20px; z-index: 60;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    width: 58px; height: 58px; border-radius: 50%;
+    background: var(--wa); display: grid; place-items: center;
+    box-shadow: 0 14px 34px rgba(37,211,102,0.4);
+    transition: transform .3s var(--ease), background .25s;
+    text-decoration: none;
+  }
+  .fab:hover { transform: scale(1.08) rotate(-4deg); background: var(--wa-dk); }
+  .fab svg { width: 28px; height: 28px; fill: #fff; }
+  .fab::after {
+    content: ''; position: absolute; inset: -8px;
+    border-radius: 50%; border: 2px solid rgba(37,211,102,0.35);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.2); opacity: 0; }
+  }
+
+  /* ═══ RESPONSIVE ═══ */
+  @media (max-width: 980px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 44px; }
+    .svc-row { grid-template-columns: 1fr 1fr; }
+    .proc-row { grid-template-columns: 1fr 1fr; gap: 40px 0; }
+    .proc-row::before { display: none; }
+    .band { grid-template-columns: 1fr; padding: 40px 32px; }
+    .sec-head { grid-template-columns: 1fr; gap: 16px; }
+    .sec-head aside { text-align: left; }
+    .sec-anchor { font-size: 46px; }
+    .hero-meta { grid-template-columns: repeat(2, auto); gap: 28px; }
+    .quote-perks { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    nav.top { padding: 12px 20px; }
+    nav.top.scrolled { padding: 10px 20px; }
+    .nav-call { display: none; }
+    .brand-txt small { display: none; }
+    .hero { padding: 110px 20px 60px; }
+    .wrap { padding: 70px 20px; }
+    .showcase-wrap { padding: 70px 20px 60px; }
+    .setores-strip { padding: 40px 20px; }
+    .svc-row { grid-template-columns: 1fr; }
+    .proc-row { grid-template-columns: 1fr; gap: 32px; }
+    footer { padding: 32px 20px; }
+    h1 { font-size: 40px; letter-spacing: -1px; }
+    .hero-meta { gap: 24px 20px; }
+    .hm-num b { font-size: 32px; }
+    .mw-lbl { width: 88px; font-size: 10.5px; }
+    .mw-in, .mw-to, .mw-ta { font-size: 15px; }
+    .mw-to-hint { display: none; }
+    .mw-err-msg { padding-left: 22px; }
+    .mw-foot { flex-direction: column; align-items: stretch; }
+    .mw-actions { flex-direction: column; }
+    .mw-send, .mw-wa { justify-content: center; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
+    h1 .ln span { transform: none; }
+    .hero-eyebrow, .hero-partners, .hero-sub, .hero-cta, .hero-trust, .hero-phones, .hero-meta, .mini { opacity: 1; }
+    [data-r] { opacity: 1; transform: none; }
+    .fab::after { display: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<a class="skip" href="#main">Saltar para o conteúdo</a>
+
+<!-- ═══ NAV ═══ -->
+<nav id="nav" class="top">
+  <a href="#topo" class="brand" aria-label="MDM Assist — início">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-txt">
+      <strong>MDM Assist</strong>
+      <small>Lisboa · desde 1991</small>
+    </span>
+  </a>
+  <div class="nav-right">
+    <a class="nav-call" href="tel:+351218935050" aria-label="Ligar 218 935 050">218 935 050</a>
+    <a class="nav-wa" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%2C%20gostaria%20de%20pedir%20assist%C3%AAncia%20t%C3%A9cnica." target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4-.1-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg>
+      WhatsApp
+    </a>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="topo" aria-labelledby="hero-title">
+  <div class="hero-grid">
+    <div class="hero-left">
+      <div class="hero-eyebrow">Lisboa · Parque das Nações · Desde 1991</div>
+
+      <!-- Track B5: partner credibility strip -->
+      <div class="hero-partners" aria-label="Sinais de confiança">
+        <span class="hp-mark" title="Fornecedor autorizado Mitsubishi Electric">
+          <img src="assets/mitsubishi-electric-logo.png" alt="Mitsubishi Electric" onerror="this.style.display='none'">
+        </span>
+        <span class="hp-mark"><span class="pill">APIRAC</span></span>
+        <span class="hp-mark"><span class="pill">REG. IMPIC</span></span>
+      </div>
+
+      <!-- Track B4: rewritten h1 copy -->
+      <!-- A/B alternative (kept for reference):
+           <span class="ln"><span>Engenharia de</span></span>
+           <span class="ln"><span><em>conforto</em> para edifícios.</span></span>
+      -->
+      <h1 id="hero-title">
+        <span class="ln"><span>AC, eletricidade e ventilação.</span></span>
+        <span class="ln"><span>Feito por <em>engenheiros</em>, desde 1991.</span></span>
+      </h1>
+      <p class="hero-sub">
+        Assistência técnica para empresas, condomínios e habitação.
+        Equipa própria, faturação transparente, relatórios claros.
+      </p>
+
+      <div class="hero-cta">
+        <a class="btn btn-wa" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%2C%20gostaria%20de%20pedir%20assist%C3%AAncia%20t%C3%A9cnica." target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4-.1-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg>
+          Falar no WhatsApp
+        </a>
+        <a class="btn btn-line" href="tel:+351218935050">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7 12.8 12.8 0 0 0 .7 2.8 2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5 12.8 12.8 0 0 0 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
+          218 935 050
+        </a>
+      </div>
+
+      <!-- Track B7: trust micro-line under CTAs -->
+      <div class="hero-trust">
+        <span class="dot" aria-hidden="true"></span>
+        Resposta em 24h úteis · Urgências 7 dias via WhatsApp
+      </div>
+      <!-- Track A8: phone-number disambiguation -->
+      <div class="hero-phones">
+        <a href="tel:+351218935050">Fixo escritório: 218 935 050</a>
+        &nbsp;·&nbsp;
+        <a href="https://wa.me/351910307579" target="_blank" rel="noopener">Móvel/WhatsApp assistência: 910 307 579</a>
+      </div>
+
+      <!-- Track B6: enlarged hero-meta numerals -->
+      <div class="hero-meta">
+        <div class="hm"><span class="hm-num"><b>1991</b></span><span class="hm-lbl">Fundação</span></div>
+        <div class="hm"><span class="hm-num"><b>35</b> anos</span><span class="hm-lbl">de experiência</span></div>
+        <div class="hm"><span class="hm-num"><b>24h</b> úteis</span><span class="hm-lbl">resposta técnica</span></div>
+        <div class="hm"><span class="hm-num"><b>8h–18h</b></span><span class="hm-lbl">seg. a sex.</span></div>
+      </div>
+    </div>
+
+    <!-- Track A6: hero mini-form (right column desktop, below CTAs mobile) -->
+    <aside class="hero-right">
+      <form class="mini" id="miniForm" novalidate data-endpoint="" aria-label="Pedido rápido de contacto">
+        <div class="mini-eyebrow">Pedido rápido — 30 segundos</div>
+        <h3>Um técnico <em>liga em 24h</em>.</h3>
+        <p class="mini-sub">Nome, telefone, serviço. Nada mais.</p>
+
+        <div class="mini-field" data-f="nome">
+          <label for="mNome">Nome</label>
+          <input type="text" id="mNome" name="nome" autocomplete="name" required placeholder="Como se chama">
+          <div class="msg" role="alert"></div>
+        </div>
+        <div class="mini-field" data-f="tel">
+          <label for="mTel">Telefone</label>
+          <input type="tel" id="mTel" name="telefone" inputmode="tel" autocomplete="tel" required placeholder="+351 9xx xxx xxx">
+          <div class="msg" role="alert"></div>
+        </div>
+
+        <div>
+          <label style="display:block;font-size:11.5px;font-weight:600;color:var(--slate);margin-bottom:8px;letter-spacing:0.2px;">Serviço</label>
+          <div class="mini-chips" role="radiogroup" aria-label="Serviço">
+            <button type="button" class="chip" role="radio" aria-checked="false" data-val="Ar Condicionado">Ar Condicionado</button>
+            <button type="button" class="chip" role="radio" aria-checked="false" data-val="Eletricidade">Eletricidade</button>
+            <button type="button" class="chip" role="radio" aria-checked="false" data-val="Ventilação">Ventilação</button>
+            <button type="button" class="chip" role="radio" aria-checked="false" data-val="Manutenção">Manutenção</button>
+          </div>
+        </div>
+
+        <button type="submit" class="mini-submit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          Pedir contacto
+        </button>
+        <span class="mini-alt">
+          Ou fale já: <a href="https://wa.me/351910307579" target="_blank" rel="noopener">WhatsApp →</a>
+        </span>
+
+        <!-- Success state (revealed after successful submit) -->
+        <div class="mini-done" style="display:none;">
+          <div class="check" aria-hidden="true">✓</div>
+          <h4>Recebido.</h4>
+          <p>Um técnico liga dentro de <strong>24h úteis</strong>. Ref: <span class="ref"></span></p>
+          <a href="https://wa.me/351910307579" target="_blank" rel="noopener" style="color:var(--wa-dk);font-weight:600;text-decoration:none;font-size:13px;">Prefere já? WhatsApp →</a>
+        </div>
+      </form>
+    </aside>
+  </div>
+</section>
+
+<!-- ═══ TRUST BAND (Track C1: moved up, right after hero) ═══ -->
+<section class="s-cream" aria-labelledby="trust-title">
+  <div class="wrap" style="padding-top: 40px;">
+    <div class="band" data-r>
+      <div>
+        <div class="sec-eyebrow" style="color: rgba(250,249,245,0.7);">Confiança comprovada</div>
+        <h2 id="trust-title">35 anos de ofício.<br>Ainda a resolver <em>bem à primeira.</em></h2>
+        <p class="lead-p">Fundada em 1991 por Manuel Domingos Melancia, a MDM é parceira de manutenção de edifícios exigentes na grande Lisboa.</p>
+      </div>
+      <ul class="band-list">
+        <li>Técnicos certificados em AVAC e eletricidade</li>
+        <li>Certificação APIRAC · Registo IMPIC nº <span style="opacity:0.6">[TODO]</span></li>
+        <li>Fornecedor autorizado Mitsubishi Electric</li>
+        <li>Peças originais, equipamentos multi-marca</li>
+        <li>Clientes ativos há +10 anos: banca, indústria, condomínios, escolas</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SERVIÇOS ═══ -->
+<section id="servicos" class="s-paper" aria-labelledby="servicos-title">
+  <div class="wrap">
+    <div class="sec-head" data-r>
+      <div class="lead">
+        <div class="sec-eyebrow">Serviços críticos</div>
+        <h2 id="servicos-title">Quatro especialidades,<br>uma resposta <em>integrada.</em></h2>
+        <p>Uma equipa própria cobre climatização, eletricidade, ventilação e manutenção — sem subcontratações escondidas.</p>
+      </div>
+      <aside><span class="sec-anchor">04</span></aside>
+    </div>
+    <div class="svc-row">
+      <div class="svc" data-r>
+        <div class="svc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9.5 14.5L3 21M21 3l-6.5 6.5M10 7L7 4 3 8l3 3M17 14l3 3-4 4-3-3M7 17l4-4"/></svg></div>
+        <h3>Ar Condicionado</h3>
+        <p>Instalação, reparação e manutenção preventiva multi-marca — Mitsubishi Electric, MIDEA, France Air, LG.</p>
+      </div>
+      <div class="svc" data-r>
+        <div class="svc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <h3>Eletricidade</h3>
+        <p>Quadros elétricos, avarias e reparações orientadas para segurança e continuidade operacional.</p>
+      </div>
+      <div class="svc" data-r>
+        <div class="svc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 8 Q 8 2, 12 8 T 21 8M3 13 Q 8 7, 12 13 T 21 13M3 18 Q 8 12, 12 18 T 21 18"/></svg></div>
+        <h3>Ventilação</h3>
+        <p>Sistemas de extração, condutas e qualidade do ar para ambientes de utilização intensiva.</p>
+      </div>
+      <div class="svc" data-r>
+        <div class="svc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+        <h3>Manutenção</h3>
+        <p>Planos preventivos com relatórios claros — do diagnóstico à conclusão, sem zonas cinzentas.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SHOWCASE + PROCESSO (Track D1: merged) ═══ -->
+<div class="showcase-wrap" aria-labelledby="processo-title">
+  <div class="showcase-inner">
+    <figure class="showcase-img" data-r role="img" aria-label="Serviços MDM em obra">
+      <span class="center-tag">obra em curso · Parque das Nações</span>
+      <figcaption class="showcase-cap">
+        <span class="showcase-tag">Ar Condicionado</span>
+        <span class="showcase-tag">Eletricidade</span>
+        <span class="showcase-tag">Ventilação</span>
+      </figcaption>
+    </figure>
+
+    <div id="processo">
+      <div class="sec-head" data-r>
+        <div class="lead">
+          <span class="proc-pill">Como funciona</span>
+          <h2 id="processo-title">Da avaliação à conclusão,<br>sem <em>zonas cinzentas.</em></h2>
+          <p>Orçamento gratuito, sem compromisso, resposta em 24h úteis. O processo por dentro:</p>
+        </div>
+        <aside><span class="sec-anchor">01–04</span></aside>
+      </div>
+      <div class="proc-row" data-r>
+        <div class="proc">
+          <div class="proc-n" aria-hidden="true">01</div>
+          <h3>Avaliação</h3>
+          <p>Levantamento técnico e escuta do problema real da instalação.</p>
+        </div>
+        <div class="proc">
+          <div class="proc-n" aria-hidden="true">02</div>
+          <h3>Diagnóstico</h3>
+          <p>Análise objetiva com critérios técnicos claros e orçamento transparente.</p>
+        </div>
+        <div class="proc">
+          <div class="proc-n" aria-hidden="true">03</div>
+          <h3>Intervenção</h3>
+          <p>Execução por profissionais experientes, com atenção à limpeza e segurança.</p>
+        </div>
+        <div class="proc">
+          <div class="proc-n" aria-hidden="true">04</div>
+          <h3>Acompanhamento</h3>
+          <p>Comunicação direta e relação de confiança de longo prazo.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SETORES inline strip (Track C4: no fake buttons) ═══ -->
+<section class="setores-strip" aria-labelledby="setores-title">
+  <div class="inner" data-r>
+    <div class="setores-eyebrow" id="setores-title">Setores que servimos</div>
+    <p class="setores-line">
+      <b>Indústria</b> · <b>Escritórios</b> · <b>Condomínios</b> · <b>Habitação</b> · <b>Banca</b> · <b>Educação</b> · <b>Restauração</b> · e toda a área do <b>Parque das Nações</b>
+    </p>
+  </div>
+</section>
+
+<!-- ═══ CONTACTO + FORM ═══ -->
+<section id="contacto" class="s-paper" aria-labelledby="contacto-title">
+  <div class="wrap">
+    <div class="head-center" data-r>
+      <div class="sec-eyebrow">Fale connosco</div>
+      <h2 id="contacto-title">Transforme uma necessidade<br>técnica num plano <em>claro.</em></h2>
+      <p class="sub">Atendimento de segunda a sexta, das 8h às 18h.</p>
+      <div class="urg-pill">
+        <span class="dot" aria-hidden="true"></span>
+        Urgências fora de horas via WhatsApp — 7 dias
+      </div>
+    </div>
+
+    <div class="c-cards" data-r>
+      <div class="c-card">
+        <div class="c-lbl">Telefone fixo</div>
+        <div class="c-val"><a href="tel:+351218935050">218 935 050</a></div>
+      </div>
+      <div class="c-card">
+        <div class="c-lbl">WhatsApp assistência</div>
+        <div class="c-val"><a href="https://wa.me/351910307579" target="_blank" rel="noopener">910 307 579</a></div>
+      </div>
+      <div class="c-card">
+        <div class="c-lbl">Morada</div>
+        <div class="c-val">Alameda dos Oceanos, 108A<br><span style="font-size:12px; font-weight:400; color:var(--slate)">1990-426 Lisboa</span></div>
+      </div>
+    </div>
+
+    <div class="quote-wrap">
+      <div class="quote-title" data-r>
+        <div class="sec-eyebrow" style="justify-content:center;display:inline-flex;">Orçamento</div>
+        <h2>Peça o seu orçamento<br>em <em>60 segundos.</em></h2>
+      </div>
+
+      <!-- Track A1–A7: rewritten mail-window form -->
+      <form class="mailwin" id="quoteForm" data-endpoint="" aria-labelledby="quoteFormTitle">
+        <span id="quoteFormTitle" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Formulário de pedido de orçamento</span>
+        <div class="mw-bar" aria-hidden="true">
+          <span class="mw-dot" style="background:#EE5C56"></span>
+          <span class="mw-dot" style="background:#F5BE4F"></span>
+          <span class="mw-dot" style="background:#61C454"></span>
+          <span class="mw-bar-title">Nova mensagem — MDM Assist</span>
+        </div>
+
+        <div class="mw-row mw-row-to" aria-hidden="true">
+          <span class="mw-lbl">Para:</span>
+          <span class="mw-to">mdmassist@mdmassist.com</span>
+          <span class="mw-to-hint">MDM Assist — Assistência Técnica</span>
+        </div>
+
+        <!-- A1: nome first, required -->
+        <div class="mw-row">
+          <label class="mw-lbl" for="qNome">Nome<span class="req" aria-hidden="true">*</span></label>
+          <input class="mw-in" id="qNome" name="nome" type="text" placeholder="Como se chama" autocomplete="name" required aria-required="true" aria-describedby="qNome-err">
+        </div>
+        <div class="mw-err-msg" id="qNome-err">Diga-nos como o tratamos.</div>
+
+        <div class="mw-row">
+          <label class="mw-lbl" for="qEmail">Email</label>
+          <input class="mw-in" id="qEmail" name="email" type="email" placeholder="email@exemplo.pt (email ou telefone)" autocomplete="email" aria-describedby="qEmail-err">
+        </div>
+        <div class="mw-err-msg" id="qEmail-err">Preencha email OU telefone.</div>
+
+        <div class="mw-row">
+          <label class="mw-lbl" for="qTel">Telefone</label>
+          <input class="mw-in" id="qTel" name="telefone" type="tel" inputmode="tel" placeholder="+351 9xx xxx xxx" autocomplete="tel" aria-describedby="qTel-err">
+        </div>
+        <div class="mw-err-msg" id="qTel-err">Preencha telefone OU email.</div>
+
+        <div class="mw-row">
+          <label class="mw-lbl" for="qServico">Serviço</label>
+          <select class="mw-in mw-select" id="qServico" name="servico">
+            <option value="">— selecione —</option>
+            <option value="Ar Condicionado">Ar Condicionado</option>
+            <option value="Eletricidade">Eletricidade</option>
+            <option value="Ventilação">Ventilação</option>
+            <option value="Manutenção">Manutenção</option>
+            <option value="Outro / não sei">Outro / não sei</option>
+          </select>
+        </div>
+
+        <div class="mw-row">
+          <label class="mw-lbl" for="qAssunto">Assunto</label>
+          <input class="mw-in" id="qAssunto" name="assunto" type="text" placeholder="Pedido de orçamento — breve descrição">
+        </div>
+
+        <div class="mw-body">
+          <label class="sr-only" for="qMsg" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Mensagem</label>
+          <textarea class="mw-ta" id="qMsg" name="mensagem" rows="6" required aria-required="true" aria-describedby="qMsg-err" placeholder="Descreva a instalação, o espaço, o número de equipamentos ou a avaria. Quanto mais detalhe, mais rápida e precisa será a proposta."></textarea>
+        </div>
+        <div class="mw-err-msg" id="qMsg-err" style="padding-left:22px;">Descreva brevemente o pedido.</div>
+
+        <!-- Track A7: optional photo upload -->
+        <div class="mw-file">
+          <label for="qPhotos">Fotos do equipamento (opcional):</label>
+          <input type="file" id="qPhotos" name="fotos" accept="image/*" capture="environment" multiple>
+          <span class="hint">até 4 imagens · máx 5 MB cada</span>
+        </div>
+
+        <!-- Track A3: B2B collapsible -->
+        <details class="mw-b2b">
+          <summary>Sou empresa ou condomínio</summary>
+          <div class="mw-row">
+            <label class="mw-lbl" for="qEmpresa">Empresa</label>
+            <input class="mw-in" id="qEmpresa" name="empresa" type="text" placeholder="Nome da empresa ou condomínio (opcional)" autocomplete="organization">
+          </div>
+          <div class="mw-row">
+            <label class="mw-lbl" for="qNif">NIF</label>
+            <input class="mw-in" id="qNif" name="nif" type="text" inputmode="numeric" pattern="[0-9]{9}" placeholder="NIF / NIPC (opcional)">
+          </div>
+          <div class="mw-row" style="border-bottom:0;">
+            <label class="mw-lbl" for="qLocal">Localidade</label>
+            <input class="mw-in" id="qLocal" name="localidade" type="text" placeholder="Cidade / Código Postal (opcional)" autocomplete="address-level2">
+          </div>
+        </details>
+
+        <!-- Track A9: RGPD non-blocking -->
+        <div class="mw-gdpr">
+          <input type="checkbox" id="qGdpr" name="gdpr">
+          <label for="qGdpr">Aceito a <a href="#privacidade">política de privacidade</a>. Os seus dados são usados exclusivamente para responder ao pedido.</label>
+        </div>
+
+        <div class="mw-foot">
+          <p class="mw-note">Resposta garantida em <strong>24h úteis</strong>. Sem compromisso, sem custos.</p>
+          <div class="mw-actions">
+            <button type="submit" class="btn btn-red mw-send" id="sendEmail">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              Enviar pedido
+            </button>
+            <button type="button" class="btn mw-wa" id="sendWa">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4-.1-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg>
+              WhatsApp
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Track D4: full success card (replaces mailwin on submit) -->
+      <div class="mw-success" id="quoteSuccess" role="status" aria-live="polite">
+        <div class="check" aria-hidden="true">✓</div>
+        <h3>Recebemos o seu pedido.</h3>
+        <p>Respondemos em <strong>24h úteis</strong>. Se for urgente, chame-nos.</p>
+        <div class="ref">Ref: <span id="quoteRef"></span></div>
+        <a href="https://wa.me/351910307579" target="_blank" rel="noopener" class="wa-escape">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4-.1-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg>
+          Prefere falar agora? WhatsApp →
+        </a>
+      </div>
+
+      <div class="quote-perks" data-r>
+        <div class="perk">
+          <div class="perk-big">24h</div>
+          <p>Resposta garantida<br>em dias úteis</p>
+        </div>
+        <div class="perk">
+          <div class="perk-big">NIF</div>
+          <p>Fatura com dados<br>fiscais completos</p>
+        </div>
+        <div class="perk">
+          <div class="perk-big">Contrato</div>
+          <p>Planos anuais de<br>manutenção disponíveis</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <strong>MDM Assist</strong> · Alameda dos Oceanos 108A · 1990-426 Lisboa
+  <div class="fline">218 935 050 · WhatsApp 910 307 579 · <a href="#privacidade" style="color:inherit;text-decoration:underline;">Política de privacidade</a></div>
+  <div class="fline">© 1991–2026 MDM — Manuel Domingos Melancia, Lda.</div>
+</footer>
+
+</main>
+
+<a class="fab" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%2C%20gostaria%20de%20pedir%20assist%C3%AAncia%20t%C3%A9cnica." target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4-.1-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg>
+</a>
+
+<script>
+/* ═════════════════════════════════════════════════════════════
+   MDM Editorial — behaviour
+   Notes:
+   - Canvas 3D background dropped — replaced with pure CSS palette.
+     Cheaper on mobile, zero JS perf tax, no gating needed.
+   - Both forms POST to `data-endpoint` if set; otherwise fall back
+     to mailto: so leads still leave the page.
+   - TODO in production: set data-endpoint="/api/lead" on both forms.
+   ═════════════════════════════════════════════════════════════ */
+
+/* Nav scrolled state */
+const nav = document.getElementById('nav');
+addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 24), { passive: true });
+
+/* Scroll reveal */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }});
+}, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+document.querySelectorAll('[data-r]').forEach(el => io.observe(el));
+
+/* ─── Mini-form (hero) ─── */
+const mini = document.getElementById('miniForm');
+const miniChips = mini.querySelectorAll('.chip');
+let miniServico = '';
+miniChips.forEach(c => c.addEventListener('click', () => {
+  miniChips.forEach(x => x.setAttribute('aria-checked', 'false'));
+  c.setAttribute('aria-checked', 'true');
+  miniServico = c.dataset.val;
+}));
+mini.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const nome = mini.querySelector('#mNome');
+  const tel  = mini.querySelector('#mTel');
+  let ok = true;
+  [nome, tel].forEach(inp => {
+    const wrap = inp.closest('.mini-field');
+    const msg = wrap.querySelector('.msg');
+    wrap.classList.remove('err'); msg.textContent = '';
+    if (!inp.value.trim()) {
+      wrap.classList.add('err');
+      msg.textContent = inp === nome ? 'Nome é obrigatório.' : 'Telefone é obrigatório.';
+      ok = false;
+    }
+  });
+  if (!ok) return;
+  const payload = { nome: nome.value.trim(), telefone: tel.value.trim(), servico: miniServico, _source: 'hero-mini', _at: new Date().toISOString() };
+  await submitPayload(mini, payload, () => {
+    mini.querySelectorAll('.mini-field, .mini-chips, .mini-submit, .mini-alt, .mini-eyebrow, h3, .mini-sub').forEach(el => el.style.display = 'none');
+    const done = mini.querySelector('.mini-done');
+    done.querySelector('.ref').textContent = payload._ref || refFor(payload);
+    done.style.display = 'block';
+    mini.classList.add('done');
+  });
+});
+
+/* ─── Full quote form ─── */
+const $q = (id) => document.getElementById(id);
+function quoteData() {
+  return {
+    nome: $q('qNome').value.trim(),
+    email: $q('qEmail').value.trim(),
+    telefone: $q('qTel').value.trim(),
+    servico: $q('qServico').value,
+    assunto: $q('qAssunto').value.trim(),
+    mensagem: $q('qMsg').value.trim(),
+    empresa: $q('qEmpresa').value.trim(),
+    nif: $q('qNif').value.trim(),
+    localidade: $q('qLocal').value.trim(),
+    gdpr: $q('qGdpr').checked,
+    _source: 'quote-form',
+    _at: new Date().toISOString(),
+  };
+}
+function quoteValidate(d) {
+  // Clear previous errors
+  document.querySelectorAll('.mailwin .mw-row').forEach(r => r.classList.remove('err'));
+  let firstErr = null;
+  const flag = (id) => {
+    const row = $q(id).closest('.mw-row');
+    row.classList.add('err');
+    if (!firstErr) firstErr = row;
+  };
+  if (!d.nome) flag('qNome');
+  if (!d.mensagem) flag('qMsg');
+  if (!d.email && !d.telefone) { flag('qEmail'); flag('qTel'); }
+  // Basic email format sanity if provided
+  if (d.email && !/^\S+@\S+\.\S+$/.test(d.email)) flag('qEmail');
+  if (firstErr) {
+    firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return false;
+  }
+  return true;
+}
+function quoteBody(d) {
+  const lines = [
+    'Pedido de orçamento — MDM Assist',
+    '',
+    `Nome: ${d.nome}`,
+    d.telefone ? `Telefone: ${d.telefone}` : null,
+    d.email ? `Email: ${d.email}` : null,
+    d.servico ? `Serviço: ${d.servico}` : null,
+    d.assunto ? `Assunto: ${d.assunto}` : null,
+    d.empresa ? `Empresa: ${d.empresa}` : null,
+    d.nif ? `NIF: ${d.nif}` : null,
+    d.localidade ? `Localidade: ${d.localidade}` : null,
+    '',
+    'Mensagem:',
+    d.mensagem,
+  ];
+  return lines.filter(Boolean).join('\n');
+}
+function refFor(d) {
+  const t = (d._at || new Date().toISOString()).replace(/[-:TZ.]/g, '').slice(0, 12);
+  return 'MDM-' + t;
+}
+
+/* Send handlers — unified through submitPayload */
+async function submitPayload(formEl, payload, onSuccess) {
+  payload._ref = refFor(payload);
+  const endpoint = formEl.dataset.endpoint;
+  if (endpoint) {
+    try {
+      const r = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (r.ok) { onSuccess(); return; }
+      // fall through to mailto fallback
+    } catch (err) {
+      // network error — fall through
+    }
+  }
+  // Fallback: mailto (opens user's mail client)
+  const subject = payload.servico ? `Pedido — ${payload.servico}` : 'Pedido de orçamento';
+  const body = 'Nome: ' + payload.nome
+    + (payload.telefone ? '\nTel: ' + payload.telefone : '')
+    + (payload.email ? '\nEmail: ' + payload.email : '')
+    + (payload.servico ? '\nServiço: ' + payload.servico : '')
+    + (payload.mensagem ? '\n\n' + payload.mensagem : '')
+    + '\n\nRef: ' + payload._ref;
+  // Trigger mailto without navigating away, then show success anyway
+  window.location.href = 'mailto:mdmassist@mdmassist.com?subject='
+    + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  onSuccess();
+}
+
+async function handleQuoteSubmit(e) {
+  e.preventDefault();
+  const d = quoteData();
+  if (!quoteValidate(d)) return;
+  await submitPayload(document.getElementById('quoteForm'), d, showQuoteSuccess);
+}
+$q('sendEmail').addEventListener('click', handleQuoteSubmit);
+document.getElementById('quoteForm').addEventListener('submit', handleQuoteSubmit);
+$q('sendWa').addEventListener('click', async (e) => {
+  e.preventDefault();
+  const d = quoteData();
+  if (!quoteValidate(d)) return;
+  const text = quoteBody(d) + '\n\nRef: ' + refFor(d);
+  window.open('https://wa.me/351910307579?text=' + encodeURIComponent(text), '_blank', 'noopener');
+  showQuoteSuccess(d);
+});
+
+function showQuoteSuccess(d) {
+  const success = document.getElementById('quoteSuccess');
+  const form = document.getElementById('quoteForm');
+  const ref = d && d._ref ? d._ref : refFor(d || {});
+  document.getElementById('quoteRef').textContent = ref;
+  form.style.display = 'none';
+  success.classList.add('show');
+  success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+</script>
+
+</body>
+</html>
