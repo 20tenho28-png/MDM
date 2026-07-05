@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>MDM Assist — AC, eletricidade e ventilação · Lisboa · desde 1991</title>
-<meta name="description" content="MDM Assist — assistência técnica em ar condicionado, eletricidade, ventilação e manutenção de edifícios em Lisboa. Resposta em 24h úteis. Desde 1991.">
+<meta name="description" content="MDM Assist — assistência técnica em Lisboa. Equipa própria. Resposta em 24h úteis. Desde 1991.">
 <meta name="theme-color" content="#B61918">
 <link rel="preconnect" href="https://fonts.googleapis.com/">
 <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
@@ -44,11 +44,10 @@
   ::selection { background: var(--red-sf); color: var(--red-dk); }
   a { color: inherit; }
 
-  /* Skip link */
   .skip { position: absolute; top: -60px; left: 0; background: var(--red); color: #fff; padding: 10px 16px; z-index: 100; }
   .skip:focus { top: 0; }
 
-  /* ═══ NAV ═══ */
+  /* ═══ NAV (simplified: brand + WhatsApp only) ═══ */
   nav.top {
     position: fixed; top: 0; left: 0; right: 0; z-index: 50;
     display: flex; align-items: center; justify-content: space-between;
@@ -75,18 +74,7 @@
   .brand-txt strong { display: block; font-family: var(--serif); font-weight: 700; font-size: 17px; line-height: 1; letter-spacing: -0.2px; }
   .brand-txt small { display: block; font-size: 11px; color: var(--slate); margin-top: 4px; letter-spacing: 0.2px; }
 
-  .nav-right { display: flex; align-items: center; gap: 14px; }
-  .nav-link {
-    font-size: 13.5px; font-weight: 500;
-    text-decoration: none; color: var(--slate);
-    transition: color .2s;
-  }
-  .nav-link:hover { color: var(--red); }
-  .nav-call {
-    font-family: var(--mono); font-size: 13px;
-    text-decoration: none; color: var(--ink);
-  }
-  .nav-call:hover { color: var(--red); }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
   .nav-wa {
     display: inline-flex; align-items: center; gap: 8px;
     background: var(--red); color: #fff;
@@ -97,7 +85,7 @@
   .nav-wa:hover { background: var(--red-dk); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(182,25,24,0.35); }
   .nav-wa svg { width: 15px; height: 15px; }
 
-  /* ═══ HERO — dark, animated, image-backed ═══ */
+  /* ═══ HERO — dark, image-backed, wave animation ═══ */
   .hero {
     position: relative;
     min-height: 100vh;
@@ -110,7 +98,7 @@
     position: absolute; inset: 0; z-index: -3;
     background:
       linear-gradient(180deg, rgba(25,25,25,0.72) 0%, rgba(25,25,25,0.85) 100%),
-      url('assets/mdm-service-hvac-electrical.webp') center/cover no-repeat,
+      url('assets/mdm-tech-electrical-panel.png') center/cover no-repeat,
       var(--deep);
   }
   .hero-veil {
@@ -159,21 +147,20 @@
   .hero-eyebrow::before { content: ''; width: 32px; height: 1px; background: #FEC6C4; }
 
   .hero-partners {
-    display: flex; align-items: center; gap: 18px;
+    display: flex; align-items: center; gap: 14px;
     margin-bottom: 26px; flex-wrap: wrap;
     opacity: 0; animation: rise .9s var(--ease) .35s forwards;
   }
   .hp-mark {
     display: inline-flex; align-items: center; gap: 8px;
-    color: rgba(255,255,255,0.75);
+    color: rgba(255,255,255,0.8);
     font-family: var(--sans); font-size: 12px; font-weight: 500;
     padding: 5px 10px; border-radius: 6px;
     border: 1px solid rgba(255,255,255,0.14);
     background: rgba(255,255,255,0.06);
     backdrop-filter: blur(6px);
   }
-  .hp-mark img { height: 18px; width: auto; filter: brightness(0) invert(1); opacity: 0.85; }
-  .hp-mark .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--wa); box-shadow: 0 0 8px var(--wa); }
+  .hp-mark img { height: 18px; width: auto; filter: brightness(0) invert(1); opacity: 0.9; }
 
   h1 {
     font-family: var(--serif);
@@ -210,8 +197,6 @@
     font-family: inherit;
   }
   .btn svg { width: 16px; height: 16px; }
-  .btn-red { background: var(--red); color: #fff; }
-  .btn-red:hover { background: var(--red-dk); transform: translateY(-2px); box-shadow: 0 14px 30px rgba(182,25,24,0.4); }
   .btn-wa { background: var(--wa); color: #fff; }
   .btn-wa:hover { background: var(--wa-dk); transform: translateY(-2px); box-shadow: 0 14px 30px rgba(37,211,102,0.45); }
   .btn-ghost { color: #fff; border: 1.5px solid rgba(255,255,255,0.35); background: rgba(255,255,255,0.06); backdrop-filter: blur(4px); }
@@ -226,28 +211,7 @@
   .hero-trust .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--wa); box-shadow: 0 0 10px rgba(37,211,102,0.5); animation: pulse-dot 2.4s ease-in-out infinite; }
   @keyframes pulse-dot { 0%,100% { transform: scale(1); } 50% { transform: scale(1.4); } }
 
-  .hero-phones {
-    margin-top: 8px;
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.5px;
-    color: rgba(255,255,255,0.55);
-    opacity: 0; animation: rise .9s var(--ease) 1.4s forwards;
-  }
-  .hero-phones a { color: rgba(255,255,255,0.75); text-decoration: none; border-bottom: 1px dotted transparent; }
-  .hero-phones a:hover { border-bottom-color: #FEC6C4; color: #FEC6C4; }
-
-  .hero-meta {
-    margin-top: 56px; display: grid; grid-template-columns: repeat(4, auto); gap: 44px;
-    opacity: 0; animation: rise 1s var(--ease) 1.55s forwards;
-  }
-  .hm { display: flex; flex-direction: column; }
-  .hm-num {
-    font-family: var(--serif); font-style: italic; font-weight: 500;
-    font-size: 30px; line-height: 1; color: rgba(255,255,255,0.7);
-  }
-  .hm-num b { color: #fff; font-weight: 700; font-style: normal; font-size: 42px; letter-spacing: -0.5px; text-shadow: 0 2px 20px rgba(182,25,24,0.4); }
-  .hm-lbl { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 6px; letter-spacing: 0.3px; text-transform: uppercase; font-family: var(--mono); }
-
-  /* ═══ HERO MINI-FORM ═══ */
+  /* ═══ HERO MINI-FORM (single conversion surface) ═══ */
   .mini {
     background: rgba(255,255,255,0.97);
     color: var(--ink);
@@ -260,7 +224,7 @@
     position: relative;
   }
   .mini::before {
-    content: 'RÁPIDO'; position: absolute; top: 20px; right: 22px;
+    content: '30 SEG'; position: absolute; top: 20px; right: 22px;
     font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
     color: var(--red); background: var(--red-sf);
     padding: 4px 9px; border-radius: 5px;
@@ -294,10 +258,16 @@
   .mini-field.err input { border-color: var(--red); background: var(--red-sf); }
   .mini-field .msg { font-size: 11.5px; color: var(--red); margin-top: 4px; min-height: 14px; }
 
+  .mini-group-label {
+    display: block;
+    font-size: 11.5px; font-weight: 600;
+    color: var(--slate); margin-bottom: 8px; letter-spacing: 0.2px;
+  }
   .mini-chips {
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
   }
+  .mini-chips.chips-3 { grid-template-columns: repeat(3, 1fr); }
   .chip {
     padding: 10px 12px; border-radius: 8px;
     border: 1px solid var(--sand); background: var(--cream);
@@ -310,7 +280,7 @@
   .chip[aria-checked="true"] { background: var(--red-sf); border-color: var(--red); color: var(--red-dk); font-weight: 600; }
 
   .mini-submit {
-    width: 100%; margin-top: 4px;
+    width: 100%; margin-top: 8px;
     padding: 14px 20px; border-radius: 10px;
     background: var(--red); color: #fff; border: 0;
     font-family: inherit; font-size: 14px; font-weight: 600;
@@ -329,17 +299,18 @@
   .mini-alt a:hover { text-decoration: underline; }
 
   .mini.done { background: linear-gradient(180deg, #F4FBF7 0%, #fff 100%); border-color: rgba(45,106,79,0.3); }
-  .mini-done { text-align: center; padding: 12px 4px; }
+  .mini-done { text-align: center; padding: 18px 4px 8px; }
   .mini-done .check {
-    width: 48px; height: 48px; border-radius: 50%;
+    width: 52px; height: 52px; border-radius: 50%;
     background: var(--ok); color: #fff;
-    display: grid; place-items: center; margin: 0 auto 14px;
-    font-size: 24px;
+    display: grid; place-items: center; margin: 0 auto 16px;
+    font-size: 26px;
     animation: pop .5s var(--ease) forwards;
   }
   @keyframes pop { from { transform: scale(0); } 60% { transform: scale(1.15); } to { transform: scale(1); } }
-  .mini-done h4 { font-family: var(--serif); font-size: 20px; font-weight: 600; margin-bottom: 6px; }
-  .mini-done p { font-size: 13px; color: var(--slate); margin-bottom: 14px; }
+  .mini-done h4 { font-family: var(--serif); font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+  .mini-done p { font-size: 13.5px; color: var(--slate); margin-bottom: 6px; line-height: 1.55; }
+  .mini-done .ref { font-family: var(--mono); font-size: 11px; color: var(--mute); margin-bottom: 16px; letter-spacing: 1px; }
 
   /* ═══ MITSUBISHI PARTNER BAND ═══ */
   .partner {
@@ -365,28 +336,19 @@
 
   /* ═══ SECTION SHELL ═══ */
   section { position: relative; }
-  .wrap { max-width: 1200px; margin: 0 auto; padding: 100px 40px; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 90px 40px; }
   .s-cream { background: var(--cream); }
   .s-paper { background: var(--paper); border-top: 1px solid var(--sand); }
 
   [data-r] { opacity: 0; transform: translateY(28px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
   [data-r].in { opacity: 1; transform: none; }
 
-  .sec-head { margin-bottom: 48px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; align-items: end; }
-  .sec-head .lead p { color: var(--slate); font-size: 16px; margin-top: 12px; max-width: 460px; }
-  .sec-head aside { text-align: right; }
-  .sec-anchor {
-    font-family: var(--serif); font-style: italic;
-    font-size: clamp(52px, 6vw, 76px);
-    line-height: 1; color: var(--red-sf);
-    letter-spacing: -1px;
-  }
-
+  .sec-head { margin-bottom: 40px; }
   .sec-eyebrow {
     display: inline-flex; align-items: center; gap: 10px;
     font-family: var(--mono); font-size: 10.5px; font-weight: 600;
     letter-spacing: 2.4px; text-transform: uppercase;
-    color: var(--red); margin-bottom: 16px;
+    color: var(--red); margin-bottom: 14px;
   }
   .sec-eyebrow::before { content: ''; width: 26px; height: 1px; background: var(--red); }
 
@@ -397,95 +359,85 @@
   }
   h2 em { font-style: italic; color: var(--red); }
 
-  /* ═══ TRUST NUMBERS BAND ═══ */
-  .stats-band {
-    background: var(--deep); color: #fff;
-    padding: 60px 40px;
-    position: relative; overflow: hidden;
+  /* ═══ TRABALHO REAL — trust photos strip ═══ */
+  .trust-photos {
+    background: var(--paper); border-top: 1px solid var(--sand);
+    padding: 90px 40px;
   }
-  .stats-band::before {
-    content: ''; position: absolute; inset: 0;
-    background:
-      radial-gradient(circle at 20% 50%, rgba(182,25,24,0.2) 0%, transparent 45%),
-      radial-gradient(circle at 80% 50%, rgba(232,155,138,0.1) 0%, transparent 45%);
-    pointer-events: none;
-  }
-  .stats-inner {
-    max-width: 1200px; margin: 0 auto;
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
-    position: relative;
-  }
-  .stat { text-align: center; }
-  .stat-icon {
-    width: 32px; height: 32px; margin: 0 auto 12px;
-    display: grid; place-items: center;
-    color: rgba(255,255,255,0.5);
-  }
-  .stat-icon svg { width: 100%; height: 100%; }
-  .stat-num {
-    font-family: var(--serif); font-weight: 700;
-    font-size: clamp(40px, 5vw, 60px); line-height: 1;
-    color: var(--red);
-    text-shadow: 0 4px 30px rgba(182,25,24,0.5);
-    letter-spacing: -1.5px;
-    margin-bottom: 8px;
-  }
-  .stat-num small { font-size: 0.55em; font-weight: 500; color: rgba(255,255,255,0.85); text-shadow: none; margin-left: 4px; letter-spacing: 0; }
-  .stat-lbl {
-    font-family: var(--mono); font-size: 10.5px; font-weight: 500;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    color: rgba(255,255,255,0.65);
-  }
+  .trust-photos-inner { max-width: 1200px; margin: 0 auto; }
+  .trust-photos .sec-head { text-align: center; margin-bottom: 40px; }
+  .trust-photos .sec-eyebrow { justify-content: center; }
+  .trust-photos h2 { max-width: 720px; margin: 0 auto; }
+  .trust-photos .lead-p { color: var(--slate); font-size: 15.5px; margin-top: 14px; max-width: 560px; margin-left: auto; margin-right: auto; }
 
-  /* ═══ SERVIÇOS with real photos ═══ */
-  .svc-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+  .tp-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
   }
-  .svc {
-    background: #fff;
-    border: 1px solid var(--sand);
-    border-radius: 18px;
-    overflow: hidden;
-    transition: transform .4s var(--ease), border-color .3s, box-shadow .4s;
-    display: flex; flex-direction: column;
-  }
-  .svc:hover { border-color: var(--red); box-shadow: 0 22px 46px rgba(182,25,24,0.14); transform: translateY(-6px); }
-  .svc-img {
-    aspect-ratio: 16 / 10;
+  .tp-item {
     position: relative;
-    overflow: hidden;
+    border-radius: 16px; overflow: hidden;
     background: var(--deep);
+    box-shadow: 0 24px 50px -28px rgba(25,25,25,0.4);
+    aspect-ratio: 4 / 3;
   }
-  .svc-img::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(180deg, rgba(25,25,25,0) 55%, rgba(25,25,25,0.55) 100%);
-  }
-  .svc-img img {
+  .tp-item img {
     width: 100%; height: 100%; object-fit: cover; display: block;
     transition: transform .8s var(--ease);
   }
-  .svc:hover .svc-img img { transform: scale(1.06); }
-  .svc-body { padding: 24px 22px 26px; flex: 1; display: flex; flex-direction: column; }
-  .svc-ic {
-    width: 36px; height: 36px; border-radius: 9px;
-    background: var(--red-sf); color: var(--red);
-    display: grid; place-items: center;
-    margin-top: -46px; margin-bottom: 14px; position: relative; z-index: 1;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transition: background .3s, transform .35s var(--ease);
+  .tp-item:hover img { transform: scale(1.04); }
+  .tp-item::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(25,25,25,0.7) 100%);
+    pointer-events: none;
   }
-  .svc:hover .svc-ic { background: var(--red); color: #fff; transform: rotate(-8deg); }
-  .svc-ic svg { width: 18px; height: 18px; }
-  .svc h3 {
-    font-family: var(--sans); font-weight: 700;
-    font-size: 16px; letter-spacing: -0.1px;
-    margin-bottom: 8px;
+  .tp-caption {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    z-index: 1;
+    padding: 22px 22px 18px;
+    color: #fff;
   }
-  .svc p { font-size: 13.5px; color: var(--slate); line-height: 1.6; flex: 1; }
+  .tp-cat {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.6px;
+    color: rgba(255,255,255,0.7); text-transform: uppercase; font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .tp-title {
+    font-family: var(--serif); font-size: 18px; font-weight: 600;
+    letter-spacing: -0.2px;
+  }
 
-  /* ═══ EMPRESA — real ops photo + prose ═══ */
+  .tp-badges {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .tp-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: 999px;
+    background: #fff; border: 1px solid var(--sand);
+    font-family: var(--sans); font-size: 12.5px; font-weight: 500;
+    color: var(--slate);
+  }
+  .tp-badge svg { width: 14px; height: 14px; color: var(--red); }
+
+  .tp-grid-photo {
+    margin-top: 32px;
+    border-radius: 16px; overflow: hidden;
+    border: 1px solid var(--sand);
+    box-shadow: 0 30px 60px -30px rgba(25,25,25,0.35);
+    position: relative;
+  }
+  .tp-grid-photo img { display: block; width: 100%; height: auto; }
+  .tp-grid-cap {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 46px 24px 18px;
+    background: linear-gradient(to top, rgba(25,25,25,0.85), transparent);
+    color: #fff;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1.4px;
+    text-transform: uppercase; font-weight: 600;
+  }
+
+  /* ═══ EMPRESA ═══ */
   .empresa {
     background: var(--cream); border-top: 1px solid var(--sand);
     padding: 100px 40px;
@@ -530,90 +482,11 @@
   .empresa-values strong { display: block; font-family: var(--serif); font-size: 17px; font-weight: 600; margin-bottom: 3px; }
   .empresa-values p { font-size: 13.5px; color: var(--slate); line-height: 1.5; }
 
-  /* ═══ PORTFOLIO — RACE-inspired sector band ═══ */
-  .portfolio {
-    background: var(--deep); color: #fff;
-    padding: 90px 40px;
-    position: relative; overflow: hidden;
-  }
-  .portfolio::before {
-    content: ''; position: absolute; inset: 0;
-    background:
-      radial-gradient(ellipse at 20% 20%, rgba(182,25,24,0.18) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 80%, rgba(232,155,138,0.08) 0%, transparent 50%);
-    pointer-events: none;
-  }
-  .portfolio-inner { max-width: 1200px; margin: 0 auto; position: relative; }
-  .portfolio-head { text-align: center; margin-bottom: 48px; }
-  .portfolio-head .sec-eyebrow { color: #FEC6C4; justify-content: center; display: inline-flex; }
-  .portfolio-head .sec-eyebrow::before { background: #FEC6C4; }
-  .portfolio-head h2 { color: #fff; font-size: clamp(30px, 4.2vw, 52px); }
-  .portfolio-head h2 em { color: #FF7973; }
-  .portfolio-head p { color: rgba(255,255,255,0.65); font-size: 15.5px; margin-top: 14px; max-width: 540px; margin-left: auto; margin-right: auto; }
-
-  .portfolio-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-  }
-  .pcard {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 14px;
-    padding: 22px 20px;
-    display: flex; flex-direction: column; gap: 12px;
-    transition: transform .35s var(--ease), border-color .3s, background .3s;
-  }
-  .pcard:hover {
-    transform: translateY(-4px);
-    border-color: rgba(255,120,115,0.5);
-    background: rgba(255,255,255,0.07);
-  }
-  .pcard-icon {
-    width: 34px; height: 34px; border-radius: 8px;
-    background: rgba(182,25,24,0.28); color: #FF9E99;
-    display: grid; place-items: center;
-  }
-  .pcard-icon svg { width: 18px; height: 18px; }
-  .pcard-cat {
-    font-family: var(--mono); font-size: 10px; letter-spacing: 1.6px;
-    color: rgba(255,255,255,0.55); text-transform: uppercase; font-weight: 600;
-  }
-  .pcard h4 {
-    font-family: var(--serif); font-size: 15px; font-weight: 600;
-    color: #fff; letter-spacing: -0.2px; line-height: 1.3;
-  }
-  .pcard p {
-    font-size: 12.5px; color: rgba(255,255,255,0.6);
-    line-height: 1.5;
-  }
-  .portfolio-note {
-    display: block; text-align: center;
-    margin-top: 32px;
-    font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px;
-    color: rgba(255,255,255,0.4);
-    text-transform: uppercase;
-  }
-  .portfolio-cta {
-    display: inline-flex; align-items: center; gap: 8px;
-    margin-top: 12px;
-    padding: 10px 18px; border-radius: 999px;
-    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-    color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
-    transition: background .25s, border-color .25s, gap .25s var(--ease);
-  }
-  .portfolio-cta:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.3); gap: 14px; }
-
   /* ═══ PROCESSO ═══ */
-  #processo { padding-top: 60px; }
-  .proc-pill {
-    display: inline-flex; align-items: center; gap: 8px;
-    padding: 8px 16px; border-radius: 999px;
-    background: #fff; border: 1px solid var(--sand);
-    font-family: var(--mono); font-size: 11px; letter-spacing: 1px; font-weight: 600;
-    color: var(--red); margin-bottom: 24px;
-  }
-  .proc-pill::before { content: '●'; font-size: 8px; }
+  .processo-wrap { background: var(--paper); border-top: 1px solid var(--sand); padding: 90px 40px; }
+  .processo-inner { max-width: 1200px; margin: 0 auto; }
+  .processo-inner .sec-head { text-align: center; }
+  .processo-inner .sec-eyebrow { justify-content: center; }
   .proc-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative; margin-top: 40px; }
   .proc-row::before {
     content: ''; position: absolute; top: 24px; left: 12%; right: 12%;
@@ -637,69 +510,11 @@
   }
   .proc p { font-size: 12.5px; color: var(--slate); line-height: 1.55; }
 
-  /* ═══ TESTEMUNHO ═══ */
-  .testimonial {
-    background: var(--paper); border-top: 1px solid var(--sand);
-    padding: 90px 40px;
-  }
-  .testimonial-inner {
-    max-width: 900px; margin: 0 auto;
-    text-align: center;
-  }
-  .testimonial-mark {
-    font-family: var(--serif); font-size: 80px; line-height: 1; color: var(--red-sf);
-    margin-bottom: -30px;
-  }
-  .testimonial-quote {
-    font-family: var(--serif); font-style: italic; font-weight: 500;
-    font-size: clamp(20px, 2.6vw, 28px); line-height: 1.5;
-    color: var(--ink); margin-bottom: 26px;
-  }
-  .testimonial-attr {
-    display: inline-flex; align-items: center; gap: 12px;
-  }
-  .testimonial-avatar {
-    width: 44px; height: 44px; border-radius: 50%;
-    background: var(--red); color: #fff;
-    display: grid; place-items: center;
-    font-family: var(--serif); font-weight: 700; font-size: 16px;
-  }
-  .testimonial-who {
-    text-align: left;
-    font-family: var(--sans); font-size: 13.5px; color: var(--slate);
-  }
-  .testimonial-who strong { display: block; color: var(--ink); font-weight: 600; margin-bottom: 2px; }
-  .testimonial-note {
-    display: inline-block;
-    margin-top: 22px; padding: 4px 10px; border-radius: 4px;
-    background: rgba(0,0,0,0.05); font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px;
-    color: var(--mute); text-transform: uppercase;
-  }
-
-  /* ═══ SETORES ═══ */
-  .setores-strip {
-    padding: 44px 40px;
-    background: var(--cream); border-top: 1px solid var(--sand);
-    text-align: center;
-  }
-  .setores-strip .inner { max-width: 1000px; margin: 0 auto; }
-  .setores-eyebrow {
-    font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 2.4px;
-    color: var(--red); text-transform: uppercase; margin-bottom: 12px;
-  }
-  .setores-line {
-    font-family: var(--serif); font-size: 17px; color: var(--slate);
-    line-height: 1.7;
-  }
-  .setores-line b { color: var(--ink); font-weight: 600; font-style: italic; }
-
   /* ═══ CONTACTO ═══ */
-  #contacto { }
-  #contacto .head-center {
-    text-align: center; max-width: 640px; margin: 0 auto 44px;
-  }
-  #contacto .head-center h2 { margin-bottom: 14px; }
-  #contacto .sub { color: var(--slate); font-size: 16px; margin-bottom: 22px; }
+  #contacto { background: var(--cream); border-top: 1px solid var(--sand); padding: 90px 40px 100px; }
+  #contacto .inner { max-width: 1000px; margin: 0 auto; text-align: center; }
+  #contacto h2 { margin-bottom: 14px; max-width: 620px; margin-left: auto; margin-right: auto; }
+  #contacto .sub { color: var(--slate); font-size: 15.5px; margin-bottom: 22px; }
 
   .urg-pill {
     display: inline-flex; align-items: center; gap: 8px;
@@ -724,196 +539,17 @@
   .c-val a { color: var(--ink); text-decoration: none; transition: color .2s; }
   .c-val a:hover { color: var(--red); }
 
-  /* ═══ QUOTE FORM ═══ */
-  .quote-wrap { max-width: 980px; margin: 72px auto 0; }
-  .quote-title {
-    text-align: center; margin-bottom: 34px;
-  }
-  .quote-title h2 { margin: 10px 0; }
-
-  .mailwin {
-    background: #fff;
-    border: 1px solid var(--sand);
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 28px 68px -30px rgba(25,25,25,0.32);
-  }
-  .mw-bar {
-    display: flex; align-items: center; gap: 7px;
-    background: var(--ink); padding: 13px 18px;
-  }
-  .mw-dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
-  .mw-bar-title {
-    margin-left: 12px;
-    font-family: var(--mono); font-size: 12px; letter-spacing: 1.5px;
-    text-transform: uppercase; color: #cfcdc6;
-  }
-  .mw-row {
-    display: flex; align-items: center; gap: 14px;
-    padding: 0 22px;
-    border-bottom: 1px solid var(--paper);
-  }
-  .mw-lbl {
-    flex: none; width: 108px;
-    font-family: var(--mono); font-size: 11.5px; font-weight: 500; letter-spacing: 1.2px;
-    text-transform: uppercase; color: var(--slate);
-  }
-  .mw-lbl .req { color: var(--red); margin-left: 2px; }
-  .mw-in {
-    flex: 1; min-width: 0;
-    border: 0; outline: 0; background: transparent;
-    font-family: var(--sans); font-size: 15.5px; color: var(--ink);
-    padding: 17px 0;
-  }
-  .mw-in::placeholder { color: #ABA89E; }
-  .mw-row:focus-within { background: #FCFBF8; }
-  .mw-row:focus-within .mw-lbl { color: var(--red); }
-  .mw-row.err { background: var(--red-sf); }
-  .mw-row.err .mw-lbl { color: var(--red-dk); }
-  .mw-err-msg {
-    display: none;
-    font-family: var(--sans); font-size: 12px; color: var(--red-dk);
-    padding: 0 22px 10px calc(108px + 36px);
-    background: var(--red-sf);
-  }
-  .mw-row.err + .mw-err-msg { display: block; }
-
-  .mw-select {
-    appearance: none; -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235C5A54' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 4px center;
-    padding-right: 28px; cursor: pointer;
-  }
-  .mw-row-to { background: #FCFBF8; }
-  .mw-to { font-weight: 600; font-size: 15.5px; padding: 17px 0; }
-  .mw-to-hint { margin-left: auto; font-size: 12.5px; color: var(--slate); white-space: nowrap; }
-
-  details.mw-b2b { border-bottom: 1px solid var(--paper); }
-  details.mw-b2b > summary {
-    padding: 14px 22px;
-    font-family: var(--mono); font-size: 11.5px; letter-spacing: 1.2px;
-    text-transform: uppercase; color: var(--slate);
-    cursor: pointer; list-style: none;
-    display: flex; align-items: center; gap: 10px;
-    transition: color .2s, background .2s;
-  }
-  details.mw-b2b > summary::-webkit-details-marker { display: none; }
-  details.mw-b2b > summary::before {
-    content: '+'; display: inline-grid; place-items: center;
-    width: 20px; height: 20px; border-radius: 50%;
-    background: var(--sand); color: var(--slate);
-    font-family: var(--sans); font-weight: 600; font-size: 13px;
-    transition: transform .25s var(--ease), background .25s;
-  }
-  details.mw-b2b[open] > summary::before { transform: rotate(45deg); background: var(--red); color: #fff; }
-  details.mw-b2b > summary:hover { color: var(--red); background: #FCFBF8; }
-  details.mw-b2b[open] > summary { color: var(--red); border-bottom: 1px solid var(--paper); }
-
-  .mw-body { padding: 4px 22px 0; border-bottom: 1px solid var(--paper); }
-  .mw-ta {
-    width: 100%; border: 0; outline: 0; background: transparent; resize: vertical;
-    font-family: var(--sans); font-size: 15.5px; line-height: 1.6; color: var(--ink);
-    padding: 16px 0; min-height: 150px;
-  }
-  .mw-ta::placeholder { color: #ABA89E; }
-
-  .mw-file {
-    padding: 16px 22px;
-    border-bottom: 1px solid var(--paper);
-    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-    background: #FCFBF8;
-  }
-  .mw-file label {
-    font-family: var(--mono); font-size: 11.5px; font-weight: 500; letter-spacing: 1.2px;
-    text-transform: uppercase; color: var(--slate);
-  }
-  .mw-file input[type="file"] {
-    font-family: inherit; font-size: 13px; color: var(--slate);
-    max-width: 100%;
-  }
-  .mw-file input[type="file"]::file-selector-button {
-    padding: 8px 14px; border-radius: 6px; border: 1px solid var(--sand);
-    background: #fff; font-family: inherit; font-size: 12.5px; font-weight: 600;
-    color: var(--ink); cursor: pointer; margin-right: 12px;
-    transition: border-color .2s, background .2s;
-  }
-  .mw-file input[type="file"]::file-selector-button:hover { border-color: var(--red); background: var(--red-sf); }
-  .mw-file .hint { font-size: 11.5px; color: var(--mute); margin-left: auto; }
-
-  .mw-gdpr {
-    padding: 14px 22px;
-    display: flex; align-items: flex-start; gap: 10px;
-    border-bottom: 1px solid var(--paper);
-    font-size: 12.5px; color: var(--slate);
-  }
-  .mw-gdpr input { margin-top: 3px; accent-color: var(--red); }
-  .mw-gdpr a { color: var(--red-dk); border-bottom: 1px dotted var(--red); text-decoration: none; }
-  .mw-gdpr a:hover { border-bottom-style: solid; }
-
-  .mw-foot {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 20px; flex-wrap: wrap;
-    padding: 20px 22px;
-  }
-  .mw-note { font-size: 12.5px; line-height: 1.55; color: var(--slate); margin: 0; }
-  .mw-actions { display: flex; gap: 12px; flex: none; }
-  .mw-send, .mw-wa {
-    display: inline-flex; align-items: center; gap: 9px;
-    border: 0; cursor: pointer;
-    font-family: var(--mono); font-size: 12.5px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase;
-    padding: 15px 24px; border-radius: 8px;
-    transition: transform .25s var(--ease), box-shadow .25s var(--ease), background .25s;
-  }
-  .mw-send { background: var(--red); color: #fff; }
-  .mw-send:hover { background: var(--red-dk); transform: translateY(-2px); box-shadow: 0 10px 24px -10px rgba(182,25,24,0.6); }
-  .mw-wa { background: var(--wa); color: #fff; }
-  .mw-wa:hover { background: var(--wa-dk); transform: translateY(-2px); box-shadow: 0 10px 24px -10px rgba(37,211,102,0.5); }
-
-  .mw-success {
-    display: none;
-    background: #fff;
-    border: 1px solid rgba(45,106,79,0.25);
-    border-left: 4px solid var(--ok);
-    border-radius: 14px; padding: 40px 32px;
-    text-align: center;
-    box-shadow: 0 28px 68px -30px rgba(25,25,25,0.28);
-  }
-  .mw-success.show { display: block; animation: rise .6s var(--ease) forwards; }
-  .mw-success .check {
-    width: 56px; height: 56px; border-radius: 50%;
-    background: var(--ok); color: #fff;
-    display: grid; place-items: center; margin: 0 auto 18px;
-    font-size: 30px;
-    animation: pop .55s var(--ease);
-  }
-  .mw-success h3 { font-family: var(--serif); font-size: 22px; font-weight: 600; margin-bottom: 8px; }
-  .mw-success p { font-size: 14px; color: var(--slate); margin-bottom: 8px; }
-  .mw-success .ref { font-family: var(--mono); font-size: 11.5px; color: var(--mute); margin-bottom: 20px; }
-  .mw-success .wa-escape {
+  .contact-back {
+    margin-top: 40px;
     display: inline-flex; align-items: center; gap: 8px;
-    font-size: 13px; color: var(--wa-dk); font-weight: 600;
-    text-decoration: none; padding: 10px 18px; border-radius: 999px;
-    border: 1px solid rgba(37,211,102,0.35); background: rgba(37,211,102,0.08);
-    transition: background .2s;
+    padding: 12px 22px; border-radius: 999px;
+    background: var(--red); color: #fff;
+    text-decoration: none;
+    font-size: 14px; font-weight: 600;
+    transition: background .25s, transform .25s var(--ease), box-shadow .3s;
   }
-  .mw-success .wa-escape:hover { background: rgba(37,211,102,0.14); }
-
-  .quote-perks {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
-    margin-top: 22px;
-  }
-  .perk {
-    display: flex; align-items: center; gap: 16px;
-    background: #fff; border: 1px solid var(--sand); border-radius: 12px;
-    padding: 20px 22px;
-    transition: transform .3s var(--ease), border-color .3s;
-  }
-  .perk:hover { transform: translateY(-3px); border-color: var(--red); }
-  .perk-big {
-    font-family: var(--serif); font-weight: 700; font-size: 28px; color: var(--red);
-    flex: none; letter-spacing: -0.5px;
-  }
-  .perk p { font-size: 13px; line-height: 1.5; color: var(--slate); margin: 0; }
+  .contact-back:hover { background: var(--red-dk); transform: translateY(-2px); box-shadow: 0 12px 26px rgba(182,25,24,0.35); }
+  .contact-back svg { width: 15px; height: 15px; }
 
   /* ═══ STICKY BOTTOM BAR (mobile) ═══ */
   .bottom-bar {
@@ -937,15 +573,16 @@
     gap: 4px;
     padding: 10px 4px; border-radius: 10px;
     text-decoration: none; font-size: 11px; font-weight: 600;
-    text-align: center;
+    text-align: center; border: 0; cursor: pointer;
+    font-family: inherit;
     transition: background .2s, transform .2s;
   }
   .bb-btn svg { width: 20px; height: 20px; }
-  .bb-call { color: var(--ink); }
+  .bb-call { color: var(--ink); background: transparent; }
   .bb-call:hover { background: var(--paper); }
   .bb-wa { background: var(--wa); color: #fff; }
   .bb-wa:hover { background: var(--wa-dk); }
-  .bb-form { color: var(--red); }
+  .bb-form { color: var(--red); background: transparent; }
   .bb-form:hover { background: var(--red-sf); }
 
   /* ═══ FOOTER ═══ */
@@ -957,16 +594,19 @@
   }
   footer strong { font-family: var(--serif); color: var(--cream); }
   footer .fline { margin-top: 8px; opacity: 0.75; }
-  footer img { height: 40px; width: 40px; border-radius: 6px; margin-bottom: 14px; }
+  footer img { height: 40px; width: 40px; border-radius: 6px; margin-bottom: 14px; display: inline-block; }
+  footer nav { display: flex; justify-content: center; gap: 18px; margin-top: 12px; font-size: 12px; }
+  footer nav a { color: rgba(250,249,245,0.65); text-decoration: none; }
+  footer nav a:hover { color: var(--cream); }
 
-  /* Floating WhatsApp — hidden when bottom-bar shown on mobile */
+  /* Floating WhatsApp (desktop only) */
   .fab {
     position: fixed; right: 20px; z-index: 60;
     bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     width: 58px; height: 58px; border-radius: 50%;
     background: var(--wa); display: grid; place-items: center;
     box-shadow: 0 14px 34px rgba(37,211,102,0.4);
-    transition: transform .3s var(--ease), background .25s, opacity .25s;
+    transition: transform .3s var(--ease), background .25s;
     text-decoration: none;
   }
   .fab:hover { transform: scale(1.08) rotate(-4deg); background: var(--wa-dk); }
@@ -984,50 +624,29 @@
   /* ═══ RESPONSIVE ═══ */
   @media (max-width: 980px) {
     .hero-inner { grid-template-columns: 1fr; gap: 44px; }
-    .svc-row { grid-template-columns: 1fr 1fr; }
     .proc-row { grid-template-columns: 1fr 1fr; gap: 40px 0; }
     .proc-row::before { display: none; }
-    .sec-head { grid-template-columns: 1fr; gap: 16px; }
-    .sec-head aside { text-align: left; }
-    .sec-anchor { font-size: 46px; }
-    .hero-meta { grid-template-columns: repeat(2, auto); gap: 28px; }
-    .quote-perks { grid-template-columns: 1fr; }
     .empresa-inner { grid-template-columns: 1fr; gap: 40px; }
     .empresa-photo { max-width: 460px; margin: 0 auto; aspect-ratio: 4 / 3; }
-    .stats-inner { grid-template-columns: repeat(2, 1fr); gap: 32px; }
     .partner-inner { justify-content: center; text-align: center; }
     .partner-mark { justify-content: center; }
-    .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
+    .tp-grid { grid-template-columns: 1fr; }
   }
   @media (max-width: 640px) {
     nav.top { padding: 10px 16px; }
     nav.top.scrolled { padding: 8px 16px; }
-    .nav-call { display: none; }
     .brand-txt small { display: none; }
     .brand img { height: 46px; width: 46px; }
     .hero { padding: 110px 20px 60px; min-height: auto; }
-    .wrap { padding: 70px 20px; }
+    .wrap { padding: 60px 20px; }
     .empresa { padding: 70px 20px; }
     .partner { padding: 20px 20px; }
-    .stats-band { padding: 44px 20px; }
-    .portfolio { padding: 60px 20px; }
-    .portfolio-grid { grid-template-columns: 1fr; }
-    .testimonial { padding: 70px 20px; }
-    .setores-strip { padding: 40px 20px; }
-    .svc-row { grid-template-columns: 1fr; }
+    .trust-photos { padding: 70px 20px; }
+    .processo-wrap { padding: 70px 20px; }
+    #contacto { padding: 70px 20px 100px; }
     .proc-row { grid-template-columns: 1fr; gap: 32px; }
-    .stats-inner { gap: 28px; }
     footer { padding: 32px 20px 90px; }
     h1 { font-size: 40px; letter-spacing: -1px; }
-    .hero-meta { gap: 24px 20px; }
-    .hm-num b { font-size: 34px; }
-    .mw-lbl { width: 88px; font-size: 10.5px; }
-    .mw-in, .mw-to, .mw-ta { font-size: 15px; }
-    .mw-to-hint { display: none; }
-    .mw-err-msg { padding-left: 22px; }
-    .mw-foot { flex-direction: column; align-items: stretch; }
-    .mw-actions { flex-direction: column; }
-    .mw-send, .mw-wa { justify-content: center; }
     .bottom-bar { display: block; }
     .fab { display: none; }
   }
@@ -1035,7 +654,7 @@
   @media (prefers-reduced-motion: reduce) {
     * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
     h1 .ln span { transform: none; }
-    .hero-eyebrow, .hero-partners, .hero-sub, .hero-cta, .hero-trust, .hero-phones, .hero-meta, .mini { opacity: 1; }
+    .hero-eyebrow, .hero-partners, .hero-sub, .hero-cta, .hero-trust, .mini { opacity: 1; }
     [data-r] { opacity: 1; transform: none; }
     .fab::after { display: none; }
     .hero-waves { display: none; }
@@ -1057,9 +676,6 @@
     </span>
   </a>
   <div class="nav-right">
-    <a class="nav-link" href="#servicos">Serviços</a>
-    <a class="nav-link" href="#empresa">Empresa</a>
-    <a class="nav-call" href="tel:+351218935050" aria-label="Ligar 218 935 050">218 935 050</a>
     <a class="nav-wa" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%2C%20gostaria%20de%20pedir%20assist%C3%AAncia%20t%C3%A9cnica." target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4-.1-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg>
       WhatsApp
@@ -1069,11 +685,10 @@
 
 <main id="main">
 
-<!-- ═══ HERO — dark, image-backed, wave animation ═══ -->
+<!-- ═══ HERO — single conversion surface ═══ -->
 <section class="hero" id="topo" aria-labelledby="hero-title">
   <div class="hero-bg" aria-hidden="true"></div>
   <div class="hero-veil" aria-hidden="true"></div>
-  <!-- Wave motif inspired by MDM logo's coiled curves. Drifts slowly. -->
   <div class="hero-waves" aria-hidden="true">
     <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
       <defs>
@@ -1102,7 +717,6 @@
         </span>
         <span class="hp-mark">APIRAC</span>
         <span class="hp-mark">Registo IMPIC</span>
-        <span class="hp-mark"><span class="dot" aria-hidden="true"></span>Online agora</span>
       </div>
 
       <h1 id="hero-title">
@@ -1110,8 +724,7 @@
         <span class="ln"><span>Feito por <em>engenheiros</em>, desde 1991.</span></span>
       </h1>
       <p class="hero-sub">
-        Assistência técnica para empresas, condomínios e habitação.
-        Equipa própria, faturação transparente, relatórios claros.
+        Assistência técnica em Lisboa. Equipa própria, faturação transparente, resposta em 24h úteis.
       </p>
 
       <div class="hero-cta">
@@ -1119,9 +732,9 @@
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4-.1-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg>
           Falar no WhatsApp
         </a>
-        <a class="btn btn-ghost" href="tel:+351218935050">
+        <a class="btn btn-ghost" href="tel:+351910307579">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7 12.8 12.8 0 0 0 .7 2.8 2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5 12.8 12.8 0 0 0 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
-          218 935 050
+          910 307 579
         </a>
       </div>
 
@@ -1129,25 +742,14 @@
         <span class="dot" aria-hidden="true"></span>
         Resposta em 24h úteis · Urgências 7 dias via WhatsApp
       </div>
-      <div class="hero-phones">
-        <a href="tel:+351218935050">Fixo escritório: 218 935 050</a>
-        &nbsp;·&nbsp;
-        <a href="https://wa.me/351910307579" target="_blank" rel="noopener">Móvel/WhatsApp: 910 307 579</a>
-      </div>
-
-      <div class="hero-meta">
-        <div class="hm"><span class="hm-num"><b>1991</b></span><span class="hm-lbl">Fundação</span></div>
-        <div class="hm"><span class="hm-num"><b>35</b> anos</span><span class="hm-lbl">de experiência</span></div>
-        <div class="hm"><span class="hm-num"><b>24h</b> úteis</span><span class="hm-lbl">resposta</span></div>
-        <div class="hm"><span class="hm-num"><b>8h–18h</b></span><span class="hm-lbl">seg. a sex.</span></div>
-      </div>
     </div>
 
+    <!-- Single conversion surface: nome + telefone + serviço + urgência -->
     <aside class="hero-right">
-      <form class="mini" id="miniForm" novalidate data-endpoint="" aria-label="Pedido rápido de contacto">
-        <div class="mini-eyebrow">Pedido rápido — 30 segundos</div>
-        <h3>Um técnico <em>liga em 24h</em>.</h3>
-        <p class="mini-sub">Nome, telefone, serviço. Nada mais.</p>
+      <form class="mini" id="miniForm" novalidate data-endpoint="" aria-label="Pedido rápido de orçamento e agendamento">
+        <div class="mini-eyebrow">Pedido rápido</div>
+        <h3>Diga-nos quando · <em>nós ligamos</em>.</h3>
+        <p class="mini-sub">Nome, telefone, serviço, urgência. Um técnico responde.</p>
 
         <div class="mini-field" data-f="nome">
           <label for="mNome">Nome</label>
@@ -1161,7 +763,7 @@
         </div>
 
         <div>
-          <label style="display:block;font-size:11.5px;font-weight:600;color:var(--slate);margin-bottom:8px;letter-spacing:0.2px;">Serviço</label>
+          <span class="mini-group-label">Serviço</span>
           <div class="mini-chips" role="radiogroup" aria-label="Serviço">
             <button type="button" class="chip" role="radio" aria-checked="false" data-val="Ar Condicionado">Ar Condicionado</button>
             <button type="button" class="chip" role="radio" aria-checked="false" data-val="Eletricidade">Eletricidade</button>
@@ -1170,16 +772,26 @@
           </div>
         </div>
 
+        <div>
+          <span class="mini-group-label">Preferência (agendamento)</span>
+          <div class="mini-chips chips-3" role="radiogroup" aria-label="Urgência">
+            <button type="button" class="chip" role="radio" aria-checked="false" data-val="Hoje">Hoje</button>
+            <button type="button" class="chip" role="radio" aria-checked="false" data-val="Esta semana">Esta semana</button>
+            <button type="button" class="chip" role="radio" aria-checked="false" data-val="Sem urgência">Sem urgência</button>
+          </div>
+        </div>
+
         <button type="submit" class="mini-submit">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-          Pedir contacto
+          Pedir orçamento
         </button>
-        <span class="mini-alt">Ou fale já: <a href="https://wa.me/351910307579" target="_blank" rel="noopener">WhatsApp →</a></span>
+        <span class="mini-alt">Prefere já? <a href="https://wa.me/351910307579" target="_blank" rel="noopener">WhatsApp →</a></span>
 
         <div class="mini-done" style="display:none;">
           <div class="check" aria-hidden="true">✓</div>
           <h4>Recebido.</h4>
-          <p>Um técnico liga dentro de <strong>24h úteis</strong>. Ref: <span class="ref"></span></p>
+          <p>Um técnico liga em <strong>24h úteis</strong>.<br><span id="miniUrgencyLine">Escolheu tempo de resposta rápido — retornamos em 2h.</span></p>
+          <div class="ref">Ref: <span class="ref-num"></span></div>
           <a href="https://wa.me/351910307579" target="_blank" rel="noopener" style="color:var(--wa-dk);font-weight:600;text-decoration:none;font-size:13px;">Prefere já? WhatsApp →</a>
         </div>
       </form>
@@ -1197,85 +809,60 @@
         <span id="partner-title">Instalação e manutenção certificada Mitsubishi Electric em Lisboa</span>
       </div>
     </div>
-    <a href="#orcamento" class="partner-cta">Pedir orçamento →</a>
+    <a href="#topo" class="partner-cta">Pedir orçamento →</a>
   </div>
 </section>
 
-<!-- ═══ TRUST NUMBERS BAND ═══ -->
-<section class="stats-band" aria-label="MDM em números">
-  <div class="stats-inner">
-    <div class="stat" data-r>
-      <div class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2L4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3z"/></svg></div>
-      <div class="stat-num">35<small>+ anos</small></div>
-      <div class="stat-lbl">no ofício desde 1991</div>
-    </div>
-    <div class="stat" data-r>
-      <div class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
-      <div class="stat-num">04</div>
-      <div class="stat-lbl">serviços integrados</div>
-    </div>
-    <div class="stat" data-r>
-      <div class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-      <div class="stat-num">24<small>h úteis</small></div>
-      <div class="stat-lbl">resposta técnica</div>
-    </div>
-    <div class="stat" data-r>
-      <div class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-      <div class="stat-num">100<small>%</small></div>
-      <div class="stat-lbl">Lisboa &amp; redondezas</div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══ SERVIÇOS with real photo headers ═══ -->
-<section id="servicos" class="s-cream" aria-labelledby="servicos-title">
-  <div class="wrap">
+<!-- ═══ TRABALHO REAL — trust photos ═══ -->
+<section class="trust-photos" aria-labelledby="trust-title">
+  <div class="trust-photos-inner">
     <div class="sec-head" data-r>
-      <div class="lead">
-        <div class="sec-eyebrow">Serviços críticos</div>
-        <h2 id="servicos-title">Quatro especialidades,<br>uma resposta <em>integrada.</em></h2>
-        <p>Uma equipa própria cobre climatização, eletricidade, ventilação e manutenção — sem subcontratações escondidas, com peças originais.</p>
-      </div>
-      <aside><span class="sec-anchor">04</span></aside>
+      <div class="sec-eyebrow">Trabalho real</div>
+      <h2 id="trust-title">Equipa própria,<br>identificada em <em>obra.</em></h2>
+      <p class="lead-p">Todos os técnicos usam farda MDM. Sem subcontratações escondidas.
+         Da climatização à eletricidade, à ventilação — mesma equipa.</p>
     </div>
-    <div class="svc-row">
-      <article class="svc" data-r>
-        <div class="svc-img"><img src="assets/mdm-service-hvac-electrical.webp" alt="Instalação de ar condicionado por técnico MDM" loading="lazy"></div>
-        <div class="svc-body">
-          <div class="svc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9.5 14.5L3 21M21 3l-6.5 6.5M10 7L7 4 3 8l3 3M17 14l3 3-4 4-3-3M7 17l4-4"/></svg></div>
-          <h3>Ar Condicionado</h3>
-          <p>Instalação, reparação e manutenção multi-marca — Mitsubishi Electric, MIDEA, France Air, LG.</p>
-        </div>
-      </article>
-      <article class="svc" data-r>
-        <div class="svc-img"><img src="assets/mdm-service-hvac-electrical.webp" alt="Trabalho elétrico em quadro" loading="lazy" style="object-position: right center;"></div>
-        <div class="svc-body">
-          <div class="svc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
-          <h3>Eletricidade</h3>
-          <p>Quadros elétricos, avarias e reparações orientadas para segurança e continuidade operacional.</p>
-        </div>
-      </article>
-      <article class="svc" data-r>
-        <div class="svc-img"><img src="assets/mdm-contact-operations.webp" alt="Sistemas de ventilação em edifício comercial" loading="lazy"></div>
-        <div class="svc-body">
-          <div class="svc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 8 Q 8 2, 12 8 T 21 8M3 13 Q 8 7, 12 13 T 21 13M3 18 Q 8 12, 12 18 T 21 18"/></svg></div>
-          <h3>Ventilação</h3>
-          <p>Sistemas de extração, condutas e qualidade do ar para ambientes de utilização intensiva.</p>
-        </div>
-      </article>
-      <article class="svc" data-r>
-        <div class="svc-img"><img src="assets/mdm-contact-operations.webp" alt="Equipa MDM em manutenção" loading="lazy" style="object-position: left center;"></div>
-        <div class="svc-body">
-          <div class="svc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
-          <h3>Manutenção</h3>
-          <p>Planos preventivos com relatórios claros — do diagnóstico à conclusão, sem zonas cinzentas.</p>
-        </div>
-      </article>
+
+    <div class="tp-grid" data-r>
+      <figure class="tp-item">
+        <img src="assets/mdm-tech-electrical-panel.png" alt="Técnico MDM em intervenção em quadro elétrico" loading="lazy">
+        <figcaption class="tp-caption">
+          <div class="tp-cat">Eletricidade</div>
+          <div class="tp-title">Intervenção em quadro elétrico</div>
+        </figcaption>
+      </figure>
+      <figure class="tp-item">
+        <img src="assets/mdm-tech-ac-soldering.png" alt="Técnico MDM em manutenção de unidade exterior de ar condicionado" loading="lazy">
+        <figcaption class="tp-caption">
+          <div class="tp-cat">Ar Condicionado · AVAC</div>
+          <div class="tp-title">Manutenção de unidade exterior</div>
+        </figcaption>
+      </figure>
     </div>
+
+    <div class="tp-badges" data-r>
+      <span class="tp-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 12l2 2 4-4M12 2a10 10 0 100 20 10 10 0 000-20z"/></svg>
+        Equipa própria em Lisboa
+      </span>
+      <span class="tp-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+        Fardas MDM identificadas
+      </span>
+      <span class="tp-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2v20M17 5h-5a3 3 0 000 6h2a3 3 0 010 6H7"/></svg>
+        Sem subcontratações
+      </span>
+    </div>
+
+    <figure class="tp-grid-photo" data-r>
+      <img src="assets/mdm-work-grid.png" alt="Diversidade de intervenções da MDM em obra: quadros elétricos, chillers, cassetes, tubagens">
+      <figcaption class="tp-grid-cap">Mosaico de intervenções recentes</figcaption>
+    </figure>
   </div>
 </section>
 
-<!-- ═══ EMPRESA — real photo + values ═══ -->
+<!-- ═══ EMPRESA ═══ -->
 <section class="empresa" id="empresa" aria-labelledby="empresa-title">
   <div class="empresa-inner">
     <div class="empresa-photo" data-r>
@@ -1292,8 +879,8 @@
       <div class="sec-eyebrow">Empresa</div>
       <h2 id="empresa-title">35 anos a resolver<br><em>bem à primeira.</em></h2>
       <p style="margin-top:14px;font-size:15.5px;color:var(--slate);line-height:1.65;max-width:520px;">
-        Fundada em 1991 por Manuel Domingos Melancia, a MDM consolidou-se como parceira de manutenção
-        de edifícios exigentes na grande Lisboa. Equipa própria, faturação transparente, relatórios claros.
+        Fundada em 1991 por Manuel Domingos Melancia, a MDM é parceira de manutenção
+        de edifícios exigentes na grande Lisboa.
       </p>
       <ul class="empresa-values">
         <li>
@@ -1322,163 +909,56 @@
   </div>
 </section>
 
-<!-- ═══ PORTFOLIO — Trabalhamos com (RACE-inspired) ═══ -->
-<section class="portfolio" aria-labelledby="portfolio-title">
-  <div class="portfolio-inner">
-    <div class="portfolio-head" data-r>
-      <div class="sec-eyebrow">Trabalhamos com</div>
-      <h2 id="portfolio-title">Edifícios exigentes,<br>manutenção <em>sem paragens.</em></h2>
-      <p>Bancos, hospitais, escolas, centros comerciais, condomínios de referência e habitação privada.
-         Contratos de longa duração — clientes ativos há mais de 10 anos.</p>
-    </div>
-
-    <div class="portfolio-grid" data-r>
-      <div class="pcard">
-        <div class="pcard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M9 12h1M9 15h1M14 9h1M14 12h1M14 15h1"/></svg></div>
-        <div class="pcard-cat">Banca</div>
-        <h4>Agências e Data Centers</h4>
-        <p>Climatização crítica e contratos de manutenção preventiva.</p>
-      </div>
-      <div class="pcard">
-        <div class="pcard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 21h18M6 21V10M18 21V10M12 21V10M3 10h18M3 5h18v5H3z"/></svg></div>
-        <div class="pcard-cat">Indústria</div>
-        <h4>Ventilação industrial</h4>
-        <p>Sistemas de extração e climatização em ambientes de utilização intensiva.</p>
-      </div>
-      <div class="pcard">
-        <div class="pcard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 21h18M5 21V9l7-6 7 6v12M10 21v-4h4v4M8 12h1M8 15h1M15 12h1M15 15h1"/></svg></div>
-        <div class="pcard-cat">Condomínios</div>
-        <h4>Manutenção transversal</h4>
-        <p>AC, eletricidade e ventilação em edifícios de referência no Parque das Nações.</p>
-      </div>
-      <div class="pcard">
-        <div class="pcard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M22 10L12 4 2 10l10 6 10-6z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></div>
-        <div class="pcard-cat">Educação</div>
-        <h4>Escolas e universidades</h4>
-        <p>Contratos anuais de manutenção com relatórios técnicos claros.</p>
-      </div>
-      <div class="pcard">
-        <div class="pcard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2v20M17 5h-5a3 3 0 000 6h2a3 3 0 010 6H7"/></svg></div>
-        <div class="pcard-cat">Restauração</div>
-        <h4>Cozinhas e frio comercial</h4>
-        <p>Sistemas de extração, câmaras frigoríficas, intervenção 7 dias.</p>
-      </div>
-      <div class="pcard">
-        <div class="pcard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 12l2 2 4-4M12 2a10 10 0 100 20 10 10 0 000-20z"/></svg></div>
-        <div class="pcard-cat">Saúde</div>
-        <h4>Clínicas e hospitais</h4>
-        <p>Qualidade do ar controlada, com procedimentos de higienização documentados.</p>
-      </div>
-      <div class="pcard">
-        <div class="pcard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 20h20M4 20V8h16v12M8 12h2M14 12h2M8 16h2M14 16h2"/></svg></div>
-        <div class="pcard-cat">Retalho</div>
-        <h4>Lojas e escritórios</h4>
-        <p>Instalação chave-na-mão e manutenção multi-marca.</p>
-      </div>
-      <div class="pcard">
-        <div class="pcard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg></div>
-        <div class="pcard-cat">Habitação</div>
-        <h4>Habitação privada</h4>
-        <p>Instalação e reparação de AC residencial em Lisboa e área envolvente.</p>
-      </div>
-    </div>
-
-    <div style="text-align:center;">
-      <span class="portfolio-note">Referências específicas de clientes disponíveis mediante pedido</span>
-      <br>
-      <a href="#orcamento" class="portfolio-cta">
-        Pedir referências e orçamento
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </a>
-    </div>
-  </div>
-</section>
-
 <!-- ═══ PROCESSO ═══ -->
-<section id="processo" class="s-paper" aria-labelledby="processo-title">
-  <div class="wrap">
+<div class="processo-wrap" id="processo">
+  <div class="processo-inner">
     <div class="sec-head" data-r>
-      <div class="lead">
-        <span class="proc-pill">Como funciona</span>
-        <h2 id="processo-title">Da avaliação à conclusão,<br>sem <em>zonas cinzentas.</em></h2>
-        <p>Orçamento gratuito, sem compromisso, resposta em 24h úteis. O processo por dentro:</p>
-      </div>
-      <aside><span class="sec-anchor">01–04</span></aside>
+      <div class="sec-eyebrow">Como funciona</div>
+      <h2>Da avaliação à conclusão,<br>sem <em>zonas cinzentas.</em></h2>
     </div>
     <div class="proc-row" data-r>
       <div class="proc">
         <div class="proc-n" aria-hidden="true">01</div>
         <h3>Avaliação</h3>
-        <p>Levantamento técnico e escuta do problema real da instalação.</p>
+        <p>Levantamento técnico e escuta do problema real.</p>
       </div>
       <div class="proc">
         <div class="proc-n" aria-hidden="true">02</div>
         <h3>Diagnóstico</h3>
-        <p>Análise objetiva com critérios técnicos claros e orçamento transparente.</p>
+        <p>Orçamento transparente, sem custos escondidos.</p>
       </div>
       <div class="proc">
         <div class="proc-n" aria-hidden="true">03</div>
         <h3>Intervenção</h3>
-        <p>Execução por profissionais experientes, com atenção à limpeza e segurança.</p>
+        <p>Execução por equipa própria, com limpeza e segurança.</p>
       </div>
       <div class="proc">
         <div class="proc-n" aria-hidden="true">04</div>
         <h3>Acompanhamento</h3>
-        <p>Comunicação direta e relação de confiança de longo prazo.</p>
+        <p>Relatório e relação de confiança de longo prazo.</p>
       </div>
     </div>
   </div>
-</section>
+</div>
 
-<!-- ═══ TESTEMUNHO ═══ -->
-<section class="testimonial" aria-label="Testemunho de cliente">
-  <div class="testimonial-inner" data-r>
-    <div class="testimonial-mark" aria-hidden="true">"</div>
-    <p class="testimonial-quote">
-      Resposta no mesmo dia, comunicação clara, orçamento sem surpresas.
-      Já são quatro anos a manter o nosso edifício.
-    </p>
-    <div class="testimonial-attr">
-      <div class="testimonial-avatar" aria-hidden="true">JR</div>
-      <div class="testimonial-who">
-        <strong>João R.</strong>
-        Administrador de condomínio · Parque das Nações
-      </div>
-    </div>
-    <div class="testimonial-note">Testemunho a validar</div>
-  </div>
-</section>
-
-<!-- ═══ SETORES ═══ -->
-<section class="setores-strip" aria-labelledby="setores-title">
+<!-- ═══ CONTACTO (final: cards + CTA back to hero form) ═══ -->
+<section id="contacto" aria-labelledby="contacto-title">
   <div class="inner" data-r>
-    <div class="setores-eyebrow" id="setores-title">Setores que servimos</div>
-    <p class="setores-line">
-      <b>Indústria</b> · <b>Escritórios</b> · <b>Condomínios</b> · <b>Habitação</b> · <b>Banca</b> · <b>Educação</b> · <b>Restauração</b> · e toda a área do <b>Parque das Nações</b>
-    </p>
-  </div>
-</section>
-
-<!-- ═══ CONTACTO + FORM ═══ -->
-<section id="contacto" class="s-paper" aria-labelledby="contacto-title">
-  <div class="wrap">
-    <div class="head-center" data-r>
-      <div class="sec-eyebrow" style="justify-content:center;display:inline-flex;">Fale connosco</div>
-      <h2 id="contacto-title">Transforme uma necessidade<br>técnica num plano <em>claro.</em></h2>
-      <p class="sub">Atendimento de segunda a sexta, das 8h às 18h.</p>
-      <div class="urg-pill">
-        <span class="dot" aria-hidden="true"></span>
-        Urgências fora de horas via WhatsApp — 7 dias
-      </div>
+    <div class="sec-eyebrow" style="justify-content:center;display:inline-flex;">Fale connosco</div>
+    <h2 id="contacto-title">Um contacto directo<br>vale mais do que <em>dez cliques.</em></h2>
+    <p class="sub">Segunda a sexta, 8h–18h.</p>
+    <div class="urg-pill">
+      <span class="dot" aria-hidden="true"></span>
+      Urgências fora de horas via WhatsApp — 7 dias
     </div>
 
-    <div class="c-cards" data-r>
+    <div class="c-cards">
       <div class="c-card">
-        <div class="c-lbl">Telefone fixo</div>
-        <div class="c-val"><a href="tel:+351218935050">218 935 050</a></div>
+        <div class="c-lbl">Telefone</div>
+        <div class="c-val"><a href="tel:+351910307579">910 307 579</a></div>
       </div>
       <div class="c-card">
-        <div class="c-lbl">WhatsApp assistência</div>
+        <div class="c-lbl">WhatsApp</div>
         <div class="c-val"><a href="https://wa.me/351910307579" target="_blank" rel="noopener">910 307 579</a></div>
       </div>
       <div class="c-card">
@@ -1487,152 +967,32 @@
       </div>
     </div>
 
-    <div class="quote-wrap" id="orcamento">
-      <div class="quote-title" data-r>
-        <div class="sec-eyebrow" style="justify-content:center;display:inline-flex;">Orçamento</div>
-        <h2>Peça o seu orçamento<br>em <em>60 segundos.</em></h2>
-      </div>
-
-      <form class="mailwin" id="quoteForm" data-endpoint="" aria-labelledby="quoteFormTitle">
-        <span id="quoteFormTitle" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Formulário de pedido de orçamento</span>
-        <div class="mw-bar" aria-hidden="true">
-          <span class="mw-dot" style="background:#EE5C56"></span>
-          <span class="mw-dot" style="background:#F5BE4F"></span>
-          <span class="mw-dot" style="background:#61C454"></span>
-          <span class="mw-bar-title">Nova mensagem — MDM Assist</span>
-        </div>
-
-        <div class="mw-row mw-row-to" aria-hidden="true">
-          <span class="mw-lbl">Para:</span>
-          <span class="mw-to">mdmassist@mdmassist.com</span>
-          <span class="mw-to-hint">MDM Assist — Assistência Técnica</span>
-        </div>
-
-        <div class="mw-row">
-          <label class="mw-lbl" for="qNome">Nome<span class="req" aria-hidden="true">*</span></label>
-          <input class="mw-in" id="qNome" name="nome" type="text" placeholder="Como se chama" autocomplete="name" required aria-required="true" aria-describedby="qNome-err">
-        </div>
-        <div class="mw-err-msg" id="qNome-err">Diga-nos como o tratamos.</div>
-
-        <div class="mw-row">
-          <label class="mw-lbl" for="qEmail">Email</label>
-          <input class="mw-in" id="qEmail" name="email" type="email" placeholder="email@exemplo.pt (email ou telefone)" autocomplete="email" aria-describedby="qEmail-err">
-        </div>
-        <div class="mw-err-msg" id="qEmail-err">Preencha email OU telefone.</div>
-
-        <div class="mw-row">
-          <label class="mw-lbl" for="qTel">Telefone</label>
-          <input class="mw-in" id="qTel" name="telefone" type="tel" inputmode="tel" placeholder="+351 9xx xxx xxx" autocomplete="tel" aria-describedby="qTel-err">
-        </div>
-        <div class="mw-err-msg" id="qTel-err">Preencha telefone OU email.</div>
-
-        <div class="mw-row">
-          <label class="mw-lbl" for="qServico">Serviço</label>
-          <select class="mw-in mw-select" id="qServico" name="servico">
-            <option value="">— selecione —</option>
-            <option value="Ar Condicionado">Ar Condicionado</option>
-            <option value="Eletricidade">Eletricidade</option>
-            <option value="Ventilação">Ventilação</option>
-            <option value="Manutenção">Manutenção</option>
-            <option value="Outro / não sei">Outro / não sei</option>
-          </select>
-        </div>
-
-        <div class="mw-row">
-          <label class="mw-lbl" for="qAssunto">Assunto</label>
-          <input class="mw-in" id="qAssunto" name="assunto" type="text" placeholder="Pedido de orçamento — breve descrição">
-        </div>
-
-        <div class="mw-body">
-          <label class="sr-only" for="qMsg" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Mensagem</label>
-          <textarea class="mw-ta" id="qMsg" name="mensagem" rows="6" required aria-required="true" aria-describedby="qMsg-err" placeholder="Descreva a instalação, o espaço, o número de equipamentos ou a avaria. Quanto mais detalhe, mais rápida e precisa será a proposta."></textarea>
-        </div>
-        <div class="mw-err-msg" id="qMsg-err" style="padding-left:22px;">Descreva brevemente o pedido.</div>
-
-        <div class="mw-file">
-          <label for="qPhotos">Fotos do equipamento (opcional):</label>
-          <input type="file" id="qPhotos" name="fotos" accept="image/*" capture="environment" multiple>
-          <span class="hint">até 4 imagens · máx 5 MB cada</span>
-        </div>
-
-        <details class="mw-b2b">
-          <summary>Sou empresa ou condomínio</summary>
-          <div class="mw-row">
-            <label class="mw-lbl" for="qEmpresa">Empresa</label>
-            <input class="mw-in" id="qEmpresa" name="empresa" type="text" placeholder="Nome da empresa ou condomínio (opcional)" autocomplete="organization">
-          </div>
-          <div class="mw-row">
-            <label class="mw-lbl" for="qNif">NIF</label>
-            <input class="mw-in" id="qNif" name="nif" type="text" inputmode="numeric" pattern="[0-9]{9}" placeholder="NIF / NIPC (opcional)">
-          </div>
-          <div class="mw-row" style="border-bottom:0;">
-            <label class="mw-lbl" for="qLocal">Localidade</label>
-            <input class="mw-in" id="qLocal" name="localidade" type="text" placeholder="Cidade / Código Postal (opcional)" autocomplete="address-level2">
-          </div>
-        </details>
-
-        <div class="mw-gdpr">
-          <input type="checkbox" id="qGdpr" name="gdpr">
-          <label for="qGdpr">Aceito a <a href="#privacidade">política de privacidade</a>. Os seus dados são usados exclusivamente para responder ao pedido.</label>
-        </div>
-
-        <div class="mw-foot">
-          <p class="mw-note">Resposta garantida em <strong>24h úteis</strong>. Sem compromisso, sem custos.</p>
-          <div class="mw-actions">
-            <button type="submit" class="btn btn-red mw-send" id="sendEmail">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-              Enviar pedido
-            </button>
-            <button type="button" class="btn mw-wa" id="sendWa">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4-.1-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg>
-              WhatsApp
-            </button>
-          </div>
-        </div>
-      </form>
-
-      <div class="mw-success" id="quoteSuccess" role="status" aria-live="polite">
-        <div class="check" aria-hidden="true">✓</div>
-        <h3>Recebemos o seu pedido.</h3>
-        <p>Respondemos em <strong>24h úteis</strong>. Se for urgente, chame-nos.</p>
-        <div class="ref">Ref: <span id="quoteRef"></span></div>
-        <a href="https://wa.me/351910307579" target="_blank" rel="noopener" class="wa-escape">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4-.1-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg>
-          Prefere falar agora? WhatsApp →
-        </a>
-      </div>
-
-      <div class="quote-perks" data-r>
-        <div class="perk">
-          <div class="perk-big">24h</div>
-          <p>Resposta garantida<br>em dias úteis</p>
-        </div>
-        <div class="perk">
-          <div class="perk-big">NIF</div>
-          <p>Fatura com dados<br>fiscais completos</p>
-        </div>
-        <div class="perk">
-          <div class="perk-big">Contrato</div>
-          <p>Planos anuais de<br>manutenção disponíveis</p>
-        </div>
-      </div>
-    </div>
+    <a href="#topo" class="contact-back" id="scrollToForm">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      Pedir orçamento agora
+    </a>
   </div>
 </section>
 
 <footer>
   <img src="assets/mdm-logo-square.jpg" alt="MDM Assist">
   <div><strong>MDM Assist</strong> · Alameda dos Oceanos 108A · 1990-426 Lisboa</div>
-  <div class="fline">218 935 050 · WhatsApp 910 307 579 · <a href="#privacidade" style="color:inherit;text-decoration:underline;">Política de privacidade</a></div>
+  <div class="fline">Telefone fixo escritório: 218 935 050 · Móvel/WhatsApp assistência: 910 307 579</div>
   <div class="fline">© 1991–2026 MDM — Manuel Domingos Melancia, Lda.</div>
+  <nav aria-label="Rodapé">
+    <a href="#empresa">Empresa</a>
+    <a href="#processo">Como funciona</a>
+    <a href="#contacto">Contacto</a>
+    <a href="#privacidade">Política de privacidade</a>
+  </nav>
 </footer>
 
 </main>
 
-<!-- Sticky bottom bar (mobile) -->
+<!-- Sticky bottom bar (mobile). Orçamento button scrolls back to hero form. -->
 <div class="bottom-bar" id="bottomBar" role="toolbar" aria-label="Ações rápidas">
   <div class="bottom-bar-inner">
-    <a href="tel:+351218935050" class="bb-btn bb-call">
+    <a href="tel:+351910307579" class="bb-btn bb-call">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7 12.8 12.8 0 0 0 .7 2.8 2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5 12.8 12.8 0 0 0 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
       Ligar
     </a>
@@ -1640,10 +1000,10 @@
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4-.1-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg>
       WhatsApp
     </a>
-    <a href="#orcamento" class="bb-btn bb-form">
+    <button type="button" class="bb-btn bb-form" id="bbForm">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
       Orçamento
-    </a>
+    </button>
   </div>
 </div>
 
@@ -1653,10 +1013,9 @@
 
 <script>
 /* ═════════════════════════════════════════════════════════════
-   MDM Editorial v2 — behaviour
+   MDM Editorial v3 — single conversion funnel
    ═════════════════════════════════════════════════════════════ */
 
-/* Nav scrolled state + bottom-bar reveal after hero */
 const nav = document.getElementById('nav');
 const bar = document.getElementById('bottomBar');
 const hero = document.querySelector('.hero');
@@ -1666,47 +1025,49 @@ addEventListener('scroll', () => {
   bar.classList.toggle('show', past);
 }, { passive: true });
 
+/* Bottom-bar Orçamento button + Contacto CTA → scroll to hero form + focus nome */
+function scrollToMiniForm() {
+  const target = document.getElementById('topo');
+  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  setTimeout(() => {
+    const nomeInput = document.getElementById('mNome');
+    if (nomeInput) nomeInput.focus({ preventScroll: true });
+  }, 700);
+}
+document.getElementById('bbForm').addEventListener('click', scrollToMiniForm);
+document.getElementById('scrollToForm').addEventListener('click', (e) => {
+  e.preventDefault();
+  scrollToMiniForm();
+});
+
 /* Scroll reveal */
 const io = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }});
 }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
 document.querySelectorAll('[data-r]').forEach(el => io.observe(el));
 
-/* Stat counters (count up on reveal) */
-const statObs = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (!e.isIntersecting) return;
-    statObs.unobserve(e.target);
-    const el = e.target.querySelector('.stat-num');
-    if (!el) return;
-    const raw = el.textContent;
-    const m = raw.match(/^(\d+)/);
-    if (!m) return;
-    const target = parseInt(m[1], 10);
-    if (isNaN(target) || target === 0) return;
-    const suffix = raw.slice(m[1].length);
-    let cur = 0;
-    const step = Math.max(1, Math.round(target / 40));
-    const iv = setInterval(() => {
-      cur += step;
-      if (cur >= target) { cur = target; clearInterval(iv); }
-      el.innerHTML = cur + (suffix ? `<small>${suffix.replace(/^<small>|<\/small>$/g,'')}</small>`.replace('<small></small>','') : '');
-      // fallback: if suffix contains any tags, restore raw at the end
-      if (cur === target) el.innerHTML = target + suffix;
-    }, 30);
-  });
-}, { threshold: 0.4 });
-document.querySelectorAll('.stat').forEach(s => statObs.observe(s));
-
-/* ─── Mini-form (hero) ─── */
+/* ─── Mini-form: single conversion surface ─── */
 const mini = document.getElementById('miniForm');
-const miniChips = mini.querySelectorAll('.chip');
+const serviceChips = mini.querySelectorAll('[aria-label="Serviço"] .chip');
+const urgencyChips = mini.querySelectorAll('[aria-label="Urgência"] .chip');
 let miniServico = '';
-miniChips.forEach(c => c.addEventListener('click', () => {
-  miniChips.forEach(x => x.setAttribute('aria-checked', 'false'));
-  c.setAttribute('aria-checked', 'true');
-  miniServico = c.dataset.val;
-}));
+let miniUrgencia = '';
+
+function bindChipGroup(chips, onPick) {
+  chips.forEach(c => c.addEventListener('click', () => {
+    chips.forEach(x => x.setAttribute('aria-checked', 'false'));
+    c.setAttribute('aria-checked', 'true');
+    onPick(c.dataset.val);
+  }));
+}
+bindChipGroup(serviceChips, v => { miniServico = v; });
+bindChipGroup(urgencyChips, v => { miniUrgencia = v; });
+
+function refFor() {
+  const t = new Date().toISOString().replace(/[-:TZ.]/g, '').slice(0, 12);
+  return 'MDM-' + t;
+}
+
 mini.addEventListener('submit', async (e) => {
   e.preventDefault();
   const nome = mini.querySelector('#mNome');
@@ -1723,80 +1084,19 @@ mini.addEventListener('submit', async (e) => {
     }
   });
   if (!ok) return;
-  const payload = { nome: nome.value.trim(), telefone: tel.value.trim(), servico: miniServico, _source: 'hero-mini', _at: new Date().toISOString() };
-  await submitPayload(mini, payload, () => {
-    mini.querySelectorAll('.mini-field, .mini-chips, .mini-submit, .mini-alt, .mini-eyebrow, h3, .mini-sub, [style*="display:block"]').forEach(el => {
-      if (!el.classList.contains('mini-done')) el.style.display = 'none';
-    });
-    const done = mini.querySelector('.mini-done');
-    done.querySelector('.ref').textContent = payload._ref || refFor(payload);
-    done.style.display = 'block';
-    mini.classList.add('done');
-  });
-});
 
-/* ─── Full quote form ─── */
-const $q = (id) => document.getElementById(id);
-function quoteData() {
-  return {
-    nome: $q('qNome').value.trim(),
-    email: $q('qEmail').value.trim(),
-    telefone: $q('qTel').value.trim(),
-    servico: $q('qServico').value,
-    assunto: $q('qAssunto').value.trim(),
-    mensagem: $q('qMsg').value.trim(),
-    empresa: $q('qEmpresa').value.trim(),
-    nif: $q('qNif').value.trim(),
-    localidade: $q('qLocal').value.trim(),
-    gdpr: $q('qGdpr').checked,
-    _source: 'quote-form',
+  const payload = {
+    nome: nome.value.trim(),
+    telefone: tel.value.trim(),
+    servico: miniServico,
+    urgencia: miniUrgencia,
+    _source: 'hero-mini',
     _at: new Date().toISOString(),
+    _ref: refFor(),
   };
-}
-function quoteValidate(d) {
-  document.querySelectorAll('.mailwin .mw-row').forEach(r => r.classList.remove('err'));
-  let firstErr = null;
-  const flag = (id) => {
-    const row = $q(id).closest('.mw-row');
-    row.classList.add('err');
-    if (!firstErr) firstErr = row;
-  };
-  if (!d.nome) flag('qNome');
-  if (!d.mensagem) flag('qMsg');
-  if (!d.email && !d.telefone) { flag('qEmail'); flag('qTel'); }
-  if (d.email && !/^\S+@\S+\.\S+$/.test(d.email)) flag('qEmail');
-  if (firstErr) {
-    firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return false;
-  }
-  return true;
-}
-function quoteBody(d) {
-  const lines = [
-    'Pedido de orçamento — MDM Assist',
-    '',
-    `Nome: ${d.nome}`,
-    d.telefone ? `Telefone: ${d.telefone}` : null,
-    d.email ? `Email: ${d.email}` : null,
-    d.servico ? `Serviço: ${d.servico}` : null,
-    d.assunto ? `Assunto: ${d.assunto}` : null,
-    d.empresa ? `Empresa: ${d.empresa}` : null,
-    d.nif ? `NIF: ${d.nif}` : null,
-    d.localidade ? `Localidade: ${d.localidade}` : null,
-    '',
-    'Mensagem:',
-    d.mensagem,
-  ];
-  return lines.filter(Boolean).join('\n');
-}
-function refFor(d) {
-  const t = (d._at || new Date().toISOString()).replace(/[-:TZ.]/g, '').slice(0, 12);
-  return 'MDM-' + t;
-}
 
-async function submitPayload(formEl, payload, onSuccess) {
-  payload._ref = refFor(payload);
-  const endpoint = formEl.dataset.endpoint;
+  const endpoint = mini.dataset.endpoint;
+  let sent = false;
   if (endpoint) {
     try {
       const r = await fetch(endpoint, {
@@ -1804,48 +1104,43 @@ async function submitPayload(formEl, payload, onSuccess) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      if (r.ok) { onSuccess(); return; }
+      if (r.ok) sent = true;
     } catch (err) { /* fall through */ }
   }
-  const subject = payload.servico ? `Pedido — ${payload.servico}` : 'Pedido de orçamento';
-  const body = 'Nome: ' + payload.nome
-    + (payload.telefone ? '\nTel: ' + payload.telefone : '')
-    + (payload.email ? '\nEmail: ' + payload.email : '')
-    + (payload.servico ? '\nServiço: ' + payload.servico : '')
-    + (payload.mensagem ? '\n\n' + payload.mensagem : '')
-    + '\n\nRef: ' + payload._ref;
-  window.location.href = 'mailto:mdmassist@mdmassist.com?subject='
-    + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-  onSuccess();
-}
+  if (!sent) {
+    // mailto fallback
+    const subject = payload.servico ? `Pedido — ${payload.servico}` : 'Pedido de contacto';
+    const body = 'Nome: ' + payload.nome
+      + '\nTelefone: ' + payload.telefone
+      + (payload.servico ? '\nServiço: ' + payload.servico : '')
+      + (payload.urgencia ? '\nUrgência: ' + payload.urgencia : '')
+      + '\n\nRef: ' + payload._ref;
+    window.location.href = 'mailto:mdmassist@mdmassist.com?subject='
+      + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  }
 
-async function handleQuoteSubmit(e) {
-  e.preventDefault();
-  const d = quoteData();
-  if (!quoteValidate(d)) return;
-  await submitPayload(document.getElementById('quoteForm'), d, () => showQuoteSuccess(d));
-}
-$q('sendEmail').addEventListener('click', handleQuoteSubmit);
-document.getElementById('quoteForm').addEventListener('submit', handleQuoteSubmit);
-$q('sendWa').addEventListener('click', async (e) => {
-  e.preventDefault();
-  const d = quoteData();
-  if (!quoteValidate(d)) return;
-  d._ref = refFor(d);
-  const text = quoteBody(d) + '\n\nRef: ' + d._ref;
-  window.open('https://wa.me/351910307579?text=' + encodeURIComponent(text), '_blank', 'noopener');
-  showQuoteSuccess(d);
+  // Reveal success card, hide the form fields
+  mini.querySelectorAll('.mini-field, .mini-chips, .mini-submit, .mini-alt, .mini-eyebrow, .mini > h3, .mini-sub, .mini > div:not(.mini-done)').forEach(el => {
+    if (!el.classList.contains('mini-done')) el.style.display = 'none';
+  });
+  const done = mini.querySelector('.mini-done');
+  done.querySelector('.ref-num').textContent = payload._ref;
+  // Contextual SLA line based on urgency
+  const line = document.getElementById('miniUrgencyLine');
+  if (line) {
+    if (payload.urgencia === 'Hoje') {
+      line.textContent = 'Escolheu "Hoje" — retornamos em 2h em horário útil.';
+    } else if (payload.urgencia === 'Esta semana') {
+      line.textContent = 'Escolheu "Esta semana" — retornamos em 24h úteis.';
+    } else if (payload.urgencia === 'Sem urgência') {
+      line.textContent = 'Sem urgência — retornamos em 48h úteis.';
+    } else {
+      line.textContent = 'Um técnico dá seguimento em 24h úteis.';
+    }
+  }
+  done.style.display = 'block';
+  mini.classList.add('done');
 });
-
-function showQuoteSuccess(d) {
-  const success = document.getElementById('quoteSuccess');
-  const form = document.getElementById('quoteForm');
-  const ref = d && d._ref ? d._ref : refFor(d || {});
-  document.getElementById('quoteRef').textContent = ref;
-  form.style.display = 'none';
-  success.classList.add('show');
-  success.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
 </script>
 
 </body>
