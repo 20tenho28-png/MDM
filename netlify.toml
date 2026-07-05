@@ -1,0 +1,42 @@
+# Netlify — MDM Assist prototypes
+# Publishes the prototype/ folder as a static site.
+# The launch variant (industrial) answers at the root URL.
+
+[build]
+  publish = "prototype"
+  # No build step — plain static HTML.
+  command = ""
+
+# Root → launch variant
+[[redirects]]
+  from = "/"
+  to = "/index-industrial.html"
+  status = 200
+  force = true
+
+# Named shortcuts for every variant (compare side by side)
+[[redirects]]
+  from = "/industrial"
+  to = "/index-industrial.html"
+  status = 200
+
+[[redirects]]
+  from = "/hibrido"
+  to = "/index-hibrido.html"
+  status = 200
+
+[[redirects]]
+  from = "/editorial"
+  to = "/index-editorial.html"
+  status = 200
+
+[[redirects]]
+  from = "/v2"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
