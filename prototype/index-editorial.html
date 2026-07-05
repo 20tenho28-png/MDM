@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#B61918">
 <link rel="preconnect" href="https://fonts.googleapis.com/">
 <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   /* ═══ TOKENS ═══ */
   :root {
@@ -16,6 +16,7 @@
     --paper:  #F0EEE6;
     --sand:   #E8E4D9;
     --ink:    #191919;
+    --deep:   #2A2825;
     --slate:  #5C5A54;
     --mute:   #8A857D;
     --red:    #B61918;
@@ -51,37 +52,39 @@
   nav.top {
     position: fixed; top: 0; left: 0; right: 0; z-index: 50;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 40px;
-    background: rgba(250,249,245,0.86);
+    padding: 12px 40px;
+    background: rgba(250,249,245,0.9);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid transparent;
-    transition: border-color .3s, padding .3s;
+    transition: border-color .3s, padding .3s, background .3s;
   }
-  nav.top.scrolled { border-color: var(--sand); padding: 10px 40px; }
+  nav.top.scrolled { border-color: var(--sand); padding: 8px 40px; background: rgba(250,249,245,0.96); }
 
   .brand {
-    display: flex; align-items: center; gap: 12px;
+    display: flex; align-items: center; gap: 14px;
     text-decoration: none; color: var(--ink);
   }
-  .brand-mark {
-    width: 42px; height: 42px; border-radius: 10px;
-    background: var(--red); color: #fff;
-    display: grid; place-items: center;
-    font-family: var(--serif); font-weight: 700; font-style: italic;
-    font-size: 22px; letter-spacing: -0.5px;
+  .brand img {
+    height: 52px; width: 52px;
+    object-fit: cover; object-position: center;
+    border-radius: 8px; display: block;
     transition: transform .35s var(--ease);
   }
-  .brand:hover .brand-mark { transform: rotate(-4deg) scale(1.05); }
-  .brand-txt strong { display: block; font-family: var(--serif); font-weight: 600; font-size: 17px; line-height: 1; }
-  .brand-txt small { display: block; font-size: 11px; color: var(--slate); margin-top: 3px; letter-spacing: 0.15px; }
+  .brand:hover img { transform: rotate(-3deg) scale(1.06); }
+  .brand-txt strong { display: block; font-family: var(--serif); font-weight: 700; font-size: 17px; line-height: 1; letter-spacing: -0.2px; }
+  .brand-txt small { display: block; font-size: 11px; color: var(--slate); margin-top: 4px; letter-spacing: 0.2px; }
 
-  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .nav-right { display: flex; align-items: center; gap: 14px; }
+  .nav-link {
+    font-size: 13.5px; font-weight: 500;
+    text-decoration: none; color: var(--slate);
+    transition: color .2s;
+  }
+  .nav-link:hover { color: var(--red); }
   .nav-call {
     font-family: var(--mono); font-size: 13px;
     text-decoration: none; color: var(--ink);
-    padding: 8px 4px;
-    transition: color .2s;
   }
   .nav-call:hover { color: var(--red); }
   .nav-wa {
@@ -89,97 +92,109 @@
     background: var(--red); color: #fff;
     padding: 10px 18px; border-radius: 999px;
     font-size: 13px; font-weight: 600; text-decoration: none;
-    transition: background .25s, transform .25s var(--ease);
+    transition: background .25s, transform .25s var(--ease), box-shadow .3s;
   }
-  .nav-wa:hover { background: var(--red-dk); transform: translateY(-2px); }
+  .nav-wa:hover { background: var(--red-dk); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(182,25,24,0.35); }
   .nav-wa svg { width: 15px; height: 15px; }
 
-  /* ═══ SECTION SHELL ═══ */
-  section { position: relative; }
-  .wrap { max-width: 1200px; margin: 0 auto; padding: 100px 40px; }
-  .s-cream { background: var(--cream); }
-  .s-paper { background: var(--paper); border-top: 1px solid var(--sand); }
-  .s-cream + .s-cream, .s-paper + .s-paper { border-top: 1px solid var(--sand); }
-
-  [data-r] { opacity: 0; transform: translateY(28px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
-  [data-r].in { opacity: 1; transform: none; }
-
-  .sec-head { margin-bottom: 48px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; align-items: end; }
-  .sec-head .lead p { color: var(--slate); font-size: 16px; margin-top: 12px; max-width: 460px; }
-  .sec-head aside { text-align: right; }
-  .sec-anchor {
-    font-family: var(--serif); font-style: italic;
-    font-size: clamp(52px, 6vw, 76px);
-    line-height: 1; color: var(--red-sf);
-    letter-spacing: -1px;
+  /* ═══ HERO — dark, animated, image-backed ═══ */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    padding: 128px 40px 100px;
+    color: #fff;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .hero-bg {
+    position: absolute; inset: 0; z-index: -3;
+    background:
+      linear-gradient(180deg, rgba(25,25,25,0.72) 0%, rgba(25,25,25,0.85) 100%),
+      url('assets/mdm-service-hvac-electrical.webp') center/cover no-repeat,
+      var(--deep);
+  }
+  .hero-veil {
+    position: absolute; inset: 0; z-index: -2;
+    background:
+      radial-gradient(ellipse at 25% 20%, rgba(182,25,24,0.28) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 80%, rgba(232,155,138,0.15) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .hero-waves {
+    position: absolute; inset: 0; z-index: -1;
+    pointer-events: none; opacity: 0.28;
+    mask-image: linear-gradient(180deg, transparent 0%, #000 20%, #000 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 20%, #000 70%, transparent 100%);
+  }
+  .hero-waves svg { width: 100%; height: 100%; display: block; }
+  .hero-waves path {
+    fill: none;
+    stroke: rgba(255,255,255,0.4);
+    stroke-width: 1;
+    stroke-linecap: round;
+  }
+  .hero-waves path.p1 { animation: drift 22s linear infinite; }
+  .hero-waves path.p2 { animation: drift 28s linear infinite reverse; }
+  .hero-waves path.p3 { animation: drift 34s linear infinite; }
+  .hero-waves path.p4 { animation: drift 40s linear infinite reverse; }
+  @keyframes drift {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-120px); }
   }
 
-  .sec-eyebrow {
-    display: inline-flex; align-items: center; gap: 10px;
-    font-family: var(--mono); font-size: 10.5px;
-    letter-spacing: 2.4px; text-transform: uppercase;
-    color: var(--red); margin-bottom: 16px;
+  .hero-inner {
+    position: relative;
+    max-width: 1240px; margin: 0 auto;
+    display: grid; grid-template-columns: 1.35fr 1fr;
+    gap: 60px; align-items: center;
   }
-  .sec-eyebrow::before { content: ''; width: 26px; height: 1px; background: var(--red); }
-
-  h2 {
-    font-family: var(--serif);
-    font-size: clamp(30px, 4vw, 46px);
-    font-weight: 600; letter-spacing: -0.5px; line-height: 1.14;
-  }
-  h2 em { font-style: italic; color: var(--red); }
-
-  /* ═══ HERO ═══ */
-  .hero { padding: 128px 40px 80px; max-width: 1200px; margin: 0 auto; }
-  .hero-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 56px; align-items: center; }
 
   .hero-eyebrow {
-    font-family: var(--mono); font-size: 11px;
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
     letter-spacing: 2.5px; text-transform: uppercase;
-    color: var(--red); margin-bottom: 22px;
+    color: #FEC6C4; margin-bottom: 22px;
     display: inline-flex; align-items: center; gap: 12px;
     opacity: 0; animation: rise .9s var(--ease) .25s forwards;
   }
-  .hero-eyebrow::before { content: ''; width: 32px; height: 1px; background: var(--red); }
+  .hero-eyebrow::before { content: ''; width: 32px; height: 1px; background: #FEC6C4; }
 
   .hero-partners {
     display: flex; align-items: center; gap: 18px;
-    margin-bottom: 22px; flex-wrap: wrap;
+    margin-bottom: 26px; flex-wrap: wrap;
     opacity: 0; animation: rise .9s var(--ease) .35s forwards;
   }
   .hp-mark {
-    height: 22px; display: inline-flex; align-items: center; gap: 6px;
-    color: var(--mute);
+    display: inline-flex; align-items: center; gap: 8px;
+    color: rgba(255,255,255,0.75);
     font-family: var(--sans); font-size: 12px; font-weight: 500;
-    letter-spacing: 0.3px;
+    padding: 5px 10px; border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(6px);
   }
-  .hp-mark img { height: 22px; width: auto; opacity: 0.65; filter: grayscale(1); }
-  .hp-mark .pill {
-    display: inline-block; padding: 4px 9px; border-radius: 4px;
-    border: 1px solid var(--sand); background: rgba(255,255,255,0.5);
-    font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
-    color: var(--slate);
-  }
+  .hp-mark img { height: 18px; width: auto; filter: brightness(0) invert(1); opacity: 0.85; }
+  .hp-mark .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--wa); box-shadow: 0 0 8px var(--wa); }
 
   h1 {
     font-family: var(--serif);
-    font-size: clamp(46px, 7.2vw, 84px);
-    font-weight: 600; line-height: 1.08;
+    font-size: clamp(46px, 7vw, 84px);
+    font-weight: 600; line-height: 1.06;
     letter-spacing: -1.5px;
-    max-width: 780px;
+    max-width: 760px;
+    color: #fff;
   }
   h1 .ln { display: block; overflow: hidden; }
   h1 .ln span { display: block; transform: translateY(112%); animation: reveal 1.05s var(--ease) forwards; }
   h1 .ln:nth-child(1) span { animation-delay: .45s; }
   h1 .ln:nth-child(2) span { animation-delay: .58s; }
-  h1 em { font-style: italic; color: var(--red); }
+  h1 em { font-style: italic; color: #FF7973; }
 
   @keyframes reveal { to { transform: translateY(0); } }
   @keyframes rise { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
   .hero-sub {
-    margin-top: 26px; font-size: 17.5px; color: var(--slate);
-    max-width: 490px; line-height: 1.65;
+    margin-top: 26px; font-size: 17.5px; color: rgba(255,255,255,0.82);
+    max-width: 500px; line-height: 1.65;
     opacity: 0; animation: rise .9s var(--ease) 1s forwards;
   }
   .hero-cta {
@@ -196,61 +211,65 @@
   }
   .btn svg { width: 16px; height: 16px; }
   .btn-red { background: var(--red); color: #fff; }
-  .btn-red:hover { background: var(--red-dk); transform: translateY(-2px); box-shadow: 0 14px 30px rgba(182,25,24,0.28); }
+  .btn-red:hover { background: var(--red-dk); transform: translateY(-2px); box-shadow: 0 14px 30px rgba(182,25,24,0.4); }
   .btn-wa { background: var(--wa); color: #fff; }
-  .btn-wa:hover { background: var(--wa-dk); transform: translateY(-2px); box-shadow: 0 14px 30px rgba(37,211,102,0.3); }
-  .btn-line { color: var(--ink); border: 1.5px solid var(--sand); background: rgba(255,255,255,0.55); }
-  .btn-line:hover { border-color: var(--ink); transform: translateY(-2px); }
+  .btn-wa:hover { background: var(--wa-dk); transform: translateY(-2px); box-shadow: 0 14px 30px rgba(37,211,102,0.45); }
+  .btn-ghost { color: #fff; border: 1.5px solid rgba(255,255,255,0.35); background: rgba(255,255,255,0.06); backdrop-filter: blur(4px); }
+  .btn-ghost:hover { border-color: #fff; transform: translateY(-2px); background: rgba(255,255,255,0.12); }
 
   .hero-trust {
     margin-top: 18px;
-    font-size: 13px; color: var(--slate);
+    font-size: 13px; color: rgba(255,255,255,0.75);
     display: inline-flex; align-items: center; gap: 8px;
     opacity: 0; animation: rise .9s var(--ease) 1.3s forwards;
   }
-  .hero-trust .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--wa); box-shadow: 0 0 0 4px rgba(37,211,102,0.15); }
+  .hero-trust .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--wa); box-shadow: 0 0 10px rgba(37,211,102,0.5); animation: pulse-dot 2.4s ease-in-out infinite; }
+  @keyframes pulse-dot { 0%,100% { transform: scale(1); } 50% { transform: scale(1.4); } }
+
   .hero-phones {
     margin-top: 8px;
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.6px;
-    color: var(--mute);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.5px;
+    color: rgba(255,255,255,0.55);
     opacity: 0; animation: rise .9s var(--ease) 1.4s forwards;
   }
-  .hero-phones a { color: var(--slate); text-decoration: none; border-bottom: 1px dotted transparent; }
-  .hero-phones a:hover { border-bottom-color: var(--red); color: var(--red); }
+  .hero-phones a { color: rgba(255,255,255,0.75); text-decoration: none; border-bottom: 1px dotted transparent; }
+  .hero-phones a:hover { border-bottom-color: #FEC6C4; color: #FEC6C4; }
 
   .hero-meta {
-    margin-top: 56px; display: grid; grid-template-columns: repeat(4, auto); gap: 42px;
+    margin-top: 56px; display: grid; grid-template-columns: repeat(4, auto); gap: 44px;
     opacity: 0; animation: rise 1s var(--ease) 1.55s forwards;
   }
   .hm { display: flex; flex-direction: column; }
   .hm-num {
     font-family: var(--serif); font-style: italic; font-weight: 500;
-    font-size: 30px; line-height: 1; color: var(--slate);
+    font-size: 30px; line-height: 1; color: rgba(255,255,255,0.7);
   }
-  .hm-num b { color: var(--red); font-weight: 700; font-style: normal; font-size: 40px; letter-spacing: -0.5px; }
-  .hm-lbl { font-size: 12px; color: var(--slate); margin-top: 6px; letter-spacing: 0.2px; }
+  .hm-num b { color: #fff; font-weight: 700; font-style: normal; font-size: 42px; letter-spacing: -0.5px; text-shadow: 0 2px 20px rgba(182,25,24,0.4); }
+  .hm-lbl { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 6px; letter-spacing: 0.3px; text-transform: uppercase; font-family: var(--mono); }
 
-  /* ═══ HERO MINI-FORM (right column desktop; below CTA mobile) ═══ */
+  /* ═══ HERO MINI-FORM ═══ */
   .mini {
-    background: #fff;
-    border: 1px solid var(--sand);
+    background: rgba(255,255,255,0.97);
+    color: var(--ink);
+    border: 1px solid rgba(255,255,255,0.4);
     border-radius: 18px;
-    padding: 26px 26px 22px;
-    box-shadow: 0 30px 60px -35px rgba(25,25,25,0.28);
+    padding: 28px 28px 24px;
+    box-shadow: 0 40px 80px -30px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+    backdrop-filter: blur(20px);
     opacity: 0; animation: rise 1s var(--ease) 1.2s forwards;
     position: relative;
   }
   .mini::before {
-    content: 'RÁPIDO'; position: absolute; top: 18px; right: 20px;
-    font-family: var(--mono); font-size: 9.5px; letter-spacing: 1.5px;
+    content: 'RÁPIDO'; position: absolute; top: 20px; right: 22px;
+    font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
     color: var(--red); background: var(--red-sf);
-    padding: 4px 8px; border-radius: 4px;
+    padding: 4px 9px; border-radius: 5px;
   }
-  .mini h3 { font-family: var(--serif); font-size: 22px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 4px; }
+  .mini h3 { font-family: var(--serif); font-size: 22px; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 4px; color: var(--ink); }
   .mini h3 em { color: var(--red); font-style: italic; }
-  .mini .mini-sub { font-size: 13px; color: var(--slate); margin-bottom: 18px; }
+  .mini .mini-sub { font-size: 13px; color: var(--slate); margin-bottom: 20px; }
   .mini-eyebrow {
-    font-family: var(--mono); font-size: 10px; letter-spacing: 2px;
+    font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 2px;
     color: var(--red); text-transform: uppercase;
     margin-bottom: 10px;
     display: inline-flex; align-items: center; gap: 8px;
@@ -268,16 +287,16 @@
     border: 1px solid var(--sand); border-radius: 10px;
     background: var(--cream);
     font-family: inherit; font-size: 15px; color: var(--ink);
-    transition: border-color .2s, background .2s;
+    transition: border-color .2s, background .2s, box-shadow .2s;
     outline: 0;
   }
-  .mini-field input:focus { border-color: var(--red); background: #fff; }
+  .mini-field input:focus { border-color: var(--red); background: #fff; box-shadow: 0 0 0 3px rgba(182,25,24,0.1); }
   .mini-field.err input { border-color: var(--red); background: var(--red-sf); }
   .mini-field .msg { font-size: 11.5px; color: var(--red); margin-top: 4px; min-height: 14px; }
 
   .mini-chips {
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
   }
   .chip {
     padding: 10px 12px; border-radius: 8px;
@@ -297,15 +316,14 @@
     font-family: inherit; font-size: 14px; font-weight: 600;
     letter-spacing: 0.3px;
     cursor: pointer;
-    transition: background .25s, transform .25s var(--ease);
+    transition: background .25s, transform .25s var(--ease), box-shadow .3s;
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   }
-  .mini-submit:hover { background: var(--red-dk); transform: translateY(-1px); }
+  .mini-submit:hover { background: var(--red-dk); transform: translateY(-1px); box-shadow: 0 10px 22px rgba(182,25,24,0.35); }
   .mini-submit svg { width: 15px; height: 15px; }
   .mini-alt {
     display: block; text-align: center;
     margin-top: 12px; font-size: 12px; color: var(--slate);
-    text-decoration: none;
   }
   .mini-alt a { color: var(--wa-dk); font-weight: 600; text-decoration: none; }
   .mini-alt a:hover { text-decoration: underline; }
@@ -317,116 +335,282 @@
     background: var(--ok); color: #fff;
     display: grid; place-items: center; margin: 0 auto 14px;
     font-size: 24px;
+    animation: pop .5s var(--ease) forwards;
   }
+  @keyframes pop { from { transform: scale(0); } 60% { transform: scale(1.15); } to { transform: scale(1); } }
   .mini-done h4 { font-family: var(--serif); font-size: 20px; font-weight: 600; margin-bottom: 6px; }
   .mini-done p { font-size: 13px; color: var(--slate); margin-bottom: 14px; }
 
-  /* ═══ TRUST BAND (moved up) ═══ */
-  .band {
-    background: var(--ink); color: var(--cream);
-    border-radius: 24px;
-    padding: 56px 48px;
-    display: grid; grid-template-columns: 1.15fr 1fr;
-    gap: 48px; align-items: center;
+  /* ═══ MITSUBISHI PARTNER BAND ═══ */
+  .partner {
+    background: #fff; border-bottom: 1px solid var(--sand);
+    padding: 26px 40px;
+  }
+  .partner-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 32px; flex-wrap: wrap;
+  }
+  .partner-mark { display: flex; align-items: center; gap: 20px; }
+  .partner-mark img { height: 34px; width: auto; }
+  .partner-txt strong { display: block; font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 2px; color: var(--red); text-transform: uppercase; margin-bottom: 4px; }
+  .partner-txt span { font-family: var(--serif); font-size: 15.5px; font-weight: 600; color: var(--ink); }
+  .partner-cta {
+    font-size: 13px; font-weight: 600; color: var(--red);
+    text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: gap .25s var(--ease);
+  }
+  .partner-cta:hover { gap: 12px; }
+
+  /* ═══ SECTION SHELL ═══ */
+  section { position: relative; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 100px 40px; }
+  .s-cream { background: var(--cream); }
+  .s-paper { background: var(--paper); border-top: 1px solid var(--sand); }
+
+  [data-r] { opacity: 0; transform: translateY(28px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
+  [data-r].in { opacity: 1; transform: none; }
+
+  .sec-head { margin-bottom: 48px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px; align-items: end; }
+  .sec-head .lead p { color: var(--slate); font-size: 16px; margin-top: 12px; max-width: 460px; }
+  .sec-head aside { text-align: right; }
+  .sec-anchor {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(52px, 6vw, 76px);
+    line-height: 1; color: var(--red-sf);
+    letter-spacing: -1px;
+  }
+
+  .sec-eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+    letter-spacing: 2.4px; text-transform: uppercase;
+    color: var(--red); margin-bottom: 16px;
+  }
+  .sec-eyebrow::before { content: ''; width: 26px; height: 1px; background: var(--red); }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: clamp(30px, 4vw, 46px);
+    font-weight: 600; letter-spacing: -0.5px; line-height: 1.14;
+  }
+  h2 em { font-style: italic; color: var(--red); }
+
+  /* ═══ TRUST NUMBERS BAND ═══ */
+  .stats-band {
+    background: var(--deep); color: #fff;
+    padding: 60px 40px;
     position: relative; overflow: hidden;
   }
-  .band::after {
-    content: ''; position: absolute; right: -100px; top: -100px;
-    width: 380px; height: 380px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(182,25,24,0.35) 0%, transparent 70%);
+  .stats-band::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 20% 50%, rgba(182,25,24,0.2) 0%, transparent 45%),
+      radial-gradient(circle at 80% 50%, rgba(232,155,138,0.1) 0%, transparent 45%);
     pointer-events: none;
   }
-  .band h2 { color: var(--cream); font-size: clamp(28px, 3.6vw, 42px); }
-  .band h2 em { color: #E89B8A; }
-  .band .lead-p { color: rgba(250,249,245,0.68); font-size: 15px; margin-top: 18px; max-width: 440px; line-height: 1.6; }
-  .band-list { list-style: none; position: relative; z-index: 1; }
-  .band-list li {
-    display: flex; gap: 12px; align-items: flex-start;
-    padding: 12px 0; font-size: 14.5px;
-    color: rgba(250,249,245,0.9);
-    border-bottom: 1px solid rgba(250,249,245,0.1);
+  .stats-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
+    position: relative;
   }
-  .band-list li::before { content: '◆'; color: var(--red); font-size: 9px; margin-top: 8px; flex: none; }
-  .band-list li:last-child { border-bottom: 0; }
+  .stat { text-align: center; }
+  .stat-icon {
+    width: 32px; height: 32px; margin: 0 auto 12px;
+    display: grid; place-items: center;
+    color: rgba(255,255,255,0.5);
+  }
+  .stat-icon svg { width: 100%; height: 100%; }
+  .stat-num {
+    font-family: var(--serif); font-weight: 700;
+    font-size: clamp(40px, 5vw, 60px); line-height: 1;
+    color: var(--red);
+    text-shadow: 0 4px 30px rgba(182,25,24,0.5);
+    letter-spacing: -1.5px;
+    margin-bottom: 8px;
+  }
+  .stat-num small { font-size: 0.55em; font-weight: 500; color: rgba(255,255,255,0.85); text-shadow: none; margin-left: 4px; letter-spacing: 0; }
+  .stat-lbl {
+    font-family: var(--mono); font-size: 10.5px; font-weight: 500;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: rgba(255,255,255,0.65);
+  }
 
-  /* ═══ SERVIÇOS ═══ */
+  /* ═══ SERVIÇOS with real photos ═══ */
   .svc-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
+    gap: 20px;
   }
   .svc {
     background: #fff;
     border: 1px solid var(--sand);
     border-radius: 18px;
-    padding: 28px 24px;
+    overflow: hidden;
     transition: transform .4s var(--ease), border-color .3s, box-shadow .4s;
+    display: flex; flex-direction: column;
   }
-  .svc:hover { border-color: var(--red); box-shadow: 0 20px 44px rgba(182,25,24,0.1); transform: translateY(-4px); }
+  .svc:hover { border-color: var(--red); box-shadow: 0 22px 46px rgba(182,25,24,0.14); transform: translateY(-6px); }
+  .svc-img {
+    aspect-ratio: 16 / 10;
+    position: relative;
+    overflow: hidden;
+    background: var(--deep);
+  }
+  .svc-img::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(25,25,25,0) 55%, rgba(25,25,25,0.55) 100%);
+  }
+  .svc-img img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform .8s var(--ease);
+  }
+  .svc:hover .svc-img img { transform: scale(1.06); }
+  .svc-body { padding: 24px 22px 26px; flex: 1; display: flex; flex-direction: column; }
   .svc-ic {
-    width: 42px; height: 42px; border-radius: 10px;
-    background: var(--red-sf);
+    width: 36px; height: 36px; border-radius: 9px;
+    background: var(--red-sf); color: var(--red);
     display: grid; place-items: center;
-    margin-bottom: 20px;
+    margin-top: -46px; margin-bottom: 14px; position: relative; z-index: 1;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     transition: background .3s, transform .35s var(--ease);
   }
-  .svc:hover .svc-ic { background: var(--red); transform: rotate(-6deg); }
-  .svc-ic svg { width: 20px; height: 20px; color: var(--red); transition: color .3s; }
-  .svc:hover .svc-ic svg { color: #fff; }
+  .svc:hover .svc-ic { background: var(--red); color: #fff; transform: rotate(-8deg); }
+  .svc-ic svg { width: 18px; height: 18px; }
   .svc h3 {
     font-family: var(--sans); font-weight: 700;
     font-size: 16px; letter-spacing: -0.1px;
     margin-bottom: 8px;
   }
-  .svc p { font-size: 13px; color: var(--slate); line-height: 1.6; }
+  .svc p { font-size: 13.5px; color: var(--slate); line-height: 1.6; flex: 1; }
 
-  /* ═══ SHOWCASE + PROCESSO merged ═══ */
-  .showcase-wrap {
-    background: var(--paper); border-top: 1px solid var(--sand);
-    padding: 100px 40px 90px;
+  /* ═══ EMPRESA — real ops photo + prose ═══ */
+  .empresa {
+    background: var(--cream); border-top: 1px solid var(--sand);
+    padding: 100px 40px;
   }
-  .showcase-inner { max-width: 1200px; margin: 0 auto; }
-  .showcase-img {
+  .empresa-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1.15fr; gap: 60px; align-items: center;
+  }
+  .empresa-photo {
     position: relative;
-    border-radius: 16px; overflow: hidden;
-    box-shadow: 0 24px 60px -32px rgba(25,25,25,0.45);
-    border: 1px solid var(--sand);
-    aspect-ratio: 16 / 8;
-    background: linear-gradient(135deg, #2C2A24 0%, #3B3833 100%);
-    display: grid; place-items: center;
+    border-radius: 18px; overflow: hidden;
+    box-shadow: 0 30px 60px -30px rgba(25,25,25,0.4);
+    aspect-ratio: 4 / 5;
   }
-  .showcase-img::before {
+  .empresa-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .empresa-photo::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(160deg, transparent 55%, rgba(182,25,24,0.14) 100%);
+  }
+  .empresa-badge {
+    position: absolute; bottom: 20px; left: 20px; right: 20px;
+    background: rgba(25,25,25,0.85); backdrop-filter: blur(12px);
+    color: #fff;
+    padding: 16px 20px; border-radius: 12px;
+    display: flex; align-items: center; gap: 14px;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .empresa-badge img { height: 30px; width: 30px; border-radius: 6px; object-fit: cover; }
+  .empresa-badge strong { display: block; font-family: var(--serif); font-size: 14px; }
+  .empresa-badge small { display: block; font-size: 11px; opacity: 0.7; margin-top: 2px; }
+  .empresa-values { list-style: none; margin-top: 32px; }
+  .empresa-values li {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--sand);
+    display: grid; grid-template-columns: 40px 1fr; gap: 14px; align-items: center;
+  }
+  .empresa-values li:last-child { border-bottom: 0; }
+  .empresa-values .n {
+    font-family: var(--mono); font-size: 11px; color: var(--red); font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .empresa-values strong { display: block; font-family: var(--serif); font-size: 17px; font-weight: 600; margin-bottom: 3px; }
+  .empresa-values p { font-size: 13.5px; color: var(--slate); line-height: 1.5; }
+
+  /* ═══ PORTFOLIO — RACE-inspired sector band ═══ */
+  .portfolio {
+    background: var(--deep); color: #fff;
+    padding: 90px 40px;
+    position: relative; overflow: hidden;
+  }
+  .portfolio::before {
     content: ''; position: absolute; inset: 0;
     background:
-      radial-gradient(circle at 25% 30%, rgba(182,25,24,0.28) 0%, transparent 45%),
-      radial-gradient(circle at 75% 70%, rgba(232,155,138,0.22) 0%, transparent 50%);
+      radial-gradient(ellipse at 20% 20%, rgba(182,25,24,0.18) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(232,155,138,0.08) 0%, transparent 50%);
+    pointer-events: none;
   }
-  .showcase-img .center-tag {
-    position: relative; z-index: 1;
-    color: rgba(255,255,255,0.8);
-    font-family: var(--serif); font-style: italic;
-    font-size: clamp(22px, 3vw, 34px); letter-spacing: -0.5px;
-    text-align: center;
-  }
-  .showcase-cap {
-    position: absolute; left: 0; right: 0; bottom: 0;
-    display: flex; flex-wrap: wrap; gap: 8px;
-    padding: 56px 24px 22px;
-    background: linear-gradient(to top, rgba(25,25,25,0.85), rgba(25,25,25,0));
-    z-index: 2;
-  }
-  .showcase-tag {
-    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.4px;
-    color: #fff; padding: 6px 12px; border-radius: 999px;
-    background: rgba(182,25,24,0.92);
-  }
+  .portfolio-inner { max-width: 1200px; margin: 0 auto; position: relative; }
+  .portfolio-head { text-align: center; margin-bottom: 48px; }
+  .portfolio-head .sec-eyebrow { color: #FEC6C4; justify-content: center; display: inline-flex; }
+  .portfolio-head .sec-eyebrow::before { background: #FEC6C4; }
+  .portfolio-head h2 { color: #fff; font-size: clamp(30px, 4.2vw, 52px); }
+  .portfolio-head h2 em { color: #FF7973; }
+  .portfolio-head p { color: rgba(255,255,255,0.65); font-size: 15.5px; margin-top: 14px; max-width: 540px; margin-left: auto; margin-right: auto; }
 
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+  .pcard {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 22px 20px;
+    display: flex; flex-direction: column; gap: 12px;
+    transition: transform .35s var(--ease), border-color .3s, background .3s;
+  }
+  .pcard:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,120,115,0.5);
+    background: rgba(255,255,255,0.07);
+  }
+  .pcard-icon {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: rgba(182,25,24,0.28); color: #FF9E99;
+    display: grid; place-items: center;
+  }
+  .pcard-icon svg { width: 18px; height: 18px; }
+  .pcard-cat {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.6px;
+    color: rgba(255,255,255,0.55); text-transform: uppercase; font-weight: 600;
+  }
+  .pcard h4 {
+    font-family: var(--serif); font-size: 15px; font-weight: 600;
+    color: #fff; letter-spacing: -0.2px; line-height: 1.3;
+  }
+  .pcard p {
+    font-size: 12.5px; color: rgba(255,255,255,0.6);
+    line-height: 1.5;
+  }
+  .portfolio-note {
+    display: block; text-align: center;
+    margin-top: 32px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+  }
+  .portfolio-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 12px;
+    padding: 10px 18px; border-radius: 999px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; text-decoration: none; font-size: 13px; font-weight: 600;
+    transition: background .25s, border-color .25s, gap .25s var(--ease);
+  }
+  .portfolio-cta:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.3); gap: 14px; }
+
+  /* ═══ PROCESSO ═══ */
   #processo { padding-top: 60px; }
   .proc-pill {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 8px 16px; border-radius: 999px;
     background: #fff; border: 1px solid var(--sand);
-    font-family: var(--mono); font-size: 11px; letter-spacing: 1px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1px; font-weight: 600;
     color: var(--red); margin-bottom: 24px;
   }
   .proc-pill::before { content: '●'; font-size: 8px; }
@@ -440,12 +624,12 @@
     width: 48px; height: 48px; border-radius: 50%;
     background: var(--cream); border: 1.5px solid var(--sand);
     display: grid; place-items: center;
-    font-family: var(--serif); font-style: italic; font-size: 18px;
+    font-family: var(--serif); font-style: italic; font-size: 18px; font-weight: 600;
     color: var(--red); margin: 0 auto 20px;
     position: relative; z-index: 1;
     transition: background .3s, border-color .3s, color .3s, transform .35s var(--ease);
   }
-  .proc:hover .proc-n { background: var(--red); border-color: var(--red); color: #fff; transform: scale(1.1); }
+  .proc:hover .proc-n { background: var(--red); border-color: var(--red); color: #fff; transform: scale(1.1) rotate(-8deg); }
   .proc h3 {
     font-family: var(--sans); font-weight: 700;
     font-size: 15px; letter-spacing: -0.1px;
@@ -453,7 +637,46 @@
   }
   .proc p { font-size: 12.5px; color: var(--slate); line-height: 1.55; }
 
-  /* ═══ SETORES inline strip ═══ */
+  /* ═══ TESTEMUNHO ═══ */
+  .testimonial {
+    background: var(--paper); border-top: 1px solid var(--sand);
+    padding: 90px 40px;
+  }
+  .testimonial-inner {
+    max-width: 900px; margin: 0 auto;
+    text-align: center;
+  }
+  .testimonial-mark {
+    font-family: var(--serif); font-size: 80px; line-height: 1; color: var(--red-sf);
+    margin-bottom: -30px;
+  }
+  .testimonial-quote {
+    font-family: var(--serif); font-style: italic; font-weight: 500;
+    font-size: clamp(20px, 2.6vw, 28px); line-height: 1.5;
+    color: var(--ink); margin-bottom: 26px;
+  }
+  .testimonial-attr {
+    display: inline-flex; align-items: center; gap: 12px;
+  }
+  .testimonial-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--red); color: #fff;
+    display: grid; place-items: center;
+    font-family: var(--serif); font-weight: 700; font-size: 16px;
+  }
+  .testimonial-who {
+    text-align: left;
+    font-family: var(--sans); font-size: 13.5px; color: var(--slate);
+  }
+  .testimonial-who strong { display: block; color: var(--ink); font-weight: 600; margin-bottom: 2px; }
+  .testimonial-note {
+    display: inline-block;
+    margin-top: 22px; padding: 4px 10px; border-radius: 4px;
+    background: rgba(0,0,0,0.05); font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px;
+    color: var(--mute); text-transform: uppercase;
+  }
+
+  /* ═══ SETORES ═══ */
   .setores-strip {
     padding: 44px 40px;
     background: var(--cream); border-top: 1px solid var(--sand);
@@ -461,7 +684,7 @@
   }
   .setores-strip .inner { max-width: 1000px; margin: 0 auto; }
   .setores-eyebrow {
-    font-family: var(--mono); font-size: 10.5px; letter-spacing: 2.4px;
+    font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 2.4px;
     color: var(--red); text-transform: uppercase; margin-bottom: 12px;
   }
   .setores-line {
@@ -485,7 +708,7 @@
     color: var(--wa-dk); font-size: 12.5px; font-weight: 600;
     margin-bottom: 40px;
   }
-  .urg-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--wa); }
+  .urg-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--wa); animation: pulse-dot 2.4s ease-in-out infinite; }
 
   .c-cards { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
   .c-card {
@@ -493,15 +716,15 @@
     border: 1px solid var(--sand);
     border-radius: 16px; padding: 24px 30px;
     text-align: left; min-width: 220px;
-    transition: transform .3s var(--ease), border-color .3s;
+    transition: transform .3s var(--ease), border-color .3s, box-shadow .3s;
   }
-  .c-card:hover { transform: translateY(-4px); border-color: var(--red); }
+  .c-card:hover { transform: translateY(-4px); border-color: var(--red); box-shadow: 0 20px 40px -20px rgba(182,25,24,0.2); }
   .c-lbl { font-family: var(--mono); font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--slate); margin-bottom: 8px; }
   .c-val { font-family: var(--serif); font-size: 17px; font-weight: 600; }
   .c-val a { color: var(--ink); text-decoration: none; transition: color .2s; }
   .c-val a:hover { color: var(--red); }
 
-  /* ═══ QUOTE FORM — email compose window ═══ */
+  /* ═══ QUOTE FORM ═══ */
   .quote-wrap { max-width: 980px; margin: 72px auto 0; }
   .quote-title {
     text-align: center; margin-bottom: 34px;
@@ -532,7 +755,7 @@
   }
   .mw-lbl {
     flex: none; width: 108px;
-    font-family: var(--mono); font-size: 11.5px; letter-spacing: 1.2px;
+    font-family: var(--mono); font-size: 11.5px; font-weight: 500; letter-spacing: 1.2px;
     text-transform: uppercase; color: var(--slate);
   }
   .mw-lbl .req { color: var(--red); margin-left: 2px; }
@@ -565,7 +788,6 @@
   .mw-to { font-weight: 600; font-size: 15.5px; padding: 17px 0; }
   .mw-to-hint { margin-left: auto; font-size: 12.5px; color: var(--slate); white-space: nowrap; }
 
-  /* B2B details toggle */
   details.mw-b2b { border-bottom: 1px solid var(--paper); }
   details.mw-b2b > summary {
     padding: 14px 22px;
@@ -602,7 +824,7 @@
     background: #FCFBF8;
   }
   .mw-file label {
-    font-family: var(--mono); font-size: 11.5px; letter-spacing: 1.2px;
+    font-family: var(--mono); font-size: 11.5px; font-weight: 500; letter-spacing: 1.2px;
     text-transform: uppercase; color: var(--slate);
   }
   .mw-file input[type="file"] {
@@ -638,7 +860,7 @@
   .mw-send, .mw-wa {
     display: inline-flex; align-items: center; gap: 9px;
     border: 0; cursor: pointer;
-    font-family: var(--mono); font-size: 12.5px; letter-spacing: 1.4px; text-transform: uppercase;
+    font-family: var(--mono); font-size: 12.5px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase;
     padding: 15px 24px; border-radius: 8px;
     transition: transform .25s var(--ease), box-shadow .25s var(--ease), background .25s;
   }
@@ -647,7 +869,6 @@
   .mw-wa { background: var(--wa); color: #fff; }
   .mw-wa:hover { background: var(--wa-dk); transform: translateY(-2px); box-shadow: 0 10px 24px -10px rgba(37,211,102,0.5); }
 
-  /* Success state (replaces mailwin) */
   .mw-success {
     display: none;
     background: #fff;
@@ -657,12 +878,13 @@
     text-align: center;
     box-shadow: 0 28px 68px -30px rgba(25,25,25,0.28);
   }
-  .mw-success.show { display: block; }
+  .mw-success.show { display: block; animation: rise .6s var(--ease) forwards; }
   .mw-success .check {
     width: 56px; height: 56px; border-radius: 50%;
     background: var(--ok); color: #fff;
     display: grid; place-items: center; margin: 0 auto 18px;
     font-size: 30px;
+    animation: pop .55s var(--ease);
   }
   .mw-success h3 { font-family: var(--serif); font-size: 22px; font-weight: 600; margin-bottom: 8px; }
   .mw-success p { font-size: 14px; color: var(--slate); margin-bottom: 8px; }
@@ -682,33 +904,69 @@
   }
   .perk {
     display: flex; align-items: center; gap: 16px;
-    background: var(--paper); border: 1px solid var(--sand); border-radius: 12px;
+    background: #fff; border: 1px solid var(--sand); border-radius: 12px;
     padding: 20px 22px;
+    transition: transform .3s var(--ease), border-color .3s;
   }
+  .perk:hover { transform: translateY(-3px); border-color: var(--red); }
   .perk-big {
-    font-family: var(--serif); font-weight: 700; font-size: 26px; color: var(--red);
-    flex: none;
+    font-family: var(--serif); font-weight: 700; font-size: 28px; color: var(--red);
+    flex: none; letter-spacing: -0.5px;
   }
   .perk p { font-size: 13px; line-height: 1.5; color: var(--slate); margin: 0; }
+
+  /* ═══ STICKY BOTTOM BAR (mobile) ═══ */
+  .bottom-bar {
+    display: none;
+    position: fixed; left: 0; right: 0;
+    bottom: 0; z-index: 55;
+    background: rgba(250,249,245,0.97);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--sand);
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -8px 24px -12px rgba(0,0,0,0.15);
+    transform: translateY(100%);
+    transition: transform .3s var(--ease);
+  }
+  .bottom-bar.show { transform: translateY(0); }
+  .bottom-bar-inner {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+  }
+  .bb-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px;
+    padding: 10px 4px; border-radius: 10px;
+    text-decoration: none; font-size: 11px; font-weight: 600;
+    text-align: center;
+    transition: background .2s, transform .2s;
+  }
+  .bb-btn svg { width: 20px; height: 20px; }
+  .bb-call { color: var(--ink); }
+  .bb-call:hover { background: var(--paper); }
+  .bb-wa { background: var(--wa); color: #fff; }
+  .bb-wa:hover { background: var(--wa-dk); }
+  .bb-form { color: var(--red); }
+  .bb-form:hover { background: var(--red-sf); }
 
   /* ═══ FOOTER ═══ */
   footer {
     background: var(--ink); color: rgba(250,249,245,0.7);
-    padding: 44px 40px;
+    padding: 44px 40px 60px;
     text-align: center;
     font-size: 12.5px;
   }
   footer strong { font-family: var(--serif); color: var(--cream); }
   footer .fline { margin-top: 8px; opacity: 0.75; }
+  footer img { height: 40px; width: 40px; border-radius: 6px; margin-bottom: 14px; }
 
-  /* Floating WhatsApp */
+  /* Floating WhatsApp — hidden when bottom-bar shown on mobile */
   .fab {
     position: fixed; right: 20px; z-index: 60;
     bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     width: 58px; height: 58px; border-radius: 50%;
     background: var(--wa); display: grid; place-items: center;
     box-shadow: 0 14px 34px rgba(37,211,102,0.4);
-    transition: transform .3s var(--ease), background .25s;
+    transition: transform .3s var(--ease), background .25s, opacity .25s;
     text-decoration: none;
   }
   .fab:hover { transform: scale(1.08) rotate(-4deg); background: var(--wa-dk); }
@@ -725,32 +983,44 @@
 
   /* ═══ RESPONSIVE ═══ */
   @media (max-width: 980px) {
-    .hero-grid { grid-template-columns: 1fr; gap: 44px; }
+    .hero-inner { grid-template-columns: 1fr; gap: 44px; }
     .svc-row { grid-template-columns: 1fr 1fr; }
     .proc-row { grid-template-columns: 1fr 1fr; gap: 40px 0; }
     .proc-row::before { display: none; }
-    .band { grid-template-columns: 1fr; padding: 40px 32px; }
     .sec-head { grid-template-columns: 1fr; gap: 16px; }
     .sec-head aside { text-align: left; }
     .sec-anchor { font-size: 46px; }
     .hero-meta { grid-template-columns: repeat(2, auto); gap: 28px; }
     .quote-perks { grid-template-columns: 1fr; }
+    .empresa-inner { grid-template-columns: 1fr; gap: 40px; }
+    .empresa-photo { max-width: 460px; margin: 0 auto; aspect-ratio: 4 / 3; }
+    .stats-inner { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+    .partner-inner { justify-content: center; text-align: center; }
+    .partner-mark { justify-content: center; }
+    .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 640px) {
-    nav.top { padding: 12px 20px; }
-    nav.top.scrolled { padding: 10px 20px; }
+    nav.top { padding: 10px 16px; }
+    nav.top.scrolled { padding: 8px 16px; }
     .nav-call { display: none; }
     .brand-txt small { display: none; }
-    .hero { padding: 110px 20px 60px; }
+    .brand img { height: 46px; width: 46px; }
+    .hero { padding: 110px 20px 60px; min-height: auto; }
     .wrap { padding: 70px 20px; }
-    .showcase-wrap { padding: 70px 20px 60px; }
+    .empresa { padding: 70px 20px; }
+    .partner { padding: 20px 20px; }
+    .stats-band { padding: 44px 20px; }
+    .portfolio { padding: 60px 20px; }
+    .portfolio-grid { grid-template-columns: 1fr; }
+    .testimonial { padding: 70px 20px; }
     .setores-strip { padding: 40px 20px; }
     .svc-row { grid-template-columns: 1fr; }
     .proc-row { grid-template-columns: 1fr; gap: 32px; }
-    footer { padding: 32px 20px; }
+    .stats-inner { gap: 28px; }
+    footer { padding: 32px 20px 90px; }
     h1 { font-size: 40px; letter-spacing: -1px; }
     .hero-meta { gap: 24px 20px; }
-    .hm-num b { font-size: 32px; }
+    .hm-num b { font-size: 34px; }
     .mw-lbl { width: 88px; font-size: 10.5px; }
     .mw-in, .mw-to, .mw-ta { font-size: 15px; }
     .mw-to-hint { display: none; }
@@ -758,6 +1028,8 @@
     .mw-foot { flex-direction: column; align-items: stretch; }
     .mw-actions { flex-direction: column; }
     .mw-send, .mw-wa { justify-content: center; }
+    .bottom-bar { display: block; }
+    .fab { display: none; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -766,6 +1038,7 @@
     .hero-eyebrow, .hero-partners, .hero-sub, .hero-cta, .hero-trust, .hero-phones, .hero-meta, .mini { opacity: 1; }
     [data-r] { opacity: 1; transform: none; }
     .fab::after { display: none; }
+    .hero-waves { display: none; }
     html { scroll-behavior: auto; }
   }
 </style>
@@ -777,13 +1050,15 @@
 <!-- ═══ NAV ═══ -->
 <nav id="nav" class="top">
   <a href="#topo" class="brand" aria-label="MDM Assist — início">
-    <span class="brand-mark" aria-hidden="true">M</span>
+    <img src="assets/mdm-logo-square.jpg" alt="MDM Assist" width="52" height="52">
     <span class="brand-txt">
       <strong>MDM Assist</strong>
       <small>Lisboa · desde 1991</small>
     </span>
   </a>
   <div class="nav-right">
+    <a class="nav-link" href="#servicos">Serviços</a>
+    <a class="nav-link" href="#empresa">Empresa</a>
     <a class="nav-call" href="tel:+351218935050" aria-label="Ligar 218 935 050">218 935 050</a>
     <a class="nav-wa" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%2C%20gostaria%20de%20pedir%20assist%C3%AAncia%20t%C3%A9cnica." target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4-.1-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg>
@@ -794,26 +1069,42 @@
 
 <main id="main">
 
-<!-- ═══ HERO ═══ -->
+<!-- ═══ HERO — dark, image-backed, wave animation ═══ -->
 <section class="hero" id="topo" aria-labelledby="hero-title">
-  <div class="hero-grid">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="hero-veil" aria-hidden="true"></div>
+  <!-- Wave motif inspired by MDM logo's coiled curves. Drifts slowly. -->
+  <div class="hero-waves" aria-hidden="true">
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="g1" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="rgba(255,255,255,0.1)"/>
+          <stop offset="50%" stop-color="rgba(255,182,178,0.55)"/>
+          <stop offset="100%" stop-color="rgba(255,255,255,0.1)"/>
+        </linearGradient>
+      </defs>
+      <path class="p1" stroke="url(#g1)" d="M-200,450 Q 200,180 600,450 T 1400,450 T 2200,450"/>
+      <path class="p2" stroke="rgba(255,220,218,0.35)" d="M-200,500 Q 200,240 600,500 T 1400,500 T 2200,500"/>
+      <path class="p3" stroke="rgba(255,255,255,0.28)" d="M-200,400 Q 200,120 600,400 T 1400,400 T 2200,400"/>
+      <path class="p4" stroke="rgba(232,155,138,0.35)" d="M-200,550 Q 200,290 600,550 T 1400,550 T 2200,550"/>
+      <path class="p1" stroke="rgba(255,255,255,0.18)" d="M-200,350 Q 200,80 600,350 T 1400,350 T 2200,350" style="animation-duration:26s;"/>
+      <path class="p2" stroke="rgba(255,255,255,0.15)" d="M-200,600 Q 200,340 600,600 T 1400,600 T 2200,600" style="animation-duration:32s;"/>
+    </svg>
+  </div>
+
+  <div class="hero-inner">
     <div class="hero-left">
       <div class="hero-eyebrow">Lisboa · Parque das Nações · Desde 1991</div>
 
-      <!-- Track B5: partner credibility strip -->
       <div class="hero-partners" aria-label="Sinais de confiança">
         <span class="hp-mark" title="Fornecedor autorizado Mitsubishi Electric">
-          <img src="assets/mitsubishi-electric-logo.png" alt="Mitsubishi Electric" onerror="this.style.display='none'">
+          <img src="assets/mitsubishi-electric-logo.png" alt="Mitsubishi Electric">
         </span>
-        <span class="hp-mark"><span class="pill">APIRAC</span></span>
-        <span class="hp-mark"><span class="pill">REG. IMPIC</span></span>
+        <span class="hp-mark">APIRAC</span>
+        <span class="hp-mark">Registo IMPIC</span>
+        <span class="hp-mark"><span class="dot" aria-hidden="true"></span>Online agora</span>
       </div>
 
-      <!-- Track B4: rewritten h1 copy -->
-      <!-- A/B alternative (kept for reference):
-           <span class="ln"><span>Engenharia de</span></span>
-           <span class="ln"><span><em>conforto</em> para edifícios.</span></span>
-      -->
       <h1 id="hero-title">
         <span class="ln"><span>AC, eletricidade e ventilação.</span></span>
         <span class="ln"><span>Feito por <em>engenheiros</em>, desde 1991.</span></span>
@@ -828,34 +1119,30 @@
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4-.1-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg>
           Falar no WhatsApp
         </a>
-        <a class="btn btn-line" href="tel:+351218935050">
+        <a class="btn btn-ghost" href="tel:+351218935050">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7 12.8 12.8 0 0 0 .7 2.8 2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5 12.8 12.8 0 0 0 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
           218 935 050
         </a>
       </div>
 
-      <!-- Track B7: trust micro-line under CTAs -->
       <div class="hero-trust">
         <span class="dot" aria-hidden="true"></span>
         Resposta em 24h úteis · Urgências 7 dias via WhatsApp
       </div>
-      <!-- Track A8: phone-number disambiguation -->
       <div class="hero-phones">
         <a href="tel:+351218935050">Fixo escritório: 218 935 050</a>
         &nbsp;·&nbsp;
-        <a href="https://wa.me/351910307579" target="_blank" rel="noopener">Móvel/WhatsApp assistência: 910 307 579</a>
+        <a href="https://wa.me/351910307579" target="_blank" rel="noopener">Móvel/WhatsApp: 910 307 579</a>
       </div>
 
-      <!-- Track B6: enlarged hero-meta numerals -->
       <div class="hero-meta">
         <div class="hm"><span class="hm-num"><b>1991</b></span><span class="hm-lbl">Fundação</span></div>
         <div class="hm"><span class="hm-num"><b>35</b> anos</span><span class="hm-lbl">de experiência</span></div>
-        <div class="hm"><span class="hm-num"><b>24h</b> úteis</span><span class="hm-lbl">resposta técnica</span></div>
+        <div class="hm"><span class="hm-num"><b>24h</b> úteis</span><span class="hm-lbl">resposta</span></div>
         <div class="hm"><span class="hm-num"><b>8h–18h</b></span><span class="hm-lbl">seg. a sex.</span></div>
       </div>
     </div>
 
-    <!-- Track A6: hero mini-form (right column desktop, below CTAs mobile) -->
     <aside class="hero-right">
       <form class="mini" id="miniForm" novalidate data-endpoint="" aria-label="Pedido rápido de contacto">
         <div class="mini-eyebrow">Pedido rápido — 30 segundos</div>
@@ -887,11 +1174,8 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           Pedir contacto
         </button>
-        <span class="mini-alt">
-          Ou fale já: <a href="https://wa.me/351910307579" target="_blank" rel="noopener">WhatsApp →</a>
-        </span>
+        <span class="mini-alt">Ou fale já: <a href="https://wa.me/351910307579" target="_blank" rel="noopener">WhatsApp →</a></span>
 
-        <!-- Success state (revealed after successful submit) -->
         <div class="mini-done" style="display:none;">
           <div class="check" aria-hidden="true">✓</div>
           <h4>Recebido.</h4>
@@ -903,110 +1187,269 @@
   </div>
 </section>
 
-<!-- ═══ TRUST BAND (Track C1: moved up, right after hero) ═══ -->
-<section class="s-cream" aria-labelledby="trust-title">
-  <div class="wrap" style="padding-top: 40px;">
-    <div class="band" data-r>
-      <div>
-        <div class="sec-eyebrow" style="color: rgba(250,249,245,0.7);">Confiança comprovada</div>
-        <h2 id="trust-title">35 anos de ofício.<br>Ainda a resolver <em>bem à primeira.</em></h2>
-        <p class="lead-p">Fundada em 1991 por Manuel Domingos Melancia, a MDM é parceira de manutenção de edifícios exigentes na grande Lisboa.</p>
+<!-- ═══ MITSUBISHI PARTNER BAND ═══ -->
+<section class="partner" aria-labelledby="partner-title">
+  <div class="partner-inner">
+    <div class="partner-mark">
+      <img src="assets/mitsubishi-electric-logo.png" alt="Mitsubishi Electric">
+      <div class="partner-txt">
+        <strong>Parceiro Oficial</strong>
+        <span id="partner-title">Instalação e manutenção certificada Mitsubishi Electric em Lisboa</span>
       </div>
-      <ul class="band-list">
-        <li>Técnicos certificados em AVAC e eletricidade</li>
-        <li>Certificação APIRAC · Registo IMPIC nº <span style="opacity:0.6">[TODO]</span></li>
-        <li>Fornecedor autorizado Mitsubishi Electric</li>
-        <li>Peças originais, equipamentos multi-marca</li>
-        <li>Clientes ativos há +10 anos: banca, indústria, condomínios, escolas</li>
-      </ul>
+    </div>
+    <a href="#orcamento" class="partner-cta">Pedir orçamento →</a>
+  </div>
+</section>
+
+<!-- ═══ TRUST NUMBERS BAND ═══ -->
+<section class="stats-band" aria-label="MDM em números">
+  <div class="stats-inner">
+    <div class="stat" data-r>
+      <div class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2L4 5v6c0 5 3.5 9.5 8 11 4.5-1.5 8-6 8-11V5l-8-3z"/></svg></div>
+      <div class="stat-num">35<small>+ anos</small></div>
+      <div class="stat-lbl">no ofício desde 1991</div>
+    </div>
+    <div class="stat" data-r>
+      <div class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+      <div class="stat-num">04</div>
+      <div class="stat-lbl">serviços integrados</div>
+    </div>
+    <div class="stat" data-r>
+      <div class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+      <div class="stat-num">24<small>h úteis</small></div>
+      <div class="stat-lbl">resposta técnica</div>
+    </div>
+    <div class="stat" data-r>
+      <div class="stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+      <div class="stat-num">100<small>%</small></div>
+      <div class="stat-lbl">Lisboa &amp; redondezas</div>
     </div>
   </div>
 </section>
 
-<!-- ═══ SERVIÇOS ═══ -->
-<section id="servicos" class="s-paper" aria-labelledby="servicos-title">
+<!-- ═══ SERVIÇOS with real photo headers ═══ -->
+<section id="servicos" class="s-cream" aria-labelledby="servicos-title">
   <div class="wrap">
     <div class="sec-head" data-r>
       <div class="lead">
         <div class="sec-eyebrow">Serviços críticos</div>
         <h2 id="servicos-title">Quatro especialidades,<br>uma resposta <em>integrada.</em></h2>
-        <p>Uma equipa própria cobre climatização, eletricidade, ventilação e manutenção — sem subcontratações escondidas.</p>
+        <p>Uma equipa própria cobre climatização, eletricidade, ventilação e manutenção — sem subcontratações escondidas, com peças originais.</p>
       </div>
       <aside><span class="sec-anchor">04</span></aside>
     </div>
     <div class="svc-row">
-      <div class="svc" data-r>
-        <div class="svc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9.5 14.5L3 21M21 3l-6.5 6.5M10 7L7 4 3 8l3 3M17 14l3 3-4 4-3-3M7 17l4-4"/></svg></div>
-        <h3>Ar Condicionado</h3>
-        <p>Instalação, reparação e manutenção preventiva multi-marca — Mitsubishi Electric, MIDEA, France Air, LG.</p>
+      <article class="svc" data-r>
+        <div class="svc-img"><img src="assets/mdm-service-hvac-electrical.webp" alt="Instalação de ar condicionado por técnico MDM" loading="lazy"></div>
+        <div class="svc-body">
+          <div class="svc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9.5 14.5L3 21M21 3l-6.5 6.5M10 7L7 4 3 8l3 3M17 14l3 3-4 4-3-3M7 17l4-4"/></svg></div>
+          <h3>Ar Condicionado</h3>
+          <p>Instalação, reparação e manutenção multi-marca — Mitsubishi Electric, MIDEA, France Air, LG.</p>
+        </div>
+      </article>
+      <article class="svc" data-r>
+        <div class="svc-img"><img src="assets/mdm-service-hvac-electrical.webp" alt="Trabalho elétrico em quadro" loading="lazy" style="object-position: right center;"></div>
+        <div class="svc-body">
+          <div class="svc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+          <h3>Eletricidade</h3>
+          <p>Quadros elétricos, avarias e reparações orientadas para segurança e continuidade operacional.</p>
+        </div>
+      </article>
+      <article class="svc" data-r>
+        <div class="svc-img"><img src="assets/mdm-contact-operations.webp" alt="Sistemas de ventilação em edifício comercial" loading="lazy"></div>
+        <div class="svc-body">
+          <div class="svc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 8 Q 8 2, 12 8 T 21 8M3 13 Q 8 7, 12 13 T 21 13M3 18 Q 8 12, 12 18 T 21 18"/></svg></div>
+          <h3>Ventilação</h3>
+          <p>Sistemas de extração, condutas e qualidade do ar para ambientes de utilização intensiva.</p>
+        </div>
+      </article>
+      <article class="svc" data-r>
+        <div class="svc-img"><img src="assets/mdm-contact-operations.webp" alt="Equipa MDM em manutenção" loading="lazy" style="object-position: left center;"></div>
+        <div class="svc-body">
+          <div class="svc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+          <h3>Manutenção</h3>
+          <p>Planos preventivos com relatórios claros — do diagnóstico à conclusão, sem zonas cinzentas.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ EMPRESA — real photo + values ═══ -->
+<section class="empresa" id="empresa" aria-labelledby="empresa-title">
+  <div class="empresa-inner">
+    <div class="empresa-photo" data-r>
+      <img src="assets/mdm-contact-operations.webp" alt="Equipa MDM em operação">
+      <div class="empresa-badge">
+        <img src="assets/mdm-logo-square.jpg" alt="">
+        <div>
+          <strong>Manuel Domingos Melancia</strong>
+          <small>Fundador · 1991</small>
+        </div>
       </div>
-      <div class="svc" data-r>
-        <div class="svc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
-        <h3>Eletricidade</h3>
-        <p>Quadros elétricos, avarias e reparações orientadas para segurança e continuidade operacional.</p>
+    </div>
+    <div data-r>
+      <div class="sec-eyebrow">Empresa</div>
+      <h2 id="empresa-title">35 anos a resolver<br><em>bem à primeira.</em></h2>
+      <p style="margin-top:14px;font-size:15.5px;color:var(--slate);line-height:1.65;max-width:520px;">
+        Fundada em 1991 por Manuel Domingos Melancia, a MDM consolidou-se como parceira de manutenção
+        de edifícios exigentes na grande Lisboa. Equipa própria, faturação transparente, relatórios claros.
+      </p>
+      <ul class="empresa-values">
+        <li>
+          <span class="n">01</span>
+          <div>
+            <strong>Rigor técnico verificável</strong>
+            <p>APIRAC · Registo IMPIC · Fornecedor autorizado Mitsubishi Electric.</p>
+          </div>
+        </li>
+        <li>
+          <span class="n">02</span>
+          <div>
+            <strong>Transparência de faturação</strong>
+            <p>Orçamento antes da obra, fatura com NIF, contratos anuais opcionais.</p>
+          </div>
+        </li>
+        <li>
+          <span class="n">03</span>
+          <div>
+            <strong>Relação de longo prazo</strong>
+            <p>Clientes ativos há +10 anos em banca, indústria, condomínios e escolas.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PORTFOLIO — Trabalhamos com (RACE-inspired) ═══ -->
+<section class="portfolio" aria-labelledby="portfolio-title">
+  <div class="portfolio-inner">
+    <div class="portfolio-head" data-r>
+      <div class="sec-eyebrow">Trabalhamos com</div>
+      <h2 id="portfolio-title">Edifícios exigentes,<br>manutenção <em>sem paragens.</em></h2>
+      <p>Bancos, hospitais, escolas, centros comerciais, condomínios de referência e habitação privada.
+         Contratos de longa duração — clientes ativos há mais de 10 anos.</p>
+    </div>
+
+    <div class="portfolio-grid" data-r>
+      <div class="pcard">
+        <div class="pcard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1M9 12h1M9 15h1M14 9h1M14 12h1M14 15h1"/></svg></div>
+        <div class="pcard-cat">Banca</div>
+        <h4>Agências e Data Centers</h4>
+        <p>Climatização crítica e contratos de manutenção preventiva.</p>
       </div>
-      <div class="svc" data-r>
-        <div class="svc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 8 Q 8 2, 12 8 T 21 8M3 13 Q 8 7, 12 13 T 21 13M3 18 Q 8 12, 12 18 T 21 18"/></svg></div>
-        <h3>Ventilação</h3>
-        <p>Sistemas de extração, condutas e qualidade do ar para ambientes de utilização intensiva.</p>
+      <div class="pcard">
+        <div class="pcard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 21h18M6 21V10M18 21V10M12 21V10M3 10h18M3 5h18v5H3z"/></svg></div>
+        <div class="pcard-cat">Indústria</div>
+        <h4>Ventilação industrial</h4>
+        <p>Sistemas de extração e climatização em ambientes de utilização intensiva.</p>
       </div>
-      <div class="svc" data-r>
-        <div class="svc-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
-        <h3>Manutenção</h3>
-        <p>Planos preventivos com relatórios claros — do diagnóstico à conclusão, sem zonas cinzentas.</p>
+      <div class="pcard">
+        <div class="pcard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 21h18M5 21V9l7-6 7 6v12M10 21v-4h4v4M8 12h1M8 15h1M15 12h1M15 15h1"/></svg></div>
+        <div class="pcard-cat">Condomínios</div>
+        <h4>Manutenção transversal</h4>
+        <p>AC, eletricidade e ventilação em edifícios de referência no Parque das Nações.</p>
+      </div>
+      <div class="pcard">
+        <div class="pcard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M22 10L12 4 2 10l10 6 10-6z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></div>
+        <div class="pcard-cat">Educação</div>
+        <h4>Escolas e universidades</h4>
+        <p>Contratos anuais de manutenção com relatórios técnicos claros.</p>
+      </div>
+      <div class="pcard">
+        <div class="pcard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2v20M17 5h-5a3 3 0 000 6h2a3 3 0 010 6H7"/></svg></div>
+        <div class="pcard-cat">Restauração</div>
+        <h4>Cozinhas e frio comercial</h4>
+        <p>Sistemas de extração, câmaras frigoríficas, intervenção 7 dias.</p>
+      </div>
+      <div class="pcard">
+        <div class="pcard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 12l2 2 4-4M12 2a10 10 0 100 20 10 10 0 000-20z"/></svg></div>
+        <div class="pcard-cat">Saúde</div>
+        <h4>Clínicas e hospitais</h4>
+        <p>Qualidade do ar controlada, com procedimentos de higienização documentados.</p>
+      </div>
+      <div class="pcard">
+        <div class="pcard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 20h20M4 20V8h16v12M8 12h2M14 12h2M8 16h2M14 16h2"/></svg></div>
+        <div class="pcard-cat">Retalho</div>
+        <h4>Lojas e escritórios</h4>
+        <p>Instalação chave-na-mão e manutenção multi-marca.</p>
+      </div>
+      <div class="pcard">
+        <div class="pcard-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg></div>
+        <div class="pcard-cat">Habitação</div>
+        <h4>Habitação privada</h4>
+        <p>Instalação e reparação de AC residencial em Lisboa e área envolvente.</p>
+      </div>
+    </div>
+
+    <div style="text-align:center;">
+      <span class="portfolio-note">Referências específicas de clientes disponíveis mediante pedido</span>
+      <br>
+      <a href="#orcamento" class="portfolio-cta">
+        Pedir referências e orçamento
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PROCESSO ═══ -->
+<section id="processo" class="s-paper" aria-labelledby="processo-title">
+  <div class="wrap">
+    <div class="sec-head" data-r>
+      <div class="lead">
+        <span class="proc-pill">Como funciona</span>
+        <h2 id="processo-title">Da avaliação à conclusão,<br>sem <em>zonas cinzentas.</em></h2>
+        <p>Orçamento gratuito, sem compromisso, resposta em 24h úteis. O processo por dentro:</p>
+      </div>
+      <aside><span class="sec-anchor">01–04</span></aside>
+    </div>
+    <div class="proc-row" data-r>
+      <div class="proc">
+        <div class="proc-n" aria-hidden="true">01</div>
+        <h3>Avaliação</h3>
+        <p>Levantamento técnico e escuta do problema real da instalação.</p>
+      </div>
+      <div class="proc">
+        <div class="proc-n" aria-hidden="true">02</div>
+        <h3>Diagnóstico</h3>
+        <p>Análise objetiva com critérios técnicos claros e orçamento transparente.</p>
+      </div>
+      <div class="proc">
+        <div class="proc-n" aria-hidden="true">03</div>
+        <h3>Intervenção</h3>
+        <p>Execução por profissionais experientes, com atenção à limpeza e segurança.</p>
+      </div>
+      <div class="proc">
+        <div class="proc-n" aria-hidden="true">04</div>
+        <h3>Acompanhamento</h3>
+        <p>Comunicação direta e relação de confiança de longo prazo.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══ SHOWCASE + PROCESSO (Track D1: merged) ═══ -->
-<div class="showcase-wrap" aria-labelledby="processo-title">
-  <div class="showcase-inner">
-    <figure class="showcase-img" data-r role="img" aria-label="Serviços MDM em obra">
-      <span class="center-tag">obra em curso · Parque das Nações</span>
-      <figcaption class="showcase-cap">
-        <span class="showcase-tag">Ar Condicionado</span>
-        <span class="showcase-tag">Eletricidade</span>
-        <span class="showcase-tag">Ventilação</span>
-      </figcaption>
-    </figure>
-
-    <div id="processo">
-      <div class="sec-head" data-r>
-        <div class="lead">
-          <span class="proc-pill">Como funciona</span>
-          <h2 id="processo-title">Da avaliação à conclusão,<br>sem <em>zonas cinzentas.</em></h2>
-          <p>Orçamento gratuito, sem compromisso, resposta em 24h úteis. O processo por dentro:</p>
-        </div>
-        <aside><span class="sec-anchor">01–04</span></aside>
-      </div>
-      <div class="proc-row" data-r>
-        <div class="proc">
-          <div class="proc-n" aria-hidden="true">01</div>
-          <h3>Avaliação</h3>
-          <p>Levantamento técnico e escuta do problema real da instalação.</p>
-        </div>
-        <div class="proc">
-          <div class="proc-n" aria-hidden="true">02</div>
-          <h3>Diagnóstico</h3>
-          <p>Análise objetiva com critérios técnicos claros e orçamento transparente.</p>
-        </div>
-        <div class="proc">
-          <div class="proc-n" aria-hidden="true">03</div>
-          <h3>Intervenção</h3>
-          <p>Execução por profissionais experientes, com atenção à limpeza e segurança.</p>
-        </div>
-        <div class="proc">
-          <div class="proc-n" aria-hidden="true">04</div>
-          <h3>Acompanhamento</h3>
-          <p>Comunicação direta e relação de confiança de longo prazo.</p>
-        </div>
+<!-- ═══ TESTEMUNHO ═══ -->
+<section class="testimonial" aria-label="Testemunho de cliente">
+  <div class="testimonial-inner" data-r>
+    <div class="testimonial-mark" aria-hidden="true">"</div>
+    <p class="testimonial-quote">
+      Resposta no mesmo dia, comunicação clara, orçamento sem surpresas.
+      Já são quatro anos a manter o nosso edifício.
+    </p>
+    <div class="testimonial-attr">
+      <div class="testimonial-avatar" aria-hidden="true">JR</div>
+      <div class="testimonial-who">
+        <strong>João R.</strong>
+        Administrador de condomínio · Parque das Nações
       </div>
     </div>
+    <div class="testimonial-note">Testemunho a validar</div>
   </div>
-</div>
+</section>
 
-<!-- ═══ SETORES inline strip (Track C4: no fake buttons) ═══ -->
+<!-- ═══ SETORES ═══ -->
 <section class="setores-strip" aria-labelledby="setores-title">
   <div class="inner" data-r>
     <div class="setores-eyebrow" id="setores-title">Setores que servimos</div>
@@ -1020,7 +1463,7 @@
 <section id="contacto" class="s-paper" aria-labelledby="contacto-title">
   <div class="wrap">
     <div class="head-center" data-r>
-      <div class="sec-eyebrow">Fale connosco</div>
+      <div class="sec-eyebrow" style="justify-content:center;display:inline-flex;">Fale connosco</div>
       <h2 id="contacto-title">Transforme uma necessidade<br>técnica num plano <em>claro.</em></h2>
       <p class="sub">Atendimento de segunda a sexta, das 8h às 18h.</p>
       <div class="urg-pill">
@@ -1044,15 +1487,14 @@
       </div>
     </div>
 
-    <div class="quote-wrap">
+    <div class="quote-wrap" id="orcamento">
       <div class="quote-title" data-r>
         <div class="sec-eyebrow" style="justify-content:center;display:inline-flex;">Orçamento</div>
         <h2>Peça o seu orçamento<br>em <em>60 segundos.</em></h2>
       </div>
 
-      <!-- Track A1–A7: rewritten mail-window form -->
       <form class="mailwin" id="quoteForm" data-endpoint="" aria-labelledby="quoteFormTitle">
-        <span id="quoteFormTitle" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Formulário de pedido de orçamento</span>
+        <span id="quoteFormTitle" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Formulário de pedido de orçamento</span>
         <div class="mw-bar" aria-hidden="true">
           <span class="mw-dot" style="background:#EE5C56"></span>
           <span class="mw-dot" style="background:#F5BE4F"></span>
@@ -1066,7 +1508,6 @@
           <span class="mw-to-hint">MDM Assist — Assistência Técnica</span>
         </div>
 
-        <!-- A1: nome first, required -->
         <div class="mw-row">
           <label class="mw-lbl" for="qNome">Nome<span class="req" aria-hidden="true">*</span></label>
           <input class="mw-in" id="qNome" name="nome" type="text" placeholder="Como se chama" autocomplete="name" required aria-required="true" aria-describedby="qNome-err">
@@ -1108,14 +1549,12 @@
         </div>
         <div class="mw-err-msg" id="qMsg-err" style="padding-left:22px;">Descreva brevemente o pedido.</div>
 
-        <!-- Track A7: optional photo upload -->
         <div class="mw-file">
           <label for="qPhotos">Fotos do equipamento (opcional):</label>
           <input type="file" id="qPhotos" name="fotos" accept="image/*" capture="environment" multiple>
           <span class="hint">até 4 imagens · máx 5 MB cada</span>
         </div>
 
-        <!-- Track A3: B2B collapsible -->
         <details class="mw-b2b">
           <summary>Sou empresa ou condomínio</summary>
           <div class="mw-row">
@@ -1132,7 +1571,6 @@
           </div>
         </details>
 
-        <!-- Track A9: RGPD non-blocking -->
         <div class="mw-gdpr">
           <input type="checkbox" id="qGdpr" name="gdpr">
           <label for="qGdpr">Aceito a <a href="#privacidade">política de privacidade</a>. Os seus dados são usados exclusivamente para responder ao pedido.</label>
@@ -1153,7 +1591,6 @@
         </div>
       </form>
 
-      <!-- Track D4: full success card (replaces mailwin on submit) -->
       <div class="mw-success" id="quoteSuccess" role="status" aria-live="polite">
         <div class="check" aria-hidden="true">✓</div>
         <h3>Recebemos o seu pedido.</h3>
@@ -1184,12 +1621,31 @@
 </section>
 
 <footer>
-  <strong>MDM Assist</strong> · Alameda dos Oceanos 108A · 1990-426 Lisboa
+  <img src="assets/mdm-logo-square.jpg" alt="MDM Assist">
+  <div><strong>MDM Assist</strong> · Alameda dos Oceanos 108A · 1990-426 Lisboa</div>
   <div class="fline">218 935 050 · WhatsApp 910 307 579 · <a href="#privacidade" style="color:inherit;text-decoration:underline;">Política de privacidade</a></div>
   <div class="fline">© 1991–2026 MDM — Manuel Domingos Melancia, Lda.</div>
 </footer>
 
 </main>
+
+<!-- Sticky bottom bar (mobile) -->
+<div class="bottom-bar" id="bottomBar" role="toolbar" aria-label="Ações rápidas">
+  <div class="bottom-bar-inner">
+    <a href="tel:+351218935050" class="bb-btn bb-call">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7 12.8 12.8 0 0 0 .7 2.8 2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5 12.8 12.8 0 0 0 2.8.7A2 2 0 0 1 22 16.9z"/></svg>
+      Ligar
+    </a>
+    <a href="https://wa.me/351910307579" target="_blank" rel="noopener" class="bb-btn bb-wa">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4-.1-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg>
+      WhatsApp
+    </a>
+    <a href="#orcamento" class="bb-btn bb-form">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+      Orçamento
+    </a>
+  </div>
+</div>
 
 <a class="fab" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%2C%20gostaria%20de%20pedir%20assist%C3%AAncia%20t%C3%A9cnica." target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2.1-.4-.1-.5-.1-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.4z"/></svg>
@@ -1197,24 +1653,50 @@
 
 <script>
 /* ═════════════════════════════════════════════════════════════
-   MDM Editorial — behaviour
-   Notes:
-   - Canvas 3D background dropped — replaced with pure CSS palette.
-     Cheaper on mobile, zero JS perf tax, no gating needed.
-   - Both forms POST to `data-endpoint` if set; otherwise fall back
-     to mailto: so leads still leave the page.
-   - TODO in production: set data-endpoint="/api/lead" on both forms.
+   MDM Editorial v2 — behaviour
    ═════════════════════════════════════════════════════════════ */
 
-/* Nav scrolled state */
+/* Nav scrolled state + bottom-bar reveal after hero */
 const nav = document.getElementById('nav');
-addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 24), { passive: true });
+const bar = document.getElementById('bottomBar');
+const hero = document.querySelector('.hero');
+addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', scrollY > 24);
+  const past = scrollY > (hero.offsetHeight - 200);
+  bar.classList.toggle('show', past);
+}, { passive: true });
 
 /* Scroll reveal */
 const io = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }});
 }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
 document.querySelectorAll('[data-r]').forEach(el => io.observe(el));
+
+/* Stat counters (count up on reveal) */
+const statObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    statObs.unobserve(e.target);
+    const el = e.target.querySelector('.stat-num');
+    if (!el) return;
+    const raw = el.textContent;
+    const m = raw.match(/^(\d+)/);
+    if (!m) return;
+    const target = parseInt(m[1], 10);
+    if (isNaN(target) || target === 0) return;
+    const suffix = raw.slice(m[1].length);
+    let cur = 0;
+    const step = Math.max(1, Math.round(target / 40));
+    const iv = setInterval(() => {
+      cur += step;
+      if (cur >= target) { cur = target; clearInterval(iv); }
+      el.innerHTML = cur + (suffix ? `<small>${suffix.replace(/^<small>|<\/small>$/g,'')}</small>`.replace('<small></small>','') : '');
+      // fallback: if suffix contains any tags, restore raw at the end
+      if (cur === target) el.innerHTML = target + suffix;
+    }, 30);
+  });
+}, { threshold: 0.4 });
+document.querySelectorAll('.stat').forEach(s => statObs.observe(s));
 
 /* ─── Mini-form (hero) ─── */
 const mini = document.getElementById('miniForm');
@@ -1243,7 +1725,9 @@ mini.addEventListener('submit', async (e) => {
   if (!ok) return;
   const payload = { nome: nome.value.trim(), telefone: tel.value.trim(), servico: miniServico, _source: 'hero-mini', _at: new Date().toISOString() };
   await submitPayload(mini, payload, () => {
-    mini.querySelectorAll('.mini-field, .mini-chips, .mini-submit, .mini-alt, .mini-eyebrow, h3, .mini-sub').forEach(el => el.style.display = 'none');
+    mini.querySelectorAll('.mini-field, .mini-chips, .mini-submit, .mini-alt, .mini-eyebrow, h3, .mini-sub, [style*="display:block"]').forEach(el => {
+      if (!el.classList.contains('mini-done')) el.style.display = 'none';
+    });
     const done = mini.querySelector('.mini-done');
     done.querySelector('.ref').textContent = payload._ref || refFor(payload);
     done.style.display = 'block';
@@ -1270,7 +1754,6 @@ function quoteData() {
   };
 }
 function quoteValidate(d) {
-  // Clear previous errors
   document.querySelectorAll('.mailwin .mw-row').forEach(r => r.classList.remove('err'));
   let firstErr = null;
   const flag = (id) => {
@@ -1281,7 +1764,6 @@ function quoteValidate(d) {
   if (!d.nome) flag('qNome');
   if (!d.mensagem) flag('qMsg');
   if (!d.email && !d.telefone) { flag('qEmail'); flag('qTel'); }
-  // Basic email format sanity if provided
   if (d.email && !/^\S+@\S+\.\S+$/.test(d.email)) flag('qEmail');
   if (firstErr) {
     firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1312,7 +1794,6 @@ function refFor(d) {
   return 'MDM-' + t;
 }
 
-/* Send handlers — unified through submitPayload */
 async function submitPayload(formEl, payload, onSuccess) {
   payload._ref = refFor(payload);
   const endpoint = formEl.dataset.endpoint;
@@ -1324,12 +1805,8 @@ async function submitPayload(formEl, payload, onSuccess) {
         body: JSON.stringify(payload),
       });
       if (r.ok) { onSuccess(); return; }
-      // fall through to mailto fallback
-    } catch (err) {
-      // network error — fall through
-    }
+    } catch (err) { /* fall through */ }
   }
-  // Fallback: mailto (opens user's mail client)
   const subject = payload.servico ? `Pedido — ${payload.servico}` : 'Pedido de orçamento';
   const body = 'Nome: ' + payload.nome
     + (payload.telefone ? '\nTel: ' + payload.telefone : '')
@@ -1337,7 +1814,6 @@ async function submitPayload(formEl, payload, onSuccess) {
     + (payload.servico ? '\nServiço: ' + payload.servico : '')
     + (payload.mensagem ? '\n\n' + payload.mensagem : '')
     + '\n\nRef: ' + payload._ref;
-  // Trigger mailto without navigating away, then show success anyway
   window.location.href = 'mailto:mdmassist@mdmassist.com?subject='
     + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
   onSuccess();
@@ -1347,7 +1823,7 @@ async function handleQuoteSubmit(e) {
   e.preventDefault();
   const d = quoteData();
   if (!quoteValidate(d)) return;
-  await submitPayload(document.getElementById('quoteForm'), d, showQuoteSuccess);
+  await submitPayload(document.getElementById('quoteForm'), d, () => showQuoteSuccess(d));
 }
 $q('sendEmail').addEventListener('click', handleQuoteSubmit);
 document.getElementById('quoteForm').addEventListener('submit', handleQuoteSubmit);
@@ -1355,7 +1831,8 @@ $q('sendWa').addEventListener('click', async (e) => {
   e.preventDefault();
   const d = quoteData();
   if (!quoteValidate(d)) return;
-  const text = quoteBody(d) + '\n\nRef: ' + refFor(d);
+  d._ref = refFor(d);
+  const text = quoteBody(d) + '\n\nRef: ' + d._ref;
   window.open('https://wa.me/351910307579?text=' + encodeURIComponent(text), '_blank', 'noopener');
   showQuoteSuccess(d);
 });
