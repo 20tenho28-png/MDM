@@ -1,12 +1,13 @@
 # MDM
 
-Team workspace with three apps, one folder each:
+Team workspace with four apps, one folder each:
 
 | App | Folder | What it is |
 | --- | --- | --- |
 | **Email ticket wall** | `src/mdm/` | IMAP-driven ticket tracking with a TV wall display (FastAPI + PostgreSQL) |
 | **Electric simulator** | `electric-simulator/` | Interactive DC circuit simulator (canvas editor + live MNA solver) |
 | **Circuit Planner — EU Edition** | `circuit-planner/` | Single-file EU electrical/HVAC training app (the trainer) |
+| **Website** | `website/` | MDM's public one-page site (single self-contained `index.html`) |
 
 ```
 MDM/
@@ -15,6 +16,7 @@ MDM/
 ├── tests/              # Python test suite (ticket wall + simulator routes)
 ├── electric-simulator/ # standalone circuit simulator (HTML/JS + own tests)
 ├── circuit-planner/    # standalone trainer app (HTML/JS + own tests)
+├── website/            # public institutional site (static, no build)
 └── .github/            # CI workflow, PR and issue templates
 ```
 
@@ -69,6 +71,13 @@ rules and workflow before editing.
 cd circuit-planner
 npm test          # full headless test suite, no dependencies needed
 ```
+
+## Website
+
+The public site lives in `website/` — open `website/index.html` in any browser,
+that's the whole thing. Static, no build step, images embedded as base64. See
+[`website/README.md`](website/README.md) for the design decisions, the real
+company data (phone, NIF, address) and the pending publish/monitoring steps.
 
 ## Contributing
 
