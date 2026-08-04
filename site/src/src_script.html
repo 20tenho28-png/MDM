@@ -1,0 +1,358 @@
+<script>
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = id => document.getElementById(id);
+
+/* ═══ NAV — sombra ao rolar, menu mobile, secção ativa ═══ */
+(function () {
+  const nav = $('nav'), burger = $('burger'), drawer = $('drawer');
+
+  addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', scrollY > 30);
+  }, { passive: true });
+
+  burger.addEventListener('click', () => {
+    const open = drawer.classList.toggle('open');
+    burger.setAttribute('aria-expanded', String(open));
+    burger.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+  });
+  drawer.addEventListener('click', e => {
+    if (e.target.tagName === 'A') {
+      drawer.classList.remove('open');
+      burger.setAttribute('aria-expanded', 'false');
+    }
+  });
+  addEventListener('keydown', e => {
+    if (e.key === 'Escape' && drawer.classList.contains('open')) {
+      drawer.classList.remove('open');
+      burger.setAttribute('aria-expanded', 'false');
+      burger.focus();
+    }
+  });
+
+  /* secção ativa no menu */
+  const links = [...document.querySelectorAll('.nav-links a')];
+  const byId = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const targets = [...byId.keys()].map(id => $(id)).filter(Boolean);
+  if (targets.length) {
+    const spy = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        const a = byId.get(en.target.id);
+        if (a && en.isIntersecting) {
+          links.forEach(l => l.removeAttribute('aria-current'));
+          a.setAttribute('aria-current', 'true');
+        }
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    targets.forEach(t => spy.observe(t));
+  }
+})();
+
+/* ═══ REVEAL ao entrar no ecrã ═══ */
+(function () {
+  const els = document.querySelectorAll('[data-r]');
+  if (reduceMotion) { els.forEach(e => e.classList.add('is-in')); return; }
+  const stagger = new Map();
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      const p = en.target.parentElement;
+      const i = stagger.get(p) || 0;
+      stagger.set(p, i + 1);
+      setTimeout(() => stagger.delete(p), 400);
+      setTimeout(() => en.target.classList.add('is-in'), i * 85);
+      io.unobserve(en.target);
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+  els.forEach(e => io.observe(e));
+})();
+
+/* ═══ OBRAS — tira contínua: auto-scroll, arrastar, setas ═══ */
+(function () {
+  const strip = $('strip');
+  if (!strip) return;
+  const prev = $('stripPrev'), next = $('stripNext');
+
+  /* duplica os cartões para o ciclo fechar sem costura */
+  if (!reduceMotion) {
+    [...strip.children].forEach(node => {
+      const c = node.cloneNode(true);
+      c.setAttribute('aria-hidden', 'true');
+      c.querySelectorAll('img').forEach(i => i.setAttribute('alt', ''));
+      strip.appendChild(c);
+    });
+  }
+
+  const half = () => strip.scrollWidth / 2;
+  function wrap() {
+    if (reduceMotion) return;
+    const h = half();
+    if (h <= 0) return;
+    if (strip.scrollLeft >= h) strip.scrollLeft -= h;
+    else if (strip.scrollLeft <= 0) strip.scrollLeft += h;
+  }
+
+  let paused = false, dragging = false, startX = 0, startLeft = 0, resume = 0;
+
+  strip.addEventListener('pointerenter', () => paused = true);
+  strip.addEventListener('pointerleave', () => paused = false);
+  strip.addEventListener('focusin', () => paused = true);
+  strip.addEventListener('focusout', () => paused = false);
+
+  strip.addEventListener('pointerdown', e => {
+    dragging = true; strip.classList.add('dragging');
+    startX = e.clientX; startLeft = strip.scrollLeft;
+    strip.setPointerCapture(e.pointerId);
+  });
+  strip.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    e.preventDefault();
+    strip.scrollLeft = startLeft - (e.clientX - startX);
+    wrap();
+  });
+  const endDrag = e => {
+    if (!dragging) return;
+    dragging = false; strip.classList.remove('dragging');
+    try { strip.releasePointerCapture(e.pointerId); } catch (_) {}
+  };
+  strip.addEventListener('pointerup', endDrag);
+  strip.addEventListener('pointercancel', endDrag);
+
+  function nudge(dir) {
+    const card = strip.querySelector('.shot');
+    const step = card ? card.getBoundingClientRect().width + 12 : 320;
+    strip.scrollBy({ left: dir * step, behavior: reduceMotion ? 'auto' : 'smooth' });
+    resume = Date.now() + 900;          // deixa a animação suave terminar
+  }
+  prev && prev.addEventListener('click', () => nudge(-1));
+  next && next.addEventListener('click', () => nudge(1));
+  strip.addEventListener('scroll', () => { if (!dragging) wrap(); }, { passive: true });
+
+  if (!reduceMotion) {
+    const SPEED = 0.55;                 // px por frame ≈ 33 px/s
+    (function frame() {
+      if (!paused && !dragging && Date.now() > resume) {
+        strip.scrollLeft += SPEED;
+        wrap();
+      }
+      requestAnimationFrame(frame);
+    })();
+  }
+})();
+
+/* ═══ FORNECEDORES — velocidade constante do marquee ═══ */
+(function () {
+  const track = document.querySelector('.marquee-track');
+  if (!track) return;
+  const SPEED = 70;                     // px/s
+  function setDuration() {
+    const row = track.querySelector('.marquee-row');
+    if (!row) return;
+    const w = row.getBoundingClientRect().width;
+    if (w) track.style.setProperty('--dur', (w / SPEED).toFixed(1) + 's');
+  }
+  setDuration();
+  addEventListener('resize', setDuration, { passive: true });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(setDuration);
+})();
+
+/* ═══ PEDIDO DE ORÇAMENTO ═══ */
+(function () {
+  const form = $('quoteForm');
+  if (!form) return;
+  const status = $('quoteStatus');
+
+  form.addEventListener('submit', e => e.preventDefault());
+
+  const data = () => ({
+    empresa: $('qEmpresa').value.trim(),
+    nif:     $('qNif').value.trim(),
+    local:   $('qLocal').value.trim(),
+    email:   $('qEmail').value.trim(),
+    tel:     $('qTel').value.trim(),
+    servico: $('qServico').value,
+    assunto: $('qAssunto').value.trim(),
+    msg:     $('qMsg').value.trim()
+  });
+
+  function mark(rowId, inputId, bad) {
+    $(rowId).classList.toggle('invalid', bad);
+    $(inputId).setAttribute('aria-invalid', String(bad));
+  }
+
+  function validate(d) {
+    const noEmpresa = !d.empresa;
+    const noContact = !d.email && !d.tel;
+    mark('rowEmpresa', 'qEmpresa', noEmpresa);
+    mark('rowEmail', 'qEmail', noContact);
+    mark('rowTel', 'qTel', noContact);
+
+    if (noEmpresa || noContact) {
+      status.innerHTML = '<b>Falta preencher.</b> Verifique os campos assinalados.';
+      const first = form.querySelector('.row.invalid');
+      if (first) {
+        first.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+        const f = first.querySelector('input');
+        if (f) setTimeout(() => f.focus(), reduceMotion ? 0 : 420);
+      }
+      return false;
+    }
+    status.textContent = '';
+    return true;
+  }
+
+  const body = d => [
+    'Pedido de orçamento — MDM Assist', '',
+    'Empresa: '    + (d.empresa || '—'),
+    'NIF: '        + (d.nif || '—'),
+    'Localidade: ' + (d.local || '—'),
+    'Email: '      + (d.email || '—'),
+    'Telefone: '   + (d.tel || '—'),
+    'Serviço: '    + (d.servico || '—'), '',
+    d.msg || ''
+  ].join('\n');
+
+  $('sendEmail').addEventListener('click', () => {
+    const d = data();
+    if (!validate(d)) return;
+    const subject = d.assunto || ('Pedido de orçamento — ' + (d.servico || 'serviços MDM'));
+    status.innerHTML = '<b>A abrir o seu programa de email…</b> Se nada acontecer, escreva para mdmassist@mdmassist.com.';
+    location.href = 'mailto:mdmassist@mdmassist.com'
+      + '?subject=' + encodeURIComponent(subject)
+      + '&body='    + encodeURIComponent(body(d));
+  });
+
+  $('sendWa').addEventListener('click', () => {
+    const d = data();
+    if (!validate(d)) return;
+    status.innerHTML = '<b>A abrir o WhatsApp…</b> Se o separador não abrir, ligue 218 935 050.';
+    const url = 'https://wa.me/351910307579?text=' + encodeURIComponent(body(d));
+    const w = window.open(url, '_blank');
+    if (w) { try { w.opener = null; } catch (e) {} }
+    else { location.href = url; }       // fallback: bloqueadores de popups / iOS
+  });
+
+  /* limpa o erro assim que o utilizador corrige */
+  ['qEmpresa', 'qEmail', 'qTel'].forEach(id => {
+    $(id).addEventListener('input', () => {
+      const d = data();
+      if (id === 'qEmpresa' && d.empresa) mark('rowEmpresa', 'qEmpresa', false);
+      if (d.email || d.tel) { mark('rowEmail', 'qEmail', false); mark('rowTel', 'qTel', false); }
+    });
+  });
+})();
+</script>
+
+<script type="module">
+/* ═══ FUNDO 3D — a onda do logótipo, viva ═══ */
+try {
+  const THREE = await import('https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.module.min.js');
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* inclinação 3D nos painéis de serviço (só rato preciso) */
+  if (!reduceMotion && matchMedia('(pointer: fine)').matches) {
+    document.querySelectorAll('.panel').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        card.style.transform = `perspective(800px) rotateY(${x * 5}deg) rotateX(${-y * 5}deg) translateY(-4px)`;
+      });
+      card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+    });
+  }
+
+  if (!reduceMotion) {
+    const canvas = document.getElementById('scene');
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(48, innerWidth / innerHeight, 0.1, 100);
+    camera.position.set(0, 0.6, 9);
+
+    /* o motivo do logótipo: um lençol de fitas em S */
+    const RIBBONS = 14, SEGS = 120;
+    const group = new THREE.Group();
+    /* sobre azul-escuro o vermelho ganha com blending aditivo */
+    const base = new THREE.LineBasicMaterial({
+      color: 0xD6392C, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    const ribbons = [];
+
+    for (let i = 0; i < RIBBONS; i++) {
+      const t = i / (RIBBONS - 1);
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(SEGS * 3), 3));
+      const mat = base.clone();
+      mat.opacity = 0.12 + 0.22 * Math.sin(t * Math.PI);
+      const line = new THREE.Line(geo, mat);
+      line.userData = { offset: t };
+      ribbons.push(line);
+      group.add(line);
+    }
+    group.position.set(2.6, 0, 0);
+    group.rotation.z = -0.35;
+    scene.add(group);
+
+    /* partículas para dar profundidade */
+    const P = 90, pPos = new Float32Array(P * 3);
+    for (let i = 0; i < P; i++) {
+      pPos[i*3]   = (Math.random() - 0.5) * 18;
+      pPos[i*3+1] = (Math.random() - 0.5) * 10;
+      pPos[i*3+2] = (Math.random() - 0.5) * 6 - 2;
+    }
+    const pGeo = new THREE.BufferGeometry();
+    pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+    scene.add(new THREE.Points(pGeo, new THREE.PointsMaterial({
+      color: 0xF0857A, size: 0.032, transparent: true, opacity: 0.4,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    })));
+
+    let mx = 0, my = 0, scrollT = 0;
+    addEventListener('mousemove', e => {
+      mx = (e.clientX / innerWidth - 0.5);
+      my = (e.clientY / innerHeight - 0.5);
+    }, { passive: true });
+    addEventListener('scroll', () => {
+      scrollT = scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    }, { passive: true });
+
+    function resize() {
+      renderer.setSize(innerWidth, innerHeight);
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      if (innerWidth < 760) { group.position.x = 0; group.scale.setScalar(0.7); }
+      else { group.position.x = 2.6; group.scale.setScalar(1); }
+    }
+    addEventListener('resize', resize);
+    resize();
+
+    const clock = new THREE.Clock();
+    (function frame() {
+      const time = clock.getElapsedTime();
+      ribbons.forEach(line => {
+        const off = line.userData.offset;
+        const pos = line.geometry.attributes.position.array;
+        for (let s = 0; s < SEGS; s++) {
+          const u = s / (SEGS - 1);
+          const wave = Math.sin(u * Math.PI * 2 + time * 0.6 + off * 2.2) * 1.15 * Math.sin(u * Math.PI);
+          pos[s*3]   = (u - 0.5) * 9;
+          pos[s*3+1] = wave + (off - 0.5) * 2.6;
+          pos[s*3+2] = Math.cos(u * Math.PI * 2 + time * 0.4 + off * 3.0) * 0.8;
+        }
+        line.geometry.attributes.position.needsUpdate = true;
+      });
+      camera.position.x += ((mx * 1.2) - camera.position.x) * 0.04;
+      camera.position.y += ((-my * 0.8 + 0.6 - scrollT * 2.2) - camera.position.y) * 0.04;
+      group.rotation.y += ((mx * 0.25) - group.rotation.y) * 0.03;
+      group.rotation.x = scrollT * 0.5;
+      camera.lookAt(group.position.x - 1.5, 0, 0);
+      renderer.render(scene, camera);
+      requestAnimationFrame(frame);
+    })();
+  }
+} catch (e) { console.warn('3D background unavailable:', e); }
+</script>
+
+</body>
+</html>

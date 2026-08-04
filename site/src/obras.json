@@ -1,0 +1,72 @@
+{
+ "obra1": {
+  "w": 427,
+  "h": 480,
+  "alt": "Técnico da MDM a carregar gás numa unidade exterior de ar condicionado."
+ },
+ "obra2": {
+  "w": 484,
+  "h": 480,
+  "alt": "Chiller industrial instalado em cobertura de edifício."
+ },
+ "obra3": {
+  "w": 453,
+  "h": 480,
+  "alt": "Manutenção do filtro de uma cassete de teto de ar condicionado."
+ },
+ "obra4": {
+  "w": 418,
+  "h": 480,
+  "alt": "Medição com multímetro num quadro elétrico de comando."
+ },
+ "obra5": {
+  "w": 367,
+  "h": 480,
+  "alt": "Tubagem frigorífica em cobre numa sala técnica."
+ },
+ "obra6": {
+  "w": 372,
+  "h": 480,
+  "alt": "Sala técnica com bombas e condutas de um sistema AVAC."
+ },
+ "obra7": {
+  "w": 336,
+  "h": 480,
+  "alt": "Técnico da MDM em intervenção numa unidade exterior."
+ },
+ "obra8": {
+  "w": 641,
+  "h": 480,
+  "alt": "Técnico da MDM a intervir num quadro elétrico com autómato e disjuntores."
+ },
+ "obra9": {
+  "w": 640,
+  "h": 480,
+  "alt": "Unidade de ventilação e condutas instaladas numa cobertura em Lisboa."
+ },
+ "obra10": {
+  "w": 360,
+  "h": 480,
+  "alt": "Equipamento Mitsubishi Electric em armazém, pronto a instalar."
+ },
+ "obra11": {
+  "w": 360,
+  "h": 480,
+  "alt": "Unidade exterior Mitsubishi Electric instalada em moradia."
+ },
+ "obra12": {
+  "w": 360,
+  "h": 480,
+  "alt": "Duas unidades exteriores empilhadas na fachada de uma moradia."
+ },
+ "obra13": {
+  "w": 360,
+  "h": 480,
+  "alt": "Split mural instalado numa sala de habitação."
+ },
+ "obra14": {
+  "w": 360,
+  "h": 480,
+  "alt": "Bateria de unidades exteriores alinhadas numa zona técnica."
+ }
+}
