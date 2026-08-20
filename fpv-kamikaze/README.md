@@ -24,6 +24,12 @@ missão.
 - **Mundo que marca**: crateras e destroços em chamas persistem
 - **Treino de 60 s** (anéis + primeiro bombardeio) acessível do menu
 - **Música procedural** que acelera com a fase e o combo (desligável)
+- **Melhorias de campo (roguelite)**: escolha 1 de 3 cartas entre fases — célula extra,
+  rack ampliado, refrigeração, blindagem, hélices eficientes, guincho magnético
+- **Depósitos de combustível** com reação em cadeia (a partir da fase 2)
+- **Escolta do QG**: aproximar-se do alvo final dispara alarme e 2 drones defensores
+- **Modo Sobrevivência** desbloqueado ao vencer a campanha — dificuldade cresce sem
+  teto, recorde próprio persistido
 
 ## Controles
 
