@@ -147,7 +147,7 @@
 
   .hero {
     /* -56px: a faixa carmim espreita acima da dobra (medido: 100vh escondia-a) */
-    min-height: calc(100vh - 56px);
+    min-height: min(calc(100vh - 56px), 720px);
     display: flex; flex-direction: column;
     justify-content: center;
     padding: 120px 40px 60px;
@@ -199,10 +199,9 @@
   .btn-line { color: var(--ink); border: 1.5px solid var(--sand); background: rgba(250,249,245,0.6); }
   .btn-line:hover { border-color: var(--ink); transform: translateY(-3px); }
 
-  .hero-meta {
-    margin-top: 64px; display: flex; gap: 44px; flex-wrap: wrap;
-    opacity: 0; animation: rise 1s var(--ease) 1.4s forwards;
-  }
+  .hero-meta { display: flex; gap: 44px; flex-wrap: wrap; }
+  .meta-band { max-width: 1200px; margin: 0 auto; padding: 0 40px 8px; }
+  @media (max-width: 640px) { .meta-band { padding: 0 20px 8px; } }
   .hm-num { font-family: var(--serif); font-style: italic; font-size: 24px; }
   .hm-num b { color: var(--red); font-weight: 600; }
   .hm-lbl { font-size: 11.5px; color: var(--slate); margin-top: 2px; }
@@ -351,7 +350,8 @@
   @media (max-width: 640px) {
     nav { padding: 12px 20px; }
     .nav-phone { display: none; }
-    .hero { padding: 110px 20px 50px; }
+    .hero { min-height: 0; padding: 106px 20px 32px; }
+    .hero-cta { display: none; }
     section { padding: 70px 20px; }
     .svc-row { grid-template-columns: 1fr; }
     footer { padding: 28px 20px; }
@@ -369,7 +369,6 @@
   /* ícones nos rótulos de contacto + barra mobile */
   .c-lbl { display: flex; align-items: center; gap: 7px; }
   .c-lbl svg { width: 13px; height: 13px; flex: none; }
-  .mcta a svg { vertical-align: -2px; margin-right: 6px; }
 
   /* ═══ ANIMAÇÕES (painel aprovado: 4) ═══ */
 
@@ -633,21 +632,13 @@
   .ls-ok { color: #fff; font-weight: 600; font-size: 15px; margin: 0; }
   .ls-note { flex-basis: 100%; color: rgba(255,255,255,.78); font-size: 11.5px; margin: 0; }
   /* ═══ barra fixa mobile ═══ */
-  .mcta { display: none; }
   @media (max-width: 760px) {
     .lead-strip { padding: 18px 20px; }
     .ls-txt { font-size: 15px; }
     .ls-txt strong { font-size: 19px; }
     .ls-form { width: 100%; }
-    .ls-tel { flex: 1; min-width: 0; }
-    .mcta { display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 70;
-      gap: 1px; background: #fff; box-shadow: 0 -8px 24px rgba(0,0,0,.14);
-      padding-bottom: env(safe-area-inset-bottom); }
-    .mcta a { flex: 1; text-align: center; padding: 16px 10px; font-weight: 700;
-      font-size: 15.5px; font-family: var(--sans); text-decoration: none; }
-    .mcta-call { background: #2B2723; color: #fff; }
-    .mcta-wa { background: var(--carmine, #A30711); color: #fff; }
-    body { padding-bottom: 58px; }
+    .ls-tel { flex: 1 1 100%; min-width: 0; }
+    .ls-btn { flex: 1 1 100%; }
     .fab { display: none; }
   }
   .skip-link { position: absolute; left: -9999px; top: 0; z-index: 200;
@@ -667,7 +658,7 @@
   /* micro-animações consistentes */
   .svc { transition: transform .35s var(--ease), box-shadow .35s var(--ease); }
   .svc:hover { box-shadow: 0 22px 48px -18px rgba(43,39,35,.28); }
-  .ls-btn:active, .mcta a:active { transform: translateY(1px) scale(.99); }
+  .ls-btn:active { transform: translateY(1px) scale(.99); }
   .band { transition: box-shadow .4s; }
   .band:hover { box-shadow: 0 30px 70px -30px rgba(0,0,0,.5); }
   /* hero — hierarquia */
@@ -683,13 +674,22 @@
   /* verde WhatsApp com contraste AA (4,9:1 com branco); o botão da faixa
      NÃO entra aqui — mantém o seu branco/carmim, que promete contacto, não WhatsApp */
   :root { --wa: #12823F; --wa-d: #0B6E34; }
-  .nav-wa, .fab, .mcta-wa, .btn.btn-red[href*="wa.me"], .btn.mw-wa {
+  .nav-wa, .fab, .btn.btn-red[href*="wa.me"], .btn.mw-wa {
     background: var(--wa) !important; color: #fff !important; }
   .nav-wa:hover, .fab:hover, .btn.btn-red[href*="wa.me"]:hover, .btn.mw-wa:hover {
     background: var(--wa-d) !important; }
   .fab svg { fill: #fff; }
   .nav-wa--icon { width: 46px; height: 46px; padding: 0; border-radius: 50%;
     display: grid; place-items: center; }
+  .nav-cam { display: none; }
+  @media (max-width: 760px) {
+    .nav-cam {
+      display: grid; place-items: center;
+      width: 40px; height: 40px; border-radius: 999px;
+      background: var(--red, #B61918); color: #fff;
+    }
+    .nav-cam svg { width: 18px; height: 18px; }
+  }
   .nav-cta { display: inline-flex; align-items: center;
     background: var(--red, #A30711); color: #fff; padding: 11px 20px; border-radius: 999px;
     font-size: 13.5px; font-weight: 700; text-decoration: none;
@@ -777,6 +777,7 @@
   <div class="nav-right">
     <a class="nav-phone" href="tel:+351218935050">218 935 050</a>
     <a class="nav-cta" href="#orcamento" id="navCta">Quero ser contactado</a>
+    <a class="nav-cam" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%21%20Tenho%20uma%20avaria%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener" aria-label="Enviar foto da avaria por WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg></a>
   </div>
 </nav>
 
@@ -798,12 +799,6 @@
     <a class="btn btn-line" href="tel:+351218935050">218 935 050</a>
   </div>
 
-  <div class="hero-meta">
-    <div><div class="hm-num"><b>1991</b></div><div class="hm-lbl">Fundação</div></div>
-    <div><div class="hm-num"><b>35</b> anos</div><div class="hm-lbl">de experiência</div></div>
-    <div><div class="hm-num"><b>24–48h</b></div><div class="hm-lbl">resposta técnica</div></div>
-    <div><div class="hm-num"><b>8h–18h</b></div><div class="hm-lbl">seg. a sex.</div></div>
-  </div>
 </section>
 
 <section class="lead-strip" id="orcamento" aria-label="Pedir orçamento rápido">
@@ -885,6 +880,15 @@
   </div>
   <p class="ob-hint">Arraste para o lado · passe o rato para parar</p>
   <p class="ob-cta" data-r><a href="#contacto">Quer um trabalho destes no seu edifício? Peça orçamento <span aria-hidden="true">→</span></a></p>
+</section>
+
+<section class="meta-band" aria-label="MDM em números">
+<div class="hero-meta" data-r>
+    <div><div class="hm-num"><b>1991</b></div><div class="hm-lbl">Fundação</div></div>
+    <div><div class="hm-num"><b>35</b> anos</div><div class="hm-lbl">de experiência</div></div>
+    <div><div class="hm-num"><b>24–48h</b></div><div class="hm-lbl">resposta técnica</div></div>
+    <div><div class="hm-num"><b>8h–18h</b></div><div class="hm-lbl">seg. a sex.</div></div>
+  </div>
 </section>
 
 <!-- ═══ SERVICES ═══ -->
@@ -1355,9 +1359,5 @@ if (reduceMotion) {
   }
 })();
 </script>
-<div class="mcta" role="navigation" aria-label="Contacto rápido">
-  <a class="mcta-call" href="tel:+351218935050">Ligar agora</a>
-  <a class="mcta-wa" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%21%20Tenho%20uma%20avaria%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg> Enviar foto</a>
-</div>
 </body>
 </html>

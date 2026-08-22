@@ -243,6 +243,8 @@
   }
   .nav-wa:hover { background: var(--red-dk); transform: translateY(-2px); }
 
+  .nav-cam { display: none; }
+
   .burger {
     display: none; width: 44px; height: 40px;
     background: none; border: 1px solid var(--line); border-radius: 3px;
@@ -281,7 +283,7 @@
   .hero {
     /* -56px: a faixa de orçamento espreita acima da dobra em todos os ecrãs —
        medido: com 100svh ficava a 1.0–1.17vh, invisível sem scroll */
-    min-height: calc(100svh - 56px);
+    min-height: min(calc(100svh - 56px), 720px);
     display: flex; flex-direction: column; justify-content: center;
     padding-block: 128px 48px;
   }
@@ -312,13 +314,13 @@
 
   /* instrument-panel stats */
   .specs {
-    margin-top: clamp(48px, 7vw, 84px);
+    margin-top: 0;
     display: grid; grid-template-columns: repeat(4, 1fr);
     border: 1px solid var(--line); border-radius: 3px;
     background: rgba(20,29,46,0.55);
     backdrop-filter: blur(6px);
-    opacity: 0; animation: rise 1s var(--ease) 1.25s forwards;
   }
+  .specs-band { padding-block: 0 8px; }
   .specs > div { padding: 22px 24px; border-left: 1px solid var(--line); }
   .specs > div:first-child { border-left: 0; }
   .spec-n {
@@ -654,10 +656,20 @@
     .perks { grid-template-columns: 1fr; }
   }
   @media (max-width: 620px) {
-    .nav-phone { display: none; }
-    /* o FAB já dá o WhatsApp — libertar espaço para o botão de menu */
+    /* as ações vivem SÓ no header fixo: telefone + câmara (foto da avaria) */
     .nav-wa { display: none; }
-    .nav-in { gap: 12px; }
+    .logo-text { display: none; }   /* o símbolo chega; liberta espaço às ações */
+    .nav-in { gap: 10px; }
+    .nav-right { gap: 8px; }
+    .nav-phone { font-size: 12.5px; }
+    .nav-cam {
+      display: grid; place-items: center;
+      width: 40px; height: 40px; border-radius: 3px;
+      background: var(--red); color: #fff;
+    }
+    .nav-cam svg { width: 18px; height: 18px; }
+    .hero-cta { display: none; }
+    .hero { min-height: 0; padding-block: 116px 30px; }
     .panels { grid-template-columns: 1fr; }
     .steps { grid-template-columns: 1fr; }
     .step { padding-right: 0; }
@@ -783,7 +795,9 @@
   .ls-note { flex-basis: 100%; color: rgba(255,255,255,0.78); font-size: 11.5px; margin: 0; }
   @media (max-width: 760px) {
     .ls-form { margin-left: 0; width: 100%; }
-    .ls-tel { flex: 1; min-width: 0; }
+    /* empilhar: campo e botão a toda a largura, senão o campo fica um fio */
+    .ls-tel { flex: 1 1 100%; min-width: 0; }
+    .ls-btn { flex: 1 1 100%; }
   }
 
   /* ═══ ESCOLHA DE INTENÇÃO (avaria vs contrato) ═══ */
@@ -805,22 +819,9 @@
   }
   @media (max-width: 620px) { .intent-row { grid-template-columns: 1fr; } }
 
-  /* ═══ BARRA FIXA MOBILE (substitui o FAB) ═══ */
-  .mcta { display: none; }
+  /* mobile: sem FAB nem barra fixa — o header fixo já traz telefone + câmara */
   @media (max-width: 620px) {
     .fab { display: none; }
-    body { padding-bottom: 58px; }
-    .mcta {
-      position: fixed; left: 0; right: 0; bottom: 0; z-index: 85;
-      display: grid; grid-template-columns: 1fr 1fr;
-    }
-    .mcta a {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 17px 10px; font-weight: 600; font-size: 14.5px; text-decoration: none;
-    }
-    .mcta-call { background: var(--ink-3); color: var(--on-dark); border-top: 1px solid var(--line); }
-    .mcta-wa { background: var(--red); color: #fff; }
-    .mcta svg { width: 17px; height: 17px; flex: none; }
   }
 </style>
 </head>
