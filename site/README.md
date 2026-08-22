@@ -148,6 +148,9 @@ diretamente no `<script>` da creme). Ao escolher uma, aplicar o endpoint só nel
   não "minificar" removendo quebras de linha sem os substituir por espaço.
 - **Animação de fundo:** Three.js (via cdnjs, import dinâmico em try/catch — se o CDN falhar, o site
   funciona na mesma). Sobre o navy usa *additive blending*.
+- **Ordem da página (decidida pelo dono):** hero → faixa de orçamento → **obras** →
+  **números** (1991 / 35 anos / 24–48h / 8–18h) → serviços → processo → … A prova
+  visual vem antes da prova numérica; igual nas duas variantes.
 - **Carrossel "Algumas das nossas obras":** 14 fotos reais, auto-scroll, pausa em hover, arrastável,
   com setas. Os cartões são duplicados por JS para o ciclo fechar sem costura.
 - **Fornecedores:** marquee contínuo para a esquerda, meia página. Velocidade constante (70 px/s)

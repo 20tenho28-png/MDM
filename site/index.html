@@ -330,7 +330,7 @@
     background: rgba(20,29,46,0.55);
     backdrop-filter: blur(6px);
   }
-  .specs-band { padding-block: 0 8px; }
+  .specs-band { padding-block: clamp(20px, 3vw, 36px) 8px; }
   .specs > div { padding: 22px 24px; border-left: 1px solid var(--line); }
   .specs > div:first-child { border-left: 0; }
   .spec-n {
@@ -1333,14 +1333,6 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
 </section>
 
 
-<section class="specs-band wrap" aria-label="MDM em números">
-<div class="specs" data-r>
-    <div><div class="spec-n"><b>1991</b></div><div class="spec-l">Fundação</div></div>
-    <div><div class="spec-n"><b>35</b> anos</div><div class="spec-l">de experiência</div></div>
-    <div><div class="spec-n"><b>24–48</b>h</div><div class="spec-l">resposta técnica</div></div>
-    <div><div class="spec-n"><b>8–18</b>h</div><div class="spec-l">segunda a sexta</div></div>
-  </div>
-</section>
 
 <!-- ═══ 01 · OBRAS (film strip) ═══ -->
 <section id="obras">
@@ -1429,6 +1421,15 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
 </section>
 
 <!-- ═══ 02 · SERVIÇOS ═══ -->
+<section class="specs-band wrap" aria-label="MDM em números">
+<div class="specs" data-r>
+    <div><div class="spec-n"><b>1991</b></div><div class="spec-l">Fundação</div></div>
+    <div><div class="spec-n"><b>35</b> anos</div><div class="spec-l">de experiência</div></div>
+    <div><div class="spec-n"><b>24–48</b>h</div><div class="spec-l">resposta técnica</div></div>
+    <div><div class="spec-n"><b>8–18</b>h</div><div class="spec-l">segunda a sexta</div></div>
+  </div>
+</section>
+
 <section class="wrap" id="servicos">
   <div class="sec-head" data-r>
     <p class="eyebrow"><span class="num">02</span> Serviços críticos</p>
