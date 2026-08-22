@@ -14,8 +14,8 @@
     </a>
 
     <nav class="nav-links" aria-label="Navegação principal">
-      <a href="#servicos">Serviços</a>
       <a href="#obras">Obras</a>
+      <a href="#servicos">Serviços</a>
       <a href="#processo">Processo</a>
       <a href="#empresa">Empresa</a>
       <a href="#contacto">Contacto</a>
@@ -31,8 +31,8 @@
   </div>
 
   <div class="drawer" id="drawer">
-    <a href="#servicos">Serviços</a>
     <a href="#obras">Obras</a>
+    <a href="#servicos">Serviços</a>
     <a href="#processo">Processo</a>
     <a href="#empresa">Empresa</a>
     <a href="#setores">Setores</a>
@@ -80,10 +80,41 @@
   </div>
 </section>
 
+<!-- ═══ 01 · OBRAS (film strip) ═══ -->
+<section id="obras">
+  <div class="wrap">
+    <div class="strip-head" data-r>
+      <div class="sec-head" style="margin-bottom:0">
+        <p class="eyebrow"><span class="num">01</span> Algumas das nossas obras</p>
+        <h2>Trabalho real,<br>em <em>instalações reais</em>.</h2>
+      </div>
+      <div class="strip-nav">
+        <button class="strip-btn" id="stripPrev" aria-label="Ver obras anteriores">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button class="strip-btn" id="stripNext" aria-label="Ver obras seguintes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="strip-mask" data-r>
+    <div class="strip" id="strip" tabindex="0" role="region" aria-label="Fotografias de obras da MDM">
+      {{OBRAS}}
+    </div>
+  </div>
+
+  <div class="wrap">
+    <p class="strip-hint">Arraste para o lado · passe o rato para parar</p>
+    <p class="strip-cta" data-r><a href="#contacto">Quer um trabalho destes no seu edifício? Peça orçamento <span aria-hidden="true">→</span></a></p>
+  </div>
+</section>
+
 <!-- ═══ 01 · SERVIÇOS ═══ -->
 <section class="wrap" id="servicos">
   <div class="sec-head" data-r>
-    <p class="eyebrow"><span class="num">01</span> Serviços críticos</p>
+    <p class="eyebrow"><span class="num">02</span> Serviços críticos</p>
     <h2>Quatro especialidades,<br>uma resposta <em>integrada</em>.</h2>
   </div>
   <div class="panels">
@@ -114,36 +145,6 @@
   </div>
 </section>
 
-<!-- ═══ 02 · OBRAS (film strip) ═══ -->
-<section id="obras">
-  <div class="wrap">
-    <div class="strip-head" data-r>
-      <div class="sec-head" style="margin-bottom:0">
-        <p class="eyebrow"><span class="num">02</span> Algumas das nossas obras</p>
-        <h2>Trabalho real,<br>em <em>instalações reais</em>.</h2>
-      </div>
-      <div class="strip-nav">
-        <button class="strip-btn" id="stripPrev" aria-label="Ver obras anteriores">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <button class="strip-btn" id="stripNext" aria-label="Ver obras seguintes">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div class="strip-mask" data-r>
-    <div class="strip" id="strip" tabindex="0" role="region" aria-label="Fotografias de obras da MDM">
-      {{OBRAS}}
-    </div>
-  </div>
-
-  <div class="wrap">
-    <p class="strip-hint">Arraste para o lado · passe o rato para parar</p>
-    <p class="strip-cta" data-r><a href="#contacto">Quer um trabalho destes no seu edifício? Peça orçamento <span aria-hidden="true">→</span></a></p>
-  </div>
-</section>
 
 <!-- ═══ 03 · PROCESSO ═══ -->
 <section class="wrap" id="processo">
