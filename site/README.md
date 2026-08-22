@@ -105,8 +105,10 @@ diretamente no `<script>` da creme). Ao escolher uma, aplicar o endpoint só nel
 ## Ícones e animações
 
 - **Ícones:** conjunto único **Lucide** (licença ISC) inline nas duas variantes — ventoinha
-  (AC, estática de propósito), raio, grelha de ventilação, prancheta-visto, câmara nos CTAs
-  de foto, telefone/pin/WhatsApp nos cartões de contacto. Traço 1.8, pontas redondas.
+  (AC, estática de propósito), raio, grelha de ventilação, prancheta-visto, câmara no CTA
+  de foto do hero, telefone/pin/WhatsApp nos cartões de contacto. Traço 1.8, pontas redondas.
+  O botão de foto do cabeçalho (só em ecrãs pequenos) usa o **glifo WhatsApp sobre verde**
+  (`--wa`), não a câmara — pedido do dono; o link continua a pré-preencher a mensagem da foto.
 - **Animações (painel curado por júri adversarial — 4 por variante, 12 ideias rejeitadas):**
   navy: LED do formulário que fica sólido quando nome+contacto estão preenchidos (`:has`),
   LED de disponibilidade junto ao telefone da nav (usa `lisbonOpen()`), flash único na linha
