@@ -100,21 +100,25 @@ document.addEventListener('click', e => {
     nav.classList.toggle('scrolled', scrollY > 30);
   }, { passive: true });
 
+  const lockScroll = on => { document.documentElement.style.overflow = on ? 'hidden' : ''; };
   burger.addEventListener('click', () => {
     const open = drawer.classList.toggle('open');
     burger.setAttribute('aria-expanded', String(open));
     burger.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+    lockScroll(open);
   });
   drawer.addEventListener('click', e => {
     if (e.target.tagName === 'A') {
       drawer.classList.remove('open');
       burger.setAttribute('aria-expanded', 'false');
+      lockScroll(false);
     }
   });
   addEventListener('keydown', e => {
     if (e.key === 'Escape' && drawer.classList.contains('open')) {
       drawer.classList.remove('open');
       burger.setAttribute('aria-expanded', 'false');
+      lockScroll(false);
       burger.focus();
     }
   });
