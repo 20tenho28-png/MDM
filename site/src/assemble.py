@@ -116,6 +116,11 @@ for i in range(1, len(obras) + 1):
     )
 body = body.replace('{{OBRAS}}', '\n'.join(figs).strip())
 
+# fotos avulsas referenciadas como PHOTO(obraN) (ex.: cartões de serviços)
+body = re.sub(r'PHOTO\((obra\d+)\)',
+              lambda m: 'data:image/jpeg;base64,' + b64(site('obras', m.group(1) + '.jpg')),
+              body)
+
 # ── 4. logótipo (nav + rodapé) ──────────────────────────────────────────────
 body = body.replace('{{LOGO_SVG}}', read(site('mdm-logo.svg')).strip())
 
