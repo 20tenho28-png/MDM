@@ -11,21 +11,36 @@ const LEAD_ENDPOINT = '';
 
 async function sendLead(payload) {
   if (!LEAD_ENDPOINT) return false;
+  /* timeout de 8s: um endpoint pendurado cai no fallback honesto,
+     nunca num "A enviar…" eterno */
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 8000);
   try {
     const r = await fetch(LEAD_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(Object.assign({}, payload, { pagina: location.href }))
+      signal: ctl.signal,
+      body: JSON.stringify(Object.assign({}, payload, {
+        pagina: location.href,
+        referrer: document.referrer || '',
+        utm: location.search.slice(1),
+        ts: new Date().toISOString()
+      }))
     });
     return r.ok;
   } catch (e) { return false; }
+  finally { clearTimeout(timer); }
 }
 
 /* ═══ MEDIÇÃO — PostHog (região UE, projeto MDM)
    persistence "memory": sem cookies nem storage → não requer banner de
    consentimento; perde-se a distinção visitante novo/recorrente, de propósito. */
+const _trackQueue = [];
 function track(event, props) {
-  try { window.posthog && window.posthog.capture(event, props || {}); } catch (e) {}
+  try {
+    if (window.posthog && window.posthog.capture) window.posthog.capture(event, props || {});
+    else _trackQueue.push([event, props || {}]);   /* cliques quentes no 1º segundo não se perdem */
+  } catch (e) {}
 }
 (function () {
   const s = document.createElement('script');
@@ -39,12 +54,34 @@ function track(event, props) {
         person_profiles: 'identified_only',
         autocapture: false
       });
+      while (_trackQueue.length) {
+        const t = _trackQueue.shift();
+        window.posthog.capture(t[0], t[1]);
+      }
     } catch (e) {}
   };
   document.head.appendChild(s);
 })();
 
 /* cliques em telefone e WhatsApp, onde quer que estejam */
+/* mensagem da faixa consoante o horário (Europe/Lisbon, 2ª–6ª 8h–18h) */
+function lisbonOpen() {
+  try {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Lisbon', hour: 'numeric', hour12: false, weekday: 'short'
+    }).formatToParts(new Date());
+    const h = +parts.find(p => p.type === 'hour').value;
+    const wd = parts.find(p => p.type === 'weekday').value;
+    return wd !== 'Sat' && wd !== 'Sun' && h >= 8 && h < 18;
+  } catch (e) { return true; }
+}
+(function () {
+  const sub = $('lsSub');
+  if (sub && !lisbonOpen()) {
+    sub.textContent = 'Fora de horário? Deixe o número — ligamos no próximo dia útil, a partir das 8h.';
+  }
+})();
+
 document.addEventListener('click', e => {
   const a = e.target.closest('a[href^="tel:"], a[href*="wa.me"]');
   if (a) track(a.getAttribute('href').indexOf('tel:') === 0 ? 'phone_click' : 'whatsapp_click');
@@ -254,6 +291,15 @@ document.addEventListener('click', e => {
   if (a) a.addEventListener('click', () => track('intent_click', { tipo: 'avaria' }));
 })();
 
+/* ═══ SINAIS DE INÍCIO DE FUNIL (uma vez cada) ═══ */
+(function () {
+  let f = false, t = false;
+  const form = $('quoteForm');
+  if (form) form.addEventListener('focusin', () => { if (!f) { f = true; track('form_focus'); } });
+  const tel = $('lsTel');
+  if (tel) tel.addEventListener('focus', () => { if (!t) { t = true; track('strip_focus'); } });
+})();
+
 /* ═══ PEDIDO DE ORÇAMENTO ═══ */
 (function () {
   const form = $('quoteForm');
@@ -264,8 +310,6 @@ document.addEventListener('click', e => {
 
   const data = () => ({
     empresa: $('qEmpresa').value.trim(),
-    nif:     $('qNif').value.trim(),
-    local:   $('qLocal').value.trim(),
     email:   $('qEmail').value.trim(),
     tel:     $('qTel').value.trim(),
     servico: $('qServico').value,
@@ -300,9 +344,7 @@ document.addEventListener('click', e => {
 
   const body = d => [
     'Pedido de orçamento — MDM Assist', '',
-    'Empresa: '    + (d.empresa || '—'),
-    'NIF: '        + (d.nif || '—'),
-    'Localidade: ' + (d.local || '—'),
+    'Nome/Empresa: ' + (d.empresa || '—'),
     'Email: '      + (d.email || '—'),
     'Telefone: '   + (d.tel || '—'),
     'Serviço: '    + (d.servico || '—'), '',
@@ -319,16 +361,21 @@ document.addEventListener('click', e => {
   }
 
   $('sendEmail').addEventListener('click', async () => {
+    const btn = $('sendEmail');
+    if (btn.disabled) return;               /* duplo clique = lead duplicado */
     const d = data();
     if (!validate(d)) return;
     track('quote_form_submit', { via: LEAD_ENDPOINT ? 'endpoint' : 'mailto', servico: d.servico });
     if (LEAD_ENDPOINT) {
+      btn.disabled = true;
       status.innerHTML = '<b>A enviar…</b>';
-      if (await sendLead(Object.assign({}, d, { origem: 'formulario' }))) {
-        status.innerHTML = '<b>Pedido enviado.</b> Respondemos em menos de 24 horas úteis.';
-        form.reset();
-        return;
-      }
+      try {
+        if (await sendLead(Object.assign({}, d, { origem: 'formulario' }))) {
+          status.innerHTML = '<b>Pedido enviado.</b> Respondemos em menos de 24 horas úteis.';
+          form.reset();
+          return;
+        }
+      } finally { btn.disabled = false; }
       status.innerHTML = '<b>Não foi possível enviar diretamente.</b> A abrir o seu programa de email…';
       mailtoFallback(d);
       return;

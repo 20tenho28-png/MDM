@@ -28,7 +28,7 @@
   });
 </script>
 <title>MDM — Manutenção e Assistência de Edifícios · Lisboa · Desde 1991</title>
-<meta name="description" content="MDM — assistência técnica em ar condicionado, eletricidade, ventilação e manutenção de edifícios em Lisboa desde 1991.">
+<meta name="description" content="Ar condicionado, eletricidade e ventilação em Lisboa desde 1991. Orçamento gratuito com resposta em menos de 24 horas úteis — 218 935 050.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="canonical" href="https://mdmassist.manus.space">
@@ -516,6 +516,14 @@
     transition: opacity .35s, transform .35s;
   }
   .ob-shot:hover figcaption { opacity: 1; transform: none; }
+  .ob-cta { max-width: 1200px; margin: 24px auto 0; padding: 0 40px; }
+  .ob-cta a {
+    font-family: var(--serif, Georgia, serif); font-style: italic; font-size: 19px;
+    color: var(--red-dk, #8E1312); text-decoration: none;
+    border-bottom: 2px solid var(--red, #B61918); padding-bottom: 2px;
+    transition: color .2s;
+  }
+  .ob-cta a:hover { color: var(--red, #B61918); }
   .ob-hint {
     max-width: 1200px; margin: 16px auto 0; padding: 0 40px;
     font-family: var(--mono); font-size: 10.5px; letter-spacing: 2px;
@@ -523,7 +531,7 @@
   }
   @media (max-width: 640px) {
     .obras-sec { padding: 20px 0 64px; }
-    .obras-sec .sec-head, .ob-hint { padding: 0 20px; }
+    .obras-sec .sec-head, .ob-hint, .ob-cta { padding: 0 20px; }
     .ob-shot figcaption { opacity: 1; transform: none; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -724,7 +732,7 @@
 
 <section class="lead-strip" id="orcamento" aria-label="Pedir orçamento rápido">
   <div class="ls-in">
-    <div class="ls-txt"><strong>Peça o seu orçamento.</strong>Resposta em menos de 24h úteis.</div>
+    <div class="ls-txt"><strong>Peça o seu orçamento.</strong><span id="lsSub">Resposta em menos de 24h úteis.</span></div>
     <div class="ls-form">
       <input class="ls-tel" id="lsTel" type="tel" inputmode="tel" placeholder="O seu telefone" aria-label="O seu telefone"/>
       <button class="ls-btn" id="lsGo" type="button">Quero ser contactado</button>
@@ -835,6 +843,7 @@
     </div>
   </div>
   <p class="ob-hint">Arraste para o lado · passe o rato para parar</p>
+  <p class="ob-cta" data-r><a href="#contacto">Quer um trabalho destes no seu edifício? Peça orçamento <span aria-hidden="true">→</span></a></p>
 </section>
 
 <!-- ═══ TRUST BAND ═══ -->
@@ -901,18 +910,8 @@
       </div>
 
       <div class="mw-row">
-        <label class="mw-lbl" for="qEmpresa">Empresa:</label>
+        <label class="mw-lbl" for="qEmpresa">Nome:</label>
         <input class="mw-in" id="qEmpresa" name="empresa" type="text" placeholder="Nome da empresa, condomínio ou particular" autocomplete="organization">
-      </div>
-
-      <div class="mw-row">
-        <label class="mw-lbl" for="qNif">NIF:</label>
-        <input class="mw-in" id="qNif" name="nif" type="text" inputmode="numeric" placeholder="NIF / NIPC da empresa">
-      </div>
-
-      <div class="mw-row">
-        <label class="mw-lbl" for="qLocal">Localidade:</label>
-        <input class="mw-in" id="qLocal" name="localidade" type="text" placeholder="Cidade / Código Postal" autocomplete="address-level2">
       </div>
 
       <div class="mw-row">
@@ -939,17 +938,12 @@
         </select>
       </div>
 
-      <div class="mw-row">
-        <label class="mw-lbl" for="qAssunto">Assunto:</label>
-        <input class="mw-in" id="qAssunto" name="assunto" type="text" placeholder="Pedido de orçamento — breve descrição">
-      </div>
-
       <div class="mw-body">
         <textarea class="mw-ta" id="qMsg" name="mensagem" rows="6" placeholder="Descreva a instalação, o espaço, o número de equipamentos ou a avaria. Quanto mais detalhe, mais rápida e precisa será a proposta."></textarea>
       </div>
 
       <div class="mw-foot">
-        <p class="mw-note">Os seus dados são usados exclusivamente para responder ao pedido de orçamento.<br>Resposta garantida em menos de 24 horas úteis.</p>
+        <p class="mw-note">Orçamento gratuito e sem compromisso — resposta em menos de 24 horas úteis.<br>Os seus dados são usados exclusivamente para responder ao pedido.</p>
         <div class="mw-actions">
           <button type="button" class="btn btn-red mw-send" id="sendEmail">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -1001,19 +995,33 @@ const LEAD_ENDPOINT = '';
 
 async function sendLead(payload) {
   if (!LEAD_ENDPOINT) return false;
+  /* timeout de 8s: um endpoint pendurado cai no fallback honesto */
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 8000);
   try {
     const r = await fetch(LEAD_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(Object.assign({}, payload, { pagina: location.href }))
+      signal: ctl.signal,
+      body: JSON.stringify(Object.assign({}, payload, {
+        pagina: location.href,
+        referrer: document.referrer || '',
+        utm: location.search.slice(1),
+        ts: new Date().toISOString()
+      }))
     });
     return r.ok;
   } catch (e) { return false; }
+  finally { clearTimeout(timer); }
 }
 
 /* ═══ MEDIÇÃO — PostHog (UE, sem cookies: persistence memory) ═══ */
+const _trackQueue = [];
 function track(event, props) {
-  try { window.posthog && window.posthog.capture(event, props || {}); } catch (e) {}
+  try {
+    if (window.posthog && window.posthog.capture) window.posthog.capture(event, props || {});
+    else _trackQueue.push([event, props || {}]);
+  } catch (e) {}
 }
 (function () {
   const el = document.createElement('script');
@@ -1027,10 +1035,37 @@ function track(event, props) {
         person_profiles: 'identified_only',
         autocapture: false
       });
+      while (_trackQueue.length) {
+        const t = _trackQueue.shift();
+        window.posthog.capture(t[0], t[1]);
+      }
     } catch (e) {}
   };
   document.head.appendChild(el);
 })();
+/* mensagem da faixa consoante o horário (Europe/Lisbon, 2ª–6ª 8h–18h) */
+function lisbonOpen() {
+  try {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Lisbon', hour: 'numeric', hour12: false, weekday: 'short'
+    }).formatToParts(new Date());
+    const h = +parts.find(p => p.type === 'hour').value;
+    const wd = parts.find(p => p.type === 'weekday').value;
+    return wd !== 'Sat' && wd !== 'Sun' && h >= 8 && h < 18;
+  } catch (e) { return true; }
+}
+addEventListener('DOMContentLoaded', function () {
+  const sub = document.getElementById('lsSub');
+  if (sub && !lisbonOpen()) {
+    sub.textContent = 'Fora de horário? Deixe o número — ligamos no próximo dia útil, a partir das 8h.';
+  }
+  let f = false, t = false;
+  const form = document.getElementById('quoteForm');
+  if (form) form.addEventListener('focusin', () => { if (!f) { f = true; track('form_focus'); } });
+  const tel = document.getElementById('lsTel');
+  if (tel) tel.addEventListener('focus', () => { if (!t) { t = true; track('strip_focus'); } });
+});
+
 document.addEventListener('click', e => {
   const a = e.target.closest('a[href^="tel:"], a[href*="wa.me"]');
   if (a) track(a.getAttribute('href').indexOf('tel:') === 0 ? 'phone_click' : 'whatsapp_click');
@@ -1041,12 +1076,9 @@ const $q = id => document.getElementById(id);
 function quoteData() {
   return {
     empresa: $q('qEmpresa').value.trim(),
-    nif: $q('qNif').value.trim(),
-    local: $q('qLocal').value.trim(),
     email: $q('qEmail').value.trim(),
     tel: $q('qTel').value.trim(),
     servico: $q('qServico').value,
-    assunto: $q('qAssunto').value.trim(),
     msg: $q('qMsg').value.trim()
   };
 }
@@ -1067,9 +1099,7 @@ function quoteBody(d) {
   return [
     'Pedido de orçamento — MDM Assist',
     '',
-    'Empresa: ' + (d.empresa || '—'),
-    'NIF: ' + (d.nif || '—'),
-    'Localidade: ' + (d.local || '—'),
+    'Nome/Empresa: ' + (d.empresa || '—'),
     'Email: ' + (d.email || '—'),
     'Telefone: ' + (d.tel || '—'),
     'Serviço: ' + (d.servico || '—'),
@@ -1079,7 +1109,7 @@ function quoteBody(d) {
 }
 if (LEAD_ENDPOINT) $q('sendEmailLbl').textContent = 'Enviar pedido';
 function quoteMailto(d) {
-  const subject = d.assunto || ('Pedido de orçamento — ' + (d.servico || 'serviços MDM'));
+  const subject = 'Pedido de orçamento — ' + (d.servico || 'serviços MDM');
   location.href = 'mailto:mdmassist@mdmassist.com'
     + '?subject=' + encodeURIComponent(subject)
     + '&body=' + encodeURIComponent(quoteBody(d));

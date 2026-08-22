@@ -72,6 +72,18 @@ diretamente no `<script>` da creme). Ao escolher uma, aplicar o endpoint só nel
 - **Barra fixa mobile** (≤620px): "Ligar agora" + "Enviar foto" substitui o FAB.
 - CTA principal do hero: **"Enviar foto da avaria"** — a foto é o CTA que mais converte
   neste setor.
+- **Segunda camada (ambas as variantes):** formulário reduzido ao essencial (NIF, localidade
+  e assunto pedem-se depois do 1º contacto), rótulo "Nome" em vez de "Empresa", faixa
+  sensível ao horário (fora de 2ª–6ª 8h–18h promete o próximo dia útil), "orçamento gratuito
+  e sem compromisso" junto ao botão, ponte de CTA a seguir ao carrossel de obras, e a pill da
+  nav navy passou de salto para o WhatsApp a âncora de captação (#orcamento).
+- **Robustez da captação:** `sendLead` tem timeout de 8s (endpoint pendurado → fallback
+  honesto, nunca spinner eterno); botões protegidos contra duplo envio; eventos disparados
+  antes do PostHog carregar ficam em fila e são despachados no load; payloads levam
+  `referrer`, `utm` e `ts` para atribuição futura. Eventos novos: `form_focus` e
+  `strip_focus` (start-rate vs submit-rate). **Nota:** com adblock (~25–30% no desktop) o
+  PostHog não carrega — a contagem de leads verdadeira é a do endpoint, o analytics é
+  direcional.
 
 ## Stack e decisões técnicas
 

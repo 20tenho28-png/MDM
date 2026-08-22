@@ -23,7 +23,7 @@
 
     <div class="nav-right">
       <a class="nav-phone" href="tel:+351218935050">218&nbsp;935&nbsp;050</a>
-      <a class="nav-wa" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%2C%20gostaria%20de%20pedir%20assist%C3%AAncia%20t%C3%A9cnica." target="_blank" rel="noopener">WhatsApp</a>
+      <a class="nav-wa" href="#orcamento">Pedir orçamento</a>
       <button class="burger" id="burger" aria-expanded="false" aria-controls="drawer" aria-label="Abrir menu">
         <span></span>
       </button>
@@ -70,7 +70,7 @@
 <!-- ═══ FAIXA DE ORÇAMENTO ═══ -->
 <section class="lead-strip" id="orcamento" aria-label="Pedido de contacto rápido">
   <div class="ls-in">
-    <p class="ls-txt"><strong>Peça o seu orçamento.</strong>Resposta em menos de 24 horas úteis.</p>
+    <p class="ls-txt"><strong>Peça o seu orçamento.</strong><span id="lsSub">Resposta em menos de 24 horas úteis.</span></p>
     <div class="ls-form">
       <input class="ls-tel" id="lsTel" type="tel" inputmode="tel" autocomplete="tel"
              placeholder="O seu telefone" aria-label="O seu telefone">
@@ -141,6 +141,7 @@
 
   <div class="wrap">
     <p class="strip-hint">Arraste para o lado · passe o rato para parar</p>
+    <p class="strip-cta" data-r><a href="#contacto">Quer um trabalho destes no seu edifício? Peça orçamento <span aria-hidden="true">→</span></a></p>
   </div>
 </section>
 
@@ -270,7 +271,7 @@
       </div>
 
       <div class="row" id="rowEmpresa">
-        <label class="row-lbl" for="qEmpresa">Empresa <span class="req" aria-hidden="true">*</span></label>
+        <label class="row-lbl" for="qEmpresa">Nome <span class="req" aria-hidden="true">*</span></label>
         <div class="field">
           <input class="in" id="qEmpresa" name="empresa" type="text" required
                  aria-describedby="errEmpresa"
@@ -279,19 +280,7 @@
         </div>
       </div>
 
-      <div class="row">
-        <label class="row-lbl" for="qNif">NIF</label>
-        <div class="field">
-          <input class="in" id="qNif" name="nif" type="text" inputmode="numeric" placeholder="NIF / NIPC (opcional)">
-        </div>
-      </div>
 
-      <div class="row">
-        <label class="row-lbl" for="qLocal">Localidade</label>
-        <div class="field">
-          <input class="in" id="qLocal" name="localidade" type="text" placeholder="Cidade / código postal" autocomplete="address-level2">
-        </div>
-      </div>
 
       <div class="row" id="rowEmail">
         <label class="row-lbl" for="qEmail">Email <span class="req" aria-hidden="true">*</span></label>
@@ -339,8 +328,8 @@
 
       <div class="sheet-foot">
         <p class="sheet-note">
-          Os seus dados são usados exclusivamente para responder ao pedido.<br>
-          Resposta garantida em menos de 24 horas úteis.
+          Orçamento gratuito e sem compromisso — resposta em menos de 24 horas úteis.<br>
+          Os seus dados são usados exclusivamente para responder ao pedido.
         </p>
         <div class="sheet-actions">
           <button type="button" class="send" id="sendEmail">
