@@ -18,6 +18,13 @@ site = lambda *a: os.path.join(SITE, *a)
 read = lambda path: open(path, encoding='utf-8').read()
 b64 = lambda path: base64.b64encode(open(path, 'rb').read()).decode()
 
+def foto_uri(nome):
+    """data URI da obra: escolhe o mais pequeno entre .webp e .jpg."""
+    j, w = site('obras', nome + '.jpg'), site('obras', nome + '.webp')
+    if os.path.exists(w) and os.path.getsize(w) < os.path.getsize(j):
+        return 'data:image/webp;base64,' + b64(w)
+    return 'data:image/jpeg;base64,' + b64(j)
+
 head   = read(src('src_head.html'))
 body   = read(src('src_body.html'))
 script = read(src('src_script.html'))
@@ -110,16 +117,14 @@ for i in range(1, len(obras) + 1):
     o = obras['obra%d' % i]
     figs.append(
         '      <figure class="shot">\n'
-        '        <img src="data:image/jpeg;base64,%s" alt="%s" width="%d" height="%d" decoding="async">\n'
+        '        <img src="%s" alt="%s" width="%d" height="%d" loading="lazy" decoding="async">\n'
         '        <figcaption>%s</figcaption>\n'
-        '      </figure>' % (b64(site('obras', 'obra%d.jpg' % i)), o['alt'], o['w'], o['h'], o['alt'])
+        '      </figure>' % (foto_uri('obra%d' % i), o['alt'], o['w'], o['h'], o['alt'])
     )
 body = body.replace('{{OBRAS}}', '\n'.join(figs).strip())
 
 # fotos avulsas referenciadas como PHOTO(obraN) (ex.: cartões de serviços)
-body = re.sub(r'PHOTO\((obra\d+)\)',
-              lambda m: 'data:image/jpeg;base64,' + b64(site('obras', m.group(1) + '.jpg')),
-              body)
+body = re.sub(r'PHOTO\((obra\d+)\)', lambda m: foto_uri(m.group(1)), body)
 
 # ── 4. logótipo (nav + rodapé) ──────────────────────────────────────────────
 body = body.replace('{{LOGO_SVG}}', read(site('mdm-logo.svg')).strip())

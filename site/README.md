@@ -85,6 +85,23 @@ diretamente no `<script>` da creme). Ao escolher uma, aplicar o endpoint só nel
   PostHog não carrega — a contagem de leads verdadeira é a do endpoint, o analytics é
   direcional.
 
+## Desempenho em telemóvel (imagens)
+
+- **WebP em todo o lado onde ganha**: as 14 fotos existem em `.jpg` e `.webp`
+  (`obras/`); o `assemble.py` embute o mais pequeno dos dois por foto, e a variante
+  creme foi re-encodada in place (incluindo a foto de fundo do hero). Resultado:
+  navy 714→641 KB, creme 817→658 KB, qualidade visual igual (q78).
+- **`loading="lazy"` em todas as imagens** fora da primeira vista: num telemóvel,
+  só ~10 das 18 imagens são sequer descarregadas/descodificadas ao abrir a página.
+- **Build de publicação com imagens externas** — `python3 externalize.py
+  <index.html> <pasta>` gera `deploy/navy/` e `deploy/creme/`: HTML de 149/95 KB
+  (com gzip do host fica ~40 KB) + imagens em ficheiros próprios, em paralelo e
+  com cache. **É esta a build a publicar quando o alojamento aceita uma pasta**
+  (Netlify/Vercel/FTP); o ficheiro único continua a ser o oficial para "arrastar
+  um ficheiro só". Regenerar sempre as duas depois de editar as fontes.
+- Nota honesta: "1 ms" não existe em rede real — o que se otimizou foi o primeiro
+  render (HTML pequeno primeiro) e o custo total, sem tocar na qualidade.
+
 ## Ícones e animações
 
 - **Ícones:** conjunto único **Lucide** (licença ISC) inline nas duas variantes — ventoinha
