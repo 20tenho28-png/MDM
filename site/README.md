@@ -7,21 +7,23 @@ Site institucional da **Manuel Domingues Melancia, Lda (MDM)** — assistência 
 
 | Ficheiro | Descrição |
 |---|---|
-| `index.html` | O site completo, auto-contido (HTML + CSS + JS + imagens em base64). É o único ficheiro necessário para publicar. |
+| `index.html` | **O site oficial (variante creme, escolhida pelo chefe em 08/2026)** — auto-contido (HTML + CSS + JS + imagens em base64), editável à mão. É o único ficheiro necessário para publicar. |
 | `mdm-logo.svg` | Logótipo vetorial limpo. Reutilizável em cartões, faturas, email. |
 | `favicon/` | O logótipo rasterizado em PNG (32px favicon, 180px apple-touch-icon). Já embutidos no `index.html`. |
 | `obras/` | As 14 fotografias de obra já otimizadas (JPEG, 480px de altura). Já embutidas no `index.html`. |
-| `src/` | Os ficheiros-fonte e o script que gera o `index.html`. Ver **Como editar**. |
-| `variante-creme/` | A variante clara (a que está em mdmassist.manus.space), com as mesmas correções de captação/medição e o carrossel de obras. **O chefe decide entre as duas.** |
+| `src/` | Os ficheiros-fonte da variante navy (arquivada) e o script que a gera. Ver **Como editar**. |
+| `variante-navy/` | A variante escura, técnica — **não escolhida**, arquivada funcional caso se queira reaproveitar. Gera-se a partir de `src/`. |
 
 ## Como editar
 
-O `index.html` tem ~560 KB por causa das imagens em base64 — **não é para editar à mão**.
-As fontes estão em `src/` e o ficheiro final é gerado:
+O `index.html` (creme) é um ficheiro único **editável à mão** — texto, preços e contactos
+alteram-se diretamente nele (as imagens em base64 não se tocam).
+
+A variante navy arquivada gera-se a partir das fontes:
 
 ```bash
 cd site/src
-python3 assemble.py          # gera ../index.html a partir das fontes
+python3 assemble.py          # gera ../variante-navy/index.html a partir das fontes
 ```
 
 | Ficheiro em `src/` | O que contém |
@@ -39,21 +41,22 @@ python3 assemble.py          # gera ../index.html a partir das fontes
 
 ## As duas variantes
 
-Há duas versões completas do site, para decisão:
+**Decisão tomada (08/2026): o chefe escolheu a creme** — é o `index.html` na raiz.
+A navy fica arquivada em `variante-navy/`, completa e funcional.
 
-| | Navy (`index.html`) | Creme (`variante-creme/index.html`) |
+| | Navy (`variante-navy/index.html`) | Creme (`index.html` — **oficial**) |
 |---|---|---|
 | Estética | Escura, técnica (navy dos polos) | Clara, editorial (a publicada) |
 | Como se edita | Fontes em `src/` + `assemble.py` | Ficheiro único, editável à mão |
 | Funcional | Igual nas duas: faixa de orçamento com `LEAD_ENDPOINT`, PostHog, CTA de foto, carrossel de 14 obras, barra fixa mobile |  |
 
-Nota: o `LEAD_ENDPOINT` define-se em cada variante (no `src/src_script.html` da navy;
-diretamente no `<script>` da creme). Ao escolher uma, aplicar o endpoint só nela.
+Nota: o `LEAD_ENDPOINT` define-se diretamente no `<script>` do `index.html` (creme).
+A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela voltar.
 
 ## Captação de leads e medição
 
 - **Faixa de orçamento** (por baixo do hero) e **formulário** enviam para um endpoint real
-  quando `LEAD_ENDPOINT` está definido em `src/src_script.html` (ex.: Formspree
+  quando `LEAD_ENDPOINT` está definido no `<script>` do `index.html` (ex.: Formspree
   `https://formspree.io/f/xxxxxxxx`, ou função serverless que reenvia para
   mdmassist@mdmassist.com). Payload: POST JSON com `origem` (`faixa-orcamento` /
   `formulario`) e `pagina`.

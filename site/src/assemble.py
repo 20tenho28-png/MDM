@@ -1,4 +1,4 @@
-"""Gera o site/index.html a partir das fontes desta pasta.
+"""Gera o site/variante-navy/index.html (variante escura, arquivada) a partir das fontes.
 
     cd site/src && python3 assemble.py
 
@@ -133,5 +133,7 @@ out = head + '\n' + body + '\n' + script
 left = re.findall(r'\{\{[A-Z_]+\}\}', out)
 assert not left, 'placeholders por substituir: %s' % set(left)
 
-open(site('index.html'), 'w', encoding='utf-8').write(out)
-print('index.html  %.0f KB  (%d linhas)' % (len(out.encode()) / 1024, out.count('\n') + 1))
+import os as _os
+_os.makedirs(site('variante-navy'), exist_ok=True)
+open(site('variante-navy', 'index.html'), 'w', encoding='utf-8').write(out)
+print('variante-navy/index.html  %.0f KB  (%d linhas)' % (len(out.encode()) / 1024, out.count('\n') + 1))
