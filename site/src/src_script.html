@@ -79,8 +79,10 @@ function lisbonOpen() {
   } catch (e) { return true; }
 }
 (function () {
+  const aberto = lisbonOpen();
+  document.documentElement.dataset.aberto = aberto ? '1' : '0';
   const sub = $('lsSub');
-  if (sub && !lisbonOpen()) {
+  if (sub && !aberto) {
     sub.textContent = 'Fora de horário? Deixe o número — ligamos no próximo dia útil, a partir das 8h.';
   }
 })();
@@ -286,7 +288,11 @@ document.addEventListener('click', e => {
   if (c) c.addEventListener('click', () => {
     track('intent_click', { tipo: 'contrato' });
     const sel = $('qServico');
-    if (sel) sel.value = 'Contrato de Manutenção Anual';
+    if (sel) {
+      sel.value = 'Contrato de Manutenção Anual';
+      const row = sel.closest('.row');
+      if (row) { row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash'); }
+    }
     $('quoteForm').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
     setTimeout(() => $('qEmpresa').focus({ preventScroll: true }), reduceMotion ? 0 : 500);
   });

@@ -683,6 +683,52 @@
     .hero-cta { margin-top: 30px; }
   }
 
+
+  /* ícones nos rótulos dos cartões de contacto */
+  .c-lbl { display: flex; align-items: center; gap: 7px; }
+  .c-lbl svg { width: 13px; height: 13px; flex: none; }
+
+  /* ═══ ANIMAÇÕES (painel aprovado: 4, caladas sob reduced-motion) ═══ */
+
+  /* 1 · LED da janela de composição: pisca devagar em vazio; fica sólido
+     quando nome + (email OU telefone) estão preenchidos — espelha validate() */
+  .sheet-bar .dot { animation: dot-idle 1.8s steps(1) infinite; }
+  @keyframes dot-idle { 50% { opacity: .3; } }
+  .sheet:has(#qEmpresa:not(:placeholder-shown)):has(#qEmail:not(:placeholder-shown), #qTel:not(:placeholder-shown)) .sheet-bar .dot {
+    animation: none; opacity: 1;
+  }
+  .sheet:has(#qEmpresa:not(:placeholder-shown)):has(#qEmail:not(:placeholder-shown), #qTel:not(:placeholder-shown)) .send {
+    animation: send-armed .5s var(--ease) 1;
+  }
+  @keyframes send-armed { 35% { transform: translateY(-3px); } }
+
+  /* 2 · LED de disponibilidade junto ao telefone da nav (lisbonOpen) */
+  .nav-phone { display: inline-flex; align-items: center; gap: 8px; }
+  .nav-phone::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--on-dark-3); flex: none;
+  }
+  html[data-aberto="1"] .nav-phone::before {
+    background: #3FBF6F;
+    animation: phone-live 2.4s ease-in-out infinite;
+  }
+  @keyframes phone-live { 50% { opacity: .35; } }
+
+  /* 3 · flash único na linha Serviço quando o cartão de contrato a pré-preenche */
+  .row { position: relative; }
+  .row.flash::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: rgba(214,57,44,.14);
+    animation: row-ack 1.4s var(--ease) .45s both;
+  }
+  @keyframes row-ack { from { opacity: 1; } to { opacity: 0; } }
+
+  /* 4 · as linhas do processo desenham-se com o reveal existente */
+  .step-n i { transform: scaleX(0); transform-origin: left; transition: transform .7s var(--ease) .25s; }
+  .step.is-in .step-n i { transform: scaleX(1); }
+  .step-dot { transform: scale(0) rotate(45deg); transition: transform .4s var(--ease) .12s; }
+  .step.is-in .step-dot { transform: scale(1) rotate(45deg); }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important; animation-delay: 0ms !important;
@@ -694,6 +740,11 @@
     [data-r] { opacity: 1; transform: none; }
     #scene { display: none; }
     .shot figcaption { opacity: 1; transform: none; }
+    .sheet-bar .dot, .nav-phone::before { animation: none; opacity: 1; }
+    .send { animation: none; }
+    .row.flash::after { content: none; }
+    .step-n i { transform: scaleX(1); }
+    .step-dot { transform: scale(1) rotate(45deg); }
   }
 
   /* ═══ FAIXA DE ORÇAMENTO — captação do número ═══ */

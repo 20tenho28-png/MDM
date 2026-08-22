@@ -85,6 +85,23 @@ diretamente no `<script>` da creme). Ao escolher uma, aplicar o endpoint só nel
   PostHog não carrega — a contagem de leads verdadeira é a do endpoint, o analytics é
   direcional.
 
+## Ícones e animações
+
+- **Ícones:** conjunto único **Lucide** (licença ISC) inline nas duas variantes — ventoinha
+  (AC, estática de propósito), raio, grelha de ventilação, prancheta-visto, câmara nos CTAs
+  de foto, telefone/pin/WhatsApp nos cartões de contacto. Traço 1.8, pontas redondas.
+- **Animações (painel curado por júri adversarial — 4 por variante, 12 ideias rejeitadas):**
+  navy: LED do formulário que fica sólido quando nome+contacto estão preenchidos (`:has`),
+  LED de disponibilidade junto ao telefone da nav (usa `lisbonOpen()`), flash único na linha
+  Serviço quando o cartão de contrato a pré-preenche, e as linhas do processo desenham-se
+  com o reveal. Creme: abanão de validação (4px, 1 ciclo) + assentar do sucesso, **esquema
+  multi-split vivo** (fluxo frigorífico tracejado + ventoinha do condensador), linha de
+  progresso de leitura sob a nav (scroll-driven, só CSS), sublinhado carmim que se desenha
+  sob o `<em>` dos títulos.
+- **Reduced-motion:** todas as animações têm kill explícito. Atenção no creme: o bloco
+  global usa `*` e **não cobre pseudo-elementos**, e os kills têm de igualar a
+  especificidade das regras com `.in` — já corrigido duas vezes; não simplificar.
+
 ## Heatmaps e geometria da dobra
 
 - **PostHog heatmaps ativados no cliente** (`enable_heatmaps: true` + `capture_dead_clicks`)
