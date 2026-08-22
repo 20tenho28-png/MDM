@@ -281,9 +281,11 @@
 
   /* ═══ HERO ═══ */
   .hero {
-    min-height: 100svh;
+    /* -56px: a faixa de orçamento espreita acima da dobra em todos os ecrãs —
+       medido: com 100svh ficava a 1.0–1.17vh, invisível sem scroll */
+    min-height: calc(100svh - 56px);
     display: flex; flex-direction: column; justify-content: center;
-    padding-block: 132px 56px;
+    padding-block: 128px 48px;
   }
   .hero .eyebrow { opacity: 0; animation: rise .9s var(--ease) .25s forwards; }
   .hero h1 .ln { display: block; overflow: hidden; }
@@ -670,6 +672,17 @@
     .send, .send-wa { justify-content: center; }
     .foot-grid { grid-template-columns: 1fr; gap: 30px; }
     .shot figcaption { opacity: 1; transform: none; }
+  }
+
+  /* ecrãs baixos (portátil 1366×768, Android 360×800): comprimir o hero
+     para os números de credibilidade (1991 · 35 anos) caberem na 1ª vista */
+  @media (max-height: 820px) {
+    .hero { padding-block: 104px 36px; }
+    .hero h1 { font-size: clamp(38px, 6.4vw, 76px); }
+    .specs { margin-top: clamp(30px, 4vw, 48px); }
+    .specs > div { padding: 16px 20px; }
+    .hero .lede { margin-top: 22px; }
+    .hero-cta { margin-top: 30px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -2006,7 +2019,10 @@ function track(event, props) {
         api_host: 'https://eu.i.posthog.com',
         persistence: 'memory',
         person_profiles: 'identified_only',
-        autocapture: false
+        autocapture: false,
+        /* heatmaps de cliques/scroll + dead clicks — dados reais assim que publicar */
+        enable_heatmaps: true,
+        capture_dead_clicks: true
       });
       while (_trackQueue.length) {
         const t = _trackQueue.shift();

@@ -52,7 +52,10 @@ function track(event, props) {
         api_host: 'https://eu.i.posthog.com',
         persistence: 'memory',
         person_profiles: 'identified_only',
-        autocapture: false
+        autocapture: false,
+        /* heatmaps de cliques/scroll + dead clicks — dados reais assim que publicar */
+        enable_heatmaps: true,
+        capture_dead_clicks: true
       });
       while (_trackQueue.length) {
         const t = _trackQueue.shift();

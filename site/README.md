@@ -85,6 +85,21 @@ diretamente no `<script>` da creme). Ao escolher uma, aplicar o endpoint só nel
   PostHog não carrega — a contagem de leads verdadeira é a do endpoint, o analytics é
   direcional.
 
+## Heatmaps e geometria da dobra
+
+- **PostHog heatmaps ativados no cliente** (`enable_heatmaps: true` + `capture_dead_clicks`)
+  nas duas variantes — cliques, scrollmap, rageclicks e dead clicks acumulam a partir do
+  primeiro dia online. Falta ativar o produto Heatmaps nas definições do projeto PostHog
+  (eu.posthog.com, projeto 226321) — hoje está desligado e **não existe ainda um único
+  evento recolhido** (site não publicado), portanto qualquer "heatmap" atual seria inventado.
+- **Auditoria de geometria (dados medidos, Playwright, 6 viewports):** com o hero a 100svh,
+  a faixa de orçamento ficava a 1,0–1,17vh — invisível sem scroll em TODOS os ecrãs — e em
+  1366×768 (o portátil de escritório mais comum) e 360×800 a linha de números (1991 · 35
+  anos) era cortada. Correções: hero a `calc(100svh - 56px)` (a faixa carmim espreita acima
+  da dobra: 0,93–0,95vh em desktop) e compressão do hero em `max-height: 820px`. No mobile
+  a faixa continua a ~1vh de propósito — a barra fixa inferior já dá cobertura de CTA
+  permanente e comprimir mais o hero custava legibilidade.
+
 ## Stack e decisões técnicas
 
 - **Vanilla HTML/CSS/JS, um único ficheiro de saída.** Decisão deliberada — foi testada uma versão

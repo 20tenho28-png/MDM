@@ -146,7 +146,8 @@
 
 
   .hero {
-    min-height: 100vh;
+    /* -56px: a faixa carmim espreita acima da dobra (medido: 100vh escondia-a) */
+    min-height: calc(100vh - 56px);
     display: flex; flex-direction: column;
     justify-content: center;
     padding: 120px 40px 60px;
@@ -354,6 +355,14 @@
     section { padding: 70px 20px; }
     .svc-row { grid-template-columns: 1fr; }
     footer { padding: 28px 20px; }
+  }
+
+  /* ecrãs baixos: hero-meta (1991 · 35 anos) tem de caber na 1ª vista */
+  @media (max-height: 820px) {
+    .hero { padding: 104px 40px 40px; }
+    h1 { font-size: clamp(40px, 6.6vw, 80px); }
+    .hero-meta { margin-top: 40px; gap: 30px; }
+    .hero-cta { margin-top: 32px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -1033,7 +1042,10 @@ function track(event, props) {
         api_host: 'https://eu.i.posthog.com',
         persistence: 'memory',
         person_profiles: 'identified_only',
-        autocapture: false
+        autocapture: false,
+        /* heatmaps de cliques/scroll + dead clicks — dados reais assim que publicar */
+        enable_heatmaps: true,
+        capture_dead_clicks: true
       });
       while (_trackQueue.length) {
         const t = _trackQueue.shift();
