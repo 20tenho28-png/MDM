@@ -12,6 +12,7 @@ Site institucional da **Manuel Domingues Melancia, Lda (MDM)** — assistência 
 | `favicon/` | O logótipo rasterizado em PNG (32px favicon, 180px apple-touch-icon). Já embutidos no `index.html`. |
 | `obras/` | As 14 fotografias de obra já otimizadas (JPEG, 480px de altura). Já embutidas no `index.html`. |
 | `src/` | Os ficheiros-fonte e o script que gera o `index.html`. Ver **Como editar**. |
+| `variante-creme/` | A variante clara (a que está em mdmassist.manus.space), com as mesmas correções de captação/medição e o carrossel de obras. **O chefe decide entre as duas.** |
 
 ## Como editar
 
@@ -35,6 +36,19 @@ python3 assemble.py          # gera ../index.html a partir das fontes
 > As fotos originais em alta resolução (`assets-fonte/` do pacote antigo + as fotos de obra do
 > telemóvel) **não estão neste repositório** por causa do tamanho (~10 MB) — guarde-as à parte.
 > O `obras/` já otimizado é suficiente para reconstruir o site.
+
+## As duas variantes
+
+Há duas versões completas do site, para decisão:
+
+| | Navy (`index.html`) | Creme (`variante-creme/index.html`) |
+|---|---|---|
+| Estética | Escura, técnica (navy dos polos) | Clara, editorial (a publicada) |
+| Como se edita | Fontes em `src/` + `assemble.py` | Ficheiro único, editável à mão |
+| Funcional | Igual nas duas: faixa de orçamento com `LEAD_ENDPOINT`, PostHog, CTA de foto, carrossel de 14 obras, barra fixa mobile |  |
+
+Nota: o `LEAD_ENDPOINT` define-se em cada variante (no `src/src_script.html` da navy;
+diretamente no `<script>` da creme). Ao escolher uma, aplicar o endpoint só nela.
 
 ## Captação de leads e medição
 
