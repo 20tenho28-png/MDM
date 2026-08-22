@@ -36,6 +36,29 @@ python3 assemble.py          # gera ../index.html a partir das fontes
 > telemóvel) **não estão neste repositório** por causa do tamanho (~10 MB) — guarde-as à parte.
 > O `obras/` já otimizado é suficiente para reconstruir o site.
 
+## Captação de leads e medição
+
+- **Faixa de orçamento** (por baixo do hero) e **formulário** enviam para um endpoint real
+  quando `LEAD_ENDPOINT` está definido em `src/src_script.html` (ex.: Formspree
+  `https://formspree.io/f/xxxxxxxx`, ou função serverless que reenvia para
+  mdmassist@mdmassist.com). Payload: POST JSON com `origem` (`faixa-orcamento` /
+  `formulario`) e `pagina`.
+- **Sem endpoint** (estado atual), os rótulos ajustam-se sozinhos para não prometer o que
+  não é captado: a faixa diz "Pedir contacto no WhatsApp" (abre rascunho com o número) e o
+  formulário mantém o `mailto:`. Definir o endpoint muda os rótulos para "Quero ser
+  contactado" / "Enviar pedido" e ativa a confirmação inline + fallback para email se o
+  POST falhar. **Definir o endpoint é o passo nº 1 para maximizar leads.**
+- **PostHog** (org MDM, projeto 226321, região UE) está instalado com
+  `persistence: 'memory'` — sem cookies nem storage, logo sem necessidade de banner de
+  consentimento; perde-se a distinção novo/recorrente de propósito. Eventos:
+  `lead_strip_submit`, `quote_form_submit` (com `via`: endpoint/mailto/whatsapp),
+  `intent_click` (avaria/contrato), `whatsapp_click`, `phone_click`.
+- **Divisão de intenção** acima do formulário: "Tenho uma avaria" (WhatsApp com foto) vs
+  "Quero um contrato de manutenção" (pré-seleciona o serviço no formulário).
+- **Barra fixa mobile** (≤620px): "Ligar agora" + "Enviar foto" substitui o FAB.
+- CTA principal do hero: **"Enviar foto da avaria"** — a foto é o CTA que mais converte
+  neste setor.
+
 ## Stack e decisões técnicas
 
 - **Vanilla HTML/CSS/JS, um único ficheiro de saída.** Decisão deliberada — foi testada uma versão
@@ -52,7 +75,8 @@ python3 assemble.py          # gera ../index.html a partir das fontes
   com setas. Os cartões são duplicados por JS para o ciclo fechar sem costura.
 - **Fornecedores:** marquee contínuo para a esquerda, meia página. Velocidade constante (70 px/s)
   calculada por JS a partir da largura real.
-- **Formulário de contacto:** sem back-end — os botões abrem `mailto:` e `wa.me` pré-preenchidos.
+- **Formulário de contacto:** POST para `LEAD_ENDPOINT` quando definido; caso contrário `mailto:`
+  e `wa.me` pré-preenchidos (ver **Captação de leads e medição**).
 
 ### Contraste (verificado)
 
@@ -92,14 +116,13 @@ navy tem apenas 2,8:1, por isso não pode ser usado em texto nem em traços:
 
 ## Próximos passos
 
-1. **Publicar** — Netlify/Vercel/etc. Arrastar o `index.html` chega (site estático, sem build).
+1. **Definir `LEAD_ENDPOINT`** em `src/src_script.html` (Formspree ou serverless) e correr
+   `python3 assemble.py` — é o que transforma a faixa e o formulário em captação real.
+2. **Publicar** — Netlify/Vercel/etc. Arrastar o `index.html` chega (site estático, sem build).
    Idealmente domínio próprio (ex.: mdmassist.pt) com HTTPS.
-2. **Verificar o Sentry** (ver acima).
-3. **Formulário a sério (opcional)** — trocar `mailto:`/`wa.me` por envio real de email
-   (Resend, Formspree ou função serverless) para mdmassist@mdmassist.com.
-4. **Analytics (opcional)** — existe projeto PostHog criado (org "MDM", projeto id 226321,
-   eu.posthog.com) mas o snippet **não** está no site. Se se quiser analytics, adicionar o
-   snippet e a respetiva nota de privacidade/cookies (RGPD).
+3. **Verificar o Sentry** (ver acima) e confirmar eventos no PostHog após publicar.
+4. **Google Business Profile** — criar/reivindicar, NAP consistente com o site, fotos das
+   obras; para pesquisas locais o map pack é o canal nº 1 e é gratuito.
 
 ## Notas para agentes de código
 

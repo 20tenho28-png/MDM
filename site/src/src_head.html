@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script
   src="https://js-de.sentry-cdn.com/f31a40fed7d908991cf6b3b9e8932c77.min.js"
   crossorigin="anonymous"
@@ -25,8 +27,6 @@
     });
   });
 </script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MDM — Assistência Técnica · Lisboa · Desde 1991</title>
 <meta name="description" content="MDM — assistência técnica em ar condicionado, eletricidade, ventilação e manutenção de edifícios em Lisboa desde 1991.">
 <meta name="theme-color" content="#0D1420">
@@ -672,6 +672,82 @@
     [data-r] { opacity: 1; transform: none; }
     #scene { display: none; }
     .shot figcaption { opacity: 1; transform: none; }
+  }
+
+  /* ═══ FAIXA DE ORÇAMENTO — captação do número ═══ */
+  .lead-strip {
+    position: relative; z-index: 2;
+    background: var(--red);
+    padding: 22px var(--pad);
+  }
+  .ls-in {
+    max-width: 1240px; margin: 0 auto;
+    display: flex; align-items: center; gap: 14px 28px; flex-wrap: wrap;
+  }
+  .ls-txt { color: #fff; font-size: 15px; }
+  .ls-txt strong {
+    font-family: var(--display); font-size: 19px; letter-spacing: -0.02em;
+    margin-right: 10px;
+  }
+  .ls-form { display: flex; gap: 10px; flex-wrap: wrap; margin-left: auto; }
+  .ls-tel {
+    background: rgba(255,255,255,0.16); color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.55); border-radius: 3px;
+    padding: 13px 18px; font-family: var(--sans); font-size: 15px; min-width: 220px;
+  }
+  .ls-tel::placeholder { color: rgba(255,255,255,0.85); }
+  .ls-tel:focus { outline: 2px solid #fff; outline-offset: 2px; }
+  .ls-tel[aria-invalid="true"] { border-color: #fff; background: rgba(255,255,255,0.3); }
+  .ls-btn {
+    background: #fff; color: var(--red-dk);
+    border: 0; border-radius: 3px; cursor: pointer;
+    padding: 14px 22px; font-family: var(--sans); font-weight: 700; font-size: 14px;
+    transition: transform .2s var(--ease), box-shadow .2s;
+  }
+  .ls-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,0.25); }
+  .ls-btn:disabled { opacity: 0.7; cursor: default; transform: none; }
+  .ls-ok { color: #fff; font-weight: 600; font-size: 15px; padding: 13px 0; }
+  .ls-note { flex-basis: 100%; color: rgba(255,255,255,0.78); font-size: 11.5px; margin: 0; }
+  @media (max-width: 760px) {
+    .ls-form { margin-left: 0; width: 100%; }
+    .ls-tel { flex: 1; min-width: 0; }
+  }
+
+  /* ═══ ESCOLHA DE INTENÇÃO (avaria vs contrato) ═══ */
+  .intent-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .intent {
+    display: block; text-align: left; text-decoration: none;
+    background: var(--ink-2); color: var(--on-dark);
+    border: 1px solid var(--line); border-radius: 3px;
+    padding: 20px 22px; cursor: pointer; font-family: inherit; font-size: inherit;
+    transition: border-color .3s, transform .3s var(--ease);
+  }
+  .intent:hover { border-color: var(--red-mark); transform: translateY(-2px); }
+  .intent b { display: block; font-family: var(--display); font-weight: 600; font-size: 17px; margin-bottom: 5px; }
+  .intent span { font-size: 13px; color: var(--on-dark-2); line-height: 1.5; }
+  .quote-proof {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--on-dark-3);
+    margin: 0 0 22px;
+  }
+  @media (max-width: 620px) { .intent-row { grid-template-columns: 1fr; } }
+
+  /* ═══ BARRA FIXA MOBILE (substitui o FAB) ═══ */
+  .mcta { display: none; }
+  @media (max-width: 620px) {
+    .fab { display: none; }
+    body { padding-bottom: 58px; }
+    .mcta {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 85;
+      display: grid; grid-template-columns: 1fr 1fr;
+    }
+    .mcta a {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 17px 10px; font-weight: 600; font-size: 14.5px; text-decoration: none;
+    }
+    .mcta-call { background: var(--ink-3); color: var(--on-dark); border-top: 1px solid var(--line); }
+    .mcta-wa { background: var(--red); color: #fff; }
+    .mcta svg { width: 17px; height: 17px; flex: none; }
   }
 </style>
 </head>

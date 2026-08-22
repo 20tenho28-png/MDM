@@ -2,6 +2,54 @@
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = id => document.getElementById(id);
 
+/* ═══ CAPTAÇÃO DE LEADS ═══
+   LEAD_ENDPOINT: URL que recebe os pedidos por POST JSON (ex.: Formspree,
+   "https://formspree.io/f/xxxxxxxx", ou uma função serverless que reenvia
+   para mdmassist@mdmassist.com). Vazio → os botões usam email/WhatsApp e
+   os rótulos ajustam-se para não prometer um contacto que não é captado. */
+const LEAD_ENDPOINT = '';
+
+async function sendLead(payload) {
+  if (!LEAD_ENDPOINT) return false;
+  try {
+    const r = await fetch(LEAD_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(Object.assign({}, payload, { pagina: location.href }))
+    });
+    return r.ok;
+  } catch (e) { return false; }
+}
+
+/* ═══ MEDIÇÃO — PostHog (região UE, projeto MDM)
+   persistence "memory": sem cookies nem storage → não requer banner de
+   consentimento; perde-se a distinção visitante novo/recorrente, de propósito. */
+function track(event, props) {
+  try { window.posthog && window.posthog.capture(event, props || {}); } catch (e) {}
+}
+(function () {
+  const s = document.createElement('script');
+  s.src = 'https://eu-assets.i.posthog.com/static/array.js';
+  s.async = true;
+  s.onload = function () {
+    try {
+      window.posthog.init('phc_veB6kR2as8m8HuRMEVuTUWubWQxLkPW5D8Uf6wsJcy8A', {
+        api_host: 'https://eu.i.posthog.com',
+        persistence: 'memory',
+        person_profiles: 'identified_only',
+        autocapture: false
+      });
+    } catch (e) {}
+  };
+  document.head.appendChild(s);
+})();
+
+/* cliques em telefone e WhatsApp, onde quer que estejam */
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[href^="tel:"], a[href*="wa.me"]');
+  if (a) track(a.getAttribute('href').indexOf('tel:') === 0 ? 'phone_click' : 'whatsapp_click');
+});
+
 /* ═══ NAV — sombra ao rolar, menu mobile, secção ativa ═══ */
 (function () {
   const nav = $('nav'), burger = $('burger'), drawer = $('drawer');
@@ -155,6 +203,57 @@ const $ = id => document.getElementById(id);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(setDuration);
 })();
 
+/* ═══ FAIXA DE ORÇAMENTO — captação do número ═══ */
+(function () {
+  const go = $('lsGo'), tel = $('lsTel');
+  if (!go) return;
+  /* sem endpoint, o botão não promete um contacto que ninguém recebe */
+  if (!LEAD_ENDPOINT) go.textContent = 'Pedir contacto no WhatsApp';
+
+  async function submit() {
+    const t = tel.value.trim();
+    if (t.replace(/\D/g, '').length < 9) {
+      tel.setAttribute('aria-invalid', 'true');
+      tel.focus();
+      return;
+    }
+    tel.setAttribute('aria-invalid', 'false');
+    track('lead_strip_submit', { via: LEAD_ENDPOINT ? 'endpoint' : 'whatsapp' });
+    if (LEAD_ENDPOINT) {
+      go.disabled = true;
+      go.textContent = 'A enviar…';
+      if (await sendLead({ telefone: t, origem: 'faixa-orcamento' })) {
+        document.querySelector('.ls-form').innerHTML =
+          '<p class="ls-ok" role="status">Recebido — ligamos-lhe em horário de expediente (8h–18h, dias úteis).</p>';
+        return;
+      }
+      go.disabled = false;
+      go.textContent = 'Quero ser contactado';
+    }
+    const url = 'https://wa.me/351910307579?text='
+      + encodeURIComponent('Olá MDM! Peço contacto para orçamento. O meu número: ' + t);
+    const w = window.open(url, '_blank');
+    if (w) { try { w.opener = null; } catch (e) {} }
+    else { location.href = url; }
+  }
+  go.addEventListener('click', submit);
+  tel.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+})();
+
+/* ═══ ESCOLHA DE INTENÇÃO — avaria vs contrato ═══ */
+(function () {
+  const c = $('intContrato');
+  if (c) c.addEventListener('click', () => {
+    track('intent_click', { tipo: 'contrato' });
+    const sel = $('qServico');
+    if (sel) sel.value = 'Contrato de Manutenção Anual';
+    $('quoteForm').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    setTimeout(() => $('qEmpresa').focus({ preventScroll: true }), reduceMotion ? 0 : 500);
+  });
+  const a = $('intAvaria');
+  if (a) a.addEventListener('click', () => track('intent_click', { tipo: 'avaria' }));
+})();
+
 /* ═══ PEDIDO DE ORÇAMENTO ═══ */
 (function () {
   const form = $('quoteForm');
@@ -170,7 +269,6 @@ const $ = id => document.getElementById(id);
     email:   $('qEmail').value.trim(),
     tel:     $('qTel').value.trim(),
     servico: $('qServico').value,
-    assunto: $('qAssunto').value.trim(),
     msg:     $('qMsg').value.trim()
   });
 
@@ -211,19 +309,38 @@ const $ = id => document.getElementById(id);
     d.msg || ''
   ].join('\n');
 
-  $('sendEmail').addEventListener('click', () => {
-    const d = data();
-    if (!validate(d)) return;
-    const subject = d.assunto || ('Pedido de orçamento — ' + (d.servico || 'serviços MDM'));
-    status.innerHTML = '<b>A abrir o seu programa de email…</b> Se nada acontecer, escreva para mdmassist@mdmassist.com.';
+  if (LEAD_ENDPOINT) $('sendEmailLbl').textContent = 'Enviar pedido';
+
+  function mailtoFallback(d) {
+    const subject = 'Pedido de orçamento — ' + (d.servico || 'serviços MDM');
     location.href = 'mailto:mdmassist@mdmassist.com'
       + '?subject=' + encodeURIComponent(subject)
       + '&body='    + encodeURIComponent(body(d));
+  }
+
+  $('sendEmail').addEventListener('click', async () => {
+    const d = data();
+    if (!validate(d)) return;
+    track('quote_form_submit', { via: LEAD_ENDPOINT ? 'endpoint' : 'mailto', servico: d.servico });
+    if (LEAD_ENDPOINT) {
+      status.innerHTML = '<b>A enviar…</b>';
+      if (await sendLead(Object.assign({}, d, { origem: 'formulario' }))) {
+        status.innerHTML = '<b>Pedido enviado.</b> Respondemos em menos de 24 horas úteis.';
+        form.reset();
+        return;
+      }
+      status.innerHTML = '<b>Não foi possível enviar diretamente.</b> A abrir o seu programa de email…';
+      mailtoFallback(d);
+      return;
+    }
+    status.innerHTML = '<b>A abrir o seu programa de email…</b> Se nada acontecer, escreva para mdmassist@mdmassist.com.';
+    mailtoFallback(d);
   });
 
   $('sendWa').addEventListener('click', () => {
     const d = data();
     if (!validate(d)) return;
+    track('quote_form_submit', { via: 'whatsapp', servico: d.servico });
     status.innerHTML = '<b>A abrir o WhatsApp…</b> Se o separador não abrir, ligue 218 935 050.';
     const url = 'https://wa.me/351910307579?text=' + encodeURIComponent(body(d));
     const w = window.open(url, '_blank');

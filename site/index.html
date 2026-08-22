@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script
   src="https://js-de.sentry-cdn.com/f31a40fed7d908991cf6b3b9e8932c77.min.js"
   crossorigin="anonymous"
@@ -25,8 +27,6 @@
     });
   });
 </script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MDM — Assistência Técnica · Lisboa · Desde 1991</title>
 <meta name="description" content="MDM — assistência técnica em ar condicionado, eletricidade, ventilação e manutenção de edifícios em Lisboa desde 1991.">
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAMFBMVEXbn6OsIivy3N3CWmG2O0O+UVikBRCjBxHShoq6RUyiBRDHaG7LdHqqHCXOfIH++/uR85PDAAAAEHRSTlP///////9f////av//////KdI/tQAAAb5JREFUeNpNkk9Ik3Ecxj/7+fPF3IYjHAPBmFonN3xheVrhr7CSDv07hUEIDRl46O0oEgyCDkEwsB2KaLOtY2ARGLVioQThliPBxERWE3kjLEUZ7mXTDtPhc3s+DzzwfPnaJhYAsLxrAMSFAwDO3M0AMCO2AXh8ynpdSwQAmutb8fs+0ABif2a7ur01YAGWi+qLBgNACQcwsfDhjT/xud5htbfO9zv8/wASAljZvBx+X3D6AGkIkJNm4O3DzPEfeWhFwKPqmJ6bUXN2RdlwCcrFaO+lQI/IvRskXknwsqXjqT399aP5dzpzdG9qSWz9LC2/8rU1y9y5pvZqBtHiGSr3p1KyMj92IR8EuWmg3dOzaYLrGyUFwgnEsjIUWO/jLCC2geshvXCiV5XUwfyGrC99o2v6Wn3c7kCxO7rUowNIAM2+kZudclMHNF5N6b8uHjrhUMFu1Dyy0glwUvzuBCBhS5Y4rE+y2d9xf3Gg6cmX2KjnimmOC5KnCUQKz24/GGkkmUdwZHVwMgKaqK49j4KkMhwMeU20XW4eW1EIdvY85FHu4R3nCLqSLM5Flq34nfj5cF9b2D1u23+HA936D1x1mFUErN1iAAAAAElFTkSuQmCC">
@@ -676,6 +676,82 @@
     .shot figcaption { opacity: 1; transform: none; }
   }
 
+  /* ═══ FAIXA DE ORÇAMENTO — captação do número ═══ */
+  .lead-strip {
+    position: relative; z-index: 2;
+    background: var(--red);
+    padding: 22px var(--pad);
+  }
+  .ls-in {
+    max-width: 1240px; margin: 0 auto;
+    display: flex; align-items: center; gap: 14px 28px; flex-wrap: wrap;
+  }
+  .ls-txt { color: #fff; font-size: 15px; }
+  .ls-txt strong {
+    font-family: var(--display); font-size: 19px; letter-spacing: -0.02em;
+    margin-right: 10px;
+  }
+  .ls-form { display: flex; gap: 10px; flex-wrap: wrap; margin-left: auto; }
+  .ls-tel {
+    background: rgba(255,255,255,0.16); color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.55); border-radius: 3px;
+    padding: 13px 18px; font-family: var(--sans); font-size: 15px; min-width: 220px;
+  }
+  .ls-tel::placeholder { color: rgba(255,255,255,0.85); }
+  .ls-tel:focus { outline: 2px solid #fff; outline-offset: 2px; }
+  .ls-tel[aria-invalid="true"] { border-color: #fff; background: rgba(255,255,255,0.3); }
+  .ls-btn {
+    background: #fff; color: var(--red-dk);
+    border: 0; border-radius: 3px; cursor: pointer;
+    padding: 14px 22px; font-family: var(--sans); font-weight: 700; font-size: 14px;
+    transition: transform .2s var(--ease), box-shadow .2s;
+  }
+  .ls-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,0.25); }
+  .ls-btn:disabled { opacity: 0.7; cursor: default; transform: none; }
+  .ls-ok { color: #fff; font-weight: 600; font-size: 15px; padding: 13px 0; }
+  .ls-note { flex-basis: 100%; color: rgba(255,255,255,0.78); font-size: 11.5px; margin: 0; }
+  @media (max-width: 760px) {
+    .ls-form { margin-left: 0; width: 100%; }
+    .ls-tel { flex: 1; min-width: 0; }
+  }
+
+  /* ═══ ESCOLHA DE INTENÇÃO (avaria vs contrato) ═══ */
+  .intent-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .intent {
+    display: block; text-align: left; text-decoration: none;
+    background: var(--ink-2); color: var(--on-dark);
+    border: 1px solid var(--line); border-radius: 3px;
+    padding: 20px 22px; cursor: pointer; font-family: inherit; font-size: inherit;
+    transition: border-color .3s, transform .3s var(--ease);
+  }
+  .intent:hover { border-color: var(--red-mark); transform: translateY(-2px); }
+  .intent b { display: block; font-family: var(--display); font-weight: 600; font-size: 17px; margin-bottom: 5px; }
+  .intent span { font-size: 13px; color: var(--on-dark-2); line-height: 1.5; }
+  .quote-proof {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--on-dark-3);
+    margin: 0 0 22px;
+  }
+  @media (max-width: 620px) { .intent-row { grid-template-columns: 1fr; } }
+
+  /* ═══ BARRA FIXA MOBILE (substitui o FAB) ═══ */
+  .mcta { display: none; }
+  @media (max-width: 620px) {
+    .fab { display: none; }
+    body { padding-bottom: 58px; }
+    .mcta {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 85;
+      display: grid; grid-template-columns: 1fr 1fr;
+    }
+    .mcta a {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 17px 10px; font-weight: 600; font-size: 14.5px; text-decoration: none;
+    }
+    .mcta-call { background: var(--ink-3); color: var(--on-dark); border-top: 1px solid var(--line); }
+    .mcta-wa { background: var(--red); color: #fff; }
+    .mcta svg { width: 17px; height: 17px; flex: none; }
+  }
+
   /* ═══ FORNECEDORES — meia página, marquee p/ esquerda ═══ */
   .sup {
     min-height: 50vh;
@@ -1108,7 +1184,7 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
     35 anos ao serviço de empresas, condomínios e habitação.
   </p>
   <div class="hero-cta">
-    <a class="btn btn-red" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%2C%20gostaria%20de%20pedir%20assist%C3%AAncia%20t%C3%A9cnica." target="_blank" rel="noopener">Falar no WhatsApp</a>
+    <a class="btn btn-red" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%21%20Tenho%20uma%20avaria%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">Enviar foto da avaria</a>
     <a class="btn btn-line" href="tel:+351218935050">218 935 050</a>
   </div>
 
@@ -1117,6 +1193,19 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
     <div><div class="spec-n"><b>35</b> anos</div><div class="spec-l">de experiência</div></div>
     <div><div class="spec-n"><b>24–48</b>h</div><div class="spec-l">resposta técnica</div></div>
     <div><div class="spec-n"><b>8–18</b>h</div><div class="spec-l">segunda a sexta</div></div>
+  </div>
+</section>
+
+<!-- ═══ FAIXA DE ORÇAMENTO ═══ -->
+<section class="lead-strip" id="orcamento" aria-label="Pedido de contacto rápido">
+  <div class="ls-in">
+    <p class="ls-txt"><strong>Peça o seu orçamento.</strong>Resposta em menos de 24 horas úteis.</p>
+    <div class="ls-form">
+      <input class="ls-tel" id="lsTel" type="tel" inputmode="tel" autocomplete="tel"
+             placeholder="O seu telefone" aria-label="O seu telefone">
+      <button class="ls-btn" id="lsGo" type="button">Quero ser contactado</button>
+    </div>
+    <p class="ls-note">Usamos o seu número apenas para este contacto.</p>
   </div>
 </section>
 
@@ -1339,6 +1428,18 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
       <h2>Descreva o que precisa.<br>Respondemos em <em>24 horas</em>.</h2>
     </div>
 
+    <div class="intent-row" data-r>
+      <a class="intent" id="intAvaria" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%21%20Tenho%20uma%20avaria%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">
+        <b>Tenho uma avaria</b>
+        <span>Envie uma foto por WhatsApp — o diagnóstico começa logo aí.</span>
+      </a>
+      <button class="intent" id="intContrato" type="button">
+        <b>Quero um contrato de manutenção</b>
+        <span>Peça uma proposta anual para o seu edifício ou empresa.</span>
+      </button>
+    </div>
+    <p class="quote-proof" data-r>Clientes: banca · indústria · condomínios · escolas — Certificação APIRAC · Registo IMPIC</p>
+
     <form class="sheet" id="quoteForm" novalidate>
       <div class="sheet-bar">
         <span class="dot"></span>
@@ -1410,13 +1511,6 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
         </div>
       </div>
 
-      <div class="row">
-        <label class="row-lbl" for="qAssunto">Assunto</label>
-        <div class="field">
-          <input class="in" id="qAssunto" name="assunto" type="text" placeholder="Pedido de orçamento — breve descrição">
-        </div>
-      </div>
-
       <div class="row row-msg" style="border-bottom:0">
         <label class="row-lbl" for="qMsg">Mensagem</label>
         <div class="field">
@@ -1435,7 +1529,7 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
         <div class="sheet-actions">
           <button type="button" class="send" id="sendEmail">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            Enviar por email
+            <span id="sendEmailLbl">Enviar por email</span>
           </button>
           <button type="button" class="send-wa" id="sendWa">
             <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -1845,6 +1939,17 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
   </div>
 </footer>
 
+<nav class="mcta" aria-label="Contacto rápido">
+  <a class="mcta-call" href="tel:+351218935050">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    Ligar agora
+  </a>
+  <a class="mcta-wa" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%21%20Tenho%20uma%20avaria%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Enviar foto
+  </a>
+</nav>
+
 <a class="fab" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%2C%20gostaria%20de%20pedir%20assist%C3%AAncia%20t%C3%A9cnica." target="_blank" rel="noopener" aria-label="Falar connosco no WhatsApp">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
@@ -1852,6 +1957,54 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
 <script>
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = id => document.getElementById(id);
+
+/* ═══ CAPTAÇÃO DE LEADS ═══
+   LEAD_ENDPOINT: URL que recebe os pedidos por POST JSON (ex.: Formspree,
+   "https://formspree.io/f/xxxxxxxx", ou uma função serverless que reenvia
+   para mdmassist@mdmassist.com). Vazio → os botões usam email/WhatsApp e
+   os rótulos ajustam-se para não prometer um contacto que não é captado. */
+const LEAD_ENDPOINT = '';
+
+async function sendLead(payload) {
+  if (!LEAD_ENDPOINT) return false;
+  try {
+    const r = await fetch(LEAD_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(Object.assign({}, payload, { pagina: location.href }))
+    });
+    return r.ok;
+  } catch (e) { return false; }
+}
+
+/* ═══ MEDIÇÃO — PostHog (região UE, projeto MDM)
+   persistence "memory": sem cookies nem storage → não requer banner de
+   consentimento; perde-se a distinção visitante novo/recorrente, de propósito. */
+function track(event, props) {
+  try { window.posthog && window.posthog.capture(event, props || {}); } catch (e) {}
+}
+(function () {
+  const s = document.createElement('script');
+  s.src = 'https://eu-assets.i.posthog.com/static/array.js';
+  s.async = true;
+  s.onload = function () {
+    try {
+      window.posthog.init('phc_veB6kR2as8m8HuRMEVuTUWubWQxLkPW5D8Uf6wsJcy8A', {
+        api_host: 'https://eu.i.posthog.com',
+        persistence: 'memory',
+        person_profiles: 'identified_only',
+        autocapture: false
+      });
+    } catch (e) {}
+  };
+  document.head.appendChild(s);
+})();
+
+/* cliques em telefone e WhatsApp, onde quer que estejam */
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[href^="tel:"], a[href*="wa.me"]');
+  if (a) track(a.getAttribute('href').indexOf('tel:') === 0 ? 'phone_click' : 'whatsapp_click');
+});
 
 /* ═══ NAV — sombra ao rolar, menu mobile, secção ativa ═══ */
 (function () {
@@ -2006,6 +2159,57 @@ const $ = id => document.getElementById(id);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(setDuration);
 })();
 
+/* ═══ FAIXA DE ORÇAMENTO — captação do número ═══ */
+(function () {
+  const go = $('lsGo'), tel = $('lsTel');
+  if (!go) return;
+  /* sem endpoint, o botão não promete um contacto que ninguém recebe */
+  if (!LEAD_ENDPOINT) go.textContent = 'Pedir contacto no WhatsApp';
+
+  async function submit() {
+    const t = tel.value.trim();
+    if (t.replace(/\D/g, '').length < 9) {
+      tel.setAttribute('aria-invalid', 'true');
+      tel.focus();
+      return;
+    }
+    tel.setAttribute('aria-invalid', 'false');
+    track('lead_strip_submit', { via: LEAD_ENDPOINT ? 'endpoint' : 'whatsapp' });
+    if (LEAD_ENDPOINT) {
+      go.disabled = true;
+      go.textContent = 'A enviar…';
+      if (await sendLead({ telefone: t, origem: 'faixa-orcamento' })) {
+        document.querySelector('.ls-form').innerHTML =
+          '<p class="ls-ok" role="status">Recebido — ligamos-lhe em horário de expediente (8h–18h, dias úteis).</p>';
+        return;
+      }
+      go.disabled = false;
+      go.textContent = 'Quero ser contactado';
+    }
+    const url = 'https://wa.me/351910307579?text='
+      + encodeURIComponent('Olá MDM! Peço contacto para orçamento. O meu número: ' + t);
+    const w = window.open(url, '_blank');
+    if (w) { try { w.opener = null; } catch (e) {} }
+    else { location.href = url; }
+  }
+  go.addEventListener('click', submit);
+  tel.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+})();
+
+/* ═══ ESCOLHA DE INTENÇÃO — avaria vs contrato ═══ */
+(function () {
+  const c = $('intContrato');
+  if (c) c.addEventListener('click', () => {
+    track('intent_click', { tipo: 'contrato' });
+    const sel = $('qServico');
+    if (sel) sel.value = 'Contrato de Manutenção Anual';
+    $('quoteForm').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    setTimeout(() => $('qEmpresa').focus({ preventScroll: true }), reduceMotion ? 0 : 500);
+  });
+  const a = $('intAvaria');
+  if (a) a.addEventListener('click', () => track('intent_click', { tipo: 'avaria' }));
+})();
+
 /* ═══ PEDIDO DE ORÇAMENTO ═══ */
 (function () {
   const form = $('quoteForm');
@@ -2021,7 +2225,6 @@ const $ = id => document.getElementById(id);
     email:   $('qEmail').value.trim(),
     tel:     $('qTel').value.trim(),
     servico: $('qServico').value,
-    assunto: $('qAssunto').value.trim(),
     msg:     $('qMsg').value.trim()
   });
 
@@ -2062,19 +2265,38 @@ const $ = id => document.getElementById(id);
     d.msg || ''
   ].join('\n');
 
-  $('sendEmail').addEventListener('click', () => {
-    const d = data();
-    if (!validate(d)) return;
-    const subject = d.assunto || ('Pedido de orçamento — ' + (d.servico || 'serviços MDM'));
-    status.innerHTML = '<b>A abrir o seu programa de email…</b> Se nada acontecer, escreva para mdmassist@mdmassist.com.';
+  if (LEAD_ENDPOINT) $('sendEmailLbl').textContent = 'Enviar pedido';
+
+  function mailtoFallback(d) {
+    const subject = 'Pedido de orçamento — ' + (d.servico || 'serviços MDM');
     location.href = 'mailto:mdmassist@mdmassist.com'
       + '?subject=' + encodeURIComponent(subject)
       + '&body='    + encodeURIComponent(body(d));
+  }
+
+  $('sendEmail').addEventListener('click', async () => {
+    const d = data();
+    if (!validate(d)) return;
+    track('quote_form_submit', { via: LEAD_ENDPOINT ? 'endpoint' : 'mailto', servico: d.servico });
+    if (LEAD_ENDPOINT) {
+      status.innerHTML = '<b>A enviar…</b>';
+      if (await sendLead(Object.assign({}, d, { origem: 'formulario' }))) {
+        status.innerHTML = '<b>Pedido enviado.</b> Respondemos em menos de 24 horas úteis.';
+        form.reset();
+        return;
+      }
+      status.innerHTML = '<b>Não foi possível enviar diretamente.</b> A abrir o seu programa de email…';
+      mailtoFallback(d);
+      return;
+    }
+    status.innerHTML = '<b>A abrir o seu programa de email…</b> Se nada acontecer, escreva para mdmassist@mdmassist.com.';
+    mailtoFallback(d);
   });
 
   $('sendWa').addEventListener('click', () => {
     const d = data();
     if (!validate(d)) return;
+    track('quote_form_submit', { via: 'whatsapp', servico: d.servico });
     status.innerHTML = '<b>A abrir o WhatsApp…</b> Se o separador não abrir, ligue 218 935 050.';
     const url = 'https://wa.me/351910307579?text=' + encodeURIComponent(body(d));
     const w = window.open(url, '_blank');
