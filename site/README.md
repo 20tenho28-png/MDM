@@ -122,10 +122,10 @@ A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela vol
   navy: LED do formulário que fica sólido quando nome+contacto estão preenchidos (`:has`),
   LED de disponibilidade junto ao telefone da nav (usa `lisbonOpen()`), flash único na linha
   Serviço quando o cartão de contrato a pré-preenche, e as linhas do processo desenham-se
-  com o reveal. Creme: abanão de validação (4px, 1 ciclo) + assentar do sucesso, **esquema
-  multi-split vivo** (fluxo frigorífico tracejado + ventoinha do condensador), linha de
+  com o reveal. Creme: abanão de validação (4px, 1 ciclo) + assentar do sucesso, linha de
   progresso de leitura sob a nav (scroll-driven, só CSS), sublinhado carmim que se desenha
-  sob o `<em>` dos títulos.
+  sob o `<em>` dos títulos. (O esquema multi-split animado do cartão de AC foi
+  **removido a pedido do dono em 09/2026** — SVG, animação e kills PRM saíram juntos.)
 - **Reduced-motion:** todas as animações têm kill explícito. Atenção no creme: o bloco
   global usa `*` e **não cobre pseudo-elementos**, e os kills têm de igualar a
   especificidade das regras com `.in` — já corrigido duas vezes; não simplificar.

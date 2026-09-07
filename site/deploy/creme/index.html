@@ -439,17 +439,6 @@
   }
   .ls-ok { animation: rise .45s var(--ease) both; }
 
-  /* 2 · esquema multi-split vivo: fluxo frigorífico + ventoinha do condensador */
-  .svc--acd.in .svc-diag g[stroke="#A30711"] path {
-    stroke-dasharray: 4 7;
-    animation: refr-flow 1.4s linear infinite;
-  }
-  @keyframes refr-flow { to { stroke-dashoffset: -11; } }
-  .svc--acd.in .svc-diag g[stroke="#2B2723"] {
-    transform-box: fill-box; transform-origin: center;
-    animation: fan-spin 4.5s linear infinite;
-  }
-  @keyframes fan-spin { to { transform: rotate(1turn); } }
 
   /* 3 · linha de progresso de leitura sob a nav (scroll-driven, sem JS) */
   nav::after {
@@ -477,10 +466,6 @@
      estas regras explícitas são obrigatórias (animações infinitas + ::after) */
   @media (prefers-reduced-motion: reduce) {
     .mw-row.mw-err, .ls-ok { animation: none; }
-    .svc-diag g[stroke="#A30711"] path,
-    .svc--acd.in .svc-diag g[stroke="#A30711"] path { animation: none; stroke-dasharray: none; }
-    .svc-diag g[stroke="#2B2723"],
-    .svc--acd.in .svc-diag g[stroke="#2B2723"] { animation: none; }
     nav::after { animation: none; transform: scaleX(0); }
     .sec-head h2 em::after, .quote-head h2 em::after, .band h2 em::after,
     .sec-head.in h2 em::after, .quote-wrap.in .quote-head h2 em::after, .band.in h2 em::after {
@@ -724,16 +709,6 @@
   .hero .eyebrow { letter-spacing: 3.2px; }
   .hero-sub { font-size: 18px; color: #55504A; }
   @media (max-width: 760px) { .nav-links { display: none; } }
-  /* o esquema multi-split vira chip claro sobre a foto do cartão de AC
-     (traços escuros #2B2723 precisam de placa opaca p/ legibilidade) */
-  .svc-diag {
-    position: absolute; top: 14px; right: 14px; z-index: 2;
-    width: 82px; height: auto; padding: 7px;
-    background: rgba(250,249,245,0.94);
-    border: 1px solid var(--sand); border-radius: var(--r-m);
-    pointer-events: none;
-  }
-  @media (max-width: 760px) { .svc-diag { width: 88px; } }
   /* verde WhatsApp com contraste AA (4,9:1 com branco); o botão da faixa
      NÃO entra aqui — mantém o seu branco/carmim, que promete contacto, não WhatsApp */
   :root { --wa: #12823F; --wa-d: #0B6E34; }
@@ -951,7 +926,6 @@
     <a class="svc svc--acd" data-r href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%21%20Preciso%20de%20apoio%20em%20ar%20condicionado%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">
       <img class="svc-img" src="img/6ac315ff9c.webp" alt="Técnico MDM a intervir numa unidade exterior de ar condicionado" width="360" height="480" loading="lazy" decoding="async">
       <span class="svc-scrim" aria-hidden="true"></span>
-      <svg class="svc-diag" viewBox="0 0 200 208" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sistema multi-split: unidade exterior ligada a cinco unidades interiores"><rect x="112" y="12" width="78" height="26" rx="9" fill="none" stroke="#2B2723" stroke-width="2.6"/><circle cx="124" cy="21" r="1.8" fill="#2B2723"/><line x1="122" y1="31" x2="146" y2="31" stroke="#2B2723" stroke-width="2.2" stroke-linecap="round"/><rect x="112" y="50" width="78" height="26" rx="9" fill="none" stroke="#2B2723" stroke-width="2.6"/><circle cx="124" cy="59" r="1.8" fill="#2B2723"/><line x1="122" y1="69" x2="146" y2="69" stroke="#2B2723" stroke-width="2.2" stroke-linecap="round"/><rect x="112" y="88" width="78" height="26" rx="9" fill="none" stroke="#2B2723" stroke-width="2.6"/><circle cx="124" cy="97" r="1.8" fill="#2B2723"/><line x1="122" y1="107" x2="146" y2="107" stroke="#2B2723" stroke-width="2.2" stroke-linecap="round"/><rect x="112" y="126" width="78" height="26" rx="9" fill="none" stroke="#2B2723" stroke-width="2.6"/><circle cx="124" cy="135" r="1.8" fill="#2B2723"/><line x1="122" y1="145" x2="146" y2="145" stroke="#2B2723" stroke-width="2.2" stroke-linecap="round"/><rect x="112" y="164" width="78" height="26" rx="9" fill="none" stroke="#2B2723" stroke-width="2.6"/><circle cx="124" cy="173" r="1.8" fill="#2B2723"/><line x1="122" y1="183" x2="146" y2="183" stroke="#2B2723" stroke-width="2.2" stroke-linecap="round"/><rect x="12" y="150" width="72" height="48" rx="5" fill="none" stroke="#2B2723" stroke-width="2.6"/><g stroke="#2B2723" stroke-width="2.4" fill="none" stroke-linecap="round"><circle cx="48" cy="174" r="13.5"/><path d="M48 174 C 52 166, 58 168, 57 173" transform="rotate(0 48 174)"/><path d="M48 174 C 52 166, 58 168, 57 173" transform="rotate(120 48 174)"/><path d="M48 174 C 52 166, 58 168, 57 173" transform="rotate(240 48 174)"/></g><g stroke="#A30711" stroke-width="2.4" fill="none" stroke-linejoin="round" stroke-linecap="round"><path d="M84 158 H 92 V 25.0 H 112"/><path d="M84 163 H 97 V 63.0 H 112"/><path d="M84 168 H 102 V 101.0 H 112"/><path d="M84 173 H 107 V 139.0 H 112"/><path d="M84 178 H 112"/></g></svg>
       <span class="svc-txt">
         <h3>Ar Condicionado</h3>
         <span class="svc-sub">Instalação e manutenção multi-marca</span>
