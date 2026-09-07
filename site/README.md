@@ -163,12 +163,13 @@ A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela vol
 
 ### Contraste (verificado)
 
-O vermelho da marca `#B61918` **só serve como preenchimento** (com texto branco dá 6,7:1). Sobre o
+O vermelho do site é agora o **carmim do logótipo `#A30711`** (unificação feita em 09/2026, a partir
+da variante paralela de tokens; com texto branco dá 8,1:1 — AAA). Sobre o
 navy tem apenas 2,8:1, por isso não pode ser usado em texto nem em traços:
 
 | Token | Uso | Rácio |
 |---|---|---|
-| `--red` `#B61918` | preenchimentos, botões | 6,7:1 com branco |
+| `--red` `#A30711` | preenchimentos, botões, acentos | 8,1:1 com branco |
 | `--red-mark` `#D6392C` | traços e losangos sobre navy | 3,9:1 |
 | `--red-ink` `#F0857A` | texto vermelho sobre navy | 7,3:1 |
 | `--wa` `#12823F` | botão WhatsApp | 4,9:1 com branco |
@@ -176,8 +177,9 @@ navy tem apenas 2,8:1, por isso não pode ser usado em texto nem em traços:
 
 ## Por verificar / decisões em aberto
 
-- **Vermelho do logótipo vs. do site.** O quadrado do logótipo é carmim `#A30711`; o acento do site
-  é `#B61918`. Ficaram diferentes de propósito (decisão adiada) — unificar quando houver decisão.
+- ~~Vermelho do logótipo vs. do site~~ **Resolvido (09/2026):** o site inteiro usa o carmim do
+  logótipo `#A30711` (tinta escura passou ao navy `#141D2E`, cinzento ao `#4E5871`, escala de
+  raios `--r-s`/`--r-m`). Origem: variante paralela de tokens enviada pelo dono, fundida na oficial.
 - **Logótipos dos fornecedores.** A secção Fornecedores está em texto porque não existem ficheiros
   dos logótipos das marcas. Para usar PNGs, trocar o texto de cada `<li>` **nas duas listas** por
   `<img src="..." alt="...">` — o CSS `.marquee-row li img` já normaliza a altura e passa a branco.
