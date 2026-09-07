@@ -108,6 +108,12 @@ A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela vol
   próprio** (a decisão SEO pendente mais importante): mudar o `canonical`, `og:url`, `og:image`
   e `twitter:image` no `index.html` e regenerar a build — robots/sitemap seguem sozinhos.
   Depois: registar no Search Console e tratar da ficha Google Business (map pack é o canal nº 1).
+- **AEO / tendências (09/2026):** secção **FAQ** (6 respostas diretas, `<details>` nativo)
+  com **schema FAQPage** cujo texto iguala o visível — feita para a pesquisa por voz e para
+  os motores de resposta por IA escolherem o site como fonte. Duas **linhas de confiança**
+  junto ao formulário ("site sem cookies nem rastreio" / "técnicos, não robôs" — ambas
+  verdadeiras por construção). **Subtítulo sazonal** no hero via JS (jun–set: arrefecimento;
+  nov–fev: aquecimento; resto do ano: o texto estático, que é também o fallback sem JS).
 - Nota honesta: "1 ms" não existe em rede real — o que se otimizou foi o primeiro
   render (HTML pequeno primeiro) e o custo total, sem tocar na qualidade.
 

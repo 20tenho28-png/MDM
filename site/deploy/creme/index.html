@@ -358,6 +358,25 @@
   .c-val a { color: var(--ink); text-decoration: none; transition: color .2s; }
   .c-val a:hover { color: var(--red); }
 
+  /* ═══ FAQ (respostas diretas — também para pesquisa por voz/IA) ═══ */
+  .faq-list { max-width: 760px; margin-top: 40px; }
+  .faq-item { border-bottom: 1px solid var(--sand); }
+  .faq-item summary {
+    cursor: pointer; list-style: none; position: relative;
+    padding: 18px 40px 18px 0;
+    font-family: var(--serif); font-size: 18.5px; font-weight: 600; color: var(--ink);
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::after {
+    content: '+'; position: absolute; right: 4px; top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--mono); font-size: 20px; color: var(--red);
+    transition: transform .2s var(--ease);
+  }
+  .faq-item[open] summary::after { transform: translateY(-50%) rotate(45deg); }
+  .faq-item summary:hover { color: var(--red-dk); }
+  .faq-item p { padding: 0 40px 20px 0; margin: 0; font-size: 15px; line-height: 1.65; color: var(--slate); }
+
   /* mensagem de validação/estado do formulário — texto, não só cor */
   .mw-alert {
     margin: 14px 0 0; padding: 11px 14px; border-radius: var(--r-s);
@@ -802,6 +821,62 @@
  ]
 }
 </script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "Fazem contratos de manutenção para condomínios e empresas?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Sim — contratos anuais de manutenção preventiva, com visitas programadas e relatórios claros. Trabalhamos com empresas, condomínios, banca e indústria desde 1991."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Qual é a zona de intervenção?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "A grande Lisboa. A sede fica no Parque das Nações (Alameda dos Oceanos 108A), e as equipas deslocam-se a toda a área metropolitana."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Quanto tempo demoram a responder?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Respondemos a qualquer pedido em menos de 24 horas úteis, e a intervenção técnica acontece tipicamente em 24–48 h. Horário: segunda a sexta, 8h–18h."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Com que marcas trabalham?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Mitsubishi Electric, MIDEA, LG, France Air, Vulcano e Hitachi, entre outras — somos multi-marca, com peças originais e garantia de fabricante."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "O orçamento tem algum custo?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Não. O orçamento é gratuito e sem compromisso, e os seus dados são usados exclusivamente para responder ao pedido."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Como reporto uma avaria rapidamente?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "O caminho mais rápido é enviar uma fotografia da avaria por WhatsApp (910 307 579) — o técnico percebe logo o que levar. Também pode ligar 218 935 050 ou usar o formulário."
+   }
+  }
+ ]
+}
+</script>
 </head>
 <body>
 <a class="skip-link" href="#topo">Saltar para o conteúdo</a>
@@ -829,7 +904,7 @@
     <span class="ln"><span>Manutenção e <em>assistência</em></span></span>
     <span class="ln"><span>de edifícios.</span></span>
   </h1>
-  <p class="hero-sub">
+  <p class="hero-sub" id="heroSub">
     Ar condicionado, eletricidade e ventilação — empresas, condomínios e habitação.
   </p>
 
@@ -989,6 +1064,40 @@
 
 
 
+<!-- ═══ FAQ ═══ -->
+<section id="faq">
+  <div data-r>
+    <div class="sec-eyebrow">Perguntas frequentes</div>
+    <h2>Respostas diretas,<br>sem letra <em>pequena.</em></h2>
+  </div>
+  <div class="faq-list" data-r>
+    <details class="faq-item" open>
+      <summary>Fazem contratos de manutenção para condomínios e empresas?</summary>
+      <p>Sim — contratos anuais de manutenção preventiva, com visitas programadas e relatórios claros. Trabalhamos com empresas, condomínios, banca e indústria desde 1991.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Qual é a zona de intervenção?</summary>
+      <p>A grande Lisboa. A sede fica no Parque das Nações (Alameda dos Oceanos 108A), e as equipas deslocam-se a toda a área metropolitana.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Quanto tempo demoram a responder?</summary>
+      <p>Respondemos a qualquer pedido em menos de 24 horas úteis, e a intervenção técnica acontece tipicamente em 24–48 h. Horário: segunda a sexta, 8h–18h.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Com que marcas trabalham?</summary>
+      <p>Mitsubishi Electric, MIDEA, LG, France Air, Vulcano e Hitachi, entre outras — somos multi-marca, com peças originais e garantia de fabricante.</p>
+    </details>
+    <details class="faq-item">
+      <summary>O orçamento tem algum custo?</summary>
+      <p>Não. O orçamento é gratuito e sem compromisso, e os seus dados são usados exclusivamente para responder ao pedido.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Como reporto uma avaria rapidamente?</summary>
+      <p>O caminho mais rápido é enviar uma fotografia da avaria por WhatsApp (910 307 579) — o técnico percebe logo o que levar. Também pode ligar 218 935 050 ou usar o formulário.</p>
+    </details>
+  </div>
+</section>
+
 <!-- ═══ CONTACT ═══ -->
 <section id="contacto">
   <div data-r>
@@ -1069,6 +1178,7 @@
 
       <div class="mw-foot">
         <p class="mw-note">Orçamento gratuito e sem compromisso — resposta em menos de 24 horas úteis.<br>Os seus dados são usados exclusivamente para responder ao pedido.</p>
+        <p class="mw-note" style="margin-top:6px"><strong>Site sem cookies nem rastreio.</strong> E quem lhe responde são técnicos — não robôs.</p>
         <div class="mw-actions">
           <button type="button" class="btn btn-red mw-send" id="sendEmail">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -1299,6 +1409,14 @@ $q('sendWa').addEventListener('click', () => {
   else { location.href = url; }  // fallback: bloqueadores de popups / iOS
 });
 
+
+/* subtítulo sazonal: verão fala de arrefecimento, inverno de aquecimento */
+(function () {
+  var m = new Date().getMonth() + 1, el = document.getElementById('heroSub');
+  if (!el) return;
+  if (m >= 6 && m <= 9) el.textContent = 'O ar condicionado avariou no pior mês? Envie uma foto — resposta em menos de 24 h úteis.';
+  else if (m >= 11 || m <= 2) el.textContent = 'Aquecimento, eletricidade e ventilação a funcionar todo o inverno — empresas, condomínios e habitação.';
+})();
 
 /* anos de atividade e © derivados do calendário (fallback estático no HTML) */
 (function () {
