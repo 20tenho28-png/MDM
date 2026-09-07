@@ -117,6 +117,16 @@ A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela vol
 - Nota honesta: "1 ms" não existe em rede real — o que se otimizou foi o primeiro
   render (HTML pequeno primeiro) e o custo total, sem tocar na qualidade.
 
+## Header de dois níveis (09/2026)
+
+Pedido do dono (referência: header do concorrente Climacer, adaptado à nossa realidade):
+**barra utilitária** navy por cima da nav — LED de estado vivo ("Aberto agora · até às 18h"
+via `lisbonOpen()`, cinzento fora de horário), morada e email, todos dados reais — que
+desliza para fora ao rolar (a nav sobe para `top: 0`); e **navegação alargada a 5 âncoras
+reais** (Obras · Serviços · Porquê a MDM · Perguntas · Contacto) em mono maiúsculas
+espaçadas. Degradação: ≤1180px aperta espaçamentos, ≤1020px esconde as duas âncoras
+`.nl-desk`, ≤900px a barra desaparece, ≤760px a nav mobile fica como estava (intocada).
+
 ## Ícones e animações
 
 - **Ícones:** conjunto único **Lucide** (licença ISC) inline nas duas variantes — ventoinha
