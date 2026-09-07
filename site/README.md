@@ -102,6 +102,12 @@ A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela vol
   com cache. **É esta a build a publicar quando o alojamento aceita uma pasta**
   (Netlify/Vercel/FTP); o ficheiro único continua a ser o oficial para "arrastar
   um ficheiro só". Regenerar sempre as duas depois de editar as fontes.
+- **SEO (09/2026):** `og.jpg` (cartão 1200×630 para partilhas WhatsApp/redes; gerado à mão,
+  guardado em `site/og.jpg`) ligado por `og:image`/`twitter:image`; o `externalize.py` copia-o
+  para a build e gera `robots.txt` + `sitemap.xml` a partir do canonical. **Quando houver domínio
+  próprio** (a decisão SEO pendente mais importante): mudar o `canonical`, `og:url`, `og:image`
+  e `twitter:image` no `index.html` e regenerar a build — robots/sitemap seguem sozinhos.
+  Depois: registar no Search Console e tratar da ficha Google Business (map pack é o canal nº 1).
 - Nota honesta: "1 ms" não existe em rede real — o que se otimizou foi o primeiro
   render (HTML pequeno primeiro) e o custo total, sem tocar na qualidade.
 

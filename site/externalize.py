@@ -9,7 +9,7 @@ A build auto-contida continua a ser a oficial para "arrastar um ficheiro";
 esta é a recomendada quando se publica uma PASTA (Netlify, Vercel, FTP).
 Só stdlib.
 """
-import base64, hashlib, os, re, sys
+import base64, datetime, hashlib, os, re, shutil, sys
 
 def main(src, outdir):
     html = open(src, encoding="utf-8").read()
@@ -33,6 +33,22 @@ def main(src, outdir):
 
     html = re.sub(r"data:image/(jpeg|webp|png);base64,([A-Za-z0-9+/=]+)", extrai, html)
     open(os.path.join(outdir, "index.html"), "w", encoding="utf-8").write(html)
+    # extras de publicação: og.jpg + robots.txt + sitemap.xml (derivados do canonical)
+    og = os.path.join(os.path.dirname(os.path.abspath(src)), "og.jpg")
+    if os.path.exists(og):
+        shutil.copy2(og, os.path.join(outdir, "og.jpg"))
+    c = re.search(r'<link rel="canonical" href="([^"]+)"', html)
+    if c:
+        base = c.group(1).rstrip("/")
+        open(os.path.join(outdir, "robots.txt"), "w").write(
+            "User-agent: *\nAllow: /\nSitemap: %s/sitemap.xml\n" % base)
+        open(os.path.join(outdir, "sitemap.xml"), "w").write(
+            '<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+            "  <url><loc>%s/</loc><lastmod>%s</lastmod></url>\n</urlset>\n"
+            % (base, datetime.date.today().isoformat()))
+        print("+ og.jpg, robots.txt, sitemap.xml (%s)" % base)
+
     total = sum(os.path.getsize(os.path.join(imgdir, f)) for f in os.listdir(imgdir))
     print("%s -> %s: index %.0f KB + %d imagens (%.0f KB)" % (
         os.path.basename(src), outdir,
