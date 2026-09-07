@@ -117,7 +117,7 @@ A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela vol
 - Nota honesta: "1 ms" não existe em rede real — o que se otimizou foi o primeiro
   render (HTML pequeno primeiro) e o custo total, sem tocar na qualidade.
 
-## Header (09/2026 — 2ª iteração, agente de design)
+## Header (09/2026 — 3ª iteração, CRO)
 
 O dono rejeitou a 1ª versão (barra navy + nav em mono maiúsculas). A versão final,
 escolhida por agente de design entre 3 candidatos fotografados: **uma só faixa creme**,
@@ -127,6 +127,17 @@ instrumento"), e o **estado vivo como chip inline** junto ao telefone — ponto 
 "Aberto agora · até às 18h" via `lisbonOpen()` (ids `tbDot`/`tbEstado`). Hierarquia: o
 CTA carmim é o único elemento alto. Degradação: ≤1240px o chip esconde-se, ≤1180px
 aperta, ≤1020px caem as âncoras `.nl-desk`, ≤760px nav mobile intocada.
+
+**Reformulado como header de conversão (CRO):** navegação reduzida a **3 itens** —
+*Serviços* e *Sobre nós* são dropdowns (Serviços → AC/Eletricidade/Ventilação com
+deep-link ao cartão + "Manutenção & Contratos" que pré-seleciona o serviço no
+formulário; Sobre nós → Porquê a MDM/Perguntas/Contacto), *Obras* é link direto.
+**Zona de ação à direita:** telefone com ícone + micro-texto de estado vivo ("Aberto ·
+até às 18h") e o CTA passivo "Quero ser contactado" passou a **"Pedir Orçamento Grátis"**
+(carmim, alto contraste, hover). **Mobile (≤760px):** botão **"Ligar"** carmim em
+evidência + hambúrguer com gaveta (scroll-lock, fecha ao escolher/Esc) + o WhatsApp
+verde de sempre; o CTA de texto esconde-se. Dropdowns: hover em ponteiro fino, clique/
+teclado sempre; `aria-expanded` em todos. Justificação das decisões no histórico do commit.
 
 ## Ícones e animações
 
