@@ -48,7 +48,7 @@ A navy fica arquivada em `variante-navy/`, completa e funcional.
 |---|---|---|
 | Estética | Escura, técnica (navy dos polos) | Clara, editorial (a publicada) |
 | Como se edita | Fontes em `src/` + `assemble.py` | Ficheiro único, editável à mão |
-| Funcional | Igual nas duas: faixa de orçamento com `LEAD_ENDPOINT`, PostHog, CTA de foto, carrossel de 14 obras, barra fixa mobile |  |
+| Funcional | Igual nas duas: faixa de orçamento com `LEAD_ENDPOINT`, PostHog, CTA de foto, carrossel de obras (10 no oficial), barra fixa mobile |  |
 
 Nota: o `LEAD_ENDPOINT` define-se diretamente no `<script>` do `index.html` (creme).
 A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela voltar.
@@ -160,7 +160,7 @@ A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela vol
 - **Ordem da página (decidida pelo dono):** hero → faixa de orçamento → **obras** →
   **números** (1991 / 35 anos / 24–48h / 8–18h) → serviços → processo → … A prova
   visual vem antes da prova numérica; igual nas duas variantes.
-- **Carrossel "Algumas das nossas obras":** 14 fotos reais, auto-scroll, pausa em hover, arrastável,
+- **Carrossel "Algumas das nossas obras":** 10 fotos reais — eram 14; as obras 4–7 (multímetro, tubagem de cobre, sala de bombas, intervenção na exterior) foram retiradas a pedido do dono em 09/2026, mas continuam em `obras/` se voltarem a ser precisas, auto-scroll, pausa em hover, arrastável,
   com setas. Os cartões são duplicados por JS para o ciclo fechar sem costura.
 - **Fornecedores:** marquee contínuo para a esquerda, meia página. Velocidade constante (70 px/s)
   calculada por JS a partir da largura real.
