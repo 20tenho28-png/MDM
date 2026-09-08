@@ -18,6 +18,12 @@ Não é um slogan para agradar a toda a gente. Tem de fazer o gestor de condomí
 ## 6) Os três cartões: segmentar por tipo de trabalho e de instalação
 Propõe **exatamente três** segmentos (à INEOS), definidos pela combinação **tipo de trabalho × tipo de instalação**, cobrindo apenas AVAC. Exemplos de eixos a combinar (escolhe e justifica): centrais e chillers / VRF e multi-split / ventilação e extração; instalação nova / avaria e reparação / contrato de manutenção preventiva; condomínio / indústria e comércio / banca e escritórios. Para cada cartão: título com seta (≤ 3 palavras), linha descritiva (≤ 12 palavras, com o vocabulário real do setor: chiller, VRF, cassete, UTA, condutas, contrato anual), a cor/estilo da barra, e **o que acontece ao clicar** — o cartão é um filtro, por isso cada um encaminha para um caminho diferente: WhatsApp com mensagem pré-preenchida específica do segmento, ou o formulário com o serviço pré-selecionado, ou a secção de contratos. Diz qual e porquê. Regra de honestidade: os três destinos existem já no site (#servicos, #contacto com pré-seleção, wa.me com texto) — não inventes páginas.
 
+**Encaminhamento fixado pelo dono (não é para o conceito decidir — é para cumprir):**
+- **Ar condicionado** (avaria, reparação, instalação de VRF/multi-split/cassetes) **entra pelo WhatsApp**: `https://wa.me/351910307579` com mensagem pré-preenchida específica do cartão, que peça logo a fotografia do equipamento. É o canal de resposta rápida; o técnico percebe a situação pela foto.
+- **Contratos de manutenção** (preventiva, anual, condomínios/indústria/banca) **entram pelo telefone 218 935 050 e pelo email**: no telemóvel o cartão liga (`tel:+351218935050`); no desktop mostra o número e abre o email `mailto:mdmassist@mdmassist.com` com assunto pré-preenchido ("Pedido de proposta — contrato de manutenção"), ou o formulário de contacto com o serviço "Contrato de Manutenção Anual" já selecionado. É o canal de conversa e proposta — um contrato não se fecha por mensagem instantânea.
+- **Terceiro segmento** (o conceito propõe qual — p. ex. ventilação/UTA/centrais, ou instalação nova de raiz): **entra pelo formulário de orçamento** (#contacto, que segue por email), com o serviço pré-selecionado. É o canal para pedidos que precisam de descrição e documentação.
+O conceito tem de mostrar, cartão a cartão, o canal, o rótulo do botão e o texto pré-preenchido (WhatsApp/assunto de email), e explicar em uma frase porque é que aquele canal serve aquele cliente.
+
 ## 7) Linha de prova (a linha dos números)
 Uma frase com 2–3 factos a negrito, só da lista da secção 3 (ex.: "**35 anos** a manter edifícios em Lisboa · **6 marcas** representadas · resposta em **menos de 24 h**"). Sem números inventados.
 
@@ -27,7 +33,7 @@ Nada de: estado "aberto agora", chips, dropdowns, ícones decorativos, animaçõ
 ## 9) Entregável: o conceito (texto, sem código)
 1. Slogan: 5 opções + recomendada, com justificação de filtro (quem atrai, quem afasta).
 2. Linha de prova.
-3. Os 3 cartões: título, descritivo, cor da barra, destino ao clicar, e o cliente-alvo de cada.
+3. Os 3 cartões: título, descritivo, cor da barra, canal fixado (WhatsApp / telefone+email / formulário), rótulo do botão, texto pré-preenchido, e o cliente-alvo de cada.
 4. Layout em palavras: creme ou navy, posição dos cartões face ao slogan, o que acontece no telemóvel (empilhar? scroll horizontal?).
 5. Um parágrafo de "porque é que isto filtra melhor do que o hero atual".
 6. Riscos: o que se perde ao focar só AVAC (eletricidade e habitação) e como mitigar noutra secção.
