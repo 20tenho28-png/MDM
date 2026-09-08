@@ -123,6 +123,26 @@ A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela vol
 - Nota honesta: "1 ms" não existe em rede real — o que se otimizou foi o primeiro
   render (HTML pequeno primeiro) e o custo total, sem tocar na qualidade.
 
+## Hero de qualificação (09/2026) — filtra a clientela
+
+Conceito produzido a partir de `docs/prompt-hero-avac.md` (gramática INEOS: declaração,
+prova, três portas) e implementado tal e qual:
+
+- **Slogan:** "Mantemos os edifícios de Lisboa a *funcionar*." — evolução do aprovado
+  ("Mantemos Lisboa a funcionar."). A palavra que filtra é **edifícios**: quem gere um
+  edifício reconhece-se; quem compra um split para a sala não.
+- **Linha de prova** (substitui o subtítulo e o sazonal por JS, que era escrito para o
+  particular): 35 anos · banca, indústria e condomínios · 6 marcas · 24 a 48 h. Só factos reais.
+- **Três portas**, com o canal fixado pelo dono: **Contratos de manutenção** (barra carmim
+  → telefone 218 935 050 + `mailto` com assunto e corpo), **Ar condicionado** (barra navy
+  → WhatsApp com texto que pede a foto), **Ventilação e UTA** (barra cinzenta → formulário
+  com `data-preselect` + `data-msg` a preencher serviço e esqueleto da mensagem).
+- **Saíram:** o eyebrow em mono, os dois CTAs do hero (fundiram-se nos cartões A e B) e a
+  troca sazonal do subtítulo. O telefone continua no header.
+- **Por decidir (assinalado, não executado):** a banda "MDM em números" repete 35 anos e
+  24–48h que agora vivem na linha de prova; e a faixa carmim logo abaixo do hero é uma
+  quarta porta genérica. Ambas foram posicionadas por decisão do dono — não se mexeu.
+
 ## Header (09/2026 — 3ª iteração, CRO)
 
 O dono rejeitou a 1ª versão (barra navy + nav em mono maiúsculas). A versão final,
