@@ -65,6 +65,12 @@ A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela vol
   formulário mantém o `mailto:`. Definir o endpoint muda os rótulos para "Quero ser
   contactado" / "Enviar pedido" e ativa a confirmação inline + fallback para email se o
   POST falhar. **Definir o endpoint é o passo nº 1 para maximizar leads.**
+- **Caminho escolhido (09/2026): Formspree.** Criar conta em formspree.io, "New form",
+  confirmar o email mdmassist@mdmassist.com quando o Formspree o pedir, e copiar o URL
+  `https://formspree.io/f/xxxxxxxx` para `LEAD_ENDPOINT`. O site já envia `_subject`
+  (assunto legível: origem + nome/telefone) e `_replyto` (responder direto ao cliente).
+  Histórico: o 503 anterior vinha de um projeto Supabase pausado sem função publicada
+  (ver `backend/README.md` — fica como alternativa se um dia se quiser guardar leads em BD).
 - **PostHog** (org MDM, projeto 226321, região UE) está instalado com
   `persistence: 'memory'` — sem cookies nem storage, logo sem necessidade de banner de
   consentimento; perde-se a distinção novo/recorrente de propósito. Eventos:

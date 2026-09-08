@@ -1311,7 +1311,7 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
    LEAD_ENDPOINT: URL que recebe os pedidos por POST JSON (ex.: Formspree
    "https://formspree.io/f/xxxxxxxx"). Vazio → email/WhatsApp e rótulos
    honestos (a faixa não promete um contacto que ninguém recebe). */
-const LEAD_ENDPOINT = '';
+const LEAD_ENDPOINT = '';   // Formspree: 'https://formspree.io/f/xxxxxxxx' (ver README, Captação de leads)
 
 async function sendLead(payload) {
   if (!LEAD_ENDPOINT) return false;
@@ -1324,6 +1324,9 @@ async function sendLead(payload) {
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       signal: ctl.signal,
       body: JSON.stringify(Object.assign({}, payload, {
+        /* campos que o Formspree entende: assunto do email e reply-to para o cliente */
+        _subject: 'Novo pedido no site MDM (' + (payload.origem || 'site') + ')' + (payload.empresa ? ' — ' + payload.empresa : payload.tel ? ' — ' + payload.tel : ''),
+        _replyto: payload.email || undefined,
         pagina: location.href,
         referrer: document.referrer || '',
         utm: location.search.slice(1),
