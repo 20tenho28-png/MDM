@@ -15,6 +15,21 @@ Site creme editorial (fundo `#FAF9F5`), tinta navy `#141D2E`, **carmim do logót
 ## 5) O que o slogan tem de fazer: filtrar
 Não é um slogan para agradar a toda a gente. Tem de fazer o gestor de condomínio, o responsável de instalações de uma fábrica ou o facility manager de um banco pensar "isto é para mim", e deixar claro o que a MDM **não** é (não é loja de ar condicionado, não vende equipamento sem instalar, não faz só a casa do vizinho). Regras: uma declaração de identidade (o que a MDM **é**), até 8 palavras no título, sem adjetivos vazios ("excelência", "qualidade", "soluções"), sem promessas que a operação não cumpra, português de Portugal. Entrega **5 opções** com uma frase de justificação cada, e indica a recomendada. O slogan atual, aprovado pelo dono, é **"Mantemos Lisboa a funcionar."** — pode ser mantido, evoluído ou substituído, mas foram rejeitados "Engenharia de conforto para edifícios" e "O técnico que atende o telefone".
 
+## 5-bis) Filtrar a clientela — o objetivo por trás de tudo
+O hero é um **filtro**, não um funil para toda a gente. Hierarquia de clientela que a MDM quer (do mais ao menos prioritário):
+1. **Contratos de manutenção** com condomínios, indústria, banca e escritórios — receita recorrente, relação longa. É o cliente que o slogan tem de fazer sentir-se em casa.
+2. **Instalações e avarias AVAC em edifícios** (VRF, centrais, chillers, UTA, cassetes em open-space) — trabalho técnico de valor.
+3. **Habitação** — continua a ser servida, mas **sem protagonismo no hero**; entra pelo WhatsApp com foto (o canal mais barato e mais rápido), sem promessa especial.
+O que a MDM **não quer atrair**: quem compara preços de um split para a sala, quem quer comprar equipamento sem instalação, quem procura "promoções". Estes não são rejeitados — são **encaminhados** para o canal de menor custo (WhatsApp com foto) e nunca para o telefone dos contratos.
+
+Mecanismos de filtro que o conceito tem de usar, explicitamente:
+- **Linguagem do slogan e da linha de prova**: falar de *edifícios, instalações, gestores, exploração, paragens* — não de *conforto em casa, promoções, preços*. Quem gere um edifício reconhece-se; quem compra um split para a sala percebe que este não é o sítio das promoções.
+- **Os cartões como portas de triagem**: cada cartão nomeia o cliente-alvo (ex.: "Gestores de condomínio", "Responsáveis de instalações", "Edifícios de serviços") e o tipo de instalação — quem não se reconhece em nenhum já ficou filtrado.
+- **O canal como filtro**: contratos pelo telefone/email (compromisso de conversa = cliente sério); ar condicionado pelo WhatsApp com foto (exige mostrar o equipamento = pedido real, não curiosidade).
+- **Ausências deliberadas**: sem tabela de preços, sem "desde X €", sem "promoção", sem dicas faça-você-mesmo.
+
+Teste do filtro (obrigatório no entregável): descreve como três pessoas leem o hero em 5 segundos — (a) gestora de condomínio com 3 chillers avariados no verão, (b) chefe de manutenção de uma fábrica em Loures a renovar o contrato, (c) particular a pedir preço para um split — e prova que (a) e (b) se sentem diretamente convocados e sabem onde clicar, e que (c) é encaminhado para o WhatsApp sem ocupar o telefone dos contratos.
+
 ## 6) Os três cartões: segmentar por tipo de trabalho e de instalação
 Propõe **exatamente três** segmentos (à INEOS), definidos pela combinação **tipo de trabalho × tipo de instalação**, cobrindo apenas AVAC. Exemplos de eixos a combinar (escolhe e justifica): centrais e chillers / VRF e multi-split / ventilação e extração; instalação nova / avaria e reparação / contrato de manutenção preventiva; condomínio / indústria e comércio / banca e escritórios. Para cada cartão: título com seta (≤ 3 palavras), linha descritiva (≤ 12 palavras, com o vocabulário real do setor: chiller, VRF, cassete, UTA, condutas, contrato anual), a cor/estilo da barra, e **o que acontece ao clicar** — o cartão é um filtro, por isso cada um encaminha para um caminho diferente: WhatsApp com mensagem pré-preenchida específica do segmento, ou o formulário com o serviço pré-selecionado, ou a secção de contratos. Diz qual e porquê. Regra de honestidade: os três destinos existem já no site (#servicos, #contacto com pré-seleção, wa.me com texto) — não inventes páginas.
 
@@ -37,5 +52,6 @@ Nada de: estado "aberto agora", chips, dropdowns, ícones decorativos, animaçõ
 4. Layout em palavras: creme ou navy, posição dos cartões face ao slogan, o que acontece no telemóvel (empilhar? scroll horizontal?).
 5. Um parágrafo de "porque é que isto filtra melhor do que o hero atual".
 6. Riscos: o que se perde ao focar só AVAC (eletricidade e habitação) e como mitigar noutra secção.
+7. Teste do filtro com as três personas da secção 5-bis.
 
 Critério de aceitação: alguém que lê só o hero consegue dizer em 5 segundos o que a MDM é, para quem trabalha, e por onde clicar para o seu caso.
