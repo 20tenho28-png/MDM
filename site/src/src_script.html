@@ -67,7 +67,7 @@ function track(event, props) {
 })();
 
 /* cliques em telefone e WhatsApp, onde quer que estejam */
-/* mensagem da faixa consoante o horário (Europe/Lisbon, 2ª–6ª 8h–18h) */
+/* mensagem da faixa consoante o horário (Europe/Lisbon, 2ª–6ª 8h–17h) */
 function lisbonOpen() {
   try {
     const parts = new Intl.DateTimeFormat('en-GB', {
@@ -75,7 +75,7 @@ function lisbonOpen() {
     }).formatToParts(new Date());
     const h = +parts.find(p => p.type === 'hour').value;
     const wd = parts.find(p => p.type === 'weekday').value;
-    return wd !== 'Sat' && wd !== 'Sun' && h >= 8 && h < 18;
+    return wd !== 'Sat' && wd !== 'Sun' && h >= 8 && h < 17;
   } catch (e) { return true; }
 }
 (function () {
@@ -270,7 +270,7 @@ document.addEventListener('click', e => {
       go.textContent = 'A enviar…';
       if (await sendLead({ telefone: t, origem: 'faixa-orcamento' })) {
         document.querySelector('.ls-form').innerHTML =
-          '<p class="ls-ok" role="status">Recebido — ligamos-lhe em horário de expediente (8h–18h, dias úteis).</p>';
+          '<p class="ls-ok" role="status">Recebido — ligamos-lhe em horário de expediente (8h–17h, dias úteis).</p>';
         return;
       }
       go.disabled = false;

@@ -83,7 +83,7 @@ A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela vol
   neste setor.
 - **Segunda camada (ambas as variantes):** formulário reduzido ao essencial (NIF, localidade
   e assunto pedem-se depois do 1º contacto), rótulo "Nome" em vez de "Empresa", faixa
-  sensível ao horário (fora de 2ª–6ª 8h–18h promete o próximo dia útil), "orçamento gratuito
+  sensível ao horário (fora de 2ª–6ª 8h–17h promete o próximo dia útil), "orçamento gratuito
   e sem compromisso" junto ao botão, ponte de CTA a seguir ao carrossel de obras, e a pill da
   nav navy passou de salto para o WhatsApp a âncora de captação (#orcamento).
 - **Robustez da captação:** `sendLead` tem timeout de 8s (endpoint pendurado → fallback
@@ -235,7 +235,7 @@ teclado sempre; `aria-expanded` em todos. Justificação das decisões no histó
 - **Animação de fundo:** Three.js (via cdnjs, import dinâmico em try/catch — se o CDN falhar, o site
   funciona na mesma). Sobre o navy usa *additive blending*.
 - **Ordem da página (decidida pelo dono):** hero → faixa de orçamento → **obras** →
-  **números** (1991 / 35 anos / 24–48h / 8–18h) → serviços → processo → … A prova
+  **números** (1991 / 35 anos / 24–48h / 8–17h) → serviços → processo → … A prova
   visual vem antes da prova numérica; igual nas duas variantes.
 - **Carrossel "Algumas das nossas obras":** 10 fotos reais — eram 14; as obras 4–7 (multímetro, tubagem de cobre, sala de bombas, intervenção na exterior) foram retiradas a pedido do dono em 09/2026, mas continuam em `obras/` se voltarem a ser precisas, auto-scroll, pausa em hover, arrastável,
   com setas. Os cartões são duplicados por JS para o ciclo fechar sem costura.
@@ -277,7 +277,7 @@ navy tem apenas 2,8:1, por isso não pode ser usado em texto nem em traços:
 ## Dados reais (não alterar sem confirmação)
 
 - Telefone: 218 935 050 · WhatsApp: 910 307 579 · Email: mdmassist@mdmassist.com
-- Morada: Alameda dos Oceanos, 108A, 1990-426 Lisboa · Horário: 2ª–6ª, 8h–18h · NIF: 502 644 761
+- Morada: Alameda dos Oceanos, 108A, 1990-426 Lisboa · Horário: 2ª–6ª, 8h–17h · NIF: 502 644 761
 - Fundação: 1991 (35 anos). Marcas: Mitsubishi Electric, MIDEA, LG, France Air, Vulcano, Hitachi.
 - **Não introduzir dados financeiros privados** (faturação, clientes, etc.) — já foram removidos
   de versões antigas de propósito.
