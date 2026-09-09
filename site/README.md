@@ -123,6 +123,27 @@ A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela vol
 - Nota honesta: "1 ms" não existe em rede real — o que se otimizou foi o primeiro
   render (HTML pequeno primeiro) e o custo total, sem tocar na qualidade.
 
+## Triagem de leads (09/2026) — hierarquia do dono
+
+**P1 montagem de ar condicionado · P2 manutenção preventiva · P3 eletricista certificado
+(foco AVAC)** · P4 avarias/ventilação · P5 por classificar. A lógica vive numa única tabela
+`TRIAGEM` no `<script>` do `index.html` (serviço → prioridade + segmento) e é usada em
+todo o lado — mudar a hierarquia é editar essa tabela:
+
+- **Assunto do email** (Formspree `_subject` e `mailto`): começa por `[P1 · Montagem AC]`,
+  `[P2 · Manutenção preventiva]`, … — a caixa de entrada ordena-se e filtra-se pelo prefixo.
+- **Payload do endpoint**: campos `prioridade` e `segmento`; **PostHog**: `quote_form_submit`
+  leva os mesmos dois campos (funil por segmento).
+- **WhatsApp**: cada texto pré-preenchido começa pela etiqueta do segmento (`[Montagem AC]`,
+  `[Eletricista AVAC]`, `[Ventilação]`, `[Ar condicionado]`) — pesquisável na app.
+- **Hero**: as três portas são exatamente P1/P2/P3, com a cor da barra a seguir a prioridade
+  (carmim · navy · cinzento) e o canal fixado pelo dono (WhatsApp com fotos do local ·
+  telefone+email · formulário com serviço e mensagem pré-preenchidos).
+- **Formulário**: opções do serviço pela ordem da prioridade; **secção Serviços**: cartões
+  AC · Manutenção · Eletricidade · Ventilação (o dropdown da nav segue os índices novos).
+- A faixa de orçamento (só telefone) chega como P5 "Por classificar" — é o preço de ter um
+  campo só; classifica-se na chamada.
+
 ## Hero de qualificação (09/2026) — filtra a clientela
 
 Conceito produzido a partir de `docs/prompt-hero-avac.md` (gramática INEOS: declaração,

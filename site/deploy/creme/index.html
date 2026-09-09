@@ -206,8 +206,9 @@
     text-decoration: none; color: var(--ink);
     transition: transform .25s var(--ease), border-color .25s, box-shadow .3s;
   }
-  .door--contratos { border-top-color: var(--red); }
-  .door--ac { border-top-color: var(--ink); }
+  .door--montagem { border-top-color: var(--red); }   /* P1 */
+  .door--manut { border-top-color: var(--ink); }      /* P2 */
+  /* .door--elet fica com o cinzento por omissão            P3 */
   .door:hover { transform: translateY(-3px); border-color: var(--slate); box-shadow: 0 12px 26px -20px rgba(20,29,46,.45); }
   .door-t {
     font-family: var(--serif); font-size: 21px; font-weight: 500; letter-spacing: -0.4px;
@@ -990,9 +991,9 @@
       <button class="nav-drop-btn" aria-expanded="false" aria-controls="dropSvc">Serviços <span class="nav-caret" aria-hidden="true"></span></button>
       <div class="nav-drop" id="dropSvc">
         <a href="#servicos" data-svc="0">Ar Condicionado</a>
-        <a href="#servicos" data-svc="1">Eletricidade</a>
-        <a href="#servicos" data-svc="2">Ventilação</a>
-        <a href="#contacto" data-preselect="Contrato de Manutenção Anual">Manutenção &amp; Contratos</a>
+        <a href="#contacto" data-preselect="Manutenção Preventiva — Contrato Anual">Manutenção preventiva</a>
+        <a href="#servicos" data-svc="2">Eletricidade</a>
+        <a href="#servicos" data-svc="3">Ventilação</a>
       </div>
     </div>
     <a href="#obras">Obras</a>
@@ -1037,22 +1038,22 @@
   </p>
 
   <div class="hero-doors">
-    <div class="door door--contratos">
-      <span class="door-t">Contratos de manutenção <i aria-hidden="true">&#8594;</i></span>
-      <p>Contrato anual para condomínios, banca, indústria e escritórios. Preventiva, com relatório.</p>
-      <a class="door-tel" href="tel:+351218935050">218&nbsp;935&nbsp;050</a>
-      <a class="door-go" href="mailto:mdmassist@mdmassist.com?subject=Pedido%20de%20proposta%20%E2%80%94%20contrato%20de%20manuten%C3%A7%C3%A3o&body=Edif%C3%ADcio%20ou%20entidade%3A%20%0AMorada%3A%20%0AEquipamentos%20a%20incluir%20%28VRF%2C%20chillers%2C%20UTA%2C%20cassetes%29%3A%20%0AContacto%20e%20melhor%20hora%20para%20ligar%3A%20%0A">Pedir proposta por email</a>
-    </div>
-
-    <a class="door door--ac" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM.%20Preciso%20de%20apoio%20em%20ar%20condicionado%20%28avaria%2C%20repara%C3%A7%C3%A3o%20ou%20instala%C3%A7%C3%A3o%29.%20Local%3A%20%E2%80%A6%20Equipamento%3A%20VRF%20/%20multi-split%20/%20cassete%20/%20chiller.%20Envio%20j%C3%A1%20a%20fotografia." target="_blank" rel="noopener">
-      <span class="door-t">Ar condicionado <i aria-hidden="true">&#8594;</i></span>
-      <p>Avaria ou instalação de VRF, multi-split, cassetes e chillers. Envie a foto.</p>
-      <span class="door-go">Enviar foto no WhatsApp</span>
+    <a class="door door--montagem" href="https://wa.me/351910307579?text=%5BMontagem%20AC%5D%20Ol%C3%A1%20MDM.%20Quero%20instalar%20ar%20condicionado.%20Local%3A%20%E2%80%A6%20Tipo%20de%20espa%C3%A7o%20%28escrit%C3%B3rio%2C%20loja%2C%20condom%C3%ADnio%2C%20habita%C3%A7%C3%A3o%29%3A%20%E2%80%A6%20N%C2%BA%20de%20divis%C3%B5es%20ou%20equipamentos%3A%20%E2%80%A6%20Envio%20j%C3%A1%20fotografias%20do%20local." target="_blank" rel="noopener">
+      <span class="door-t">Montagem de ar condicionado <i aria-hidden="true">&#8594;</i></span>
+      <p>Instalação de VRF, multi-split, cassetes e chillers em edifícios. Envie fotos do local.</p>
+      <span class="door-go">Enviar fotos no WhatsApp</span>
     </a>
 
-    <a class="door door--vent" href="#contacto" data-preselect="Ventilação — Instalação / Revisão" data-msg="Edifício ou espaço: &#10;Área ou número de pisos: &#10;Instalação existente (UTA, extração, condutas): &#10;Prazo pretendido: &#10;Tem projeto ou caderno de encargos? ">
-      <span class="door-t">Ventilação e UTA <i aria-hidden="true">&#8594;</i></span>
-      <p>Extração, condutas e renovação de ar. Instalação nova ou remodelação, com projeto.</p>
+    <div class="door door--manut">
+      <span class="door-t">Manutenção preventiva <i aria-hidden="true">&#8594;</i></span>
+      <p>Contrato anual para condomínios, banca, indústria e escritórios. Com relatório.</p>
+      <a class="door-tel" href="tel:+351218935050">218&nbsp;935&nbsp;050</a>
+      <a class="door-go" href="mailto:mdmassist@mdmassist.com?subject=%5BP2%20%C2%B7%20Manuten%C3%A7%C3%A3o%20preventiva%5D%20Pedido%20de%20proposta%20%E2%80%94%20contrato%20anual&body=Edif%C3%ADcio%20ou%20entidade%3A%20%0AMorada%3A%20%0AEquipamentos%20a%20incluir%20%28VRF%2C%20chillers%2C%20UTA%2C%20cassetes%29%3A%20%0APeriodicidade%20pretendida%3A%20%0AContacto%20e%20melhor%20hora%20para%20ligar%3A%20%0A">Pedir proposta por email</a>
+    </div>
+
+    <a class="door door--elet" href="#contacto" data-preselect="Eletricidade — Quadros e Alimentações AVAC" data-msg="Edifício ou instalação: &#10;O que precisa (quadro, alimentação de unidades AVAC, proteções, avaria): &#10;Potência/nº de equipamentos a alimentar: &#10;Precisa de certificação/vistoria? &#10;Prazo: ">
+      <span class="door-t">Eletricista certificado <i aria-hidden="true">&#8594;</i></span>
+      <p>Quadros, alimentações e proteções para AVAC. Avarias e conformidade.</p>
       <span class="door-go">Pedir orçamento</span>
     </a>
   </div>
@@ -1142,40 +1143,43 @@
     <h2>Quatro especialidades,<br>uma resposta <em>integrada.</em></h2>
   </div>
   <div class="svc-row">
-    <a class="svc svc--acd" data-r href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%21%20Preciso%20de%20apoio%20em%20ar%20condicionado%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">
+    <a class="svc svc--acd" data-r href="https://wa.me/351910307579?text=%5BAr%20condicionado%5D%20Ol%C3%A1%20MDM%21%20Preciso%20de%20apoio%20em%20ar%20condicionado%20%28montagem%20ou%20avaria%29%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">
       <img class="svc-img" src="img/6ac315ff9c.webp" alt="Técnico MDM a intervir numa unidade exterior de ar condicionado" width="360" height="480" loading="lazy" decoding="async">
       <span class="svc-scrim" aria-hidden="true"></span>
       <span class="svc-txt">
         <h3>Ar Condicionado</h3>
-        <span class="svc-sub">Instalação e manutenção multi-marca</span>
+        <span class="svc-sub">Montagem, avarias e manutenção multi-marca</span>
         <span class="svc-go">Pedir apoio no WhatsApp <span aria-hidden="true">→</span></span>
       </span>
     </a>
-    <a class="svc" data-r href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%21%20Preciso%20de%20apoio%20em%20eletricidade%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">
+
+    <a class="svc" data-r href="#contacto" data-preselect="Manutenção Preventiva — Contrato Anual">
+      <img class="svc-img" src="img/fe2136ede4.webp" alt="Equipa MDM em manutenção programada de edifício" width="453" height="480" loading="lazy" decoding="async">
+      <span class="svc-scrim" aria-hidden="true"></span>
+      <span class="svc-txt">
+        <h3>Manutenção</h3>
+        <span class="svc-sub">Contratos anuais preventivos, com relatório</span>
+        <span class="svc-go">Pedir proposta <span aria-hidden="true">→</span></span>
+      </span>
+    </a>
+
+    <a class="svc" data-r href="https://wa.me/351910307579?text=%5BEletricista%20AVAC%5D%20Ol%C3%A1%20MDM%21%20Preciso%20de%20um%20eletricista%20certificado%20%28quadro%2C%20alimenta%C3%A7%C3%A3o%20ou%20avaria%29%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">
       <img class="svc-img" src="img/1c3f80e9db.webp" alt="Quadro elétrico montado e identificado por técnico da MDM" width="418" height="480" loading="lazy" decoding="async">
       <span class="svc-scrim" aria-hidden="true"></span>
       <span class="svc-txt">
         <h3>Eletricidade</h3>
-        <span class="svc-sub">Quadros elétricos, avarias e reparações</span>
+        <span class="svc-sub">Quadros e alimentações para AVAC — técnico certificado</span>
         <span class="svc-go">Pedir apoio no WhatsApp <span aria-hidden="true">→</span></span>
       </span>
     </a>
-    <a class="svc" data-r href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%21%20Preciso%20de%20apoio%20em%20ventila%C3%A7%C3%A3o%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">
+
+    <a class="svc" data-r href="https://wa.me/351910307579?text=%5BVentila%C3%A7%C3%A3o%5D%20Ol%C3%A1%20MDM%21%20Preciso%20de%20apoio%20em%20ventila%C3%A7%C3%A3o%20ou%20extra%C3%A7%C3%A3o%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">
       <img class="svc-img" src="img/3889bc0925.webp" alt="Condutas de ventilação instaladas pela MDM" width="640" height="480" loading="lazy" decoding="async">
       <span class="svc-scrim" aria-hidden="true"></span>
       <span class="svc-txt">
         <h3>Ventilação</h3>
         <span class="svc-sub">Extração, condutas e qualidade do ar</span>
         <span class="svc-go">Pedir apoio no WhatsApp <span aria-hidden="true">→</span></span>
-      </span>
-    </a>
-    <a class="svc" data-r href="#contacto">
-      <img class="svc-img" src="img/fe2136ede4.webp" alt="Equipa MDM em manutenção programada de edifício" width="453" height="480" loading="lazy" decoding="async">
-      <span class="svc-scrim" aria-hidden="true"></span>
-      <span class="svc-txt">
-        <h3>Manutenção</h3>
-        <span class="svc-sub">Contratos preventivos, relatórios claros</span>
-        <span class="svc-go">Pedir proposta <span aria-hidden="true">→</span></span>
       </span>
     </a>
   </div>
@@ -1304,12 +1308,12 @@
         <label class="mw-lbl" for="qServico">Serviço:</label>
         <select class="mw-in mw-select" id="qServico" name="servico">
           <option value="" selected disabled>Selecione o tipo de serviço</option>
-          <option>Ar Condicionado — Instalação</option>
-          <option>Ar Condicionado — Manutenção / Reparação</option>
-          <option>Eletricidade — Instalação / Quadro</option>
+          <option>Ar Condicionado — Montagem / Instalação</option>
+          <option>Manutenção Preventiva — Contrato Anual</option>
+          <option>Eletricidade — Quadros e Alimentações AVAC</option>
+          <option>Ar Condicionado — Avaria / Reparação</option>
           <option>Eletricidade — Avaria / Reparação</option>
           <option>Ventilação — Instalação / Revisão</option>
-          <option>Contrato de Manutenção Anual</option>
           <option>Outro / Múltiplos serviços</option>
         </select>
       </div>
@@ -1384,7 +1388,9 @@ async function sendLead(payload) {
       signal: ctl.signal,
       body: JSON.stringify(Object.assign({}, payload, {
         /* campos que o Formspree entende: assunto do email e reply-to para o cliente */
-        _subject: 'Novo pedido no site MDM (' + (payload.origem || 'site') + ')' + (payload.empresa ? ' — ' + payload.empresa : payload.tel ? ' — ' + payload.tel : ''),
+        prioridade: triagem(payload.servico).p,
+        segmento: triagem(payload.servico).seg,
+        _subject: etiqueta(payload.servico) + ' Pedido no site (' + (payload.origem || 'site') + ')' + (payload.empresa ? ' — ' + payload.empresa : payload.tel || payload.telefone ? ' — ' + (payload.tel || payload.telefone) : ''),
         _replyto: payload.email || undefined,
         pagina: location.href,
         referrer: document.referrer || '',
@@ -1458,6 +1464,21 @@ document.addEventListener('click', e => {
 
 /* ═══ quote form ═══ */
 const $q = id => document.getElementById(id);
+/* ═══ TRIAGEM DE LEADS — uma tabela, usada no assunto do email, no payload e na medição ═══
+   Hierarquia do dono (09/2026): P1 montagem de AC · P2 manutenção preventiva · P3 eletricista certificado (AVAC). */
+const TRIAGEM = {
+  'Ar Condicionado — Montagem / Instalação':     { p: 'P1', seg: 'Montagem AC' },
+  'Manutenção Preventiva — Contrato Anual':      { p: 'P2', seg: 'Manutenção preventiva' },
+  'Eletricidade — Quadros e Alimentações AVAC':  { p: 'P3', seg: 'Eletricista certificado' },
+  'Ar Condicionado — Avaria / Reparação':        { p: 'P4', seg: 'Avaria AC' },
+  'Eletricidade — Avaria / Reparação':           { p: 'P4', seg: 'Avaria elétrica' },
+  'Ventilação — Instalação / Revisão':           { p: 'P4', seg: 'Ventilação' },
+};
+function triagem(servico) {
+  return TRIAGEM[servico] || { p: 'P5', seg: servico ? 'Outro' : 'Por classificar' };
+}
+function etiqueta(servico) { const t = triagem(servico); return '[' + t.p + ' · ' + t.seg + ']'; }
+
 function quoteData() {
   return {
     empresa: $q('qEmpresa').value.trim(),
@@ -1511,13 +1532,14 @@ function quoteBody(d) {
     'Email: ' + (d.email || '—'),
     'Telefone: ' + (d.tel || '—'),
     'Serviço: ' + (d.servico || '—'),
+    'Triagem: ' + etiqueta(d.servico),
     '',
     d.msg || ''
   ].join('\n');
 }
 if (LEAD_ENDPOINT) $q('sendEmailLbl').textContent = 'Enviar pedido';
 function quoteMailto(d) {
-  const subject = 'Pedido de orçamento — ' + (d.servico || 'serviços MDM');
+  const subject = etiqueta(d.servico) + ' Pedido de orçamento — ' + (d.servico || 'serviços MDM');
   location.href = 'mailto:mdmassist@mdmassist.com'
     + '?subject=' + encodeURIComponent(subject)
     + '&body=' + encodeURIComponent(quoteBody(d));
@@ -1530,7 +1552,7 @@ document.getElementById('quoteForm').addEventListener('submit', e => {
 $q('sendEmail').addEventListener('click', async () => {
   const d = quoteData();
   if (!quoteValidate(d)) return;
-  track('quote_form_submit', { via: LEAD_ENDPOINT ? 'endpoint' : 'mailto', servico: d.servico });
+  track('quote_form_submit', { via: LEAD_ENDPOINT ? 'endpoint' : 'mailto', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg });
   if (LEAD_ENDPOINT) {
     const btn = $q('sendEmail');
     btn.disabled = true;
@@ -1549,7 +1571,7 @@ $q('sendEmail').addEventListener('click', async () => {
 $q('sendWa').addEventListener('click', () => {
   const d = quoteData();
   if (!quoteValidate(d)) return;
-  track('quote_form_submit', { via: 'whatsapp', servico: d.servico });
+  track('quote_form_submit', { via: 'whatsapp', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg });
   const url = 'https://wa.me/351910307579?text=' + encodeURIComponent(quoteBody(d));
   const w = window.open(url, '_blank');
   if (w) { try { w.opener = null; } catch (e) {} }
