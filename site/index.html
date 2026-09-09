@@ -191,60 +191,33 @@
   }
   .hero-proof b { font-family: var(--serif); font-weight: 600; color: var(--red); font-size: 1.06em; }
 
-  /* três portas: cada uma filtra um cliente e leva ao canal que lhe serve */
+  /* três portas, estilo INEOS: barra de cor, título com seta, uma linha — sem caixa */
   .hero-doors {
-    margin-top: clamp(30px, 4.5vh, 56px);
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+    margin-top: clamp(34px, 5vh, 64px);
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(28px, 4vw, 60px);
     opacity: 0; animation: rise .9s var(--ease) 1.15s forwards;
   }
   .door {
-    display: flex; flex-direction: column;
-    padding: 18px 20px 20px;
-    background: rgba(250,249,245,0.78);
-    border: 1px solid var(--sand); border-top: 3px solid var(--slate);
-    border-radius: var(--r-s);
+    display: block; padding: 22px 0 6px;
+    border-top: 4px solid var(--slate);
     text-decoration: none; color: var(--ink);
-    transition: transform .25s var(--ease), border-color .25s, box-shadow .3s;
   }
   .door--montagem { border-top-color: var(--red); }   /* P1 */
   .door--manut { border-top-color: var(--ink); }      /* P2 */
   /* .door--elet fica com o cinzento por omissão            P3 */
-  .door:hover { transform: translateY(-3px); border-color: var(--slate); box-shadow: 0 12px 26px -20px rgba(20,29,46,.45); }
   .door-t {
-    font-family: var(--serif); font-size: 21px; font-weight: 500; letter-spacing: -0.4px;
-    display: flex; align-items: baseline; gap: 8px;
+    font-family: var(--serif); font-size: 26px; font-weight: 600; letter-spacing: -0.5px; line-height: 1.15;
+    display: block;   /* a seta segue a última palavra, mesmo quando o título quebra */
   }
-  .door-t i { font-style: normal; color: var(--red); transition: transform .25s var(--ease); }
-  .door:hover .door-t i, a.door:focus-visible .door-t i { transform: translateX(4px); }
-  .door p { margin-top: 8px; font-size: 14.5px; line-height: 1.55; color: var(--slate); flex: 1; }
-  .door-go {
-    margin-top: 11px; font-size: 13.5px; font-weight: 600; color: var(--red-dk);
-    display: inline-flex; align-items: center; gap: 7px; text-decoration: none;
-    align-self: flex-start; padding: 13px 0; min-height: 44px; box-sizing: border-box;
-  }
-  /* nos cartões-link o rótulo é texto, não alvo: não precisa dos 44px */
-  a.door .door-go { padding: 4px 0; min-height: 0; margin-top: 15px; }
-  .door-go:hover { text-decoration: underline; text-underline-offset: 4px; }
-  .door-tel {
-    margin-top: 10px; font-family: var(--serif); font-style: italic; font-size: 22px;
-    color: var(--ink); text-decoration: none; align-self: flex-start;
-    padding: 8px 0; min-height: 44px; box-sizing: border-box;
-  }
-  .door-tel:hover { color: var(--red-dk); }
-  @media (max-width: 900px) {
-    .hero-doors { gap: 14px; }
-    .door { padding: 16px 16px 18px; }
-    .door-t { font-size: 19px; }
-    .door p { font-size: 13.5px; }
-  }
+  .door-t i { font-style: normal; color: var(--red); display: inline-block; margin-left: 9px; transition: transform .25s var(--ease); }
+  .door:hover .door-t i, .door:focus-visible .door-t i { transform: translateX(5px); }
+  .door p { margin: 8px 0 0; font-size: 15px; line-height: 1.5; color: var(--slate); }
+  @media (max-width: 900px) { .door-t { font-size: 22px; } .door p { font-size: 14px; } }
   @media (max-width: 760px) {
-    .hero-doors { grid-template-columns: 1fr; gap: 10px; }
-    .door { padding: 12px 16px 13px; border-top-width: 3px; }
-    .door-t { font-size: 18px; }
-    .door p { margin-top: 4px; font-size: 13px; line-height: 1.45; }
-    .door-tel { margin-top: 6px; font-size: 20px; padding: 8px 0; }
-    .door-go { margin-top: 6px; padding: 12px 0; }
-    a.door .door-go { margin-top: 8px; }
+    .hero-doors { grid-template-columns: 1fr; gap: 14px; }
+    .door { padding: 14px 0 4px; }
+    .door-t { font-size: 21px; }
+    .door p { margin-top: 4px; font-size: 13.5px; }
   }
   .btn {
     display: inline-flex; align-items: center; gap: 10px;
@@ -1040,21 +1013,15 @@
   <div class="hero-doors">
     <a class="door door--montagem" href="https://wa.me/351910307579?text=%5BMontagem%20AC%5D%20Ol%C3%A1%20MDM.%20Quero%20instalar%20ar%20condicionado.%20Local%3A%20%E2%80%A6%20Tipo%20de%20espa%C3%A7o%20%28escrit%C3%B3rio%2C%20loja%2C%20condom%C3%ADnio%2C%20habita%C3%A7%C3%A3o%29%3A%20%E2%80%A6%20N%C2%BA%20de%20divis%C3%B5es%20ou%20equipamentos%3A%20%E2%80%A6%20Envio%20j%C3%A1%20fotografias%20do%20local." target="_blank" rel="noopener">
       <span class="door-t">Montagem de ar condicionado <i aria-hidden="true">&#8594;</i></span>
-      <p>Instalação de VRF, multi-split, cassetes e chillers em edifícios. Envie fotos do local.</p>
-      <span class="door-go">Enviar fotos no WhatsApp</span>
+      <p>VRF, multi-split, cassetes e chillers. Envie fotos do local.</p>
     </a>
-
-    <div class="door door--manut">
+    <a class="door door--manut" href="mailto:mdmassist@mdmassist.com?subject=%5BP2%20%C2%B7%20Manuten%C3%A7%C3%A3o%20preventiva%5D%20Pedido%20de%20proposta%20%E2%80%94%20contrato%20anual&body=Edif%C3%ADcio%20ou%20entidade%3A%20%0AMorada%3A%20%0AEquipamentos%20a%20incluir%20%28VRF%2C%20chillers%2C%20UTA%2C%20cassetes%29%3A%20%0APeriodicidade%20pretendida%3A%20%0AContacto%20e%20melhor%20hora%20para%20ligar%3A%20%0A" data-tel="tel:+351218935050">
       <span class="door-t">Manutenção preventiva <i aria-hidden="true">&#8594;</i></span>
-      <p>Contrato anual para condomínios, banca, indústria e escritórios. Com relatório.</p>
-      <a class="door-tel" href="tel:+351218935050">218&nbsp;935&nbsp;050</a>
-      <a class="door-go" href="mailto:mdmassist@mdmassist.com?subject=%5BP2%20%C2%B7%20Manuten%C3%A7%C3%A3o%20preventiva%5D%20Pedido%20de%20proposta%20%E2%80%94%20contrato%20anual&body=Edif%C3%ADcio%20ou%20entidade%3A%20%0AMorada%3A%20%0AEquipamentos%20a%20incluir%20%28VRF%2C%20chillers%2C%20UTA%2C%20cassetes%29%3A%20%0APeriodicidade%20pretendida%3A%20%0AContacto%20e%20melhor%20hora%20para%20ligar%3A%20%0A">Pedir proposta por email</a>
-    </div>
-
+      <p>Contratos anuais · 218 935 050</p>
+    </a>
     <a class="door door--elet" href="#contacto" data-preselect="Eletricidade — Quadros e Alimentações AVAC" data-msg="Edifício ou instalação: &#10;O que precisa (quadro, alimentação de unidades AVAC, proteções, avaria): &#10;Potência/nº de equipamentos a alimentar: &#10;Precisa de certificação/vistoria? &#10;Prazo: ">
       <span class="door-t">Eletricista certificado <i aria-hidden="true">&#8594;</i></span>
-      <p>Quadros, alimentações e proteções para AVAC. Avarias e conformidade.</p>
-      <span class="door-go">Pedir orçamento</span>
+      <p>Quadros, alimentações e proteções para AVAC.</p>
     </a>
   </div>
 
@@ -1616,6 +1583,10 @@ addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 30),
     const card = document.querySelectorAll('.svc')[+a.dataset.svc];
     if (card) { e.preventDefault(); fecha(); card.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
   }));
+  /* porta dos contratos: no telemóvel liga; no desktop abre o email com o assunto */
+  const dm = document.querySelector('.door--manut[data-tel]');
+  if (dm && matchMedia('(pointer: coarse)').matches) dm.setAttribute('href', dm.dataset.tel);
+
   document.querySelectorAll('[data-preselect]').forEach(a => a.addEventListener('click', () => {
     const sel = document.getElementById('qServico');
     if (sel) sel.value = a.dataset.preselect;

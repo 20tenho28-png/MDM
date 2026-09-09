@@ -136,7 +136,9 @@ todo o lado — mudar a hierarquia é editar essa tabela:
   leva os mesmos dois campos (funil por segmento).
 - **WhatsApp**: cada texto pré-preenchido começa pela etiqueta do segmento (`[Montagem AC]`,
   `[Eletricista AVAC]`, `[Ventilação]`, `[Ar condicionado]`) — pesquisável na app.
-- **Hero**: as três portas são exatamente P1/P2/P3, com a cor da barra a seguir a prioridade
+- **Hero**: as três portas são exatamente P1/P2/P3, **em estilo INEOS** (barra de cor de 4px,
+  título Lora com seta, uma linha — sem caixa nem botões; a porta dos contratos liga no
+  telemóvel e abre o email no desktop via `data-tel` + `pointer: coarse`), com a cor da barra a seguir a prioridade
   (carmim · navy · cinzento) e o canal fixado pelo dono (WhatsApp com fotos do local ·
   telefone+email · formulário com serviço e mensagem pré-preenchidos).
 - **Formulário**: opções do serviço pela ordem da prioridade; **secção Serviços**: cartões
