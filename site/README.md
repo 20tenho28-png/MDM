@@ -1,6 +1,6 @@
 # MDM Assist — Website
 
-Site institucional da **Manuel Domingues Melancia, Lda (MDM)** — assistência técnica a edifícios
+Site institucional da **M.D.M. - Manuel Domingos Melancia, Lda (MDM)** — assistência técnica a edifícios
 (ar condicionado, eletricidade, ventilação) na grande Lisboa, desde 1991.
 
 ## Conteúdo
@@ -326,7 +326,10 @@ navy tem apenas 2,8:1, por isso não pode ser usado em texto nem em traços:
 ## Dados reais (não alterar sem confirmação)
 
 - Telefone: 218 935 050 · WhatsApp: 910 307 579 · Email: mdmassist@mdmassist.com
-- Morada: Alameda dos Oceanos, 108A, 1990-426 Lisboa · Horário: 2ª–6ª, 8h–17h · NIF: 502 644 761
+- Denominação legal: **M.D.M. - Manuel Domingos Melancia, Lda** ("Domingos", não "Domingues" —
+  confirmado em 09/2026 no registo público (racius.com, base.gov.pt) e no impresso FM-TEC-04 da
+  própria empresa; o site dizia "Domingues" por erro).
+- Morada: Alameda dos Oceanos, 108A, Edifício Vila do Oriente, 1990-426 Lisboa · Horário: 2ª–6ª, 8h–17h · NIF: 502 644 761
 - Fundação: 1991 (35 anos). Marcas: Mitsubishi Electric, MIDEA, LG, France Air, Vulcano, Hitachi.
 - **Não introduzir dados financeiros privados** (faturação, clientes, etc.) — já foram removidos
   de versões antigas de propósito.
