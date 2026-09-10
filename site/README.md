@@ -48,23 +48,23 @@ A navy fica arquivada em `variante-navy/`, completa e funcional.
 |---|---|---|
 | Estética | Escura, técnica (navy dos polos) | Clara, editorial (a publicada) |
 | Como se edita | Fontes em `src/` + `assemble.py` | Ficheiro único, editável à mão |
-| Funcional | Igual nas duas: faixa de orçamento com `LEAD_ENDPOINT`, PostHog, CTA de foto, carrossel de obras (10 no oficial), barra fixa mobile |  |
+| Funcional | Navy: faixa de orçamento, barra fixa mobile, CTA de foto. Creme (oficial): **caminhos de lead** — três portas + formulário (ver secção própria), sem faixa nem barra fixa. Ambas: `LEAD_ENDPOINT`, PostHog, carrossel de obras (10 no oficial) |  |
 
 Nota: o `LEAD_ENDPOINT` define-se diretamente no `<script>` do `index.html` (creme).
 A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela voltar.
 
 ## Captação de leads e medição
 
-- **Faixa de orçamento** (por baixo do hero) e **formulário** enviam para um endpoint real
-  quando `LEAD_ENDPOINT` está definido no `<script>` do `index.html` (ex.: Formspree
+- **Formulário** (`#orcamento`, na secção Contacto) envia para um endpoint real quando
+  `LEAD_ENDPOINT` está definido no `<script>` do `index.html` (ex.: Formspree
   `https://formspree.io/f/xxxxxxxx`, ou função serverless que reenvia para
-  mdmassist@mdmassist.com). Payload: POST JSON com `origem` (`faixa-orcamento` /
-  `formulario`) e `pagina`.
-- **Sem endpoint** (estado atual), os rótulos ajustam-se sozinhos para não prometer o que
-  não é captado: a faixa diz "Pedir contacto no WhatsApp" (abre rascunho com o número) e o
-  formulário mantém o `mailto:`. Definir o endpoint muda os rótulos para "Quero ser
-  contactado" / "Enviar pedido" e ativa a confirmação inline + fallback para email se o
-  POST falhar. **Definir o endpoint é o passo nº 1 para maximizar leads.**
+  mdmassist@mdmassist.com). Payload: POST JSON com `origem` (`formulario`), `prioridade`,
+  `segmento` e `pagina`. A faixa carmim de orçamento (só telefone) **saiu da oficial em
+  09/2026** — ver **Caminhos de lead**; continua na navy arquivada.
+- **Sem endpoint** (estado atual), o formulário abre o programa de email com o pedido
+  preparado e o botão diz, honestamente, "Enviar por email". Definir o endpoint muda o rótulo
+  para "Enviar pedido" e ativa a confirmação inline + fallback para email se o POST falhar.
+  **Definir o endpoint é o passo nº 1 para maximizar leads.**
 - **Caminho escolhido (09/2026): Formspree.** Criar conta em formspree.io, "New form",
   confirmar o email mdmassist@mdmassist.com quando o Formspree o pedir, e copiar o URL
   `https://formspree.io/f/xxxxxxxx` para `LEAD_ENDPOINT`. O site já envia `_subject`
@@ -73,14 +73,16 @@ A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela vol
   (ver `backend/README.md` — fica como alternativa se um dia se quiser guardar leads em BD).
 - **PostHog** (org MDM, projeto 226321, região UE) está instalado com
   `persistence: 'memory'` — sem cookies nem storage, logo sem necessidade de banner de
-  consentimento; perde-se a distinção novo/recorrente de propósito. Eventos:
-  `lead_strip_submit`, `quote_form_submit` (com `via`: endpoint/mailto/whatsapp),
-  `intent_click` (avaria/contrato), `whatsapp_click`, `phone_click`.
-- **Divisão de intenção** acima do formulário: "Tenho uma avaria" (WhatsApp com foto) vs
-  "Quero um contrato de manutenção" (pré-seleciona o serviço no formulário).
-- **Barra fixa mobile** (≤620px): "Ligar agora" + "Enviar foto" substitui o FAB.
-- CTA principal do hero: **"Enviar foto da avaria"** — a foto é o CTA que mais converte
-  neste setor.
+  consentimento; perde-se a distinção novo/recorrente de propósito. Eventos (oficial):
+  `quote_form_submit` (com `via`: endpoint/mailto + `prioridade`/`segmento`),
+  `form_preselect`, `form_focus`, e `whatsapp_click` / `phone_click` / `email_click`, todos
+  com a propriedade `lead` (montagem · avaria · manut · manut-mail · elet · tel · mail) —
+  é o funil por segmento. Na navy arquivada existem ainda `lead_strip_submit`,
+  `intent_click` e `strip_focus`.
+- **Só na navy arquivada:** divisão de intenção acima do formulário ("Tenho uma avaria" vs
+  "Quero um contrato"), barra fixa mobile ("Ligar agora" + "Enviar foto") e CTA do hero
+  "Enviar foto da avaria". Na oficial estes papéis passaram para as três portas do hero e
+  para o botão verde do header.
 - **Segunda camada (ambas as variantes):** formulário reduzido ao essencial (NIF, localidade
   e assunto pedem-se depois do 1º contacto), rótulo "Nome" em vez de "Empresa", faixa
   sensível ao horário (fora de 2ª–6ª 8h–17h promete o próximo dia útil), "orçamento gratuito
@@ -89,8 +91,8 @@ A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela vol
 - **Robustez da captação:** `sendLead` tem timeout de 8s (endpoint pendurado → fallback
   honesto, nunca spinner eterno); botões protegidos contra duplo envio; eventos disparados
   antes do PostHog carregar ficam em fila e são despachados no load; payloads levam
-  `referrer`, `utm` e `ts` para atribuição futura. Eventos novos: `form_focus` e
-  `strip_focus` (start-rate vs submit-rate). **Nota:** com adblock (~25–30% no desktop) o
+  `referrer`, `utm` e `ts` para atribuição futura. `form_focus` dá o start-rate do
+  formulário (vs `quote_form_submit`). **Nota:** com adblock (~25–30% no desktop) o
   PostHog não carrega — a contagem de leads verdadeira é a do endpoint, o analytics é
   direcional.
 
@@ -134,17 +136,14 @@ todo o lado — mudar a hierarquia é editar essa tabela:
   `[P2 · Manutenção preventiva]`, … — a caixa de entrada ordena-se e filtra-se pelo prefixo.
 - **Payload do endpoint**: campos `prioridade` e `segmento`; **PostHog**: `quote_form_submit`
   leva os mesmos dois campos (funil por segmento).
-- **WhatsApp**: cada texto pré-preenchido começa pela etiqueta do segmento (`[Montagem AC]`,
-  `[Eletricista AVAC]`, `[Ventilação]`, `[Ar condicionado]`) — pesquisável na app.
+- **WhatsApp**: só existem dois textos pré-preenchidos, definidos uma vez no `<script>`
+  (`WA_MONTAGEM` → `[P1 · Montagem AC] …` com pedido de fotos do local; `WA_AVARIA` →
+  `[P4 · Avaria] …` com pedido de foto) — pesquisáveis na app pelo prefixo.
 - **Hero**: as três portas são exatamente P1/P2/P3, **em estilo INEOS** (barra de cor de 4px,
-  título Lora com seta, uma linha — sem caixa nem botões; a porta dos contratos liga no
-  telemóvel e abre o email no desktop via `data-tel` + `pointer: coarse`), com a cor da barra a seguir a prioridade
-  (carmim · navy · cinzento) e o canal fixado pelo dono (WhatsApp com fotos do local ·
-  telefone+email · formulário com serviço e mensagem pré-preenchidos).
-- **Formulário**: opções do serviço pela ordem da prioridade; **secção Serviços**: cartões
-  AC · Manutenção · Eletricidade · Ventilação (o dropdown da nav segue os índices novos).
-- A faixa de orçamento (só telefone) chega como P5 "Por classificar" — é o preço de ter um
-  campo só; classifica-se na chamada.
+  título Lora com seta, uma linha — sem caixa nem botões), com a cor da barra a seguir a
+  prioridade (carmim · navy · cinzento) e o canal fixado pelo dono — ver **Caminhos de lead**.
+- **Formulário**: opções do serviço pela ordem da prioridade; **secção Serviços**: os quatro
+  cartões (AC · Manutenção · Eletricidade · Ventilação) são espelhos exatos das portas.
 
 ## Hero de qualificação (09/2026) — filtra a clientela
 
@@ -163,8 +162,9 @@ prova, três portas) e implementado tal e qual:
 - **Saíram:** o eyebrow em mono, os dois CTAs do hero (fundiram-se nos cartões A e B) e a
   troca sazonal do subtítulo. O telefone continua no header.
 - **Por decidir (assinalado, não executado):** a banda "MDM em números" repete 35 anos e
-  24–48h que agora vivem na linha de prova; e a faixa carmim logo abaixo do hero é uma
-  quarta porta genérica. Ambas foram posicionadas por decisão do dono — não se mexeu.
+  24–48h que agora vivem na linha de prova — posicionada por decisão do dono, não se mexeu.
+  A faixa carmim abaixo do hero (quarta porta genérica) **foi retirada em 09/2026** na
+  passagem aos caminhos de lead (ver secção própria); volta com `git revert` se o dono quiser.
 
 ## Header (09/2026 — 3ª iteração, CRO)
 
@@ -177,7 +177,12 @@ instrumento"), e o **estado vivo como chip inline** junto ao telefone — ponto 
 CTA carmim é o único elemento alto. Degradação: ≤1240px o chip esconde-se, ≤1180px
 aperta, ≤1020px caem as âncoras `.nl-desk`, ≤760px nav mobile intocada.
 
-**Reformulado como header de conversão (CRO):** navegação reduzida a **3 itens** —
+**4ª iteração (09/2026 — caminhos de lead, passos mínimos):** ver secção **Caminhos de
+lead** abaixo — os dropdowns e o CTA "Pedir Orçamento Grátis" saíram; ficou o menu plano de
+5 âncoras, o telefone com estado vivo e o WhatsApp de avaria com rótulo. O parágrafo seguinte
+descreve a 3ª iteração, já substituída.
+
+**Reformulado como header de conversão (CRO, 3ª iteração):** navegação reduzida a **3 itens** —
 *Serviços* e *Sobre nós* são dropdowns (Serviços → AC/Eletricidade/Ventilação com
 deep-link ao cartão + "Manutenção & Contratos" que pré-seleciona o serviço no
 formulário; Sobre nós → Porquê a MDM/Perguntas/Contacto), *Obras* é link direto.
@@ -187,6 +192,48 @@ até às 18h") e o CTA passivo "Quero ser contactado" passou a **"Pedir Orçamen
 evidência + hambúrguer com gaveta (scroll-lock, fecha ao escolher/Esc) + o WhatsApp
 verde de sempre; o CTA de texto esconde-se. Dropdowns: hover em ponteiro fino, clique/
 teclado sempre; `aria-expanded` em todos. Justificação das decisões no histórico do commit.
+
+## Caminhos de lead (09/2026) — um caminho por lead, passos mínimos
+
+Pedido do dono: "há vários botões para as mesmas coisas; a UX tem de ser o mais user
+friendly possível, passos mínimos". Antes havia 17 ações de contacto no desktop (5 WhatsApp
+com textos diferentes, 8 rótulos para "pedir orçamento"). Regra aplicada: **cada tipo de
+lead tem um único destino, repetido apenas em dois momentos de leitura** — o hero (decidir)
+e a secção Contacto (confirmar); o header trata só do "agora".
+
+| Lead | Destino único | Onde aparece |
+|---|---|---|
+| **P1 Montagem de AC** | WhatsApp 910 307 579 com `[P1 · Montagem AC] …` (pede fotos do local) | porta 1 do hero · cartão AC · cartão WhatsApp em Contacto |
+| **P2 Manutenção preventiva** | desktop: `mailto` com assunto `[P2 · Manutenção preventiva] …`; telemóvel (`pointer: coarse`): liga 218 935 050 | porta 2 · cartão Manutenção · cartões Telefone/Email em Contacto · FAQ |
+| **P3 Eletricista certificado** | formulário `#orcamento` com serviço, esqueleto da mensagem e título pré-preenchidos | porta 3 · cartão Eletricidade |
+| **P4 Avaria** (AC, ventilação, quadro) | WhatsApp com `[P4 · Avaria] …` (pede foto) | botão verde do header (desktop com rótulo "Avaria? Envie foto", ≤1000px só ícone) · cartão Ventilação · FAQ |
+| Outro | formulário (select) ou email direto | Contacto |
+
+- **Uma fonte única no `<script>`:** `WA_MONTAGEM`, `WA_AVARIA`, `MAIL_P2`, `TEL_MDM`,
+  `PRESELECT_ELET`; `applyLeads()` aplica-os a todos os `[data-lead]`. Os `href` estáticos
+  no HTML são os mesmos (fallback sem JS). Mudar um destino = mudar uma constante.
+- **Saíram:** faixa carmim `#orcamento` (só telefone → WhatsApp genérico), CTA "Pedir
+  Orçamento Grátis" do header, dropdowns da nav (+ deep-links `data-svc`), ligação "Peça
+  orçamento" após o carrossel, botão WhatsApp do formulário, "Pedir orçamento grátis" da
+  gaveta mobile. A âncora `#orcamento` passou para o formulário (`.quote-wrap`), com
+  `scroll-margin-top` a compensar o header fixo e o `translateY` do reveal.
+- **Header:** menu plano Serviços · Obras · Porquê a MDM · FAQ · Contacto; um só ponto de
+  viragem a **1000px** (acima: menu + telefone com estado + WhatsApp com rótulo; abaixo:
+  "Ligar" com estado vivo por baixo + WhatsApp ícone + hambúrguer). `--nav-h` (89px / 81px
+  ≤640px) alimenta a gaveta e o `scroll-margin-top` das secções. Estado vivo:
+  "Aberto · até às 17h" / "Fechado · 2ª–6ª 8h–17h" (`[data-estado]`, versão curta no mobile).
+- **Contacto:** três cartões que dizem para que serve cada canal (Telefone → contratos e
+  urgências; WhatsApp → montagem e avarias, com fotos; Email → propostas de manutenção),
+  morada em texto corrido, formulário com um só botão ("Enviar por email"), "Nome *" e
+  ajuda "* obrigatório: o nome e um contacto". Ecrãs estreitos (≤400px): prova numa linha
+  mais curta (`.hp-x` esconde "6 marcas") para as três portas caberem em 375×667 (medido:
+  fundo da 3ª porta a 467px).
+- **Contagem depois:** 13 ações de contacto no desktop (2 header · 3 portas · 4 cartões ·
+  3 canais + botão do formulário), mais 3 ligações inline de texto (FAQ e nota do
+  formulário). Verificação Playwright: sem erros, header sem overflow em 900–1440px,
+  âncoras a aterrar abaixo do header, pré-seleção e validação a funcionar.
+- **Decisões do dono a validar:** (1) a faixa carmim saiu; (2) o WhatsApp de avaria ganhou
+  rótulo no desktop. Ambas revertem-se em CSS/HTML sem tocar no resto.
 
 ## Ícones e animações
 
@@ -217,10 +264,10 @@ teclado sempre; `aria-expanded` em todos. Justificação das decisões no histó
 - **Auditoria de geometria (dados medidos, Playwright, 6 viewports):** com o hero a 100svh,
   a faixa de orçamento ficava a 1,0–1,17vh — invisível sem scroll em TODOS os ecrãs — e em
   1366×768 (o portátil de escritório mais comum) e 360×800 a linha de números (1991 · 35
-  anos) era cortada. Correções: hero a `calc(100svh - 56px)` (a faixa carmim espreita acima
-  da dobra: 0,93–0,95vh em desktop) e compressão do hero em `max-height: 820px`. No mobile
-  a faixa continua a ~1vh de propósito — a barra fixa inferior já dá cobertura de CTA
-  permanente e comprimir mais o hero custava legibilidade.
+  anos) era cortada. Correções: hero a `calc(100svh - 56px)` (a faixa carmim espreitava acima
+  da dobra: 0,93–0,95vh em desktop) e compressão do hero em `max-height: 820px`. A faixa
+  saiu em 09/2026; o `-56px` mantém-se para a secção seguinte (obras) espreitar como pista
+  de scroll.
 
 ## Stack e decisões técnicas
 
@@ -234,15 +281,17 @@ teclado sempre; `aria-expanded` em todos. Justificação das decisões no histó
   não "minificar" removendo quebras de linha sem os substituir por espaço.
 - **Animação de fundo:** Three.js (via cdnjs, import dinâmico em try/catch — se o CDN falhar, o site
   funciona na mesma). Sobre o navy usa *additive blending*.
-- **Ordem da página (decidida pelo dono):** hero → faixa de orçamento → **obras** →
-  **números** (1991 / 35 anos / 24–48h / 8–17h) → serviços → processo → … A prova
-  visual vem antes da prova numérica; igual nas duas variantes.
+- **Ordem da página (decidida pelo dono):** hero → **obras** → **números** (1991 / 35 anos /
+  24–48h / 8–17h) → serviços → porquê → FAQ → contacto (formulário). A prova visual vem
+  antes da prova numérica. (Na navy arquivada há ainda a faixa de orçamento entre o hero e
+  as obras.)
 - **Carrossel "Algumas das nossas obras":** 10 fotos reais — eram 14; as obras 4–7 (multímetro, tubagem de cobre, sala de bombas, intervenção na exterior) foram retiradas a pedido do dono em 09/2026, mas continuam em `obras/` se voltarem a ser precisas, auto-scroll, pausa em hover, arrastável,
   com setas. Os cartões são duplicados por JS para o ciclo fechar sem costura.
 - **Fornecedores:** marquee contínuo para a esquerda, meia página. Velocidade constante (70 px/s)
   calculada por JS a partir da largura real.
 - **Formulário de contacto:** POST para `LEAD_ENDPOINT` quando definido; caso contrário `mailto:`
-  e `wa.me` pré-preenchidos (ver **Captação de leads e medição**).
+  pré-preenchido (ver **Captação de leads e medição**; o botão WhatsApp do formulário saiu em
+  09/2026 — o WhatsApp vive na porta P1 e no header).
 
 ### Contraste (verificado)
 
@@ -284,8 +333,9 @@ navy tem apenas 2,8:1, por isso não pode ser usado em texto nem em traços:
 
 ## Próximos passos
 
-1. **Definir `LEAD_ENDPOINT`** em `src/src_script.html` (Formspree ou serverless) e correr
-   `python3 assemble.py` — é o que transforma a faixa e o formulário em captação real.
+1. **Definir `LEAD_ENDPOINT`** no `<script>` do `index.html` (creme oficial) com o URL do
+   Formspree — é o que transforma o formulário em captação real. (Navy arquivada:
+   `src/src_script.html` + `python3 assemble.py`.)
 2. **Publicar** — Netlify/Vercel/etc. Arrastar o `index.html` chega (site estático, sem build).
    Idealmente domínio próprio (ex.: mdmassist.pt) com HTTPS.
 3. **Verificar o Sentry** (ver acima) e confirmar eventos no PostHog após publicar.

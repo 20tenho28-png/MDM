@@ -161,7 +161,7 @@
 
 
   .hero {
-    /* -56px: a faixa carmim espreita acima da dobra (medido: 100vh escondia-a) */
+    /* -56px: a secção seguinte espreita acima da dobra (pista de scroll) */
     min-height: min(calc(100vh - 56px), 720px);
     display: flex; flex-direction: column;
     justify-content: center;
@@ -213,7 +213,14 @@
   .door-t i { font-style: normal; color: var(--red); display: inline-block; margin-left: 4px; transition: transform .25s var(--ease); }
   .door:hover .door-t i, .door:focus-visible .door-t i { transform: translateX(5px); }
   .door p { margin: 8px 0 0; font-size: 15px; line-height: 1.5; color: var(--slate); }
-  @media (max-width: 900px) { .door-t { font-size: 22px; } .door p { font-size: 14px; } }
+  @media (max-width: 900px) {
+    .door-t { font-size: 22px; } .door p { font-size: 14px; }
+    /* telemóvel: sequência mais curta — h1 .15/.25s, prova .35s, portas .45s */
+    h1 .ln:nth-child(1) span { animation-delay: .15s; animation-duration: .8s; }
+    h1 .ln:nth-child(2) span { animation-delay: .25s; animation-duration: .8s; }
+    .hero-proof { animation-delay: .35s; animation-duration: .5s; }
+    .hero-doors { animation-delay: .45s; animation-duration: .5s; }
+  }
   @media (max-width: 760px) {
     .hero-doors { grid-template-columns: 1fr; gap: 14px; }
     .door { padding: 14px 0 4px; }
@@ -244,6 +251,13 @@
 
   /* ═══ SECTIONS ═══ */
   section { padding: 100px 40px; max-width: 1200px; margin: 0 auto; }
+  /* âncoras do menu aterram com o título visível abaixo do header fixo (--nav-h) */
+  #servicos, #porque, #faq, #contacto { scroll-margin-top: 28px; }
+  #obras { scroll-margin-top: calc(var(--nav-h) - 24px); }
+  #orcamento { scroll-margin-top: calc(var(--nav-h) + 20px); }
+  /* antes do reveal o bloco está 38px mais abaixo (translateY) — compensa-se para não aterrar sob o header */
+  #orcamento[data-r]:not(.in) { scroll-margin-top: calc(var(--nav-h) + 58px); }
+  @media (max-width: 640px) { #obras { scroll-margin-top: calc(var(--nav-h) + 8px); } }
 
   [data-r] {
     opacity: 0; transform: translateY(38px);
@@ -375,6 +389,10 @@
   .c-val { font-family: var(--serif); font-size: 16.5px; font-weight: 600; }
   .c-val a { color: var(--ink); text-decoration: none; transition: color .2s; }
   .c-val a:hover { color: var(--red); }
+  .c-use { font-size: 12.5px; line-height: 1.45; color: var(--slate); margin-top: 5px; }
+  .c-addr { text-align: center; font-size: 14px; color: var(--slate); margin: -26px 0 0; }
+  .c-addr b { font-weight: 600; color: var(--ink); }
+  @media (max-width: 640px) { .c-card { width: 100%; } }
 
   /* ═══ FAQ (respostas diretas — também para pesquisa por voz/IA) ═══ */
   .faq-list { max-width: 760px; margin-top: 40px; }
@@ -403,7 +421,6 @@
     border-left: 3px solid var(--red);
   }
   .mw-alert--ok { background: #E9F2EC; color: #1F5C33; border-left-color: #12823F; }
-  .ls-note--err { color: #fff; font-weight: 700; }
 
   /* ═══ FOOTER ═══ */
   footer {
@@ -457,6 +474,14 @@
     .hero-meta { margin-top: 40px; gap: 30px; }
     .hero-doors { margin-top: 32px; }
   }
+  /* telemóveis estreitos (≤400px): h1 + prova numa linha + três portas dentro de 667px */
+  @media (max-width: 400px) {
+    .hero { padding: 84px 20px 22px; }
+    h1 { font-size: clamp(30px, 9.5vw, 40px); letter-spacing: -1px; }
+    .hero-proof { margin-top: 14px; font-size: 14px; line-height: 1.55; }
+    .hero-proof .hp-x { display: none; }
+    .hero-doors { margin-top: 18px; gap: 10px; }
+  }
 
 
   /* ícones nos rótulos de contacto + barra mobile */
@@ -465,7 +490,7 @@
 
   /* ═══ ANIMAÇÕES (painel aprovado: 4) ═══ */
 
-  /* 1 · abanão de validação (4px, um ciclo) + assentar do sucesso da faixa */
+  /* 1 · abanão de validação (4px, um ciclo) */
   .mw-row.mw-err { animation: mw-shake .3s cubic-bezier(.36,.07,.19,.97) 1; }
   @keyframes mw-shake {
     0%, 100% { transform: translateX(0); }
@@ -473,7 +498,6 @@
     45% { transform: translateX(3px); }
     70% { transform: translateX(-2px); }
   }
-  .ls-ok { animation: rise .45s var(--ease) both; }
 
 
   /* 3 · linha de progresso de leitura sob a nav (scroll-driven, sem JS) */
@@ -501,7 +525,7 @@
   /* reduced-motion: o bloco global usa '*' e NÃO cobre pseudo-elementos —
      estas regras explícitas são obrigatórias (animações infinitas + ::after) */
   @media (prefers-reduced-motion: reduce) {
-    .mw-row.mw-err, .ls-ok { animation: none; }
+    .mw-row.mw-err { animation: none; }
     nav::after { animation: none; transform: scaleX(0); }
     .sec-head h2 em::after, .quote-head h2 em::after, .band h2 em::after,
     .sec-head.in h2 em::after, .quote-wrap.in .quote-head h2 em::after, .band.in h2 em::after {
@@ -590,7 +614,7 @@
   }
   .mw-note { font-size: 12.5px; line-height: 1.55; color: var(--slate); margin: 0; }
   .mw-actions { display: flex; gap: 12px; flex: none; }
-  .mw-send, .mw-wa {
+  .mw-send {
     display: inline-flex; align-items: center; gap: 9px;
     border: 0; cursor: pointer;
     font-family: var(--mono); font-size: 12.5px; letter-spacing: 1.4px; text-transform: uppercase;
@@ -599,8 +623,6 @@
   }
   .mw-send { background: var(--red); color: #fff; }
   .mw-send:hover { background: var(--red-dk); transform: translateY(-2px); box-shadow: 0 10px 24px -10px rgba(163,7,17,0.6); }
-  .mw-wa { background: #25D366; color: #fff; }
-  .mw-wa:hover { background: #1EB257; transform: translateY(-2px); box-shadow: 0 10px 24px -10px rgba(37,211,102,0.55); }
 
   .mw-row.mw-err { background: var(--red-sf); }
   .mw-row.mw-err .mw-lbl { color: var(--red-dk); }
@@ -626,7 +648,7 @@
     .mw-to-hint { display: none; }
     .mw-foot { flex-direction: column; align-items: stretch; }
     .mw-actions { flex-direction: column; }
-    .mw-send, .mw-wa { justify-content: center; }
+    .mw-send { justify-content: center; }
     .quote-perks { grid-template-columns: 1fr; }
   }
 
@@ -669,14 +691,6 @@
     transition: opacity .35s, transform .35s;
   }
   .ob-shot:hover figcaption { opacity: 1; transform: none; }
-  .ob-cta { max-width: 1200px; margin: 24px auto 0; padding: 0 40px; }
-  .ob-cta a {
-    font-family: var(--serif, Georgia, serif); font-style: italic; font-size: 19px;
-    color: var(--red-dk, #7C050D); text-decoration: none;
-    border-bottom: 2px solid var(--red, #A30711); padding-bottom: 2px;
-    transition: color .2s;
-  }
-  .ob-cta a:hover { color: var(--red, #A30711); }
   @media (hover: none) {
     .ob-shot figcaption { opacity: 1; transform: none; }
   }
@@ -687,41 +701,13 @@
   }
   @media (max-width: 640px) {
     .obras-sec { padding: 20px 0 64px; }
-    .obras-sec .sec-head, .ob-hint, .ob-cta { padding: 0 20px; }
+    .obras-sec .sec-head, .ob-hint { padding: 0 20px; }
     .ob-shot figcaption { opacity: 1; transform: none; }
   }
   @media (prefers-reduced-motion: reduce) {
     .ob-shot figcaption { opacity: 1; transform: none; }
   }
 
-  /* ═══ lead strip ═══ */
-  .lead-strip { background: var(--carmine, #A30711); position: relative; z-index: 2; padding: 26px 40px; }
-  .ls-in { max-width: 1200px; margin: 0 auto; display: flex; align-items: center;
-    justify-content: space-between; gap: 22px; flex-wrap: wrap; }
-  .ls-txt { color: #F7F2E9; font-size: 17px; }
-  .ls-txt strong { font-family: var(--serif, Georgia, serif); font-style: italic; font-size: 22px; margin-right: 10px; }
-  .ls-form { display: flex; gap: 10px; flex-wrap: wrap; }
-  .ls-tel { background: rgba(255,255,255,.14); border: 1.5px solid rgba(255,255,255,.45); color: #fff;
-    border-radius: 999px; padding: 13px 20px; font-size: 16px; min-width: 210px; font-family: var(--sans); }
-  .ls-tel::placeholder { color: rgba(255,255,255,.75); }
-  .ls-tel:focus { outline: none; border-color: #fff; background: rgba(255,255,255,.22); }
-  .ls-btn { background: #fff; color: var(--carmine, #A30711); border: 0; border-radius: 999px;
-    padding: 13px 26px; font-weight: 700; font-size: 15px; cursor: pointer; font-family: var(--sans);
-    transition: transform .2s; }
-  .ls-btn:hover { transform: translateY(-2px); }
-  .ls-btn:disabled { opacity: .7; cursor: default; transform: none; }
-  .ls-ok { color: #fff; font-weight: 600; font-size: 15px; margin: 0; }
-  .ls-note { flex-basis: 100%; color: rgba(255,255,255,.92); font-size: 11.5px; margin: 0; }
-  /* ═══ barra fixa mobile ═══ */
-  @media (max-width: 760px) {
-    .lead-strip { padding: 18px 20px; }
-    .ls-txt { font-size: 15px; }
-    .ls-txt strong { font-size: 19px; }
-    .ls-form { width: 100%; }
-    .ls-tel { flex: 1 1 100%; min-width: 0; }
-    .ls-btn { flex: 1 1 100%; }
-    .fab { display: none; }
-  }
   .skip-link { position: absolute; left: -9999px; top: 0; z-index: 200;
     background: #2B2723; color: #fff; padding: 12px 20px; border-radius: 0 0 12px 0;
     font-family: var(--sans); font-weight: 700; text-decoration: none; }
@@ -729,56 +715,55 @@
   a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
     outline: 3px solid var(--carmine, #A30711); outline-offset: 3px; border-radius: var(--r-s); }
 
-  /* ── navegação central: 3 itens, dois com dropdown ── */
-  .nav-menu { display: flex; align-items: center; gap: 6px; margin-inline: auto; }
-  .nav-item { position: relative; }
-  .nav-menu a, .nav-drop-btn {
-    font-family: var(--sans); font-size: 14.5px; font-weight: 500;
-    color: var(--slate); text-decoration: none; background: none; border: 0; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 12px 14px; border-radius: var(--r-s);
+  /* ── navegação central: 5 ligações planas (sem dropdowns) ── */
+  :root { --nav-h: 89px; }
+  @media (max-width: 640px) { :root { --nav-h: 81px; } }
+  .nav-menu { display: flex; align-items: center; gap: 4px; margin-inline: auto; }
+  .nav-menu a {
+    font-family: var(--sans); font-size: 14.5px; font-weight: 500; white-space: nowrap;
+    color: var(--slate); text-decoration: none;
+    display: inline-flex; align-items: center;
+    padding: 12px 13px; border-radius: var(--r-s);
     transition: color .2s, background .2s;
   }
-  .nav-menu a:hover, .nav-drop-btn:hover,
-  .nav-item.open .nav-drop-btn { color: var(--ink); background: rgba(20,29,46,0.05); }
-  .nav-caret { width: 9px; height: 9px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor;
-    transform: rotate(45deg) translateY(-2px); transition: transform .2s; margin-top: -3px; }
-  .nav-item.open .nav-caret { transform: rotate(225deg) translateY(-1px); margin-top: 4px; }
-  .nav-drop {
-    position: absolute; top: calc(100% + 6px); left: 50%; transform: translate(-50%, 6px);
-    min-width: 240px; padding: 8px;
-    background: var(--cream, #FAF9F5); border: 1px solid var(--sand); border-radius: var(--r-m);
-    box-shadow: 0 14px 32px -18px rgba(20,29,46,0.35);
-    opacity: 0; visibility: hidden; transition: opacity .18s, transform .18s, visibility .18s;
-  }
-  .nav-item.open .nav-drop { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
-  .nav-drop a { display: flex; width: 100%; padding: 10px 12px; font-size: 13.5px; border-radius: var(--r-s); }
-  .nav-drop a:hover { background: var(--red-sf); color: var(--red-dk); }
+  .nav-menu a:hover { color: var(--ink); background: rgba(20,29,46,0.05); }
 
-  /* ── zona de ação: telefone com estado vivo + CTA ── */
-  .nav-tel { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; margin-right: 6px; }
+  /* ── zona de ação: telefone com estado vivo (contratos · "agora") + WhatsApp de avaria ── */
+  .nav-tel { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; margin-right: 4px; }
   .nav-tel svg { width: 17px; height: 17px; color: var(--red); flex: none; }
   .nav-tel-num { font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.15; }
   .nav-tel-sub { display: flex; align-items: center; gap: 5px; font-family: var(--sans);
-    font-size: 10.5px; font-weight: 500; color: var(--slate); }
+    font-size: 10.5px; font-weight: 500; color: var(--slate); white-space: nowrap; }
   .nav-tel:hover .nav-tel-num { color: var(--red-dk); }
   .tb-dot { width: 6px; height: 6px; border-radius: 50%; background: #7B8598; flex: none; }
   .tb-dot.aberto { background: #2FA35B; }
+  .nav-cam {
+    display: inline-flex; align-items: center; gap: 8px;
+    min-height: 44px; padding: 0 18px 0 14px; border-radius: 999px;
+    background: var(--wa, #12823F); color: #fff; text-decoration: none;
+    font-size: 13.5px; font-weight: 700; white-space: nowrap;
+    transition: background .25s, transform .25s var(--ease);
+  }
+  .nav-cam:hover { background: var(--wa-d, #0B6E34); transform: translateY(-2px); }
+  .nav-cam svg { width: 20px; height: 20px; flex: none; }
 
-  /* ── mobile: Ligar em evidência + hambúrguer ── */
+  /* ── ≤1160px aperta; ≤1000px vira mobile: Ligar (estado vivo) + WhatsApp + hambúrguer ── */
   .nav-call { display: none; }
   .burger { display: none; }
   .m-drawer { display: none; }
-  @media (max-width: 1100px) { .nav-menu a, .nav-drop-btn { padding: 12px 9px; font-size: 14px; } }
-  @media (max-width: 980px) { .nav-tel { display: none; } }
-  @media (max-width: 860px) { .nav-menu { display: none; } }
-  @media (max-width: 760px) {
+  @media (max-width: 1160px) { .nav-menu a { padding: 12px 9px; font-size: 14px; } .logo-text { display: none; } }
+  @media (max-width: 1000px) {
+    .nav-menu, .nav-tel, .nav-phone { display: none; }
+    .nav-cam { width: 44px; padding: 0; justify-content: center; }
+    .nav-cam span { display: none; }
+    .nav-cam:hover { transform: none; }
     .nav-call {
-      display: inline-flex; align-items: center; gap: 7px;
-      background: var(--red); color: #fff; padding: 10px 16px; border-radius: 999px;
-      font-size: 13.5px; font-weight: 700; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--red); color: #fff; min-height: 44px; padding: 0 16px 0 14px; border-radius: 999px;
+      font-size: 13.5px; font-weight: 700; text-decoration: none; line-height: 1.15;
     }
-    .nav-call svg { width: 15px; height: 15px; }
+    .nav-call svg { width: 15px; height: 15px; flex: none; }
+    .nav-call small { display: block; font-size: 10px; font-weight: 500; opacity: .88; letter-spacing: .2px; margin-top: 2px; }
     .nav-call:active { transform: translateY(1px); }
     .burger {
       display: grid; place-items: center; width: 44px; height: 44px;
@@ -788,7 +773,7 @@
     .burger span::before, .burger span::after { content: ''; position: absolute; left: 0; width: 17px; height: 2px; background: var(--ink); }
     .burger span::before { top: -5px; } .burger span::after { top: 5px; }
     .m-drawer {
-      display: block; position: fixed; top: 64px; left: 0; right: 0; z-index: 49;
+      display: block; position: fixed; top: var(--nav-h); left: 0; right: 0; z-index: 49;
       background: var(--cream, #FAF9F5); border-bottom: 1px solid var(--sand);
       padding: 10px 20px 18px;
       opacity: 0; visibility: hidden; transform: translateY(-8px);
@@ -798,38 +783,16 @@
     .m-drawer a { display: block; padding: 13px 4px; font-size: 16px; font-weight: 500;
       color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--sand); }
     .m-drawer a:last-child { border-bottom: 0; }
-    .m-drawer .md-cta { color: var(--red-dk); font-weight: 700; }
   }
-  /* verde WhatsApp com contraste AA (4,9:1 com branco); o botão da faixa
-     NÃO entra aqui — mantém o seu branco/carmim, que promete contacto, não WhatsApp */
+  /* verde WhatsApp com contraste AA (4,9:1 com branco) */
   :root { --wa: #12823F; --wa-d: #0B6E34; }
-  .nav-wa, .fab, .btn.btn-red[href*="wa.me"], .btn.mw-wa {
+  .nav-wa, .fab, .btn.btn-red[href*="wa.me"] {
     background: var(--wa) !important; color: #fff !important; }
-  .nav-wa:hover, .fab:hover, .btn.btn-red[href*="wa.me"]:hover, .btn.mw-wa:hover {
+  .nav-wa:hover, .fab:hover, .btn.btn-red[href*="wa.me"]:hover {
     background: var(--wa-d) !important; }
   .fab svg { fill: #fff; }
   .nav-wa--icon { width: 46px; height: 46px; padding: 0; border-radius: 50%;
     display: grid; place-items: center; }
-  .nav-cam { display: none; }
-  @media (max-width: 760px) {
-    .nav-cam {
-      display: grid; place-items: center;
-      width: 44px; height: 44px; border-radius: 999px;
-      background: var(--wa, #12823F); color: #fff;
-    }
-    .nav-cam:hover { background: var(--wa-d, #0B6E34); }
-    .nav-cam svg { width: 21px; height: 21px; }
-  }
-  .nav-cta { display: inline-flex; align-items: center;
-    background: var(--red, #A30711); color: #fff; padding: 11px 20px; border-radius: 999px;
-    font-size: 13.5px; font-weight: 700; text-decoration: none;
-    transition: background .25s, transform .25s var(--ease); }
-  .nav-cta:hover { background: #8C060F; transform: translateY(-2px); }
-  @media (max-width: 760px) {
-    .nav-phone { display: none; }
-    .logo-text { display: none; }
-    .nav-cta { display: none; }   /* no mobile a ação direta é Ligar + WhatsApp */
-  }
 </style>
 <script type="application/ld+json">
 {
@@ -903,7 +866,7 @@
    "name": "Fazem contratos de manutenção para condomínios e empresas?",
    "acceptedAnswer": {
     "@type": "Answer",
-    "text": "Sim — contratos anuais de manutenção preventiva, com visitas programadas e relatórios claros. Trabalhamos com empresas, condomínios, banca e indústria desde 1991."
+    "text": "Sim — contratos anuais de manutenção preventiva, com visitas programadas e relatórios claros, para empresas, condomínios, banca e indústria desde 1991. Para pedir proposta, ligue 218 935 050 (2ª–6ª, 8h–17h) ou escreva para mdmassist@mdmassist.com."
    }
   },
   {
@@ -943,7 +906,7 @@
    "name": "Como reporto uma avaria rapidamente?",
    "acceptedAnswer": {
     "@type": "Answer",
-    "text": "O caminho mais rápido é enviar uma fotografia da avaria por WhatsApp (910 307 579) — o técnico percebe logo o que levar. Também pode ligar 218 935 050 ou usar o formulário."
+    "text": "O caminho mais rápido é enviar uma fotografia da avaria por WhatsApp para o 910 307 579 — o técnico percebe logo o que levar. Em horário de expediente (2ª–6ª, 8h–17h) também pode ligar 218 935 050."
    }
   }
  ]
@@ -961,39 +924,24 @@
     <div class="logo-text"><small>Assistência Técnica · Lisboa</small></div>
   </a>
   <div class="nav-menu" id="navMenu">
-    <div class="nav-item">
-      <button class="nav-drop-btn" aria-expanded="false" aria-controls="dropSvc">Serviços <span class="nav-caret" aria-hidden="true"></span></button>
-      <div class="nav-drop" id="dropSvc">
-        <a href="#servicos" data-svc="0">Ar Condicionado</a>
-        <a href="#contacto" data-preselect="Manutenção Preventiva — Contrato Anual">Manutenção preventiva</a>
-        <a href="#servicos" data-svc="2">Eletricidade</a>
-        <a href="#servicos" data-svc="3">Ventilação</a>
-      </div>
-    </div>
+    <a href="#servicos">Serviços</a>
     <a href="#obras">Obras</a>
-    <div class="nav-item">
-      <button class="nav-drop-btn" aria-expanded="false" aria-controls="dropSobre">Sobre nós <span class="nav-caret" aria-hidden="true"></span></button>
-      <div class="nav-drop" id="dropSobre">
-        <a href="#porque">Porquê a MDM</a>
-        <a href="#faq">Perguntas frequentes</a>
-        <a href="#contacto">Contacto</a>
-      </div>
-    </div>
+    <a href="#porque">Porquê a MDM</a>
+    <a href="#faq">FAQ</a>
+    <a href="#contacto">Contacto</a>
   </div>
   <div class="nav-right">
-    <a class="nav-tel" href="tel:+351218935050"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span><span class="nav-tel-num">218 935 050</span><span class="nav-tel-sub"><span class="tb-dot" id="tbDot"></span><span id="tbEstado">Seg–Sex · 8h–17h</span></span></span></a>
-    <a class="nav-cta" href="#orcamento" id="navCta">Pedir Orçamento Grátis</a>
-    <a class="nav-call" href="tel:+351218935050"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Ligar</a>
+    <a class="nav-tel" href="tel:+351218935050" data-lead="tel" title="Contratos de manutenção e urgências · 2ª–6ª, 8h–17h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span><span class="nav-tel-num">218 935 050</span><span class="nav-tel-sub"><span class="tb-dot" id="tbDot"></span><span id="tbEstado" data-estado="longo">2ª–6ª · 8h–17h</span></span></span></a>
+    <a class="nav-call" href="tel:+351218935050" data-lead="tel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>Ligar<small data-estado="curto">2ª–6ª · 8h–17h</small></span></a>
     <button class="burger" id="burger" aria-expanded="false" aria-controls="mDrawer" aria-label="Abrir menu"><span></span></button>
-    <a class="nav-cam" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%21%20Tenho%20uma%20avaria%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener" aria-label="Enviar foto da avaria por WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
+    <a class="nav-cam" href="https://wa.me/351910307579?text=%5BP4%20%C2%B7%20Avaria%5D%20Ol%C3%A1%20MDM%21%20Tenho%20uma%20avaria%20em%20%28ar%20condicionado%20%2F%20ventila%C3%A7%C3%A3o%20%2F%20quadro%20el%C3%A9trico%29.%20Local%3A%20%E2%80%A6%20Envio%20j%C3%A1%20uma%20fotografia." data-lead="avaria" target="_blank" rel="noopener" aria-label="Avaria? Envie uma foto por WhatsApp para o 910 307 579"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg><span>Avaria? Envie foto</span></a>
   </div>
 </nav>
 <div class="m-drawer" id="mDrawer">
-  <a class="md-cta" href="#orcamento">Pedir orçamento grátis →</a>
   <a href="#servicos">Serviços</a>
   <a href="#obras">Obras</a>
   <a href="#porque">Porquê a MDM</a>
-  <a href="#faq">Perguntas frequentes</a>
+  <a href="#faq">FAQ</a>
   <a href="#contacto">Contacto</a>
 </div>
 
@@ -1008,38 +956,25 @@
 
   <p class="hero-proof">
     <b><span data-anos>35</span> anos</b> a manter edifícios de banca, indústria e condomínios ·
-    <b>6 marcas</b> representadas · intervenção em <b>24 a 48 h</b>
+    <span class="hp-x"><b>6 marcas</b> representadas · </span>intervenção em <b>24 a 48 h</b>
   </p>
 
   <div class="hero-doors">
-    <a class="door door--montagem" href="https://wa.me/351910307579?text=%5BMontagem%20AC%5D%20Ol%C3%A1%20MDM.%20Quero%20instalar%20ar%20condicionado.%20Local%3A%20%E2%80%A6%20Tipo%20de%20espa%C3%A7o%20%28escrit%C3%B3rio%2C%20loja%2C%20condom%C3%ADnio%2C%20habita%C3%A7%C3%A3o%29%3A%20%E2%80%A6%20N%C2%BA%20de%20divis%C3%B5es%20ou%20equipamentos%3A%20%E2%80%A6%20Envio%20j%C3%A1%20fotografias%20do%20local." target="_blank" rel="noopener">
+    <a class="door door--montagem" href="https://wa.me/351910307579?text=%5BP1%20%C2%B7%20Montagem%20AC%5D%20Ol%C3%A1%20MDM.%20Quero%20instalar%20ar%20condicionado.%20Local%3A%20%E2%80%A6%20Tipo%20de%20espa%C3%A7o%20%28escrit%C3%B3rio%2C%20loja%2C%20condom%C3%ADnio%2C%20habita%C3%A7%C3%A3o%29%3A%20%E2%80%A6%20N%C2%BA%20de%20divis%C3%B5es%20ou%20equipamentos%3A%20%E2%80%A6%20Envio%20j%C3%A1%20fotografias%20do%20local." data-lead="montagem" target="_blank" rel="noopener">
       <span class="door-t">Montagem de ar <span class="nb">condicionado&nbsp;<i aria-hidden="true">&#8594;</i></span></span>
-      <p>VRF, multi-split, cassetes e chillers. Envie fotos do local.</p>
+      <p>Envie fotos do local · WhatsApp 910 307 579</p>
     </a>
-    <a class="door door--manut" href="mailto:mdmassist@mdmassist.com?subject=%5BP2%20%C2%B7%20Manuten%C3%A7%C3%A3o%20preventiva%5D%20Pedido%20de%20proposta%20%E2%80%94%20contrato%20anual&body=Edif%C3%ADcio%20ou%20entidade%3A%20%0AMorada%3A%20%0AEquipamentos%20a%20incluir%20%28VRF%2C%20chillers%2C%20UTA%2C%20cassetes%29%3A%20%0APeriodicidade%20pretendida%3A%20%0AContacto%20e%20melhor%20hora%20para%20ligar%3A%20%0A" data-tel="tel:+351218935050">
+    <a class="door door--manut" href="mailto:mdmassist@mdmassist.com?subject=%5BP2%20%C2%B7%20Manuten%C3%A7%C3%A3o%20preventiva%5D%20Pedido%20de%20proposta%20%E2%80%94%20contrato%20anual&body=Edif%C3%ADcio%20e%20equipamentos%20a%20incluir%3A%20" data-lead="manut">
       <span class="door-t">Manutenção <span class="nb">preventiva&nbsp;<i aria-hidden="true">&#8594;</i></span></span>
       <p>Contratos anuais · 218 935 050</p>
     </a>
-    <a class="door door--elet" href="#contacto" data-preselect="Eletricidade — Quadros e Alimentações AVAC" data-msg="Edifício ou instalação: &#10;O que precisa (quadro, alimentação de unidades AVAC, proteções, avaria): &#10;Potência/nº de equipamentos a alimentar: &#10;Precisa de certificação/vistoria? &#10;Prazo: ">
+    <a class="door door--elet" href="#orcamento" data-lead="elet" data-preselect="Eletricidade — Quadros e Alimentações AVAC" data-msg="Edifício ou instalação: &#10;O que precisa (quadro, alimentação de unidades AVAC, proteções, avaria): &#10;Potência/nº de equipamentos a alimentar: &#10;Precisa de certificação/vistoria? &#10;Prazo: ">
       <span class="door-t">Eletricista <span class="nb">certificado&nbsp;<i aria-hidden="true">&#8594;</i></span></span>
-      <p>Quadros, alimentações e proteções para AVAC.</p>
+      <p>Quadros e alimentações AVAC · formulário</p>
     </a>
   </div>
 
 </section>
-
-<section class="lead-strip" id="orcamento" aria-label="Pedir orçamento rápido">
-  <div class="ls-in">
-    <div class="ls-txt"><strong>Peça o seu orçamento.</strong><span id="lsSub">Resposta em menos de 24h úteis.</span></div>
-    <div class="ls-form">
-      <input class="ls-tel" id="lsTel" type="tel" inputmode="tel" placeholder="O seu telefone" aria-label="O seu telefone"/>
-      <button class="ls-btn" id="lsGo" type="button">Quero ser contactado</button>
-    </div>
-    <p class="ls-note" id="lsNote" aria-live="polite">Usamos o seu número apenas para este contacto.</p>
-  </div>
-</section>
-
-
 
 <!-- ═══ OBRAS ═══ -->
 <section class="obras-sec" id="obras">
@@ -1092,7 +1027,6 @@
     </div>
   </div>
   <p class="ob-hint">Arraste para o lado · passe o rato para parar</p>
-  <p class="ob-cta" data-r><a href="#contacto">Quer um trabalho destes no seu edifício? Peça orçamento <span aria-hidden="true">→</span></a></p>
 </section>
 
 <!-- ═══ SERVICES ═══ -->
@@ -1111,43 +1045,43 @@
     <h2>Quatro especialidades,<br>uma resposta <em>integrada.</em></h2>
   </div>
   <div class="svc-row">
-    <a class="svc svc--acd" data-r href="https://wa.me/351910307579?text=%5BAr%20condicionado%5D%20Ol%C3%A1%20MDM%21%20Preciso%20de%20apoio%20em%20ar%20condicionado%20%28montagem%20ou%20avaria%29%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">
+    <a class="svc svc--acd" data-r href="https://wa.me/351910307579?text=%5BP1%20%C2%B7%20Montagem%20AC%5D%20Ol%C3%A1%20MDM.%20Quero%20instalar%20ar%20condicionado.%20Local%3A%20%E2%80%A6%20Tipo%20de%20espa%C3%A7o%20%28escrit%C3%B3rio%2C%20loja%2C%20condom%C3%ADnio%2C%20habita%C3%A7%C3%A3o%29%3A%20%E2%80%A6%20N%C2%BA%20de%20divis%C3%B5es%20ou%20equipamentos%3A%20%E2%80%A6%20Envio%20j%C3%A1%20fotografias%20do%20local." data-lead="montagem" target="_blank" rel="noopener">
       <img class="svc-img" src="img/6ac315ff9c.webp" alt="Técnico MDM a intervir numa unidade exterior de ar condicionado" width="360" height="480" loading="lazy" decoding="async">
       <span class="svc-scrim" aria-hidden="true"></span>
       <span class="svc-txt">
         <h3>Ar Condicionado</h3>
         <span class="svc-sub">Montagem, avarias e manutenção multi-marca</span>
-        <span class="svc-go">Pedir apoio no WhatsApp <span aria-hidden="true">→</span></span>
+        <span class="svc-go">Montagem de ar condicionado <span aria-hidden="true">→</span></span>
       </span>
     </a>
 
-    <a class="svc" data-r href="#contacto" data-preselect="Manutenção Preventiva — Contrato Anual">
+    <a class="svc" data-r href="mailto:mdmassist@mdmassist.com?subject=%5BP2%20%C2%B7%20Manuten%C3%A7%C3%A3o%20preventiva%5D%20Pedido%20de%20proposta%20%E2%80%94%20contrato%20anual&body=Edif%C3%ADcio%20e%20equipamentos%20a%20incluir%3A%20" data-lead="manut">
       <img class="svc-img" src="img/fe2136ede4.webp" alt="Equipa MDM em manutenção programada de edifício" width="453" height="480" loading="lazy" decoding="async">
       <span class="svc-scrim" aria-hidden="true"></span>
       <span class="svc-txt">
         <h3>Manutenção</h3>
         <span class="svc-sub">Contratos anuais preventivos, com relatório</span>
-        <span class="svc-go">Pedir proposta <span aria-hidden="true">→</span></span>
+        <span class="svc-go">Manutenção preventiva <span aria-hidden="true">→</span></span>
       </span>
     </a>
 
-    <a class="svc" data-r href="https://wa.me/351910307579?text=%5BEletricista%20AVAC%5D%20Ol%C3%A1%20MDM%21%20Preciso%20de%20um%20eletricista%20certificado%20%28quadro%2C%20alimenta%C3%A7%C3%A3o%20ou%20avaria%29%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">
+    <a class="svc" data-r href="#orcamento" data-lead="elet" data-preselect="Eletricidade — Quadros e Alimentações AVAC">
       <img class="svc-img" src="img/1c3f80e9db.webp" alt="Quadro elétrico montado e identificado por técnico da MDM" width="418" height="480" loading="lazy" decoding="async">
       <span class="svc-scrim" aria-hidden="true"></span>
       <span class="svc-txt">
         <h3>Eletricidade</h3>
         <span class="svc-sub">Quadros e alimentações para AVAC — técnico certificado</span>
-        <span class="svc-go">Pedir apoio no WhatsApp <span aria-hidden="true">→</span></span>
+        <span class="svc-go">Eletricista certificado <span aria-hidden="true">→</span></span>
       </span>
     </a>
 
-    <a class="svc" data-r href="https://wa.me/351910307579?text=%5BVentila%C3%A7%C3%A3o%5D%20Ol%C3%A1%20MDM%21%20Preciso%20de%20apoio%20em%20ventila%C3%A7%C3%A3o%20ou%20extra%C3%A7%C3%A3o%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">
+    <a class="svc" data-r href="https://wa.me/351910307579?text=%5BP4%20%C2%B7%20Avaria%5D%20Ol%C3%A1%20MDM%21%20Tenho%20uma%20avaria%20em%20%28ar%20condicionado%20%2F%20ventila%C3%A7%C3%A3o%20%2F%20quadro%20el%C3%A9trico%29.%20Local%3A%20%E2%80%A6%20Envio%20j%C3%A1%20uma%20fotografia." data-lead="avaria" target="_blank" rel="noopener">
       <img class="svc-img" src="img/3889bc0925.webp" alt="Condutas de ventilação instaladas pela MDM" width="640" height="480" loading="lazy" decoding="async">
       <span class="svc-scrim" aria-hidden="true"></span>
       <span class="svc-txt">
         <h3>Ventilação</h3>
         <span class="svc-sub">Extração, condutas e qualidade do ar</span>
-        <span class="svc-go">Pedir apoio no WhatsApp <span aria-hidden="true">→</span></span>
+        <span class="svc-go">Ventilação · envie foto <span aria-hidden="true">→</span></span>
       </span>
     </a>
   </div>
@@ -1189,7 +1123,7 @@
   <div class="faq-list" data-r>
     <details class="faq-item" open>
       <summary>Fazem contratos de manutenção para condomínios e empresas?</summary>
-      <p>Sim — contratos anuais de manutenção preventiva, com visitas programadas e relatórios claros. Trabalhamos com empresas, condomínios, banca e indústria desde 1991.</p>
+      <p>Sim — contratos anuais de manutenção preventiva, com visitas programadas e relatórios claros, para empresas, condomínios, banca e indústria desde 1991. Para pedir proposta, ligue <a href="tel:+351218935050" data-lead="tel">218 935 050</a> (2ª–6ª, 8h–17h) ou escreva para <a href="mailto:mdmassist@mdmassist.com?subject=%5BP2%20%C2%B7%20Manuten%C3%A7%C3%A3o%20preventiva%5D%20Pedido%20de%20proposta%20%E2%80%94%20contrato%20anual&body=Edif%C3%ADcio%20e%20equipamentos%20a%20incluir%3A%20" data-lead="manut-mail">mdmassist@mdmassist.com</a>.</p>
     </details>
     <details class="faq-item">
       <summary>Qual é a zona de intervenção?</summary>
@@ -1209,7 +1143,7 @@
     </details>
     <details class="faq-item">
       <summary>Como reporto uma avaria rapidamente?</summary>
-      <p>O caminho mais rápido é enviar uma fotografia da avaria por WhatsApp (910 307 579) — o técnico percebe logo o que levar. Também pode ligar 218 935 050 ou usar o formulário.</p>
+      <p>O caminho mais rápido é o botão verde do topo da página: envia uma fotografia da avaria por WhatsApp (910 307 579) e o técnico percebe logo o que levar. Em horário de expediente (2ª–6ª, 8h–17h) também pode ligar 218 935 050.</p>
     </details>
   </div>
 </section>
@@ -1224,23 +1158,27 @@
   <div class="c-cards" data-r>
     <div class="c-card">
       <div class="c-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg>Telefone</div>
-      <div class="c-val"><a href="tel:+351218935050">218 935 050</a></div>
+      <div class="c-val"><a href="tel:+351218935050" data-lead="tel">218 935 050</a></div>
+      <div class="c-use">Contratos de manutenção e urgências<br>2ª–6ª · 8h–17h</div>
     </div>
     <div class="c-card">
       <div class="c-lbl"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>WhatsApp</div>
-      <div class="c-val"><a href="https://wa.me/351910307579" target="_blank" rel="noopener">910 307 579</a></div>
+      <div class="c-val"><a href="https://wa.me/351910307579?text=%5BP1%20%C2%B7%20Montagem%20AC%5D%20Ol%C3%A1%20MDM.%20Quero%20instalar%20ar%20condicionado.%20Local%3A%20%E2%80%A6%20Tipo%20de%20espa%C3%A7o%20%28escrit%C3%B3rio%2C%20loja%2C%20condom%C3%ADnio%2C%20habita%C3%A7%C3%A3o%29%3A%20%E2%80%A6%20N%C2%BA%20de%20divis%C3%B5es%20ou%20equipamentos%3A%20%E2%80%A6%20Envio%20j%C3%A1%20fotografias%20do%20local." data-lead="montagem" target="_blank" rel="noopener">910 307 579</a></div>
+      <div class="c-use">Montagem de ar condicionado e avarias<br>envie fotos do local</div>
     </div>
     <div class="c-card">
-      <div class="c-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Morada</div>
-      <div class="c-val">Alameda dos Oceanos, 108A<br><span style="font-size:12px; font-weight:400; color:var(--slate)">1990-426 Lisboa</span></div>
+      <div class="c-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Email</div>
+      <div class="c-val"><a href="mailto:mdmassist@mdmassist.com?subject=%5BP2%20%C2%B7%20Manuten%C3%A7%C3%A3o%20preventiva%5D%20Pedido%20de%20proposta%20%E2%80%94%20contrato%20anual&body=Edif%C3%ADcio%20e%20equipamentos%20a%20incluir%3A%20" data-lead="manut-mail">mdmassist@mdmassist.com</a></div>
+      <div class="c-use">Propostas de manutenção preventiva<br>resposta em 24 h úteis</div>
     </div>
   </div>
+  <p class="c-addr" data-r><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:13px;height:13px;vertical-align:-2px;margin-right:5px"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg><b>Alameda dos Oceanos, 108A</b> · 1990-426 Lisboa (Parque das Nações)</p>
   <!-- ═══ QUOTE FORM (email-window style) ═══ -->
-  <div class="quote-wrap" data-r>
+  <div class="quote-wrap" id="orcamento" data-r>
     <div class="quote-head">
-      <div class="sec-eyebrow">Pedido de orçamento</div>
-      <h2 class="quote-title">Peça o seu orçamento<br>em <em>3 minutos.</em></h2>
-      <p class="sub">Preencha os dados da sua empresa. Recebe proposta por email em menos de 24 horas.</p>
+      <div class="sec-eyebrow" id="quoteEyebrow">Pedido de orçamento</div>
+      <h2 class="quote-title" id="quoteTitle">Peça o seu orçamento<br>em <em>3 minutos.</em></h2>
+      <p class="sub">Diga-nos o essencial — respondemos por email em menos de 24 horas úteis.</p>
     </div>
 
     <form class="mailwin" id="quoteForm" novalidate>
@@ -1258,8 +1196,8 @@
       </div>
 
       <div class="mw-row">
-        <label class="mw-lbl" for="qEmpresa">Nome:</label>
-        <input class="mw-in" id="qEmpresa" name="empresa" type="text" placeholder="Nome da empresa, condomínio ou particular" autocomplete="organization">
+        <label class="mw-lbl" for="qEmpresa">Nome *</label>
+        <input class="mw-in" id="qEmpresa" name="empresa" type="text" placeholder="Nome da empresa, condomínio ou particular" autocomplete="organization" required aria-required="true">
       </div>
 
       <div class="mw-row">
@@ -1287,22 +1225,18 @@
       </div>
 
       <div class="mw-body">
-        <textarea class="mw-ta" id="qMsg" name="mensagem" rows="6" placeholder="Descreva a instalação, o espaço, o número de equipamentos ou a avaria. Quanto mais detalhe, mais rápida e precisa será a proposta."></textarea>
+        <textarea class="mw-ta" id="qMsg" name="mensagem" rows="6" aria-label="Mensagem (opcional)" placeholder="Mensagem (opcional): o edifício, o espaço, o número de equipamentos ou a avaria. Quanto mais detalhe, mais precisa a proposta."></textarea>
       </div>
 
       <p class="mw-alert" id="qAlert" role="alert" aria-live="polite" hidden></p>
 
       <div class="mw-foot">
-        <p class="mw-note">Orçamento gratuito e sem compromisso — resposta em menos de 24 horas úteis.<br>Os seus dados são usados exclusivamente para responder ao pedido.</p>
-        <p class="mw-note" style="margin-top:6px"><strong>Site sem cookies nem rastreio.</strong> E quem lhe responde são técnicos — não robôs.</p>
+        <p class="mw-note">* obrigatório: o nome e um contacto (email ou telefone). Orçamento gratuito e sem compromisso.<br>Os seus dados são usados exclusivamente para responder ao pedido — e quem responde são técnicos, não robôs.</p>
+        <p class="mw-note" style="margin-top:6px">Ou escreva diretamente para <a href="mailto:mdmassist@mdmassist.com" style="color:var(--ink);font-weight:600" data-lead="mail">mdmassist@mdmassist.com</a>.</p>
         <div class="mw-actions">
           <button type="button" class="btn btn-red mw-send" id="sendEmail">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
             <span id="sendEmailLbl">Enviar por email</span>
-          </button>
-          <button type="button" class="btn mw-wa" id="sendWa">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            WhatsApp
           </button>
         </div>
       </div>
@@ -1340,8 +1274,8 @@ const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ═══ CAPTAÇÃO DE LEADS ═══
    LEAD_ENDPOINT: URL que recebe os pedidos por POST JSON (ex.: Formspree
-   "https://formspree.io/f/xxxxxxxx"). Vazio → email/WhatsApp e rótulos
-   honestos (a faixa não promete um contacto que ninguém recebe). */
+   "https://formspree.io/f/xxxxxxxx"). Vazio → o formulário abre o programa
+   de email com o pedido preparado (rótulo honesto: "Enviar por email"). */
 const LEAD_ENDPOINT = '';   // Formspree: 'https://formspree.io/f/xxxxxxxx' (ver README, Captação de leads)
 
 async function sendLead(payload) {
@@ -1370,6 +1304,29 @@ async function sendLead(payload) {
   } catch (e) { return false; }
   finally { clearTimeout(timer); }
 }
+
+/* ═══ CAMINHOS DE LEAD — uma fonte única (o HTML traz os mesmos hrefs como fallback sem JS) ═══
+   montagem  → WhatsApp com pedido de fotos (P1)          avaria → WhatsApp com pedido de foto (P4)
+   manut     → email com assunto P2; no toque (telemóvel) liga 218 935 050
+   manut-mail→ email P2 sempre                            elet   → formulário pré-selecionado (P3) */
+const TEL_MDM  = 'tel:+351218935050';
+const WA_BASE  = 'https://wa.me/351910307579?text=';
+const WA_MONTAGEM = WA_BASE + encodeURIComponent('[P1 · Montagem AC] Olá MDM. Quero instalar ar condicionado. Local: … Tipo de espaço (escritório, loja, condomínio, habitação): … Nº de divisões ou equipamentos: … Envio já fotografias do local.');
+const WA_AVARIA   = WA_BASE + encodeURIComponent('[P4 · Avaria] Olá MDM! Tenho uma avaria em (ar condicionado / ventilação / quadro elétrico). Local: … Envio já uma fotografia.');
+const MAIL_P2     = 'mailto:mdmassist@mdmassist.com?subject=' + encodeURIComponent('[P2 · Manutenção preventiva] Pedido de proposta — contrato anual') + '&body=' + encodeURIComponent('Edifício e equipamentos a incluir: ');
+const PRESELECT_ELET = 'Eletricidade — Quadros e Alimentações AVAC';
+const TOQUE = matchMedia('(pointer: coarse)').matches;
+function applyLeads() {
+  const dest = { montagem: WA_MONTAGEM, avaria: WA_AVARIA, manut: TOQUE ? TEL_MDM : MAIL_P2, 'manut-mail': MAIL_P2, elet: '#orcamento', tel: TEL_MDM };
+  document.querySelectorAll('[data-lead]').forEach(a => {
+    const h = dest[a.dataset.lead]; if (!h) return;
+    a.setAttribute('href', h);
+    if (h.indexOf('https://wa.me') === 0) { a.setAttribute('target', '_blank'); a.setAttribute('rel', 'noopener'); }
+    else { a.removeAttribute('target'); }
+    if (a.dataset.lead === 'elet') a.setAttribute('data-preselect', PRESELECT_ELET);
+  });
+}
+applyLeads();
 
 /* ═══ MEDIÇÃO — PostHog (UE, sem cookies: persistence memory) ═══ */
 const _trackQueue = [];
@@ -1414,20 +1371,18 @@ function lisbonOpen() {
   } catch (e) { return true; }
 }
 addEventListener('DOMContentLoaded', function () {
-  const sub = document.getElementById('lsSub');
-  if (sub && !lisbonOpen()) {
-    sub.textContent = 'Fora de horário? Deixe o número — ligamos no próximo dia útil, a partir das 8h.';
-  }
-  let f = false, t = false;
+  let f = false;
   const form = document.getElementById('quoteForm');
   if (form) form.addEventListener('focusin', () => { if (!f) { f = true; track('form_focus'); } });
-  const tel = document.getElementById('lsTel');
-  if (tel) tel.addEventListener('focus', () => { if (!t) { t = true; track('strip_focus'); } });
 });
 
+/* cada clique de contacto leva o caminho de lead (data-lead) — funil por segmento no PostHog */
 document.addEventListener('click', e => {
-  const a = e.target.closest('a[href^="tel:"], a[href*="wa.me"]');
-  if (a) track(a.getAttribute('href').indexOf('tel:') === 0 ? 'phone_click' : 'whatsapp_click');
+  const a = e.target.closest('a[href^="tel:"], a[href*="wa.me"], a[href^="mailto:"]');
+  if (!a) return;
+  const h = a.getAttribute('href');
+  track(h.indexOf('tel:') === 0 ? 'phone_click' : h.indexOf('mailto:') === 0 ? 'email_click' : 'whatsapp_click',
+        { lead: a.dataset.lead || '' });
 });
 
 /* ═══ quote form ═══ */
@@ -1536,15 +1491,6 @@ $q('sendEmail').addEventListener('click', async () => {
   }
   quoteMailto(d);
 });
-$q('sendWa').addEventListener('click', () => {
-  const d = quoteData();
-  if (!quoteValidate(d)) return;
-  track('quote_form_submit', { via: 'whatsapp', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg });
-  const url = 'https://wa.me/351910307579?text=' + encodeURIComponent(quoteBody(d));
-  const w = window.open(url, '_blank');
-  if (w) { try { w.opener = null; } catch (e) {} }
-  else { location.href = url; }  // fallback: bloqueadores de popups / iOS
-});
 
 
 /* anos de atividade e © derivados do calendário (fallback estático no HTML) */
@@ -1559,41 +1505,25 @@ $q('sendWa').addEventListener('click', () => {
 const nav = document.getElementById('nav');
 addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 30), { passive: true });
 
-/* dropdowns do nav: clique/teclado sempre; hover só em ponteiro fino */
+/* porta P3 / cartão Eletricidade: pré-selecionam o serviço, o esqueleto da mensagem e o título do formulário */
 (function () {
-  const items = [...document.querySelectorAll('.nav-item')];
-  const fecha = () => items.forEach(i => { i.classList.remove('open');
-    i.querySelector('.nav-drop-btn').setAttribute('aria-expanded', 'false'); });
-  items.forEach(item => {
-    const btn = item.querySelector('.nav-drop-btn');
-    btn.addEventListener('click', e => {
-      const aberto = item.classList.contains('open');
-      fecha(); if (!aberto) { item.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); }
-      e.stopPropagation();
-    });
-    if (matchMedia('(hover: hover)').matches) {
-      item.addEventListener('mouseenter', () => { fecha(); item.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); });
-      item.addEventListener('mouseleave', fecha);
-    }
-  });
-  addEventListener('click', fecha);
-  addEventListener('keydown', e => { if (e.key === 'Escape') fecha(); });
-
-  /* deep-links: cartão de serviço específico / pré-seleção de contrato */
-  document.querySelectorAll('[data-svc]').forEach(a => a.addEventListener('click', e => {
-    const card = document.querySelectorAll('.svc')[+a.dataset.svc];
-    if (card) { e.preventDefault(); fecha(); card.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-  }));
-  /* porta dos contratos: no telemóvel liga; no desktop abre o email com o assunto */
-  const dm = document.querySelector('.door--manut[data-tel]');
-  if (dm && matchMedia('(pointer: coarse)').matches) dm.setAttribute('href', dm.dataset.tel);
-
+  const TITULOS = { [PRESELECT_ELET]: ['Eletricista certificado', 'Orçamento para quadros<br>e alimentações <em>AVAC.</em>'] };
   document.querySelectorAll('[data-preselect]').forEach(a => a.addEventListener('click', () => {
     const sel = document.getElementById('qServico');
     if (sel) sel.value = a.dataset.preselect;
     const msg = document.getElementById('qMsg');
     if (msg && a.dataset.msg && !msg.value.trim()) msg.value = a.dataset.msg;
+    const t = TITULOS[a.dataset.preselect];
+    const eb = document.getElementById('quoteEyebrow'), h2 = document.getElementById('quoteTitle');
+    if (t && eb && h2) { eb.textContent = t[0]; h2.innerHTML = t[1]; }
+    track('form_preselect', { servico: a.dataset.preselect, lead: a.dataset.lead || '' });
   }));
+  /* se depois mudar o serviço, o título volta ao genérico */
+  const sel = document.getElementById('qServico'), eb = document.getElementById('quoteEyebrow'), h2 = document.getElementById('quoteTitle');
+  if (sel && eb && h2) {
+    const base = [eb.textContent, h2.innerHTML];
+    sel.addEventListener('change', () => { if (!TITULOS[sel.value]) { eb.textContent = base[0]; h2.innerHTML = base[1]; } });
+  }
 })();
 
 /* gaveta mobile */
@@ -1608,11 +1538,14 @@ addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 30),
   addEventListener('keydown', e => { if (e.key === 'Escape') set(false); });
 })();
 (function () {
-  const dot = document.getElementById('tbDot'), est = document.getElementById('tbEstado');
-  if (dot && typeof lisbonOpen === 'function' && lisbonOpen()) {
-    dot.classList.add('aberto');
-    est.textContent = 'Aberto · até às 17h';
-  }
+  const aberto = typeof lisbonOpen === 'function' && lisbonOpen();
+  const dot = document.getElementById('tbDot');
+  if (dot && aberto) dot.classList.add('aberto');
+  document.querySelectorAll('[data-estado]').forEach(el => {
+    const curto = el.dataset.estado === 'curto';
+    el.textContent = aberto ? (curto ? 'aberto · até às 17h' : 'Aberto · até às 17h')
+                            : (curto ? '2ª–6ª · 8h–17h' : 'Fechado · 2ª–6ª 8h–17h');
+  });
 })();
 
 const els = document.querySelectorAll('[data-r]');
@@ -1640,50 +1573,6 @@ if (reduceMotion) {
 
 
 <script>
-/* nav CTA → faixa de orçamento com foco no telefone */
-(function(){
-  var c=document.getElementById('navCta'); if(!c) return;
-  c.addEventListener('click', function(e){
-    e.preventDefault();
-    var s=document.getElementById('orcamento');
-    if(s){ s.scrollIntoView({behavior:'smooth',block:'center'});
-      setTimeout(function(){ var t=document.getElementById('lsTel'); if(t) t.focus(); }, 650); }
-  });
-})();
-
-/* faixa de orçamento: POST real com LEAD_ENDPOINT; senão, WhatsApp com rótulo honesto */
-(function(){
-  var b=document.getElementById('lsGo'), tel=document.getElementById('lsTel');
-  if(!b) return;
-  if(!LEAD_ENDPOINT) b.textContent='Pedir contacto no WhatsApp';
-  async function go(){
-    var t=(tel.value||'').trim();
-    if(t.replace(/\D/g,'').length<9){
-      var n=document.getElementById('lsNote');
-      if(n){ n.textContent='Verifique o número — são precisos 9 dígitos.'; n.classList.add('ls-note--err'); }
-      tel.setAttribute('aria-invalid','true'); tel.focus(); return;
-    }
-    var n0=document.getElementById('lsNote');
-    if(n0){ n0.textContent='Usamos o seu número apenas para este contacto.'; n0.classList.remove('ls-note--err'); }
-    tel.removeAttribute('aria-invalid');
-    track('lead_strip_submit',{ via: LEAD_ENDPOINT?'endpoint':'whatsapp' });
-    if(LEAD_ENDPOINT){
-      b.disabled=true; b.textContent='A enviar…';
-      if(await sendLead({ telefone:t, origem:'faixa-orcamento' })){
-        document.querySelector('.ls-form').innerHTML=
-          '<p class="ls-ok" role="status">Recebido — ligamos-lhe em horário de expediente (8h–17h, dias úteis).</p>';
-        return;
-      }
-      b.disabled=false; b.textContent='Quero ser contactado';
-    }
-    var url='https://wa.me/351910307579?text='+encodeURIComponent('Olá MDM! Peço contacto para orçamento. O meu número: '+t);
-    var w=window.open(url,'_blank');
-    if(w){ try{ w.opener=null; }catch(e){} } else { location.href=url; }
-  }
-  b.addEventListener('click',go);
-  tel.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
-})();
-
 /* obras: tira contínua — auto-scroll, pausa em hover/foco, arrastável */
 (function(){
   var strip=document.getElementById('obStrip');
