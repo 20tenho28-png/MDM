@@ -1,0 +1,162 @@
+<!-- ═══════════════════════════════════════════════════════════════
+     FORNECEDORES — rodapé de meia página, marquee contínuo p/ esquerda
+     Cola esta secção antes do <footer>. CSS e JS vão junto.
+     ═══════════════════════════════════════════════════════════════ -->
+
+<section class="sup" id="fornecedores" aria-labelledby="sup-t">
+  <div class="sup-head">
+    <p class="sup-eyebrow"><span>07</span> Fornecedores</p>
+    <h2 id="sup-t">Marcas com que <em>trabalhamos</em>.</h2>
+    <p class="sup-lede">
+      Equipamento original e peças de origem — instalado e mantido por técnicos
+      certificados, com garantia de fabricante.
+    </p>
+  </div>
+
+  <!-- marquee: duas listas idênticas; a 2ª é decorativa (aria-hidden) -->
+  <div class="marquee" role="group" aria-label="Fornecedores MDM">
+    <div class="marquee-track">
+      <ul class="marquee-row">
+        <li>Mitsubishi Electric</li>
+        <li>MIDEA</li>
+        <li>LG</li>
+        <li>France Air</li>
+        <li>Vulcano</li>
+        <li>Hitachi</li>
+      </ul>
+      <ul class="marquee-row" aria-hidden="true">
+        <li>Mitsubishi Electric</li>
+        <li>MIDEA</li>
+        <li>LG</li>
+        <li>France Air</li>
+        <li>Vulcano</li>
+        <li>Hitachi</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="sup-foot">
+    <span class="sup-dot"></span>
+    Multi-marca · peças originais · garantia de fabricante
+  </p>
+</section>
+
+<style>
+  /* ── secção: meia página ── */
+  .sup {
+    min-height: 50vh;
+    display: flex; flex-direction: column; justify-content: center;
+    gap: clamp(28px, 4vw, 48px);
+    padding-block: clamp(48px, 6vw, 80px);
+    border-top: 1px solid var(--line, rgba(200,214,240,0.16));
+    overflow: hidden;
+  }
+  .sup-head { max-width: 1240px; margin: 0 auto; padding-inline: var(--pad, clamp(20px,5vw,56px)); width: 100%; }
+  .sup-eyebrow {
+    font-family: var(--mono, monospace); font-size: 11.5px; font-weight: 500;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--on-dark-3, #7B8598);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .sup-eyebrow span {
+    color: var(--red-ink, #F0857A);
+    padding-right: 12px; border-right: 1px solid var(--line, rgba(200,214,240,0.16));
+  }
+  .sup h2 {
+    font-family: var(--display, sans-serif); font-weight: 600;
+    font-size: clamp(28px, 4.1vw, 50px); line-height: 1.06;
+    letter-spacing: -0.035em; margin-top: 18px;
+  }
+  .sup h2 em {
+    font-style: normal; color: var(--red-ink, #F0857A);
+    text-decoration: underline; text-decoration-color: var(--red-mark, #D6392C);
+    text-decoration-thickness: 3px; text-underline-offset: 8px;
+  }
+  .sup-lede {
+    margin-top: 18px; max-width: 48ch;
+    color: var(--on-dark-2, #A6AEC0); font-size: 15px;
+  }
+
+  /* ── marquee ── */
+  .marquee {
+    overflow: hidden;
+    /* desvanece nas pontas em vez de cortar a seco */
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+            mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  }
+  .marquee-track {
+    display: flex; width: max-content;
+    /* --dur é ajustado por JS à largura real, p/ velocidade constante */
+    animation: sup-left var(--dur, 34s) linear infinite;
+  }
+  /* pausa ao passar o rato ou ao focar por teclado */
+  .marquee:hover .marquee-track,
+  .marquee:focus-within .marquee-track { animation-play-state: paused; }
+
+  .marquee-row { display: flex; list-style: none; margin: 0; padding: 0; }
+  .marquee-row li {
+    display: flex; align-items: center; gap: clamp(28px, 4vw, 62px);
+    padding-right: clamp(28px, 4vw, 62px);
+    white-space: nowrap;
+    font-family: var(--display, sans-serif); font-weight: 500;
+    font-size: clamp(24px, 3.6vw, 46px); letter-spacing: -0.035em;
+    color: var(--on-dark, #F4F1EA);
+    opacity: 0.72; transition: opacity .3s, color .3s;
+  }
+  /* losango separador vermelho depois de cada marca */
+  .marquee-row li::after {
+    content: ''; flex: none; width: 7px; height: 7px;
+    background: var(--red-mark, #D6392C); transform: rotate(45deg);
+  }
+  .marquee-row li:hover { opacity: 1; color: var(--red-ink, #F0857A); }
+
+  .sup-foot {
+    max-width: 1240px; margin: 0 auto; width: 100%;
+    padding-inline: var(--pad, clamp(20px,5vw,56px));
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--mono, monospace); font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--on-dark-3, #7B8598);
+  }
+  .sup-dot { width: 6px; height: 6px; background: var(--red-mark, #D6392C); transform: rotate(45deg); flex: none; }
+
+  @keyframes sup-left {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }   /* = largura de UMA lista → costura invisível */
+  }
+
+  @media (max-width: 620px) {
+    .sup { min-height: 46vh; }
+  }
+
+  /* acessibilidade: sem movimento -> vira lista estática que se desliza à mão */
+  @media (prefers-reduced-motion: reduce) {
+    .marquee {
+      overflow-x: auto;
+      padding-inline: var(--pad, clamp(20px,5vw,56px));
+      -webkit-mask-image: none; mask-image: none;
+    }
+    .marquee-track { animation: none; }
+    .marquee-row[aria-hidden="true"] { display: none; }
+  }
+</style>
+
+<script>
+(function () {
+  var track = document.querySelector('.marquee-track');
+  if (!track) return;
+
+  // Velocidade constante (px/s) seja qual for a largura do ecrã ou o nº de marcas.
+  var SPEED = 70;
+  function setDuration() {
+    var row = track.querySelector('.marquee-row');
+    if (!row) return;
+    var w = row.getBoundingClientRect().width;
+    if (w) track.style.setProperty('--dur', (w / SPEED).toFixed(1) + 's');
+  }
+  setDuration();
+  addEventListener('resize', setDuration, { passive: true });
+  // as fontes mudam a largura ao carregar
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(setDuration);
+})();
+</script>

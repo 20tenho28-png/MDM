@@ -1,0 +1,468 @@
+<body>
+
+<a class="skip" href="#conteudo">Saltar para o conteúdo</a>
+
+<!-- fundo 3D (ribbons do logótipo) -->
+<canvas id="scene" aria-hidden="true"></canvas>
+
+<!-- ═══ NAV ═══ -->
+<header class="nav" id="nav">
+  <div class="nav-in">
+    <a href="#topo" class="logo" aria-label="MDM — início">
+      {{LOGO_SVG}}
+      <span class="logo-text"><small>Assistência técnica<br>Lisboa · desde 1991</small></span>
+    </a>
+
+    <nav class="nav-links" aria-label="Navegação principal">
+      <a href="#obras">Obras</a>
+      <a href="#servicos">Serviços</a>
+      <a href="#processo">Processo</a>
+      <a href="#empresa">Empresa</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+
+    <div class="nav-right">
+      <a class="nav-phone" href="tel:+351218935050">218&nbsp;935&nbsp;050</a>
+      <a class="nav-wa" href="#orcamento">Pedir orçamento</a>
+      <a class="nav-cam" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%21%20Tenho%20uma%20avaria%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener" aria-label="Enviar foto da avaria por WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
+      <button class="burger" id="burger" aria-expanded="false" aria-controls="drawer" aria-label="Abrir menu">
+        <span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="drawer" id="drawer">
+    <a href="#obras">Obras</a>
+    <a href="#servicos">Serviços</a>
+    <a href="#processo">Processo</a>
+    <a href="#empresa">Empresa</a>
+    <a href="#setores">Setores</a>
+    <a href="#contacto">Contacto</a>
+    <a class="drawer-tel" href="tel:+351218935050">218 935 050</a>
+  </div>
+</header>
+
+<main id="conteudo">
+
+<!-- ═══ HERO ═══ -->
+<section class="hero wrap" id="topo">
+  <p class="eyebrow">Lisboa · Parque das Nações · desde 1991</p>
+  <h1>
+    <span class="ln"><span>Mantemos Lisboa</span></span>
+    <span class="ln"><span>a <em>funcionar</em>.</span></span>
+  </h1>
+  <p class="lede">
+    Ar condicionado, eletricidade, ventilação e manutenção de edifícios —
+    35 anos ao serviço de empresas, condomínios e habitação.
+  </p>
+  <div class="hero-cta">
+    <a class="btn btn-red" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%21%20Tenho%20uma%20avaria%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="17" height="17" aria-hidden="true"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg>Enviar foto da avaria</a>
+    <a class="btn btn-line" href="tel:+351218935050">218 935 050</a>
+  </div>
+
+</section>
+
+<!-- ═══ FAIXA DE ORÇAMENTO ═══ -->
+<section class="lead-strip" id="orcamento" aria-label="Pedido de contacto rápido">
+  <div class="ls-in">
+    <p class="ls-txt"><strong>Peça o seu orçamento.</strong><span id="lsSub">Resposta em menos de 24 horas úteis.</span></p>
+    <div class="ls-form">
+      <input class="ls-tel" id="lsTel" type="tel" inputmode="tel" autocomplete="tel"
+             placeholder="O seu telefone" aria-label="O seu telefone">
+      <button class="ls-btn" id="lsGo" type="button">Quero ser contactado</button>
+    </div>
+    <p class="ls-note">Usamos o seu número apenas para este contacto.</p>
+  </div>
+</section>
+
+
+
+<!-- ═══ 01 · OBRAS (film strip) ═══ -->
+<section id="obras">
+  <div class="wrap">
+    <div class="strip-head" data-r>
+      <div class="sec-head" style="margin-bottom:0">
+        <p class="eyebrow"><span class="num">01</span> Algumas das nossas obras</p>
+        <h2>Trabalho real,<br>em <em>instalações reais</em>.</h2>
+      </div>
+      <div class="strip-nav">
+        <button class="strip-btn" id="stripPrev" aria-label="Ver obras anteriores">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button class="strip-btn" id="stripNext" aria-label="Ver obras seguintes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="strip-mask" data-r>
+    <div class="strip" id="strip" tabindex="0" role="region" aria-label="Fotografias de obras da MDM">
+      {{OBRAS}}
+    </div>
+  </div>
+
+  <div class="wrap">
+    <p class="strip-hint">Arraste para o lado · passe o rato para parar</p>
+    <p class="strip-cta" data-r><a href="#contacto">Quer um trabalho destes no seu edifício? Peça orçamento <span aria-hidden="true">→</span></a></p>
+  </div>
+</section>
+
+<!-- ═══ 02 · SERVIÇOS ═══ -->
+<section class="specs-band wrap" aria-label="MDM em números">
+<div class="specs" data-r>
+    <div><div class="spec-n"><b>1991</b></div><div class="spec-l">Fundação</div></div>
+    <div><div class="spec-n"><b>35</b> anos</div><div class="spec-l">de experiência</div></div>
+    <div><div class="spec-n"><b>24–48</b>h</div><div class="spec-l">resposta técnica</div></div>
+    <div><div class="spec-n"><b>8–18</b>h</div><div class="spec-l">segunda a sexta</div></div>
+  </div>
+</section>
+
+<section class="wrap" id="servicos">
+  <div class="sec-head" data-r>
+    <p class="eyebrow"><span class="num">02</span> Serviços críticos</p>
+    <h2>Quatro especialidades,<br>uma resposta <em>integrada</em>.</h2>
+  </div>
+  <div class="panels">
+    <a class="panel" data-r href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%21%20Preciso%20de%20apoio%20em%20ar%20condicionado%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">
+      <img class="panel-img" src="PHOTO(obra11)" alt="" width="360" height="480" loading="lazy" decoding="async">
+      <span class="panel-scrim" aria-hidden="true"></span>
+      <span class="panel-ix">01 / AVAC</span>
+      <span class="panel-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+      <span class="panel-txt">
+        <h3>Ar Condicionado</h3>
+        <span class="panel-s">Instalação e manutenção multi-marca</span>
+      </span>
+    </a>
+    <a class="panel" data-r href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%21%20Preciso%20de%20apoio%20em%20eletricidade%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">
+      <img class="panel-img" src="PHOTO(obra4)" alt="" width="418" height="480" loading="lazy" decoding="async">
+      <span class="panel-scrim" aria-hidden="true"></span>
+      <span class="panel-ix">02 / Elétrica</span>
+      <span class="panel-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+      <span class="panel-txt">
+        <h3>Eletricidade</h3>
+        <span class="panel-s">Quadros elétricos, avarias e reparações</span>
+      </span>
+    </a>
+    <a class="panel" data-r href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%21%20Preciso%20de%20apoio%20em%20ventila%C3%A7%C3%A3o%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">
+      <img class="panel-img" src="PHOTO(obra9)" alt="" width="640" height="480" loading="lazy" decoding="async">
+      <span class="panel-scrim" aria-hidden="true"></span>
+      <span class="panel-ix">03 / Ventilação</span>
+      <span class="panel-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+      <span class="panel-txt">
+        <h3>Ventilação</h3>
+        <span class="panel-s">Extração, condutas e qualidade do ar</span>
+      </span>
+    </a>
+    <a class="panel" data-r href="#contacto">
+      <img class="panel-img" src="PHOTO(obra3)" alt="" width="453" height="480" loading="lazy" decoding="async">
+      <span class="panel-scrim" aria-hidden="true"></span>
+      <span class="panel-ix">04 / Contratos</span>
+      <span class="panel-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></span>
+      <span class="panel-txt">
+        <h3>Manutenção</h3>
+        <span class="panel-s">Contratos preventivos, relatórios claros</span>
+      </span>
+    </a>
+  </div>
+</section>
+
+
+
+<!-- ═══ 03 · PROCESSO ═══ -->
+<section class="wrap" id="processo">
+  <div class="sec-head" data-r>
+    <p class="eyebrow"><span class="num">03</span> Como trabalhamos</p>
+    <h2>Da avaliação à conclusão,<br>sem <em>zonas cinzentas</em>.</h2>
+  </div>
+  <div class="steps">
+    <div class="step" data-r>
+      <div class="step-n"><span class="step-dot"></span><b>01</b><i></i></div>
+      <h3>Avaliação</h3>
+      <p>Levantamento técnico e escuta do problema real da instalação.</p>
+    </div>
+    <div class="step" data-r>
+      <div class="step-n"><span class="step-dot"></span><b>02</b><i></i></div>
+      <h3>Diagnóstico</h3>
+      <p>Análise objetiva com critérios técnicos claros e orçamento transparente.</p>
+    </div>
+    <div class="step" data-r>
+      <div class="step-n"><span class="step-dot"></span><b>03</b><i></i></div>
+      <h3>Intervenção</h3>
+      <p>Execução por profissionais experientes, com atenção à limpeza e segurança.</p>
+    </div>
+    <div class="step" data-r>
+      <div class="step-n"><span class="step-dot"></span><b>04</b><i></i></div>
+      <h3>Acompanhamento</h3>
+      <p>Comunicação direta e relação de confiança de longo prazo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 04 · EMPRESA (banda creme) ═══ -->
+<section class="wrap" id="empresa">
+  <div class="band" data-r>
+    <div>
+      <p class="eyebrow"><span class="num">04</span> Porquê a MDM</p>
+      <h2>35 anos de ofício.<br>Confiança <em>comprovada</em>.</h2>
+      <p>Fundada em 1991 por Manuel Domingos Melancia, a MDM consolidou-se como
+         parceira de manutenção de edifícios exigentes na grande Lisboa.</p>
+    </div>
+    <ul class="creds">
+      <li>Técnicos certificados em AVAC e eletricidade</li>
+      <li>Certificação APIRAC · Registo IMPIC</li>
+      <li>Equipamentos multi-marca, peças originais</li>
+      <li>Relatórios claros em cada intervenção</li>
+      <li>Clientes: banca, indústria, condomínios, escolas</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══ 05 · SETORES ═══ -->
+<section class="wrap" id="setores" style="padding-top:0">
+  <div class="sec-head" data-r>
+    <p class="eyebrow"><span class="num">05</span> Para quem</p>
+    <h2>Setores que <em>servimos</em></h2>
+  </div>
+  <div class="tags" data-r>
+    <span class="tag">Indústria</span>
+    <span class="tag">Escritórios</span>
+    <span class="tag">Condomínios</span>
+    <span class="tag">Habitação</span>
+    <span class="tag">Banca</span>
+    <span class="tag">Educação</span>
+    <span class="tag">Restauração</span>
+    <span class="tag is-home">Parque das Nações</span>
+  </div>
+</section>
+
+<!-- ═══ 06 · CONTACTO ═══ -->
+<section class="wrap" id="contacto">
+  <div class="sec-head" data-r>
+    <p class="eyebrow"><span class="num">06</span> Contacto</p>
+    <h2>Transforme uma necessidade técnica<br>num plano <em>claro</em>.</h2>
+    <p class="lede" style="margin-top:20px">Atendimento de segunda a sexta, das 8h às 17h.</p>
+  </div>
+
+  <div class="c-grid" data-r>
+    <div class="c-card">
+      <div class="c-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg>Telefone</div>
+      <div class="c-val"><a href="tel:+351218935050">218 935 050</a></div>
+      <div class="c-sub">Seg. a sex., 8h–17h</div>
+    </div>
+    <div class="c-card">
+      <div class="c-lbl"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>WhatsApp</div>
+      <div class="c-val"><a href="https://wa.me/351910307579" target="_blank" rel="noopener">910 307 579</a></div>
+      <div class="c-sub">Resposta mais rápida</div>
+    </div>
+    <div class="c-card">
+      <div class="c-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>Morada</div>
+      <div class="c-val">Alameda dos Oceanos, 108A</div>
+      <div class="c-sub">1990-426 Lisboa</div>
+    </div>
+  </div>
+
+  <!-- ── pedido de orçamento ── -->
+  <div class="quote" data-r>
+    <div class="sec-head">
+      <p class="eyebrow">Pedido de orçamento</p>
+      <h2>Descreva o que precisa.<br>Respondemos em <em>24 horas</em>.</h2>
+    </div>
+
+    <div class="intent-row" data-r>
+      <a class="intent" id="intAvaria" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%21%20Tenho%20uma%20avaria%20%E2%80%94%20envio%20j%C3%A1%20uma%20fotografia." target="_blank" rel="noopener">
+        <b>Tenho uma avaria</b>
+        <span>Envie uma foto por WhatsApp — o diagnóstico começa logo aí.</span>
+      </a>
+      <button class="intent" id="intContrato" type="button">
+        <b>Quero um contrato de manutenção</b>
+        <span>Peça uma proposta anual para o seu edifício ou empresa.</span>
+      </button>
+    </div>
+    <p class="quote-proof" data-r>Clientes: banca · indústria · condomínios · escolas — Certificação APIRAC · Registo IMPIC</p>
+
+    <form class="sheet" id="quoteForm" novalidate>
+      <div class="sheet-bar">
+        <span class="dot"></span>
+        <b>Nova mensagem</b>
+        <span>mdmassist@mdmassist.com</span>
+      </div>
+
+      <div class="row row-to">
+        <span class="row-lbl">Para:</span>
+        <span class="to-val">MDM Assist</span>
+        <span class="to-hint">Assistência Técnica · Lisboa</span>
+      </div>
+
+      <div class="row" id="rowEmpresa">
+        <label class="row-lbl" for="qEmpresa">Nome <span class="req" aria-hidden="true">*</span></label>
+        <div class="field">
+          <input class="in" id="qEmpresa" name="empresa" type="text" required
+                 aria-describedby="errEmpresa"
+                 placeholder="Nome da empresa, condomínio ou particular" autocomplete="organization">
+          <p class="err" id="errEmpresa">Indique o nome da empresa, condomínio ou o seu nome.</p>
+        </div>
+      </div>
+
+
+
+      <div class="row" id="rowEmail">
+        <label class="row-lbl" for="qEmail">Email <span class="req" aria-hidden="true">*</span></label>
+        <div class="field">
+          <input class="in" id="qEmail" name="email" type="email" aria-describedby="errEmail"
+                 placeholder="email@empresa.pt" autocomplete="email">
+          <p class="err" id="errEmail">Indique um email ou um telefone para lhe podermos responder.</p>
+        </div>
+      </div>
+
+      <div class="row" id="rowTel">
+        <label class="row-lbl" for="qTel">Telefone <span class="req" aria-hidden="true">*</span></label>
+        <div class="field">
+          <input class="in" id="qTel" name="telefone" type="tel" aria-describedby="errTel"
+                 placeholder="+351 9xx xxx xxx" autocomplete="tel">
+          <p class="err" id="errTel">Chega um dos dois — email ou telefone.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <label class="row-lbl" for="qServico">Serviço</label>
+        <div class="field">
+          <select class="in" id="qServico" name="servico">
+            <option value="" selected>Selecione o tipo de serviço</option>
+            <option>Ar Condicionado — Instalação</option>
+            <option>Ar Condicionado — Manutenção / Reparação</option>
+            <option>Eletricidade — Instalação / Quadro</option>
+            <option>Eletricidade — Avaria / Reparação</option>
+            <option>Ventilação — Instalação / Revisão</option>
+            <option>Contrato de Manutenção Anual</option>
+            <option>Outro / Múltiplos serviços</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row row-msg" style="border-bottom:0">
+        <label class="row-lbl" for="qMsg">Mensagem</label>
+        <div class="field">
+          <textarea class="in" id="qMsg" name="mensagem" rows="6"
+            placeholder="Descreva a instalação, o espaço, o número de equipamentos ou a avaria. Quanto mais detalhe, mais rápida e precisa será a proposta."></textarea>
+        </div>
+      </div>
+
+      <p class="status" id="quoteStatus" role="status" aria-live="polite"></p>
+
+      <div class="sheet-foot">
+        <p class="sheet-note">
+          Orçamento gratuito e sem compromisso — resposta em menos de 24 horas úteis.<br>
+          Os seus dados são usados exclusivamente para responder ao pedido.
+        </p>
+        <div class="sheet-actions">
+          <button type="button" class="send" id="sendEmail">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            <span id="sendEmailLbl">Enviar por email</span>
+          </button>
+          <button type="button" class="send-wa" id="sendWa">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <div class="perks" data-r>
+      <div class="perk"><b>24h</b><p>Resposta garantida<br>em dias úteis</p></div>
+      <div class="perk"><b>NIF</b><p>Fatura com dados<br>fiscais completos</p></div>
+      <div class="perk"><b>Anual</b><p>Planos de manutenção<br>disponíveis</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 07 · FORNECEDORES (meia página, marquee p/ esquerda) ═══ -->
+<section class="sup" id="fornecedores" aria-labelledby="sup-t">
+  <div class="sup-head" data-r>
+    <p class="eyebrow"><span class="num">07</span> Fornecedores</p>
+    <h2 id="sup-t">Marcas com que <em>trabalhamos</em>.</h2>
+    <p class="sup-lede">
+      Equipamento original e peças de origem — instalado e mantido por técnicos
+      certificados, com garantia de fabricante.
+    </p>
+  </div>
+
+  <!-- Duas listas idênticas: a 2ª é decorativa e fecha o ciclo sem costura.
+       Para usar logótipos PNG, troque o texto de CADA <li> nas DUAS listas por:
+         <img src="logos/mitsubishi.png" alt="Mitsubishi Electric">
+       (o CSS .marquee-row img já normaliza a altura ótica) -->
+  <div class="marquee" role="group" aria-label="Fornecedores MDM">
+    <div class="marquee-track">
+      <ul class="marquee-row">
+        <li>Mitsubishi Electric</li>
+        <li>MIDEA</li>
+        <li>LG</li>
+        <li>France Air</li>
+        <li>Vulcano</li>
+        <li>Hitachi</li>
+      </ul>
+      <ul class="marquee-row" aria-hidden="true">
+        <li>Mitsubishi Electric</li>
+        <li>MIDEA</li>
+        <li>LG</li>
+        <li>France Air</li>
+        <li>Vulcano</li>
+        <li>Hitachi</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="sup-foot">
+    <span class="sup-dot"></span>
+    Multi-marca · peças originais · garantia de fabricante
+  </p>
+</section>
+
+</main>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#topo" class="logo" aria-label="MDM — início">
+          {{LOGO_SVG}}
+          <span class="logo-text"><small>Assistência técnica<br>Lisboa · desde 1991</small></span>
+        </a>
+        <p>Assistência técnica a edifícios na grande Lisboa desde 1991 —
+           ar condicionado, eletricidade, ventilação e manutenção.</p>
+      </div>
+
+      <div>
+        <h4>Serviços</h4>
+        <ul>
+          <li><a href="#servicos">Ar condicionado</a></li>
+          <li><a href="#servicos">Eletricidade</a></li>
+          <li><a href="#servicos">Ventilação</a></li>
+          <li><a href="#servicos">Contratos de manutenção</a></li>
+          <li><a href="#obras">Obras</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Contacto</h4>
+        <ul>
+          <li><a href="tel:+351218935050">218 935 050</a></li>
+          <li><a href="https://wa.me/351910307579" target="_blank" rel="noopener">910 307 579 (WhatsApp)</a></li>
+          <li><a href="mailto:mdmassist@mdmassist.com">mdmassist@mdmassist.com</a></li>
+          <li>Alameda dos Oceanos, 108A<br>1990-426 Lisboa</li>
+          <li>Seg. a sex., 8h–17h</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="foot-legal">
+      <span>MDM — Manuel Domingos Melancia, Lda · NIF 502 644 761</span>
+      <span>© 2026 · Lisboa, Portugal</span>
+    </div>
+  </div>
+</footer>
+
+<a class="fab" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%2C%20gostaria%20de%20pedir%20assist%C3%AAncia%20t%C3%A9cnica." target="_blank" rel="noopener" aria-label="Falar connosco no WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>

@@ -1,0 +1,8 @@
+{
+  "name": "relatorio-intervencao",
+  "private": true,
+  "description": "Relatório de Intervenção MDM (FM-TEC-04 / V07) — app de ficheiro único, offline, com registo F-gas",
+  "scripts": {
+    "test": "node test/run.js"
+  }
+}

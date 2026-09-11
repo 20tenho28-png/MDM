@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  /* Recusa de medição (privacidade.html): guardada no browser do visitante.
+     É a única coisa que este site escreve no equipamento — e só depois de o visitante a pedir. */
+  window.MDM_SEM_MEDICAO = (function () { try { return localStorage.getItem('mdm-sem-medicao') === '1'; } catch (e) { return false; } })();
+</script>
+<script>
+  /* Sentry (erros) — carregado em assíncrono, depois do conteúdo, e nunca se o visitante recusou a medição */
+  if (!window.MDM_SEM_MEDICAO) {
+    var _sy = document.createElement('script');
+    _sy.src = 'https://js-de.sentry-cdn.com/f31a40fed7d908991cf6b3b9e8932c77.min.js';
+    _sy.crossOrigin = 'anonymous'; _sy.async = true;
+    _sy.onload = function () {
+  window.Sentry && Sentry.onLoad(function () {
+    Sentry.init({
+      dsn: "https://f31a40fed7d908991cf6b3b9e8932c77@o4511750499926016.ingest.de.sentry.io/4511802709573712",
+      environment: location.hostname === "localhost" ? "development" : "production",
+      // Não enviar dados pessoais (IP, cookies) — conformidade RGPD
+      sendDefaultPii: false,
+      // Desempenho: site de tráfego baixo, recolhe tudo
+      tracesSampleRate: 1.0,
+      // Ignorar ruído de extensões do browser e falhas de rede do visitante
+      ignoreErrors: [
+        "Non-Error promise rejection captured",
+        "ResizeObserver loop limit exceeded",
+        "Failed to fetch"
+      ],
+      denyUrls: [/extensions\//i, /^chrome:\/\//i, /^moz-extension:\/\//i],
+      /* nunca enviar o que o visitante escreveu no formulário */
+      beforeSend: function (ev) {
+        try {
+          if (ev.request) { delete ev.request.cookies; delete ev.request.data; }
+          delete ev.user;
+          (ev.breadcrumbs || []).forEach(function (b) { if (b.data) delete b.data.value; });
+        } catch (e) {}
+        return ev;
+      }
+    });
+  });
+    };
+    document.head.appendChild(_sy);
+  }
+</script>
+<title>MDM — Manutenção e Assistência de Edifícios · Lisboa · Desde 1991</title>
+<meta name="description" content="Ar condicionado, eletricidade e ventilação em Lisboa desde 1991. Orçamento gratuito com resposta em menos de 24 horas úteis — 218 935 050.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- DOMÍNIO: para passar ao domínio próprio não se editam estas linhas à mão —
+     correr  python3 externalize.py index.html deploy/creme --url https://www.exemplo.pt
+     que reescreve canonical, og:url, og:image, twitter:image, o schema, o robots.txt e o sitemap.xml. -->
+<link rel="canonical" href="https://mdmassist.manus.space">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MDM — Assistência Técnica">
+<meta property="og:title" content="MDM — Manutenção e Assistência de Edifícios · Lisboa">
+<meta property="og:description" content="Manutenção e assistência de edifícios em Lisboa desde 1991 — ar condicionado, eletricidade e ventilação. Resposta em menos de 24h úteis.">
+<meta property="og:url" content="https://mdmassist.manus.space">
+<meta property="og:locale" content="pt_PT">
+<meta property="og:image" content="https://mdmassist.manus.space/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="MDM — Manutenção e assistência de edifícios em Lisboa desde 1991">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://mdmassist.manus.space/og.jpg">
+<meta name="twitter:title" content="MDM — Manutenção e Assistência de Edifícios · Lisboa">
+<meta name="twitter:description" content="Manutenção e assistência de edifícios em Lisboa desde 1991 — ar condicionado, eletricidade e ventilação. Resposta em menos de 24h úteis.">
+<link rel="icon" type="image/png" sizes="64x64" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABABAMAAABYR2ztAAAAJFBMVEX9+PnnvsHGZmyyLzeoFB2kCROkBxKjBxKjBxGjBxChBw6fAQcn0gk3AAAFPElEQVR42n1VXUxURxg9M7sVf+/MAkVSu/cu2GiwgV0waaGJaGJ8aFIrJjVgIwhtY5Rai5I0FpNSGqOVpEVMfKlNi1IjkRetibaVon2iNaWwuy1Qo7J3qfIn7Mxu+Y17pw/L4lpp5+l+35w53zf3fudcQnPxxHIokRiO0Se3iboX4IkJbkd6VUI8XUpV+uHHkJn9doTOzMfMc0TyzI6a6/Eqyg07eOY8wP+ryTO6co45PXEAR2IP0Z1djgxvIQ14EpKJgJ7PJDOzI71T2QsDoiVd3L7C5lusf5NwU3sCQavMHF3tdbqlT3kWYIiWdDvGz3mdDcFgyLUQQ08rkFvsbDgUFtoGf/wajxmixd2U+VeerI6ENIanGVTPGbClqvFtqRmMndZdcwTzDN3FAax+0PiOWKExLk2RwCAAIPrGASTfbaoc1zmTJpmO86p4iT+WByC2VQ4aBjEhSajUH6vbOlci+mYtqPvWVI5HmjIslR47FikO8BhDT5sgxuzkRumVRHBNY+dzAERvX5UxhmjJDfCU3oagLwjFNMNweLsB+Eq753roaQVyb351akAwpji4kDMAortKQUBofuHY1teRaW6I9E4b4MohJAmPf+tH51g7UlZQILrmABxhZ6RvscFcIKaUpqUB0d3tQAYocH9NAEuWZ/Yl6S5iSlOGpaa5Twcm3wNoLexA0W7Qwcs7F+U4vIKAQGnMIOay0X4gywsKckGQrE37Fm0kXkkBpTTDLX1/vtQJ0HoXKHADtL76QUPYF4SlGDMMHhyQK9YGgKxzgB2LBMm7EnGfCkqNKQ7FhYyE9PIygNb7ABu1RErjbGrxhTHGePo0yPAIHuoNJ4aAdUPprN2OAMlv9oCO6pxJISGJ1PSG6n6A1vsVYAd/ZqkHthbNIEJKgISYXld9D0BWsweAHeFXUwDAIKYkRMHS2cHqe0zAVu8HABtJOzoL4NkdrWGZpHhS+solV/r1IeCVQDrA2u3Ia/YAUDRoMQ2METk4kh0AbDX+OV0IFwDQsGUw7oI0B0acDgGS3xyfyZi2yTVN49KETBp3flIGpMwRJCiLOaSUQTGdfaqCg7zc/G9lGRM+KRVjrGKfM4DUSv+/tbmsIiyZYRjJ9RMOkPPNT2uTCk3THd6ZyfWdWHfd81jdcyKytWiGW/qGJ892gdZHFjIQbZNvILioqcIQWedcC8jfmLgcCekNlVo/rfcvZEHL3hq29IYjk0QUzHeY6A+g4SnnyZqevHFbzcIuR67pByv7tv8m85vxhIGou/Hnug+Htt1ktpqmzvnt5bAjeU88mp1y/2QFv8eex+dnQGiCo1mmQuaT9m/ZEyOagaeWHVn7Pl5ZBeBE6NPDjhDSDgHTdbGMOD77rh2jXXc6K5tQ1pb8hdXmQOcvBUujdzorm1DalvyDAkVq31l1zOaxUECPYt3FzdbP5QVn1THb+hBOBD2gwHNAAD3vQ6Af+HJv4/jpEYEA/LX4OvaiCDIGSxHmAhwgt1KUef+Sa6jUE+YkBggLhzpXErfGlAtcIJRhYe0SiDlAk039bmXM/5g4iEhWHygeHxgi0ly3a13xyYEA5GKXqPLw+MdSWl00WMWVC4DqLBEuoMw1KMvjJSB3JVthgVFdAJv3fERrgEeHLFsThxWbqNDEZb7qEiyXheGLY10vdhddxXc8DRgqD8FGnp8e6njtr1XbW5I6rpCpwcDqz3+80Xcr9dHxVS1JvS902Eh2YeHfRVsKkh7sfagdII6d+4O52o5HRVttU9HygS3XCM3j+O+l7trBQv8DIPgHx8w3SiQXsUQAAAAASUVORK5CYII=">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,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">
+
+<meta name="theme-color" content="#A30711">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream:  #FAF9F5;
+    --paper:  #F0EEE6;
+    --sand:   #E8E4D9;
+    --ink:    #141D2E;   /* navy dos polos da equipa */
+    --slate:  #4E5871;   /* cinzento frio derivado do navy */
+    --red:    #A30711;   /* carmim do logótipo — um só vermelho no site */
+    --red-dk: #7C050D;
+    --red-sf: #F6E4E4;
+    --r-s: 6px;          /* raio pequeno (chips, inputs) */
+    --r-m: 10px;         /* raio médio (cartões) */
+
+    --serif: 'Lora', Georgia, serif;
+    --sans:  'Inter', sans-serif;
+    --mono:  'JetBrains Mono', monospace;
+    --ease:  cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+  }
+  body {
+    font-family: var(--sans);
+    background: var(--cream);
+    color: var(--ink);
+    line-height: 1.55;
+    overflow-x: hidden;
+  }
+  ::selection { background: var(--red-sf); color: var(--red-dk); }
+
+  /* ═══ 3D CANVAS — fixed behind everything ═══ */
+  #scene {
+    position: fixed; inset: 0;
+    z-index: 0; pointer-events: none;
+  }
+
+  main { position: relative; z-index: 1; }
+
+  /* ═══ NAV ═══ */
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    transition: top .3s var(--ease), border-color .3s;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 40px;
+    background: rgba(250,249,245,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid transparent;
+  }
+  nav.scrolled { border-color: var(--sand); }
+  .logo {
+    display: flex; align-items: center; gap: 11px;
+    text-decoration: none; color: var(--ink);
+  }
+  .logo-img {
+    height: 56px; width: 54px; display: block;
+    transition: transform .35s var(--ease);
+  }
+  .logo:hover .logo-img { transform: rotate(-3deg) scale(1.05); }
+  .logo-text small { display: block; font-family: var(--sans); font-weight: 500; font-size: 11px; line-height: 1.35; color: var(--slate); letter-spacing: 0.2px; }
+
+  .nav-right { display: flex; align-items: center; gap: 14px; }
+  .nav-phone {
+    font-family: var(--mono); font-size: 13px; color: var(--ink);
+    text-decoration: none; transition: color .2s;
+    display: inline-block; padding: 12px 4px;
+  }
+  .nav-phone:hover { color: var(--red); }
+  .nav-wa {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--red); color: #fff;
+    padding: 10px 20px; border-radius: 999px;
+    font-size: 13px; font-weight: 600; text-decoration: none;
+    transition: background .25s, transform .25s var(--ease);
+  }
+  .nav-wa:hover { background: var(--red-dk); transform: translateY(-2px); }
+
+  /* ═══ HERO ═══ */
+  .bg-photo {
+    position: absolute; top: 0; left: 0; right: 0; height: min(140vh, 1200px);
+    z-index: 0; pointer-events: none;
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 94%);
+            mask-image: linear-gradient(to bottom, #000 55%, transparent 94%);
+    background: url(img/cf5314dd70.webp) center/cover no-repeat;
+  }
+  .bg-photo::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg,
+      rgba(246,242,234,.94) 0%,
+      rgba(246,242,234,.82) 26%,
+      rgba(246,242,234,.48) 46%,
+      rgba(246,242,234,.10) 64%,
+      rgba(246,242,234,0) 78%);
+  }
+  @media (max-width: 760px) {
+    .bg-photo::after {
+      background: linear-gradient(180deg,
+        rgba(246,242,234,.92) 0%,
+        rgba(246,242,234,.80) 40%,
+        rgba(246,242,234,.62) 100%);
+    }
+  }
+
+
+  .hero {
+    /* -56px: a secção seguinte espreita acima da dobra (pista de scroll) */
+    min-height: min(calc(100vh - 56px), 720px);
+    display: flex; flex-direction: column;
+    justify-content: center;
+    padding: 120px 40px 60px;
+    max-width: 1200px; margin: 0 auto;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(40px, 6.4vw, 80px);
+    font-weight: 500; line-height: 1.04;
+    letter-spacing: -2px;
+    max-width: 850px;
+  }
+  h1 .ln { display: block; overflow: hidden; }
+  h1 .ln span { display: block; transform: translateY(112%); animation: reveal 1.1s var(--ease) forwards; }
+  h1 .ln:nth-child(1) span { animation-delay: .45s; }
+  h1 .ln:nth-child(2) span { animation-delay: .6s; }
+  h1 em { font-style: italic; color: var(--red); }
+  @keyframes reveal { to { transform: translateY(0); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* linha de prova: factos reais, números em serifa carmim (convenção da casa) */
+  .hero-proof {
+    margin-top: 26px; font-size: 17px; color: var(--slate);
+    max-width: 640px; line-height: 1.75;
+    opacity: 0; animation: rise .9s var(--ease) .95s forwards;
+  }
+  /* nenhum dos factos destacados deve partir-se ao meio ("multi-/marca", "24 a/48 h") */
+  .hero-proof b { font-family: var(--serif); font-weight: 600; color: var(--red); font-size: 1.06em; white-space: nowrap; }
+
+  /* três portas, estilo INEOS: barra de cor, título com seta, uma linha — sem caixa */
+  .hero-doors {
+    margin-top: clamp(34px, 5vh, 64px);
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(28px, 4vw, 60px);
+    opacity: 0; animation: rise .9s var(--ease) 1.15s forwards;
+  }
+  .door {
+    display: block; padding: 22px 0 6px;
+    border-top: 4px solid var(--slate);
+    text-decoration: none; color: var(--ink);
+  }
+  .door--montagem { border-top-color: var(--red); }   /* P1 */
+  .door--manut { border-top-color: var(--ink); }      /* P2 */
+  /* .door--elet fica com o cinzento por omissão            P3 */
+  .door-t {
+    font-family: var(--serif); font-size: 25px; font-weight: 600; letter-spacing: -0.5px; line-height: 1.15;
+    display: block;
+  }
+  .door-t .nb { white-space: nowrap; }   /* última palavra + seta nunca se separam */
+  .door-t i { font-style: normal; color: var(--red); display: inline-block; margin-left: 4px; transition: transform .25s var(--ease); }
+  .door:hover .door-t i, .door:focus-visible .door-t i { transform: translateX(5px); }
+  .door p { margin: 8px 0 0; font-size: 15px; line-height: 1.5; color: var(--slate); }
+  @media (max-width: 900px) {
+    .door-t { font-size: 22px; } .door p { font-size: 14px; }
+    /* telemóvel: sequência mais curta — h1 .15/.25s, prova .35s, portas .45s */
+    h1 .ln:nth-child(1) span { animation-delay: .15s; animation-duration: .8s; }
+    h1 .ln:nth-child(2) span { animation-delay: .25s; animation-duration: .8s; }
+    .hero-proof { animation-delay: .35s; animation-duration: .5s; }
+    .hero-doors { animation-delay: .45s; animation-duration: .5s; }
+  }
+  @media (max-width: 760px) {
+    .hero-doors { grid-template-columns: 1fr; gap: 14px; }
+    .door { padding: 14px 0 4px; }
+    .door-t { font-size: 21px; }
+    .door p { margin-top: 4px; font-size: 13.5px; }
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 17px 34px; border-radius: 999px;
+    font-size: 15px; font-weight: 600; text-decoration: none;
+    transition: transform .3s var(--ease), background .25s, box-shadow .3s;
+    will-change: transform;
+  }
+  .btn-red { background: var(--red); color: #fff; }
+  .btn-red:hover { background: var(--red-dk); transform: translateY(-3px); box-shadow: 0 10px 24px rgba(163,7,17,0.20); }
+  .btn-line { color: var(--ink); border: 1.5px solid var(--sand); background: rgba(250,249,245,0.6); }
+  .btn-line:hover { border-color: var(--ink); transform: translateY(-3px); }
+
+  .hero-meta { display: flex; gap: 44px; flex-wrap: wrap; }
+  .meta-band { max-width: 1200px; margin: 0 auto; padding: 28px 40px 8px; }
+  @media (max-width: 640px) { .meta-band { padding: 20px 20px 8px; } }
+  .hm-num { font-family: var(--serif); font-style: italic; font-size: 24px; }
+  .hm-num b { color: var(--red); font-weight: 600; }
+  .hm-lbl { font-size: 11.5px; color: #44403A; margin-top: 2px; }
+  @media (max-width: 640px) {
+    .hero-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 22px 28px; }
+  }
+
+  /* ═══ SECTIONS ═══ */
+  section { padding: 100px 40px; max-width: 1200px; margin: 0 auto; }
+  /* âncoras do menu aterram com o título visível abaixo do header fixo (--nav-h) */
+  #servicos, #porque, #faq, #contacto { scroll-margin-top: 28px; }
+  #obras { scroll-margin-top: calc(var(--nav-h) - 24px); }
+  #orcamento { scroll-margin-top: calc(var(--nav-h) + 20px); }
+  /* antes do reveal o bloco está 38px mais abaixo (translateY) — compensa-se para não aterrar sob o header */
+  #orcamento[data-r]:not(.in) { scroll-margin-top: calc(var(--nav-h) + 58px); }
+  @media (max-width: 640px) { #obras { scroll-margin-top: calc(var(--nav-h) + 8px); } }
+
+  [data-r] {
+    opacity: 0; transform: translateY(38px);
+    transition: opacity 1s var(--ease), transform 1s var(--ease);
+  }
+  [data-r].in { opacity: 1; transform: none; }
+
+  .sec-head { margin-bottom: 52px; }
+  .sec-eyebrow {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--red); margin-bottom: 14px;
+  }
+  h2 {
+    font-family: var(--serif);
+    font-size: clamp(30px, 4.2vw, 50px);
+    font-weight: 500; letter-spacing: -1px; line-height: 1.1;
+  }
+  h2 em { font-style: italic; color: var(--red); }
+
+  /* ── services: cartões fotográficos ── */
+  #servicos { padding-top: clamp(48px, 6vw, 72px); padding-bottom: clamp(56px, 7vw, 84px); }
+  .svc-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .svc {
+    position: relative; display: block; overflow: hidden;
+    height: clamp(200px, 24vw, 280px);
+    border: 1px solid var(--sand);
+    border-radius: 18px;
+    background: #fff; text-decoration: none;
+    box-shadow: 0 10px 24px -18px rgba(20,29,46,0.30);
+    transition: opacity 1s var(--ease), transform .6s var(--ease),
+                box-shadow .35s var(--ease), border-color .3s;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+  .svc:hover { border-color: var(--red); box-shadow: 0 22px 48px -18px rgba(43,39,35,.28); }
+  .svc-img {
+    position: absolute; inset: 0; z-index: 0;
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform .6s var(--ease);
+  }
+  .svc:hover .svc-img { transform: scale(1.05); }
+  .svc-scrim {
+    position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(to top,
+      rgba(20,29,46,0.88) 0%, rgba(20,29,46,0.46) 44%, rgba(20,29,46,0) 76%);
+  }
+  .svc-go {
+    margin-top: 10px;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 12px; border-radius: 999px;
+    background: rgba(250,249,245,0.94); color: var(--red-dk);
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.6px; text-transform: uppercase;
+    transition: background .25s, color .25s;
+  }
+  .svc:hover .svc-go { background: var(--red); color: #fff; }
+  .svc-txt { position: absolute; left: 20px; right: 20px; bottom: 16px; z-index: 2; }
+  .svc h3 {
+    font-family: var(--serif); font-size: clamp(19px, 1.7vw, 23px);
+    font-weight: 600; color: #fff; margin: 0; letter-spacing: -0.3px;
+  }
+  .svc-sub {
+    display: block; margin-top: 3px;
+    font-size: 12.5px; line-height: 1.5; color: rgba(250,249,245,0.85);
+  }
+
+  /* ── process: numbered timeline ── */
+  #processo { padding-top: 60px; }
+
+  /* ── trust band (dark) ── */
+  .band {
+    background: var(--ink); color: var(--cream);
+    border-radius: 24px;
+    padding: 56px 48px;
+    display: grid; grid-template-columns: 1.2fr 1fr;
+    gap: 48px; align-items: center;
+    position: relative; overflow: hidden;
+  }
+  .band::after {
+    content: ''; position: absolute; right: -80px; top: -80px;
+    width: 340px; height: 340px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(163,7,17,0.35) 0%, transparent 70%);
+  }
+  .band h2 { color: var(--cream); }
+  .band h2 em { color: #E89B8A; }
+  .band p { color: rgba(250,249,245,0.65); font-size: 14.5px; margin-top: 16px; max-width: 420px; }
+  .band-list { list-style: none; position: relative; z-index: 1; }
+  .band-list li {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 11px 0; font-size: 14px;
+    color: rgba(250,249,245,0.85);
+    border-bottom: 1px solid rgba(250,249,245,0.1);
+  }
+  .band-list li::before { content: '◆'; color: var(--red); font-size: 8px; margin-top: 7px; }
+
+  /* ── sectors pills ── */
+  .sect-row { display: flex; flex-wrap: wrap; gap: 12px; }
+  .sect {
+    font-size: 13.5px; padding: 14px 26px;
+    border: 1px solid var(--sand); border-radius: 999px;
+    background: rgba(240,238,230,0.7);
+    color: var(--slate);
+    transition: all .3s var(--ease);
+  }
+  .sect:hover { border-color: var(--red); color: var(--red-dk); background: var(--red-sf); transform: translateY(-3px); }
+
+  /* ── contact ── */
+  #contacto {
+    text-align: center;
+    padding-bottom: 80px;
+  }
+  #contacto h2 { max-width: 620px; margin: 0 auto 14px; }
+  #contacto .sub { color: var(--slate); font-size: 16px; margin-bottom: 44px; }
+  .c-cards { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-bottom: 44px; }
+  .c-card {
+    background: rgba(240,238,230,0.8);
+    border: 1px solid var(--sand);
+    border-radius: 16px; padding: 22px 30px;
+    text-align: left; min-width: 200px;
+    transition: transform .3s var(--ease), border-color .3s;
+  }
+  .c-card:hover { transform: translateY(-4px); border-color: var(--red); }
+  .c-lbl { font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--slate); margin-bottom: 7px; }
+  .c-val { font-family: var(--serif); font-size: 16.5px; font-weight: 600; }
+  .c-val a { color: var(--ink); text-decoration: none; transition: color .2s; }
+  .c-val a:hover { color: var(--red); }
+  .c-use { font-size: 12.5px; line-height: 1.45; color: var(--slate); margin-top: 5px; }
+  .c-addr { text-align: center; font-size: 14px; color: var(--slate); margin: -26px 0 0; }
+  .c-addr b { font-weight: 600; color: var(--ink); }
+  @media (max-width: 640px) { .c-card { width: 100%; } }
+
+  /* ═══ FAQ (respostas diretas — também para pesquisa por voz/IA) ═══ */
+  .faq-list { max-width: 760px; margin-top: 40px; }
+  .faq-item { border-bottom: 1px solid var(--sand); }
+  .faq-item summary {
+    cursor: pointer; list-style: none; position: relative;
+    padding: 18px 40px 18px 0;
+    font-family: var(--serif); font-size: 18.5px; font-weight: 600; color: var(--ink);
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::after {
+    content: '+'; position: absolute; right: 4px; top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--mono); font-size: 20px; color: var(--red);
+    transition: transform .2s var(--ease);
+  }
+  .faq-item[open] summary::after { transform: translateY(-50%) rotate(45deg); }
+  .faq-item summary:hover { color: var(--red-dk); }
+  .faq-item p { padding: 0 40px 20px 0; margin: 0; font-size: 15px; line-height: 1.65; color: var(--slate); }
+
+  /* mensagem de validação/estado do formulário — texto, não só cor */
+  .mw-alert {
+    margin: 14px 0 0; padding: 11px 14px; border-radius: var(--r-s);
+    background: var(--red-sf); color: var(--red-dk);
+    font-size: 13.5px; line-height: 1.45;
+    border-left: 3px solid var(--red);
+  }
+  .mw-alert--ok { background: #E9F2EC; color: #1F5C33; border-left-color: #12823F; }
+  /* armadilha anti-spam: invisível para pessoas, preenchida por robôs */
+  .mw-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+  /* ═══ FOOTER ═══ */
+  footer {
+    position: relative; z-index: 1;
+    border-top: 1px solid var(--sand);
+    padding: 36px 40px;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
+    max-width: 1200px; margin: 0 auto;
+    font-size: 12.5px; color: var(--slate);
+  }
+  footer strong { font-family: var(--serif); color: var(--ink); }
+
+  /* floating whatsapp */
+  .fab {
+    position: fixed; right: 24px; bottom: 24px; z-index: 60;
+    width: 58px; height: 58px; border-radius: 50%;
+    background: var(--red); display: grid; place-items: center;
+    box-shadow: 0 8px 20px rgba(163,7,17,0.28);
+    transition: transform .3s var(--ease), background .25s;
+    text-decoration: none;
+  }
+  .fab:hover { transform: scale(1.06); background: var(--red-dk); }
+  .fab svg { width: 26px; height: 26px; fill: #fff; }
+
+  /* ═══ RESPONSIVE ═══ */
+  @media (max-width: 980px) {
+    .svc-row { grid-template-columns: 1fr 1fr; }
+    .band { grid-template-columns: 1fr; padding: 40px 28px; }
+  }
+  @media (max-width: 640px) {
+    nav { padding: 12px 20px; }
+    .nav-phone { display: none; }
+    .hero { min-height: 0; padding: 84px 20px 22px; }
+    section { padding: 70px 20px; }
+    .svc-row { grid-template-columns: 1fr; }
+    footer { padding: 28px 20px; }
+  }
+
+  /* telemóvel em landscape: hero cabe num ecrã */
+  @media (max-height: 520px) {
+    .hero { min-height: 0; padding: 82px 40px 22px; }
+    h1 { font-size: clamp(30px, 8.4vh, 44px); letter-spacing: -1px; }
+    .hero-proof { margin-top: 12px; font-size: 14.5px; line-height: 1.6; }
+    .hero-doors { margin-top: 16px; }
+  }
+
+  /* ecrãs baixos: hero-meta (1991 · 35 anos) tem de caber na 1ª vista */
+  @media (max-height: 820px) {
+    .hero { padding: 104px 40px 40px; }
+    h1 { font-size: clamp(38px, 5.6vw, 68px); }
+    .hero-meta { margin-top: 40px; gap: 30px; }
+    .hero-doors { margin-top: 32px; }
+  }
+  /* telemóveis estreitos (≤400px): h1 + prova numa linha + três portas dentro de 667px */
+  @media (max-width: 400px) {
+    .hero { padding: 84px 20px 22px; }
+    h1 { font-size: clamp(30px, 9.5vw, 40px); letter-spacing: -1px; }
+    .hero-proof { margin-top: 14px; font-size: 14px; line-height: 1.55; }
+    .hero-proof .hp-x { display: none; }
+    .hero-doors { margin-top: 18px; gap: 10px; }
+  }
+
+
+  /* ícones nos rótulos de contacto + barra mobile */
+  .c-lbl { display: flex; align-items: center; gap: 7px; }
+  .c-lbl svg { width: 13px; height: 13px; flex: none; }
+
+  /* ═══ ANIMAÇÕES (painel aprovado: 4) ═══ */
+
+  /* 1 · abanão de validação (4px, um ciclo) */
+  .mw-row.mw-err { animation: mw-shake .3s cubic-bezier(.36,.07,.19,.97) 1; }
+  @keyframes mw-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    45% { transform: translateX(3px); }
+    70% { transform: translateX(-2px); }
+  }
+
+
+  /* 3 · linha de progresso de leitura sob a nav (scroll-driven, sem JS) */
+  nav::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+    background: var(--red); transform: scaleX(0); transform-origin: 0 50%;
+  }
+  @supports (animation-timeline: scroll()) {
+    nav::after { animation: navprog linear both; animation-timeline: scroll(root); }
+  }
+  @keyframes navprog { to { transform: scaleX(1); } }
+
+  /* 4 · o sublinhado carmim desenha-se sob o <em> quando a secção revela */
+  .sec-head h2 em, .quote-head h2 em, .band h2 em { position: relative; }
+  .sec-head h2 em::after, .quote-head h2 em::after, .band h2 em::after {
+    content: ""; position: absolute; left: .02em; right: .06em; bottom: .04em; height: 2px;
+    background: currentColor; opacity: .35;
+    transform: scaleX(0); transform-origin: 0 50%;
+  }
+  .sec-head.in h2 em::after, .quote-wrap.in .quote-head h2 em::after, .band.in h2 em::after {
+    animation: em-draw .6s var(--ease) .35s both;
+  }
+  @keyframes em-draw { to { transform: scaleX(1); } }
+
+  /* reduced-motion: o bloco global usa '*' e NÃO cobre pseudo-elementos —
+     estas regras explícitas são obrigatórias (animações infinitas + ::after) */
+  @media (prefers-reduced-motion: reduce) {
+    .mw-row.mw-err { animation: none; }
+    nav::after { animation: none; transform: scaleX(0); }
+    .sec-head h2 em::after, .quote-head h2 em::after, .band h2 em::after,
+    .sec-head.in h2 em::after, .quote-wrap.in .quote-head h2 em::after, .band.in h2 em::after {
+      animation: none; transform: scaleX(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; }
+    h1 .ln span { transform: none; }
+    .hero-proof, .hero-doors, .hero-meta { opacity: 1; }
+    [data-r] { opacity: 1; transform: none; }
+    #scene { display: none; }
+    html { scroll-behavior: auto; }
+  }
+
+  /* ═══ SHOWCASE BANNER ═══ */
+  @media (max-width: 640px) {
+  }
+
+
+  /* ═══ QUOTE FORM — email window ═══ */
+  .quote-wrap { max-width: 980px; margin: 72px auto 0; }
+  .quote-head { margin-bottom: 36px; }
+  .quote-title { margin: 10px 0 14px; }
+
+  .mailwin {
+    background: #fff;
+    border: 1px solid var(--sand);
+    border-radius: var(--r-m);
+    overflow: hidden;
+    box-shadow: 0 20px 48px -28px rgba(20,29,46,0.32);
+  }
+  .mw-bar {
+    display: flex; align-items: center; gap: 7px;
+    background: var(--ink); padding: 13px 18px;
+  }
+  .mw-dot { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+  .mw-bar-title {
+    margin-left: 12px;
+    font-family: var(--mono); font-size: 12px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: #cfcdc6;
+  }
+  .mw-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 0 22px;
+    border-bottom: 1px solid var(--paper);
+  }
+  .mw-lbl {
+    flex: none; width: 108px;
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--slate);
+  }
+  .mw-in {
+    flex: 1; min-width: 0;
+    border: 0; outline: 0; background: transparent;
+    font-family: var(--sans); font-size: 16px; color: var(--ink);
+    padding: 17px 0;
+  }
+  .mw-in::placeholder { color: #8F8B80; }
+  .mw-row:focus-within { background: #FCFBF8; }
+  .mw-row:focus-within .mw-lbl { color: var(--red); }
+  .mw-select {
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235C5A54' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 4px center;
+    padding-right: 28px; cursor: pointer;
+  }
+  .mw-row-to { background: #FCFBF8; }
+  .mw-to { font-weight: 600; font-size: 16px; padding: 17px 0; }
+  .mw-to-hint { margin-left: auto; font-size: 12.5px; color: var(--slate); white-space: nowrap; }
+
+  .mw-body { padding: 4px 22px 0; }
+  .mw-ta {
+    width: 100%; border: 0; outline: 0; background: transparent; resize: vertical;
+    font-family: var(--sans); font-size: 16px; line-height: 1.6; color: var(--ink);
+    padding: 16px 0; min-height: 150px;
+  }
+  .mw-ta::placeholder { color: #8F8B80; }
+
+  .mw-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap;
+    padding: 18px 22px 22px;
+    border-top: 1px solid var(--paper);
+  }
+  .mw-note { font-size: 12.5px; line-height: 1.55; color: var(--slate); margin: 0; }
+  /* com dois botões o grupo passa para a linha de baixo: encosta-o à direita,
+     como estava quando era um só */
+  .mw-actions { display: flex; flex-direction: column; gap: 10px; flex: none; margin-left: auto; }
+  .mw-btns { display: flex; gap: 12px; }
+  .mw-send {
+    display: inline-flex; align-items: center; gap: 9px;
+    border: 0; cursor: pointer;
+    font-family: var(--mono); font-size: 12.5px; letter-spacing: 1.4px; text-transform: uppercase;
+    padding: 15px 24px; border-radius: var(--r-s);
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease), background .25s;
+  }
+  .mw-send { background: var(--red); color: #fff; }
+  .mw-send:hover { background: var(--red-dk); transform: translateY(-2px); box-shadow: 0 10px 24px -10px rgba(163,7,17,0.6); }
+  /* segunda via: o mesmo pedido, no canal que o cliente preferir */
+  .mw-send--wa { background: var(--wa); color: #fff; }
+  .mw-send--wa:hover { background: var(--wa-d); box-shadow: 0 10px 24px -10px rgba(18,130,63,0.6); }
+  .mw-send svg { flex: none; }
+  /* a garantia vale junto ao gesto, não enterrada no bloco de notas */
+  .mw-reassure { margin: 0; font-family: var(--mono); font-size: 11px; letter-spacing: 1.1px;
+    text-transform: uppercase; color: var(--slate); text-align: center; }
+  .mw-alert-wa { color: var(--wa-d); font-weight: 700; }
+
+  .mw-row.mw-err { background: var(--red-sf); }
+  .mw-row.mw-err .mw-lbl { color: var(--red-dk); }
+
+  .quote-perks {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    margin-top: 18px;
+  }
+  .perk {
+    display: flex; align-items: center; gap: 16px;
+    background: #fff; border: 1px solid var(--sand); border-radius: var(--r-m);
+    padding: 20px 22px;
+  }
+  .perk-big {
+    font-family: var(--serif); font-weight: 600; font-size: 26px; color: var(--red);
+    flex: none;
+  }
+  .perk p { font-size: 13px; line-height: 1.5; color: var(--slate); margin: 0; }
+
+  @media (max-width: 720px) {
+    .mw-lbl { width: 88px; font-size: 11px; }
+    .mw-in, .mw-to, .mw-ta { font-size: 16px; }
+    .mw-to-hint { display: none; }
+    .mw-foot { flex-direction: column; align-items: stretch; }
+    .mw-btns { flex-direction: column; }
+    .mw-send { justify-content: center; }
+    .quote-perks { grid-template-columns: 1fr; }
+  }
+
+  @media (min-width: 1800px) {
+    .hero { max-width: 1440px; }
+    nav { padding-left: 64px; padding-right: 64px; }
+  }
+
+  /* ═══ OBRAS — tira contínua de fotografias reais ═══ */
+  .obras-sec { padding: 56px 0 64px; }
+  .obras-sec .sec-head { max-width: 1200px; margin: 0 auto 44px; padding: 0 40px; }
+  .ob-mask {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+            mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+  }
+  .ob-strip {
+    display: flex; gap: 14px; scroll-behavior: smooth;
+    overflow-x: auto; overflow-y: hidden;
+    scrollbar-width: none; cursor: grab; padding-bottom: 4px;
+  }
+  .ob-strip::-webkit-scrollbar { display: none; }
+  .ob-strip.dragging { cursor: grabbing; }
+  .ob-shot {
+    position: relative; flex: none; margin: 0;
+    height: clamp(180px, 20vw, 248px);
+    border-radius: var(--r-m); overflow: hidden;
+    border: 1px solid var(--sand); background: #fff;
+    box-shadow: 0 10px 24px -18px rgba(20,29,46,0.30);
+  }
+  .ob-shot img {
+    height: 100%; width: auto; display: block; object-fit: cover;
+    -webkit-user-drag: none; user-select: none;
+  }
+  .ob-shot figcaption {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 34px 14px 12px;
+    font-size: 11.5px; letter-spacing: 0.02em; color: #fff;
+    background: linear-gradient(to top, rgba(20,29,46,0.85), rgba(20,29,46,0));
+    opacity: 0; transform: translateY(6px);
+    transition: opacity .35s, transform .35s;
+  }
+  .ob-shot:hover figcaption { opacity: 1; transform: none; }
+  @media (hover: none) {
+    .ob-shot figcaption { opacity: 1; transform: none; }
+  }
+  .ob-ctrls { max-width: 1200px; margin: 16px auto 0; padding: 0 40px; display: flex; align-items: center; }
+  .ob-ctrls > * + * { margin-left: 10px; }
+  .ob-bt { width: 46px; height: 46px; flex: none; display: grid; place-items: center;
+    border: 1.5px solid var(--sand); background: #fff; color: var(--ink); border-radius: 50%; cursor: pointer;
+    transition: border-color .2s, background .2s; }
+  .ob-bt:hover { border-color: var(--ink); }
+  .ob-bt[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .ob-bt svg { width: 20px; height: 20px; }
+  /* a regra base de .ob-hint vem a seguir: selector mais específico para não ser anulado */
+  @media (max-width: 640px) {
+    .ob-ctrls { padding: 0 20px; flex-wrap: wrap; }
+    .ob-ctrls .ob-hint { flex: 1 0 100%; margin: 12px 0 0; }
+  }
+  .ob-hint {
+    margin: 0 0 0 14px; padding: 0; flex: 1; min-width: 0;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--slate);
+  }
+  @media (max-width: 640px) {
+    .obras-sec { padding: 20px 0 64px; }
+    .obras-sec .sec-head, .ob-hint { padding: 0 20px; }
+    .ob-shot figcaption { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ob-shot figcaption { opacity: 1; transform: none; }
+  }
+
+  .ft-sub { font-size: 12px; color: var(--slate); }
+  .ft-link { color: var(--red-dk); text-decoration: none; border-bottom: 1px solid var(--sand); }
+  .ft-link:hover { border-color: var(--red); }
+  .skip-link { position: absolute; left: -9999px; top: 0; z-index: 200;
+    background: #2B2723; color: #fff; padding: 12px 20px; border-radius: 0 0 12px 0;
+    font-family: var(--sans); font-weight: 700; text-decoration: none; }
+  .skip-link:focus { left: 0; }
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid var(--carmine, #A30711); outline-offset: 3px; border-radius: var(--r-s); }
+
+  /* ── navegação central: 5 ligações planas (sem dropdowns) ── */
+  :root { --nav-h: 89px; }
+  @media (max-width: 640px) { :root { --nav-h: 81px; } }
+  .nav-menu { display: flex; align-items: center; gap: 4px; margin-inline: auto; }
+  .nav-menu a {
+    font-family: var(--sans); font-size: 14.5px; font-weight: 500; white-space: nowrap;
+    color: var(--slate); text-decoration: none;
+    display: inline-flex; align-items: center;
+    padding: 12px 13px; border-radius: var(--r-s);
+    transition: color .2s, background .2s;
+  }
+  .nav-menu a:hover { color: var(--ink); background: rgba(20,29,46,0.05); }
+
+  /* ── zona de ação: telefone com estado vivo (contratos · "agora") + WhatsApp de avaria ── */
+  .nav-tel { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; margin-right: 4px; }
+  .nav-tel svg { width: 17px; height: 17px; color: var(--red); flex: none; }
+  .nav-tel-num { font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.15; }
+  .nav-tel-sub { display: flex; align-items: center; gap: 5px; font-family: var(--sans);
+    font-size: 10.5px; font-weight: 500; color: var(--slate); white-space: nowrap; }
+  .nav-tel:hover .nav-tel-num { color: var(--red-dk); }
+  .tb-dot { width: 6px; height: 6px; border-radius: 50%; background: #7B8598; flex: none; }
+  .tb-dot.aberto { background: #2FA35B; }
+  .nav-cam {
+    display: inline-flex; align-items: center; gap: 8px;
+    min-height: 44px; padding: 0 18px 0 14px; border-radius: 999px;
+    background: var(--wa, #12823F); color: #fff; text-decoration: none;
+    font-size: 13.5px; font-weight: 700; white-space: nowrap;
+    transition: background .25s, transform .25s var(--ease);
+  }
+  .nav-cam:hover { background: var(--wa-d, #0B6E34); transform: translateY(-2px); }
+  .nav-cam svg { width: 20px; height: 20px; flex: none; }
+
+  /* ── ≤1160px aperta; ≤1000px vira mobile: Ligar (estado vivo) + WhatsApp + hambúrguer ── */
+  .nav-call { display: none; }
+  .burger { display: none; }
+  .m-drawer { display: none; }
+  @media (max-width: 1160px) { .nav-menu a { padding: 12px 9px; font-size: 14px; } .logo-text { display: none; } }
+  @media (max-width: 1000px) {
+    .nav-menu, .nav-tel, .nav-phone { display: none; }
+    .nav-cam { width: 44px; padding: 0; justify-content: center; }
+    .nav-cam span { display: none; }
+    .nav-cam:hover { transform: none; }
+    .nav-call {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--red); color: #fff; min-height: 44px; padding: 0 16px 0 14px; border-radius: 999px;
+      font-size: 13.5px; font-weight: 700; text-decoration: none; line-height: 1.15;
+    }
+    .nav-call svg { width: 15px; height: 15px; flex: none; }
+    .nav-call small { display: block; font-size: 10px; font-weight: 500; opacity: .88; letter-spacing: .2px; margin-top: 2px; }
+    .nav-call:active { transform: translateY(1px); }
+    .burger {
+      display: grid; place-items: center; width: 44px; height: 44px;
+      background: none; border: 1px solid var(--sand); border-radius: var(--r-s); cursor: pointer;
+    }
+    .burger span { display: block; width: 17px; height: 2px; background: var(--ink); position: relative; }
+    .burger span::before, .burger span::after { content: ''; position: absolute; left: 0; width: 17px; height: 2px; background: var(--ink); }
+    .burger span::before { top: -5px; } .burger span::after { top: 5px; }
+    .m-drawer {
+      display: block; position: fixed; top: var(--nav-h); left: 0; right: 0; z-index: 49;
+      background: var(--cream, #FAF9F5); border-bottom: 1px solid var(--sand);
+      padding: 10px 20px 18px;
+      opacity: 0; visibility: hidden; transform: translateY(-8px);
+      transition: opacity .2s, transform .2s, visibility .2s;
+    }
+    .m-drawer.open { opacity: 1; visibility: visible; transform: none; }
+    .m-drawer a { display: block; padding: 13px 4px; font-size: 16px; font-weight: 500;
+      color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--sand); }
+    .m-drawer a:last-child { border-bottom: 0; }
+  }
+  /* verde WhatsApp com contraste AA (4,9:1 com branco) */
+  :root { --wa: #12823F; --wa-d: #0B6E34; }
+  .nav-wa, .fab, .btn.btn-red[href*="wa.me"] {
+    background: var(--wa) !important; color: #fff !important; }
+  .nav-wa:hover, .fab:hover, .btn.btn-red[href*="wa.me"]:hover {
+    background: var(--wa-d) !important; }
+  .fab svg { fill: #fff; }
+  .nav-wa--icon { width: 46px; height: 46px; padding: 0; border-radius: 50%;
+    display: grid; place-items: center; }
+</style>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": [
+  "HVACBusiness",
+  "Electrician"
+ ],
+ "name": "MDM — Assistência Técnica",
+ "legalName": "M.D.M. - Manuel Domingos Melancia, Lda",
+ "vatID": "PT502644761",
+ "url": "https://mdmassist.manus.space",
+ "telephone": "+351218935050",
+ "email": "mdmassist@mdmassist.com",
+ "foundingDate": "1991",
+ "address": {
+  "@type": "PostalAddress",
+  "streetAddress": "Alameda dos Oceanos, 108A, Edifício Vila do Oriente",
+  "postalCode": "1990-426",
+  "addressLocality": "Lisboa",
+  "addressCountry": "PT"
+ },
+ "areaServed": {
+  "@type": "Place",
+  "name": "Grande Lisboa"
+ },
+ "openingHoursSpecification": [
+  {
+   "@type": "OpeningHoursSpecification",
+   "dayOfWeek": [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday"
+   ],
+   "opens": "08:00",
+   "closes": "17:00"
+  }
+ ],
+ "knowsAbout": [
+  "Ar condicionado",
+  "Climatização",
+  "Eletricidade",
+  "Ventilação",
+  "Manutenção de edifícios"
+ ],
+ "brand": [
+  {
+   "@type": "Brand",
+   "name": "Mitsubishi Electric"
+  },
+  {
+   "@type": "Brand",
+   "name": "Daikin"
+  },
+  {
+   "@type": "Brand",
+   "name": "MIDEA"
+  }
+ ]
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "FAQPage",
+ "mainEntity": [
+  {
+   "@type": "Question",
+   "name": "Fazem contratos de manutenção para condomínios e empresas?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Sim — contratos anuais de manutenção preventiva, com visitas programadas e relatórios claros, para empresas, condomínios, banca e indústria desde 1991. Para pedir proposta, ligue 218 935 050 (2ª–6ª, 8h–17h) ou escreva para mdmassist@mdmassist.com."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Qual é a zona de intervenção?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "A grande Lisboa. A sede fica no Parque das Nações (Alameda dos Oceanos 108A), e as equipas deslocam-se a toda a área metropolitana."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Quanto tempo demoram a responder?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Respondemos a qualquer pedido em menos de 24 horas úteis, e a intervenção técnica acontece tipicamente em 24–48 h. Horário: segunda a sexta, 8h–17h."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Com que marcas trabalham?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Mitsubishi Electric, MIDEA, LG, France Air, Vulcano e Hitachi, entre outras — somos multi-marca, com peças originais e garantia de fabricante."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "O orçamento tem algum custo?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "Não. O orçamento é gratuito e sem compromisso, e os seus dados são usados exclusivamente para responder ao pedido."
+   }
+  },
+  {
+   "@type": "Question",
+   "name": "Como reporto uma avaria rapidamente?",
+   "acceptedAnswer": {
+    "@type": "Answer",
+    "text": "O caminho mais rápido é enviar uma fotografia da avaria por WhatsApp para o 910 307 579 — o técnico percebe logo o que levar. Em horário de expediente (2ª–6ª, 8h–17h) também pode ligar 218 935 050."
+   }
+  }
+ ]
+}
+</script>
+</head>
+<body>
+<a class="skip-link" href="#topo">Saltar para o conteúdo</a>
+<div class="bg-photo" aria-hidden="true"></div>
+<!-- ═══ NAV ═══ -->
+
+<nav id="nav">
+  <a href="#" class="logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1426.000000 1480.000000" class="logo-img" role="img" aria-label="MDM"><rect x="0" y="0" width="1426.000000" height="1480.000000" rx="16" fill="#A30711"/><g transform="translate(0.000000,1480.000000) scale(0.100000,-0.100000)" fill="#FFFFFF" stroke="none"><path fill-rule="evenodd" d="M200 7400 l0 -7200 6930 0 6930 0 0 7200 0 7200 -6930 0 -6930 0 0 -7200z m13799 7124 l23 -17 -6 -1535 c-5 -1030 -10 -1540 -17 -1549 -6 -6 -32 -13 -57 -15 -46 -3 -47 -4 -74 -58 -15 -30 -36 -77 -47 -105 -54 -137 -92 -220 -107 -236 -24 -26 -54 -24 -139 12 -79 33 -107 32 -126 -3 -16 -30 -77 -192 -105 -277 -38 -119 -61 -131 -159 -86 -80 36 -98 39 -122 18 -12 -11 -44 -85 -78 -183 -32 -91 -62 -173 -67 -182 -13 -26 -60 -22 -119 8 -96 48 -134 24 -178 -114 -12 -38 -39 -110 -59 -158 -49 -114 -68 -127 -145 -91 -69 33 -117 42 -139 25 -15 -12 -75 -147 -133 -303 -13 -34 -34 -68 -48 -79 -26 -19 -27 -19 -82 2 -70 27 -126 28 -148 4 -9 -10 -25 -43 -36 -73 -63 -181 -112 -286 -137 -296 -9 -3 -44 4 -78 16 -68 24 -119 27 -133 9 -6 -7 -27 -55 -47 -106 -74 -186 -93 -221 -121 -228 -14 -3 -38 -3 -53 1 -66 17 -103 17 -120 1 -10 -8 -33 -48 -51 -88 -18 -40 -38 -84 -45 -98 -16 -34 -73 -70 -111 -70 -39 0 -72 33 -150 150 -141 210 -258 427 -463 860 -48 102 -124 279 -162 375 -15 39 -45 108 -65 155 -20 47 -43 104 -50 127 -8 23 -28 74 -46 115 -18 40 -49 118 -70 173 -20 55 -52 136 -69 180 -18 44 -43 109 -56 145 -13 36 -38 106 -57 155 -19 50 -57 153 -86 230 -29 77 -68 181 -88 230 -19 50 -43 113 -53 140 -11 28 -38 100 -61 160 -48 129 -96 254 -132 345 -14 36 -37 97 -51 135 -15 39 -35 86 -45 105 -10 19 -39 87 -64 150 -87 223 -280 624 -390 810 -143 242 -135 229 -277 423 -86 118 -288 315 -396 388 -261 175 -426 214 -799 190 -245 -16 -373 -49 -571 -146 -338 -167 -666 -430 -1274 -1019 -156 -152 -536 -515 -690 -661 -52 -50 -174 -165 -270 -256 -96 -91 -240 -224 -319 -295 -80 -71 -206 -185 -281 -254 -75 -69 -194 -177 -265 -240 -277 -247 -450 -402 -670 -600 -34 -30 -108 -95 -165 -145 -57 -49 -134 -117 -170 -150 -36 -33 -96 -87 -135 -120 -116 -100 -239 -208 -250 -220 -5 -7 -89 -79 -184 -161 -96 -82 -227 -196 -290 -253 -64 -57 -172 -153 -241 -215 -547 -488 -1016 -972 -1191 -1228 -46 -67 -55 -74 -74 -58 -13 11 -15 404 -15 3063 0 2824 1 3052 17 3069 16 17 243 18 6862 18 6325 0 6848 -1 6870 -16z m-6339 -334 c143 -37 240 -90 387 -212 253 -213 472 -528 732 -1053 49 -100 139 -303 181 -410 15 -38 58 -144 95 -235 76 -186 165 -413 200 -510 13 -36 40 -108 60 -160 36 -94 68 -178 118 -315 14 -38 40 -106 57 -150 17 -44 47 -120 65 -170 19 -49 49 -130 68 -180 19 -49 55 -146 81 -215 69 -182 202 -510 271 -670 20 -47 50 -116 65 -155 28 -69 75 -172 193 -415 136 -282 357 -660 434 -741 40 -43 53 -95 38 -147 -8 -24 -21 -52 -29 -61 -19 -20 -80 -41 -121 -41 -36 0 -92 57 -162 165 -28 44 -61 94 -73 110 -47 67 -102 160 -182 306 -83 151 -208 403 -208 417 0 4 -31 72 -69 152 -37 80 -78 168 -89 195 -36 86 -157 388 -179 445 -11 30 -40 105 -63 165 -42 107 -94 244 -150 395 -15 41 -44 118 -65 170 -20 52 -47 124 -60 160 -21 61 -81 221 -177 470 -22 58 -59 159 -83 225 -24 66 -64 172 -90 235 -26 63 -56 138 -66 165 -16 46 -34 89 -121 290 -16 39 -41 98 -54 132 -13 34 -28 70 -33 80 -5 10 -26 54 -46 98 -316 690 -638 1095 -1024 1289 -118 60 -214 80 -378 78 -79 -1 -143 2 -143 7 0 4 8 15 18 24 79 71 431 111 602 67z m-387 -291 c241 -67 479 -252 690 -537 119 -162 292 -451 337 -563 7 -19 17 -38 21 -44 15 -21 153 -325 194 -430 24 -60 50 -123 58 -140 8 -16 40 -93 70 -170 30 -77 81 -205 112 -285 32 -80 68 -176 81 -215 14 -38 47 -126 74 -195 27 -69 70 -183 96 -255 81 -226 99 -275 183 -500 45 -121 88 -236 96 -255 8 -19 25 -64 39 -100 13 -36 38 -101 56 -145 18 -44 43 -109 56 -144 14 -35 50 -123 80 -195 31 -72 67 -158 81 -191 132 -314 324 -704 414 -846 16 -25 29 -49 29 -54 0 -14 190 -293 246 -362 30 -36 54 -75 54 -87 -1 -29 -33 -98 -54 -115 -13 -11 -39 -14 -94 -12 -68 2 -80 5 -105 29 -63 60 -240 326 -344 517 -97 176 -265 526 -332 690 -18 44 -40 96 -49 115 -53 122 -87 203 -107 260 -13 36 -37 99 -54 140 -18 41 -58 147 -91 235 -32 88 -75 203 -95 255 -20 52 -47 124 -60 160 -12 36 -37 103 -54 150 -18 47 -45 121 -61 165 -37 102 -72 199 -150 405 -33 91 -76 206 -94 255 -56 153 -116 304 -177 452 -32 78 -59 144 -59 147 0 10 -165 375 -235 521 -123 255 -292 532 -428 700 -84 104 -263 277 -350 339 -87 61 -212 125 -302 154 -122 39 -193 44 -357 26 -117 -13 -151 -14 -163 -4 -24 20 -1 46 57 68 73 27 215 58 323 71 50 6 101 13 115 15 47 8 181 -5 253 -25z m-397 -318 c298 -73 590 -339 863 -786 112 -185 312 -591 402 -820 46 -116 63 -156 118 -283 23 -50 41 -96 41 -100 0 -5 21 -63 46 -128 124 -324 261 -697 309 -839 13 -38 38 -106 55 -150 53 -134 111 -287 127 -340 14 -45 39 -110 168 -435 20 -52 52 -133 70 -180 18 -47 44 -112 58 -145 13 -33 45 -111 71 -174 26 -63 56 -133 67 -155 11 -23 58 -123 105 -223 85 -185 113 -241 177 -348 20 -33 46 -78 58 -100 75 -139 196 -311 310 -442 55 -64 61 -91 29 -153 -30 -59 -50 -68 -128 -62 -37 2 -75 9 -84 13 -48 25 -231 271 -345 464 -50 84 -215 409 -275 541 -78 171 -133 295 -160 363 -46 116 -86 218 -118 301 -16 41 -43 111 -60 155 -52 133 -86 224 -135 360 -25 72 -59 164 -75 205 -15 41 -42 113 -58 160 -93 258 -162 445 -192 525 -11 28 -33 88 -50 135 -17 47 -42 112 -55 145 -13 33 -41 105 -60 160 -73 203 -176 460 -245 610 -10 22 -34 78 -54 125 -236 547 -508 965 -778 1192 -154 131 -251 188 -398 239 -131 45 -192 52 -352 38 -156 -13 -169 -10 -144 39 11 22 29 34 63 46 49 16 270 62 333 70 66 8 215 -4 296 -23z m-324 -346 c215 -74 399 -218 604 -475 152 -189 371 -577 518 -920 20 -47 43 -98 51 -115 32 -68 69 -154 95 -225 16 -41 54 -140 85 -220 54 -137 96 -249 150 -400 13 -36 40 -108 60 -160 20 -52 49 -133 65 -180 15 -47 42 -121 60 -165 17 -44 57 -150 87 -235 31 -85 70 -195 88 -245 18 -49 49 -135 68 -190 20 -55 50 -134 67 -175 17 -41 42 -104 55 -140 44 -121 86 -228 160 -410 145 -358 337 -753 482 -988 71 -117 207 -301 305 -415 36 -42 58 -77 58 -92 0 -16 -21 -47 -62 -90 -74 -80 -90 -90 -120 -74 -26 14 -119 108 -156 158 -15 20 -45 59 -68 87 -23 28 -58 78 -79 110 -21 32 -53 83 -72 112 -59 92 -287 532 -336 648 -13 32 -41 97 -62 144 -20 47 -42 101 -50 121 -7 19 -22 55 -33 80 -11 24 -41 98 -66 164 -26 66 -53 135 -61 153 -29 65 -87 221 -231 622 -31 85 -71 196 -89 245 -18 50 -58 162 -90 250 -170 471 -169 470 -210 575 -21 52 -50 129 -65 170 -54 146 -78 206 -120 300 -23 52 -52 124 -65 160 -32 90 -179 410 -261 565 -37 72 -76 147 -86 169 -24 47 -127 210 -186 291 -23 33 -53 76 -66 95 -42 64 -181 214 -263 285 -116 99 -280 197 -400 236 -96 32 -102 33 -278 33 -162 1 -180 3 -183 18 -4 19 55 79 99 103 24 13 189 49 269 59 19 2 80 2 135 -1 78 -4 121 -12 197 -38z m-362 -354 c130 -46 228 -105 351 -210 140 -119 244 -243 373 -441 38 -58 77 -117 87 -132 24 -34 256 -498 298 -593 27 -63 45 -107 101 -245 10 -25 35 -83 55 -130 20 -47 49 -121 65 -165 16 -44 43 -116 60 -160 18 -44 52 -136 77 -205 25 -69 63 -172 85 -230 55 -145 100 -268 163 -450 58 -165 111 -314 150 -420 13 -36 53 -146 89 -245 35 -99 79 -214 96 -255 18 -41 45 -109 60 -150 34 -88 64 -163 115 -280 20 -47 46 -107 57 -135 11 -27 44 -101 74 -163 30 -62 54 -115 54 -117 0 -3 17 -39 39 -82 194 -393 409 -711 612 -904 46 -43 69 -73 69 -88 0 -13 -17 -51 -37 -84 -20 -34 -43 -72 -50 -84 -26 -44 -64 -31 -161 56 -171 155 -257 258 -402 486 -72 113 -268 494 -330 642 -23 54 -50 115 -61 135 -23 47 -162 390 -219 543 -10 28 -35 93 -55 145 -20 52 -47 124 -60 160 -13 36 -39 108 -58 160 -20 52 -40 109 -46 125 -5 17 -19 57 -31 90 -12 33 -48 134 -79 225 -32 91 -73 203 -91 250 -18 47 -47 128 -65 180 -18 52 -70 194 -115 315 -122 323 -145 382 -180 465 -17 41 -39 98 -49 125 -10 28 -28 70 -39 95 -12 25 -51 113 -87 195 -144 322 -296 600 -441 803 -128 179 -322 375 -454 460 -69 44 -252 127 -328 149 -35 10 -104 17 -182 19 -69 1 -128 3 -132 3 -18 2 -6 46 22 81 54 69 181 101 380 97 112 -3 135 -6 220 -36z m-375 -364 c191 -66 291 -132 461 -301 72 -72 144 -151 161 -176 154 -223 266 -407 342 -565 109 -224 221 -474 275 -615 31 -80 65 -165 76 -190 38 -90 167 -439 211 -573 10 -32 24 -67 30 -79 6 -11 32 -82 59 -157 59 -170 207 -584 273 -766 27 -75 101 -274 147 -395 15 -41 47 -122 70 -180 24 -58 53 -132 65 -165 35 -91 96 -239 105 -250 4 -5 15 -32 25 -60 10 -27 67 -151 128 -275 101 -208 143 -287 202 -380 12 -19 42 -66 66 -105 116 -183 329 -429 451 -519 123 -91 128 -96 128 -122 0 -26 -57 -129 -94 -171 -25 -29 -40 -29 -101 3 -142 75 -274 184 -388 322 -72 87 -176 232 -207 289 -11 21 -39 67 -61 103 -88 143 -276 541 -369 780 -29 74 -59 151 -68 170 -19 45 -67 167 -97 250 -13 36 -40 108 -60 160 -21 52 -61 163 -90 245 -30 83 -86 238 -125 345 -39 107 -81 227 -94 265 -37 109 -120 339 -166 460 -23 61 -50 135 -60 165 -19 55 -68 187 -153 415 -25 66 -66 167 -92 225 -26 58 -55 128 -65 155 -69 189 -271 598 -378 765 -137 216 -206 305 -333 431 -177 177 -317 264 -520 325 -72 21 -117 28 -190 29 -132 2 -141 10 -88 76 50 63 82 80 177 95 133 20 229 12 347 -29z m-350 -354 c266 -83 479 -267 718 -622 73 -108 258 -445 304 -553 19 -46 38 -87 43 -93 4 -5 18 -35 30 -65 63 -157 81 -203 119 -290 22 -52 64 -158 92 -235 79 -212 105 -281 144 -385 52 -137 163 -443 190 -525 13 -38 37 -106 53 -150 16 -44 82 -226 145 -405 64 -179 136 -375 160 -437 24 -61 47 -123 51 -138 15 -59 156 -411 212 -531 19 -39 34 -74 34 -77 0 -4 13 -35 29 -69 16 -35 55 -121 86 -191 32 -71 70 -147 85 -170 14 -23 50 -85 78 -137 122 -221 241 -386 386 -534 120 -122 206 -187 338 -257 57 -30 100 -59 103 -70 8 -25 -61 -155 -95 -181 -25 -18 -26 -18 -110 12 -368 134 -652 463 -958 1110 -41 85 -80 167 -88 182 -8 15 -39 87 -68 160 -29 73 -72 178 -94 233 -22 55 -64 163 -93 240 -29 77 -63 169 -77 205 -13 36 -39 106 -57 155 -18 50 -47 128 -64 175 -51 135 -91 249 -116 330 -13 41 -43 129 -68 195 -25 66 -64 174 -88 240 -23 66 -53 144 -66 173 -13 29 -23 57 -23 61 0 15 -74 228 -110 316 -18 44 -45 114 -60 155 -16 41 -43 111 -60 155 -18 44 -47 118 -65 165 -56 149 -132 319 -258 580 -54 112 -175 323 -251 436 -123 185 -281 358 -426 468 -152 116 -404 217 -501 202 -52 -8 -89 7 -89 38 0 29 78 118 118 135 84 35 242 32 367 -6z m-463 -344 c11 -6 56 -20 99 -30 172 -41 388 -195 557 -396 198 -236 362 -518 539 -928 90 -207 191 -455 238 -585 13 -36 40 -108 60 -160 38 -101 63 -168 118 -320 18 -52 70 -196 115 -320 44 -124 108 -301 141 -395 96 -271 130 -367 151 -420 10 -27 35 -95 55 -150 81 -222 192 -508 236 -606 16 -36 29 -69 29 -72 0 -12 87 -212 125 -287 20 -40 54 -113 76 -164 90 -203 303 -544 439 -701 165 -191 348 -324 542 -395 97 -35 128 -54 128 -78 0 -19 -61 -110 -87 -129 -42 -32 -227 8 -366 79 -211 106 -417 309 -602 595 -144 223 -308 550 -435 868 -15 39 -42 104 -60 145 -17 41 -45 111 -60 155 -16 44 -43 116 -60 160 -17 44 -44 116 -60 160 -30 85 -70 191 -90 240 -7 17 -32 86 -56 155 -23 69 -62 177 -85 240 -77 213 -110 305 -129 360 -10 30 -39 111 -65 180 -25 69 -52 143 -60 165 -7 22 -29 83 -50 135 -36 92 -45 117 -118 320 -19 52 -49 130 -66 173 -17 42 -44 110 -60 150 -38 98 -114 275 -158 372 -52 111 -208 419 -231 452 -10 16 -34 53 -54 83 -72 113 -125 189 -181 264 -64 82 -220 239 -305 306 -79 62 -246 146 -357 180 -121 37 -133 46 -111 87 18 37 78 91 120 109 38 16 110 18 138 3z m-169 -408 c137 -70 184 -101 294 -194 296 -251 583 -753 898 -1572 12 -33 51 -132 85 -220 99 -257 277 -744 385 -1055 56 -164 142 -401 185 -515 23 -60 50 -135 60 -165 10 -30 35 -98 55 -150 20 -52 49 -129 65 -170 27 -74 46 -118 89 -212 11 -26 21 -50 21 -53 0 -4 12 -30 26 -59 14 -28 35 -76 46 -106 11 -30 25 -60 29 -66 5 -6 15 -28 23 -50 17 -49 141 -297 191 -384 20 -36 51 -90 67 -120 131 -241 407 -551 598 -672 92 -58 213 -107 316 -129 142 -29 149 -32 152 -56 4 -28 -78 -131 -124 -156 -30 -17 -43 -18 -136 -8 -206 21 -418 125 -592 291 -195 186 -361 432 -549 810 -121 245 -207 438 -258 580 -21 61 -46 124 -54 140 -20 39 -111 266 -146 365 -29 81 -79 220 -119 330 -52 142 -93 253 -110 300 -11 28 -48 133 -84 235 -35 102 -92 259 -126 350 -86 229 -127 343 -155 425 -13 39 -43 120 -68 180 -24 61 -63 157 -85 215 -97 245 -198 480 -281 648 -34 67 -61 124 -61 127 0 2 -13 25 -29 52 -16 26 -61 102 -100 168 -39 66 -81 133 -94 150 -12 16 -47 63 -78 105 -152 202 -350 372 -544 464 -155 75 -166 85 -141 130 37 70 58 87 116 96 103 14 113 12 233 -49z m-350 -350 c290 -139 518 -390 760 -837 70 -129 210 -421 242 -504 7 -19 30 -73 50 -120 21 -47 50 -116 65 -155 15 -38 40 -99 55 -135 47 -112 106 -263 125 -320 11 -30 32 -91 49 -135 45 -122 110 -304 131 -365 10 -30 35 -100 55 -155 21 -55 54 -147 75 -205 161 -448 241 -668 293 -800 14 -36 51 -130 82 -210 31 -80 68 -174 81 -210 24 -64 42 -106 111 -265 196 -448 389 -795 569 -1021 238 -299 512 -471 787 -493 118 -10 141 -23 112 -68 -35 -54 -100 -114 -135 -123 -39 -11 -265 3 -315 19 -146 46 -227 87 -340 171 -137 103 -295 275 -422 461 -140 203 -358 638 -502 999 -27 69 -62 154 -77 190 -15 36 -44 110 -64 165 -51 136 -150 401 -190 505 -17 47 -56 154 -85 238 -30 84 -73 199 -96 255 -23 56 -50 129 -60 162 -10 33 -33 103 -53 155 -19 52 -68 187 -109 300 -41 113 -84 228 -95 255 -11 28 -42 104 -67 170 -65 170 -184 457 -251 605 -39 88 -212 428 -261 516 -36 65 -126 203 -178 274 -118 162 -255 304 -385 399 -75 56 -173 109 -282 154 -43 18 -54 46 -35 84 22 42 50 63 104 78 95 26 143 20 256 -34z m-378 -341 c55 -27 132 -73 170 -102 140 -104 334 -317 432 -473 137 -219 231 -392 320 -590 25 -55 65 -142 90 -194 24 -51 55 -121 68 -155 12 -33 42 -106 65 -161 23 -55 76 -190 118 -300 41 -110 91 -240 109 -290 19 -49 45 -121 58 -160 13 -38 40 -113 60 -165 20 -52 61 -162 90 -245 157 -437 334 -914 370 -996 14 -31 25 -60 25 -64 0 -11 124 -319 175 -435 26 -58 52 -121 60 -140 7 -19 39 -91 72 -160 33 -69 62 -129 64 -135 29 -72 204 -382 277 -490 115 -170 158 -224 270 -339 215 -220 453 -342 703 -361 89 -7 119 -16 119 -36 0 -20 -74 -89 -117 -110 -41 -20 -63 -23 -192 -23 -139 -1 -150 1 -236 30 -184 64 -287 132 -453 297 -127 126 -232 262 -349 452 -32 52 -203 365 -203 371 0 2 -26 57 -58 122 -33 64 -65 135 -72 157 -7 22 -21 56 -30 75 -51 103 -210 499 -329 820 -16 41 -43 113 -61 160 -17 47 -44 121 -60 165 -15 44 -42 116 -60 160 -36 89 -183 488 -234 635 -19 52 -65 176 -104 275 -38 99 -73 191 -77 205 -9 29 -78 199 -130 320 -20 47 -45 108 -55 135 -28 75 -78 193 -95 223 -8 15 -43 88 -78 162 -170 360 -393 714 -555 883 -143 148 -333 287 -462 337 -62 24 -80 42 -80 80 0 37 37 68 96 79 27 5 65 17 84 25 47 22 78 15 195 -44z m-450 -310 c105 -43 161 -76 260 -155 157 -125 300 -291 446 -520 128 -200 357 -652 394 -775 4 -14 15 -38 25 -55 10 -16 27 -52 38 -80 11 -27 36 -88 57 -135 37 -88 51 -123 153 -395 33 -88 74 -196 92 -240 17 -44 42 -111 55 -150 13 -38 40 -113 60 -165 37 -94 69 -180 124 -335 26 -70 62 -168 181 -485 16 -41 42 -109 58 -150 17 -41 57 -145 90 -230 84 -219 170 -432 181 -451 5 -9 31 -68 57 -130 58 -143 226 -483 302 -611 193 -329 386 -574 548 -693 21 -16 53 -41 70 -55 46 -39 234 -129 316 -152 40 -11 112 -23 161 -27 48 -4 92 -12 98 -18 21 -21 -2 -51 -64 -84 l-62 -34 -185 0 -185 0 -80 33 c-175 73 -301 165 -445 325 -181 201 -358 478 -526 827 -119 246 -145 301 -174 368 -17 41 -38 90 -45 110 -7 21 -30 75 -50 122 -54 126 -103 247 -130 320 -13 36 -38 101 -55 145 -31 76 -96 248 -182 475 -22 58 -44 121 -50 140 -5 19 -32 89 -58 155 -27 66 -63 158 -80 205 -17 47 -53 146 -80 220 -26 74 -58 154 -69 177 -12 23 -21 46 -21 51 0 11 -79 221 -93 247 -6 11 -21 47 -33 80 -12 33 -35 94 -52 135 -16 41 -43 109 -60 150 -40 100 -124 286 -174 385 -22 44 -48 100 -58 125 -24 60 -153 293 -223 405 -31 50 -69 110 -84 135 -59 99 -152 211 -277 335 -140 139 -263 230 -369 271 -102 40 -118 71 -74 149 46 82 133 93 272 35z m10359 -3367 c1 -3240 1 -3242 -19 -3263 -20 -20 -24 -20 -3469 -20 -2486 0 -3453 3 -3460 11 -15 15 29 49 133 101 153 77 403 249 585 403 39 33 112 94 161 135 50 41 142 122 205 180 63 58 133 121 155 139 22 19 99 89 170 156 258 243 474 443 641 593 93 85 185 171 204 191 19 20 71 68 115 106 44 38 123 110 175 160 53 49 192 178 310 285 117 107 311 285 429 395 119 110 236 218 261 240 24 22 83 76 130 120 47 44 166 154 265 245 99 91 223 206 275 256 52 49 190 177 305 284 329 304 568 533 850 811 143 142 310 306 371 366 154 151 516 530 611 639 43 50 110 127 148 171 104 118 242 296 312 403 94 143 93 141 115 138 l21 -3 1 -3242z m-10712 3018 c170 -82 329 -217 491 -416 77 -96 192 -264 252 -370 15 -27 43 -77 62 -110 31 -54 81 -155 193 -390 41 -86 175 -396 220 -510 16 -38 42 -104 58 -145 48 -122 162 -420 187 -490 31 -87 239 -639 270 -718 14 -34 25 -67 25 -73 0 -6 13 -41 28 -77 16 -37 41 -98 55 -137 118 -312 217 -565 257 -655 15 -36 37 -85 48 -110 11 -25 33 -79 50 -120 65 -164 312 -663 375 -759 13 -20 54 -83 90 -141 94 -151 162 -239 282 -367 218 -232 409 -342 640 -370 54 -6 71 -12 73 -25 2 -12 -6 -22 -24 -28 -38 -15 -250 -50 -301 -50 -107 0 -309 72 -413 148 -133 98 -299 271 -386 402 -13 19 -40 60 -61 90 -117 171 -252 424 -409 770 -41 91 -79 173 -84 182 -5 9 -34 77 -64 150 -30 73 -74 183 -99 243 -44 106 -101 250 -174 440 -33 85 -58 152 -122 325 -16 41 -56 149 -90 240 -34 91 -75 201 -91 245 -31 86 -56 151 -120 315 -22 58 -61 159 -86 225 -25 66 -52 134 -59 150 -18 39 -60 143 -94 230 -16 39 -47 113 -70 165 -24 52 -61 136 -83 185 -75 169 -239 487 -324 628 -108 179 -225 334 -352 467 -117 123 -222 204 -363 280 -56 30 -107 62 -112 71 -12 20 2 60 37 103 28 33 101 57 161 52 22 -2 79 -22 127 -45z m-413 -334 c114 -47 244 -139 362 -257 117 -117 147 -152 240 -290 137 -201 233 -368 355 -620 123 -251 301 -668 390 -910 19 -52 50 -132 69 -177 19 -45 35 -85 35 -89 0 -7 54 -154 107 -289 44 -113 80 -208 194 -515 78 -210 232 -606 294 -755 21 -49 46 -112 57 -140 33 -87 90 -220 98 -230 5 -5 29 -57 55 -115 112 -250 225 -479 256 -519 10 -13 19 -27 19 -31 0 -13 101 -184 175 -296 88 -133 165 -227 288 -353 112 -114 179 -162 321 -232 59 -29 111 -59 114 -67 15 -41 -76 -42 -260 -1 -150 33 -242 74 -353 158 -129 98 -280 274 -410 476 -112 174 -299 528 -391 741 -26 60 -62 145 -81 189 -19 44 -59 141 -89 215 -30 74 -59 144 -64 155 -6 11 -28 70 -50 130 -23 61 -54 142 -70 180 -33 80 -99 253 -141 370 -15 44 -42 116 -59 160 -18 44 -47 121 -65 170 -69 186 -94 252 -125 330 -18 44 -45 114 -60 155 -27 74 -172 441 -210 530 -19 45 -75 175 -132 305 -58 132 -208 437 -265 539 -209 376 -406 628 -610 779 -72 54 -118 80 -263 151 -41 20 -47 57 -19 113 47 92 136 104 288 40z m-387 -389 c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243 -530 3 -8 22 -53 42 -100 20 -47 54 -130 76 -185 22 -55 62 -156 90 -225 62 -152 113 -283 144 -370 50 -139 114 -308 133 -355 12 -28 58 -149 103 -270 126 -339 143 -382 193 -503 25 -63 46 -118 46 -124 0 -8 94 -236 159 -388 16 -36 50 -117 77 -180 46 -108 208 -436 276 -560 52 -93 119 -200 198 -313 101 -146 232 -290 374 -413 20 -18 36 -40 36 -53 l0 -21 -2594 0 c-1427 0 -2601 -3 -2610 -6 -9 -3 -26 5 -41 20 l-25 25 0 1814 c0 1732 1 1815 18 1830 12 11 29 15 52 11 19 -2 40 -1 46 3 7 4 29 51 49 103 76 195 96 239 115 245 11 4 39 -5 67 -19 53 -28 90 -33 116 -13 16 12 51 101 90 234 35 117 65 136 142 88 66 -41 107 -31 139 33 7 15 32 86 56 157 58 175 83 200 158 155 41 -25 103 -26 124 -2 9 9 23 37 31 62 48 136 90 246 99 257 16 19 79 15 113 -7 63 -42 109 -20 140 66 20 59 64 177 81 221 16 41 45 49 119 29 84 -22 98 -13 146 91 22 49 52 113 67 143 l27 55 60 6 c120 11 133 10 197 -23z m11498 -5765 l21 -27 -3 -1625 c-3 -1554 -4 -1626 -21 -1648 l-18 -23 -6845 0 -6844 0 -20 20 c-20 20 -20 30 -20 1641 1 1370 3 1626 15 1655 l14 33 6850 1 6850 0 21 -27z M6033 3273 l-713 -3 -16 -25 c-15 -23 -15 -27 0 -50 9 -14 17 -25 19 -25 27 -1 242 -33 268 -40 53 -15 117 -65 134 -106 29 -69 35 -258 35 -1039 -1 -968 -6 -1030 -97 -1088 -37 -25 -98 -43 -238 -73 -79 -17 -115 -36 -115 -63 0 -47 -9 -46 709 -46 372 0 755 -4 851 -8 148 -7 206 -5 375 13 110 11 236 30 280 42 44 11 105 26 136 34 31 8 99 30 150 50 268 103 498 269 648 466 148 194 204 338 231 598 21 202 -23 447 -112 625 -36 71 -128 199 -195 271 -179 192 -463 339 -800 414 -244 55 -361 59 -1550 53z m1137 -236 c197 -42 399 -115 489 -176 14 -10 52 -36 85 -57 75 -50 225 -208 267 -282 107 -186 156 -377 146 -572 -8 -146 -34 -252 -91 -372 -167 -349 -502 -567 -991 -644 -142 -23 -390 -28 -590 -14 -160 12 -181 15 -200 34 -21 21 -22 35 -29 246 -10 316 -6 1809 5 1837 5 13 19 28 31 33 14 6 159 8 368 6 l345 -4 165 -35z M952 3254 c-29 -20 -26 -51 8 -76 14 -10 72 -27 130 -38 226 -44 343 -107 370 -198 8 -32 -3 -157 -44 -477 -9 -66 -32 -266 -51 -445 -20 -179 -46 -406 -60 -505 -13 -99 -27 -205 -30 -235 -11 -100 -55 -253 -88 -308 -18 -29 -46 -64 -64 -78 -30 -22 -134 -62 -208 -79 -62 -14 -85 -62 -42 -89 33 -20 961 -10 983 11 39 39 6 68 -113 102 -114 32 -161 61 -189 118 -16 33 -19 60 -18 203 0 91 8 235 17 320 9 85 21 227 27 315 6 88 19 239 30 335 10 96 24 238 30 315 14 168 17 185 33 185 20 0 54 -40 76 -91 17 -38 282 -527 366 -674 12 -22 46 -83 75 -135 29 -52 61 -106 70 -120 18 -26 43 -68 91 -156 56 -104 133 -241 174 -309 23 -38 53 -90 67 -115 71 -127 144 -250 172 -289 59 -83 103 -76 163 26 66 111 252 475 441 863 50 102 149 307 222 455 72 149 163 340 202 425 68 149 92 190 109 190 23 0 28 -29 74 -440 28 -248 56 -482 91 -760 39 -308 50 -449 40 -504 -9 -46 -59 -104 -111 -127 -22 -10 -78 -27 -125 -39 -96 -24 -110 -33 -110 -65 0 -47 -6 -47 619 -47 324 0 598 3 609 6 29 10 38 43 17 66 -10 11 -48 26 -89 35 -111 25 -188 53 -222 83 -61 53 -93 145 -118 342 -61 479 -87 678 -91 700 -3 14 -12 88 -20 165 -8 77 -24 201 -35 275 -16 112 -46 363 -68 568 -3 34 1 51 21 81 32 48 117 83 256 106 103 18 145 34 161 65 8 15 6 24 -10 40 -20 20 -28 21 -439 18 -397 -3 -420 -4 -440 -22 -12 -11 -86 -150 -165 -310 -167 -338 -306 -625 -306 -632 0 -3 -40 -87 -89 -187 -180 -369 -271 -559 -271 -564 0 -18 -92 -192 -104 -196 -25 -10 -52 23 -102 123 -26 52 -55 106 -64 120 -10 14 -40 68 -67 120 -27 52 -57 106 -65 120 -21 32 -155 276 -220 400 -28 52 -58 106 -68 120 -18 27 -195 351 -254 465 -19 39 -42 81 -50 95 -8 14 -49 88 -90 166 -42 78 -86 150 -97 160 -20 18 -45 19 -473 22 -403 2 -453 1 -474 -14z M9256 3255 c-28 -14 -31 -46 -9 -73 14 -17 46 -27 143 -47 230 -45 339 -104 356 -191 8 -42 -8 -262 -32 -434 -23 -162 -73 -594 -94 -810 -50 -508 -93 -690 -184 -784 -37 -38 -58 -49 -140 -75 -53 -17 -102 -31 -110 -31 -17 0 -46 -32 -46 -52 0 -40 12 -41 512 -40 344 1 484 5 494 13 33 27 0 89 -48 89 -9 0 -53 11 -96 25 -65 21 -87 33 -120 69 -71 77 -76 155 -33 581 46 454 91 981 91 1052 0 53 8 73 30 73 23 0 45 -26 71 -85 12 -28 41 -84 64 -125 23 -41 75 -138 115 -215 40 -77 77 -146 83 -153 6 -7 47 -79 92 -160 45 -81 114 -203 155 -272 65 -111 123 -212 215 -375 16 -27 71 -123 124 -212 53 -89 112 -191 131 -225 52 -92 77 -118 111 -118 49 0 73 35 242 360 94 180 95 182 225 450 66 135 174 355 240 490 66 135 136 281 157 325 20 44 58 124 85 177 27 53 54 115 61 137 32 106 99 106 99 -1 0 -24 4 -79 10 -123 32 -262 62 -520 75 -660 8 -88 19 -187 24 -220 6 -33 17 -139 26 -235 9 -96 18 -182 20 -190 3 -9 6 -58 6 -111 2 -106 -9 -139 -61 -183 -28 -23 -114 -54 -200 -71 -58 -12 -90 -33 -90 -59 0 -13 6 -29 14 -35 11 -9 166 -12 613 -12 329 0 606 3 615 6 44 17 26 69 -30 84 -20 6 -73 20 -117 31 -188 49 -232 113 -269 390 -10 69 -28 204 -41 300 -14 96 -31 236 -39 310 -8 74 -24 209 -35 300 -11 91 -30 239 -41 330 -11 91 -26 215 -34 275 -28 217 -29 256 -6 293 27 44 87 69 235 98 66 13 134 30 152 38 39 18 51 51 28 76 -15 17 -43 18 -420 18 -222 1 -418 -3 -435 -8 -49 -14 -38 6 -240 -415 -34 -71 -98 -203 -141 -293 -44 -89 -79 -165 -79 -167 0 -5 -95 -202 -233 -486 -52 -106 -132 -273 -177 -369 -46 -96 -86 -179 -90 -183 -18 -20 -52 7 -81 64 -16 33 -161 299 -321 592 -160 293 -315 579 -345 637 -31 58 -70 130 -88 160 -18 30 -76 136 -130 235 -53 99 -108 191 -121 205 l-24 25 -447 0 c-285 0 -454 -4 -467 -10z"/></g></svg>
+    <div class="logo-text"><small>Assistência Técnica · Lisboa</small></div>
+  </a>
+  <div class="nav-menu" id="navMenu">
+    <a href="#servicos">Serviços</a>
+    <a href="#obras">Obras</a>
+    <a href="#porque">Porquê a MDM</a>
+    <a href="#faq">FAQ</a>
+    <a href="#contacto">Contacto</a>
+  </div>
+  <div class="nav-right">
+    <a class="nav-tel" href="tel:+351218935050" data-lead="tel" title="Contratos de manutenção e urgências · 2ª–6ª, 8h–17h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span><span class="nav-tel-num">218 935 050</span><span class="nav-tel-sub"><span class="tb-dot" id="tbDot"></span><span id="tbEstado" data-estado="longo">2ª–6ª · 8h–17h</span></span></span></a>
+    <a class="nav-call" href="tel:+351218935050" data-lead="tel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>Ligar<small data-estado="curto">2ª–6ª · 8h–17h</small></span></a>
+    <button class="burger" id="burger" aria-expanded="false" aria-controls="mDrawer" aria-label="Abrir menu"><span></span></button>
+    <a class="nav-cam" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM.%20Tenho%20uma%20avaria%20e%20envio%20j%C3%A1%20uma%20fotografia.%20%E2%80%94%20%5BP4%20%C2%B7%20Avaria%5D" data-lead="avaria" target="_blank" rel="noopener" aria-label="Avaria? Envie uma foto por WhatsApp para o 910 307 579"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg><span>Avaria? Envie foto</span></a>
+  </div>
+</nav>
+<div class="m-drawer" id="mDrawer">
+  <a href="#servicos">Serviços</a>
+  <a href="#obras">Obras</a>
+  <a href="#porque">Porquê a MDM</a>
+  <a href="#faq">FAQ</a>
+  <a href="#contacto">Contacto</a>
+  <a href="privacidade.html">Política de privacidade</a>
+</div>
+
+<main>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="topo">
+  <h1>
+    <span class="ln"><span>Mantemos os edifícios</span></span>
+    <span class="ln"><span>de Lisboa a <em>funcionar</em>.</span></span>
+  </h1>
+
+  <p class="hero-proof">
+    <b><span data-anos>35</span> anos</b> a manter edifícios de banca, indústria e condomínios ·
+    <span class="hp-x">assistência <b>multi-marca</b>, com peças originais · </span>técnicos certificados em <b>AVAC e eletricidade</b>
+  </p>
+
+  <div class="hero-doors">
+    <a class="door door--montagem" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM.%20Quero%20or%C3%A7amento%20para%20instalar%20ar%20condicionado.%20Envio%20j%C3%A1%20fotografias%20do%20local.%20%E2%80%94%20%5BP1%20%C2%B7%20Montagem%20AC%5D" data-lead="montagem" target="_blank" rel="noopener">
+      <span class="door-t">Montagem de ar <span class="nb">condicionado&nbsp;<i aria-hidden="true">&#8594;</i></span></span>
+      <p>Envie fotos do local · WhatsApp 910 307 579</p>
+    </a>
+    <a class="door door--manut" href="mailto:mdmassist@mdmassist.com?subject=%5BP2%20%C2%B7%20Manuten%C3%A7%C3%A3o%20preventiva%5D%20Pedido%20de%20proposta%20%E2%80%94%20contrato%20anual&body=Edif%C3%ADcio%20e%20equipamentos%20a%20incluir%3A%20" data-lead="manut">
+      <span class="door-t">Manutenção <span class="nb">preventiva&nbsp;<i aria-hidden="true">&#8594;</i></span></span>
+      <p>Contratos anuais · 218 935 050</p>
+    </a>
+    <a class="door door--elet" href="#orcamento" data-lead="elet" data-preselect="Eletricidade — Quadros e Alimentações AVAC" data-msg="Edifício ou instalação: &#10;O que precisa (quadro, alimentação de unidades AVAC, proteções, avaria): &#10;Potência/nº de equipamentos a alimentar: &#10;Precisa de certificação/vistoria? &#10;Prazo: ">
+      <span class="door-t">Eletricista <span class="nb">certificado&nbsp;<i aria-hidden="true">&#8594;</i></span></span>
+      <p>Quadros e alimentações AVAC · formulário</p>
+    </a>
+  </div>
+
+</section>
+
+<!-- ═══ OBRAS ═══ -->
+<section class="obras-sec" id="obras">
+  <div class="sec-head" data-r>
+    <div class="sec-eyebrow">Algumas das nossas obras</div>
+    <h2>Trabalho real,<br>em instalações <em>reais.</em></h2>
+  </div>
+  <div class="ob-mask">
+    <div class="ob-strip" id="obStrip" tabindex="0" role="region" aria-label="Fotografias de obras da MDM">
+    <figure class="ob-shot">
+      <img src="img/c819ee36a7.jpg" alt="Técnico da MDM a carregar gás numa unidade exterior de ar condicionado." width="427" height="480" decoding="async" loading="lazy">
+      <figcaption>Técnico da MDM a carregar gás numa unidade exterior de ar condicionado.</figcaption>
+    </figure>
+    <figure class="ob-shot">
+      <img src="img/052ec5d337.webp" alt="Chiller industrial instalado em cobertura de edifício." width="484" height="480" decoding="async" loading="lazy">
+      <figcaption>Chiller industrial instalado em cobertura de edifício.</figcaption>
+    </figure>
+    <figure class="ob-shot">
+      <img src="img/fe2136ede4.webp" alt="Manutenção do filtro de uma cassete de teto de ar condicionado." width="453" height="480" decoding="async" loading="lazy">
+      <figcaption>Manutenção do filtro de uma cassete de teto de ar condicionado.</figcaption>
+    </figure>
+    <figure class="ob-shot">
+      <img src="img/672f55f227.webp" alt="Técnico da MDM a intervir num quadro elétrico com autómato e disjuntores." width="641" height="480" decoding="async" loading="lazy">
+      <figcaption>Técnico da MDM a intervir num quadro elétrico com autómato e disjuntores.</figcaption>
+    </figure>
+    <figure class="ob-shot">
+      <img src="img/3889bc0925.webp" alt="Unidade de ventilação e condutas instaladas numa cobertura em Lisboa." width="640" height="480" decoding="async" loading="lazy">
+      <figcaption>Unidade de ventilação e condutas instaladas numa cobertura em Lisboa.</figcaption>
+    </figure>
+    <figure class="ob-shot">
+      <img src="img/8e3c39f9ee.jpg" alt="Equipamento Mitsubishi Electric em armazém, pronto a instalar." width="360" height="480" decoding="async" loading="lazy">
+      <figcaption>Equipamento Mitsubishi Electric em armazém, pronto a instalar.</figcaption>
+    </figure>
+    <figure class="ob-shot">
+      <img src="img/6ac315ff9c.webp" alt="Unidade exterior Mitsubishi Electric instalada em moradia." width="360" height="480" decoding="async" loading="lazy">
+      <figcaption>Unidade exterior Mitsubishi Electric instalada em moradia.</figcaption>
+    </figure>
+    <figure class="ob-shot">
+      <img src="img/7a3dea4c5d.webp" alt="Duas unidades exteriores empilhadas na fachada de uma moradia." width="360" height="480" decoding="async" loading="lazy">
+      <figcaption>Duas unidades exteriores empilhadas na fachada de uma moradia.</figcaption>
+    </figure>
+    <figure class="ob-shot">
+      <img src="img/b5fa62f325.jpg" alt="Split mural instalado numa sala de habitação." width="360" height="480" decoding="async" loading="lazy">
+      <figcaption>Split mural instalado numa sala de habitação.</figcaption>
+    </figure>
+    <figure class="ob-shot">
+      <img src="img/0a159d1a59.webp" alt="Bateria de unidades exteriores alinhadas numa zona técnica." width="360" height="480" decoding="async" loading="lazy">
+      <figcaption>Bateria de unidades exteriores alinhadas numa zona técnica.</figcaption>
+    </figure>
+    </div>
+  </div>
+  <div class="ob-ctrls">
+    <button class="ob-bt" id="obPrev" type="button" aria-label="Ver fotografias anteriores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <button class="ob-bt" id="obPausa" type="button" aria-pressed="false" aria-label="Parar o movimento das fotografias"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="7" y="6" width="3.4" height="12" rx="1"/><rect x="13.6" y="6" width="3.4" height="12" rx="1"/></svg></button>
+    <button class="ob-bt" id="obNext" type="button" aria-label="Ver fotografias seguintes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+    <span class="ob-hint">Arraste, use as setas do teclado ou estes botões</span>
+  </div>
+</section>
+
+<!-- ═══ SERVICES ═══ -->
+<section class="meta-band" aria-label="MDM em números">
+<div class="hero-meta" data-r>
+    <div><div class="hm-num"><b>1991</b></div><div class="hm-lbl">Fundação</div></div>
+    <div><div class="hm-num"><b data-anos>35</b> anos</div><div class="hm-lbl">de experiência</div></div>
+    <div><div class="hm-num"><b>24–48h</b></div><div class="hm-lbl">intervenção técnica</div></div>
+    <div><div class="hm-num"><b>8h–17h</b></div><div class="hm-lbl">seg. a sex.</div></div>
+  </div>
+</section>
+
+<section id="servicos">
+  <div class="sec-head" data-r>
+    <div class="sec-eyebrow">Serviços críticos</div>
+    <h2>Quatro especialidades,<br>uma resposta <em>integrada.</em></h2>
+  </div>
+  <div class="svc-row">
+    <a class="svc svc--acd" data-r href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM.%20Quero%20or%C3%A7amento%20para%20instalar%20ar%20condicionado.%20Envio%20j%C3%A1%20fotografias%20do%20local.%20%E2%80%94%20%5BP1%20%C2%B7%20Montagem%20AC%5D" data-lead="montagem" target="_blank" rel="noopener">
+      <img class="svc-img" src="img/6ac315ff9c.webp" alt="Técnico MDM a intervir numa unidade exterior de ar condicionado" width="360" height="480" loading="lazy" decoding="async">
+      <span class="svc-scrim" aria-hidden="true"></span>
+      <span class="svc-txt">
+        <h3>Ar Condicionado</h3>
+        <span class="svc-sub">Montagem, avarias e manutenção multi-marca</span>
+        <span class="svc-go">Montagem de ar condicionado <span aria-hidden="true">→</span></span>
+      </span>
+    </a>
+
+    <a class="svc" data-r href="mailto:mdmassist@mdmassist.com?subject=%5BP2%20%C2%B7%20Manuten%C3%A7%C3%A3o%20preventiva%5D%20Pedido%20de%20proposta%20%E2%80%94%20contrato%20anual&body=Edif%C3%ADcio%20e%20equipamentos%20a%20incluir%3A%20" data-lead="manut">
+      <img class="svc-img" src="img/fe2136ede4.webp" alt="Equipa MDM em manutenção programada de edifício" width="453" height="480" loading="lazy" decoding="async">
+      <span class="svc-scrim" aria-hidden="true"></span>
+      <span class="svc-txt">
+        <h3>Manutenção</h3>
+        <span class="svc-sub">Contratos anuais preventivos, com relatório</span>
+        <span class="svc-go">Manutenção preventiva <span aria-hidden="true">→</span></span>
+      </span>
+    </a>
+
+    <a class="svc" data-r href="#orcamento" data-lead="elet" data-preselect="Eletricidade — Quadros e Alimentações AVAC">
+      <img class="svc-img" src="img/1c3f80e9db.webp" alt="Quadro elétrico montado e identificado por técnico da MDM" width="418" height="480" loading="lazy" decoding="async">
+      <span class="svc-scrim" aria-hidden="true"></span>
+      <span class="svc-txt">
+        <h3>Eletricidade</h3>
+        <span class="svc-sub">Quadros e alimentações para AVAC — técnico certificado</span>
+        <span class="svc-go">Eletricista certificado <span aria-hidden="true">→</span></span>
+      </span>
+    </a>
+
+    <a class="svc" data-r href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM.%20Tenho%20uma%20avaria%20e%20envio%20j%C3%A1%20uma%20fotografia.%20%E2%80%94%20%5BP4%20%C2%B7%20Avaria%5D" data-lead="avaria" target="_blank" rel="noopener">
+      <img class="svc-img" src="img/3889bc0925.webp" alt="Condutas de ventilação instaladas pela MDM" width="640" height="480" loading="lazy" decoding="async">
+      <span class="svc-scrim" aria-hidden="true"></span>
+      <span class="svc-txt">
+        <h3>Ventilação</h3>
+        <span class="svc-sub">Extração, condutas e qualidade do ar</span>
+        <span class="svc-go">Ventilação · envie foto <span aria-hidden="true">→</span></span>
+      </span>
+    </a>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+<!-- ═══ TRUST BAND ═══ -->
+<section id="porque">
+  <div class="band" data-r>
+    <div>
+      <div class="sec-eyebrow" style="color:#E89B8A">Porquê a MDM</div>
+      <h2><span data-anos>35</span> anos de ofício.<br>Confiança <em>comprovada.</em></h2>
+      <p>Desde 1991, parceira de manutenção de edifícios exigentes na grande Lisboa.</p>
+    </div>
+    <ul class="band-list">
+      <li>Técnicos certificados em AVAC e eletricidade</li>
+      <li>Certificação APIRAC · Registo IMPIC</li>
+      <li>Equipamentos multi-marca, peças originais</li>
+      <li>Relatórios claros em cada intervenção</li>
+      <li>Clientes: banca, indústria, condomínios, escolas</li>
+    </ul>
+  </div>
+</section>
+
+
+
+<!-- ═══ FAQ ═══ -->
+<section id="faq">
+  <div data-r>
+    <div class="sec-eyebrow">Perguntas frequentes</div>
+    <h2>Respostas diretas,<br>sem letra <em>pequena.</em></h2>
+  </div>
+  <div class="faq-list" data-r>
+    <details class="faq-item" open>
+      <summary>Fazem contratos de manutenção para condomínios e empresas?</summary>
+      <p>Sim — contratos anuais de manutenção preventiva, com visitas programadas e relatórios claros, para empresas, condomínios, banca e indústria desde 1991. Para pedir proposta, ligue <a href="tel:+351218935050" data-lead="tel">218 935 050</a> (2ª–6ª, 8h–17h) ou escreva para <a href="mailto:mdmassist@mdmassist.com?subject=%5BP2%20%C2%B7%20Manuten%C3%A7%C3%A3o%20preventiva%5D%20Pedido%20de%20proposta%20%E2%80%94%20contrato%20anual&body=Edif%C3%ADcio%20e%20equipamentos%20a%20incluir%3A%20" data-lead="manut-mail">mdmassist@mdmassist.com</a>.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Qual é a zona de intervenção?</summary>
+      <p>A grande Lisboa. A sede fica no Parque das Nações (Alameda dos Oceanos 108A), e as equipas deslocam-se a toda a área metropolitana.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Quanto tempo demoram a responder?</summary>
+      <p>Respondemos a qualquer pedido em menos de 24 horas úteis, e a intervenção técnica acontece tipicamente em 24–48 h. Horário: segunda a sexta, 8h–17h.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Com que marcas trabalham?</summary>
+      <p>Mitsubishi Electric, MIDEA, LG, France Air, Vulcano e Hitachi, entre outras — somos multi-marca, com peças originais e garantia de fabricante.</p>
+    </details>
+    <details class="faq-item">
+      <summary>O orçamento tem algum custo?</summary>
+      <p>Não. O orçamento é gratuito e sem compromisso, e os seus dados são usados exclusivamente para responder ao pedido.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Como reporto uma avaria rapidamente?</summary>
+      <p>O caminho mais rápido é o botão verde do topo da página: envia uma fotografia da avaria por WhatsApp (910 307 579) e o técnico percebe logo o que levar. Em horário de expediente (2ª–6ª, 8h–17h) também pode ligar 218 935 050.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ═══ CONTACT ═══ -->
+<section id="contacto">
+  <div data-r>
+    <div class="sec-eyebrow">Contacto</div>
+    <h2>Transforme uma necessidade<br>técnica num plano <em>claro.</em></h2>
+    <p class="sub">Atendimento de segunda a sexta, das 8h às 17h.</p>
+  </div>
+  <div class="c-cards" data-r>
+    <div class="c-card">
+      <div class="c-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"/></svg>Telefone</div>
+      <div class="c-val"><a href="tel:+351218935050" data-lead="tel">218 935 050</a></div>
+      <div class="c-use">Contratos de manutenção e urgências<br>2ª–6ª · 8h–17h</div>
+    </div>
+    <div class="c-card">
+      <div class="c-lbl"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>WhatsApp</div>
+      <div class="c-val"><a href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM.%20Quero%20or%C3%A7amento%20para%20instalar%20ar%20condicionado.%20Envio%20j%C3%A1%20fotografias%20do%20local.%20%E2%80%94%20%5BP1%20%C2%B7%20Montagem%20AC%5D" data-lead="montagem" target="_blank" rel="noopener">910 307 579</a></div>
+      <div class="c-use">Montagem de ar condicionado e avarias<br>envie fotos do local</div>
+    </div>
+    <div class="c-card">
+      <div class="c-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>Email</div>
+      <div class="c-val"><a href="mailto:mdmassist@mdmassist.com?subject=%5BP2%20%C2%B7%20Manuten%C3%A7%C3%A3o%20preventiva%5D%20Pedido%20de%20proposta%20%E2%80%94%20contrato%20anual&body=Edif%C3%ADcio%20e%20equipamentos%20a%20incluir%3A%20" data-lead="manut-mail">mdmassist@mdmassist.com</a></div>
+      <div class="c-use">Propostas de manutenção preventiva<br>resposta em 24 h úteis</div>
+    </div>
+  </div>
+  <p class="c-addr" data-r><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:13px;height:13px;vertical-align:-2px;margin-right:5px"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg><b>Alameda dos Oceanos, 108A</b> · Edifício Vila do Oriente · 1990-426 Lisboa (Parque das Nações)</p>
+  <!-- ═══ QUOTE FORM (email-window style) ═══ -->
+  <div class="quote-wrap" id="orcamento" data-r>
+    <div class="quote-head">
+      <div class="sec-eyebrow" id="quoteEyebrow">Pedido de orçamento</div>
+      <h2 class="quote-title" id="quoteTitle">Peça o seu orçamento<br>em <em>3 minutos.</em></h2>
+      <p class="sub">Diga-nos o essencial — respondemos por email em menos de 24 horas úteis.</p>
+    </div>
+
+    <form class="mailwin" id="quoteForm" novalidate>
+      <div class="mw-bar">
+        <span class="mw-dot" style="background:#EE5C56"></span>
+        <span class="mw-dot" style="background:#F5BE4F"></span>
+        <span class="mw-dot" style="background:#61C454"></span>
+        <span class="mw-bar-title">Nova mensagem — MDM Assist</span>
+      </div>
+
+      <div class="mw-row mw-row-to">
+        <label class="mw-lbl">Para:</label>
+        <span class="mw-to">mdmassist@mdmassist.com</span>
+        <span class="mw-to-hint">MDM Assist — Assistência Técnica</span>
+      </div>
+
+      <div class="mw-row">
+        <label class="mw-lbl" for="qEmpresa">Nome *</label>
+        <input class="mw-in" id="qEmpresa" name="empresa" type="text" placeholder="Nome da empresa, condomínio ou particular" autocomplete="name" autocapitalize="words" enterkeyhint="next" required aria-required="true">
+      </div>
+
+      <div class="mw-row">
+        <label class="mw-lbl" for="qEmail">Email:</label>
+        <input class="mw-in" id="qEmail" name="email" type="email" placeholder="email@empresa.pt" autocomplete="email" autocapitalize="off" spellcheck="false" enterkeyhint="next">
+      </div>
+
+      <div class="mw-row">
+        <label class="mw-lbl" for="qTel">Telefone:</label>
+        <input class="mw-in" id="qTel" name="telefone" type="tel" inputmode="tel" placeholder="+351 9xx xxx xxx" autocomplete="tel" enterkeyhint="next">
+      </div>
+
+      <div class="mw-row">
+        <label class="mw-lbl" for="qServico">Serviço:</label>
+        <select class="mw-in mw-select" id="qServico" name="servico">
+          <option value="" selected disabled>Selecione o tipo de serviço</option>
+          <option>Ar Condicionado — Montagem / Instalação</option>
+          <option>Manutenção Preventiva — Contrato Anual</option>
+          <option>Eletricidade — Quadros e Alimentações AVAC</option>
+          <option>Ar Condicionado — Avaria / Reparação</option>
+          <option>Eletricidade — Avaria / Reparação</option>
+          <option>Ventilação — Instalação / Revisão</option>
+          <option>Outro / Múltiplos serviços</option>
+        </select>
+      </div>
+
+      <div class="mw-body">
+        <textarea class="mw-ta" id="qMsg" name="mensagem" rows="6" aria-label="Mensagem (opcional)" placeholder="Mensagem (opcional): o edifício, o espaço, o número de equipamentos ou a avaria. Quanto mais detalhe, mais precisa a proposta."></textarea>
+      </div>
+
+      <div class="mw-hp" aria-hidden="true"><label for="qGotcha">Não preencher</label><input id="qGotcha" name="_gotcha" type="text" tabindex="-1" autocomplete="off"></div>
+      <p class="mw-alert" id="qAlert" role="alert" aria-live="polite" hidden></p>
+
+      <div class="mw-foot">
+        <p class="mw-note">* obrigatório: o nome e um contacto (email ou telefone).<br>Os seus dados são usados exclusivamente para responder ao pedido — ver a <a href="privacidade.html">política de privacidade</a>.</p>
+        <p class="mw-note" style="margin-top:6px">Ou escreva diretamente para <a href="mailto:mdmassist@mdmassist.com" style="color:var(--ink);font-weight:600" data-lead="mail">mdmassist@mdmassist.com</a>.</p>
+        <div class="mw-actions">
+          <div class="mw-btns">
+            <button type="button" class="btn btn-red mw-send" id="sendEmail">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              <span id="sendEmailLbl">Enviar por email</span>
+            </button>
+            <button type="button" class="btn mw-send mw-send--wa" id="sendWhats">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884"/></svg>
+              <span>Enviar por WhatsApp</span>
+            </button>
+          </div>
+          <p class="mw-reassure">Orçamento gratuito e sem compromisso</p>
+        </div>
+      </div>
+    </form>
+
+    <div class="quote-perks" data-r>
+      <div class="perk">
+        <div class="perk-big">24h</div>
+        <p>Respondemos em<br>dias úteis</p>
+      </div>
+      <div class="perk">
+        <div class="perk-big">NIF</div>
+        <p>Fatura com dados<br>fiscais completos</p>
+      </div>
+      <div class="perk">
+        <div class="perk-big">Contrato</div>
+        <p>Planos anuais de<br>manutenção disponíveis</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div><strong>MDM</strong> — M.D.M. – Manuel Domingos Melancia, Lda · NIF 502 644 761<br><span class="ft-sub">Alameda dos Oceanos 108 A, Edifício Vila do Oriente · 1990-426 Lisboa · 218 935 050</span></div>
+  <div>© <span data-ano-atual>2026</span> · Lisboa, Portugal<br><a class="ft-link" href="privacidade.html">Política de privacidade</a></div>
+</footer>
+
+<script>
+
+
+
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ═══ CAPTAÇÃO DE LEADS ═══
+   LEAD_ENDPOINT: URL que recebe os pedidos por POST JSON (ex.: Formspree
+   "https://formspree.io/f/xxxxxxxx"). Vazio → o formulário abre o programa
+   de email com o pedido preparado (rótulo honesto: "Enviar por email"). */
+const LEAD_ENDPOINT = '';   // Formspree: 'https://formspree.io/f/xxxxxxxx' (ver README, Captação de leads)
+
+async function sendLead(payload) {
+  if (!LEAD_ENDPOINT) return false;
+  /* timeout de 8s: um endpoint pendurado cai no fallback honesto */
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 8000);
+  try {
+    const r = await fetch(LEAD_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      signal: ctl.signal,
+      body: JSON.stringify(Object.assign({}, payload, {
+        /* campos que o Formspree entende: assunto do email e reply-to para o cliente */
+        prioridade: triagem(payload.servico).p,
+        segmento: triagem(payload.servico).seg,
+        _subject: etiqueta(payload.servico) + ' Pedido no site (' + (payload.origem || 'site') + ')' + (payload.empresa ? ' — ' + payload.empresa : payload.tel || payload.telefone ? ' — ' + (payload.tel || payload.telefone) : ''),
+        _replyto: payload.email || undefined,
+        pagina: location.href,
+        referrer: document.referrer || '',
+        utm: location.search.slice(1),
+        ts: new Date().toISOString()
+      }))
+    });
+    return r.ok;
+  } catch (e) { return false; }
+  finally { clearTimeout(timer); }
+}
+
+/* ═══ CAMINHOS DE LEAD — uma fonte única (o HTML traz os mesmos hrefs como fallback sem JS) ═══
+   montagem  → WhatsApp com pedido de fotos (P1)          avaria → WhatsApp com pedido de foto (P4)
+   manut     → email com assunto P2; no toque (telemóvel) liga 218 935 050
+   manut-mail→ email P2 sempre                            elet   → formulário pré-selecionado (P3) */
+const TEL_MDM  = 'tel:+351218935050';
+const WA_BASE  = 'https://wa.me/351910307579?text=';
+const WA_MONTAGEM = WA_BASE + encodeURIComponent('Olá MDM. Quero orçamento para instalar ar condicionado. Envio já fotografias do local. — [P1 · Montagem AC]');
+const WA_AVARIA   = WA_BASE + encodeURIComponent('Olá MDM. Tenho uma avaria e envio já uma fotografia. — [P4 · Avaria]');
+const MAIL_P2     = 'mailto:mdmassist@mdmassist.com?subject=' + encodeURIComponent('[P2 · Manutenção preventiva] Pedido de proposta — contrato anual') + '&body=' + encodeURIComponent('Edifício e equipamentos a incluir: ');
+const PRESELECT_ELET = 'Eletricidade — Quadros e Alimentações AVAC';
+const TOQUE = matchMedia('(pointer: coarse)').matches;
+function applyLeads() {
+  const dest = { montagem: WA_MONTAGEM, avaria: WA_AVARIA, manut: TOQUE ? TEL_MDM : MAIL_P2, 'manut-mail': MAIL_P2, elet: '#orcamento', tel: TEL_MDM };
+  document.querySelectorAll('[data-lead]').forEach(a => {
+    const h = dest[a.dataset.lead]; if (!h) return;
+    a.setAttribute('href', h);
+    if (h.indexOf('https://wa.me') === 0) { a.setAttribute('target', '_blank'); a.setAttribute('rel', 'noopener'); }
+    else { a.removeAttribute('target'); }
+    if (a.dataset.lead === 'elet') a.setAttribute('data-preselect', PRESELECT_ELET);
+  });
+}
+applyLeads();
+
+/* ═══ MEDIÇÃO — PostHog (UE, sem cookies: persistence memory; respeita a recusa em privacidade.html) ═══ */
+const _trackQueue = [];
+function track(event, props) {
+  try {
+    if (window.posthog && window.posthog.capture) window.posthog.capture(event, props || {});
+    else _trackQueue.push([event, props || {}]);
+  } catch (e) {}
+}
+(function () {
+  if (window.MDM_SEM_MEDICAO) return;
+  const el = document.createElement('script');
+  el.src = 'https://eu-assets.i.posthog.com/static/array.js';
+  el.async = true;
+  el.onload = function () {
+    try {
+      window.posthog.init('phc_veB6kR2as8m8HuRMEVuTUWubWQxLkPW5D8Uf6wsJcy8A', {
+        api_host: 'https://eu.i.posthog.com',
+        persistence: 'memory',
+        person_profiles: 'identified_only',
+        autocapture: false,
+        /* heatmaps de cliques/scroll + dead clicks — dados reais assim que publicar */
+        enable_heatmaps: true,
+        capture_dead_clicks: true
+      });
+      while (_trackQueue.length) {
+        const t = _trackQueue.shift();
+        window.posthog.capture(t[0], t[1]);
+      }
+    } catch (e) {}
+  };
+  document.head.appendChild(el);
+})();
+/* mensagem da faixa consoante o horário (Europe/Lisbon, 2ª–6ª 8h–17h) */
+function lisbonOpen() {
+  try {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Lisbon', hour: 'numeric', hour12: false, weekday: 'short'
+    }).formatToParts(new Date());
+    const h = +parts.find(p => p.type === 'hour').value;
+    const wd = parts.find(p => p.type === 'weekday').value;
+    return wd !== 'Sat' && wd !== 'Sun' && h >= 8 && h < 17;
+  } catch (e) { return true; }
+}
+addEventListener('DOMContentLoaded', function () {
+  let f = false;
+  const form = document.getElementById('quoteForm');
+  if (form) form.addEventListener('focusin', () => { if (!f) { f = true; track('form_focus'); } });
+});
+
+/* cada clique de contacto leva o caminho de lead (data-lead) — funil por segmento no PostHog */
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[href^="tel:"], a[href*="wa.me"], a[href^="mailto:"]');
+  if (!a) return;
+  const h = a.getAttribute('href');
+  track(h.indexOf('tel:') === 0 ? 'phone_click' : h.indexOf('mailto:') === 0 ? 'email_click' : 'whatsapp_click',
+        { lead: a.dataset.lead || '' });
+});
+
+/* ═══ quote form ═══ */
+const $q = id => document.getElementById(id);
+/* ═══ TRIAGEM DE LEADS — uma tabela, usada no assunto do email, no payload e na medição ═══
+   Hierarquia do dono (09/2026): P1 montagem de AC · P2 manutenção preventiva · P3 eletricista certificado (AVAC). */
+const TRIAGEM = {
+  'Ar Condicionado — Montagem / Instalação':     { p: 'P1', seg: 'Montagem AC' },
+  'Manutenção Preventiva — Contrato Anual':      { p: 'P2', seg: 'Manutenção preventiva' },
+  'Eletricidade — Quadros e Alimentações AVAC':  { p: 'P3', seg: 'Eletricista certificado' },
+  'Ar Condicionado — Avaria / Reparação':        { p: 'P4', seg: 'Avaria AC' },
+  'Eletricidade — Avaria / Reparação':           { p: 'P4', seg: 'Avaria elétrica' },
+  'Ventilação — Instalação / Revisão':           { p: 'P4', seg: 'Ventilação' },
+};
+function triagem(servico) {
+  return TRIAGEM[servico] || { p: 'P5', seg: servico ? 'Outro' : 'Por classificar' };
+}
+function etiqueta(servico) { const t = triagem(servico); return '[' + t.p + ' · ' + t.seg + ']'; }
+
+function quoteData() {
+  return {
+    empresa: $q('qEmpresa').value.trim(),
+    email: $q('qEmail').value.trim(),
+    tel: $q('qTel').value.trim(),
+    servico: $q('qServico').value,
+    msg: $q('qMsg').value.trim()
+  };
+}
+function quoteAlert(msg, ok, comWhats) {
+  const a = $q('qAlert');
+  if (!msg) { a.hidden = true; a.textContent = ''; a.classList.remove('mw-alert--ok'); return; }
+  a.textContent = msg; a.hidden = false;   /* limpa os filhos anteriores */
+  a.classList.toggle('mw-alert--ok', !!ok);
+  /* momento de maior intenção: quem já pediu aceita falar já */
+  if (comWhats) {
+    const l = document.createElement('a');
+    l.href = WA_BASE + encodeURIComponent('Olá MDM. Acabei de enviar um pedido de orçamento pelo site.');
+    l.target = '_blank'; l.rel = 'noopener';
+    l.className = 'mw-alert-wa';
+    l.textContent = 'Falar agora por WhatsApp';
+    a.appendChild(document.createTextNode(' '));
+    a.appendChild(l);
+  }
+}
+function quoteValidate(d) {
+  // essenciais: nome + (email ou telefone) — e diz por palavras o que falta
+  document.querySelectorAll('.mw-row').forEach(r => { r.classList.remove('mw-err'); void r.offsetWidth; });
+  ['qEmpresa', 'qEmail', 'qTel'].forEach(id => { $q(id).removeAttribute('aria-invalid'); $q(id).removeAttribute('aria-describedby'); });
+  const faltas = [];
+  if (!d.empresa) {
+    $q('qEmpresa').closest('.mw-row').classList.add('mw-err');
+    $q('qEmpresa').setAttribute('aria-invalid', 'true');
+    faltas.push('indique o seu nome');
+  }
+  if (!d.email && !d.tel) {
+    $q('qEmail').closest('.mw-row').classList.add('mw-err');
+    $q('qTel').closest('.mw-row').classList.add('mw-err');
+    $q('qEmail').setAttribute('aria-invalid', 'true');
+    $q('qTel').setAttribute('aria-invalid', 'true');
+    faltas.push('deixe um email ou um telefone para a resposta');
+  } else if (d.email && !/^\S+@\S+\.\S+$/.test(d.email)) {
+    $q('qEmail').closest('.mw-row').classList.add('mw-err');
+    $q('qEmail').setAttribute('aria-invalid', 'true');
+    faltas.push('verifique o email — parece incompleto');
+  }
+  if (faltas.length) {
+    const f = faltas.join(' e ');
+    document.querySelectorAll('[aria-invalid="true"]').forEach(el => el.setAttribute('aria-describedby', 'qAlert'));
+    quoteAlert('Para enviar o pedido, ' + f + '.');
+    document.querySelector('.mw-err')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return false;
+  }
+  quoteAlert('');
+  return true;
+}
+function quoteBody(d) {
+  return [
+    'Pedido de orçamento — MDM Assist',
+    '',
+    'Nome/Empresa: ' + (d.empresa || '—'),
+    'Email: ' + (d.email || '—'),
+    'Telefone: ' + (d.tel || '—'),
+    'Serviço: ' + (d.servico || '—'),
+    'Triagem: ' + etiqueta(d.servico),
+    '',
+    d.msg || ''
+  ].join('\n');
+}
+if (LEAD_ENDPOINT) $q('sendEmailLbl').textContent = 'Enviar pedido';
+function quoteMailto(d) {
+  const subject = etiqueta(d.servico) + ' Pedido de orçamento — ' + (d.servico || 'serviços MDM');
+  location.href = 'mailto:mdmassist@mdmassist.com'
+    + '?subject=' + encodeURIComponent(subject)
+    + '&body=' + encodeURIComponent(quoteBody(d));
+  quoteAlert('Abrimos o seu programa de email com o pedido preparado — falta só carregar em enviar. Se nada aconteceu, escreva para mdmassist@mdmassist.com ou fale connosco:', true, true);
+}
+document.getElementById('quoteForm').addEventListener('submit', e => {
+  e.preventDefault();
+  $q('sendEmail').click();
+});
+$q('sendEmail').addEventListener('click', async () => {
+  const btn = $q('sendEmail'), lbl = $q('sendEmailLbl');
+  if (btn.disabled) return;
+  /* robôs preenchem o campo escondido; uma pessoa nunca lhe toca (fora do ecrã e do tab) */
+  if ($q('qGotcha').value) { quoteAlert('Não foi possível validar o pedido. Escreva-nos para mdmassist@mdmassist.com ou ligue 218 935 050.'); return; }
+  const d = quoteData();
+  if (!quoteValidate(d)) return;
+  track('quote_form_submit', { via: LEAD_ENDPOINT ? 'endpoint' : 'mailto', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg });
+  if (LEAD_ENDPOINT) {
+    btn.disabled = true; lbl.textContent = 'A enviar…'; quoteAlert('');
+    const ok = await sendLead(Object.assign({}, d, { origem: 'formulario' }));
+    btn.disabled = false;
+    if (ok) {
+      lbl.textContent = 'Pedido enviado ✓';
+      quoteAlert('Pedido recebido ✓ Respondemos por email em menos de 24 horas úteis (2ª a 6ª, 8h–17h). Guardámos o seu contacto apenas para esta resposta. Se for urgente:', true, true);
+      document.getElementById('quoteForm').reset();
+      track('quote_form_ok', { servico: d.servico, segmento: triagem(d.servico).seg });
+      setTimeout(() => { lbl.textContent = 'Enviar pedido'; }, 6000);
+      return;
+    }
+    lbl.textContent = 'Tentar novamente';
+    quoteAlert('Não conseguimos enviar o pedido (falha de rede ou serviço indisponível). Toque em “Tentar novamente” — se continuar, abrimos o seu email com o pedido preparado.');
+    track('quote_form_erro', { servico: d.servico });
+    if (!btn.dataset.falhou) { btn.dataset.falhou = '1'; return; }   /* 2.ª falha: cai para o email */
+  }
+  quoteMailto(d);
+});
+
+/* segunda via: o mesmo pedido validado, entregue pelo canal do cliente.
+   Se houver endpoint, a lead segue também por lá — duplicar é melhor do que perder. */
+$q('sendWhats').addEventListener('click', () => {
+  if ($q('qGotcha').value) { quoteAlert('Não foi possível validar o pedido. Escreva-nos para mdmassist@mdmassist.com ou ligue 218 935 050.'); return; }
+  const d = quoteData();
+  if (!quoteValidate(d)) return;
+  track('quote_form_submit', { via: 'whatsapp', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg });
+  /* abrir dentro do gesto: depois de um await o browser bloqueia a janela */
+  window.open(WA_BASE + encodeURIComponent(quoteBody(d)), '_blank', 'noopener');
+  if (LEAD_ENDPOINT) sendLead(Object.assign({}, d, { origem: 'formulario-whatsapp' }));
+  quoteAlert('Abrimos o WhatsApp com o pedido preenchido — falta só carregar em enviar.', true);
+});
+
+/* primeiro toque no formulário: sem isto não se sabe quantos começaram e desistiram
+   (desistências = quote_form_start − quote_form_submit; não precisa de evento próprio) */
+(function () {
+  let arrancou = false;
+  document.getElementById('quoteForm').addEventListener('focusin', e => {
+    if (arrancou || e.target.id === 'qGotcha') return;
+    if (!/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+    arrancou = true;
+    track('quote_form_start', { campo: e.target.id });
+  });
+})();
+
+
+/* anos de atividade e © derivados do calendário (fallback estático no HTML) */
+(function () {
+  var anos = new Date().getFullYear() - 1991;
+  if (anos >= 35) document.querySelectorAll('[data-anos]').forEach(function (e) { e.textContent = anos; });
+  var y = new Date().getFullYear();
+  if (y >= 2026) document.querySelectorAll('[data-ano-atual]').forEach(function (e) { e.textContent = y; });
+})();
+
+/* ═══ scroll reveal + nav ═══ */
+const nav = document.getElementById('nav');
+addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 30), { passive: true });
+
+/* porta P3 / cartão Eletricidade: pré-selecionam o serviço, o esqueleto da mensagem e o título do formulário */
+(function () {
+  const TITULOS = { [PRESELECT_ELET]: ['Eletricista certificado', 'Orçamento para quadros<br>e alimentações <em>AVAC.</em>'] };
+  document.querySelectorAll('[data-preselect]').forEach(a => a.addEventListener('click', () => {
+    const sel = document.getElementById('qServico');
+    if (sel) sel.value = a.dataset.preselect;
+    const msg = document.getElementById('qMsg');
+    if (msg && a.dataset.msg && !msg.value.trim()) msg.value = a.dataset.msg;
+    const t = TITULOS[a.dataset.preselect];
+    const eb = document.getElementById('quoteEyebrow'), h2 = document.getElementById('quoteTitle');
+    if (t && eb && h2) { eb.textContent = t[0]; h2.innerHTML = t[1]; }
+    track('form_preselect', { servico: a.dataset.preselect, lead: a.dataset.lead || '' });
+  }));
+  /* se depois mudar o serviço, o título volta ao genérico */
+  const sel = document.getElementById('qServico'), eb = document.getElementById('quoteEyebrow'), h2 = document.getElementById('quoteTitle');
+  if (sel && eb && h2) {
+    const base = [eb.textContent, h2.innerHTML];
+    sel.addEventListener('change', () => { if (!TITULOS[sel.value]) { eb.textContent = base[0]; h2.innerHTML = base[1]; } });
+  }
+})();
+
+/* gaveta mobile */
+(function () {
+  const b = document.getElementById('burger'), d = document.getElementById('mDrawer');
+  if (!b || !d) return;
+  const set = aberto => { d.classList.toggle('open', aberto);
+    b.setAttribute('aria-expanded', String(aberto));
+    document.documentElement.style.overflow = aberto ? 'hidden' : ''; };
+  b.addEventListener('click', () => set(!d.classList.contains('open')));
+  d.querySelectorAll('a').forEach(a => a.addEventListener('click', () => set(false)));
+  addEventListener('keydown', e => { if (e.key === 'Escape') set(false); });
+})();
+(function () {
+  const aberto = typeof lisbonOpen === 'function' && lisbonOpen();
+  const dot = document.getElementById('tbDot');
+  if (dot && aberto) dot.classList.add('aberto');
+  document.querySelectorAll('[data-estado]').forEach(el => {
+    const curto = el.dataset.estado === 'curto';
+    el.textContent = aberto ? (curto ? 'aberto · até às 17h' : 'Aberto · até às 17h')
+                            : (curto ? '2ª–6ª · 8h–17h' : 'Fechado · 2ª–6ª 8h–17h');
+  });
+})();
+
+const els = document.querySelectorAll('[data-r]');
+if (reduceMotion) {
+  els.forEach(e => e.classList.add('in'));
+} else {
+  const stagger = new Map();
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      const p = en.target.parentElement;
+      const i = stagger.get(p) || 0;
+      stagger.set(p, i + 1);
+      setTimeout(() => stagger.delete(p), 400);
+      setTimeout(() => en.target.classList.add('in'), i * 90);
+      io.unobserve(en.target);
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+  els.forEach(e => io.observe(e));
+}
+</script>
+
+<script>
+</script>
+
+
+<script>
+/* obras: tira contínua — auto-scroll, pausa em hover/foco, arrastável */
+(function(){
+  var strip=document.getElementById('obStrip');
+  if(!strip) return;
+  if(!reduceMotion){
+    [].slice.call(strip.children).forEach(function(node){
+      var c=node.cloneNode(true);
+      c.setAttribute('aria-hidden','true');
+      [].slice.call(c.querySelectorAll('img')).forEach(function(i){ i.setAttribute('alt',''); });
+      strip.appendChild(c);
+    });
+  }
+  function wrap(){
+    if(reduceMotion) return;
+    var h=strip.scrollWidth/2;
+    if(h<=0) return;
+    if(strip.scrollLeft>=h) strip.scrollLeft-=h;
+    else if(strip.scrollLeft<=0) strip.scrollLeft+=h;
+  }
+  var paused=false, dragging=false, sx=0, sl=0, parado=false, manual=false, manualT=null;
+  function suspende(){ manual=true; clearTimeout(manualT); manualT=setTimeout(function(){ manual=false; }, 700); }
+  var passo=function(){ var f=strip.querySelector('.ob-shot'); return f? f.getBoundingClientRect().width+14 : 260; };
+  var btP=document.getElementById('obPrev'), btN=document.getElementById('obNext'), btS=document.getElementById('obPausa');
+  if(btP) btP.addEventListener('click',function(){ suspende(); strip.scrollLeft-=passo(); });
+  if(btN) btN.addEventListener('click',function(){ suspende(); strip.scrollLeft+=passo(); });
+  if(btS) btS.addEventListener('click',function(){ parado=!parado; btS.setAttribute('aria-pressed',String(parado));
+    btS.setAttribute('aria-label', parado? 'Retomar o movimento das fotografias':'Parar o movimento das fotografias');
+    btS.innerHTML = parado
+      ? '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="7" y="6" width="3.4" height="12" rx="1"/><rect x="13.6" y="6" width="3.4" height="12" rx="1"/></svg>'; });
+  strip.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'){ e.preventDefault(); suspende(); strip.scrollLeft+=passo(); }
+    else if(e.key==='ArrowLeft'){ e.preventDefault(); suspende(); strip.scrollLeft-=passo(); }
+    else if(e.key===' '||e.key==='Spacebar'){ e.preventDefault(); if(btS) btS.click(); }
+  });
+  strip.addEventListener('pointerenter',function(){paused=true;});
+  strip.addEventListener('pointerleave',function(){paused=false;});
+  strip.addEventListener('focusin',function(){paused=true;});
+  strip.addEventListener('focusout',function(){paused=false;});
+  strip.addEventListener('pointerdown',function(e){
+    dragging=true; strip.classList.add('dragging');
+    sx=e.clientX; sl=strip.scrollLeft;
+    strip.setPointerCapture(e.pointerId);
+  });
+  strip.addEventListener('pointermove',function(e){
+    if(!dragging) return;
+    e.preventDefault();
+    strip.scrollLeft=sl-(e.clientX-sx);
+    wrap();
+  });
+  function end(e){
+    if(!dragging) return;
+    dragging=false; strip.classList.remove('dragging');
+    try{ strip.releasePointerCapture(e.pointerId); }catch(_){}
+  }
+  strip.addEventListener('pointerup',end);
+  strip.addEventListener('pointercancel',end);
+  strip.addEventListener('scroll',function(){ if(!dragging) wrap(); },{passive:true});
+  if(!reduceMotion){
+    (function frame(){
+      if(!paused && !dragging && !parado && !manual){ strip.scrollLeft+=0.55; wrap(); }
+      requestAnimationFrame(frame);
+    })();
+  }
+})();
+</script>
+</body>
+</html>
