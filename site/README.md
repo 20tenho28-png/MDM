@@ -177,7 +177,10 @@ prova, três portas) e implementado tal e qual:
   ("Mantemos Lisboa a funcionar."). A palavra que filtra é **edifícios**: quem gere um
   edifício reconhece-se; quem compra um split para a sala não.
 - **Linha de prova** (substitui o subtítulo e o sazonal por JS, que era escrito para o
-  particular): 35 anos · banca, indústria e condomínios · 6 marcas · 24 a 48 h. Só factos reais.
+  particular): 35 anos · banca, indústria e condomínios · assistência multi-marca com peças
+  originais · 24 a 48 h. Só factos reais. **"6 marcas representadas" saiu em 09/2026:** era o
+  único sítio do site a sugerir representação oficial das marcas (o resto sempre disse
+  "multi-marca") e era o facto mais fraco dos três — falava do fornecedor, não do cliente.
 - **Três portas**, com o canal fixado pelo dono: **Contratos de manutenção** (barra carmim
   → telefone 218 935 050 + `mailto` com assunto e corpo), **Ar condicionado** (barra navy
   → WhatsApp com texto que pede a foto), **Ventilação e UTA** (barra cinzenta → formulário
@@ -249,7 +252,7 @@ e a secção Contacto (confirmar); o header trata só do "agora".
   urgências; WhatsApp → montagem e avarias, com fotos; Email → propostas de manutenção),
   morada em texto corrido, formulário com um só botão ("Enviar por email"), "Nome *" e
   ajuda "* obrigatório: o nome e um contacto". Ecrãs estreitos (≤400px): prova numa linha
-  mais curta (`.hp-x` esconde "6 marcas") para as três portas caberem em 375×667 (medido:
+  mais curta (`.hp-x` esconde a linha das marcas) para as três portas caberem em 375×667 (medido:
   fundo da 3ª porta a 467px).
 - **Contagem depois:** 13 ações de contacto no desktop (2 header · 3 portas · 4 cartões ·
   3 canais + botão do formulário), mais 3 ligações inline de texto (FAQ e nota do

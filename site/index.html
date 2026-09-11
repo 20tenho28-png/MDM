@@ -210,7 +210,8 @@
     max-width: 640px; line-height: 1.75;
     opacity: 0; animation: rise .9s var(--ease) .95s forwards;
   }
-  .hero-proof b { font-family: var(--serif); font-weight: 600; color: var(--red); font-size: 1.06em; }
+  /* nenhum dos factos destacados deve partir-se ao meio ("multi-/marca", "24 a/48 h") */
+  .hero-proof b { font-family: var(--serif); font-weight: 600; color: var(--red); font-size: 1.06em; white-space: nowrap; }
 
   /* três portas, estilo INEOS: barra de cor, título com seta, uma linha — sem caixa */
   .hero-doors {
@@ -996,7 +997,7 @@
 
   <p class="hero-proof">
     <b><span data-anos>35</span> anos</b> a manter edifícios de banca, indústria e condomínios ·
-    <span class="hp-x"><b>6 marcas</b> representadas · </span>intervenção em <b>24 a 48 h</b>
+    <span class="hp-x">assistência <b>multi-marca</b>, com peças originais · </span>intervenção em <b>24 a 48 h</b>
   </p>
 
   <div class="hero-doors">

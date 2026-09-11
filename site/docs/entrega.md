@@ -67,7 +67,7 @@ O site publica-as; se alguma não for verdade, tem de ser corrigida antes de div
 | Afirmação no site | Confirmado? |
 |---|---|
 | Fundação em 1991 (o site calcula "35 anos" a partir daí) | |
-| 6 marcas: Mitsubishi Electric, MIDEA, LG, France Air, Vulcano, Hitachi — e em que qualidade (revenda? assistência autorizada?) | |
+| Assistência multi-marca com peças originais e garantia de fabricante (Mitsubishi Electric, MIDEA, LG, France Air, Vulcano, Hitachi, entre outras) — e em que qualidade: revenda, assistência autorizada ou apenas intervenção multi-marca? | |
 | "Intervenção em 24 a 48 h" e "resposta em menos de 24 horas úteis" | |
 | Horário 2ª–6ª, 8h–17h, e o que acontece fora dele | |
 | "Técnicos certificados em AVAC e eletricidade" — números de certificado | |
