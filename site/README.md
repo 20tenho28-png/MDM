@@ -178,7 +178,11 @@ prova, três portas) e implementado tal e qual:
   edifício reconhece-se; quem compra um split para a sala não.
 - **Linha de prova** (substitui o subtítulo e o sazonal por JS, que era escrito para o
   particular): 35 anos · banca, indústria e condomínios · assistência multi-marca com peças
-  originais · 24 a 48 h. Só factos reais. **"6 marcas representadas" saiu em 09/2026:** era o
+  originais · técnicos certificados em AVAC e eletricidade. Só factos reais, nenhum deles um
+  prazo. **"intervenção em 24 a 48 h" saiu do hero em 09/2026, a pedido do dono:** um prazo
+  no primeiro ecrã é uma promessa que depende da carga de trabalho. O prazo continua a ser
+  dito onde é uma expectativa e não uma garantia — na banda de números (`24–48h`) e na FAQ
+  ("tipicamente em 24–48 h"). Se o dono quiser tirá-lo também daí, são dois sítios. **"6 marcas representadas" saiu em 09/2026:** era o
   único sítio do site a sugerir representação oficial das marcas (o resto sempre disse
   "multi-marca") e era o facto mais fraco dos três — falava do fornecedor, não do cliente.
 - **Três portas**, com o canal fixado pelo dono: **Contratos de manutenção** (barra carmim
