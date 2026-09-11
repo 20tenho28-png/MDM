@@ -8,6 +8,8 @@ Site institucional da **M.D.M. - Manuel Domingos Melancia, Lda (MDM)** — assis
 | Ficheiro | Descrição |
 |---|---|
 | `index.html` | **O site oficial (variante creme, escolhida pelo chefe em 08/2026)** — auto-contido (HTML + CSS + JS + imagens em base64), editável à mão. É o único ficheiro necessário para publicar. |
+| `privacidade.html` | Política de privacidade (RGPD art. 13.º) com a recusa de medição. Ligada no rodapé, na gaveta do telemóvel e junto ao formulário. |
+| `docs/entrega.md` | Lista de verificação da entrega: contas, domínio, formulário, afirmações comerciais a confirmar e decisões técnicas documentadas. |
 | `mdm-logo.svg` | Logótipo vetorial limpo. Reutilizável em cartões, faturas, email. |
 | `favicon/` | O logótipo rasterizado em PNG (32px favicon, 180px apple-touch-icon). Já embutidos no `index.html`. |
 | `obras/` | As 14 fotografias de obra já otimizadas (JPEG, 480px de altura). Já embutidas no `index.html`. |
@@ -53,6 +55,23 @@ A navy fica arquivada em `variante-navy/`, completa e funcional.
 Nota: o `LEAD_ENDPOINT` define-se diretamente no `<script>` do `index.html` (creme).
 A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela voltar.
 
+## Privacidade, medição e recusa (09/2026)
+
+- **`privacidade.html`** cobre o art. 13.º do RGPD: responsável, dados, finalidades e
+  fundamentos (al. b) para o formulário, al. f) para medição e erros), prazos de conservação,
+  subcontratantes (PostHog UE, Sentry DE, Formspree EUA com cláusulas-tipo, Google Fonts),
+  direitos e CNPD. **Três valores foram escritos por omissão e o dono tem de os confirmar:**
+  3 anos para pedidos sem contrato, 12 meses de medição, 90 dias de registos de erro.
+- **Recusa de medição:** o botão na política grava `mdm-sem-medicao` no browser; o
+  `index.html` lê essa marca antes de tudo (`window.MDM_SEM_MEDICAO`) e, se existir, **não
+  carrega o PostHog nem o Sentry**. Verificado: com a marca, o único pedido externo que resta
+  é o das fontes.
+- **Sentry** deixou de ser um `<script>` bloqueante no `<head>`: é injetado em assíncrono e
+  tem `beforeSend` que apaga `request.data`, cookies e `user` — o que o visitante escreve no
+  formulário nunca sai no relatório de erro.
+- **Sem banner de cookies**, por opção justificada: não há cookies nem identificação entre
+  visitas. A única escrita no equipamento é a própria recusa.
+
 ## Captação de leads e medição
 
 - **Formulário** (`#orcamento`, na secção Contacto) envia para um endpoint real quando
@@ -88,6 +107,10 @@ A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela vol
   sensível ao horário (fora de 2ª–6ª 8h–17h promete o próximo dia útil), "orçamento gratuito
   e sem compromisso" junto ao botão, ponte de CTA a seguir ao carrossel de obras, e a pill da
   nav navy passou de salto para o WhatsApp a âncora de captação (#orcamento).
+- **Anti-spam e estados (09/2026):** campo-armadilha `_gotcha` (escondido fora do ecrã; o
+  Formspree também o reconhece do lado do servidor) e estados explícitos no botão — *A
+  enviar…* → *Pedido enviado ✓* ou *Tentar novamente*; à segunda falha abre o programa de
+  email com o pedido preparado. Não há armadilha temporal: bloqueava quem preenche depressa.
 - **Robustez da captação:** `sendLead` tem timeout de 8s (endpoint pendurado → fallback
   honesto, nunca spinner eterno); botões protegidos contra duplo envio; eventos disparados
   antes do PostHog carregar ficam em fila e são despachados no load; payloads levam
@@ -234,6 +257,27 @@ e a secção Contacto (confirmar); o header trata só do "agora".
   âncoras a aterrar abaixo do header, pré-seleção e validação a funcionar.
 - **Decisões do dono a validar:** (1) a faixa carmim saiu; (2) o WhatsApp de avaria ganhou
   rótulo no desktop. Ambas revertem-se em CSS/HTML sem tocar no resto.
+
+## Domínio próprio — um só comando
+
+O `index.html` aponta para o domínio provisório `mdmassist.manus.space`. Para mudar **não se
+editam as etiquetas à mão**:
+
+```bash
+cd site && python3 externalize.py index.html deploy/creme --url https://www.mdmassist.pt
+```
+
+reescreve canonical, `og:url`, `og:image`, `twitter:image`, o JSON-LD, o `robots.txt`, o
+`sitemap.xml` (que passou a incluir a página de privacidade) e a própria `privacidade.html`.
+
+## Acessibilidade do carrossel de obras (09/2026)
+
+O carrossel movia-se sozinho e só parava com o rato em cima — o que falha o critério 2.2.2
+das WCAG para quem usa teclado ou toque. Passou a ter **botões visíveis de anterior, pausa e
+seguinte** (46 px, `aria-pressed` no de pausa), **setas do teclado** e barra de espaço para
+parar. O movimento automático suspende-se 700 ms quando se usa um botão, senão a escrita de
+`scrollLeft` a cada frame anulava o scroll suave. Continua desligado com
+`prefers-reduced-motion`.
 
 ## Ícones e animações
 

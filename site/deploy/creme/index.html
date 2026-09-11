@@ -1,14 +1,20 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-PT">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script
-  src="https://js-de.sentry-cdn.com/f31a40fed7d908991cf6b3b9e8932c77.min.js"
-  crossorigin="anonymous"
-></script>
 <script>
-  // Configuração do Sentry (monitorização de erros + desempenho)
+  /* Recusa de medição (privacidade.html): guardada no browser do visitante.
+     É a única coisa que este site escreve no equipamento — e só depois de o visitante a pedir. */
+  window.MDM_SEM_MEDICAO = (function () { try { return localStorage.getItem('mdm-sem-medicao') === '1'; } catch (e) { return false; } })();
+</script>
+<script>
+  /* Sentry (erros) — carregado em assíncrono, depois do conteúdo, e nunca se o visitante recusou a medição */
+  if (!window.MDM_SEM_MEDICAO) {
+    var _sy = document.createElement('script');
+    _sy.src = 'https://js-de.sentry-cdn.com/f31a40fed7d908991cf6b3b9e8932c77.min.js';
+    _sy.crossOrigin = 'anonymous'; _sy.async = true;
+    _sy.onload = function () {
   window.Sentry && Sentry.onLoad(function () {
     Sentry.init({
       dsn: "https://f31a40fed7d908991cf6b3b9e8932c77@o4511750499926016.ingest.de.sentry.io/4511802709573712",
@@ -23,14 +29,29 @@
         "ResizeObserver loop limit exceeded",
         "Failed to fetch"
       ],
-      denyUrls: [/extensions\//i, /^chrome:\/\//i, /^moz-extension:\/\//i]
+      denyUrls: [/extensions\//i, /^chrome:\/\//i, /^moz-extension:\/\//i],
+      /* nunca enviar o que o visitante escreveu no formulário */
+      beforeSend: function (ev) {
+        try {
+          if (ev.request) { delete ev.request.cookies; delete ev.request.data; }
+          delete ev.user;
+          (ev.breadcrumbs || []).forEach(function (b) { if (b.data) delete b.data.value; });
+        } catch (e) {}
+        return ev;
+      }
     });
   });
+    };
+    document.head.appendChild(_sy);
+  }
 </script>
 <title>MDM — Manutenção e Assistência de Edifícios · Lisboa · Desde 1991</title>
 <meta name="description" content="Ar condicionado, eletricidade e ventilação em Lisboa desde 1991. Orçamento gratuito com resposta em menos de 24 horas úteis — 218 935 050.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- DOMÍNIO: para passar ao domínio próprio não se editam estas linhas à mão —
+     correr  python3 externalize.py index.html deploy/creme --url https://www.exemplo.pt
+     que reescreve canonical, og:url, og:image, twitter:image, o schema, o robots.txt e o sitemap.xml. -->
 <link rel="canonical" href="https://mdmassist.manus.space">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="MDM — Assistência Técnica">
@@ -421,6 +442,8 @@
     border-left: 3px solid var(--red);
   }
   .mw-alert--ok { background: #E9F2EC; color: #1F5C33; border-left-color: #12823F; }
+  /* armadilha anti-spam: invisível para pessoas, preenchida por robôs */
+  .mw-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
   /* ═══ FOOTER ═══ */
   footer {
@@ -665,7 +688,7 @@
             mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
   }
   .ob-strip {
-    display: flex; gap: 14px;
+    display: flex; gap: 14px; scroll-behavior: smooth;
     overflow-x: auto; overflow-y: hidden;
     scrollbar-width: none; cursor: grab; padding-bottom: 4px;
   }
@@ -694,8 +717,21 @@
   @media (hover: none) {
     .ob-shot figcaption { opacity: 1; transform: none; }
   }
+  .ob-ctrls { max-width: 1200px; margin: 16px auto 0; padding: 0 40px; display: flex; align-items: center; }
+  .ob-ctrls > * + * { margin-left: 10px; }
+  .ob-bt { width: 46px; height: 46px; flex: none; display: grid; place-items: center;
+    border: 1.5px solid var(--sand); background: #fff; color: var(--ink); border-radius: 50%; cursor: pointer;
+    transition: border-color .2s, background .2s; }
+  .ob-bt:hover { border-color: var(--ink); }
+  .ob-bt[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .ob-bt svg { width: 20px; height: 20px; }
+  /* a regra base de .ob-hint vem a seguir: selector mais específico para não ser anulado */
+  @media (max-width: 640px) {
+    .ob-ctrls { padding: 0 20px; flex-wrap: wrap; }
+    .ob-ctrls .ob-hint { flex: 1 0 100%; margin: 12px 0 0; }
+  }
   .ob-hint {
-    max-width: 1200px; margin: 16px auto 0; padding: 0 40px;
+    margin: 0 0 0 14px; padding: 0; flex: 1; min-width: 0;
     font-family: var(--mono); font-size: 11px; letter-spacing: 2px;
     text-transform: uppercase; color: var(--slate);
   }
@@ -708,6 +744,9 @@
     .ob-shot figcaption { opacity: 1; transform: none; }
   }
 
+  .ft-sub { font-size: 12px; color: var(--slate); }
+  .ft-link { color: var(--red-dk); text-decoration: none; border-bottom: 1px solid var(--sand); }
+  .ft-link:hover { border-color: var(--red); }
   .skip-link { position: absolute; left: -9999px; top: 0; z-index: 200;
     background: #2B2723; color: #fff; padding: 12px 20px; border-radius: 0 0 12px 0;
     font-family: var(--sans); font-weight: 700; text-decoration: none; }
@@ -943,6 +982,7 @@
   <a href="#porque">Porquê a MDM</a>
   <a href="#faq">FAQ</a>
   <a href="#contacto">Contacto</a>
+  <a href="privacidade.html">Política de privacidade</a>
 </div>
 
 <main>
@@ -1026,7 +1066,12 @@
     </figure>
     </div>
   </div>
-  <p class="ob-hint">Arraste para o lado · passe o rato para parar</p>
+  <div class="ob-ctrls">
+    <button class="ob-bt" id="obPrev" type="button" aria-label="Ver fotografias anteriores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <button class="ob-bt" id="obPausa" type="button" aria-pressed="false" aria-label="Parar o movimento das fotografias"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="7" y="6" width="3.4" height="12" rx="1"/><rect x="13.6" y="6" width="3.4" height="12" rx="1"/></svg></button>
+    <button class="ob-bt" id="obNext" type="button" aria-label="Ver fotografias seguintes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+    <span class="ob-hint">Arraste, use as setas do teclado ou estes botões</span>
+  </div>
 </section>
 
 <!-- ═══ SERVICES ═══ -->
@@ -1228,10 +1273,11 @@
         <textarea class="mw-ta" id="qMsg" name="mensagem" rows="6" aria-label="Mensagem (opcional)" placeholder="Mensagem (opcional): o edifício, o espaço, o número de equipamentos ou a avaria. Quanto mais detalhe, mais precisa a proposta."></textarea>
       </div>
 
+      <div class="mw-hp" aria-hidden="true"><label for="qGotcha">Não preencher</label><input id="qGotcha" name="_gotcha" type="text" tabindex="-1" autocomplete="off"></div>
       <p class="mw-alert" id="qAlert" role="alert" aria-live="polite" hidden></p>
 
       <div class="mw-foot">
-        <p class="mw-note">* obrigatório: o nome e um contacto (email ou telefone). Orçamento gratuito e sem compromisso.<br>Os seus dados são usados exclusivamente para responder ao pedido — e quem responde são técnicos, não robôs.</p>
+        <p class="mw-note">* obrigatório: o nome e um contacto (email ou telefone). Orçamento gratuito e sem compromisso.<br>Os seus dados são usados exclusivamente para responder ao pedido — ver a <a href="privacidade.html">política de privacidade</a>.</p>
         <p class="mw-note" style="margin-top:6px">Ou escreva diretamente para <a href="mailto:mdmassist@mdmassist.com" style="color:var(--ink);font-weight:600" data-lead="mail">mdmassist@mdmassist.com</a>.</p>
         <div class="mw-actions">
           <button type="button" class="btn btn-red mw-send" id="sendEmail">
@@ -1245,7 +1291,7 @@
     <div class="quote-perks" data-r>
       <div class="perk">
         <div class="perk-big">24h</div>
-        <p>Resposta garantida<br>em dias úteis</p>
+        <p>Respondemos em<br>dias úteis</p>
       </div>
       <div class="perk">
         <div class="perk-big">NIF</div>
@@ -1262,8 +1308,8 @@
 </main>
 
 <footer>
-  <div><strong>MDM</strong> — Manuel Domingos Melancia, Lda · NIF 502 644 761</div>
-  <div>© <span data-ano-atual>2026</span> · Lisboa, Portugal</div>
+  <div><strong>MDM</strong> — M.D.M. – Manuel Domingos Melancia, Lda · NIF 502 644 761<br><span class="ft-sub">Alameda dos Oceanos 108 A, Edifício Vila do Oriente · 1990-426 Lisboa · 218 935 050</span></div>
+  <div>© <span data-ano-atual>2026</span> · Lisboa, Portugal<br><a class="ft-link" href="privacidade.html">Política de privacidade</a></div>
 </footer>
 
 <script>
@@ -1328,7 +1374,7 @@ function applyLeads() {
 }
 applyLeads();
 
-/* ═══ MEDIÇÃO — PostHog (UE, sem cookies: persistence memory) ═══ */
+/* ═══ MEDIÇÃO — PostHog (UE, sem cookies: persistence memory; respeita a recusa em privacidade.html) ═══ */
 const _trackQueue = [];
 function track(event, props) {
   try {
@@ -1337,6 +1383,7 @@ function track(event, props) {
   } catch (e) {}
 }
 (function () {
+  if (window.MDM_SEM_MEDICAO) return;
   const el = document.createElement('script');
   el.src = 'https://eu-assets.i.posthog.com/static/array.js';
   el.async = true;
@@ -1420,7 +1467,7 @@ function quoteAlert(msg, ok) {
 function quoteValidate(d) {
   // essenciais: nome + (email ou telefone) — e diz por palavras o que falta
   document.querySelectorAll('.mw-row').forEach(r => { r.classList.remove('mw-err'); void r.offsetWidth; });
-  ['qEmpresa', 'qEmail', 'qTel'].forEach(id => $q(id).removeAttribute('aria-invalid'));
+  ['qEmpresa', 'qEmail', 'qTel'].forEach(id => { $q(id).removeAttribute('aria-invalid'); $q(id).removeAttribute('aria-describedby'); });
   const faltas = [];
   if (!d.empresa) {
     $q('qEmpresa').closest('.mw-row').classList.add('mw-err');
@@ -1440,6 +1487,7 @@ function quoteValidate(d) {
   }
   if (faltas.length) {
     const f = faltas.join(' e ');
+    document.querySelectorAll('[aria-invalid="true"]').forEach(el => el.setAttribute('aria-describedby', 'qAlert'));
     quoteAlert('Para enviar o pedido, ' + f + '.');
     document.querySelector('.mw-err')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return false;
@@ -1473,21 +1521,29 @@ document.getElementById('quoteForm').addEventListener('submit', e => {
   $q('sendEmail').click();
 });
 $q('sendEmail').addEventListener('click', async () => {
+  const btn = $q('sendEmail'), lbl = $q('sendEmailLbl');
+  if (btn.disabled) return;
+  /* robôs preenchem o campo escondido; uma pessoa nunca lhe toca (fora do ecrã e do tab) */
+  if ($q('qGotcha').value) { quoteAlert('Não foi possível validar o pedido. Escreva-nos para mdmassist@mdmassist.com ou ligue 218 935 050.'); return; }
   const d = quoteData();
   if (!quoteValidate(d)) return;
   track('quote_form_submit', { via: LEAD_ENDPOINT ? 'endpoint' : 'mailto', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg });
   if (LEAD_ENDPOINT) {
-    const btn = $q('sendEmail');
-    btn.disabled = true;
-    if (await sendLead(Object.assign({}, d, { origem: 'formulario' }))) {
-      btn.disabled = false;
-      $q('sendEmailLbl').textContent = 'Pedido enviado ✓';
-      quoteAlert('Pedido recebido — respondemos em menos de 24 horas úteis.', true);
+    btn.disabled = true; lbl.textContent = 'A enviar…'; quoteAlert('');
+    const ok = await sendLead(Object.assign({}, d, { origem: 'formulario' }));
+    btn.disabled = false;
+    if (ok) {
+      lbl.textContent = 'Pedido enviado ✓';
+      quoteAlert('Pedido recebido — respondemos em menos de 24 horas úteis. Guardámos o seu contacto apenas para esta resposta.', true);
       document.getElementById('quoteForm').reset();
-      setTimeout(() => { $q('sendEmailLbl').textContent = 'Enviar pedido'; }, 5000);
+      track('quote_form_ok', { servico: d.servico, segmento: triagem(d.servico).seg });
+      setTimeout(() => { lbl.textContent = 'Enviar pedido'; }, 6000);
       return;
     }
-    btn.disabled = false;
+    lbl.textContent = 'Tentar novamente';
+    quoteAlert('Não conseguimos enviar o pedido (falha de rede ou serviço indisponível). Toque em “Tentar novamente” — se continuar, abrimos o seu email com o pedido preparado.');
+    track('quote_form_erro', { servico: d.servico });
+    if (!btn.dataset.falhou) { btn.dataset.falhou = '1'; return; }   /* 2.ª falha: cai para o email */
   }
   quoteMailto(d);
 });
@@ -1592,7 +1648,22 @@ if (reduceMotion) {
     if(strip.scrollLeft>=h) strip.scrollLeft-=h;
     else if(strip.scrollLeft<=0) strip.scrollLeft+=h;
   }
-  var paused=false, dragging=false, sx=0, sl=0;
+  var paused=false, dragging=false, sx=0, sl=0, parado=false, manual=false, manualT=null;
+  function suspende(){ manual=true; clearTimeout(manualT); manualT=setTimeout(function(){ manual=false; }, 700); }
+  var passo=function(){ var f=strip.querySelector('.ob-shot'); return f? f.getBoundingClientRect().width+14 : 260; };
+  var btP=document.getElementById('obPrev'), btN=document.getElementById('obNext'), btS=document.getElementById('obPausa');
+  if(btP) btP.addEventListener('click',function(){ suspende(); strip.scrollLeft-=passo(); });
+  if(btN) btN.addEventListener('click',function(){ suspende(); strip.scrollLeft+=passo(); });
+  if(btS) btS.addEventListener('click',function(){ parado=!parado; btS.setAttribute('aria-pressed',String(parado));
+    btS.setAttribute('aria-label', parado? 'Retomar o movimento das fotografias':'Parar o movimento das fotografias');
+    btS.innerHTML = parado
+      ? '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="7" y="6" width="3.4" height="12" rx="1"/><rect x="13.6" y="6" width="3.4" height="12" rx="1"/></svg>'; });
+  strip.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'){ e.preventDefault(); suspende(); strip.scrollLeft+=passo(); }
+    else if(e.key==='ArrowLeft'){ e.preventDefault(); suspende(); strip.scrollLeft-=passo(); }
+    else if(e.key===' '||e.key==='Spacebar'){ e.preventDefault(); if(btS) btS.click(); }
+  });
   strip.addEventListener('pointerenter',function(){paused=true;});
   strip.addEventListener('pointerleave',function(){paused=false;});
   strip.addEventListener('focusin',function(){paused=true;});
@@ -1618,7 +1689,7 @@ if (reduceMotion) {
   strip.addEventListener('scroll',function(){ if(!dragging) wrap(); },{passive:true});
   if(!reduceMotion){
     (function frame(){
-      if(!paused && !dragging){ strip.scrollLeft+=0.55; wrap(); }
+      if(!paused && !dragging && !parado && !manual){ strip.scrollLeft+=0.55; wrap(); }
       requestAnimationFrame(frame);
     })();
   }
