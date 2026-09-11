@@ -11,7 +11,7 @@
 :root{
   --red:#A30711; --red-dk:#7C050D; --red-sf:#F6E4E4;
   --ink:#141D2E; --slate:#4E5871; --cream:#FAF9F5; --sand:#E8E4D9; --paper:#F0EEE6;
-  --ok:#12823F; --ok-sf:#E6F3EA; --warn:#B4600A; --warn-sf:#FBEEDC;
+  --ok:#12823F; --ok-sf:#E6F3EA; --warn:#8F4A00; --warn-sf:#FBEEDC;
   --serif:Lora,Georgia,"Times New Roman",serif; --sans:Inter,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   --r:10px; --tap:48px;
@@ -27,7 +27,8 @@ a{color:var(--red-dk)}
 .sr{position:absolute;left:-9999px}
 
 /* ═══ Barra superior ═══ */
-.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(250,249,245,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--sand)}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;padding:10px 14px;background:rgba(250,249,245,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--sand)}
+.top>*+*{margin-left:10px}
 .top .logo{width:38px;height:40px;flex:none}
 .top .logo svg{width:100%;height:100%;display:block;border-radius:5px}
 .top .tt{flex:1;min-width:0}
@@ -48,27 +49,29 @@ a{color:var(--red-dk)}
 .big.ok{background:var(--ok)}
 .big:disabled{opacity:.5}
 .big svg{width:22px;height:22px;flex:none}
-.list a,.list button.row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 4px;border:0;border-bottom:1px solid var(--sand);background:none;text-decoration:none;color:var(--ink);min-height:var(--tap)}
+.list a,.list button.row{display:flex;align-items:center;width:100%;text-align:left;padding:12px 4px;border:0;border-bottom:1px solid var(--sand);background:none;text-decoration:none;color:var(--ink);min-height:var(--tap)}
 .list .row:last-child{border-bottom:0}
-.row .n{font-family:var(--mono);font-size:12.5px;color:var(--slate);white-space:nowrap}
+.row>*+*{margin-left:12px}
+.row .n{font-family:var(--mono);font-size:13px;color:var(--slate);white-space:nowrap}
 .row .t{flex:1;min-width:0}.row .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row .t small{color:var(--slate);font-size:13px}
-.badge{font-family:var(--mono);font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;padding:3px 7px;border-radius:6px;background:var(--paper);color:var(--slate);white-space:nowrap}
-.badge.emitido{background:#E8ECF5;color:#2E3F66}.badge.aceite{background:var(--ok-sf);color:#1F5C33}.badge.rascunho{background:var(--warn-sf);color:var(--warn)}.badge.recusado,.badge.ausente{background:var(--red-sf);color:var(--red-dk)}
+.badge{font-family:var(--mono);font-size:12px;letter-spacing:.5px;text-transform:uppercase;padding:3px 7px;border-radius:6px;background:var(--paper);color:var(--slate);white-space:nowrap}
+.badge.emitido{background:#E8ECF5;color:#2E3F66}.badge.aceite{background:var(--ok-sf);color:#1F5C33}.badge.rascunho{background:var(--warn-sf);color:var(--warn)}.badge.retificado{background:var(--sand);color:var(--ink);text-decoration:line-through}.badge.recusado,.badge.ausente{background:var(--red-sf);color:var(--red-dk)}
 
 /* ═══ Formulário ═══ */
 .sec{background:#fff;border:1px solid var(--sand);border-radius:14px;margin:0 0 12px;overflow:hidden}
-.sec>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;min-height:56px}
+.sec>summary{list-style:none;display:flex;align-items:center;padding:14px 16px;cursor:pointer;min-height:56px}
+.sec>summary>*+*{margin-left:10px}
 .sec>summary::-webkit-details-marker{display:none}
 .sec>summary .num{width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font-family:var(--mono);font-size:12px;display:grid;place-items:center;flex:none}
 .sec.done>summary .num{background:var(--ok)}
 .sec.err>summary .num{background:var(--red)}
 .sec>summary h2{font-size:17px;flex:1}
-.sec>summary .st{font-size:12.5px;color:var(--slate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%}
+.sec>summary .st{font-size:14px;color:var(--slate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%}
 .sec>summary .car{width:10px;height:10px;border-right:2px solid var(--slate);border-bottom:2px solid var(--slate);transform:rotate(45deg);transition:transform .2s;flex:none;margin-right:4px}
 .sec[open]>summary .car{transform:rotate(225deg);margin-top:5px}
 .sec .body{padding:0 16px 16px}
 .f{margin:0 0 12px}
-.f label,.f .lbl{display:block;font-size:13px;font-weight:600;color:var(--slate);margin:0 0 5px;letter-spacing:.1px}
+.f label,.f .lbl{display:block;font-size:14px;font-weight:600;color:var(--slate);margin:0 0 5px;letter-spacing:.1px}
 .f label b{color:var(--red)}
 .in{width:100%;min-height:var(--tap);border:1.5px solid var(--sand);border-radius:var(--r);background:#fff;padding:10px 12px;font-size:16px}
 .in:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(20,29,46,.08)}
@@ -79,72 +82,79 @@ select.in{appearance:none;-webkit-appearance:none;background-image:url("data:ima
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .g2>*,.g3>*{min-width:0}
 @media (max-width:420px){.g3{grid-template-columns:1fr 1fr}}
-.help{font-size:12.5px;color:var(--slate);margin:5px 0 0}
-.msg{font-size:13.5px;margin:6px 0 0;padding:8px 10px;border-radius:8px;border-left:3px solid}
+.help{font-size:14px;color:var(--slate);margin:5px 0 0}
+.msg{font-size:15px;line-height:1.4;margin:6px 0 0;padding:8px 10px;border-radius:8px;border-left:3px solid}
 .msg.err{background:var(--red-sf);border-color:var(--red);color:var(--red-dk)}
 .msg.warn{background:var(--warn-sf);border-color:var(--warn);color:var(--warn)}
 .msg.ok{background:var(--ok-sf);border-color:var(--ok);color:#1F5C33}
 .msg.info{background:var(--paper);border-color:var(--slate);color:var(--slate)}
 /* pílulas / segmentos: 1 toque, alvos ≥ 48px */
-.pills{display:flex;flex-wrap:wrap;gap:8px}
-.pill{min-height:44px;padding:8px 14px;border-radius:999px;border:1.5px solid var(--sand);background:#fff;font-size:14.5px;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.pills{display:flex;flex-wrap:wrap;margin:-4px}
+.pills>*{margin:4px}
+.pill{min-height:44px;padding:8px 14px;border-radius:999px;border:1.5px solid var(--sand);background:#fff;font-size:15px;font-weight:500;display:inline-flex;align-items:center}
 .pill.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.pill.chip{min-height:38px;padding:6px 12px;font-size:13.5px;background:var(--paper);border-color:transparent}
-.pill.chip:active{background:var(--sand)}
+.pill.chip{min-height:44px;padding:8px 14px;font-size:15px;background:#fff;border-color:var(--sand)}
+.pill.chip:active{background:var(--ink);color:#fff}
 .seg{display:flex;border:1.5px solid var(--sand);border-radius:var(--r);overflow:hidden}
 .seg button{flex:1;min-width:0;min-height:var(--tap);border:0;background:#fff;font-weight:600;font-size:14.5px;padding:6px 5px}
 .seg button+button{border-left:1.5px solid var(--sand)}
 .seg button.on{background:var(--ink);color:#fff}
-.seg.sm button{min-height:40px;font-size:13.5px}
-.mais{background:none;border:0;color:var(--red-dk);font-weight:600;padding:8px 0;font-size:14px}
+.seg.sm button{min-height:44px;font-size:14px}
+.mais{background:none;border:0;color:var(--red-dk);font-weight:600;padding:8px 0;font-size:15px;min-height:44px}
 .more{display:none}.more.on{display:block}
-.inl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.inl .in{flex:1 1 120px}
+.inl{display:flex;align-items:center;flex-wrap:wrap;margin:-4px}
+.inl>*{margin:4px}
+.inl .in{flex:1 1 90px}
+.inl .bt.sm{flex:none}
 .bt{min-height:var(--tap);padding:8px 14px;border-radius:var(--r);border:1.5px solid var(--sand);background:#fff;font-weight:600;white-space:nowrap}
 .bt.red{background:var(--red);color:#fff;border-color:var(--red)}
 .bt.ink{background:var(--ink);color:#fff;border-color:var(--ink)}
-.bt.sm{min-height:38px;padding:6px 10px;font-size:13.5px}
+.bt.sm{min-height:44px;padding:6px 12px;font-size:14px}
 .bt:disabled{opacity:.45}
 .stepper{display:flex;align-items:center;border:1.5px solid var(--sand);border-radius:var(--r);overflow:hidden}
-.stepper button{width:40px;flex:none;min-height:var(--tap);border:0;background:#fff;font-size:20px}
+.stepper button{width:48px;flex:none;min-height:var(--tap);border:0;background:#fff;font-size:20px}
 .stepper input{flex:1;min-width:0;width:40px;text-align:center;border:0;min-height:var(--tap);font-size:16px}
 .item{border:1px solid var(--sand);border-radius:12px;padding:12px;margin:0 0 10px;background:#FCFBF8}
-.item .hd{display:flex;align-items:center;gap:8px;margin:0 0 8px}
+.item .hd{display:flex;align-items:center;margin:0 0 8px}
 .item .hd b{flex:1;font-size:15px}
-.item .del{background:none;border:0;color:var(--slate);width:36px;height:36px;font-size:20px;line-height:1}
+.item .del{background:none;border:0;color:var(--slate);width:44px;height:44px;font-size:22px;line-height:1;margin-left:8px}
 .calc{font-family:var(--mono);font-size:13px;background:var(--paper);border-radius:8px;padding:8px 10px;margin:0 0 10px;line-height:1.5}
 .calc b{color:var(--red-dk)}
-.tick{display:flex;align-items:center;gap:10px;min-height:var(--tap);font-size:15px;font-weight:500}
-.tick input{width:22px;height:22px;accent-color:var(--red);flex:none}
+.tick{display:flex;align-items:center;min-height:var(--tap);font-size:15px;font-weight:500}
+.tick input{width:22px;height:22px;accent-color:var(--red);flex:none;margin:0 10px 0 0}
 /* fotos */
 .fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
-.foto{position:relative;border-radius:10px;overflow:hidden;background:var(--sand);aspect-ratio:1}
-.foto img{width:100%;height:100%;object-fit:cover;display:block}
-.foto .cat{position:absolute;left:0;right:0;bottom:0;background:rgba(20,29,46,.78);color:#fff;font-size:11px;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.foto .x{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(20,29,46,.7);color:#fff;font-size:16px}
-.cam{aspect-ratio:1;border:2px dashed var(--sand);border-radius:10px;background:#fff;display:grid;place-items:center;color:var(--slate);font-size:13px;font-weight:600;text-align:center;padding:6px}
+.foto{position:relative;border-radius:10px;overflow:hidden;background:var(--sand);height:0;padding-bottom:100%}
+.foto img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block}
+.foto .edit{position:absolute;top:0;left:0;width:100%;height:100%;border:0;background:transparent;padding:0;cursor:pointer}
+.foto .cat{position:absolute;left:0;right:0;bottom:0;background:rgba(20,29,46,.78);color:#fff;font-size:12px;padding:5px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.foto .x{position:absolute;top:4px;right:4px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(20,29,46,.7);color:#fff;font-size:18px}
+.cam{position:relative;height:0;padding-bottom:100%;border:2px dashed var(--sand);border-radius:10px;background:#fff;color:var(--slate);font-size:13px;font-weight:600;text-align:center;padding-left:0;padding-right:0}
+.cam>span{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .cam svg{width:26px;height:26px}
 /* assinatura */
 .sig{position:relative;border:1.5px solid var(--sand);border-radius:12px;background:#fff;touch-action:none;overflow:hidden}
 .sig canvas{display:block;width:100%;height:auto}
-.sig .line{position:absolute;left:12%;right:12%;bottom:26%;border-bottom:1px dashed #C9C4B6;pointer-events:none}
-.sig .ph{position:absolute;inset:0;display:grid;place-items:center;color:#B6B1A4;font-size:14px;pointer-events:none}
+.sig .line{position:absolute;left:12%;right:12%;bottom:30%;border-bottom:1px dashed #C9C4B6;pointer-events:none}
+.sig .ph{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;color:#6B6659;font-size:15px;pointer-events:none}
 .sig.has .ph{display:none}
 /* barra fixa inferior */
-.bar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid var(--sand);padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:none;gap:10px;align-items:center}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,.96);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-top:1px solid var(--sand);padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:none;align-items:center}
 .bar.on{display:flex}
-.bar .info{flex:1;min-width:0;font-size:12.5px;color:var(--slate);line-height:1.3}
+.bar>*+*{margin-left:10px}
+.bar .info{flex:1;min-width:0;font-size:13.5px;color:var(--slate);line-height:1.3;cursor:pointer}
 .bar .info b{display:block;color:var(--ink);font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bar .bt{min-height:50px;padding:8px 18px}
-.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none;max-width:92vw;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-size:15px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;max-width:92vw;text-align:center}
 .toast.on{opacity:1}
 /* aceitação (ecrã cheio) */
-.full{position:fixed;inset:0;z-index:50;background:var(--cream);overflow:auto;display:none;padding:14px}
+.full{position:fixed;top:0;left:0;right:0;bottom:0;z-index:50;background:var(--cream);overflow:auto;display:none;padding:14px}
 .full.on{display:block}
 .full .wrap{max-width:720px;margin:0 auto}
 .resumo{background:#fff;border:1px solid var(--sand);border-radius:12px;padding:12px 14px;font-size:14.5px;margin:0 0 12px}
-.resumo div{display:flex;gap:8px;padding:3px 0}.resumo div span:first-child{color:var(--slate);width:110px;flex:none}
-.legal{font-size:12.5px;color:var(--slate);line-height:1.45;background:var(--paper);padding:10px 12px;border-radius:10px;margin:0 0 12px}
+.resumo div{display:flex;padding:3px 0}.resumo div span:first-child{color:var(--slate);width:110px;flex:none;margin-right:8px}
+.legal{font-size:14px;color:var(--ink);line-height:1.45;background:var(--paper);padding:10px 12px;border-radius:10px;margin:0 0 12px}
+.legal.small{font-size:12px;color:var(--slate)}
 .prev{background:#9A968C;padding:14px 8px;border-radius:12px;overflow:auto}
 .prev .page{transform-origin:0 0;margin:0 auto 14px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 @media (min-width:900px){.screen{max-width:900px}.g3{grid-template-columns:1fr 1fr 1fr}}
@@ -152,8 +162,9 @@ select.in{appearance:none;-webkit-appearance:none;background-image:url("data:ima
 /* ═══ Impressão A4: só o relatório; páginas explícitas em mm ═══ */
 .page{width:210mm;min-height:297mm;background:#fff;color:#141D2E;font:10.5pt/1.35 var(--sans);padding:12mm 12mm 14mm;position:relative;page-break-after:always;break-after:page}
 .page:last-child{page-break-after:auto;break-after:auto}
-.page .ph{display:flex;align-items:flex-start;gap:8mm;border-bottom:1.2mm solid #A30711;padding-bottom:3mm;margin-bottom:4mm}
-.page .ph svg{width:18mm;height:18.7mm;flex:none;border-radius:1mm}
+.page .ph{display:flex;align-items:flex-start;border-bottom:1.2mm solid #A30711;padding-bottom:3mm;margin-bottom:4mm}
+.page .ph svg{width:18mm;height:18.7mm;flex:none;border-radius:1mm;margin-right:8mm}
+.page .ph .co{margin-right:6mm}
 .page .ph .co{flex:1}
 .page .ph .co b{font-family:var(--serif);font-size:13pt;display:block}
 .page .ph .co span{display:block;font-size:8.5pt;color:#4E5871}
@@ -162,8 +173,8 @@ select.in{appearance:none;-webkit-appearance:none;background-image:url("data:ima
 .page .ph .no .st{display:inline-block;border:1px solid #4E5871;border-radius:2mm;padding:0 2mm;font-size:8pt;text-transform:uppercase;letter-spacing:.5px}
 .page h2{font-family:var(--sans);font-size:9pt;text-transform:uppercase;letter-spacing:1.2px;color:#A30711;margin:3mm 0 1.2mm;padding-bottom:.8mm;border-bottom:.3mm solid #E8E4D9}
 .page .kv{display:grid;grid-template-columns:1fr 1fr;gap:1mm 6mm}
-.page .kv div{display:flex;gap:2mm;font-size:10pt;padding:.4mm 0}
-.page .kv div span{color:#4E5871;flex:none;min-width:28mm}
+.page .kv div{display:flex;font-size:10pt;padding:.4mm 0}
+.page .kv div span{color:#4E5871;flex:none;min-width:28mm;margin-right:2mm}
 .page .kv.one{grid-template-columns:1fr}
 .page table{width:100%;border-collapse:collapse;font-size:9.5pt}
 .page th{text-align:left;font-weight:600;color:#4E5871;border-bottom:.4mm solid #4E5871;padding:1.2mm 1.5mm;font-size:8.5pt;text-transform:uppercase;letter-spacing:.4px}
@@ -175,8 +186,8 @@ select.in{appearance:none;-webkit-appearance:none;background-image:url("data:ima
 .page .box.alert{border-color:#A30711;background:#FBF3F3}
 .page .box.note{background:#F5F3EC;border-color:#C9C4B6}
 .page .fg{display:grid;grid-template-columns:1fr 1fr;gap:1mm 6mm;font-size:9.5pt}
-.page .fg div{display:flex;gap:2mm;padding:.5mm 0;border-bottom:.2mm dotted #E8E4D9}
-.page .fg div span{color:#4E5871;flex:none;min-width:38mm}
+.page .fg div{display:flex;padding:.5mm 0;border-bottom:.2mm dotted #E8E4D9}
+.page .fg div span{color:#4E5871;flex:none;min-width:38mm;margin-right:2mm}
 .page .sigs{display:grid;grid-template-columns:1fr 1fr;gap:5mm;margin-top:3mm;break-inside:avoid}
 .page .sigb{border:.3mm solid #4E5871;border-radius:2mm;padding:2mm 3mm;min-height:32mm}
 .page .sigb h3{font-family:var(--sans);font-size:8.5pt;text-transform:uppercase;letter-spacing:.8px;color:#4E5871;margin:0 0 1.5mm}
@@ -184,7 +195,9 @@ select.in{appearance:none;-webkit-appearance:none;background-image:url("data:ima
 .page .sigb .nm{font-weight:600;font-size:10pt}
 .page .sigb small{display:block;color:#4E5871;font-size:8pt;line-height:1.35}
 .page .accept{font-size:7.4pt;color:#4E5871;line-height:1.3;margin-top:1.5mm}
-.page .pf{position:absolute;left:12mm;right:12mm;bottom:5mm;font-size:6.8pt;color:#4E5871;line-height:1.35;border-top:.2mm solid #E8E4D9;padding-top:1.5mm;display:flex;justify-content:space-between;gap:4mm}
+.page .pf{position:absolute;left:12mm;right:12mm;bottom:5mm;font-size:6.8pt;color:#4E5871;line-height:1.35;border-top:.2mm solid #E8E4D9;padding-top:1.5mm;display:flex;justify-content:space-between}
+.page .pf .pg{margin-left:4mm}
+.page .rgpd{font-size:6.8pt;color:#4E5871;line-height:1.3;margin-top:2mm;break-inside:avoid}
 .page .pf .pg{font-family:var(--mono);white-space:nowrap}
 .page .photos{display:grid;grid-template-columns:1fr 1fr;gap:4mm}
 .page figure{margin:0;break-inside:avoid}
@@ -198,7 +211,7 @@ select.in{appearance:none;-webkit-appearance:none;background-image:url("data:ima
   html,body{background:#fff;padding:0;margin:0}
   body>*:not(#printRoot){display:none!important}
   #printRoot{display:block!important}
-  .page{box-shadow:none;margin:0}
+  .page{box-shadow:none;margin:0;height:297mm;overflow:hidden}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
@@ -527,7 +540,9 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
   <div class="card">
     <h2>Anteriores</h2>
     <p class="hint" id="histHint">Os relatórios ficam só neste aparelho. Exporte-os para o escritório.</p>
+    <input class="in" id="histQ" placeholder="Procurar cliente, morada ou n.º" aria-label="Procurar relatório" style="margin:0 0 8px">
     <div class="list" id="histList"></div>
+    <button class="bt sm" id="btLimparAntigos" hidden style="margin-top:10px"></button>
     <div class="inl" style="margin-top:12px;flex-wrap:wrap">
       <button class="bt sm" id="btExportTudo">Exportar tudo (JSON)</button>
       <button class="bt sm" id="btImportar">Importar JSON</button>
@@ -558,7 +573,7 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
     <div class="f"><label for="cColegas">Colegas habituais (separados por vírgula)</label><input class="in" id="cColegas" data-c="colegas" placeholder="Leonardo, Rui"></div>
     <div class="f"><label for="cEmail">Email do escritório</label><input class="in" id="cEmail" data-c="email_escritorio" type="email" inputmode="email"></div>
     <div class="f"><span class="lbl">Assinatura guardada do técnico (opcional)</span>
-      <div class="sig" id="sigCfg"><canvas width="900" height="300"></canvas><div class="line"></div><div class="ph">Assine com o dedo</div></div>
+      <div class="sig" id="sigCfg"><canvas width="900" height="450" role="img" aria-label="Área de assinatura do técnico (definições)" tabindex="0"></canvas><div class="line"></div><div class="ph">Assine com o dedo</div></div>
       <div class="inl" style="margin-top:8px"><button class="bt sm" id="sigCfgClear">Limpar</button><span class="help">É aplicada com um toque ao emitir cada relatório.</span></div>
     </div>
     <button class="big ok" id="btConfigOk">Guardar definições</button>
@@ -627,10 +642,17 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
         <div class="f"><label for="kOutros">Outros técnicos</label><input class="in" id="kOutros" data-k="outros_tecnicos_txt" placeholder="nomes separados por vírgula"><div class="pills" style="margin-top:6px" id="colegasChips"></div></div>
       </div>
       <div class="g2">
-        <div class="f"><label for="kHIni">Hora de início <b>*</b></label><div class="inl"><input class="in" id="kHIni" data-k="hora_inicio" type="time" step="300"><button class="bt sm" data-now="hora_inicio">Agora</button></div></div>
+        <div class="f"><label for="kHIni">Hora de início <b>*</b></label><input class="in" id="kHIni" data-k="hora_inicio" type="time" step="300"><div class="pills" style="margin-top:6px"><button class="pill chip" data-ini="-30">−30 min</button><button class="pill chip" data-ini="-60">−1 h</button><button class="pill chip" data-ini="-120">−2 h</button></div><p class="help">Atalhos: subtraem à hora de fim (ou à hora atual).</p></div>
         <div class="f"><label for="kHFim">Hora de fim <b>*</b></label><div class="inl"><input class="in" id="kHFim" data-k="hora_fim" type="time" step="300"><button class="bt sm" data-now="hora_fim">Agora</button></div></div>
       </div>
       <div class="calc" id="calcDur"></div>
+      <button class="mais" data-more="moreMed">+ Medições (pressões, ΔT, corrente)</button>
+      <div class="more" id="moreMed"><div class="g2">
+        <div class="f"><label for="kPb">P. baixa (bar)</label><input class="in" id="kPb" data-k="medicoes.p_baixa" inputmode="decimal"></div>
+        <div class="f"><label for="kPa">P. alta (bar)</label><input class="in" id="kPa" data-k="medicoes.p_alta" inputmode="decimal"></div>
+        <div class="f"><label for="kDt">ΔT ar (°C)</label><input class="in" id="kDt" data-k="medicoes.delta_t" inputmode="decimal"></div>
+        <div class="f"><label for="kA">Corrente (A)</label><input class="in" id="kA" data-k="medicoes.corrente" inputmode="decimal"></div>
+      </div></div>
       <label class="tick"><input type="checkbox" id="kGas" data-k="houve_gas"> Houve manuseamento de gás refrigerante (recarga, recuperação, verificação de fugas)</label>
     </div>
   </details>
@@ -727,7 +749,10 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
       <button class="bt sm" id="btJson">Exportar JSON</button>
       <button class="bt sm" id="btShare" hidden>Partilhar JSON</button>
       <button class="bt sm" id="btPrev">Pré-visualizar</button>
+      <button class="bt sm" id="btCorrigir" hidden>Corrigir antes da validação</button>
+      <button class="bt sm" id="btValEmail" hidden>Registar validação recebida por email</button>
       <button class="bt sm" id="btRetificar">Retificar</button>
+      <button class="bt sm" id="btAnular" hidden style="color:var(--red-dk)">Anular</button>
     </div>
     <p class="help" id="entNote" style="margin-top:12px"></p>
   </div>
@@ -736,7 +761,8 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
 
 <!-- ═══ Barra fixa do formulário ═══ -->
 <div class="bar" id="bar">
-  <div class="info"><b id="barTitle">—</b><span id="barSub">Rascunho guardado automaticamente</span></div>
+  <div class="info" id="barInfo" role="button" tabindex="0"><b id="barTitle">—</b><span id="barSub">Rascunho guardado automaticamente</span></div>
+  <button class="ib" id="btCamBar" aria-label="Tirar fotografia" title="Tirar fotografia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button>
   <button class="bt red" id="btEmitir">Validar e assinar</button>
 </div>
 <div class="toast" id="toast"></div>
@@ -745,8 +771,9 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
 <div class="full" id="fullSig"><div class="wrap">
   <h2 style="font-size:22px;margin:6px 0 4px">Assinatura do técnico responsável</h2>
   <p class="hint" id="sigTecHint"></p>
-  <div class="legal">Declaro que a intervenção foi executada conforme descrito e, quando aplicável, que o manuseamento de gases fluorados foi efetuado por técnico certificado, com verificação de fugas e registo das quantidades.</div>
-  <div class="sig" id="sigTec"><canvas width="900" height="300"></canvas><div class="line"></div><div class="ph">Assine com o dedo</div></div>
+  <div class="legal" id="sigTecDecl"></div>
+  <p class="msg err" id="sigTecMsg" hidden></p>
+  <div class="sig" id="sigTec"><canvas width="900" height="450" role="img" aria-label="Área de assinatura do técnico" tabindex="0"></canvas><div class="line"></div><div class="ph">Assine com o dedo</div></div>
   <div class="inl" style="margin:10px 0"><button class="bt sm" id="sigTecClear">Limpar</button><button class="bt sm" id="sigTecUse" hidden>Usar a minha assinatura guardada</button></div>
   <button class="big ok" id="sigTecOk">Confirmar e emitir</button>
   <button class="big sec" id="sigTecCancel">Voltar</button>
@@ -762,9 +789,13 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
     <div class="f"><label for="aQual">Na qualidade de</label><select class="in" id="aQual"><option>O próprio / titular</option><option>Representante do cliente</option><option>Administração do condomínio</option><option>Responsável de manutenção</option><option>Outro</option></select></div>
   </div>
   <div class="f"><label for="aObs">Observações do cliente</label><textarea class="in" id="aObs" rows="2"></textarea></div>
-  <div class="legal" id="aceitTexto">Declaro que tomei conhecimento do conteúdo deste relatório (trabalho executado, materiais, registo de gases fluorados quando aplicável, trabalhos pendentes e recomendações) e que o aceito, atendendo às observações registadas. Os dados pessoais recolhidos destinam-se exclusivamente à execução, faturação e registo legal desta intervenção.</div>
+  <button class="bt sm" id="aceitVer" style="margin:0 0 10px">Ver o relatório completo</button>
+  <div class="prev" id="aceitPrev" hidden style="margin:0 0 12px"></div>
+  <div class="legal" id="aceitTexto"></div>
+  <div class="legal small" id="aceitRgpd"></div>
   <label class="tick"><input type="checkbox" id="aAceita"> Li e aceito</label>
-  <div class="sig" id="sigCli"><canvas width="900" height="300"></canvas><div class="line"></div><div class="ph">Assinatura do cliente</div></div>
+  <p class="msg err" id="aceitMsg" hidden></p>
+  <div class="sig" id="sigCli"><canvas width="900" height="450" role="img" aria-label="Área de assinatura do cliente" tabindex="0"></canvas><div class="line"></div><div class="ph">Assinatura do cliente</div></div>
   <div class="inl" style="margin:10px 0"><button class="bt sm" id="sigCliClear">Limpar</button></div>
   <button class="big ok" id="aceitOk">Confirmar aceitação</button>
   <button class="mais" id="aceitAlt">O cliente não pode assinar agora…</button>
@@ -790,17 +821,25 @@ var RI = (function () {
   'use strict';
   var VERSAO = 'FM-TEC-04 / V07';
   var SCHEMA = 'mdm-ri/1';
+  var HASH_VERSAO = 2;
   var EMPRESA = { nome: 'M.D.M. - Manuel Domingos Melancia, Lda', curto: 'MDM', nif: '502 644 761', morada: 'Alameda dos Oceanos 108 A, Edifício Vila do Oriente, 1990-426 Lisboa', tel: '218 935 050', email: 'mdmassist@mdmassist.com', legal: 'Soc. por quotas · Capital social 100.000 € · C.R.C. de Loures n.º 20 423 · NIF 502 644 761 · Alvará de construção n.º 49930' };
-  /* GWP (AR4) — base do cálculo de t CO2e no regime F-gas (Reg. (UE) 2024/573) */
-  var GWP = { R410A: 2088, R32: 675, R134a: 1430, R407C: 1774, R404A: 3922, R407F: 1825, R448A: 1387, R449A: 1397, R513A: 631, R1234yf: 4, R290: 3, R744: 1, R717: 0, R22: 1810 };
-  var REFRIGERANTES = ['R410A', 'R32', 'R134a', 'R407C', 'R404A', 'R407F', 'R448A', 'R449A', 'R513A', 'R1234yf', 'R290', 'R744', 'R717', 'R22', 'Outro'];
-  var ANEXO_I = ['R410A', 'R32', 'R134a', 'R407C', 'R404A', 'R407F', 'R448A', 'R449A', 'R513A'];
+  /* GWP conforme o Anexo I do Reg. (UE) 2024/573 (valores AR6 do IPCC) e misturas pelo Anexo VI.
+     Substituem os valores AR4 do Reg. 517/2014 (ex.: R32 675 → 771; R410A 2088 → 2256). Confirmar com o OC antes de publicar. */
+  var GWP = { R410A: 2256, R32: 771, R134a: 1526, R407C: 1906, R404A: 4728, R407F: 1964, R448A: 1494, R449A: 1496, R513A: 855, R407A: 2261, R507A: 4775, R417A: 2506, R422D: 2915, R427A: 2395, R452A: 2292, R454B: 531, R454C: 166, R455A: 169, R1234yf: 1, R1234ze: 1, R290: 1, R744: 1, R717: 0, R22: 1810 };
+  var REFRIGERANTES = ['R410A', 'R32', 'R134a', 'R407C', 'R404A', 'R407F', 'R448A', 'R449A', 'R513A', 'R407A', 'R507A', 'R417A', 'R422D', 'R427A', 'R452A', 'R454B', 'R454C', 'R455A', 'R1234yf', 'R1234ze', 'R290', 'R744', 'R717', 'R22', 'Outro'];
+  var ANEXO_I = ['R410A', 'R32', 'R134a', 'R407C', 'R404A', 'R407F', 'R448A', 'R449A', 'R513A', 'R407A', 'R507A', 'R417A', 'R422D', 'R427A', 'R452A', 'R454B', 'R454C', 'R455A'];
+  var ANEXO_II_I = ['R1234yf', 'R1234ze'];   /* HFO — verificação ≥ 1 kg (a confirmar com o OC) */
   var NATURAIS = ['R290', 'R744', 'R717'];
-  var HCFC = /^R\s?-?(22|12|502|123|124|141b?|142b?)\b/i;
+  /* HCFC/CFC e misturas com R22 (Reg. (CE) 1005/2009): apanha "R22", "HCFC-22", "R408A", "Freon 22"… */
+  var HCFC = /(^|[^A-Z0-9])(R|HCFC|CFC|FREON|FORANE|GENETRON)?\s?-?(22|12|123|124|141B|142B|401[ABC]|402[AB]|408A|409A|502)([^A-Z0-9]|$)/i;
   var CATEGORIAS = ['Split / multi-split', 'VRF / VRV', 'Chiller', 'Rooftop / UTA', 'Bomba de calor', 'Câmara frigorífica', 'Ventilação (sem gás)', 'Quadro elétrico', 'Outro'];
   var COM_GAS = ['Split / multi-split', 'VRF / VRV', 'Chiller', 'Rooftop / UTA', 'Bomba de calor', 'Câmara frigorífica', 'Outro'];
   /* sugestão modelo → refrigerante (só aviso; a chapa manda) */
   var SUGESTAO = [[/^MXZ-\d\w*VF/i, 'R410A'], [/^MXZ-\d\w*VG/i, 'R32'], [/^MSZ-(AP|EF|LN|AY|HR)/i, 'R32'], [/^MSZ-(SF|GF|GE|FH|EF\d+VE)/i, 'R410A'], [/^PUHZ-|^PUZ-(ZM|WM)/i, 'R32'], [/^PUHZ-(SW|RP|SHW)/i, 'R410A'], [/^RXM|^RXJ|^2MXM|^3MXM|^4MXM|^5MXM/i, 'R32'], [/^RXS|^RXZ|^RZQ|^RXYQ|^RXYSQ/i, 'R410A'], [/^PC\d{2}SQ|^PC\d{2}ST|^MU\dR|^MU\dM/i, 'R32'], [/^AR\d{2}TX/i, 'R32'], [/^VMH|^VMS/i, 'R32']];
+  var TEXTO_ACEITACAO = 'Declaro que tomei conhecimento do conteúdo deste relatório (trabalho executado, materiais, registo de gases fluorados quando aplicável, trabalhos pendentes e recomendações) e que o aceito, atendendo às observações registadas.';
+  var TEXTO_RGPD = 'Responsável pelo tratamento: M.D.M. - Manuel Domingos Melancia, Lda, NIF 502 644 761, Alameda dos Oceanos 108 A, 1990-426 Lisboa, mdmassist@mdmassist.com. Finalidades e fundamentos: execução do serviço e faturação (contrato e obrigações fiscais; conservação 10 anos) e registos de gases fluorados (art. 7.º do Reg. (UE) 2024/573 e DL n.º 145/2017; 5 anos), podendo ser facultados ao Organismo de Certificação e às autoridades competentes (APA / IGAMAOT). As fotografias limitam-se ao equipamento e ao local. Direitos de acesso, retificação, apagamento, limitação, oposição e portabilidade junto do responsável; reclamação à CNPD.';
+  var TEXTO_CONSERVACAO = 'Quando o equipamento está sujeito a verificação de fugas (art. 5.º), este registo serve de suporte aos registos do operador (art. 7.º), que o operador e a M.D.M. - Manuel Domingos Melancia, Lda conservam durante, pelo menos, 5 anos e facultam à autoridade competente quando solicitado. Não substitui a ficha do caderno de registo de intervenções do Organismo de Certificação (DL n.º 145/2017). GWP e limiares conforme os Anexos I e VI e o art. 5.º do Reg. (UE) 2024/573.';
+  function declaracaoTecnico(cert) { return 'Declaro que a intervenção foi executada conforme descrito e que o registo de gases fluorados, quando existente, reflete fielmente as operações efetuadas, as quantidades manuseadas e o resultado da verificação de fugas, quando realizada, tendo sido executadas por mim, técnico certificado' + (cert ? ' n.º ' + cert : '') + '.'; }
 
   function num(v) { if (v == null || v === '') return 0; if (typeof v === 'number') return isFinite(v) ? v : 0; var n = parseFloat(String(v).trim().replace(/\s/g, '').replace(',', '.')); return isFinite(n) ? n : 0; }
   function vazio(v) { return v == null || String(v).trim() === ''; }
@@ -811,30 +850,47 @@ var RI = (function () {
   function minutos(h) { if (!h || !/^\d{1,2}:\d{2}$/.test(h)) return null; var p = h.split(':'); return (+p[0]) * 60 + (+p[1]); }
   function duracao(ini, fim) { var a = minutos(ini), b = minutos(fim); if (a == null || b == null) return null; return b - a; }
   function fmtHM(min) { if (min == null || min < 0) return '—'; var h = Math.floor(min / 60), m = min % 60; return h + ':' + pad(m); }
-  function horaArred(date, cima) { var m = date.getHours() * 60 + date.getMinutes(); m = cima ? Math.ceil(m / 5) * 5 : Math.floor(m / 5) * 5; if (m >= 1440) m = 1435; return pad(Math.floor(m / 60)) + ':' + pad(m % 60); }
+  function minToHora(m) { m = Math.max(0, Math.min(1435, Math.round(m / 5) * 5)); return pad(Math.floor(m / 60)) + ':' + pad(m % 60); }
+  /* hora arredondada ao múltiplo de 5 min mais próximo (simétrico: não infla nem encolhe a duração) */
+  function horaArred(date) { return minToHora(date.getHours() * 60 + date.getMinutes()); }
   function isoDate(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
   function isoLocal(d) { return isoDate(d) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()); }
   function fmtData(iso) { if (!iso) return '—'; var p = String(iso).slice(0, 10).split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso; }
   function fmtDataHora(iso) { if (!iso) return '—'; var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(iso); return m ? m[3] + '/' + m[2] + '/' + m[1] + ' ' + m[4] + ':' + m[5] : iso; }
-  /* + n meses de calendário; se o dia não existir, último dia do mês (C-6/C-7) */
+  /* + n meses de calendário; se o dia não existir, último dia do mês */
   function addMonths(iso, n) { var p = String(iso).slice(0, 10).split('-').map(Number); if (p.length !== 3 || !p[0]) return null; var m = p[1] - 1 + n; var y = p[0] + Math.floor(m / 12); var mm = ((m % 12) + 12) % 12; var last = new Date(y, mm + 1, 0).getDate(); return y + '-' + pad(mm + 1) + '-' + pad(Math.min(p[2], last)); }
   function diasEntre(a, b) { var da = new Date(a + 'T00:00:00'), db = new Date(b + 'T00:00:00'); return Math.round((db - da) / 86400000); }
 
   function gwp(ref, manual) { if (!ref) return null; if (ref === 'Outro') { var g = num(manual); return g > 0 ? g : null; } return GWP.hasOwnProperty(ref) ? GWP[ref] : null; }
   function co2e(kg, g) { if (!num(kg) || g == null) return null; return round2(num(kg) * g / 1000); }
-  function isHCFC(ref, outro) { return ref === 'R22' || (ref === 'Outro' && HCFC.test(outro || '')); }
+  function isHCFC(ref, outro) { return ref === 'R22' || (ref === 'Outro' && HCFC.test(String(outro || ''))); }
   function temGas(eq) { return !!eq && COM_GAS.indexOf(eq.categoria) >= 0; }
-  /* Reg. (UE) 2024/573, art. 5.º — gases do Anexo I */
-  function verificacao(ref, t, hermetico, detecao, outro) {
-    if (!ref || t == null) return { obrigatoria: false, meses: null, texto: '—' };
-    if (isHCFC(ref, outro)) return { obrigatoria: false, meses: null, texto: 'n/a — HCFC fora do regime F-gas (Reg. (CE) 1005/2009)' };
+  function eqVazio(eq) { return !eq || ['marca', 'modelo', 'serie', 'refrigerante', 'carga_kg', 'localizacao'].every(function (k) { return vazio(eq[k]); }); }
+  /* Verificação de fugas: Reg. (UE) 2024/573 art. 5.º (Anexo I por t CO2e; Anexo II secção I por kg) e Reg. (CE) 1005/2009 art. 23.º (HCFC por kg) */
+  function verificacao(ref, t, hermetico, detecao, outro, kg) {
+    kg = num(kg);
+    if (!ref) return { obrigatoria: false, meses: null, texto: '—' };
+    if (isHCFC(ref, outro)) {
+      if (kg <= 0) return { obrigatoria: false, meses: null, texto: '— (indique a carga em kg)' };
+      if (kg < 3 || (hermetico && kg < 6)) return { obrigatoria: false, meses: null, texto: 'Não obrigatória (HCFC < 3 kg — Reg. (CE) 1005/2009, art. 23.º)' };
+      var mh = kg < 30 ? 12 : kg < 300 ? 6 : 3;
+      return { obrigatoria: true, meses: mh, texto: 'Obrigatória — cada ' + mh + ' meses (HCFC ≥ 3 kg — Reg. (CE) 1005/2009, art. 23.º)' };
+    }
     if (NATURAIS.indexOf(ref) >= 0) return { obrigatoria: false, meses: null, texto: 'Não aplicável (refrigerante natural)' };
-    if (ANEXO_I.indexOf(ref) < 0) return { obrigatoria: false, meses: null, texto: 'A confirmar com o Organismo de Certificação (gás fora do Anexo I)' };
-    if (t < 5) return { obrigatoria: false, meses: null, texto: 'Não obrigatória (< 5 t CO2e)' };
+    if (ANEXO_II_I.indexOf(ref) >= 0) {
+      if (kg <= 0) return { obrigatoria: false, meses: null, texto: '— (indique a carga em kg)' };
+      if (kg < 1 || (hermetico && kg < 2)) return { obrigatoria: false, meses: null, texto: 'Não obrigatória (Anexo II, secção I, < 1 kg)' };
+      var m2 = detecao ? 24 : 12;
+      return { obrigatoria: true, meses: m2, texto: 'Obrigatória — cada ' + m2 + ' meses (Anexo II, secção I, ≥ 1 kg) · a confirmar com o OC' };
+    }
+    if (t == null) return { obrigatoria: false, meses: null, texto: '— (indique a carga em kg' + (ref === 'Outro' ? ' e o GWP' : '') + ')' };
+    var naoCatalogado = ref === 'Outro' || ANEXO_I.indexOf(ref) < 0;
+    if (t < 5) return { obrigatoria: false, meses: null, texto: 'Não obrigatória (< 5 t CO2e)' + (naoCatalogado ? ' · gás não catalogado: aplicados os limiares do Anexo I, confirmar com o OC' : '') };
     if (hermetico && t < 10) return { obrigatoria: false, meses: null, texto: 'Não obrigatória (hermético rotulado, < 10 t CO2e)' };
     var meses = t < 50 ? (detecao ? 24 : 12) : t < 500 ? (detecao ? 12 : 6) : (detecao ? 6 : 3);
     var txt = 'Obrigatória — cada ' + meses + ' meses';
     if (t >= 500 && !detecao) txt += ' · sistema de deteção de fugas obrigatório (≥ 500 t CO2e)';
+    if (naoCatalogado) txt += ' · gás não catalogado: aplicados os limiares do Anexo I, confirmar com o OC';
     return { obrigatoria: true, meses: meses, texto: txt };
   }
   function sugestaoRefrigerante(modelo) { var m = String(modelo || '').trim(); if (!m) return null; for (var i = 0; i < SUGESTAO.length; i++) if (SUGESTAO[i][0].test(m)) return SUGESTAO[i][1]; return null; }
@@ -852,18 +908,20 @@ var RI = (function () {
   function outrosTecnicos(r) { return String(r.outros_tecnicos_txt || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean); }
   function tecnicos(r) { var t = [r.tecnico && r.tecnico.nome].filter(Boolean); return t.concat(outrosTecnicos(r)); }
   function equipGas(r) { var eqs = (r.equipamentos || []).filter(temGas); if (!eqs.length) return null; var id = r.fgas && r.fgas.equip_id; for (var i = 0; i < eqs.length; i++) if (eqs[i].id === id) return eqs[i]; return eqs[0]; }
+  function fugaAberta(f) { return !!f && f.verificacao === 'fuga' && (f.fuga_reparada !== 'sim' || f.ensaio_final === 'persiste'); }
   /* cálculo F-gas do equipamento ligado ao registo */
   function fgasCalc(r) {
     var eq = equipGas(r); if (!eq) return null;
     var g = gwp(eq.refrigerante, eq.gwp_manual), t = co2e(eq.carga_kg, g);
-    var v = verificacao(eq.refrigerante, t, !!eq.hermetico, !!eq.detecao, eq.refrigerante_outro);
-    var f = r.fgas || {}, out = { eq: eq, gwp: g, t: t, verif: v, reverif: null, proxima: null };
-    if (f.fuga_reparada === 'sim' && f.verificacao === 'fuga' && r.data_inicio) out.reverif = addMonths(r.data_inicio, 1);
-    if (v.obrigatoria && r.data_inicio && (f.verificacao === 'sem_fuga' || (f.verificacao === 'fuga' && f.fuga_reparada === 'sim' && f.ensaio_final === 'ok'))) out.proxima = addMonths(r.data_inicio, v.meses);
+    var v = verificacao(eq.refrigerante, t, !!eq.hermetico, !!eq.detecao, eq.refrigerante_outro, eq.carga_kg);
+    var f = r.fgas || {}, out = { eq: eq, gwp: g, t: t, verif: v, reverif: null, proxima: null, fugaAberta: fugaAberta(f) };
+    var reparadaOk = f.verificacao === 'fuga' && f.fuga_reparada === 'sim' && f.ensaio_final === 'ok';
+    if (reparadaOk && r.data_inicio) out.reverif = addMonths(r.data_inicio, 1);
+    if (v.obrigatoria && r.data_inicio && (f.verificacao === 'sem_fuga' || reparadaOk)) out.proxima = addMonths(r.data_inicio, v.meses);
     return out;
   }
   function sugestaoProxima(r) { var c = r.houve_gas ? fgasCalc(r) : null; if (!c) return null; return c.reverif || c.proxima; }
-  function cargaFinal(r) { var c = fgasCalc(r); if (!c) return null; var f = r.fgas || {}; var add = num(f.qty_add), rec = num(f.qty_rec); if (f.motivo === 'Desmantelamento') return 0; if (f.motivo === 'Instalação') return round2(add); var base = num(c.eq.carga_kg); if (f.destino_rec === 'Reintroduzido no mesmo equipamento') rec = 0; if (add > 0 && f.ensaio_final === 'ok') return base; return round2(Math.max(0, base - rec)); }
+  function cargaFinal(r) { var c = fgasCalc(r); if (!c) return null; var f = r.fgas || {}; var add = num(f.qty_add), rec = num(f.qty_rec), base = num(c.eq.carga_kg); if (f.motivo === 'Desmantelamento') return 0; if (f.motivo === 'Instalação') return base > 0 ? base : round2(add); if (f.destino_rec === 'Reintroduzido no mesmo equipamento') rec = 0; if (add > 0 && f.ensaio_final === 'ok') return base; return round2(Math.max(0, base - rec)); }
 
   /* ═══ Validações — devolve [{campo, msg, bloq}] ═══ */
   function validar(r, hoje) {
@@ -886,26 +944,31 @@ var RI = (function () {
     if (vazio(r.hora_fim)) add('hora_fim', "Registe a hora de fim — toque em 'Agora'.");
     var dur = duracao(r.hora_inicio, r.hora_fim);
     if (dur != null && dur <= 0) add('hora_fim', 'A hora de fim tem de ser posterior à de início (' + r.hora_inicio + '). Se a intervenção passou da meia-noite, divida o relatório.');
+    else if (dur != null && dur < 15) add('hora_inicio', 'Duração de ' + fmtHM(dur) + '. Confirme a hora de início (o relatório foi criado às ' + r.hora_inicio + ' — use os atalhos −30 min / −1 h / −2 h).', true);
     else if (dur != null && dur > 720) add('hora_fim', 'Duração de ' + fmtHM(dur) + '. Confirme as horas.', true);
-    var eqs = r.equipamentos || [];
+    var eqs = (r.equipamentos || []).filter(function (eq) { return r.houve_gas || !eqVazio(eq) || (r.equipamentos.length > 1); });
     eqs.forEach(function (eq, i) {
       var k = 'equipamentos.' + i;
       if (vazio(eq.categoria)) add(k + '.categoria', 'Equipamento ' + (i + 1) + ': escolha a categoria.');
-      if (temGas(eq) && eq.refrigerante === 'Outro' && !(num(eq.gwp_manual) > 0)) add(k + '.gwp_manual', 'Equipamento ' + (i + 1) + ': indique o GWP do gás (Anexo I/II do Reg. (UE) 2024/573 ou ficha de segurança).');
+      if (temGas(eq) && eq.refrigerante === 'Outro' && !(num(eq.gwp_manual) > 0) && !isHCFC('Outro', eq.refrigerante_outro)) add(k + '.gwp_manual', 'Equipamento ' + (i + 1) + ': indique o GWP do gás (Anexo I/II do Reg. (UE) 2024/573 ou ficha de segurança).');
       var sug = sugestaoRefrigerante(eq.modelo); if (sug && eq.refrigerante && eq.refrigerante !== sug) add(k + '.refrigerante', 'O modelo ' + eq.modelo + ' usa normalmente ' + sug + '. Confirme pela chapa de características.', true);
       if (temGas(eq) && eq.refrigerante && num(eq.carga_kg) > 0) { var t = co2e(eq.carga_kg, gwp(eq.refrigerante, eq.gwp_manual)); if (t != null && t >= 500 && !eq.detecao) add(k + '.detecao', 'Equipamento ' + (i + 1) + ': ≥ 500 t CO2e sem sistema de deteção de fugas (obrigatório — art. 5.º).', true); }
     });
     if (!eqs.length && r.tipo_intervencao !== 'Trabalho de bancada') add('equipamentos', 'Sem equipamento identificado. Recomendado indicar pelo menos categoria e modelo.', !r.houve_gas);
     if (r.houve_gas) {
-      var eq = equipGas(r);
+      var eq = equipGas(r), comGas = (r.equipamentos || []).filter(temGas);
       if (!eq) add('equipamentos', 'Com manuseamento de gás é obrigatório um equipamento com circuito frigorífico.');
       else {
         if (vazio(eq.refrigerante) || !(num(eq.carga_kg) > 0) || vazio(eq.modelo) || vazio(eq.serie)) add('equipamentos.gas', "Com manuseamento de gás são obrigatórios: refrigerante, carga (kg), modelo e n.º de série do equipamento (ou 'ILEGÍVEL' com fotografia da chapa).");
         if (String(eq.serie || '').trim().toUpperCase() === 'ILEGÍVEL' && !(r.fotos || []).some(function (p) { return p.categoria === 'Chapa de características'; })) add('fotos', "N.º de série 'ILEGÍVEL' só com fotografia da chapa de características.");
+        if (comGas.length > 1) add('equipamentos', 'Só o equipamento ' + ([eq.marca, eq.modelo].filter(Boolean).join(' ') || eq.categoria) + ' tem registo de gás. Faça um relatório por circuito ou confirme que os restantes não tiveram manuseamento nem verificação.', true);
       }
-      var qa = num(f.qty_add), qr = num(f.qty_rec), hcfc = eq ? isHCFC(eq.refrigerante, eq.refrigerante_outro) : false;
+      var qa = num(f.qty_add), qr = num(f.qty_rec), hcfc = eq ? isHCFC(eq.refrigerante, eq.refrigerante_outro) : false, base = eq ? num(eq.carga_kg) : 0, aberta = fugaAberta(f);
       if (vazio(f.tecnico_cert)) add('fgas.tecnico_cert', 'Indique o n.º do seu certificado F-gas (fica guardado para os próximos relatórios) — art. 10.º.');
+      else if (!vazio(r.tecnico && r.tecnico.cert) && f.tecnico_cert !== r.tecnico.cert) add('fgas.tecnico_cert', 'O n.º de certificado difere do das definições (' + r.tecnico.cert + '). Confirme.', true);
+      if (vazio(r.tecnico && r.tecnico.empresa_cert)) add('fgas.tecnico_cert', 'Falta o n.º de certificado F-gas da empresa nas definições (art. 10.º · DL n.º 145/2017).', true);
       if (vazio(f.motivo)) add('fgas.motivo', 'Indique o motivo do manuseamento de gás (art. 7.º).');
+      if (hcfc && f.motivo === 'Instalação') add('fgas.motivo', 'Não é possível registar a instalação de equipamento com HCFC (R22) — Reg. (CE) 1005/2009.');
       if (vazio(f.verificacao)) add('fgas.verificacao', 'Registe se a verificação de fugas foi efetuada e o resultado.');
       if ((f.verificacao === 'sem_fuga' || f.verificacao === 'fuga') && !(f.metodo && f.metodo.length)) add('fgas.metodo', 'Indique o método de verificação de fugas.');
       if (f.verificacao === 'nao' && vazio(f.motivo_nao)) add('fgas.motivo_nao', 'Indique porque não foi efetuada a verificação de fugas.');
@@ -913,26 +976,27 @@ var RI = (function () {
         if (vazio(f.fuga_local)) add('fgas.fuga_local', 'Indique o local da fuga.');
         if (vazio(f.fuga_reparada)) add('fgas.fuga_reparada', 'Indique se a fuga foi reparada nesta intervenção.');
         if (f.fuga_reparada === 'sim' && String(f.reparacao_desc || '').trim().length < 5) add('fgas.reparacao_desc', 'Descreva a reparação efetuada.');
-        if (f.fuga_reparada === 'nao' && r.obra_concluida === 'sim') add('obra_concluida', "Fuga por reparar: a obra não pode ficar 'concluída'. Registe o pendente.");
+        if (f.fuga_reparada === 'sim' && vazio(f.ensaio_final)) add('fgas.ensaio_final', 'Registe o ensaio de estanquidade após a reparação.');
+        if (aberta && r.obra_concluida === 'sim') add('obra_concluida', "Fuga por reparar (ou que persiste): a obra não pode ficar 'concluída'. Registe o pendente.");
       }
       if (qa > 0) {
         if (hcfc) add('fgas.qty_add', 'R22 (HCFC): é proibido carregar, mesmo reciclado, desde 01/01/2015 — Reg. (CE) n.º 1005/2009. Só pode registar a recuperação para regeneração/destruição.');
         if (f.verificacao === 'nao') add('fgas.verificacao', 'Não é possível registar uma recarga sem verificação de fugas (art. 5.º do Reg. (UE) 2024/573). Registe a verificação e, se houve fuga, a reparação.');
-        if (f.verificacao === 'fuga' && f.fuga_reparada !== 'sim') add('fgas.qty_add', 'Fuga por reparar: não registe recarga. Repare a fuga primeiro ou registe 0 kg.');
+        if (aberta) add('fgas.qty_add', 'Fuga por reparar (ou que persiste): não registe recarga. Repare a fuga primeiro ou registe 0 kg.');
         if (f.verificacao === 'fuga' && /não localizada/i.test(f.fuga_local || '')) add('fgas.qty_add', 'Fuga não localizada: não recarregar. Registe a recuperação (se aplicável) e agende nova visita.');
         if (f.ensaio_final !== 'ok') add('fgas.ensaio_final', 'Registe o ensaio de estanquidade final sem fuga antes de emitir (art. 5.º).');
         if (vazio(f.origem)) add('fgas.origem', 'Indique se o gás adicionado é virgem, reciclado ou regenerado (art. 7.º).');
         else if (f.origem !== 'Virgem' && (vazio(f.origem_inst) || vazio(f.origem_cert))) add('fgas.origem_inst', 'Gás reciclado/regenerado: indique o nome e morada da instalação e o seu n.º de certificado (art. 7.º).');
-        if (eq && num(eq.carga_kg) > 0 && qa > num(eq.carga_kg) * 1.1) add('fgas.qty_add', 'Adicionou ' + fmtNum(qa) + ' kg num equipamento com carga de ' + fmtNum(eq.carga_kg) + ' kg. Confirme as quantidades.', true);
+        if (base > 0 && qa > base * 1.1) add('fgas.qty_add', 'Adicionou ' + fmtNum(qa) + ' kg num equipamento com carga de ' + fmtNum(base) + ' kg. Confirme as quantidades.', true);
+        if (f.verificacao === 'sem_fuga' && qr === 0 && f.motivo !== 'Instalação') add('fgas.verificacao', 'Adicionou ' + fmtNum(qa) + ' kg sem fuga detetada nem recuperação prévia: a perda de carga indica fuga. Registe "fuga detetada" (local ou "Não localizada") ou a recuperação efetuada.', true);
       }
-      if (f.verificacao === 'fuga' && f.fuga_reparada === 'sim' && vazio(f.ensaio_final)) add('fgas.ensaio_final', 'Registe o ensaio de estanquidade após a reparação.');
       if (qr > 0 && vazio(f.destino_rec)) add('fgas.destino_rec', 'Indique o destino do gás recuperado.');
       if (hcfc && f.destino_rec === 'Reintroduzido no mesmo equipamento') add('fgas.destino_rec', 'R22 recuperado não pode ser reintroduzido: só regeneração ou destruição.');
-      if (f.motivo === 'Desmantelamento') { if (!(qr > 0)) add('fgas.qty_rec', 'Desmantelamento sem quantidade recuperada. Indique os kg recuperados e o destino.'); if (String(f.desmant_medidas || '').trim().length < 10) add('fgas.desmant_medidas', 'Descreva as medidas de recuperação e eliminação do gás (art. 7.º).'); }
+      if (f.motivo === 'Desmantelamento') { if (!(qr > 0)) add('fgas.qty_rec', 'Desmantelamento sem quantidade recuperada. Indique os kg recuperados e o destino.'); else if (base > 0 && qr < base * 0.7) add('fgas.qty_rec', 'Recuperou ' + fmtNum(qr) + ' kg de uma carga nominal de ' + fmtNum(base) + ' kg. Justifique a diferença nas medidas (fuga anterior, carga real inferior).', true); if (String(f.desmant_medidas || '').trim().length < 10) add('fgas.desmant_medidas', 'Descreva as medidas de recuperação e eliminação do gás (art. 7.º).'); }
       if (qa === 0 && qr === 0 && f.verificacao !== 'sem_fuga' && f.verificacao !== 'fuga' && f.motivo !== 'Desmantelamento') add('fgas.qty_add', 'Registo de gás sem quantidades nem verificação — confirme se houve mesmo manuseamento.', true);
-      if (!f.ficha_oc) add('fgas.ficha_oc', 'Não se esqueça da ficha do caderno de registo do OC (duplicado para o operador).', true);
+      if (!f.ficha_oc) add('fgas.ficha_oc', 'Não se esqueça da ficha do caderno de registo do OC (duplicado para o operador) — fica como pendente no relatório.', true);
     }
-    (r.materiais || []).forEach(function (m, i) { var k = 'materiais.' + i; if (vazio(m.designacao)) add(k, 'Material ' + (i + 1) + ': indique a designação.'); else if (/\bR\s?-?22\b/i.test(m.designacao)) add(k, 'R22 não pode ser fornecido nem aplicado (HCFC — Reg. (CE) 1005/2009).'); if (!(num(m.qty) > 0)) add(k, 'Material ' + (i + 1) + ': quantidade tem de ser maior que zero.'); });
+    (r.materiais || []).forEach(function (m, i) { var k = 'materiais.' + i; if (vazio(m.designacao)) add(k, 'Material ' + (i + 1) + ': indique a designação.'); else if (HCFC.test(m.designacao)) add(k, 'R22 / HCFC não pode ser fornecido nem aplicado (Reg. (CE) 1005/2009).'); if (!(num(m.qty) > 0)) add(k, 'Material ' + (i + 1) + ': quantidade tem de ser maior que zero.'); });
     var dl = r.deslocacao || {};
     if (dl.taxa === 'sim') { if (!matriculaValida(dl.matricula)) add('deslocacao.matricula', 'Indique a matrícula da viatura (ex.: AA-00-00).'); if (!(num(dl.km) > 0)) add('deslocacao.km', 'Taxa de deslocação: indique os km (ida e volta).'); }
     else if (!vazio(dl.matricula) && !matriculaValida(dl.matricula)) add('deslocacao.matricula', 'Matrícula inválida (ex.: AA-00-00).');
@@ -951,26 +1015,27 @@ var RI = (function () {
     var L = ['Relatório de Intervenção ' + r.numero + ' — ' + EMPRESA.curto, '', 'Cliente: ' + (c.nome || '—'), 'Local: ' + [c.morada, c.local].filter(Boolean).join(' · '), 'Data: ' + fmtData(r.data_inicio) + ' · ' + (r.hora_inicio || '') + '–' + (r.hora_fim || '') + ' (' + fmtHM(dur) + ')', 'Técnico: ' + tecnicos(r).join(', '), 'Tipo: ' + (r.tipo_intervencao || '—') + (c.contrato ? ' · contrato ' + c.contrato : '')];
     if (eq) L.push('Equipamento: ' + [eq.categoria, eq.marca, eq.modelo, eq.serie ? 'n.º ' + eq.serie : ''].filter(Boolean).join(' '));
     L.push('', 'Intervenção: ' + String(r.descricao || '').slice(0, 400));
-    if (r.houve_gas) { var f = r.fgas || {}, cc = fgasCalc(r); L.push('', 'Gases fluorados: ' + (cc && cc.eq ? cc.eq.refrigerante : '') + (cc && cc.t != null ? ' · ' + fmtNum(cc.eq.carga_kg) + ' kg = ' + fmtNum(cc.t) + ' t CO2e' : ''), 'Verificação de fugas: ' + ({ sem_fuga: 'efetuada, sem fuga', fuga: 'efetuada, fuga detetada' + (f.fuga_reparada === 'sim' ? ' e reparada' : ' — POR REPARAR'), nao: 'não efetuada' }[f.verificacao] || '—'), 'Adicionado: ' + fmtNum(f.qty_add) + ' kg' + (f.origem ? ' (' + f.origem.toLowerCase() + ')' : '') + ' · Recuperado: ' + fmtNum(f.qty_rec) + ' kg'); if (cc && cc.reverif) L.push('Nova verificação de fugas até: ' + fmtData(cc.reverif)); }
+    if (r.houve_gas) { var f = r.fgas || {}, cc = fgasCalc(r); L.push('', 'Gases fluorados: ' + (cc && cc.eq ? cc.eq.refrigerante : '') + (cc && cc.t != null ? ' · ' + fmtNum(cc.eq.carga_kg) + ' kg = ' + fmtNum(cc.t) + ' t CO2e' : ''), 'Verificação de fugas: ' + ({ sem_fuga: 'efetuada, sem fuga', fuga: 'efetuada, fuga detetada' + (fugaAberta(f) ? ' — POR REPARAR' : ' e reparada'), nao: 'não efetuada' }[f.verificacao] || '—'), 'Adicionado: ' + fmtNum(f.qty_add) + ' kg' + (f.origem ? ' (' + f.origem.toLowerCase() + ')' : '') + ' · Recuperado: ' + fmtNum(f.qty_rec) + ' kg'); if (cc && cc.reverif) L.push('Nova verificação de fugas até: ' + fmtData(cc.reverif)); }
     if ((r.materiais || []).length) L.push('', 'Materiais: ' + r.materiais.map(function (m) { return m.designacao + ' × ' + fmtNum(m.qty, 3).replace(/,?0+$/, '') + ' ' + (m.unidade || 'un'); }).join('; ') + (tot.incompleto ? ' (valores a definir pelo escritório)' : ' — total ' + fmtEur(tot.total) + ' s/ IVA'));
     L.push('', 'Obra concluída: ' + (r.obra_concluida === 'sim' ? 'Sim' : 'Não' + (r.pendentes ? ' — pendente: ' + r.pendentes : '')));
     if (r.proxima_visita) L.push('Próxima visita: ' + fmtData(r.proxima_visita));
-    L.push('', 'Estado: ' + estadoTexto(r), 'Ref.: ' + (r.hash ? r.hash.slice(0, 12) : '—'), '', 'PDF em anexo: ' + ficheiro(r) + '.pdf');
+    L.push('', 'Estado: ' + estadoTexto(r), 'Ref.: ' + (r.hash ? r.hash.slice(0, 12) : '—'), '', 'Anexar antes de enviar: ' + ficheiro(r) + '.pdf (Imprimir → Guardar PDF)');
     var body = L.join('\n'); if (body.length > 1700) body = body.slice(0, 1690) + '…';
     var to = (cfg && cfg.email_escritorio) || EMPRESA.email, cc2 = c.email && emailValido(c.email) ? c.email : '';
-    return { to: to, cc: cc2, subject: 'Relatório de Intervenção ' + r.numero + ' — ' + (c.nome || '') + ' — ' + fmtData(r.data_inicio), body: body, href: 'mailto:' + encodeURIComponent(to) + '?' + (cc2 ? 'cc=' + encodeURIComponent(cc2) + '&' : '') + 'subject=' + encodeURIComponent('Relatório de Intervenção ' + r.numero + ' — ' + (c.nome || '') + ' — ' + fmtData(r.data_inicio)) + '&body=' + encodeURIComponent(body) };
+    var subject = 'Relatório de Intervenção ' + r.numero + ' — ' + (c.nome || '') + ' — ' + fmtData(r.data_inicio);
+    return { to: to, cc: cc2, subject: subject, body: body, href: 'mailto:' + encodeURIComponent(to) + '?' + (cc2 ? 'cc=' + encodeURIComponent(cc2) + '&' : '') + 'subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body) };
   }
-  function estadoTexto(r) { return { rascunho: 'Rascunho', emitido: 'Emitido — aguarda validação do cliente', aceite: 'Aceite pelo cliente', recusado: 'Cliente recusou assinar', ausente: 'Cliente ausente — validação por email' }[r.estado] || r.estado || '—'; }
+  function estadoTexto(r) { if (r.retificado_por) return 'Retificado — substituído por ' + r.retificado_por; return { rascunho: 'Rascunho', emitido: 'Emitido — aguarda validação do cliente', aceite: 'Aceite pelo cliente', recusado: 'Cliente recusou assinar', ausente: 'Cliente ausente — validação por email' }[r.estado] || r.estado || '—'; }
 
   /* ═══ SHA-256 em JS puro (WebCrypto não existe em file:// em alguns browsers) ═══ */
   function sha256(str) {
     var K = [0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da, 0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967, 0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070, 0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2];
     var H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
-    var bytes = []; var u = unescape(encodeURIComponent(str)); for (var i = 0; i < u.length; i++) bytes.push(u.charCodeAt(i));
-    var l = bytes.length * 8; bytes.push(0x80); while (bytes.length % 64 !== 56) bytes.push(0);
-    for (var j = 7; j >= 0; j--) bytes.push(j >= 4 ? 0 : (l >>> (j * 8)) & 0xff);
-    var rotr = function (x, n) { return (x >>> n) | (x << (32 - n)); }, w = new Array(64);
-    for (var off = 0; off < bytes.length; off += 64) {
+    var u = unescape(encodeURIComponent(str)), n = u.length, len = ((n + 8) >> 6 << 6) + 64, bytes = new Uint8Array(len);
+    for (var i = 0; i < n; i++) bytes[i] = u.charCodeAt(i);
+    bytes[n] = 0x80; var l = n * 8; for (var j = 0; j < 4; j++) bytes[len - 1 - j] = (l >>> (j * 8)) & 0xff;
+    var rotr = function (x, k) { return (x >>> k) | (x << (32 - k)); }, w = new Int32Array(64);
+    for (var off = 0; off < len; off += 64) {
       for (var t = 0; t < 16; t++) w[t] = (bytes[off + t * 4] << 24) | (bytes[off + t * 4 + 1] << 16) | (bytes[off + t * 4 + 2] << 8) | bytes[off + t * 4 + 3];
       for (t = 16; t < 64; t++) { var s0 = rotr(w[t - 15], 7) ^ rotr(w[t - 15], 18) ^ (w[t - 15] >>> 3), s1 = rotr(w[t - 2], 17) ^ rotr(w[t - 2], 19) ^ (w[t - 2] >>> 10); w[t] = (w[t - 16] + s0 + w[t - 7] + s1) | 0; }
       var a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
@@ -979,15 +1044,25 @@ var RI = (function () {
     }
     return H.map(function (x) { return ('00000000' + (x >>> 0).toString(16)).slice(-8); }).join('');
   }
-  /* JSON canónico (chaves ordenadas) sem assinaturas do cliente nem imagens */
-  function canonico(r) { var omit = { aceitacao: 1, fotos: 1, hash: 1, atualizado_em: 1 }; var f = function (v) { if (Array.isArray(v)) return v.map(f); if (v && typeof v === 'object') { var o = {}; Object.keys(v).sort().forEach(function (k) { if (!(k in omit) && k !== 'png' && k !== 'dataUrl') o[k] = f(v[k]); }); return o; } return v; }; var c = f(r); c.fotos = (r.fotos || []).map(function (p) { return { id: p.id, categoria: p.categoria, legenda: p.legenda, datahora: p.datahora }; }); return JSON.stringify(c); }
+  /* JSON canónico: chaves ordenadas; fora ficam o estado e as datas posteriores à emissão, a aceitação do cliente
+     (coberta por hashAceitacao) e os binários — que entram pelo seu SHA-256 (assinatura do técnico, cada fotografia). */
+  function canonico(r) {
+    var omit = { aceitacao: 1, fotos: 1, hash: 1, hash_aceitacao: 1, hash_versao: 1, atualizado_em: 1, estado: 1, aceite_em: 1, exportado_em: 1, retificado_por: 1 };
+    var f = function (v) { if (Array.isArray(v)) return v.map(f); if (v && typeof v === 'object') { var o = {}; Object.keys(v).sort().forEach(function (k) { if (k in omit || k === 'dataUrl') return; if (k === 'png') { o.png_sha256 = sha256(String(v[k] || '')); return; } o[k] = f(v[k]); }); return o; } return v; };
+    var c = f(r);
+    c.fotos = (r.fotos || []).map(function (p) { return { id: p.id, categoria: p.categoria, legenda: p.legenda, datahora: p.datahora, sha256: sha256(String(p.dataUrl || '')) }; });
+    c.hash_versao = HASH_VERSAO;
+    return JSON.stringify(c);
+  }
   function hash(r) { return sha256(canonico(r)); }
+  function hashAceitacao(r) { var a = r.aceitacao || {}; return sha256([r.hash || '', sha256(String(a.png || '')), a.nome || '', a.qualidade || '', a.datahora || '', a.texto || '', a.observacoes || '', a.recusa || '', a.motivo || ''].join('|')); }
 
+  function equipamentoVazio(id) { return { id: id, categoria: 'Split / multi-split', marca: '', modelo: '', serie: '', localizacao: '', refrigerante: '', refrigerante_outro: '', gwp_manual: '', carga_kg: '', hermetico: false, detecao: false }; }
   function novo(cfg, ano, seq, agora) {
     var d = agora || new Date();
-    return { schema: SCHEMA, impresso: VERSAO, numero: numero(ano, cfg.codigo, seq), estado: 'rascunho', criado_em: isoLocal(d), atualizado_em: isoLocal(d), data_inicio: isoDate(d), hora_inicio: horaArred(d, false), hora_fim: '', tecnico: { nome: cfg.tecnico_nome || '', cert: cfg.tecnico_cert || '', oc: cfg.tecnico_oc || '' }, outros_tecnicos_txt: '', cliente: { nome: '', morada: '', local: '', contacto: '', email: '', nif: '', contrato: '', pessoa: '' }, tipo_intervencao: '', conforme_orcamento: 'sem', orcamento_numero: '', orcamento_desvio: '', pedido_origem: '', ref_interna: '', equipamentos: [], descricao: '', houve_gas: false, fgas: { equip_id: '', motivo: '', verificacao: '', motivo_nao: '', metodo: [], fuga_local: '', fuga_reparada: '', reparacao_desc: '', ensaio_final: '', qty_add: '', qty_rec: '', origem: '', origem_inst: '', origem_cert: '', destino_rec: '', desmant_medidas: '', garrafa: '', tecnico_cert: cfg.tecnico_cert || '', ficha_oc: false }, materiais: [], deslocacao: { taxa: '', matricula: cfg.matricula || '', km: '', tempo_min: '' }, obra_concluida: 'sim', pendentes: '', recomendacoes: '', proxima_visita: '', observacoes: '', fotos: [], assinatura_tecnico: null, aceitacao: null, hash: '', retifica: '', motivo_retificacao: '' };
+    return { schema: SCHEMA, impresso: VERSAO, numero: numero(ano, cfg.codigo, seq), estado: 'rascunho', criado_em: isoLocal(d), atualizado_em: isoLocal(d), data_inicio: isoDate(d), hora_inicio: horaArred(d), hora_fim: '', tecnico: { nome: cfg.tecnico_nome || '', cert: cfg.tecnico_cert || '', oc: cfg.tecnico_oc || '', empresa_cert: cfg.empresa_cert || '' }, outros_tecnicos_txt: '', cliente: { nome: '', morada: '', local: '', contacto: '', email: '', nif: '', contrato: '', pessoa: '' }, tipo_intervencao: '', conforme_orcamento: 'sem', orcamento_numero: '', orcamento_desvio: '', pedido_origem: '', ref_interna: '', equipamentos: [equipamentoVazio('e1')], descricao: '', medicoes: { p_baixa: '', p_alta: '', delta_t: '', corrente: '' }, houve_gas: false, fgas: { equip_id: '', motivo: '', verificacao: '', motivo_nao: '', metodo: [], fuga_local: '', fuga_reparada: '', reparacao_desc: '', ensaio_final: '', qty_add: '', qty_rec: '', origem: '', origem_inst: '', origem_cert: '', destino_rec: '', desmant_medidas: '', garrafa: '', tecnico_cert: cfg.tecnico_cert || '', ficha_oc: false }, materiais: [], deslocacao: { taxa: '', matricula: cfg.matricula || '', km: '', tempo_min: '' }, obra_concluida: 'sim', pendentes: '', recomendacoes: '', proxima_visita: '', observacoes: '', fotos: [], assinatura_tecnico: null, aceitacao: null, hash: '', hash_aceitacao: '', retifica: '', motivo_retificacao: '' };
   }
-  return { VERSAO: VERSAO, SCHEMA: SCHEMA, EMPRESA: EMPRESA, GWP: GWP, REFRIGERANTES: REFRIGERANTES, CATEGORIAS: CATEGORIAS, num: num, vazio: vazio, round2: round2, pad: pad, fmtNum: fmtNum, fmtEur: fmtEur, minutos: minutos, duracao: duracao, fmtHM: fmtHM, horaArred: horaArred, isoDate: isoDate, isoLocal: isoLocal, fmtData: fmtData, fmtDataHora: fmtDataHora, addMonths: addMonths, diasEntre: diasEntre, gwp: gwp, co2e: co2e, isHCFC: isHCFC, temGas: temGas, verificacao: verificacao, sugestaoRefrigerante: sugestaoRefrigerante, numero: numero, slug: slug, ficheiro: ficheiro, nifValido: nifValido, telValido: telValido, telFmt: telFmt, emailValido: emailValido, matriculaNorm: matriculaNorm, matriculaValida: matriculaValida, linhaTotal: linhaTotal, totais: totais, outrosTecnicos: outrosTecnicos, tecnicos: tecnicos, equipGas: equipGas, fgasCalc: fgasCalc, sugestaoProxima: sugestaoProxima, cargaFinal: cargaFinal, validar: validar, bloqueantes: bloqueantes, emailResumo: emailResumo, estadoTexto: estadoTexto, sha256: sha256, canonico: canonico, hash: hash, novo: novo };
+  return { VERSAO: VERSAO, SCHEMA: SCHEMA, HASH_VERSAO: HASH_VERSAO, EMPRESA: EMPRESA, GWP: GWP, REFRIGERANTES: REFRIGERANTES, CATEGORIAS: CATEGORIAS, TEXTO_ACEITACAO: TEXTO_ACEITACAO, TEXTO_RGPD: TEXTO_RGPD, TEXTO_CONSERVACAO: TEXTO_CONSERVACAO, declaracaoTecnico: declaracaoTecnico, num: num, vazio: vazio, round2: round2, pad: pad, fmtNum: fmtNum, fmtEur: fmtEur, minutos: minutos, duracao: duracao, fmtHM: fmtHM, minToHora: minToHora, horaArred: horaArred, isoDate: isoDate, isoLocal: isoLocal, fmtData: fmtData, fmtDataHora: fmtDataHora, addMonths: addMonths, diasEntre: diasEntre, gwp: gwp, co2e: co2e, isHCFC: isHCFC, temGas: temGas, eqVazio: eqVazio, verificacao: verificacao, sugestaoRefrigerante: sugestaoRefrigerante, numero: numero, slug: slug, ficheiro: ficheiro, nifValido: nifValido, telValido: telValido, telFmt: telFmt, emailValido: emailValido, matriculaNorm: matriculaNorm, matriculaValida: matriculaValida, linhaTotal: linhaTotal, totais: totais, outrosTecnicos: outrosTecnicos, tecnicos: tecnicos, equipGas: equipGas, fugaAberta: fugaAberta, fgasCalc: fgasCalc, sugestaoProxima: sugestaoProxima, cargaFinal: cargaFinal, validar: validar, bloqueantes: bloqueantes, emailResumo: emailResumo, estadoTexto: estadoTexto, sha256: sha256, canonico: canonico, hash: hash, hashAceitacao: hashAceitacao, equipamentoVazio: equipamentoVazio, novo: novo };
 })();
 if (typeof module !== 'undefined' && module.exports) module.exports = RI;
 </script>
@@ -999,146 +1074,173 @@ if (typeof module !== 'undefined' && module.exports) module.exports = RI;
   var $ = function (id) { return document.getElementById(id); };
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var DATA_IMG = /^data:image\/(?:jpeg|png);base64,[A-Za-z0-9+\/]+=*$/;
+  var imgSrc = function (d) { return DATA_IMG.test(d || '') ? d : ''; };
   var LOGO = document.getElementById('logoTop') ? document.getElementById('logoTop').innerHTML : '';
 
-  /* ── armazenamento: localStorage (config, rascunho, índices) + IndexedDB (relatórios, fotos) ── */
+  /* ── armazenamento: localStorage (config, rascunho, índices) + IndexedDB (relatórios, fotos) com fallback ── */
   var LS = { get: function (k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set: function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }, del: function (k) { try { localStorage.removeItem(k); } catch (e) {} } };
-  var K = { cfg: 'mdm_ri_config', draft: 'mdm_ri_draft', cli: 'mdm_ri_clientes', mat: 'mdm_ri_materiais', anul: 'mdm_ri_anulados', fallback: 'mdm_ri_relatorios_fallback' };
+  var K = { cfg: 'mdm_ri_config', draft: 'mdm_ri_draft', cli: 'mdm_ri_clientes', mat: 'mdm_ri_materiais', anul: 'mdm_ri_anulados', ultimo: 'mdm_ri_ultimo', fallback: 'mdm_ri_relatorios_fallback', fallbackBlobs: 'mdm_ri_blobs_fallback' };
   var DB = (function () {
     var db = null, falhou = false;
-    function open() { return new Promise(function (res) { if (db) return res(db); if (falhou || !window.indexedDB) return res(null); try { var rq = indexedDB.open('mdm_ri', 1); rq.onupgradeneeded = function (e) { var d = e.target.result; if (!d.objectStoreNames.contains('relatorios')) d.createObjectStore('relatorios', { keyPath: 'numero' }); if (!d.objectStoreNames.contains('blobs')) d.createObjectStore('blobs', { keyPath: 'id' }); }; rq.onsuccess = function (e) { db = e.target.result; res(db); }; rq.onerror = function () { falhou = true; res(null); }; } catch (e) { falhou = true; res(null); } }); }
-    function tx(store, mode, fn) { return open().then(function (d) { if (!d) return null; return new Promise(function (res, rej) { var t = d.transaction(store, mode), s = t.objectStore(store), r = fn(s); t.oncomplete = function () { res(r && r.result !== undefined ? r.result : r); }; t.onerror = function () { rej(t.error); }; }); }); }
+    function open() { return new Promise(function (res) { if (db) return res(db); if (falhou || !window.indexedDB) return res(null); try { var rq = indexedDB.open('mdm_ri', 1); rq.onupgradeneeded = function (e) { var d = e.target.result; if (!d.objectStoreNames.contains('relatorios')) d.createObjectStore('relatorios', { keyPath: 'numero' }); if (!d.objectStoreNames.contains('blobs')) d.createObjectStore('blobs', { keyPath: 'id' }); }; rq.onsuccess = function (e) { db = e.target.result; res(db); }; rq.onerror = function () { falhou = true; res(null); }; rq.onblocked = function () { falhou = true; res(null); }; } catch (e) { falhou = true; res(null); } }); }
+    function tx(store, mode, fn) { return open().then(function (d) { if (!d) return undefined; return new Promise(function (res, rej) { try { var t = d.transaction(store, mode), st = t.objectStore(store), r = fn(st); t.oncomplete = function () { res(r && 'result' in r ? r.result : r); }; t.onerror = function () { rej(t.error); }; t.onabort = function () { rej(t.error || new Error('abort')); }; } catch (e) { rej(e); } }); }); }
+    var fkey = function (store) { return store === 'relatorios' ? K.fallback : K.fallbackBlobs; };
+    var keyOf = function (store, obj) { return store === 'relatorios' ? obj.numero : obj.id; };
     return {
-      put: function (store, obj) { return tx(store, 'readwrite', function (s) { return s.put(obj); }).then(function (r) { if (r === null && store === 'relatorios') { var all = LS.get(K.fallback, {}); all[obj.numero] = obj; LS.set(K.fallback, all); } return r; }); },
-      get: function (store, key) { return tx(store, 'readonly', function (s) { return s.get(key); }).then(function (r) { if (r === null && store === 'relatorios') return LS.get(K.fallback, {})[key] || null; return r || null; }); },
-      del: function (store, key) { return tx(store, 'readwrite', function (s) { return s.delete(key); }).then(function (r) { if (r === null && store === 'relatorios') { var all = LS.get(K.fallback, {}); delete all[key]; LS.set(K.fallback, all); } }); },
-      all: function (store) { return tx(store, 'readonly', function (s) { return s.getAll(); }).then(function (r) { if (r === null && store === 'relatorios') { var all = LS.get(K.fallback, {}); return Object.keys(all).map(function (k) { return all[k]; }); } return r || []; }); },
+      disponivel: function () { return open().then(function (d) { return !!d; }); },
+      put: function (store, obj) { return tx(store, 'readwrite', function (st) { return st.put(obj); }).then(function (r) { if (r !== undefined) return r; var all = LS.get(fkey(store), {}); all[keyOf(store, obj)] = obj; if (!LS.set(fkey(store), all)) throw new Error('QuotaExceeded'); return keyOf(store, obj); }); },
+      get: function (store, key) { return tx(store, 'readonly', function (st) { return st.get(key); }).then(function (r) { if (r === undefined) return LS.get(fkey(store), {})[key] || null; return r == null ? null : r; }); },
+      del: function (store, key) { return tx(store, 'readwrite', function (st) { return st.delete(key); }).then(function (r) { if (r === undefined) { var all = LS.get(fkey(store), {}); delete all[key]; LS.set(fkey(store), all); } }); },
+      all: function (store) { return tx(store, 'readonly', function (st) { return st.getAll(); }).then(function (r) { if (r === undefined) { var all = LS.get(fkey(store), {}); return Object.keys(all).map(function (k) { return all[k]; }); } return r || []; }); },
       clear: function () { return open().then(function (d) { if (d) { d.close(); db = null; } return new Promise(function (res) { try { var rq = indexedDB.deleteDatabase('mdm_ri'); rq.onsuccess = rq.onerror = rq.onblocked = function () { res(); }; } catch (e) { res(); } }); }); }
     };
   })();
 
   /* ── estado ── */
-  var cfg = LS.get(K.cfg, { tecnico_nome: '', codigo: '', seq_proximo: 1, tecnico_cert: '', tecnico_oc: 'APIRAC', empresa_cert: '', matricula: '', tecnico_tel: '', colegas: '', email_escritorio: RI.EMPRESA.email, assinatura: '', contadores: {} });
-  var R = null, tentou = false, saveTimer = null, fotoSel = null;
+  var cfg = LS.get(K.cfg, { tecnico_nome: '', codigo: '', seq_proximo: 1, seq_ano: 0, tecnico_cert: '', tecnico_oc: 'APIRAC', empresa_cert: '', matricula: '', tecnico_tel: '', colegas: '', email_escritorio: RI.EMPRESA.email, assinatura: '', contadores: {} });
+  var R = null, tentou = false, saveTimer = null, semIDB = false;
   function get(o, p) { return p.split('.').reduce(function (a, k) { return a == null ? undefined : a[k]; }, o); }
   function set(o, p, v) { var ks = p.split('.'), a = o; for (var i = 0; i < ks.length - 1; i++) { if (a[ks[i]] == null) a[ks[i]] = /^\d+$/.test(ks[i + 1]) ? [] : {}; a = a[ks[i]]; } a[ks[ks.length - 1]] = v; }
   function toast(m, ms) { var t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(function () { t.classList.remove('on'); }, ms || 2200); }
   function show(id) { $$('.screen').forEach(function (s) { s.classList.toggle('on', s.id === id); }); $('bar').classList.toggle('on', id === 'sForm'); window.scrollTo(0, 0); $('ttSub').textContent = id === 'sForm' && R ? R.numero + ' · ' + RI.estadoTexto(R) : 'MDM · Assistência Técnica'; }
   function hoje() { return RI.isoDate(new Date()); }
+  function lerTexto(f) { return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(fr.result); }; fr.onerror = rej; fr.readAsText(f); }); }
+  function msgInline(id, texto) { var m = $(id); if (!m) return; if (!texto) { m.hidden = true; m.textContent = ''; return; } m.textContent = texto; m.hidden = false; m.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
 
   /* ── assinatura (canvas, pointer events) ── */
   function SigPad(wrap) {
     var cv = wrap.querySelector('canvas'), ctx = cv.getContext('2d'), self = this, draw = false, last = null;
-    this.pontos = 0; this.percurso = 0;
+    this.pontos = 0; this.percurso = 0; this.origem = 'manual';
     function pos(e) { var r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) * cv.width / r.width, y: (e.clientY - r.top) * cv.height / r.height }; }
-    function reset() { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height); ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#141D2E'; }
+    function reset() { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cv.width, cv.height); ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#141D2E'; }
     reset();
-    cv.addEventListener('pointerdown', function (e) { draw = true; last = pos(e); self.pontos++; wrap.classList.add('has'); try { cv.setPointerCapture(e.pointerId); } catch (x) {} e.preventDefault(); });
+    cv.addEventListener('pointerdown', function (e) { draw = true; last = pos(e); self.pontos++; self.origem = 'manual'; wrap.classList.add('has'); try { cv.setPointerCapture(e.pointerId); } catch (x) {} e.preventDefault(); });
     cv.addEventListener('pointermove', function (e) { if (!draw) return; var p = pos(e); ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); self.percurso += Math.hypot(p.x - last.x, p.y - last.y); self.pontos++; last = p; e.preventDefault(); });
     var up = function () { draw = false; }; cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up); cv.addEventListener('pointerleave', up);
-    this.clear = function () { reset(); self.pontos = 0; self.percurso = 0; wrap.classList.remove('has'); };
+    this.clear = function () { reset(); self.pontos = 0; self.percurso = 0; self.origem = 'manual'; wrap.classList.remove('has'); };
     this.valida = function () { return self.pontos >= 8 && self.percurso >= 60; };
     this.png = function () { return cv.toDataURL('image/png'); };
-    this.load = function (dataUrl) { if (!dataUrl) return; var im = new Image(); im.onload = function () { reset(); ctx.drawImage(im, 0, 0, cv.width, cv.height); self.pontos = 99; self.percurso = 999; wrap.classList.add('has'); }; im.src = dataUrl; };
+    this.load = function (dataUrl) { if (!imgSrc(dataUrl)) return; var im = new Image(); im.onload = function () { reset(); ctx.drawImage(im, 0, 0, cv.width, cv.height); self.pontos = 99; self.percurso = 999; self.origem = 'guardada'; wrap.classList.add('has'); }; im.src = dataUrl; };
   }
   var sigCfg = new SigPad($('sigCfg')), sigTec = new SigPad($('sigTec')), sigCli = new SigPad($('sigCli'));
   $('sigCfgClear').onclick = function () { sigCfg.clear(); cfg.assinatura = ''; };
-  $('sigTecClear').onclick = function () { sigTec.clear(); };
-  $('sigCliClear').onclick = function () { sigCli.clear(); };
+  $('sigTecClear').onclick = function () { sigTec.clear(); msgInline('sigTecMsg'); };
+  $('sigCliClear').onclick = function () { sigCli.clear(); msgInline('aceitMsg'); };
 
   /* ── definições ── */
   function cfgRender() { $$('[data-c]').forEach(function (el) { el.value = cfg[el.dataset.c] == null ? '' : cfg[el.dataset.c]; }); if (cfg.assinatura) sigCfg.load(cfg.assinatura); else sigCfg.clear(); storageInfo(); }
   function cfgRead() { $$('[data-c]').forEach(function (el) { var v = el.value.trim(); if (el.dataset.c === 'codigo') v = v.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 3); if (el.dataset.c === 'matricula') v = RI.matriculaNorm(v); if (el.dataset.c === 'seq_proximo') v = Math.max(1, parseInt(v, 10) || 1); cfg[el.dataset.c] = v; }); if (sigCfg.pontos > 0 && sigCfg.valida()) cfg.assinatura = sigCfg.png(); }
-  function storageInfo() { var el = $('storageInfo'); if (navigator.storage && navigator.storage.estimate) navigator.storage.estimate().then(function (e) { el.textContent = 'Espaço usado neste aparelho: ' + Math.round((e.usage || 0) / 1048576) + ' MB de ' + Math.round((e.quota || 0) / 1048576) + ' MB.'; }); }
+  function storageInfo() { var el = $('storageInfo'); if (navigator.storage && navigator.storage.estimate) navigator.storage.estimate().then(function (e) { el.textContent = 'Espaço usado neste aparelho: ' + Math.round((e.usage || 0) / 1048576) + ' MB de ' + Math.round((e.quota || 0) / 1048576) + ' MB.' + (semIDB ? ' Atenção: sem base de dados local (IndexedDB) — capacidade muito limitada, exporte após cada relatório.' : ''); }); }
   $('btConfig').onclick = function () { cfgRender(); show('sConfig'); };
-  $('btConfigOk').onclick = function () { cfgRead(); if (!cfg.tecnico_nome || !cfg.codigo) { toast('Preencha o nome do técnico e o código do aparelho.'); return; } if (!cfg.codigo) cfg.codigo = 'X'; LS.set(K.cfg, cfg); toast('Definições guardadas'); home(); };
+  $('btConfigOk').onclick = function () { cfgRead(); if (!cfg.tecnico_nome || !cfg.codigo) { toast('Preencha o nome do técnico e o código do aparelho.'); return; } LS.set(K.cfg, cfg); toast('Definições guardadas'); home(); };
   $('btCfgExport').onclick = function () { cfgRead(); download('mdm-ri-definicoes-' + (cfg.codigo || 'X') + '.json', JSON.stringify({ schema: 'mdm-ri-config/1', config: cfg }, null, 1)); };
   $('btCfgImport').onclick = function () { $('fileCfg').click(); };
-  $('fileCfg').onchange = function () { var f = this.files[0]; if (!f) return; f.text().then(function (t) { var o = JSON.parse(t); if (!o || !o.config) throw 0; cfg = Object.assign(cfg, o.config); LS.set(K.cfg, cfg); cfgRender(); toast('Definições importadas'); }).catch(function () { toast('Ficheiro de definições inválido'); }); this.value = ''; };
-  $('btApagarTudo').onclick = function () { if (!confirm('Apagar TODOS os relatórios, fotografias, rascunho e sugestões deste aparelho? Exporte primeiro. Esta ação não se desfaz.')) return; if (!confirm('Confirma apagar tudo?')) return; DB.clear().then(function () { [K.draft, K.cli, K.mat, K.anul, K.fallback].forEach(LS.del); toast('Tudo apagado'); home(); }); };
+  $('fileCfg').onchange = function () { var f = this.files[0]; this.value = ''; if (!f) return; lerTexto(f).then(function (t) { var o = JSON.parse(t); if (!o || !o.config || typeof o.config !== 'object') throw 0; var c = o.config; /* o código e os contadores são deste aparelho: nunca se importam (evita números repetidos) */ delete c.codigo; delete c.contadores; delete c.seq_proximo; delete c.seq_ano; if (c.assinatura && !imgSrc(c.assinatura)) delete c.assinatura; cfg = Object.assign(cfg, c); LS.set(K.cfg, cfg); cfgRender(); toast('Definições importadas (código e numeração deste aparelho mantidos)', 3500); }).catch(function () { toast('Ficheiro de definições inválido'); }); };
+  $('btApagarTudo').onclick = function () { if (!confirm('Apagar TODOS os relatórios, fotografias, rascunho e sugestões deste aparelho? Exporte primeiro. Esta ação não se desfaz.')) return; if (!confirm('Confirma apagar tudo?')) return; DB.clear().then(function () { [K.draft, K.cli, K.mat, K.anul, K.ultimo, K.fallback, K.fallbackBlobs].forEach(LS.del); toast('Tudo apagado'); home(); }); };
+
+  /* ── numeração: contador anual por aparelho ── */
+  function novoRelatorio() { var ano = new Date().getFullYear(); cfg.contadores = cfg.contadores || {}; if (cfg.seq_ano !== ano) { cfg.seq_ano = ano; cfg.seq_proximo = 1; } var seq = Math.max(cfg.contadores[ano] || 0, (cfg.seq_proximo || 1) - 1) + 1; cfg.contadores[ano] = seq; cfg.seq_proximo = seq + 1; LS.set(K.cfg, cfg); return RI.novo(cfg, ano, seq); }
+  function anular(r, motivo) { var an = LS.get(K.anul, []); an.push({ numero: r.numero, quando: RI.isoLocal(new Date()), motivo: motivo }); LS.set(K.anul, an.slice(-500)); }
+  /* o rascunho em curso nunca se perde: passa para o histórico como 'rascunho' e retoma-se de lá */
+  function arquivarRascunhoAtual() { var d = LS.get(K.draft, null); if (!d) return Promise.resolve(); var r = d; return carregarFotos(r).then(function () { return DB.put('relatorios', r); }).then(function () { LS.del(K.draft); }).catch(function () { toast('Não foi possível guardar o rascunho anterior. Exporte-o primeiro.', 4000); throw new Error('rascunho'); }); }
+  function carregarFotos(r) { if (!r || !r.fotos || !r.fotos.length) return Promise.resolve(0); var antes = r.fotos.length; return Promise.all(r.fotos.map(function (p) { if (p.dataUrl) return null; return DB.get('blobs', p.id).then(function (b) { if (b && imgSrc(b.dataUrl)) p.dataUrl = b.dataUrl; }); })).then(function () { r.fotos = r.fotos.filter(function (p) { return imgSrc(p.dataUrl); }); return antes - r.fotos.length; }); }
 
   /* ── início / histórico ── */
-  function home() { var d = LS.get(K.draft, null); $('homeDraft').hidden = !d; if (d) $('btContinuarTxt').textContent = 'Continuar ' + d.numero + (d.cliente && d.cliente.nome ? ' — ' + d.cliente.nome : ''); DB.all('relatorios').then(function (all) { all.sort(function (a, b) { return (b.criado_em || '').localeCompare(a.criado_em || ''); }); $('btDuplicar').hidden = !all.length; var h = all.slice(0, 40).map(function (r) { return '<button class="row" data-open="' + esc(r.numero) + '"><span class="n">' + esc(r.numero.replace(/^RI-\d{4}-/, '')) + '</span><span class="t"><b>' + esc(r.cliente && r.cliente.nome || '—') + '</b><small>' + esc(RI.fmtData(r.data_inicio)) + ' · ' + esc((r.equipamentos || []).map(function (e) { return [e.marca, e.modelo].filter(Boolean).join(' '); }).filter(Boolean).join(', ') || r.tipo_intervencao || '') + (r.houve_gas ? ' · gás' : '') + '</small></span><span class="badge ' + esc(r.estado) + '">' + esc(r.estado) + '</span></button>'; }).join(''); $('histList').innerHTML = h || '<p class="help">Ainda não há relatórios neste aparelho.</p>'; $('histHint').textContent = all.length ? all.length + ' relatório(s) neste aparelho · ' + all.filter(function (r) { return !r.exportado_em; }).length + ' por exportar' : 'Os relatórios ficam só neste aparelho. Exporte-os para o escritório.'; $$('[data-open]').forEach(function (b) { b.onclick = function () { DB.get('relatorios', b.dataset.open).then(function (r) { if (!r) return; R = r; entrega(); }); }; }); }); show('sHome'); }
+  var histTodos = [];
+  function home() {
+    var d = LS.get(K.draft, null); $('homeDraft').hidden = !d; if (d) $('btContinuarTxt').textContent = 'Continuar ' + d.numero + (d.cliente && d.cliente.nome ? ' — ' + d.cliente.nome : '');
+    DB.all('relatorios').then(function (all) { all.sort(function (a, b) { return (b.criado_em || '').localeCompare(a.criado_em || ''); }); histTodos = all; $('btDuplicar').hidden = !all.length; renderHist(); var lim = RI.addMonths(hoje(), -3); var velhos = all.filter(function (r) { return r.exportado_em && r.exportado_em.slice(0, 10) < lim && r.estado !== 'rascunho'; }); $('btLimparAntigos').hidden = !velhos.length; $('btLimparAntigos').textContent = 'Apagar ' + velhos.length + ' relatório(s) já exportados há mais de 90 dias (RGPD)'; $('btLimparAntigos').onclick = function () { if (!confirm('Apagar do aparelho ' + velhos.length + ' relatório(s) já exportados há mais de 90 dias? O arquivo é o do escritório.')) return; Promise.all(velhos.map(function (r) { return DB.del('relatorios', r.numero); })).then(home); }; });
+    show('sHome');
+  }
+  function renderHist() { var q = ($('histQ').value || '').trim().toLowerCase(); var lista = histTodos.filter(function (r) { if (!q) return true; return [r.numero, r.cliente && r.cliente.nome, r.cliente && r.cliente.morada].join(' ').toLowerCase().indexOf(q) >= 0; }); if (!q) lista = lista.slice(0, 60); var h = lista.map(function (r) { var est = r.retificado_por ? 'retificado' : r.estado; return '<button class="row" data-open="' + esc(r.numero) + '"><span class="n">' + esc(r.numero.replace(/^RI-\d{4}-/, '')) + '</span><span class="t"><b>' + esc(r.cliente && r.cliente.nome || '—') + '</b><small>' + esc(RI.fmtData(r.data_inicio)) + ' · ' + esc((r.equipamentos || []).map(function (e) { return [e.marca, e.modelo].filter(Boolean).join(' '); }).filter(Boolean).join(', ') || r.tipo_intervencao || '') + (r.houve_gas ? ' · gás' : '') + (r.estado !== 'rascunho' && !r.exportado_em ? ' · <b>por exportar</b>' : '') + '</small></span><span class="badge ' + esc(est) + '">' + esc(est) + '</span></button>'; }).join(''); $('histList').innerHTML = h || '<p class="help">' + (q ? 'Nada encontrado.' : 'Ainda não há relatórios neste aparelho.') + '</p>'; var all = histTodos; $('histHint').textContent = all.length ? all.length + ' relatório(s) neste aparelho · ' + all.filter(function (r) { return !r.exportado_em && r.estado !== 'rascunho'; }).length + ' por exportar' : 'Os relatórios ficam só neste aparelho. Exporte-os para o escritório.'; $$('[data-open]').forEach(function (b) { b.onclick = function () { DB.get('relatorios', b.dataset.open).then(function (r) { if (!r) return; if (r.estado === 'rascunho') { arquivarRascunhoAtual().then(function () { return DB.del('relatorios', r.numero); }).then(function () { R = r; return Promise.all(R.fotos.map(function (p) { return DB.put('blobs', { id: p.id, numero: R.numero, dataUrl: p.dataUrl }); })); }).then(function () { abrirForm(); }).catch(function () {}); return; } R = r; entrega(); }); }; }); }
+  $('histQ').oninput = renderHist;
   $('btHome').onclick = function () { if (R && R.estado === 'rascunho') saveDraft(true); home(); };
-  $('btContinuar').onclick = function () { R = LS.get(K.draft, null); if (!R) return home(); abrirForm(); };
-  $('btNovo').onclick = function () { if (!cfg.codigo || !cfg.tecnico_nome) { toast('Primeiro, as definições do aparelho.'); cfgRender(); show('sConfig'); return; } var d = LS.get(K.draft, null); if (d && !confirm('Há um rascunho por terminar (' + d.numero + '). Criar um novo relatório na mesma? O rascunho antigo fica anulado.')) return; if (d) { var an = LS.get(K.anul, []); an.push({ numero: d.numero, quando: RI.isoLocal(new Date()), motivo: 'rascunho substituído' }); LS.set(K.anul, an); } R = novoRelatorio(); abrirForm(); };
-  $('btDuplicar').onclick = function () { DB.all('relatorios').then(function (all) { all.sort(function (a, b) { return (b.criado_em || '').localeCompare(a.criado_em || ''); }); var u = all[0]; if (!u) return; var n = novoRelatorio(); n.cliente = JSON.parse(JSON.stringify(u.cliente)); n.equipamentos = JSON.parse(JSON.stringify(u.equipamentos || [])).map(function (e, i) { e.id = 'e' + (i + 1); return e; }); n.tipo_intervencao = u.tipo_intervencao; R = n; abrirForm(); toast('Cliente e equipamento copiados'); }); };
-  function novoRelatorio() { var ano = new Date().getFullYear(); cfg.contadores = cfg.contadores || {}; var seq = Math.max(cfg.contadores[ano] || 0, (cfg.seq_proximo || 1) - 1) + 1; cfg.contadores[ano] = seq; cfg.seq_proximo = seq + 1; LS.set(K.cfg, cfg); var r = RI.novo(cfg, ano, seq); r.deslocacao.taxa = ''; return r; }
+  $('btContinuar').onclick = function () { R = LS.get(K.draft, null); if (!R) return home(); carregarFotos(R).then(function (perdidas) { if (perdidas) toast(perdidas + ' fotografia(s) do rascunho não foram recuperadas.', 4000); abrirForm(); }); };
+  $('btNovo').onclick = function () { if (!cfg.codigo || !cfg.tecnico_nome) { toast('Primeiro, as definições do aparelho.'); cfgRender(); show('sConfig'); return; } arquivarRascunhoAtual().then(function () { R = novoRelatorio(); abrirForm(); }).catch(function () {}); };
+  $('btDuplicar').onclick = function () { var u = histTodos.filter(function (r) { return r.estado !== 'rascunho'; })[0]; if (!u) return; arquivarRascunhoAtual().then(function () { var n = novoRelatorio(); n.cliente = JSON.parse(JSON.stringify(u.cliente)); n.equipamentos = JSON.parse(JSON.stringify(u.equipamentos || [])).map(function (e, i) { e.id = 'e' + (i + 1); return e; }); if (!n.equipamentos.length) n.equipamentos = [RI.equipamentoVazio('e1')]; n.tipo_intervencao = u.tipo_intervencao; n.deslocacao.taxa = u.deslocacao && u.deslocacao.taxa || ''; R = n; abrirForm(); toast('Cliente e equipamento copiados'); }).catch(function () {}); };
 
   /* ── exportação / importação ── */
-  function download(nome, texto) { var b = new Blob([texto], { type: 'application/json' }); if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([b], nome, { type: 'application/json' })] }) && /Android|iPhone|iPad/i.test(navigator.userAgent)) { return navigator.share({ files: [new File([b], nome, { type: 'application/json' })], title: nome }).catch(function () {}); } var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = nome; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
-  function exportarJSON(r) { return DB.put('relatorios', Object.assign(r, { exportado_em: RI.isoLocal(new Date()) })).then(function () { download(RI.ficheiro(r) + '.json', JSON.stringify(r)); }); }
-  $('btExportTudo').onclick = function () { DB.all('relatorios').then(function (all) { if (!all.length) return toast('Nada para exportar'); var agora = RI.isoLocal(new Date()); all.forEach(function (r) { r.exportado_em = r.exportado_em || agora; }); Promise.all(all.map(function (r) { return DB.put('relatorios', r); })).then(function () { download('mdm-ri-' + hoje() + '-' + (cfg.codigo || 'X') + '.json', JSON.stringify({ schema: 'mdm-ri-lote/1', exportado_em: agora, aparelho: cfg.codigo, relatorios: all })); home(); }); }); };
+  function download(nome, texto) { var b = new Blob([texto], { type: 'application/json' }); var podeShare = false; try { podeShare = !!(navigator.share && navigator.canShare && navigator.canShare({ files: [new File([b], nome, { type: 'application/json' })] }) && /Android|iPhone|iPad/i.test(navigator.userAgent)); } catch (e) {} if (podeShare) return navigator.share({ files: [new File([b], nome, { type: 'application/json' })], title: nome }); var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = nome; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500); return Promise.resolve(); }
+  function exportarJSON(r) { return download(RI.ficheiro(r) + '.json', JSON.stringify(r)).then(function () { r.exportado_em = RI.isoLocal(new Date()); return DB.put('relatorios', r); }); }
+  $('btExportTudo').onclick = function () { var all = histTodos.filter(function (r) { return r.estado !== 'rascunho'; }); if (!all.length) return toast('Nada para exportar'); var agora = RI.isoLocal(new Date()); download('mdm-ri-' + hoje() + '-' + (cfg.codigo || 'X') + '.json', JSON.stringify({ schema: 'mdm-ri-lote/1', exportado_em: agora, aparelho: cfg.codigo, relatorios: all })).then(function () { all.forEach(function (r) { r.exportado_em = r.exportado_em || agora; }); return Promise.all(all.map(function (r) { return DB.put('relatorios', r); })); }).then(home).catch(function () { toast('Exportação cancelada'); }); };
+  var RANK = { emitido: 1, ausente: 2, recusado: 2, aceite: 3 };
+  function importavel(r) { return r && typeof r.numero === 'string' && /^RI-\d{4}-[A-Z0-9]{1,3}-\d{4}$/.test(r.numero) && r.schema === RI.SCHEMA && r.estado !== 'rascunho' && r.cliente && typeof r.cliente === 'object' && typeof r.descricao === 'string' && ['equipamentos', 'materiais', 'fotos'].every(function (k) { return Array.isArray(r[k]); }) && r.tecnico && r.deslocacao && r.fgas; }
+  function sanear(r) { r.fotos = r.fotos.filter(function (p) { return p && imgSrc(p.dataUrl); }); if (r.assinatura_tecnico && !imgSrc(r.assinatura_tecnico.png)) r.assinatura_tecnico.png = ''; if (r.aceitacao && !imgSrc(r.aceitacao.png)) r.aceitacao.png = ''; r.equipamentos.forEach(function (e, i) { e.id = 'e' + (i + 1); }); if (r.fgas) r.fgas.equip_id = ''; return r; }
   $('btImportar').onclick = function () { $('fileJson').click(); };
-  $('fileJson').onchange = function () { var fs = Array.prototype.slice.call(this.files); this.value = ''; Promise.all(fs.map(function (f) { return f.text().then(function (t) { var o = JSON.parse(t); return o.relatorios ? o.relatorios : [o]; }).catch(function () { return []; }); })).then(function (lists) { var rs = [].concat.apply([], lists).filter(function (r) { return r && r.numero && r.schema === RI.SCHEMA; }); return Promise.all(rs.map(function (r) { return DB.put('relatorios', r); })).then(function () { toast(rs.length + ' relatório(s) importado(s)'); home(); }); }); };
+  $('fileJson').onchange = function () { var fs = Array.prototype.slice.call(this.files); this.value = ''; Promise.all(fs.map(function (f) { return lerTexto(f).then(function (t) { var o = JSON.parse(t); return o && o.relatorios ? o.relatorios : [o]; }).catch(function () { return []; }); })).then(function (lists) { var rs = [].concat.apply([], lists).filter(importavel).map(sanear); var ok = 0, ign = 0; return rs.reduce(function (pr, r) { return pr.then(function () { return DB.get('relatorios', r.numero).then(function (ex) { if (ex && ((RANK[ex.estado] || 0) > (RANK[r.estado] || 0) || (ex.criado_em !== r.criado_em && !confirm('Já existe ' + r.numero + ' de outro aparelho ou data. Substituir?')))) { ign++; return; } ok++; return DB.put('relatorios', r); }); }); }, Promise.resolve()).then(function () { toast(ok + ' relatório(s) importado(s)' + (ign ? ' · ' + ign + ' ignorado(s)' : '') + (rs.length < [].concat.apply([], lists).length ? ' · ficheiros inválidos ignorados' : ''), 3500); home(); }); }); };
 
   /* ── formulário: ligação genérica modelo ↔ campos ── */
-  function abrirForm() { tentou = false; renderForm(); show('sForm'); }
+  function abrirForm() { tentou = false; LS.del(K.ultimo); renderForm(); show('sForm'); }
   function renderForm() {
     $$('[data-k]').forEach(function (el) { var v = get(R, el.dataset.k); if (el.type === 'checkbox') el.checked = !!v; else el.value = v == null ? '' : v; });
     $$('[data-seg]').forEach(function (g) { var v = get(R, g.dataset.seg); $$('button', g).forEach(function (b) { b.classList.toggle('on', b.dataset.v === v); }); });
     $$('[data-multi]').forEach(function (g) { var v = get(R, g.dataset.multi) || []; $$('button', g).forEach(function (b) { b.classList.toggle('on', v.indexOf(b.dataset.v) >= 0); }); });
     $('colegasChips').innerHTML = String(cfg.colegas || '').split(',').map(function (s) { return s.trim(); }).filter(Boolean).map(function (n) { return '<button class="pill chip" data-colega="' + esc(n) + '">' + esc(n) + '</button>'; }).join('');
     $$('[data-colega]').forEach(function (b) { b.onclick = function () { var l = RI.outrosTecnicos(R); if (l.indexOf(b.dataset.colega) < 0) l.push(b.dataset.colega); R.outros_tecnicos_txt = l.join(', '); $('kOutros').value = R.outros_tecnicos_txt; refresh(); }; });
+    var med = R.medicoes || {}; $('moreMed').classList.toggle('on', !!(med.p_baixa || med.p_alta || med.delta_t || med.corrente));
     renderRecentes(); renderEq(); renderMat(); renderFotos(); refresh();
   }
-  document.addEventListener('input', function (e) { var el = e.target; if (!el.dataset || !el.dataset.k || !R) return; var v = el.type === 'checkbox' ? el.checked : el.value; if (el.dataset.k === 'houve_gas' && v && !R.fgas.equip_id) { var eq = RI.equipGas(R); if (eq) R.fgas.equip_id = eq.id; } set(R, el.dataset.k, v); if (el.dataset.k === 'houve_gas') $('secGas').open = true; refresh(); });
-  document.addEventListener('change', function (e) { var el = e.target; if (!el.dataset || !el.dataset.k || !R) return; if (el.dataset.k === 'deslocacao.matricula') { el.value = RI.matriculaNorm(el.value); set(R, el.dataset.k, el.value); } if (el.dataset.k === 'cliente.contacto') { el.value = RI.telFmt(el.value); set(R, el.dataset.k, el.value); } if (el.tagName === 'SELECT' || el.type === 'checkbox') { set(R, el.dataset.k, el.type === 'checkbox' ? el.checked : el.value); } refresh(); });
+  document.addEventListener('input', function (e) { var el = e.target; if (!el.dataset || !el.dataset.k || !R) return; var v = el.type === 'checkbox' ? el.checked : el.value; set(R, el.dataset.k, v); if (el.dataset.k === 'houve_gas' && v) { if (!R.fgas.equip_id) { var eq = RI.equipGas(R); if (eq) R.fgas.equip_id = eq.id; } if (!R.fgas.tecnico_cert && cfg.tecnico_cert) { R.fgas.tecnico_cert = cfg.tecnico_cert; $('kCertTec').value = cfg.tecnico_cert; } $('secGas').open = true; } if (el.dataset.k === 'cliente.nome') renderRecentes(); refresh(); });
+  document.addEventListener('change', function (e) { var el = e.target; if (!el.dataset || !el.dataset.k || !R || el.type === 'checkbox') return; if (el.dataset.k === 'deslocacao.matricula') { el.value = RI.matriculaNorm(el.value); set(R, el.dataset.k, el.value); } if (el.dataset.k === 'cliente.contacto') { el.value = RI.telFmt(el.value); set(R, el.dataset.k, el.value); } if (el.tagName === 'SELECT') set(R, el.dataset.k, el.value); refresh(); });
   document.addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
-    var seg = b.closest('[data-seg]'); if (seg && b.dataset.v != null && R) { e.preventDefault(); var cur = get(R, seg.dataset.seg); set(R, seg.dataset.seg, cur === b.dataset.v && seg.classList.contains('pills') ? '' : b.dataset.v); $$('button', seg).forEach(function (x) { x.classList.toggle('on', x.dataset.v === get(R, seg.dataset.seg)); }); if (seg.dataset.seg === 'tipo_intervencao') { if (!R.deslocacao.taxa) { R.deslocacao.taxa = /Contrato|Garantia|bancada/.test(b.dataset.v) ? 'nao' : 'sim'; $$('[data-seg="deslocacao.taxa"] button').forEach(function (x) { x.classList.toggle('on', x.dataset.v === R.deslocacao.taxa); }); } } if (seg.dataset.seg === 'fgas.verificacao' && b.dataset.v === 'fuga' && !R.fgas.motivo) { R.fgas.motivo = 'Reparação de fuga'; } if (seg.dataset.seg === 'fgas.fuga_reparada' && b.dataset.v === 'nao') { R.obra_concluida = 'nao'; if (!/fuga/i.test(R.pendentes || '')) R.pendentes = (R.pendentes ? R.pendentes + '; ' : '') + 'Reparação de fuga em ' + (R.fgas.fuga_local || 'local a confirmar'); } refresh(); return; }
+    var seg = b.closest('[data-seg]'); if (seg && b.dataset.v != null && R) { e.preventDefault(); var cur = get(R, seg.dataset.seg); set(R, seg.dataset.seg, cur === b.dataset.v && seg.classList.contains('pills') ? '' : b.dataset.v); $$('button', seg).forEach(function (x) { x.classList.toggle('on', x.dataset.v === get(R, seg.dataset.seg)); }); if (seg.dataset.seg === 'tipo_intervencao' && !R.deslocacao.taxa) { R.deslocacao.taxa = /Contrato|Garantia|bancada/.test(b.dataset.v) ? 'nao' : 'sim'; $$('[data-seg="deslocacao.taxa"] button').forEach(function (x) { x.classList.toggle('on', x.dataset.v === R.deslocacao.taxa); }); } if (seg.dataset.seg === 'fgas.verificacao' && b.dataset.v === 'fuga' && !R.fgas.motivo) R.fgas.motivo = 'Reparação de fuga'; if ((seg.dataset.seg === 'fgas.fuga_reparada' && b.dataset.v === 'nao') || (seg.dataset.seg === 'fgas.ensaio_final' && b.dataset.v === 'persiste')) { R.obra_concluida = 'nao'; if (!/fuga/i.test(R.pendentes || '')) R.pendentes = (R.pendentes ? R.pendentes + '; ' : '') + 'Reparação de fuga em ' + (R.fgas.fuga_local || 'local a confirmar'); $$('[data-seg="obra_concluida"] button').forEach(function (x) { x.classList.toggle('on', x.dataset.v === 'nao'); }); $('kPend').value = R.pendentes; } refresh(); return; }
     var mu = b.closest('[data-multi]'); if (mu && b.dataset.v != null && R) { e.preventDefault(); var arr = get(R, mu.dataset.multi) || []; var i = arr.indexOf(b.dataset.v); if (i >= 0) arr.splice(i, 1); else arr.push(b.dataset.v); set(R, mu.dataset.multi, arr); b.classList.toggle('on', i < 0); refresh(); return; }
-    var ch = b.closest('[data-chips]'); if (ch && b.classList.contains('chip') && R) { e.preventDefault(); var k = ch.dataset.chips, cur2 = String(get(R, k) || '').trim(), txt = b.textContent.trim(); var nv = ch.dataset.sep ? (cur2 ? (cur2.indexOf(txt) >= 0 ? cur2 : cur2.replace(/[;.]?\s*$/, '') + ch.dataset.sep + txt) : txt) : txt; set(R, k, nv); var inp = document.querySelector('[data-k="' + k + '"]'); if (inp) inp.value = nv; if (b.dataset.gas && !R.houve_gas) { R.houve_gas = true; $('kGas').checked = true; var eqg = RI.equipGas(R); if (eqg) R.fgas.equip_id = eqg.id; if (/Reparação de fuga/.test(txt)) R.fgas.motivo = 'Reparação de fuga'; else if (/Verificação/.test(txt)) R.fgas.motivo = 'Verificação periódica'; else if (/Instalação/.test(txt)) R.fgas.motivo = 'Instalação'; else if (/Desmontagem/.test(txt)) R.fgas.motivo = 'Desmantelamento'; else R.fgas.motivo = 'Manutenção / assistência'; $('secGas').open = true; } refresh(); return; }
-    if (b.dataset.now && R) { e.preventDefault(); var h = RI.horaArred(new Date(), b.dataset.now === 'hora_fim'); set(R, b.dataset.now, h); document.querySelector('[data-k="' + b.dataset.now + '"]').value = h; refresh(); return; }
+    var ch = b.closest('[data-chips]'); if (ch && b.classList.contains('chip') && R) { e.preventDefault(); var k = ch.dataset.chips, cur2 = String(get(R, k) || '').trim(), txt = b.textContent.trim(); var nv = ch.dataset.sep ? (cur2 ? (cur2.indexOf(txt) >= 0 ? cur2 : cur2.replace(/[;.]?\s*$/, '') + ch.dataset.sep + txt) : txt) : txt; set(R, k, nv); var inp = document.querySelector('[data-k="' + k + '"]'); if (inp) inp.value = nv; if (b.dataset.gas && !R.houve_gas) { R.houve_gas = true; $('kGas').checked = true; var eqg = RI.equipGas(R); if (eqg) R.fgas.equip_id = eqg.id; if (!R.fgas.tecnico_cert && cfg.tecnico_cert) { R.fgas.tecnico_cert = cfg.tecnico_cert; $('kCertTec').value = cfg.tecnico_cert; } if (/Reparação de fuga/.test(txt)) R.fgas.motivo = 'Reparação de fuga'; else if (/Verificação/.test(txt)) R.fgas.motivo = 'Verificação periódica'; else if (/Instalação/.test(txt)) R.fgas.motivo = 'Instalação'; else if (/Desmontagem/.test(txt)) R.fgas.motivo = 'Desmantelamento'; else R.fgas.motivo = 'Manutenção / assistência'; $('secGas').open = true; } refresh(); return; }
+    if (b.dataset.now && R) { e.preventDefault(); var h = RI.horaArred(new Date()); set(R, b.dataset.now, h); document.querySelector('[data-k="' + b.dataset.now + '"]').value = h; refresh(); return; }
+    if (b.dataset.ini && R) { e.preventDefault(); var ref = RI.minutos(R.hora_fim); if (ref == null) { var dn = new Date(); ref = dn.getHours() * 60 + dn.getMinutes(); } R.hora_inicio = RI.minToHora(ref + (+b.dataset.ini)); $('kHIni').value = R.hora_inicio; refresh(); return; }
     if (b.dataset.more) { e.preventDefault(); $(b.dataset.more).classList.toggle('on'); return; }
   });
 
-  /* ── clientes recentes ── */
-  function renderRecentes() { var cl = LS.get(K.cli, []); $('recentesWrap').hidden = !cl.length; $('recentes').innerHTML = cl.slice(0, 8).map(function (c, i) { return '<button class="pill chip" data-rec="' + i + '">' + esc(c.nome) + '</button>'; }).join(''); $('dlCli').innerHTML = cl.map(function (c) { return '<option value="' + esc(c.nome) + '">'; }).join(''); $$('[data-rec]').forEach(function (b) { b.onclick = function () { aplicarCliente(cl[+b.dataset.rec]); }; }); var cur = cl.filter(function (c) { return c.nome === (R.cliente.nome || '').trim(); })[0]; $('eqCliWrap').hidden = !(cur && cur.equipamentos && cur.equipamentos.length); if (cur && cur.equipamentos) { $('eqCli').innerHTML = cur.equipamentos.map(function (e, i) { return '<button class="pill chip" data-eqc="' + i + '">' + esc([e.marca, e.modelo, e.serie ? 'n.º ' + e.serie : '', e.refrigerante].filter(Boolean).join(' · ')) + '</button>'; }).join(''); $$('[data-eqc]').forEach(function (b) { b.onclick = function () { var e = JSON.parse(JSON.stringify(cur.equipamentos[+b.dataset.eqc])); e.id = 'e' + (R.equipamentos.length + 1); R.equipamentos.push(e); renderEq(); refresh(); }; }); } }
-  function aplicarCliente(c) { R.cliente = { nome: c.nome, morada: c.morada || '', local: '', contacto: c.contacto || '', email: c.email || '', nif: c.nif || '', contrato: c.contrato || '', pessoa: c.pessoa || '' }; if (c.tipo_intervencao && !R.tipo_intervencao) R.tipo_intervencao = c.tipo_intervencao; renderForm(); toast('Cliente preenchido'); }
-  function memorizarCliente(r) { if (!r.cliente.nome) return; var cl = LS.get(K.cli, []).filter(function (c) { return c.nome !== r.cliente.nome; }); cl.unshift({ nome: r.cliente.nome, morada: r.cliente.morada, contacto: r.cliente.contacto, email: r.cliente.email, nif: r.cliente.nif, contrato: r.cliente.contrato, pessoa: r.cliente.pessoa, tipo_intervencao: r.tipo_intervencao, equipamentos: (r.equipamentos || []).map(function (e) { var x = Object.assign({}, e); delete x.id; return x; }) }); LS.set(K.cli, cl.slice(0, 20)); var mats = LS.get(K.mat, {}); (r.materiais || []).forEach(function (m) { if (m.designacao && !m.gas) mats[m.designacao] = (mats[m.designacao] || 0) + 1; }); LS.set(K.mat, mats); }
+  /* ── clientes recentes (LRU, purga aos 180 dias sem uso) ── */
+  function clientes() { var lim = RI.addMonths(hoje(), -6); var cl = LS.get(K.cli, []).filter(function (c) { return !c.usado_em || c.usado_em.slice(0, 10) >= lim; }); return cl; }
+  function renderRecentes() { var cl = clientes(); $('recentesWrap').hidden = !cl.length; $('recentes').innerHTML = cl.slice(0, 8).map(function (c, i) { return '<button class="pill chip" data-rec="' + i + '">' + esc(c.nome) + '</button>'; }).join(''); $('dlCli').innerHTML = cl.map(function (c) { return '<option value="' + esc(c.nome) + '">'; }).join(''); $$('[data-rec]').forEach(function (b) { b.onclick = function () { aplicarCliente(cl[+b.dataset.rec]); }; }); var cur = cl.filter(function (c) { return c.nome === (R.cliente.nome || '').trim(); })[0]; $('eqCliWrap').hidden = !(cur && cur.equipamentos && cur.equipamentos.length); if (cur && cur.equipamentos) { $('eqCli').innerHTML = cur.equipamentos.map(function (e, i) { return '<button class="pill chip" data-eqc="' + i + '">' + esc([e.marca, e.modelo, e.serie ? 'n.º ' + e.serie : '', e.refrigerante].filter(Boolean).join(' · ')) + '</button>'; }).join(''); $$('[data-eqc]').forEach(function (b) { b.onclick = function () { var e = JSON.parse(JSON.stringify(cur.equipamentos[+b.dataset.eqc])); if (R.equipamentos.length === 1 && RI.eqVazio(R.equipamentos[0])) R.equipamentos = []; e.id = 'e' + (R.equipamentos.length + 1); R.equipamentos.push(e); renderEq(); refresh(); }; }); } }
+  function aplicarCliente(c) { R.cliente = { nome: c.nome, morada: c.morada || '', local: '', contacto: c.contacto || '', email: c.email || '', nif: c.nif || '', contrato: c.contrato || '', pessoa: c.pessoa || '' }; if (c.tipo_intervencao && !R.tipo_intervencao) R.tipo_intervencao = c.tipo_intervencao; if (!R.deslocacao.taxa && R.tipo_intervencao) R.deslocacao.taxa = /Contrato|Garantia|bancada/.test(R.tipo_intervencao) ? 'nao' : 'sim'; renderForm(); toast('Cliente preenchido'); }
+  function memorizarCliente(r) { if (!r.cliente.nome) return; var cl = clientes().filter(function (c) { return c.nome !== r.cliente.nome; }); cl.unshift({ nome: r.cliente.nome, morada: r.cliente.morada, contacto: r.cliente.contacto, email: r.cliente.email, nif: r.cliente.nif, contrato: r.cliente.contrato, pessoa: r.cliente.pessoa, tipo_intervencao: r.tipo_intervencao, usado_em: RI.isoLocal(new Date()), equipamentos: (r.equipamentos || []).filter(function (e) { return !RI.eqVazio(e); }).map(function (e) { var x = Object.assign({}, e); delete x.id; return x; }) }); LS.set(K.cli, cl.slice(0, 300)); var mats = LS.get(K.mat, {}); (r.materiais || []).forEach(function (m) { if (m.designacao && !m.gas) mats[m.designacao] = (mats[m.designacao] || 0) + 1; }); LS.set(K.mat, mats); }
 
   /* ── equipamentos ── */
+  function calcEq(e) { var g = RI.gwp(e.refrigerante, e.gwp_manual), t = RI.co2e(e.carga_kg, g), v = RI.verificacao(e.refrigerante, t, !!e.hermetico, !!e.detecao, e.refrigerante_outro, e.carga_kg); if (!e.refrigerante || !(RI.num(e.carga_kg) > 0)) return ''; return (t != null ? esc(RI.fmtNum(e.carga_kg)) + ' kg × GWP ' + g + ' = <b>' + esc(RI.fmtNum(t)) + ' t CO2e</b>' : esc(RI.fmtNum(e.carga_kg)) + ' kg') + '<br>Verificação de fugas: ' + esc(v.texto); }
   function renderEq() {
     $('eqList').innerHTML = (R.equipamentos || []).map(function (e, i) {
-      var gas = RI.temGas(e), g = RI.gwp(e.refrigerante, e.gwp_manual), t = RI.co2e(e.carga_kg, g), v = gas && e.refrigerante ? RI.verificacao(e.refrigerante, t, !!e.hermetico, !!e.detecao, e.refrigerante_outro) : null;
-      return '<div class="item" data-eqi="' + i + '"><div class="hd"><b>Equipamento ' + (i + 1) + '</b><button class="del" data-eqdel="' + i + '" aria-label="Remover">×</button></div>' +
-        '<div class="g2"><div class="f"><label>Categoria <b>*</b></label><select class="in" data-eq="categoria" data-i="' + i + '"><option value="">—</option>' + RI.CATEGORIAS.map(function (c) { return '<option' + (c === e.categoria ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select></div>' +
-        '<div class="f"><label>Marca</label><input class="in" data-eq="marca" data-i="' + i + '" list="dlMarcas" value="' + esc(e.marca) + '"></div></div>' +
-        '<div class="g2"><div class="f"><label>Modelo' + (gas ? ' <b>*</b>' : '') + '</label><input class="in" data-eq="modelo" data-i="' + i + '" style="text-transform:uppercase" value="' + esc(e.modelo) + '"></div>' +
-        '<div class="f"><label>N.º de série' + (gas ? ' <b>*</b>' : '') + '</label><div class="inl"><input class="in" data-eq="serie" data-i="' + i + '" value="' + esc(e.serie) + '"><button class="bt sm" data-ileg="' + i + '">Ilegível</button></div></div></div>' +
-        (gas ? '<div class="g3"><div class="f"><label>Refrigerante <b>*</b></label><select class="in" data-eq="refrigerante" data-i="' + i + '"><option value="">—</option>' + RI.REFRIGERANTES.map(function (r) { return '<option' + (r === e.refrigerante ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select></div>' +
-          '<div class="f"><label>Carga (kg) <b>*</b></label><input class="in" data-eq="carga_kg" data-i="' + i + '" inputmode="decimal" placeholder="chapa + tubagem" value="' + esc(e.carga_kg) + '"></div>' +
-          '<div class="f"><label>Localização</label><input class="in" data-eq="localizacao" data-i="' + i + '" placeholder="UE cobertura, UI sala 7" value="' + esc(e.localizacao) + '"></div></div>' +
-          (e.refrigerante === 'Outro' ? '<div class="g2"><div class="f"><label>Designação do gás <b>*</b></label><input class="in" data-eq="refrigerante_outro" data-i="' + i + '" value="' + esc(e.refrigerante_outro) + '"></div><div class="f"><label>GWP <b>*</b></label><input class="in" data-eq="gwp_manual" data-i="' + i + '" inputmode="numeric" value="' + esc(e.gwp_manual) + '"></div></div>' : '') +
-          (e.refrigerante === 'R22' ? '<p class="msg err">R22 é um HCFC: proibido carregar desde 2015 (Reg. (CE) 1005/2009). Só recuperação para regeneração/destruição. Recomende a substituição do equipamento.</p>' : '') +
+      var gas = RI.temGas(e), id = 'eq' + i, c = calcEq(e);
+      return '<div class="item" data-eqi="' + i + '"><div class="hd"><b>Equipamento ' + (i + 1) + '</b><button class="del" data-eqdel="' + i + '" aria-label="Remover equipamento ' + (i + 1) + '">×</button></div>' +
+        '<div class="g2"><div class="f"><label for="' + id + 'cat">Categoria <b>*</b></label><select class="in" id="' + id + 'cat" data-eq="categoria" data-i="' + i + '"><option value="">—</option>' + RI.CATEGORIAS.map(function (c) { return '<option' + (c === e.categoria ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select></div>' +
+        '<div class="f"><label for="' + id + 'marca">Marca</label><input class="in" id="' + id + 'marca" data-eq="marca" data-i="' + i + '" list="dlMarcas" value="' + esc(e.marca) + '"></div></div>' +
+        '<div class="g2"><div class="f"><label for="' + id + 'mod">Modelo' + (gas ? ' <b>*</b>' : '') + '</label><input class="in" id="' + id + 'mod" data-eq="modelo" data-i="' + i + '" style="text-transform:uppercase" autocapitalize="characters" value="' + esc(e.modelo) + '"></div>' +
+        '<div class="f"><label for="' + id + 'ser">N.º de série' + (gas ? ' <b>*</b>' : '') + '</label><div class="inl"><input class="in" id="' + id + 'ser" data-eq="serie" data-i="' + i + '" value="' + esc(e.serie) + '"><button class="bt sm" data-ileg="' + i + '">Ilegível</button></div></div></div>' +
+        (gas ? '<div class="g3"><div class="f"><label for="' + id + 'ref">Refrigerante <b>*</b></label><select class="in" id="' + id + 'ref" data-eq="refrigerante" data-i="' + i + '"><option value="">—</option>' + RI.REFRIGERANTES.map(function (r) { return '<option' + (r === e.refrigerante ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select></div>' +
+          '<div class="f"><label for="' + id + 'kg">Carga (kg) <b>*</b></label><input class="in" id="' + id + 'kg" data-eq="carga_kg" data-i="' + i + '" inputmode="decimal" placeholder="chapa + tubagem" value="' + esc(e.carga_kg) + '"></div>' +
+          '<div class="f"><label for="' + id + 'loc">Localização</label><input class="in" id="' + id + 'loc" data-eq="localizacao" data-i="' + i + '" placeholder="UE cobertura, UI sala 7" value="' + esc(e.localizacao) + '"></div></div>' +
+          (e.refrigerante === 'Outro' ? '<div class="g2"><div class="f"><label for="' + id + 'out">Designação do gás <b>*</b></label><input class="in" id="' + id + 'out" data-eq="refrigerante_outro" data-i="' + i + '" value="' + esc(e.refrigerante_outro) + '"></div><div class="f"><label for="' + id + 'gwp">GWP (Anexo I/II) <b>*</b></label><input class="in" id="' + id + 'gwp" data-eq="gwp_manual" data-i="' + i + '" inputmode="numeric" value="' + esc(e.gwp_manual) + '"></div></div>' : '') +
+          (RI.isHCFC(e.refrigerante, e.refrigerante_outro) ? '<p class="msg err">HCFC (R22): proibido carregar desde 2015 (Reg. (CE) 1005/2009). Só recuperação para regeneração/destruição. Recomende a substituição do equipamento.</p>' : '') +
           '<label class="tick"><input type="checkbox" data-eq="hermetico" data-i="' + i + '"' + (e.hermetico ? ' checked' : '') + '> Hermético rotulado na chapa</label><label class="tick"><input type="checkbox" data-eq="detecao" data-i="' + i + '"' + (e.detecao ? ' checked' : '') + '> Tem sistema de deteção de fugas</label>' +
-          (t != null ? '<div class="calc">' + esc(RI.fmtNum(e.carga_kg)) + ' kg × GWP ' + g + ' = <b>' + esc(RI.fmtNum(t)) + ' t CO2e</b><br>Verificação de fugas: ' + esc(v.texto) + '</div>' : '')
-          : '<div class="f"><label>Localização</label><input class="in" data-eq="localizacao" data-i="' + i + '" value="' + esc(e.localizacao) + '"></div>') + '</div>';
+          (c ? '<div class="calc">' + c + '</div>' : '')
+          : '<div class="f"><label for="' + id + 'loc">Localização</label><input class="in" id="' + id + 'loc" data-eq="localizacao" data-i="' + i + '" value="' + esc(e.localizacao) + '"></div>') + '</div>';
     }).join('');
     if (!$('dlMarcas')) { var dl = document.createElement('datalist'); dl.id = 'dlMarcas'; dl.innerHTML = ['Mitsubishi Electric', 'Daikin', 'LG', 'Samsung', 'Carrier', 'Trane', 'Hitachi', 'Fujitsu', 'Panasonic', 'Toshiba', 'Midea', 'Gree', 'France Air', 'Vulcano', 'Haier'].map(function (m) { return '<option value="' + m + '">'; }).join(''); document.body.appendChild(dl); }
-    $$('[data-eq]').forEach(function (el) { var ev = el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input'; el.addEventListener(ev, function () { var e = R.equipamentos[+el.dataset.i]; var v = el.type === 'checkbox' ? el.checked : el.value; if (el.dataset.eq === 'modelo') v = v.toUpperCase(); e[el.dataset.eq] = v; if (el.dataset.eq === 'modelo') { var s = RI.sugestaoRefrigerante(v); if (s && !e.refrigerante) { e.refrigerante = s; renderEq(); } } if (ev === 'change') renderEq(); else if (el.dataset.eq === 'carga_kg') { var it = el.closest('.item'); var c = it.querySelector('.calc'); var g = RI.gwp(e.refrigerante, e.gwp_manual), t = RI.co2e(e.carga_kg, g); if (t != null) { if (!c) { c = document.createElement('div'); c.className = 'calc'; it.appendChild(c); } c.innerHTML = esc(RI.fmtNum(e.carga_kg)) + ' kg × GWP ' + g + ' = <b>' + esc(RI.fmtNum(t)) + ' t CO2e</b><br>Verificação de fugas: ' + esc(RI.verificacao(e.refrigerante, t, !!e.hermetico, !!e.detecao, e.refrigerante_outro).texto); } else if (c) c.remove(); } refresh(); }); });
+    $$('[data-eq]').forEach(function (el) { var ev = el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input'; el.addEventListener(ev, function () { var e = R.equipamentos[+el.dataset.i]; var v = el.type === 'checkbox' ? el.checked : el.value; if (el.dataset.eq === 'modelo') v = v.toUpperCase(); e[el.dataset.eq] = v; var it = el.closest('.item'); if (el.dataset.eq === 'modelo') { var sg = RI.sugestaoRefrigerante(v); if (sg && !e.refrigerante) { e.refrigerante = sg; var sel = it.querySelector('[data-eq="refrigerante"]'); if (sel) sel.value = sg; } } if (ev === 'change') { renderEq(); } else if (el.dataset.eq === 'carga_kg' || el.dataset.eq === 'modelo' || el.dataset.eq === 'gwp_manual' || el.dataset.eq === 'refrigerante_outro') { var c = it.querySelector('.calc'), html = calcEq(e); if (html) { if (!c) { c = document.createElement('div'); c.className = 'calc'; it.appendChild(c); } c.innerHTML = html; } else if (c) c.remove(); } refresh(); }); });
     $$('[data-eqdel]').forEach(function (b) { b.onclick = function () { R.equipamentos.splice(+b.dataset.eqdel, 1); renderEq(); refresh(); }; });
     $$('[data-ileg]').forEach(function (b) { b.onclick = function () { R.equipamentos[+b.dataset.ileg].serie = 'ILEGÍVEL'; renderEq(); refresh(); toast('Junte uma fotografia da chapa de características'); }; });
   }
-  $('btEqAdd').onclick = function () { R.equipamentos.push({ id: 'e' + (R.equipamentos.length + 1), categoria: R.equipamentos.length ? '' : 'Split / multi-split', marca: '', modelo: '', serie: '', localizacao: '', refrigerante: '', refrigerante_outro: '', gwp_manual: '', carga_kg: '', hermetico: false, detecao: false }); renderEq(); refresh(); $('secEq').open = true; };
+  $('btEqAdd').onclick = function () { R.equipamentos.push(RI.equipamentoVazio('e' + (R.equipamentos.length + 1))); if (R.equipamentos.length > 1) R.equipamentos[R.equipamentos.length - 1].categoria = ''; renderEq(); refresh(); $('secEq').open = true; };
   $('btEqFoto').onclick = function () { fotoCategoriaSeguinte = 'Chapa de características'; $('fileCam').click(); };
 
   /* ── materiais ── */
   function renderMat() {
-    $('matList').innerHTML = (R.materiais || []).map(function (m, i) { var t = RI.linhaTotal(m); return '<div class="item"><div class="hd"><b>' + (m.gas ? 'Refrigerante (do registo F-gas)' : 'Material ' + (i + 1)) + '</b>' + (m.gas ? '' : '<button class="del" data-matdel="' + i + '" aria-label="Remover">×</button>') + '</div>' +
-      '<div class="f"><input class="in" data-m="designacao" data-i="' + i + '" list="dlMat" placeholder="Designação" value="' + esc(m.designacao) + '"' + (m.gas ? ' readonly' : '') + '></div>' +
+    $('matList').innerHTML = (R.materiais || []).map(function (m, i) { var t = RI.linhaTotal(m), id = 'mat' + i; return '<div class="item" data-mati="' + i + '"><div class="hd"><b>' + (m.gas ? 'Refrigerante (do registo F-gas)' : 'Material ' + (i + 1)) + '</b>' + (m.gas ? '' : '<button class="del" data-matdel="' + i + '" aria-label="Remover material ' + (i + 1) + '">×</button>') + '</div>' +
+      '<div class="f"><label for="' + id + 'd" class="sr">Designação</label><input class="in" id="' + id + 'd" data-m="designacao" data-i="' + i + '" list="dlMat" placeholder="Designação" value="' + esc(m.designacao) + '"' + (m.gas ? ' readonly' : '') + '></div>' +
       '<div class="f"><span class="lbl">Origem</span><div class="seg sm" data-mo="' + i + '">' + ['Adquirido', 'Stock', 'Cliente'].map(function (o) { return '<button data-v="' + o + '"' + (m.origem === o ? ' class="on"' : '') + '>' + o + '</button>'; }).join('') + '</div></div>' +
-      '<div class="g2"><div class="f"><span class="lbl">Quantidade</span><div class="stepper"><button data-ms="' + i + '" data-d="-1">−</button><input data-m="qty" data-i="' + i + '" inputmode="decimal" value="' + esc(m.qty) + '"' + (m.gas ? ' readonly' : '') + '><button data-ms="' + i + '" data-d="1">+</button></div></div>' +
-      '<div class="f"><label>Unidade</label><select class="in" data-m="unidade" data-i="' + i + '">' + ['un', 'kg', 'm', 'L', 'conj', 'h'].map(function (u) { return '<option' + (u === m.unidade ? ' selected' : '') + '>' + u + '</option>'; }).join('') + '</select></div></div>' +
-      '<div class="g2"><div class="f"><label>Preço unit. (€ s/ IVA, opcional)</label><input class="in" data-m="preco" data-i="' + i + '" inputmode="decimal" value="' + esc(m.preco) + '"></div><div class="f"><label>Total</label><div class="in" style="display:flex;align-items:center;background:var(--paper)">' + (t == null ? '—' : esc(RI.fmtEur(t))) + '</div></div></div>' +
+      '<div class="g2"><div class="f"><label for="' + id + 'q">Quantidade</label><div class="stepper"><button data-ms="' + i + '" data-d="-1" aria-label="Menos">−</button><input id="' + id + 'q" data-m="qty" data-i="' + i + '" inputmode="decimal" value="' + esc(m.qty) + '"' + (m.gas ? ' readonly' : '') + '><button data-ms="' + i + '" data-d="1" aria-label="Mais">+</button></div></div>' +
+      '<div class="f"><label for="' + id + 'u">Unidade</label><select class="in" id="' + id + 'u" data-m="unidade" data-i="' + i + '">' + ['un', 'kg', 'm', 'L', 'conj', 'h'].map(function (u) { return '<option' + (u === m.unidade ? ' selected' : '') + '>' + u + '</option>'; }).join('') + '</select></div></div>' +
+      '<div class="g2"><div class="f"><label for="' + id + 'p">Preço unit. (€ s/ IVA, opcional)</label><input class="in" id="' + id + 'p" data-m="preco" data-i="' + i + '" inputmode="decimal" value="' + esc(m.preco) + '"></div><div class="f"><span class="lbl">Total</span><div class="in tot" style="display:flex;align-items:center;background:var(--paper)">' + (t == null ? '—' : esc(RI.fmtEur(t))) + '</div></div></div>' +
       '<label class="tick"><input type="checkbox" data-m="garantia" data-i="' + i + '"' + (m.garantia ? ' checked' : '') + '> Peça em garantia do fabricante (0 €)</label></div>'; }).join('');
     var freq = LS.get(K.mat, {}); var top = Object.keys(freq).sort(function (a, b) { return freq[b] - freq[a]; }).slice(0, 8); $('matFreq').innerHTML = top.map(function (d) { return '<button class="pill chip" data-mf="' + esc(d) + '">' + esc(d) + '</button>'; }).join('');
     if (!$('dlMat')) { var dl = document.createElement('datalist'); dl.id = 'dlMat'; document.body.appendChild(dl); } $('dlMat').innerHTML = Object.keys(freq).map(function (d) { return '<option value="' + esc(d) + '">'; }).join('');
     $$('[data-mf]').forEach(function (b) { b.onclick = function () { R.materiais.push({ designacao: b.dataset.mf, origem: 'Stock', qty: '1', unidade: 'un', preco: '', garantia: false }); renderMat(); refresh(); }; });
-    $$('[data-m]').forEach(function (el) { el.addEventListener(el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input', function () { var m = R.materiais[+el.dataset.i]; m[el.dataset.m] = el.type === 'checkbox' ? el.checked : el.value; if (el.dataset.m === 'garantia' || el.dataset.m === 'preco' || el.dataset.m === 'qty') { var t = RI.linhaTotal(m); el.closest('.item').querySelector('.g2 .in[style]').textContent = t == null ? '—' : RI.fmtEur(t); } refresh(); }); });
+    $$('[data-m]').forEach(function (el) { el.addEventListener(el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input', function () { var m = R.materiais[+el.dataset.i]; m[el.dataset.m] = el.type === 'checkbox' ? el.checked : el.value; var t = RI.linhaTotal(m); el.closest('.item').querySelector('.tot').textContent = t == null ? '—' : RI.fmtEur(t); refresh(); }); });
     $$('[data-mo]').forEach(function (g) { $$('button', g).forEach(function (b) { b.onclick = function () { R.materiais[+g.dataset.mo].origem = b.dataset.v; $$('button', g).forEach(function (x) { x.classList.toggle('on', x === b); }); refresh(); }; }); });
-    $$('[data-ms]').forEach(function (b) { b.onclick = function () { var m = R.materiais[+b.dataset.ms]; if (m.gas) return; var q = RI.num(m.qty) + (+b.dataset.d); if (q < 1) q = 1; m.qty = String(q); b.parentNode.querySelector('input').value = m.qty; refresh(); }; });
+    $$('[data-ms]').forEach(function (b) { b.onclick = function () { var m = R.materiais[+b.dataset.ms]; if (m.gas) return; var q = RI.num(m.qty) + (+b.dataset.d); if (q < 1) q = 1; m.qty = String(q); b.parentNode.querySelector('input').value = m.qty; var t = RI.linhaTotal(m); b.closest('.item').querySelector('.tot').textContent = t == null ? '—' : RI.fmtEur(t); refresh(); }; });
     $$('[data-matdel]').forEach(function (b) { b.onclick = function () { R.materiais.splice(+b.dataset.matdel, 1); renderMat(); refresh(); }; });
   }
   $('btMatAdd').onclick = function () { R.materiais.push({ designacao: '', origem: 'Stock', qty: '1', unidade: 'un', preco: '', garantia: false }); renderMat(); refresh(); setTimeout(function () { var l = $$('[data-m="designacao"]'); if (l.length) l[l.length - 1].focus(); }, 50); };
@@ -1146,14 +1248,16 @@ if (typeof module !== 'undefined' && module.exports) module.exports = RI;
 
   /* ── fotografias: redução no aparelho (canvas → JPEG), sem EXIF/GPS ── */
   var fotoCategoriaSeguinte = null, FOTO_CATS = ['Antes', 'Depois', 'Chapa de características', 'Fuga / avaria', 'Reparação', 'Quadro elétrico', 'Outro'];
-  function reduzir(file) { return new Promise(function (res, rej) { if (file.size > 25 * 1048576) return rej('Fotografia demasiado grande. Tire-a com a câmara da app.'); var url = URL.createObjectURL(file), im = new Image(); im.onload = function () { try { var max = 1600, w = im.naturalWidth, h = im.naturalHeight, s = Math.min(1, max / Math.max(w, h)); var c = document.createElement('canvas'); c.width = Math.round(w * s); c.height = Math.round(h * s); var ctx = c.getContext('2d'); ctx.drawImage(im, 0, 0, c.width, c.height); var q = 0.72, d = c.toDataURL('image/jpeg', q); if (d.length > 420000) d = c.toDataURL('image/jpeg', 0.58); URL.revokeObjectURL(url); res(d); } catch (e) { rej('Não foi possível processar a fotografia.'); } }; im.onerror = function () { URL.revokeObjectURL(url); rej('Ficheiro de imagem inválido.'); }; im.src = url; }); }
-  function addFotos(files) { var lista = Array.prototype.slice.call(files); if (!lista.length) return; if (R.fotos.length + lista.length > 8) { toast('Máximo de 8 fotografias por relatório.'); lista = lista.slice(0, Math.max(0, 8 - R.fotos.length)); } toast('A processar ' + lista.length + ' fotografia(s)…'); lista.reduce(function (p, f) { return p.then(function () { return reduzir(f).then(function (d) { var id = 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); var cat = fotoCategoriaSeguinte || (R.fotos.length ? 'Depois' : 'Antes'); fotoCategoriaSeguinte = null; R.fotos.push({ id: id, categoria: cat, legenda: '', datahora: RI.isoLocal(new Date()), dataUrl: d }); return DB.put('blobs', { id: id, numero: R.numero, dataUrl: d }); }).catch(function (m) { toast(String(m)); }); }); }, Promise.resolve()).then(function () { renderFotos(); refresh(); }); }
-  $('btCam').onclick = function () { $('fileCam').click(); }; $('btGal').onclick = function () { $('fileGal').click(); };
+  function reduzir(file) { return new Promise(function (res, rej) { if (file.size > 25 * 1048576) return rej('Fotografia demasiado grande. Tire-a com a câmara da app.'); var url = URL.createObjectURL(file), im = new Image(); im.onload = function () { try { var max = 1600, w = im.naturalWidth, h = im.naturalHeight, sc = Math.min(1, max / Math.max(w, h)); var c = document.createElement('canvas'); c.width = Math.round(w * sc); c.height = Math.round(h * sc); var ctx = c.getContext('2d'); ctx.drawImage(im, 0, 0, c.width, c.height); var d = c.toDataURL('image/jpeg', 0.72); if (d.length > 420000) d = c.toDataURL('image/jpeg', 0.58); URL.revokeObjectURL(url); res(d); } catch (e) { rej('Não foi possível processar a fotografia.'); } }; im.onerror = function () { URL.revokeObjectURL(url); rej('Ficheiro de imagem inválido.'); }; im.src = url; }); }
+  function addFotos(files) { var lista = Array.prototype.slice.call(files); var cat = fotoCategoriaSeguinte; fotoCategoriaSeguinte = null; if (!lista.length) return; var max = semIDB ? 2 : 8; if (R.fotos.length + lista.length > max) { toast('Máximo de ' + max + ' fotografias por relatório' + (semIDB ? ' (sem base de dados local)' : '') + '.'); lista = lista.slice(0, Math.max(0, max - R.fotos.length)); } if (!lista.length) return; toast('A processar ' + lista.length + ' fotografia(s)…'); lista.reduce(function (p, f) { return p.then(function () { return reduzir(f).then(function (d) { var id = 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); var ct = cat || (R.fotos.length ? 'Depois' : 'Antes'); cat = null; var foto = { id: id, categoria: ct, legenda: '', datahora: RI.isoLocal(new Date()), dataUrl: d }; return DB.put('blobs', { id: id, numero: R.numero, dataUrl: d }).then(function () { R.fotos.push(foto); }); }).catch(function (m) { toast(String(m && m.message === 'QuotaExceeded' ? 'Sem espaço para guardar a fotografia. Exporte e apague relatórios antigos.' : m)); }); }); }, Promise.resolve()).then(function () { renderFotos(); refresh(); toast(R.fotos.length + '/' + max + ' fotografia(s) — ver secção 8'); }); }
+  $('btCam').onclick = function () { $('fileCam').click(); }; $('btGal').onclick = function () { $('fileGal').click(); }; $('btCamBar').onclick = function () { $('fileCam').click(); };
   $('fileCam').onchange = function () { addFotos(this.files); this.value = ''; }; $('fileGal').onchange = function () { addFotos(this.files); this.value = ''; };
-  function renderFotos() { var g = $('fotosGrid'); $$('.foto', g).forEach(function (n) { n.remove(); }); var ed = $('fotoEd'); if (ed) ed.remove(); R.fotos.forEach(function (p, i) { var d = document.createElement('div'); d.className = 'foto'; d.innerHTML = '<img src="' + p.dataUrl + '" alt=""><span class="cat">' + esc(p.categoria) + (p.legenda ? ' · ' + esc(p.legenda) : '') + '</span><button class="x" aria-label="Apagar">×</button>'; d.querySelector('img').onclick = function () { editarFoto(i); }; d.querySelector('.x').onclick = function () { if (!confirm('Apagar esta fotografia?')) return; DB.del('blobs', p.id); R.fotos.splice(i, 1); renderFotos(); refresh(); }; g.insertBefore(d, $('btCam')); }); }
-  function editarFoto(i) { var p = R.fotos[i]; var ed = $('fotoEd'); if (ed) ed.remove(); ed = document.createElement('div'); ed.id = 'fotoEd'; ed.className = 'item'; ed.innerHTML = '<div class="hd"><b>Fotografia ' + (i + 1) + '</b><button class="del" id="fotoEdX">×</button></div><div class="f"><span class="lbl">Categoria</span><div class="pills" id="fotoCats">' + FOTO_CATS.map(function (c) { return '<button class="pill' + (c === p.categoria ? ' on' : '') + '" data-v="' + esc(c) + '">' + esc(c) + '</button>'; }).join('') + '</div></div><div class="f"><label for="fotoLeg">Legenda</label><input class="in" id="fotoLeg" maxlength="80" value="' + esc(p.legenda) + '"></div>'; $('fotosGrid').parentNode.insertBefore(ed, $('fotosGrid').nextSibling); $$('#fotoCats button').forEach(function (b) { b.onclick = function () { p.categoria = b.dataset.v; renderFotos(); refresh(); }; }); $('fotoLeg').oninput = function () { p.legenda = this.value; $$('.foto .cat')[i].textContent = p.categoria + (p.legenda ? ' · ' + p.legenda : ''); saveDraft(); }; $('fotoEdX').onclick = function () { ed.remove(); }; }
+  function renderFotos() { var g = $('fotosGrid'); $$('.foto', g).forEach(function (n) { n.remove(); }); var ed = $('fotoEd'); if (ed) ed.remove(); R.fotos.forEach(function (p, i) { var d = document.createElement('div'); d.className = 'foto'; d.innerHTML = '<img src="' + imgSrc(p.dataUrl) + '" alt=""><button class="edit" aria-label="Editar fotografia ' + (i + 1) + '"></button><span class="cat">' + esc(p.categoria) + (p.legenda ? ' · ' + esc(p.legenda) : '') + '</span><button class="x" aria-label="Apagar fotografia ' + (i + 1) + '">×</button>'; d.querySelector('.edit').onclick = function () { editarFoto(i); }; d.querySelector('.x').onclick = function () { if (!confirm('Apagar esta fotografia?')) return; DB.del('blobs', p.id); R.fotos.splice(i, 1); renderFotos(); refresh(); }; g.insertBefore(d, $('btCam')); }); }
+  function editarFoto(i) { var p = R.fotos[i]; var ed = $('fotoEd'); if (ed) ed.remove(); ed = document.createElement('div'); ed.id = 'fotoEd'; ed.className = 'item'; ed.innerHTML = '<div class="hd"><b>Fotografia ' + (i + 1) + '</b><button class="del" id="fotoEdX" aria-label="Fechar">×</button></div><div class="f"><span class="lbl">Categoria</span><div class="pills" id="fotoCats">' + FOTO_CATS.map(function (c) { return '<button class="pill' + (c === p.categoria ? ' on' : '') + '" data-v="' + esc(c) + '">' + esc(c) + '</button>'; }).join('') + '</div></div><div class="f"><label for="fotoLeg">Legenda</label><input class="in" id="fotoLeg" maxlength="80" value="' + esc(p.legenda) + '"></div>'; $('fotosGrid').parentNode.insertBefore(ed, $('fotosGrid').nextSibling); $$('#fotoCats button').forEach(function (b) { b.onclick = function () { p.categoria = b.dataset.v; renderFotos(); refresh(); }; }); $('fotoLeg').oninput = function () { p.legenda = this.value; $$('.foto .cat')[i].textContent = p.categoria + (p.legenda ? ' · ' + p.legenda : ''); saveDraft(); }; $('fotoEdX').onclick = function () { ed.remove(); }; }
 
   /* ── refresh: visibilidade condicional, cálculos, estados, rascunho ── */
+  var SEC = { cliente: 'Cli', tipo_intervencao: 'Cli', orcamento_numero: 'Cli', orcamento_desvio: 'Cli', equipamentos: 'Eq', descricao: 'Trab', data_inicio: 'Trab', hora_inicio: 'Trab', hora_fim: 'Trab', fgas: 'Gas', materiais: 'Mat', deslocacao: 'Desl', obra_concluida: 'Fim', pendentes: 'Fim', proxima_visita: 'Fim', fotos: 'Fotos' };
+  function hostErro(campo) { var p = campo.split('.'); if (p[0] === 'equipamentos' && /^\d+$/.test(p[1] || '')) return document.querySelector('[data-eqi="' + p[1] + '"]'); if (p[0] === 'materiais' && /^\d+$/.test(p[1] || '')) return document.querySelector('[data-mati="' + p[1] + '"]'); var el = document.querySelector('[data-k="' + campo + '"], [data-seg="' + campo + '"], [data-multi="' + campo + '"]'); if (el) return el.closest('.f') || el.parentNode; var sec = $('sec' + (SEC[p[0]] || 'Trab')); return sec && sec.querySelector('.body'); }
   function refresh() {
     if (!R) return;
     var f = R.fgas; var qa = RI.num(f.qty_add), qr = RI.num(f.qty_rec);
@@ -1168,101 +1272,133 @@ if (typeof module !== 'undefined' && module.exports) module.exports = RI;
     var dur = RI.duracao(R.hora_inicio, R.hora_fim), nt = RI.tecnicos(R).length;
     $('calcDur').innerHTML = dur == null ? 'Duração: — · ' + nt + ' técnico(s)' : 'Duração: <b>' + RI.fmtHM(dur) + '</b>' + (nt > 1 ? ' × ' + nt + ' técnicos = ' + RI.fmtHM(dur * nt) + ' de mão de obra' : '');
     if (R.houve_gas) {
-      var eqs = R.equipamentos.filter(RI.temGas); $('fGasEq').hidden = eqs.length < 2; $('gasEqPills').innerHTML = eqs.map(function (e) { return '<button class="pill' + (e.id === (RI.equipGas(R) || {}).id ? ' on' : '') + '" data-geq="' + e.id + '">' + esc([e.marca, e.modelo].filter(Boolean).join(' ') || e.categoria) + '</button>'; }).join(''); $$('[data-geq]').forEach(function (b) { b.onclick = function () { f.equip_id = b.dataset.geq; refresh(); }; });
-      var c = RI.fgasCalc(R); $('calcGas').innerHTML = !c ? '<span class="msg err" style="display:block">Sem equipamento com circuito frigorífico. Acrescente-o na secção 2.</span>' : (c.t == null ? 'Indique refrigerante e carga (kg) do equipamento na secção 2.' : esc(c.eq.refrigerante === 'Outro' ? c.eq.refrigerante_outro : c.eq.refrigerante) + ' · ' + esc(RI.fmtNum(c.eq.carga_kg)) + ' kg × GWP ' + c.gwp + ' = <b>' + esc(RI.fmtNum(c.t)) + ' t CO2e</b><br>Verificação de fugas: ' + esc(c.verif.texto) + (c.reverif ? '<br>Nova verificação após reparação até <b>' + RI.fmtData(c.reverif) + '</b>' : '') + (c.proxima ? '<br>Próxima verificação periódica: <b>' + RI.fmtData(c.proxima) + '</b>' : '') + (qa > 0 || qr > 0 ? '<br>Balanço: recuperado ' + RI.fmtNum(qr) + ' kg · adicionado ' + RI.fmtNum(qa) + ' kg · carga final ' + RI.fmtNum(RI.cargaFinal(R)) + ' kg' : ''));
-      if (!f.tecnico_cert && cfg.tecnico_cert) { f.tecnico_cert = cfg.tecnico_cert; $('kCertTec').value = f.tecnico_cert; }
+      var eqs = R.equipamentos.filter(RI.temGas); $('fGasEq').hidden = eqs.length < 2; $('gasEqPills').innerHTML = eqs.map(function (e) { return '<button class="pill' + (e.id === (RI.equipGas(R) || {}).id ? ' on' : '') + '" data-geq="' + esc(e.id) + '">' + esc([e.marca, e.modelo].filter(Boolean).join(' ') || e.categoria) + '</button>'; }).join(''); $$('[data-geq]').forEach(function (b) { b.onclick = function () { f.equip_id = b.dataset.geq; refresh(); }; });
+      var c = RI.fgasCalc(R); $('calcGas').innerHTML = !c ? '<span class="msg err" style="display:block">Sem equipamento com circuito frigorífico. Acrescente-o na secção 2.</span>' : (!c.eq.refrigerante || !(RI.num(c.eq.carga_kg) > 0) ? 'Indique refrigerante e carga (kg) do equipamento na secção 2.' : esc(c.eq.refrigerante === 'Outro' ? c.eq.refrigerante_outro : c.eq.refrigerante) + ' · ' + esc(RI.fmtNum(c.eq.carga_kg)) + ' kg' + (c.t != null ? ' × GWP ' + c.gwp + ' = <b>' + esc(RI.fmtNum(c.t)) + ' t CO2e</b>' : '') + '<br>Verificação de fugas: ' + esc(c.verif.texto) + (c.reverif ? '<br>Nova verificação após reparação até <b>' + RI.fmtData(c.reverif) + '</b>' : '') + (c.proxima ? '<br>Próxima verificação periódica: <b>' + RI.fmtData(c.proxima) + '</b>' : '') + (qa > 0 || qr > 0 ? '<br>Balanço: recuperado ' + RI.fmtNum(qr) + ' kg · adicionado ' + RI.fmtNum(qa) + ' kg · carga final ' + RI.fmtNum(RI.cargaFinal(R)) + ' kg' : ''));
     }
     sincronizarGas();
     var sug = RI.sugestaoProxima(R); $('btProxSug').hidden = !sug || R.proxima_visita === sug; $('proxHelp').textContent = sug ? 'Sugestão (F-gas): ' + RI.fmtData(sug) : ''; $('btProxSug').onclick = function () { R.proxima_visita = sug; $('kProx').value = sug; refresh(); };
     var E = RI.validar(R, hoje()), B = RI.bloqueantes(E);
     $$('.msg[data-auto]').forEach(function (m) { m.remove(); }); $$('.in.bad').forEach(function (i) { i.classList.remove('bad'); });
-    if (tentou) E.forEach(function (e) { var el = document.querySelector('[data-k="' + e.campo + '"], [data-seg="' + e.campo + '"], [data-multi="' + e.campo + '"]'); var host = el ? (el.closest('.f') || el.parentNode) : ({ fotos: $('secFotos'), equipamentos: $('secEq'), 'equipamentos.gas': $('secEq') }[e.campo] || $('sec' + ({ 'cliente': 'Cli' }[e.campo.split('.')[0]] || 'Trab'))); if (!host) return; if (el && el.classList.contains('in') && e.bloq) el.classList.add('bad'); var m = document.createElement('p'); m.className = 'msg ' + (e.bloq ? 'err' : 'warn'); m.dataset.auto = '1'; m.textContent = e.msg; (host.classList && host.classList.contains('sec') ? host.querySelector('.body') : host).appendChild(m); });
-    var secErr = {}; E.forEach(function (e) { if (!e.bloq) return; var s = e.campo.split('.')[0]; secErr[{ cliente: 'Cli', tipo_intervencao: 'Cli', orcamento_numero: 'Cli', orcamento_desvio: 'Cli', equipamentos: 'Eq', descricao: 'Trab', data_inicio: 'Trab', hora_inicio: 'Trab', hora_fim: 'Trab', fgas: 'Gas', materiais: 'Mat', deslocacao: 'Desl', obra_concluida: 'Fim', pendentes: 'Fim', proxima_visita: 'Fim', fotos: 'Fotos' }[s] || 'Trab'] = 1; });
-    ['Cli', 'Eq', 'Trab', 'Gas', 'Mat', 'Desl', 'Fim', 'Fotos'].forEach(function (k) { var s = $('sec' + k); s.classList.toggle('err', tentou && !!secErr[k]); s.classList.toggle('done', !secErr[k] && (k !== 'Cli' || !!R.cliente.nome) && (k !== 'Trab' || !!R.hora_fim)); });
-    $$('[data-st]').forEach(function (el) { var k = el.dataset.st, t = ''; if (k === 'cli') t = [R.cliente.nome, R.tipo_intervencao].filter(Boolean).join(' · '); if (k === 'eq') t = R.equipamentos.map(function (e) { return [e.marca, e.modelo].filter(Boolean).join(' ') || e.categoria; }).filter(Boolean).join(', '); if (k === 'trab') t = R.hora_inicio ? R.hora_inicio + (R.hora_fim ? '–' + R.hora_fim : '') : ''; if (k === 'gas') { var cc = RI.fgasCalc(R); t = cc && cc.t != null ? RI.fmtNum(cc.t) + ' t CO2e' : ''; } if (k === 'mat') t = R.materiais.length ? R.materiais.length + ' linha(s)' : 'sem materiais'; if (k === 'desl') t = R.deslocacao.taxa === 'sim' ? 'com taxa' : R.deslocacao.taxa === 'nao' ? 'sem taxa' : ''; if (k === 'fim') t = R.obra_concluida === 'nao' ? 'pendente' : 'concluída'; if (k === 'fotos') t = R.fotos.length ? R.fotos.length + ' foto(s)' : ''; el.textContent = t; });
+    if (tentou) E.forEach(function (e) { var host = hostErro(e.campo); if (!host) return; var el = document.querySelector('[data-k="' + e.campo + '"]'); if (el && el.classList.contains('in') && e.bloq) el.classList.add('bad'); var m = document.createElement('p'); m.className = 'msg ' + (e.bloq ? 'err' : 'warn'); m.dataset.auto = '1'; m.textContent = e.msg; host.appendChild(m); });
+    var secErr = {}; E.forEach(function (e) { if (e.bloq) secErr[SEC[e.campo.split('.')[0]] || 'Trab'] = 1; });
+    ['Cli', 'Eq', 'Trab', 'Gas', 'Mat', 'Desl', 'Fim', 'Fotos'].forEach(function (k) { var sc = $('sec' + k); sc.classList.toggle('err', tentou && !!secErr[k]); sc.classList.toggle('done', !secErr[k] && (k !== 'Cli' || !!R.cliente.nome) && (k !== 'Trab' || !!R.hora_fim)); });
+    $$('[data-st]').forEach(function (el) { var k = el.dataset.st, t = ''; if (k === 'cli') t = [R.cliente.nome, R.tipo_intervencao].filter(Boolean).join(' · '); if (k === 'eq') t = R.equipamentos.map(function (e) { return [e.marca, e.modelo].filter(Boolean).join(' ') || (RI.eqVazio(e) ? '' : e.categoria); }).filter(Boolean).join(', '); if (k === 'trab') t = R.hora_inicio ? R.hora_inicio + (R.hora_fim ? '–' + R.hora_fim : '') : ''; if (k === 'gas') { var cc = RI.fgasCalc(R); t = cc && cc.t != null ? RI.fmtNum(cc.t) + ' t CO2e' : ''; } if (k === 'mat') t = R.materiais.length ? R.materiais.length + ' linha(s)' : 'sem materiais'; if (k === 'desl') t = R.deslocacao.taxa === 'sim' ? 'com taxa' : R.deslocacao.taxa === 'nao' ? 'sem taxa' : ''; if (k === 'fim') t = R.obra_concluida === 'nao' ? 'pendente' : 'concluída'; if (k === 'fotos') t = R.fotos.length ? R.fotos.length + ' foto(s)' : ''; el.textContent = t; });
     $('cab').innerHTML = '<b>' + esc(R.numero) + '</b> · ' + esc(RI.fmtData(R.data_inicio)) + ' · ' + esc(R.tecnico.nome) + (R.retifica ? '<br>Retifica o ' + esc(R.retifica) : '');
-    $('barTitle').textContent = R.numero + (R.cliente.nome ? ' — ' + R.cliente.nome : ''); $('barSub').textContent = B.length ? B.length + ' campo(s) por resolver' + (E.length > B.length ? ' · ' + (E.length - B.length) + ' aviso(s)' : '') : (E.length ? E.length + ' aviso(s) · pronto a assinar' : 'Rascunho guardado automaticamente');
+    $('barTitle').textContent = R.numero + (R.cliente.nome ? ' — ' + R.cliente.nome : ''); $('barSub').textContent = B.length ? B.length + ' campo(s) por resolver — toque para ver' + (E.length > B.length ? ' · ' + (E.length - B.length) + ' aviso(s)' : '') : (E.length ? E.length + ' aviso(s) · pronto a assinar' : 'Rascunho guardado automaticamente');
     saveDraft();
   }
-  function saveDraft(agora) { if (!R || R.estado !== 'rascunho') return; R.atualizado_em = RI.isoLocal(new Date()); var go = function () { var d = JSON.parse(JSON.stringify(R)); d.fotos = d.fotos.map(function (p) { delete p.dataUrl; return p; }); if (!LS.set(K.draft, d)) toast('Sem espaço para guardar o rascunho. Exporte relatórios antigos.'); }; clearTimeout(saveTimer); if (agora) go(); else saveTimer = setTimeout(go, 300); }
+  $('barInfo').onclick = function () { tentou = true; refresh(); var m = document.querySelector('.msg.err[data-auto], .msg.warn[data-auto]'); if (m) { var d = m.closest('details'); if (d) d.open = true; m.scrollIntoView({ behavior: 'smooth', block: 'center' }); } };
+  function saveDraft(agora) { if (!R || R.estado !== 'rascunho') return; R.atualizado_em = RI.isoLocal(new Date()); var go = function () { var d = Object.assign({}, R, { fotos: R.fotos.map(function (p) { var q = Object.assign({}, p); delete q.dataUrl; return q; }) }); if (!LS.set(K.draft, d)) toast('Sem espaço para guardar o rascunho. Exporte relatórios antigos.'); }; clearTimeout(saveTimer); if (agora) go(); else saveTimer = setTimeout(go, 300); }
   document.addEventListener('visibilitychange', function () { if (document.hidden) saveDraft(true); }); window.addEventListener('pagehide', function () { saveDraft(true); });
-  function carregarFotosDraft() { if (!R || !R.fotos.length) return Promise.resolve(); return Promise.all(R.fotos.map(function (p) { if (p.dataUrl) return null; return DB.get('blobs', p.id).then(function (b) { if (b) p.dataUrl = b.dataUrl; }); })).then(function () { R.fotos = R.fotos.filter(function (p) { return p.dataUrl; }); }); }
 
-  /* ── emissão: validar → assinatura do técnico → congelar ── */
-  $('btEmitir').onclick = function () { tentou = true; refresh(); var B = RI.bloqueantes(RI.validar(R, hoje())); if (B.length) { var first = B[0]; var el = document.querySelector('[data-k="' + first.campo + '"], [data-seg="' + first.campo + '"]') || document.querySelector('.msg.err[data-auto]'); var sec = el && el.closest('details'); if (sec) sec.open = true; if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast(B.length + ' campo(s) por resolver'); return; } $('sigTecHint').textContent = R.tecnico.nome + (R.tecnico.cert ? ' · certificado n.º ' + R.tecnico.cert : ''); sigTec.clear(); $('sigTecUse').hidden = !cfg.assinatura; $('fullSig').classList.add('on'); };
+  /* ── emissão: validar → assinatura do técnico → congelar (só depois de gravado) ── */
+  $('btEmitir').onclick = function () { tentou = true; refresh(); var B = RI.bloqueantes(RI.validar(R, hoje())); if (B.length) { var host = hostErro(B[0].campo); var sec = host && host.closest('details'); if (sec) sec.open = true; var m = document.querySelector('.msg.err[data-auto]'); if (m) m.scrollIntoView({ behavior: 'smooth', block: 'center' }); toast(B.length + ' campo(s) por resolver'); return; } $('sigTecHint').textContent = R.tecnico.nome + (R.tecnico.cert ? ' · certificado n.º ' + R.tecnico.cert : ''); $('sigTecDecl').textContent = RI.declaracaoTecnico(R.fgas.tecnico_cert || R.tecnico.cert); sigTec.clear(); msgInline('sigTecMsg'); $('sigTecUse').hidden = !cfg.assinatura; if (cfg.assinatura) sigTec.load(cfg.assinatura); $('fullSig').classList.add('on'); $('fullSig').scrollTop = 0; };
   $('sigTecUse').onclick = function () { sigTec.load(cfg.assinatura); };
   $('sigTecCancel').onclick = function () { $('fullSig').classList.remove('on'); };
-  $('sigTecOk').onclick = function () { if (!sigTec.valida()) return toast('Assinatura demasiado curta. Assine novamente.'); var agora = RI.isoLocal(new Date()); R.assinatura_tecnico = { png: sigTec.png(), datahora: agora, nome: R.tecnico.nome, cert: R.tecnico.cert }; R.estado = 'emitido'; R.emitido_em = agora; R.hash = RI.hash(R); if (R.fgas && R.fgas.tecnico_cert && !cfg.tecnico_cert) { cfg.tecnico_cert = R.fgas.tecnico_cert; LS.set(K.cfg, cfg); } memorizarCliente(R); DB.put('relatorios', R).then(function () { LS.del(K.draft); R.fotos.forEach(function (p) { DB.del('blobs', p.id); }); $('fullSig').classList.remove('on'); toast('Relatório emitido'); entrega(); }).catch(function () { toast('Sem espaço para guardar. Exporte e apague relatórios antigos.'); }); };
+  $('sigTecOk').onclick = function () {
+    if (!sigTec.valida()) return msgInline('sigTecMsg', 'Assinatura demasiado curta. Assine novamente.');
+    var agora = RI.isoLocal(new Date()), n = JSON.parse(JSON.stringify(R));
+    if (n.houve_gas && n.fgas.tecnico_cert) n.tecnico.cert = n.fgas.tecnico_cert;
+    n.tecnico.empresa_cert = cfg.empresa_cert || n.tecnico.empresa_cert || '';
+    if (n.houve_gas && !n.fgas.ficha_oc && !/caderno de registo/i.test(n.pendentes || '')) n.pendentes = (n.pendentes ? n.pendentes + '; ' : '') + 'Ficha do caderno de registo do OC (duplicado ao operador)';
+    n.assinatura_tecnico = { png: sigTec.png(), datahora: agora, nome: n.tecnico.nome, cert: n.tecnico.cert, origem: sigTec.origem, declaracao: RI.declaracaoTecnico(n.tecnico.cert) };
+    n.estado = 'emitido'; n.emitido_em = agora; n.hash = RI.hash(n); n.hash_versao = RI.HASH_VERSAO;
+    var btn = $('sigTecOk'); btn.disabled = true;
+    DB.put('relatorios', n).then(function () { R = n; if (R.fgas && R.fgas.tecnico_cert && !cfg.tecnico_cert) { cfg.tecnico_cert = R.fgas.tecnico_cert; LS.set(K.cfg, cfg); } memorizarCliente(R); LS.del(K.draft); R.fotos.forEach(function (p) { DB.del('blobs', p.id); }); $('fullSig').classList.remove('on'); toast('Relatório emitido'); entrega(); }).catch(function () { msgInline('sigTecMsg', 'Não foi possível guardar. O rascunho mantém-se — exporte e apague relatórios antigos e tente de novo.'); }).then(function () { btn.disabled = false; });
+  };
 
   /* ── aceitação pelo cliente ── */
-  $('btAceit').onclick = function () { var c = R.cliente; $('aceitResumo').innerHTML = [['Relatório', R.numero + ' · ' + RI.fmtData(R.data_inicio)], ['Cliente', c.nome], ['Local', [c.morada, c.local].filter(Boolean).join(' · ')], ['Equipamento', R.equipamentos.map(function (e) { return [e.marca, e.modelo, e.serie ? 'n.º ' + e.serie : ''].filter(Boolean).join(' '); }).join('; ') || '—'], ['Intervenção', R.descricao], ['Horas', R.hora_inicio + '–' + R.hora_fim + ' (' + RI.fmtHM(RI.duracao(R.hora_inicio, R.hora_fim)) + ')'], ['Materiais', R.materiais.length ? R.materiais.map(function (m) { return m.designacao + ' × ' + m.qty + ' ' + m.unidade; }).join('; ') : 'nenhum'], ['Estado', R.obra_concluida === 'sim' ? 'Obra concluída' : 'Pendente: ' + R.pendentes]].map(function (p) { return '<div><span>' + esc(p[0]) + '</span><span>' + esc(p[1]) + '</span></div>'; }).join(''); $('aNome').value = c.pessoa || (c.nif && /^[123]/.test(c.nif) ? c.nome : ''); $('aQual').value = c.nif && /^5/.test(c.nif) ? 'Representante do cliente' : 'O próprio / titular'; $('aObs').value = ''; $('aAceita').checked = false; sigCli.clear(); $('aceitAltBox').classList.remove('on'); $('fullAceit').classList.add('on'); };
+  $('aceitTexto').textContent = RI.TEXTO_ACEITACAO; $('aceitRgpd').textContent = RI.TEXTO_RGPD;
+  $('btAceit').onclick = function () { var c = R.cliente, cc = R.houve_gas ? RI.fgasCalc(R) : null, f = R.fgas, tot = RI.totais(R.materiais); var linhas = [['Relatório', R.numero + ' · ' + RI.fmtData(R.data_inicio)], ['Cliente', c.nome], ['Local', [c.morada, c.local].filter(Boolean).join(' · ')], ['Equipamento', R.equipamentos.filter(function (e) { return !RI.eqVazio(e); }).map(function (e) { return [e.marca, e.modelo, e.serie ? 'n.º ' + e.serie : ''].filter(Boolean).join(' '); }).join('; ') || '—'], ['Intervenção', R.descricao], ['Horas', R.hora_inicio + '–' + R.hora_fim + ' (' + RI.fmtHM(RI.duracao(R.hora_inicio, R.hora_fim)) + ')'], ['Materiais', R.materiais.length ? R.materiais.map(function (m) { return m.designacao + ' × ' + m.qty + ' ' + m.unidade; }).join('; ') + (tot.incompleto ? '' : ' · total ' + RI.fmtEur(tot.total) + ' s/ IVA') : 'nenhum']]; if (cc) linhas.push(['Gases fluorados', (cc.eq.refrigerante === 'Outro' ? cc.eq.refrigerante_outro : cc.eq.refrigerante) + (cc.t != null ? ' · ' + RI.fmtNum(cc.t) + ' t CO2e' : '') + ' · verificação: ' + ({ sem_fuga: 'sem fuga', fuga: RI.fugaAberta(f) ? 'fuga por reparar' : 'fuga reparada', nao: 'não efetuada' }[f.verificacao] || '—') + ' · +' + RI.fmtNum(f.qty_add) + ' kg / −' + RI.fmtNum(f.qty_rec) + ' kg' + (cc.reverif ? ' · nova verificação até ' + RI.fmtData(cc.reverif) : cc.proxima ? ' · próxima verificação ' + RI.fmtData(cc.proxima) : '')]); if (R.conforme_orcamento === 'nao') linhas.push(['Desvio ao orçamento', R.orcamento_desvio]); linhas.push(['Estado', R.obra_concluida === 'sim' ? 'Obra concluída' : 'Pendente: ' + R.pendentes]); $('aceitResumo').innerHTML = linhas.map(function (p) { return '<div><span>' + esc(p[0]) + '</span><span>' + esc(p[1]) + '</span></div>'; }).join(''); $('aNome').value = c.pessoa || (c.nif && /^[123]/.test(c.nif) ? c.nome : ''); $('aQual').value = c.nif && /^5/.test(c.nif) ? 'Representante do cliente' : 'O próprio / titular'; $('aObs').value = ''; $('aAceita').checked = false; sigCli.clear(); msgInline('aceitMsg'); $('aceitAltBox').classList.remove('on'); $('aceitPrev').hidden = true; $('aceitPrev').innerHTML = ''; $('fullAceit').classList.add('on'); $('fullAceit').scrollTop = 0; };
+  $('aceitVer').onclick = function () { var w = $('aceitPrev'); if (!w.hidden) { w.hidden = true; w.innerHTML = ''; return; } w.hidden = false; preview(w, R); };
   $('aceitCancel').onclick = function () { $('fullAceit').classList.remove('on'); };
   $('aceitAlt').onclick = function () { $('aceitAltBox').classList.toggle('on'); };
   var aceitAltV = ''; $$('#aceitAltSeg button').forEach(function (b) { b.onclick = function () { aceitAltV = b.dataset.v; $$('#aceitAltSeg button').forEach(function (x) { x.classList.toggle('on', x === b); }); }; });
-  $('aceitOk').onclick = function () { var nome = $('aNome').value.trim(); if (nome.length < 2) return toast('Escreva o nome de quem assina (legível).'); if (!$('aAceita').checked) return toast("É necessário marcar 'Li e aceito' antes de assinar."); if (!sigCli.valida()) return toast('Assinatura demasiado curta. Assine de novo.'); R.aceitacao = { nome: nome, qualidade: $('aQual').value, observacoes: $('aObs').value.trim(), png: sigCli.png(), datahora: RI.isoLocal(new Date()), texto: $('aceitTexto').textContent }; R.estado = 'aceite'; R.aceite_em = R.aceitacao.datahora; DB.put('relatorios', R).then(function () { $('fullAceit').classList.remove('on'); toast('Aceite pelo cliente'); entrega(); }); };
-  $('aceitAltOk').onclick = function () { if (!aceitAltV) return toast('Escolha: ausente ou recusou.'); var mot = $('aMotivo').value.trim(); if (aceitAltV === 'recusado' && mot.length < 3) return toast('Registe o motivo da recusa.'); R.aceitacao = { nome: $('aNome').value.trim(), qualidade: $('aQual').value, observacoes: $('aObs').value.trim(), png: '', datahora: RI.isoLocal(new Date()), recusa: aceitAltV, motivo: mot }; R.estado = aceitAltV; DB.put('relatorios', R).then(function () { $('fullAceit').classList.remove('on'); entrega(); }); };
+  function gravarAceitacao(a, estado) { var n = JSON.parse(JSON.stringify(R)); n.aceitacao = a; n.estado = estado; if (estado === 'aceite') n.aceite_em = a.datahora; n.hash_aceitacao = RI.hashAceitacao(n); return DB.put('relatorios', n).then(function () { R = n; $('fullAceit').classList.remove('on'); entrega(); }).catch(function () { msgInline('aceitMsg', 'Não foi possível guardar. Exporte relatórios antigos e tente de novo.'); }); }
+  $('aceitOk').onclick = function () { var nome = $('aNome').value.trim(); if (nome.length < 2) return msgInline('aceitMsg', 'Escreva o nome de quem assina (legível).'); if (!$('aAceita').checked) return msgInline('aceitMsg', "Marque 'Li e aceito' antes de confirmar."); if (!sigCli.valida()) return msgInline('aceitMsg', 'Assinatura demasiado curta. Assine de novo.'); gravarAceitacao({ nome: nome, qualidade: $('aQual').value, observacoes: $('aObs').value.trim(), png: sigCli.png(), datahora: RI.isoLocal(new Date()), texto: RI.TEXTO_ACEITACAO, rgpd: RI.TEXTO_RGPD }, 'aceite').then(function () { toast('Aceite pelo cliente'); }); };
+  $('aceitAltOk').onclick = function () { if (!aceitAltV) return msgInline('aceitMsg', 'Escolha: ausente ou recusou.'); var mot = $('aMotivo').value.trim(); if (aceitAltV === 'recusado' && mot.length < 3) return msgInline('aceitMsg', 'Registe o motivo da recusa.'); if (aceitAltV === 'ausente' && (RI.vazio(R.cliente.email) || !RI.emailValido(R.cliente.email))) return msgInline('aceitMsg', 'Para validar por email é preciso o email do cliente. Use "Corrigir antes da validação" para o acrescentar na secção 1.'); gravarAceitacao({ nome: $('aNome').value.trim(), qualidade: $('aQual').value, observacoes: $('aObs').value.trim(), png: '', datahora: RI.isoLocal(new Date()), recusa: aceitAltV, motivo: mot, email: aceitAltV === 'ausente' ? R.cliente.email : '' }, aceitAltV); };
 
-  /* ── entrega: PDF, email, JSON, pré-visualização, retificação ── */
-  function entrega() { show('sEntrega'); $('entTitle').textContent = R.numero + ' · ' + RI.estadoTexto(R); $('entHint').textContent = (R.cliente.nome || '') + ' · ' + RI.fmtData(R.data_inicio) + (R.hash ? ' · ref. ' + R.hash.slice(0, 12) : ''); $('btAceit').hidden = R.estado !== 'emitido'; $('btShare').hidden = !(navigator.share && navigator.canShare); $('btRetificar').hidden = R.estado === 'rascunho'; $('entNote').textContent = R.estado === 'emitido' ? 'Entregue o aparelho ao cliente para validar. Se não estiver presente, pode registar "ausente" e enviar o PDF por email para validação.' : R.exportado_em ? 'Exportado em ' + RI.fmtDataHora(R.exportado_em) + '.' : 'Ainda não exportado para o escritório.'; $('prevWrap').hidden = true; $('prevWrap').innerHTML = ''; }
+  /* ── entrega: PDF, email, JSON, pré-visualização, correção, retificação, anulação ── */
+  function entrega() { show('sEntrega'); LS.set(K.ultimo, R.numero); $('entTitle').textContent = R.numero + ' · ' + RI.estadoTexto(R); $('entHint').textContent = (R.cliente.nome || '') + ' · ' + RI.fmtData(R.data_inicio) + (R.hash ? ' · ref. ' + R.hash.slice(0, 12) : ''); var pend = ['emitido', 'ausente', 'recusado'].indexOf(R.estado) >= 0 && !R.retificado_por; $('btAceit').hidden = !pend; $('btAceit').textContent = R.estado === 'emitido' ? 'Validar com o cliente (assinatura)' : 'O cliente já pode assinar? Validar agora'; $('btShare').hidden = !(navigator.share && navigator.canShare); $('btRetificar').hidden = !!R.retificado_por; $('btCorrigir').hidden = !(R.estado === 'emitido' && !R.exportado_em); $('btValEmail').hidden = R.estado !== 'ausente'; $('btAnular').hidden = !!R.exportado_em || !!R.retificado_por; $('entNote').textContent = R.retificado_por ? 'Este relatório foi retificado e substituído por ' + R.retificado_por + '. Sem efeito.' : R.estado === 'emitido' ? 'Entregue o aparelho ao cliente para validar. Se não estiver presente, pode registar "ausente" e enviar o PDF por email para validação.' : R.estado === 'ausente' ? 'Envie o PDF por email a ' + (R.aceitacao && R.aceitacao.email || R.cliente.email) + ' e, quando o cliente responder a aceitar, registe-o aqui.' : R.exportado_em ? 'Exportado em ' + RI.fmtDataHora(R.exportado_em) + '.' : 'Ainda não exportado para o escritório.'; $('prevWrap').hidden = true; $('prevWrap').innerHTML = ''; }
+  function preview(w, r) { w.innerHTML = renderPaginas(r); var scale = Math.min(1, (w.clientWidth - 16) / 794); $$('.page', w).forEach(function (p) { p.style.transform = 'scale(' + scale + ')'; p.style.marginBottom = (-1123 * (1 - scale) + 14) + 'px'; p.style.width = '210mm'; }); }
   $('btPdf').onclick = function () { $('printRoot').innerHTML = renderPaginas(R); var t = document.title; document.title = RI.ficheiro(R); setTimeout(function () { window.print(); setTimeout(function () { document.title = t; }, 2000); }, 60); };
-  $('btEmail').onclick = function () { location.href = RI.emailResumo(R, cfg).href; };
-  $('btJson').onclick = function () { exportarJSON(R).then(entrega); };
+  $('btEmail').onclick = function () { toast('Anexe o PDF ao email antes de enviar', 3500); location.href = RI.emailResumo(R, cfg).href; };
+  $('btJson').onclick = function () { exportarJSON(R).then(entrega).catch(function () { toast('Exportação cancelada'); }); };
   $('btShare').onclick = function () { var nome = RI.ficheiro(R) + '.json'; var f = new File([JSON.stringify(R)], nome, { type: 'application/json' }); navigator.share({ files: [f], title: nome }).then(function () { R.exportado_em = RI.isoLocal(new Date()); return DB.put('relatorios', R); }).then(entrega).catch(function () {}); };
-  $('btPrev').onclick = function () { var w = $('prevWrap'); w.hidden = false; w.innerHTML = renderPaginas(R); var scale = Math.min(1, (w.clientWidth - 16) / 794); $$('.page', w).forEach(function (p) { p.style.transform = 'scale(' + scale + ')'; p.style.marginBottom = (-1123 * (1 - scale) + 14) + 'px'; p.style.width = '210mm'; }); w.scrollIntoView({ behavior: 'smooth' }); };
-  $('btRetificar').onclick = function () { var mot = prompt('Motivo da retificação (fica impresso no novo relatório):'); if (!mot || mot.trim().length < 3) return; var orig = R; var n = novoRelatorio(); ['cliente', 'tipo_intervencao', 'conforme_orcamento', 'orcamento_numero', 'orcamento_desvio', 'pedido_origem', 'ref_interna', 'equipamentos', 'descricao', 'houve_gas', 'fgas', 'materiais', 'deslocacao', 'obra_concluida', 'pendentes', 'recomendacoes', 'proxima_visita', 'observacoes', 'outros_tecnicos_txt', 'data_inicio', 'hora_inicio', 'hora_fim', 'fotos'].forEach(function (k) { n[k] = JSON.parse(JSON.stringify(orig[k])); }); n.retifica = orig.numero; n.motivo_retificacao = mot.trim(); orig.retificado_por = n.numero; DB.put('relatorios', orig).then(function () { return Promise.all(n.fotos.map(function (p) { return DB.put('blobs', { id: p.id, numero: n.numero, dataUrl: p.dataUrl }); })); }).then(function () { R = n; abrirForm(); toast('Nova versão criada — as assinaturas serão recolhidas de novo'); }); };
+  $('btPrev').onclick = function () { var w = $('prevWrap'); w.hidden = false; preview(w, R); w.scrollIntoView({ behavior: 'smooth' }); };
+  $('btValEmail').onclick = function () { if (!confirm('Confirma que o cliente respondeu por email a aceitar o relatório ' + R.numero + '? Guarde esse email no arquivo do escritório.')) return; var a = Object.assign({}, R.aceitacao || {}, { validado_email_em: RI.isoLocal(new Date()), datahora: RI.isoLocal(new Date()), texto: RI.TEXTO_ACEITACAO, recusa: '' }); gravarAceitacao(a, 'aceite').then(function () { toast('Validação por email registada'); }); };
+  $('btCorrigir').onclick = function () { if (!confirm('Voltar a rascunho para corrigir? A assinatura do técnico e a referência serão recolhidas de novo; o número mantém-se.')) return; arquivarRascunhoAtual().then(function () { var n = JSON.parse(JSON.stringify(R)); n.estado = 'rascunho'; n.assinatura_tecnico = null; n.hash = ''; n.hash_aceitacao = ''; n.aceitacao = null; delete n.emitido_em; delete n.aceite_em; return DB.del('relatorios', R.numero).then(function () { return Promise.all(n.fotos.map(function (p) { return DB.put('blobs', { id: p.id, numero: n.numero, dataUrl: p.dataUrl }); })); }).then(function () { R = n; LS.del(K.ultimo); abrirForm(); }); }).catch(function () {}); };
+  $('btRetificar').onclick = function () { var mot = prompt('Motivo da retificação (fica impresso no novo relatório):'); if (!mot || mot.trim().length < 3) return; var orig = R; arquivarRascunhoAtual().then(function () { var n = novoRelatorio(); ['cliente', 'tipo_intervencao', 'conforme_orcamento', 'orcamento_numero', 'orcamento_desvio', 'pedido_origem', 'ref_interna', 'equipamentos', 'descricao', 'medicoes', 'houve_gas', 'fgas', 'materiais', 'deslocacao', 'obra_concluida', 'pendentes', 'recomendacoes', 'proxima_visita', 'observacoes', 'outros_tecnicos_txt', 'data_inicio', 'hora_inicio', 'hora_fim', 'fotos'].forEach(function (k) { if (orig[k] !== undefined) n[k] = JSON.parse(JSON.stringify(orig[k])); }); n.fotos = n.fotos.map(function (p) { p.id = 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); return p; }); n.retifica = orig.numero; n.motivo_retificacao = mot.trim(); orig.retificado_por = n.numero; return DB.put('relatorios', orig).then(function () { return Promise.all(n.fotos.map(function (p) { return DB.put('blobs', { id: p.id, numero: n.numero, dataUrl: p.dataUrl }); })); }).then(function () { R = n; abrirForm(); toast('Nova versão criada — as assinaturas serão recolhidas de novo'); }); }).catch(function () {}); };
+  $('btAnular').onclick = function () { var mot = prompt('Anular o relatório ' + R.numero + ' (teste, engano)? Indique o motivo:'); if (!mot || mot.trim().length < 3) return; var r = R; anular(r, mot.trim()); DB.del('relatorios', r.numero).then(function () { LS.del(K.ultimo); toast('Relatório anulado'); home(); }); };
 
   /* ── impressão A4: a mesma função serve a pré-visualização e o PDF ── */
   function renderPaginas(r) {
-    var c = r.cliente, E = RI.EMPRESA, f = r.fgas || {}, dur = RI.duracao(r.hora_inicio, r.hora_fim), tecs = RI.tecnicos(r), tot = RI.totais(r.materiais), cc = r.houve_gas ? RI.fgasCalc(r) : null;
-    var kv = function (pares, cls) { var h = pares.filter(function (p) { return !RI.vazio(p[1]); }).map(function (p) { return '<div><span>' + esc(p[0]) + '</span><div>' + (p[2] ? p[1] : esc(p[1])) + '</div></div>'; }).join(''); return h ? '<div class="kv ' + (cls || '') + '">' + h + '</div>' : ''; };
+    var c = r.cliente, E = RI.EMPRESA, f = r.fgas || {}, dur = RI.duracao(r.hora_inicio, r.hora_fim), tecs = RI.tecnicos(r), tot = RI.totais(r.materiais), cc = r.houve_gas ? RI.fgasCalc(r) : null, eqs = (r.equipamentos || []).filter(function (e) { return !RI.eqVazio(e) || r.houve_gas; }), aberta = RI.fugaAberta(f);
+    var kv = function (pares, cls) { var h = pares.filter(function (p) { return !RI.vazio(p[1]); }).map(function (p) { return '<div><span>' + esc(p[0]) + '</span><div>' + esc(p[1]) + '</div></div>'; }).join(''); return h ? '<div class="kv ' + (cls || '') + '">' + h + '</div>' : ''; };
+    var certLinha = r.tecnico.empresa_cert && r.tecnico.cert ? '<span>Certificação em gases fluorados (Reg. (UE) 2024/573 · DL n.º 145/2017): empresa n.º ' + esc(r.tecnico.empresa_cert) + ' · técnico n.º ' + esc(r.tecnico.cert) + (r.tecnico.oc ? ' (' + esc(r.tecnico.oc) + ')' : '') + '</span>' : '<span>Reg. (UE) 2024/573 · DL n.º 145/2017</span>';
+    var head = function () { return '<div class="ph">' + LOGO + '<div class="co"><b>Relatório de Intervenção</b><span>' + esc(E.nome) + ' · Manutenção de Edifícios &amp; Assistência Técnica</span>' + certLinha + '</div><div class="no"><b>' + esc(r.numero) + '</b>' + esc(RI.fmtData(r.data_inicio)) + (r.ref_interna ? ' · ref. ' + esc(r.ref_interna) : '') + '<br><span class="st">' + esc(r.retificado_por ? 'retificado' : r.estado === 'aceite' ? 'aceite pelo cliente' : r.estado === 'emitido' ? 'emitido' : r.estado === 'rascunho' ? 'rascunho' : r.estado === 'ausente' ? 'validação por email' : 'recusado') + '</span> ' + esc(RI.VERSAO) + '</div></div>' + (r.retificado_por ? '<div class="box alert"><b>RETIFICADO — substituído pelo relatório ' + esc(r.retificado_por) + '. Sem efeito.</b></div>' : '') + (r.retifica ? '<div class="box alert"><b>Retifica e substitui o relatório ' + esc(r.retifica) + '.</b> Motivo: ' + esc(r.motivo_retificacao) + '</div>' : ''); };
+    var foot = function () { return '<div class="pf"><div>' + esc(E.nome) + ' · ' + esc(E.legal) + '<br>' + esc(E.morada) + ' · Tel. ' + esc(E.tel) + ' · ' + esc(E.email) + (r.hash ? ' · Ref. ' + esc(r.hash.slice(0, 12)) : '') + (r.hash_aceitacao ? ' · Ref. aceitação ' + esc(r.hash_aceitacao.slice(0, 12)) : '') + '</div><div class="pg">Pág. {N} de {T}</div></div>'; };
     var paginas = [];
-    var head = function () { return '<div class="ph">' + LOGO + '<div class="co"><b>Relatório de Intervenção</b><span>' + esc(E.nome) + ' · Manutenção de Edifícios &amp; Assistência Técnica</span><span>Empresa e técnicos certificados em gases fluorados — Reg. (UE) 2024/573 · DL n.º 145/2017' + (cfg.empresa_cert ? ' · Certificado n.º ' + esc(cfg.empresa_cert) : '') + '</span></div><div class="no"><b>' + esc(r.numero) + '</b>' + esc(RI.fmtData(r.data_inicio)) + (r.ref_interna ? ' · ref. ' + esc(r.ref_interna) : '') + '<br><span class="st">' + esc(r.estado === 'aceite' ? 'aceite pelo cliente' : r.estado === 'emitido' ? 'emitido' : r.estado === 'rascunho' ? 'rascunho' : r.estado === 'ausente' ? 'validação por email' : 'recusado') + '</span> ' + esc(RI.VERSAO) + '</div></div>' + (r.retifica ? '<div class="box alert"><b>Retifica e substitui o relatório ' + esc(r.retifica) + '.</b> Motivo: ' + esc(r.motivo_retificacao) + '</div>' : ''); };
-    var foot = function () { return '<div class="pf"><div>' + esc(E.nome) + ' · ' + esc(E.legal) + '<br>' + esc(E.morada) + ' · Tel. ' + esc(E.tel) + ' · ' + esc(E.email) + (r.hash ? ' · Ref. ' + esc(r.hash.slice(0, 12)) : '') + '</div><div class="pg">Pág. {N} de {T}</div></div>'; };
-    /* página 1 */
     var p1 = head();
-    var resumo = (r.obra_concluida === 'sim' ? 'Obra concluída' : 'Obra não concluída — ' + (r.pendentes || 'pendente')) + '. ' + (cc && f.verificacao === 'fuga' ? (f.fuga_reparada === 'sim' ? 'Fuga detetada e reparada' : 'Fuga detetada por reparar') + ' (' + (f.fuga_local || '') + '). ' : '') + (RI.num(f.qty_add) > 0 ? 'Recarga de ' + RI.fmtNum(f.qty_add) + ' kg de ' + (cc ? cc.eq.refrigerante : '') + '. ' : '') + (r.proxima_visita ? 'Próxima visita até ' + RI.fmtData(r.proxima_visita) + '.' : '');
+    var resumo = (r.obra_concluida === 'sim' ? 'Obra concluída' : 'Obra não concluída — ' + (r.pendentes || 'pendente')) + '. ' + (cc && f.verificacao === 'fuga' ? (aberta ? (f.ensaio_final === 'persiste' ? 'Reparação tentada sem êxito — fuga persiste' : 'Fuga detetada por reparar') : 'Fuga detetada e reparada') + ' (' + (f.fuga_local || '') + '). ' : '') + (RI.num(f.qty_add) > 0 ? 'Recarga de ' + RI.fmtNum(f.qty_add) + ' kg de ' + (cc ? cc.eq.refrigerante : '') + '. ' : '') + (r.proxima_visita ? 'Próxima visita até ' + RI.fmtData(r.proxima_visita) + '.' : '');
     p1 += '<div class="summ"><b>' + esc(r.descricao.split(/[.;\n]/)[0].slice(0, 90)) + '</b>' + esc(resumo) + '</div>';
     p1 += '<h2>Cliente e local</h2>' + kv([['Cliente', c.nome], ['Morada', c.morada], ['Local', c.local], ['Contacto', [c.contacto, c.email].filter(Boolean).join(' · ')], ['NIF', c.nif], ['Tipo', r.tipo_intervencao + (c.contrato ? ' · contrato n.º ' + c.contrato : '') + (r.conforme_orcamento === 'sim' ? ' · conforme orçamento n.º ' + r.orcamento_numero : r.conforme_orcamento === 'nao' ? ' · com desvio ao orçamento' : '')], ['Pedido', r.pedido_origem], ['Técnicos', tecs.join(', ')]]);
     if (r.conforme_orcamento === 'nao') p1 += '<div class="box alert"><b>Desvio ao orçamento:</b> ' + esc(r.orcamento_desvio) + '</div>';
-    if (r.equipamentos.length) p1 += '<h2>Equipamento</h2><table><tr><th>Categoria</th><th>Marca / modelo</th><th>N.º de série</th><th>Localização</th><th>Gás · carga</th></tr>' + r.equipamentos.map(function (e) { var g = RI.gwp(e.refrigerante, e.gwp_manual), t = RI.co2e(e.carga_kg, g); return '<tr><td>' + esc(e.categoria) + '</td><td>' + esc([e.marca, e.modelo].filter(Boolean).join(' ')) + '</td><td>' + esc(e.serie) + '</td><td>' + esc(e.localizacao) + '</td><td>' + (RI.temGas(e) && e.refrigerante ? esc((e.refrigerante === 'Outro' ? e.refrigerante_outro : e.refrigerante) + (RI.num(e.carga_kg) ? ' · ' + RI.fmtNum(e.carga_kg) + ' kg' : '') + (t != null ? ' = ' + RI.fmtNum(t) + ' t CO2e' : '')) : '—') + '</td></tr>'; }).join('') + '</table>';
-    p1 += '<h2>Intervenção</h2><div class="txt">' + esc(r.descricao) + '</div><table style="margin-top:2mm"><tr><th>Data</th><th>Técnico(s)</th><th class="r">Início</th><th class="r">Fim</th><th class="r">Duração</th></tr><tr><td>' + esc(RI.fmtData(r.data_inicio)) + '</td><td>' + esc(tecs.join(', ')) + '</td><td class="r">' + esc(r.hora_inicio) + '</td><td class="r">' + esc(r.hora_fim) + '</td><td class="r">' + esc(RI.fmtHM(dur)) + (tecs.length > 1 ? ' × ' + tecs.length + ' = ' + RI.fmtHM(dur * tecs.length) : '') + '</td></tr></table>';
-    if (cc) { p1 += '<div class="box note" style="font-size:9pt"><b>Gases fluorados:</b> ' + esc(cc.eq.refrigerante === 'Outro' ? cc.eq.refrigerante_outro : cc.eq.refrigerante) + (cc.t != null ? ' · ' + esc(RI.fmtNum(cc.eq.carga_kg)) + ' kg = ' + esc(RI.fmtNum(cc.t)) + ' t CO2e' : '') + ' · verificação de fugas ' + esc({ sem_fuga: 'efetuada, sem fuga', fuga: 'efetuada, fuga detetada' + (f.fuga_reparada === 'sim' ? ' e reparada' : ' — por reparar'), nao: 'não efetuada' }[f.verificacao] || '—') + ' · adicionado ' + esc(RI.fmtNum(f.qty_add)) + ' kg · recuperado ' + esc(RI.fmtNum(f.qty_rec)) + ' kg — registo completo na página seguinte.</div>'; }
+    if (eqs.length) p1 += '<h2>Equipamento</h2><table><tr><th>Categoria</th><th>Marca / modelo</th><th>N.º de série</th><th>Localização</th><th>Gás · carga</th></tr>' + eqs.map(function (e) { var g = RI.gwp(e.refrigerante, e.gwp_manual), t = RI.co2e(e.carga_kg, g); return '<tr><td>' + esc(e.categoria) + '</td><td>' + esc([e.marca, e.modelo].filter(Boolean).join(' ')) + '</td><td>' + esc(e.serie) + '</td><td>' + esc(e.localizacao) + '</td><td>' + (RI.temGas(e) && e.refrigerante ? esc((e.refrigerante === 'Outro' ? e.refrigerante_outro : e.refrigerante) + (RI.num(e.carga_kg) ? ' · ' + RI.fmtNum(e.carga_kg) + ' kg' : '') + (t != null ? ' = ' + RI.fmtNum(t) + ' t CO2e' : '')) : '—') + '</td></tr>'; }).join('') + '</table>';
+    var med = r.medicoes || {}, medTxt = [med.p_baixa ? 'P. baixa ' + med.p_baixa + ' bar' : '', med.p_alta ? 'P. alta ' + med.p_alta + ' bar' : '', med.delta_t ? 'ΔT ar ' + med.delta_t + ' °C' : '', med.corrente ? 'Corrente ' + med.corrente + ' A' : ''].filter(Boolean).join(' · ');
+    p1 += '<h2>Intervenção</h2><div class="txt">' + esc(r.descricao) + '</div>' + (medTxt ? '<div style="font-size:9.5pt;margin-top:1mm"><span style="color:#4E5871">Medições:</span> ' + esc(medTxt) + '</div>' : '') + '<table style="margin-top:2mm"><tr><th>Data</th><th>Técnico(s)</th><th class="r">Início</th><th class="r">Fim</th><th class="r">Duração</th></tr><tr><td>' + esc(RI.fmtData(r.data_inicio)) + '</td><td>' + esc(tecs.join(', ')) + '</td><td class="r">' + esc(r.hora_inicio) + '</td><td class="r">' + esc(r.hora_fim) + '</td><td class="r">' + esc(RI.fmtHM(dur)) + (tecs.length > 1 ? ' × ' + tecs.length + ' = ' + RI.fmtHM(dur * tecs.length) : '') + '</td></tr></table>';
+    if (cc) p1 += '<div class="box note" style="font-size:9pt"><b>Gases fluorados:</b> ' + esc(cc.eq.refrigerante === 'Outro' ? cc.eq.refrigerante_outro : cc.eq.refrigerante) + (cc.t != null ? ' · ' + esc(RI.fmtNum(cc.eq.carga_kg)) + ' kg = ' + esc(RI.fmtNum(cc.t)) + ' t CO2e' : '') + ' · verificação de fugas ' + esc({ sem_fuga: 'efetuada, sem fuga', fuga: 'efetuada, fuga detetada' + (aberta ? ' — por reparar' : ' e reparada'), nao: 'não efetuada' }[f.verificacao] || '—') + ' · adicionado ' + esc(RI.fmtNum(f.qty_add)) + ' kg · recuperado ' + esc(RI.fmtNum(f.qty_rec)) + ' kg — registo completo na página seguinte.</div>';
     if (r.materiais.length) { var comP = !tot.incompleto; p1 += '<h2>Materiais</h2><table><tr><th>Designação</th><th>Origem</th><th class="r">Qtd.</th><th>Un.</th>' + (comP ? '<th class="r">P. unit.</th><th class="r">Total</th>' : '') + '</tr>' + r.materiais.map(function (m) { var t = RI.linhaTotal(m); return '<tr><td>' + esc(m.designacao) + (m.garantia ? ' <small>(garantia)</small>' : '') + '</td><td>' + esc(m.origem) + '</td><td class="r">' + esc(RI.fmtNum(m.qty, 3).replace(/,?0+$/, '')) + '</td><td>' + esc(m.unidade) + '</td>' + (comP ? '<td class="r">' + esc(RI.fmtEur(m.garantia ? 0 : m.preco)) + '</td><td class="r">' + esc(RI.fmtEur(t)) + '</td>' : '') + '</tr>'; }).join('') + (comP ? '<tr><td colspan="5" class="r"><b>Total s/ IVA</b></td><td class="r"><b>' + esc(RI.fmtEur(tot.total)) + '</b></td></tr>' : '') + '</table>' + (comP ? '' : '<p style="font-size:8.5pt;color:#4E5871;margin:1mm 0 0">Valores a definir pelo escritório.</p>'); }
-    var dl = r.deslocacao; p1 += '<h2>Deslocação e conclusão</h2>' + kv([['Taxa de deslocação', dl.taxa === 'sim' ? 'Sim' + (dl.matricula ? ' · viatura ' + dl.matricula : '') + (dl.km ? ' · ' + dl.km + ' km' : '') + (dl.tempo_min ? ' · ' + RI.fmtHM(RI.num(dl.tempo_min)) + ' h' : '') : dl.taxa === 'nao' ? 'Não' : ''], ['Obra concluída', r.obra_concluida === 'sim' ? 'Sim' : 'Não'], ['Pendente', r.pendentes], ['Recomendações', r.recomendacoes], ['Próxima visita', r.proxima_visita ? RI.fmtData(r.proxima_visita) : ''], ['Observações', r.observacoes]], 'one');
+    var dl = r.deslocacao; p1 += '<h2>Deslocação e conclusão</h2>' + kv([['Taxa de deslocação', dl.taxa === 'sim' ? 'Sim' + (dl.matricula ? ' · viatura ' + dl.matricula : '') + (dl.km ? ' · ' + dl.km + ' km' : '') + (dl.tempo_min ? ' · ' + dl.tempo_min + ' min' : '') : dl.taxa === 'nao' ? 'Não' : ''], ['Obra concluída', r.obra_concluida === 'sim' ? 'Sim' : 'Não'], ['Pendente', r.pendentes], ['Recomendações', r.recomendacoes], ['Próxima visita', r.proxima_visita ? RI.fmtData(r.proxima_visita) : ''], ['Observações', r.observacoes]], 'one');
     var sigT = r.assinatura_tecnico, a = r.aceitacao;
-    p1 += '<div class="sigs"><div class="sigb"><h3>Técnico responsável</h3>' + (sigT ? '<img src="' + sigT.png + '" alt="Assinatura do técnico">' : '<div style="height:16mm"></div>') + '<div class="nm">' + esc(r.tecnico.nome) + '</div><small>' + (r.tecnico.cert ? 'Certificado F-gas n.º ' + esc(r.tecnico.cert) + (r.tecnico.oc ? ' (' + esc(r.tecnico.oc) + ')' : '') + '<br>' : '') + (sigT ? 'Assinado no ecrã em ' + esc(RI.fmtDataHora(sigT.datahora)) : 'Por assinar') + '</small><div class="accept">Declaro que a intervenção foi executada conforme descrito e, quando aplicável, que o manuseamento de gases fluorados foi efetuado por técnico certificado, com verificação de fugas e registo das quantidades.</div></div>' +
-      '<div class="sigb"><h3>Validação pelo cliente</h3>' + (a && a.png ? '<img src="' + a.png + '" alt="Assinatura do cliente">' : '<div style="height:16mm"></div>') + '<div class="nm">' + esc(a ? a.nome : '') + '</div><small>' + (a ? esc(a.qualidade || '') + (a.png ? '<br>Assinado no ecrã em ' + esc(RI.fmtDataHora(a.datahora)) : a.recusa === 'recusado' ? '<br><b>O cliente recusou assinar.</b> Motivo: ' + esc(a.motivo) + ' · ' + esc(RI.fmtDataHora(a.datahora)) : '<br><b>Cliente ausente</b> — relatório enviado para validação por email · ' + esc(RI.fmtDataHora(a.datahora))) : 'Nome (legível) e assinatura') + '</small>' + (a && a.observacoes ? '<div class="box" style="margin:1.5mm 0;font-size:9pt"><b>Observações do cliente:</b> ' + esc(a.observacoes) + '</div>' : '') + '<div class="accept">A assinatura do cliente determina a aceitação do conteúdo deste relatório, atendendo às observações registadas. Os dados pessoais recolhidos destinam-se exclusivamente à execução, faturação e registo legal desta intervenção.</div></div></div>';
+    p1 += '<div class="sigs"><div class="sigb"><h3>Técnico responsável</h3>' + (sigT && imgSrc(sigT.png) ? '<img src="' + imgSrc(sigT.png) + '" alt="Assinatura do técnico">' : '<div style="height:13mm"></div>') + '<div class="nm">' + esc(r.tecnico.nome) + '</div><small>' + (r.tecnico.cert ? 'Certificado F-gas n.º ' + esc(r.tecnico.cert) + (r.tecnico.oc ? ' (' + esc(r.tecnico.oc) + ')' : '') + '<br>' : '') + (sigT ? (sigT.origem === 'guardada' ? 'Assinatura aplicada a partir do modelo guardado no aparelho em ' : 'Assinado no ecrã em ') + esc(RI.fmtDataHora(sigT.datahora)) : 'Por assinar') + '</small><div class="accept">' + esc(sigT && sigT.declaracao ? sigT.declaracao : RI.declaracaoTecnico(r.tecnico.cert)) + '</div></div>' +
+      '<div class="sigb"><h3>Validação pelo cliente</h3>' + (a && imgSrc(a.png) ? '<img src="' + imgSrc(a.png) + '" alt="Assinatura do cliente">' : '<div style="height:13mm"></div>') + '<div class="nm">' + esc(a ? a.nome : '') + '</div><small>' + (a ? esc(a.qualidade || '') + (imgSrc(a.png) ? '<br>Assinado no ecrã em ' + esc(RI.fmtDataHora(a.datahora)) : a.validado_email_em ? '<br>Aceitação recebida por email em ' + esc(RI.fmtDataHora(a.validado_email_em)) : a.recusa === 'recusado' ? '<br><b>O cliente recusou assinar.</b> Motivo: ' + esc(a.motivo) + ' · ' + esc(RI.fmtDataHora(a.datahora)) : '<br><b>Cliente ausente no fim da intervenção</b> — relatório a enviar para ' + esc(a.email || c.email || '(email por indicar)') + ' para validação · ' + esc(RI.fmtDataHora(a.datahora))) : 'Nome (legível) e assinatura') + '</small>' + (a && a.observacoes ? '<div class="box" style="margin:1.5mm 0;font-size:9pt"><b>Observações do cliente:</b> ' + esc(a.observacoes) + '</div>' : '') + '<div class="accept">' + esc(a && a.texto ? a.texto : RI.TEXTO_ACEITACAO) + '</div></div></div>' + '<div class="rgpd">' + esc(RI.TEXTO_RGPD) + '</div>';
     paginas.push(p1);
-    /* página F-gas */
     if (cc) {
-      var e = cc.eq, ok = f.verificacao;
+      var e = cc.eq, ok = f.verificacao, outros = eqs.filter(RI.temGas).filter(function (x) { return x.id !== e.id; });
       var p2 = head() + '<h2>Registo de gases fluorados — art. 7.º do Reg. (UE) 2024/573 · DL n.º 145/2017</h2>' +
-        '<div class="fg">' + [['Equipamento', [e.categoria, e.marca, e.modelo].filter(Boolean).join(' · ')], ['N.º de série', e.serie], ['Localização', e.localizacao], ['Refrigerante', (e.refrigerante === 'Outro' ? e.refrigerante_outro + ' (GWP indicado pelo técnico)' : e.refrigerante) + (cc.gwp != null ? ' · GWP ' + cc.gwp : '')], ['Carga do circuito', cc.t != null ? RI.fmtNum(e.carga_kg) + ' kg = ' + RI.fmtNum(cc.t) + ' t CO2e' : ''], ['Verificação obrigatória', cc.verif.texto], ['Hermético rotulado', e.hermetico ? 'Sim' : 'Não'], ['Sistema de deteção de fugas', e.detecao ? 'Sim' : 'Não'], ['Motivo do manuseamento', f.motivo], ['Verificação de fugas', ok === 'sem_fuga' ? 'Efetuada em ' + RI.fmtData(r.data_inicio) + ' — sem fuga detetada' : ok === 'fuga' ? 'Efetuada em ' + RI.fmtData(r.data_inicio) + ' — FUGA DETETADA' : 'Não efetuada' + (f.motivo_nao ? ' — ' + f.motivo_nao : '')], ['Método', (f.metodo || []).join(', ')], ['Local da fuga', ok === 'fuga' ? f.fuga_local : ''], ['Fuga reparada', ok === 'fuga' ? (f.fuga_reparada === 'sim' ? 'Sim — ' + f.reparacao_desc : 'NÃO — pendente; equipamento não recarregado') : ''], ['Ensaio de estanquidade final', { ok: 'Efetuado — sem fuga', persiste: 'Efetuado — fuga persiste', nao: 'Não efetuado' }[f.ensaio_final] || ''], ['Gás adicionado', RI.num(f.qty_add) > 0 ? RI.fmtNum(f.qty_add) + ' kg · ' + (f.origem || '') + (f.origem && f.origem !== 'Virgem' ? ' — ' + f.origem_inst + ' · cert. n.º ' + f.origem_cert : '') : 'Nenhum'], ['Garrafa / lote', f.garrafa], ['Gás recuperado', RI.num(f.qty_rec) > 0 ? RI.fmtNum(f.qty_rec) + ' kg → ' + (f.destino_rec || '') : 'Nenhum'], ['Carga após a intervenção', RI.fmtNum(RI.cargaFinal(r)) + ' kg'], ['Desmantelamento', f.desmant_medidas], ['Nova verificação após reparação', cc.reverif ? 'até ' + RI.fmtData(cc.reverif) + ' (art. 5.º: no prazo de 1 mês)' : ''], ['Próxima verificação periódica', cc.proxima ? 'até ' + RI.fmtData(cc.proxima) : ''], ['Técnico certificado', r.tecnico.nome + (f.tecnico_cert ? ' · certificado n.º ' + f.tecnico_cert : '') + (r.tecnico.oc ? ' (' + r.tecnico.oc + ')' : '')], ['Empresa', E.nome + ' · NIF ' + E.nif + (cfg.empresa_cert ? ' · certificado n.º ' + cfg.empresa_cert : ' · certificado de empresa: a confirmar com o OC')], ['Ficha do caderno do OC', f.ficha_oc ? 'Preenchida (duplicado entregue ao operador)' : 'Por preencher']].filter(function (p) { return !RI.vazio(p[1]); }).map(function (p) { return '<div><span>' + esc(p[0]) + '</span><div>' + esc(p[1]) + '</div></div>'; }).join('') + '</div>' +
+        '<div class="fg">' + [['Equipamento', [e.categoria, e.marca, e.modelo].filter(Boolean).join(' · ')], ['N.º de série', e.serie], ['Localização', e.localizacao], ['Refrigerante', (e.refrigerante === 'Outro' ? e.refrigerante_outro + ' (GWP indicado pelo técnico)' : e.refrigerante) + (cc.gwp != null ? ' · GWP ' + cc.gwp : '')], ['Carga do circuito', cc.t != null ? RI.fmtNum(e.carga_kg) + ' kg = ' + RI.fmtNum(cc.t) + ' t CO2e' : RI.fmtNum(e.carga_kg) + ' kg'], ['Verificação obrigatória', cc.verif.texto], ['Hermético rotulado', e.hermetico ? 'Sim' : 'Não'], ['Sistema de deteção de fugas', e.detecao ? 'Sim' : 'Não'], ['Motivo do manuseamento', f.motivo], ['Verificação de fugas', ok === 'sem_fuga' ? 'Efetuada em ' + RI.fmtData(r.data_inicio) + ' — sem fuga detetada' : ok === 'fuga' ? 'Efetuada em ' + RI.fmtData(r.data_inicio) + ' — FUGA DETETADA' : 'Não efetuada' + (f.motivo_nao ? ' — ' + f.motivo_nao : '')], ['Método', (f.metodo || []).join(', ')], ['Local da fuga', ok === 'fuga' ? f.fuga_local : ''], ['Fuga reparada', ok === 'fuga' ? (f.fuga_reparada === 'sim' ? (f.ensaio_final === 'persiste' ? 'Reparação tentada sem êxito — fuga persiste; equipamento não recarregado. ' : 'Sim — ') + f.reparacao_desc : 'NÃO — pendente; equipamento não recarregado') : ''], ['Ensaio de estanquidade final', { ok: 'Efetuado — sem fuga', persiste: 'Efetuado — fuga persiste', nao: 'Não efetuado' }[f.ensaio_final] || ''], ['Gás adicionado', RI.num(f.qty_add) > 0 ? RI.fmtNum(f.qty_add) + ' kg · ' + (f.origem || '') + (f.origem && f.origem !== 'Virgem' ? ' — ' + f.origem_inst + ' · cert. n.º ' + f.origem_cert : '') : 'Nenhum'], ['Garrafa / lote', f.garrafa], ['Gás recuperado', RI.num(f.qty_rec) > 0 ? RI.fmtNum(f.qty_rec) + ' kg → ' + (f.destino_rec || '') : 'Nenhum'], [f.motivo === 'Instalação' ? 'Carga instalada (chapa + complemento)' : 'Carga após a intervenção', RI.fmtNum(RI.cargaFinal(r)) + ' kg'], ['Desmantelamento', f.desmant_medidas], ['Nova verificação após reparação', cc.reverif ? 'até ' + RI.fmtData(cc.reverif) + ' (art. 5.º: no prazo de 1 mês)' : ''], ['Próxima verificação periódica', cc.proxima ? 'até ' + RI.fmtData(cc.proxima) : ''], ['Técnico certificado', r.tecnico.nome + (f.tecnico_cert ? ' · certificado n.º ' + f.tecnico_cert : '') + (r.tecnico.oc ? ' (' + r.tecnico.oc + ')' : '')], ['Empresa', E.nome + ' · NIF ' + E.nif + (r.tecnico.empresa_cert ? ' · certificado n.º ' + r.tecnico.empresa_cert : '')], ['Ficha do caderno do OC', f.ficha_oc ? 'Preenchida (duplicado entregue ao operador)' : 'A preencher pelo técnico (DL n.º 145/2017) — pendente']].filter(function (p) { return !RI.vazio(p[1]); }).map(function (p) { return '<div><span>' + esc(p[0]) + '</span><div>' + esc(p[1]) + '</div></div>'; }).join('') + '</div>' +
+        (outros.length ? '<div class="box note" style="font-size:8.5pt">Registo aplicável apenas ao equipamento identificado. Os restantes equipamentos com circuito frigorífico listados na página 1 (' + esc(outros.map(function (x) { return [x.marca, x.modelo].filter(Boolean).join(' ') || x.categoria; }).join(', ')) + ') não tiveram manuseamento de gás nem verificação nesta intervenção.</div>' : '') +
         (RI.isHCFC(e.refrigerante, e.refrigerante_outro) ? '<div class="box alert"><b>HCFC (R22):</b> proibido carregar desde 01/01/2015 (Reg. (CE) n.º 1005/2009). Só recuperação para regeneração ou destruição. Recomenda-se a substituição do equipamento.</div>' : '') +
-        '<div class="box note" style="font-size:8.5pt">Este relatório constitui a cópia do registo do operador (art. 7.º) para o equipamento identificado; o operador deve conservá-la durante 5 anos. Não substitui a ficha do caderno de registo de intervenções do Organismo de Certificação do técnico. Limiares e periodicidades conforme o art. 5.º do Reg. (UE) 2024/573 (GWP AR4).</div>';
+        '<div class="box note" style="font-size:8.5pt">' + esc(RI.TEXTO_CONSERVACAO) + '</div>';
       paginas.push(p2);
     }
-    /* fotografias: 6 por página */
-    for (var i = 0; i < r.fotos.length; i += 6) { paginas.push(head() + '<h2>Fotografias (' + (i + 1) + '–' + Math.min(i + 6, r.fotos.length) + ' de ' + r.fotos.length + ')</h2><div class="photos">' + r.fotos.slice(i, i + 6).map(function (p, j) { return '<figure><img src="' + p.dataUrl + '" alt="' + esc(p.categoria) + '"><figcaption>' + (i + j + 1) + '. ' + esc(p.categoria) + (p.legenda ? ' — ' + esc(p.legenda) : '') + ' · ' + esc(RI.fmtDataHora(p.datahora)) + '</figcaption></figure>'; }).join('') + '</div>'); }
+    for (var i = 0; i < r.fotos.length; i += 6) { paginas.push(head() + '<h2>Fotografias (' + (i + 1) + '–' + Math.min(i + 6, r.fotos.length) + ' de ' + r.fotos.length + ')</h2><div class="photos">' + r.fotos.slice(i, i + 6).map(function (p, j) { return '<figure><img src="' + imgSrc(p.dataUrl) + '" alt="' + esc(p.categoria) + '"><figcaption>' + (i + j + 1) + '. ' + esc(p.categoria) + (p.legenda ? ' — ' + esc(p.legenda) : '') + ' · ' + esc(RI.fmtDataHora(p.datahora)) + '</figcaption></figure>'; }).join('') + '</div>'); }
     return paginar(paginas, head, foot);
   }
+  /* mede cada página no DOM (sem min-height) e corta os blocos que não cabem para uma página nova com o cabeçalho repetido */
   function paginar(paginas, head, foot) {
     var med = document.createElement('div'); med.style.cssText = 'position:absolute;left:-10000px;top:0;width:210mm;visibility:hidden;pointer-events:none'; document.body.appendChild(med);
-    med.innerHTML = paginas.map(function (p) { return '<div class="page">' + p + '</div>'; }).join('');
-    var LIM = 1123 - 4;   /* 297 mm a 96 dpi; rodapé é absoluto (fora do fluxo) */
-    var pgs = $$('.page', med), extra = 0;
-    pgs.forEach(function (pg) { if (pg.scrollHeight <= LIM) return; var sg = pg.querySelector('.sigs'); if (!sg) return; var np = document.createElement('div'); np.className = 'page'; np.innerHTML = head(); np.appendChild(sg); pg.parentNode.insertBefore(np, pg.nextSibling); extra++; });
-    var all = $$('.page', med); all.forEach(function (pg, i) { pg.insertAdjacentHTML('beforeend', foot().replace('{N}', i + 1).replace('{T}', all.length)); });
+    med.innerHTML = paginas.map(function (p) { return '<div class="page" style="min-height:0">' + p + '</div>'; }).join('');
+    var LIM = Math.floor((297 - 14 - 9) * 96 / 25.4);   /* fundo útil acima do rodapé absoluto (≈ 1035 px) */
+    var pgs = $$('.page', med);
+    for (var i = 0; i < pgs.length; i++) {
+      var pg = pgs[i], kids = Array.prototype.slice.call(pg.children), corte = -1;
+      for (var k = 1; k < kids.length; k++) if (kids[k].offsetTop + kids[k].offsetHeight > LIM) { corte = k; break; }
+      if (corte < 0) continue;
+      if (corte > 1 && kids[corte - 1].tagName === 'H2') corte--;
+      if (corte < 2) corte = 2;
+      if (corte >= kids.length) continue;
+      var np = document.createElement('div'); np.className = 'page'; np.style.minHeight = '0'; np.innerHTML = head();
+      kids.slice(corte).forEach(function (el) { np.appendChild(el); });
+      pg.parentNode.insertBefore(np, pg.nextSibling); pgs.splice(i + 1, 0, np);
+    }
+    pgs.forEach(function (pg, i) { pg.style.minHeight = ''; pg.insertAdjacentHTML('beforeend', foot().replace('{N}', i + 1).replace('{T}', pgs.length)); });
     var html = med.innerHTML; med.remove(); return html;
   }
 
   /* ── arranque ── */
+  function limparBlobsOrfaos() { var d = LS.get(K.draft, null), ids = d ? (d.fotos || []).map(function (p) { return p.id; }) : []; DB.all('blobs').then(function (bs) { bs.forEach(function (b) { if (ids.indexOf(b.id) < 0) DB.del('blobs', b.id); }); }).catch(function () {}); }
   function init() {
     if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
+    DB.disponivel().then(function (ok) { semIDB = !ok; if (!ok) toast('Sem base de dados local: capacidade limitada. Exporte após cada relatório.', 5000); });
     var d = LS.get(K.draft, null);
     if (!cfg.codigo || !cfg.tecnico_nome) { cfgRender(); show('sConfig'); toast('Bem-vindo. Preencha as definições do aparelho (uma vez).', 3500); return; }
-    if (d && d.estado === 'rascunho') { R = d; carregarFotosDraft().then(function () { abrirForm(); }); return; }
-    home();
+    if (d && d.estado === 'rascunho') { R = d; carregarFotos(R).then(function (perdidas) { if (perdidas) toast(perdidas + ' fotografia(s) do rascunho não foram recuperadas.', 4000); limparBlobsOrfaos(); abrirForm(); }); return; }
+    var u = LS.get(K.ultimo, null);
+    if (u) { DB.get('relatorios', u).then(function (r) { if (r && ['emitido', 'ausente', 'recusado'].indexOf(r.estado) >= 0) { R = r; entrega(); } else home(); }); }
+    else home();
+    limparBlobsOrfaos();
   }
   window.RI_UI = { renderPaginas: renderPaginas, get R() { return R; }, set R(v) { R = v; }, abrirForm: abrirForm, entrega: entrega, home: home, DB: DB, cfg: function () { return cfg; } };
   init();
