@@ -244,7 +244,7 @@ e a secção Contacto (confirmar); o header trata só do "agora".
   no HTML são os mesmos (fallback sem JS). Mudar um destino = mudar uma constante.
 - **Saíram:** faixa carmim `#orcamento` (só telefone → WhatsApp genérico), CTA "Pedir
   Orçamento Grátis" do header, dropdowns da nav (+ deep-links `data-svc`), ligação "Peça
-  orçamento" após o carrossel, botão WhatsApp do formulário, "Pedir orçamento grátis" da
+  orçamento" após o carrossel, "Pedir orçamento grátis" da
   gaveta mobile. A âncora `#orcamento` passou para o formulário (`.quote-wrap`), com
   `scroll-margin-top` a compensar o header fixo e o `translateY` do reveal.
 - **Header:** menu plano Serviços · Obras · Porquê a MDM · FAQ · Contacto; um só ponto de
@@ -254,16 +254,74 @@ e a secção Contacto (confirmar); o header trata só do "agora".
   "Aberto · até às 17h" / "Fechado · 2ª–6ª 8h–17h" (`[data-estado]`, versão curta no mobile).
 - **Contacto:** três cartões que dizem para que serve cada canal (Telefone → contratos e
   urgências; WhatsApp → montagem e avarias, com fotos; Email → propostas de manutenção),
-  morada em texto corrido, formulário com um só botão ("Enviar por email"), "Nome *" e
+  morada em texto corrido, formulário com dois botões de envio (ver secção seguinte), "Nome *" e
   ajuda "* obrigatório: o nome e um contacto". Ecrãs estreitos (≤400px): prova numa linha
   mais curta (`.hp-x` esconde a linha das marcas) para as três portas caberem em 375×667 (medido:
   fundo da 3ª porta a 467px).
 - **Contagem depois:** 13 ações de contacto no desktop (2 header · 3 portas · 4 cartões ·
-  3 canais + botão do formulário), mais 3 ligações inline de texto (FAQ e nota do
+  3 canais + botões do formulário), mais 3 ligações inline de texto (FAQ e nota do
   formulário). Verificação Playwright: sem erros, header sem overflow em 900–1440px,
   âncoras a aterrar abaixo do header, pré-seleção e validação a funcionar.
 - **Decisões do dono a validar:** (1) a faixa carmim saiu; (2) o WhatsApp de avaria ganhou
   rótulo no desktop. Ambas revertem-se em CSS/HTML sem tocar no resto.
+
+## Conversão do formulário e do WhatsApp (09/2026)
+
+Ronda focada só no fim do funil: o pedido já está escrito, falta chegar à MDM.
+
+- **Segunda via de envio.** O formulário passa a ter dois botões: "Enviar por email"
+  (vermelho, primário) e "Enviar por WhatsApp" (verde). O segundo corre a mesma validação,
+  monta o mesmo `quoteBody(d)` e abre `wa.me` com o pedido já escrito. Se houver
+  `LEAD_ENDPOINT`, a lead segue **também** por POST (`origem: 'formulario-whatsapp'`) —
+  duplicar é melhor do que perder. O `window.open` é chamado dentro do gesto, antes de
+  qualquer `await`, senão o browser bloqueia a janela.
+  Isto **reverte** a remoção feita na ronda "um caminho por lead": lá o botão saiu por ser
+  um destino repetido; aqui volta por outra razão — no momento de maior intenção o site
+  oferecia só o canal mais lento.
+- **Mensagens de WhatsApp enviáveis sem edição.** A de montagem tinha 193 caracteres e três
+  `…` para o cliente preencher dentro da caixa de texto do telemóvel; a de avaria, 126.
+  Agora têm 107 e 68, sem reticências, e a etiqueta de triagem passou do início para o fim
+  (a conversa do cliente já não abre com um código interno). As perguntas de qualificação
+  passam a ser a primeira resposta da MDM, que é onde funcionam.
+- **`quote_form_start`.** Dispara uma vez, no primeiro `focusin` de um campo real (ignora o
+  honeypot). Sem ele não se sabia quantas pessoas começaram a preencher e desistiram:
+  desistências = `quote_form_start` − `quote_form_submit`. Não há evento de abandono próprio
+  — seria ruído, o número já sai da subtração.
+- **Campos.** `qEmpresa` tinha `autocomplete="organization"` com um rótulo ("Nome") que
+  aceita pessoa singular: o browser não oferecia o nome no preenchimento automático. Passou
+  a `name`, com `autocapitalize="words"`. Email ganhou `autocapitalize="off"` e
+  `spellcheck="false"`; os três ganharam `enterkeyhint="next"`.
+- **"Orçamento gratuito e sem compromisso"** saiu do bloco de notas cinzento e ficou
+  imediatamente por baixo dos botões (`.mw-reassure`). O grupo de ações leva
+  `margin-left: auto` para, ao passar para a linha de baixo, encostar à direita como
+  fazia quando era um só botão.
+- **Estados de fim.** Sucesso e falha do `mailto` passam a oferecer uma ligação de WhatsApp
+  (`quoteAlert(msg, ok, comWhats)`, construída com `createElement`, sem `innerHTML`). O
+  `textContent` limpa os filhos antes, por isso as ligações não se acumulam. Importa
+  sobretudo no `mailto`: quando não acontece nada, o cliente passa a ter alternativa visível.
+- **Contraste:** branco sobre `--wa` 4,89:1; sobre `--wa-d` 6,37:1; `--wa-d` sobre o fundo do
+  alerta de sucesso 5,58:1. Botão de 45px de altura.
+- **Verificação Playwright** (1440/390/360): sem erros de página, sem overflow, botões lado a
+  lado no desktop e empilhados no telemóvel, validação a bloquear o envio por WhatsApp tal
+  como o do email, `wa.me` a levar nome/contacto/etiqueta, `quote_form_start` a disparar uma
+  só vez.
+
+### Por fazer nesta frente
+
+1. **`LEAD_ENDPOINT` continua vazio** (`site/index.html`) — todo o `submit` cai em `mailto:`,
+   que no telemóvel obriga a enviar outra vez noutra app e em quem usa webmail muitas vezes
+   não faz nada. É o maior buraco de conversão do site e espera só pelo URL do Formspree.
+   Enquanto não existir, o botão verde é na prática o caminho fiável; quando existir, o
+   vermelho volta a ser o primário sem mudar nada.
+2. **Decisão do dono:** o botão verde do header diz "Avaria? Envie foto" — é o CTA mais
+   visível do site e está fechado no lead P4. Neutro ("WhatsApp 910 307 579") serve todos os
+   pedidos, mas perde a urgência que faz converter a avaria. No telemóvel não se põe: aí já
+   é só o ícone.
+3. **Decisão do dono:** o formulário está a 76% da profundidade da página no telemóvel
+   (4770px de 6264). Uma chamada a seguir ao carrossel de obras resolveria, ao custo de mais
+   um CTA na página.
+4. **Ideia por avaliar:** trocar o `<select>` de serviço por chips (radios estilizados) —
+   tira uma modal nativa no telemóvel, mantém o sinal de triagem.
 
 ## Domínio próprio — um só comando
 
