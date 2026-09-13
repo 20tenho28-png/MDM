@@ -36,7 +36,7 @@ do escritório, também por `file://`. Os dados ficam só no aparelho (localStor
 - **PDF A4** pelo browser (Imprimir → Guardar como PDF): cabeçalho com legislação atual,
   resumo executivo, secções vazias escondidas, página própria de registo F-gas, anexo de
   fotografias (6 por página), "Pág. n de N", rodapé fiscal completo. Nome do ficheiro
-  `RI-2026-AL-0042 Paula Lemos 2026-09-07`.
+  `RI-2026-AL-0042 Ana Ribeiro 2026-09-07`.
 - **Entrega**: email com resumo (mailto; o PDF anexa-se à mão), JSON por relatório ou em lote,
   partilha (Web Share) no telemóvel, importação validada no PC do escritório (rejeita JSON
   inválido, nunca regride um relatório aceite para emitido, pergunta antes de substituir um
