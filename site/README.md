@@ -310,7 +310,9 @@ Ronda focada só no fim do funil: o pedido já está escrito, falta chegar à MD
 
 1. **`LEAD_ENDPOINT` continua vazio** (`site/index.html`) — todo o `submit` cai em `mailto:`,
    que no telemóvel obriga a enviar outra vez noutra app e em quem usa webmail muitas vezes
-   não faz nada. É o maior buraco de conversão do site e espera só pelo URL do Formspree.
+   não faz nada. É o maior buraco de conversão do site e espera só pelo receptor
+   de leads. O receptor já está escrito em `site/backend/` (edge function + tabela com RLS);
+   o que falta é reactivar o projeto Supabase, que está `INACTIVE` e devolve 503 a tudo.
    Enquanto não existir, o botão verde é na prática o caminho fiável; quando existir, o
    vermelho volta a ser o primário sem mudar nada.
 2. **Decisão do dono:** o botão verde do header diz "Avaria? Envie foto" — é o CTA mais
@@ -320,8 +322,36 @@ Ronda focada só no fim do funil: o pedido já está escrito, falta chegar à MD
 3. **Decisão do dono:** o formulário está a 76% da profundidade da página no telemóvel
    (4770px de 6264). Uma chamada a seguir ao carrossel de obras resolveria, ao custo de mais
    um CTA na página.
-4. **Ideia por avaliar:** trocar o `<select>` de serviço por chips (radios estilizados) —
-   tira uma modal nativa no telemóvel, mantém o sinal de triagem.
+4. **Decisão do dono:** os chips de serviço custam +142px de altura no telemóvel (ver
+   abaixo). Se esse custo não compensar a janela nativa que poupam, o `<select>` volta.
+
+## Serviço em chips, não em `<select>` (09/2026)
+
+O `<select id="qServico">` deu lugar a sete radios estilizados (`#qServicoGrupo`, com
+`role="radiogroup"` e `aria-labelledby`). Ao mesmo tempo saiu o CSS morto do botão flutuante
+`.fab`, seis regras sem elemento na página desde a reorganização do rodapé.
+
+- **Porquê:** no telemóvel o `<select>` abre uma janela nativa que tapa o formulário, e as
+  sete opções só se vêem depois de a abrir. Quem não sabia que há "avaria" não descobria.
+  Em chips as opções estão todas à vista e escolhe-se com um toque em vez de três.
+- **Custo medido (Playwright, linha "Serviço"):** 1440px 52→123px; 390/375/360px 52→194px,
+  ou seja +142px, cerca de 2% da altura da página no telemóvel. É o mínimo prático: sete
+  alvos de 44px em três linhas, mais o rótulo.
+- **Como se chegou a +142 e não a +331:** as etiquetas encurtaram ("Montagem de AC" em vez
+  de "Ar condicionado · montagem"), e a ≤720px o rótulo sobe para cima dos chips, o que
+  devolve os 108px da coluna da esquerda. Aí os chips passam a 13px de texto, 13px de
+  padding e 6px de intervalo — em 360px cada 4px de folga vale uma linha inteira de 44px.
+- **Acessibilidade:** o input real fica escondido por *clip* (não `display:none`), por isso
+  o grupo continua a navegar-se com as setas e a anunciar-se como grupo de rádio. Fronteira
+  do chip a 3,3:1 com o branco (WCAG 1.4.11) e `:focus` emparelhado com `:focus-visible`
+  para o Safari 13. Todos os chips ≥44px de altura.
+- **JS:** `servicoVal()` e `servicoSet()` substituem o `.value` do `<select>` nos três sítios
+  que o liam ou escreviam — `quoteData()`, a pré-seleção vinda dos cartões de serviço e o
+  ouvinte que repõe o título genérico.
+- **Verificação Playwright** (1440/390/375/360): 17 asserções verdes — sem erros de página,
+  sem `<select>` no formulário, nome acessível no grupo, alvos ≥44px, clique a marcar o
+  valor certo, serviço e etiqueta `[P4 · Avaria AC]` a chegarem ao `wa.me`, setas do teclado
+  a navegar, pré-seleção a partir do cartão Eletricidade, e sem overflow horizontal.
 
 ## Domínio próprio — um só comando
 
