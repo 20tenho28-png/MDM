@@ -600,27 +600,12 @@
   .mw-in::placeholder { color: #8F8B80; }
   .mw-row:focus-within { background: #FCFBF8; }
   .mw-row:focus-within .mw-lbl { color: var(--red); }
-  /* serviço em chips (radios reais): no telemóvel não abre a janela nativa e
-     vêem-se todas as opções — quem não sabia que há "avaria" passa a saber */
-  .mw-row--chips { align-items: flex-start; padding-top: 13px; padding-bottom: 13px; }
-  .mw-row--chips .mw-lbl { padding-top: 14px; }
-  .mw-chips { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-  .mw-chips input {
-    position: absolute; width: 1px; height: 1px; margin: -1px;
-    padding: 0; overflow: hidden; clip: rect(0 0 0 0); border: 0;
+  .mw-select {
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235C5A54' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 4px center;
+    padding-right: 28px; cursor: pointer;
   }
-  .mw-chip {
-    display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px;
-    /* 3,3:1 com o branco: a fronteira do controlo tem de se ver (WCAG 1.4.11) */
-    border: 1.5px solid rgba(78,88,113,0.7); border-radius: 999px; background: #fff;
-    font-size: 13.5px; line-height: 1.2; color: var(--slate); cursor: pointer;
-    transition: border-color .2s, background .2s, color .2s;
-  }
-  .mw-chip:hover { border-color: var(--ink); color: var(--ink); }
-  .mw-chips input:checked + .mw-chip { background: var(--red); border-color: var(--red); color: #fff; }
-  .mw-chips input:focus + .mw-chip { outline: 2px solid var(--ink); outline-offset: 2px; }
-  .mw-chips input:focus:not(:focus-visible) + .mw-chip { outline: 0; }
-  .mw-chips input:focus-visible + .mw-chip { outline: 2px solid var(--ink); outline-offset: 2px; }
   .mw-row-to { background: #FCFBF8; }
   .mw-to { font-weight: 600; font-size: 16px; padding: 17px 0; }
   .mw-to-hint { margin-left: auto; font-size: 12.5px; color: var(--slate); white-space: nowrap; }
@@ -682,13 +667,6 @@
 
   @media (max-width: 720px) {
     .mw-lbl { width: 88px; font-size: 11px; }
-    /* o rótulo sobe para cima dos chips: em 360px são mais 100px de largura
-       útil, o que poupa uma linha inteira de 44px */
-    .mw-row--chips { flex-wrap: wrap; row-gap: 8px; padding-top: 12px; padding-bottom: 12px; }
-    .mw-row--chips .mw-lbl { width: 100%; padding-top: 0; text-align: left; }
-    /* num ecrã de 360px cada 4px de folga vale uma linha de 44px */
-    .mw-chips { gap: 6px; }
-    .mw-chip { font-size: 13px; padding: 0 13px; }
     .mw-in, .mw-to, .mw-ta { font-size: 16px; }
     .mw-to-hint { display: none; }
     .mw-foot { flex-direction: column; align-items: stretch; }
@@ -1276,17 +1254,18 @@
         <input class="mw-in" id="qTel" name="telefone" type="tel" inputmode="tel" placeholder="+351 9xx xxx xxx" autocomplete="tel" enterkeyhint="next">
       </div>
 
-      <div class="mw-row mw-row--chips">
-        <span class="mw-lbl" id="qServicoLbl">Serviço:</span>
-        <div class="mw-chips" id="qServicoGrupo" role="radiogroup" aria-labelledby="qServicoLbl">
-          <input type="radio" name="servico" id="qsv1" value="Ar Condicionado — Montagem / Instalação"><label class="mw-chip" for="qsv1">Montagem de AC</label>
-          <input type="radio" name="servico" id="qsv2" value="Manutenção Preventiva — Contrato Anual"><label class="mw-chip" for="qsv2">Manutenção anual</label>
-          <input type="radio" name="servico" id="qsv3" value="Eletricidade — Quadros e Alimentações AVAC"><label class="mw-chip" for="qsv3">Quadros elétricos</label>
-          <input type="radio" name="servico" id="qsv4" value="Ar Condicionado — Avaria / Reparação"><label class="mw-chip" for="qsv4">Avaria de AC</label>
-          <input type="radio" name="servico" id="qsv5" value="Eletricidade — Avaria / Reparação"><label class="mw-chip" for="qsv5">Avaria elétrica</label>
-          <input type="radio" name="servico" id="qsv6" value="Ventilação — Instalação / Revisão"><label class="mw-chip" for="qsv6">Ventilação</label>
-          <input type="radio" name="servico" id="qsv7" value="Outro / Múltiplos serviços"><label class="mw-chip" for="qsv7">Outro</label>
-        </div>
+      <div class="mw-row">
+        <label class="mw-lbl" for="qServico">Serviço:</label>
+        <select class="mw-in mw-select" id="qServico" name="servico">
+          <option value="" selected disabled>Selecione o tipo de serviço</option>
+          <option>Ar Condicionado — Montagem / Instalação</option>
+          <option>Manutenção Preventiva — Contrato Anual</option>
+          <option>Eletricidade — Quadros e Alimentações AVAC</option>
+          <option>Ar Condicionado — Avaria / Reparação</option>
+          <option>Eletricidade — Avaria / Reparação</option>
+          <option>Ventilação — Instalação / Revisão</option>
+          <option>Outro / Múltiplos serviços</option>
+        </select>
       </div>
 
       <div class="mw-body">
@@ -1476,21 +1455,12 @@ function triagem(servico) {
 }
 function etiqueta(servico) { const t = triagem(servico); return '[' + t.p + ' · ' + t.seg + ']'; }
 
-/* o serviço deixou de ser um <select>: lê-se e escreve-se o radio marcado */
-function servicoVal() {
-  const r = document.querySelector('#qServicoGrupo input:checked');
-  return r ? r.value : '';
-}
-function servicoSet(v) {
-  const rs = document.querySelectorAll('#qServicoGrupo input');
-  for (let i = 0; i < rs.length; i++) if (rs[i].value === v) { rs[i].checked = true; return; }
-}
 function quoteData() {
   return {
     empresa: $q('qEmpresa').value.trim(),
     email: $q('qEmail').value.trim(),
     tel: $q('qTel').value.trim(),
-    servico: servicoVal(),
+    servico: $q('qServico').value,
     msg: $q('qMsg').value.trim()
   };
 }
@@ -1636,7 +1606,8 @@ addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 30),
 (function () {
   const TITULOS = { [PRESELECT_ELET]: ['Eletricista certificado', 'Orçamento para quadros<br>e alimentações <em>AVAC.</em>'] };
   document.querySelectorAll('[data-preselect]').forEach(a => a.addEventListener('click', () => {
-    servicoSet(a.dataset.preselect);
+    const sel = document.getElementById('qServico');
+    if (sel) sel.value = a.dataset.preselect;
     const msg = document.getElementById('qMsg');
     if (msg && a.dataset.msg && !msg.value.trim()) msg.value = a.dataset.msg;
     const t = TITULOS[a.dataset.preselect];
@@ -1645,10 +1616,10 @@ addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 30),
     track('form_preselect', { servico: a.dataset.preselect, lead: a.dataset.lead || '' });
   }));
   /* se depois mudar o serviço, o título volta ao genérico */
-  const grp = document.getElementById('qServicoGrupo'), eb = document.getElementById('quoteEyebrow'), h2 = document.getElementById('quoteTitle');
-  if (grp && eb && h2) {
+  const sel = document.getElementById('qServico'), eb = document.getElementById('quoteEyebrow'), h2 = document.getElementById('quoteTitle');
+  if (sel && eb && h2) {
     const base = [eb.textContent, h2.innerHTML];
-    grp.addEventListener('change', () => { if (!TITULOS[servicoVal()]) { eb.textContent = base[0]; h2.innerHTML = base[1]; } });
+    sel.addEventListener('change', () => { if (!TITULOS[sel.value]) { eb.textContent = base[0]; h2.innerHTML = base[1]; } });
   }
 })();
 

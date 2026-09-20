@@ -322,36 +322,26 @@ Ronda focada só no fim do funil: o pedido já está escrito, falta chegar à MD
 3. **Decisão do dono:** o formulário está a 76% da profundidade da página no telemóvel
    (4770px de 6264). Uma chamada a seguir ao carrossel de obras resolveria, ao custo de mais
    um CTA na página.
-4. **Decisão do dono:** os chips de serviço custam +142px de altura no telemóvel (ver
-   abaixo). Se esse custo não compensar a janela nativa que poupam, o `<select>` volta.
+4. **Fechado:** os chips de serviço foram experimentados e revertidos — ver abaixo.
 
-## Serviço em chips, não em `<select>` (09/2026)
+## O `<select>` de serviço fica (09/2026)
 
-O `<select id="qServico">` deu lugar a sete radios estilizados (`#qServicoGrupo`, com
-`role="radiogroup"` e `aria-labelledby`). Ao mesmo tempo saiu o CSS morto do botão flutuante
-`.fab`, seis regras sem elemento na página desde a reorganização do rodapé.
+Experimentámos trocar o `<select id="qServico">` por sete chips (radios estilizados). Ficou
+desfeito: o dono preferiu o `<select>`, e o custo em altura dá-lhe razão.
 
-- **Porquê:** no telemóvel o `<select>` abre uma janela nativa que tapa o formulário, e as
-  sete opções só se vêem depois de a abrir. Quem não sabia que há "avaria" não descobria.
-  Em chips as opções estão todas à vista e escolhe-se com um toque em vez de três.
-- **Custo medido (Playwright, linha "Serviço"):** 1440px 52→123px; 390/375/360px 52→194px,
-  ou seja +142px, cerca de 2% da altura da página no telemóvel. É o mínimo prático: sete
-  alvos de 44px em três linhas, mais o rótulo.
-- **Como se chegou a +142 e não a +331:** as etiquetas encurtaram ("Montagem de AC" em vez
-  de "Ar condicionado · montagem"), e a ≤720px o rótulo sobe para cima dos chips, o que
-  devolve os 108px da coluna da esquerda. Aí os chips passam a 13px de texto, 13px de
-  padding e 6px de intervalo — em 360px cada 4px de folga vale uma linha inteira de 44px.
-- **Acessibilidade:** o input real fica escondido por *clip* (não `display:none`), por isso
-  o grupo continua a navegar-se com as setas e a anunciar-se como grupo de rádio. Fronteira
-  do chip a 3,3:1 com o branco (WCAG 1.4.11) e `:focus` emparelhado com `:focus-visible`
-  para o Safari 13. Todos os chips ≥44px de altura.
-- **JS:** `servicoVal()` e `servicoSet()` substituem o `.value` do `<select>` nos três sítios
-  que o liam ou escreviam — `quoteData()`, a pré-seleção vinda dos cartões de serviço e o
-  ouvinte que repõe o título genérico.
-- **Verificação Playwright** (1440/390/375/360): 17 asserções verdes — sem erros de página,
-  sem `<select>` no formulário, nome acessível no grupo, alvos ≥44px, clique a marcar o
-  valor certo, serviço e etiqueta `[P4 · Avaria AC]` a chegarem ao `wa.me`, setas do teclado
-  a navegar, pré-seleção a partir do cartão Eletricidade, e sem overflow horizontal.
+- **O que custava:** a linha "Serviço" passava de 52px para 123px no desktop e para 194px no
+  telemóvel, ou seja +142px — e isto já depois de encurtar as etiquetas e de subir o rótulo
+  para cima dos chips a ≤720px. Sete alvos de 44px não cabem em menos de três linhas num
+  ecrã de 360px, por isso +142px era o mínimo prático, não um mau primeiro corte.
+- **O que se ganhava:** no telemóvel o `<select>` abre uma janela nativa que tapa o
+  formulário, e as sete opções só se vêem depois de a abrir. Em chips estavam todas à vista.
+- **Se um dia se voltar ao assunto:** o caminho barato é encurtar a lista, não estilizar o
+  controlo. Com quatro ou cinco opções os chips cabem em duas linhas e o custo cai para
+  metade. Isso obriga a decidir que serviços deixam de ter entrada própria no formulário.
+
+Ficou da experiência a limpeza do CSS morto do botão flutuante `.fab`, seis regras sem
+elemento na página desde a reorganização do rodapé.
+
 
 ## Domínio próprio — um só comando
 
