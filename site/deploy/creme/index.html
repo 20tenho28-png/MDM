@@ -86,6 +86,7 @@
     --red-sf: #F6E4E4;
     --r-s: 6px;          /* raio pequeno (chips, inputs) */
     --r-m: 10px;         /* raio médio (cartões) */
+    --r-l: 16px;         /* raio grande (faixas e painéis largos) */
 
     --serif: 'Lora', Georgia, serif;
     --sans:  'Inter', sans-serif;
@@ -311,7 +312,7 @@
     position: relative; display: block; overflow: hidden;
     height: clamp(200px, 24vw, 280px);
     border: 1px solid var(--sand);
-    border-radius: 18px;
+    border-radius: var(--r-m);
     background: #fff; text-decoration: none;
     box-shadow: 0 10px 24px -18px rgba(20,29,46,0.30);
     transition: opacity 1s var(--ease), transform .6s var(--ease),
@@ -357,7 +358,7 @@
   /* ── trust band (dark) ── */
   .band {
     background: var(--ink); color: var(--cream);
-    border-radius: 24px;
+    border-radius: var(--r-l);
     padding: 56px 48px;
     display: grid; grid-template-columns: 1.2fr 1fr;
     gap: 48px; align-items: center;
@@ -402,7 +403,7 @@
   .c-card {
     background: rgba(240,238,230,0.8);
     border: 1px solid var(--sand);
-    border-radius: 16px; padding: 22px 30px;
+    border-radius: var(--r-m); padding: 22px 30px;
     text-align: left; min-width: 200px;
     transition: transform .3s var(--ease), border-color .3s;
   }
@@ -748,7 +749,7 @@
   .ft-link { color: var(--red-dk); text-decoration: none; border-bottom: 1px solid var(--sand); }
   .ft-link:hover { border-color: var(--red); }
   .skip-link { position: absolute; left: -9999px; top: 0; z-index: 200;
-    background: #2B2723; color: #fff; padding: 12px 20px; border-radius: 0 0 12px 0;
+    background: #2B2723; color: #fff; padding: 12px 20px; border-radius: 0 0 var(--r-m) 0;
     font-family: var(--sans); font-weight: 700; text-decoration: none; }
   .skip-link:focus { left: 0; }
   a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
@@ -1095,7 +1096,7 @@
       <span class="svc-txt">
         <h3>Ar Condicionado</h3>
         <span class="svc-sub">Montagem, avarias e manutenção multi-marca</span>
-        <span class="svc-go">Montagem de ar condicionado <span aria-hidden="true">→</span></span>
+        <span class="svc-go">Montagem · envie foto <span aria-hidden="true">→</span></span>
       </span>
     </a>
 

@@ -331,12 +331,15 @@ aplicam, duas são parciais e defensáveis, uma era defeito.
 
 - **Corrigido:** o logótipo do cabeçalho apontava para `href="#"`, que não vai a lado nenhum.
   Passa a apontar para `#topo` e ganhou nome acessível. Medido: de 2718px de scroll volta a 0.
-- **Parcial, fica como está — cartões de serviço iguais:** os quatro usam o mesmo molde, mas
-  cada um leva foto própria, título, subtítulo, texto de acção e destino diferentes (WhatsApp,
-  mailto, âncora com pré-selecção). Molde repetido com conteúdo distinto é a forma certa para
-  um conjunto comparável.
-- **Parcial, fica como está — cantos arredondados:** só os botões em cápsula usam raio grande;
-  o resto anda nos 16–24px e as fotos são de canto vivo.
+- **Corrigido — cartões de serviço:** o molde repetido fica (quatro serviços comparáveis
+  devem ler-se como um conjunto), mas a chamada do primeiro partia em duas linhas enquanto as
+  outras três cabiam numa. "Montagem de ar condicionado" passa a "Montagem · envie foto", que
+  descreve melhor o destino (abre o WhatsApp com pedido de fotografia) e alinha com o quarto
+  cartão. Medido a 1440 e 390px: as quatro chamadas com 31px, uma linha cada.
+- **Corrigido — sistema de raios:** já existiam fichas (`--r-s: 6px`, `--r-m: 10px`) e três
+  regras escapavam-lhes com valores à mão: os cartões de serviço a 18px, os de contacto a 16px
+  e a faixa escura a 24px. Passam todas por ficha, com uma `--r-l: 16px` nova para superfícies
+  largas. Não sobra nenhum raio escrito à mão fora das cápsulas dos botões e dos círculos.
 - **Por fazer, depende do dono — não há um único testemunho de cliente.** Trinta e cinco anos
   de casa e nem uma frase citada. Não se inventam: é preciso autorização de três clientes
   reais, com nome do condomínio ou da empresa.
