@@ -371,6 +371,26 @@ informação: tudo o que saiu estava dito noutro sítio ou era instrução a mai
 - **Dica do carrossel:** "Arraste, use as setas do teclado ou estes botões" passa a "Arraste ou
   use as setas". Os botões estão à vista e dispensam legenda.
 
+### Segunda passagem
+
+Ficou em 558 palavras e 5016px.
+
+- **Faixa de números:** dizia a mesma coisa duas vezes lado a lado, "1991 Fundação" e
+  "35 anos de experiência", e repetia o horário que já está no cabeçalho e no cartão do
+  telefone. Fica com duas colunas, fundação e janela de intervenção.
+- **Título da secção de contacto:** "Transforme uma necessidade técnica num plano claro" era
+  a única frase de marketing da página e vinha logo antes de outro título. Passa a
+  "Fale connosco."
+- **Cartões de contacto:** cada um ocupava duas linhas de descrição; a informação cabe numa.
+- **Subtítulos dos serviços:** o que estava a mais já estava no título do cartão ou nas
+  perguntas (o multi-marca, o "técnico certificado", a "qualidade do ar").
+- **"Ou escreva diretamente para mdmassist@mdmassist.com":** o endereço aparecia três vezes na
+  mesma secção — no cartão do email, na linha "Para:" do formulário e nesta nota. Sai a nota.
+  Era a saída de recurso para quando o `mailto:` não abre; quando o receptor de leads entrar
+  ao serviço deixa de fazer falta, mas até lá vale a pena saber que saiu.
+- **"Desde 1991" na secção do porquê:** a data está na faixa e o título logo acima já diz
+  "35 anos de ofício".
+
 Não se mexeu no que é obrigatório nem no que é dado real: a nota de campos obrigatórios, a
 frase do RGPD, a morada, o NIF, os telefones e o horário ficam como estavam.
 
