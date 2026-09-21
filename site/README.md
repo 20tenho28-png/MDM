@@ -324,6 +324,29 @@ Ronda focada só no fim do funil: o pedido já está escrito, falta chegar à MD
    um CTA na página.
 4. **Fechado:** os chips de serviço foram experimentados e revertidos — ver abaixo.
 
+## Auditoria "site feito por IA" (09/2026)
+
+Passámos o site pela lista das dezanove marcas de página gerada em série. Dezasseis não se
+aplicam, duas são parciais e defensáveis, uma era defeito.
+
+- **Corrigido:** o logótipo do cabeçalho apontava para `href="#"`, que não vai a lado nenhum.
+  Passa a apontar para `#topo` e ganhou nome acessível. Medido: de 2718px de scroll volta a 0.
+- **Parcial, fica como está — cartões de serviço iguais:** os quatro usam o mesmo molde, mas
+  cada um leva foto própria, título, subtítulo, texto de acção e destino diferentes (WhatsApp,
+  mailto, âncora com pré-selecção). Molde repetido com conteúdo distinto é a forma certa para
+  um conjunto comparável.
+- **Parcial, fica como está — cantos arredondados:** só os botões em cápsula usam raio grande;
+  o resto anda nos 16–24px e as fotos são de canto vivo.
+- **Por fazer, depende do dono — não há um único testemunho de cliente.** Trinta e cinco anos
+  de casa e nem uma frase citada. Não se inventam: é preciso autorização de três clientes
+  reais, com nome do condomínio ou da empresa.
+
+Os restantes quinze não se verificam: sem manchas de gradiente decorativas (os nove gradientes
+do ficheiro são máscaras de carrossel, véu sobre foto e o halo do logótipo), sem roxo, sem
+formas 3D, sem fotos de banco de imagens (as catorze são obras reais), um só acento de cor,
+sem palavras da moda, perguntas frequentes que não repetem a página, sem grelhas bento, sem
+emojis, e chamadas à acção que dizem o que fazem.
+
 ## O `<select>` de serviço fica (09/2026)
 
 Experimentámos trocar o `<select id="qServico">` por sete chips (radios estilizados). Ficou
