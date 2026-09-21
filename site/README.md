@@ -350,6 +350,30 @@ formas 3D, sem fotos de banco de imagens (as catorze são obras reais), um só a
 sem palavras da moda, perguntas frequentes que não repetem a página, sem grelhas bento, sem
 emojis, e chamadas à acção que dizem o que fazem.
 
+## Corte de texto (09/2026)
+
+A página tinha 720 palavras e 5241px. Ficou com 593 palavras e 5090px, sem perder nenhuma
+informação: tudo o que saiu estava dito noutro sítio ou era instrução a mais.
+
+- **Legendas das obras (−88 palavras):** eram texto alternativo promovido a legenda, frases
+  inteiras de dez a doze palavras por cima da fotografia. Passam a etiquetas de três a cinco
+  ("Carga de gás · unidade exterior"). O `alt` das imagens mantém a descrição completa, por
+  isso quem usa leitor de ecrã não perde nada.
+- **Prova do hero (−18):** eram três afirmações numa só respiração. Sai o "assistência
+  multi-marca, com peças originais", que já está no cartão de AC, na secção "porquê" e nas
+  perguntas. Sai também a regra `.hp-x`, que existia só para o esconder a ≤400px.
+- **As 24 horas estavam ditas três vezes** na mesma secção: no subtítulo do formulário, no
+  cartão do email e na garantia por baixo dos botões. Fica a garantia.
+- **O horário estava duas vezes** no cabeçalho da secção de contacto e no cartão do telefone.
+  Fica o cartão.
+- **Marcador da mensagem (−13):** era uma instrução de vinte palavras dentro do campo. A caixa
+  passa de seis para quatro linhas, que estavam quase sempre vazias.
+- **Dica do carrossel:** "Arraste, use as setas do teclado ou estes botões" passa a "Arraste ou
+  use as setas". Os botões estão à vista e dispensam legenda.
+
+Não se mexeu no que é obrigatório nem no que é dado real: a nota de campos obrigatórios, a
+frase do RGPD, a morada, o NIF, os telefones e o horário ficam como estavam.
+
 ## O `<select>` de serviço fica (09/2026)
 
 Experimentámos trocar o `<select id="qServico">` por sete chips (radios estilizados). Ficou
