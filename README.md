@@ -7,6 +7,8 @@ Team workspace with three apps, one folder each:
 | **Email ticket wall** | `src/mdm/` | IMAP-driven ticket tracking with a TV wall display (FastAPI + PostgreSQL) |
 | **Electric simulator** | `electric-simulator/` | Interactive DC circuit simulator (canvas editor + live MNA solver) |
 | **Circuit Planner — EU Edition** | `circuit-planner/` | Single-file EU electrical/HVAC training app (the trainer) |
+| **Website** | `site/` | MDM public site — single-file static page (cream official variant, lead paths, works carousel) |
+| **Relatório de Intervenção** | `relatorio-intervencao/` | Digital field report (FM-TEC-04/V07): offline single file, F-gas register, signatures, A4 PDF |
 
 ```
 MDM/
@@ -15,6 +17,8 @@ MDM/
 ├── tests/              # Python test suite (ticket wall + simulator routes)
 ├── electric-simulator/ # standalone circuit simulator (HTML/JS + own tests)
 ├── circuit-planner/    # standalone trainer app (HTML/JS + own tests)
+├── site/               # public website (single-file build + sources)
+├── relatorio-intervencao/ # technician intervention report app (single file + node tests)
 └── .github/            # CI workflow, PR and issue templates
 ```
 
@@ -69,6 +73,12 @@ rules and workflow before editing.
 cd circuit-planner
 npm test          # full headless test suite, no dependencies needed
 ```
+
+## Website
+
+`site/index.html` is the whole public site — open it in a browser, or drop it on any static
+host. Do not hand-edit it (it is ~560 KB of inlined images): edit the sources in `site/src/`
+and run `python3 assemble.py`. See [`site/README.md`](site/README.md).
 
 ## Contributing
 
