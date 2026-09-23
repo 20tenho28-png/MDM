@@ -391,6 +391,18 @@ Ficou em 558 palavras e 5016px.
 - **"Desde 1991" na secção do porquê:** a data está na faixa e o título logo acima já diz
   "35 anos de ofício".
 
+### Terceira passagem
+
+Ficou em 553 palavras e 4995px.
+
+- **Garantias por baixo do formulário:** eram três. A dos contratos anuais repetia o cartão do
+  telefone e o cartão de Manutenção. Ficam a resposta em dias úteis e a fatura com NIF, em
+  duas colunas.
+- **Secção do porquê:** "Técnicos certificados em AVAC e eletricidade" e "Certificação APIRAC ·
+  Registo IMPIC" eram a mesma afirmação em duas linhas. Passam a uma. A lista fica com quatro.
+
+A partir daqui o que sobra é argumento de venda, não repetição.
+
 Não se mexeu no que é obrigatório nem no que é dado real: a nota de campos obrigatórios, a
 frase do RGPD, a morada, o NIF, os telefones e o horário ficam como estavam.
 
