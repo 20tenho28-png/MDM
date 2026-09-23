@@ -324,6 +324,61 @@ Ronda focada só no fim do funil: o pedido já está escrito, falta chegar à MD
    um CTA na página.
 4. **Fechado:** os chips de serviço foram experimentados e revertidos — ver abaixo.
 
+## Variante carmim (09/2026)
+
+`site/variante-carmim/` é uma adaptação do site à linguagem de um site de construtora que o
+dono trouxe como referência: uma faixa de cor a toda a largura com letra enorme e apertada,
+uma fotografia metida entre as palavras do título, linhas verticais a marcar as colunas, uma
+barra lateral estreita com o logótipo, o menu e miniaturas de obras, uma faixa de números que
+fica fixa no topo ao descer, uma ficha técnica em linhas, uma secção escura de obras com o
+título fixo ao centro e as fotografias a passar, e uma ficha de obra com título grande e
+linha de dados. **Não substitui o site oficial.** É uma variante para comparar.
+
+- **Marca da MDM, não a da referência.** A faixa é o carmim do logótipo e o resto usa as
+  cores de sempre. Para ver a comparação com o amarelo da referência basta abrir com
+  `?cor=amarelo` no fim do endereço; os botões passam a tinta para não haver dois acentos.
+- **Só dados reais.** A referência mostra "150+ projetos" e "0.82 taxa de incidentes". Aqui a
+  faixa mostra o telefone, 35 anos, 1991, 4 especialidades e o horário, tudo verificado.
+  A ficha de obra mostra especialidade e tipo de trabalho, tirados da descrição de cada
+  fotografia. Não mostra local, prazo nem valor, porque não os temos.
+- **As fotografias limitam o desenho.** Todas têm 480 pixéis de altura, incluindo os
+  originais em `site/obras/`. A referência vive de fotografias enormes de ponta a ponta; aqui
+  cada uma aparece perto do tamanho real para não desfocar. Com originais de 1600 pixéis ou
+  mais, a ficha de obra e a secção "Quem somos" podiam levar fotografia a toda a largura.
+- **Letra:** Geist e Geist Mono, alojadas com o site em `fonts/`. Deixa de haver pedidos ao
+  Google Fonts, o que tira um subcontratante da política de privacidade se a variante for
+  adotada. O tamanho do título foi medido na fonte: "MANTEMOS EDIFÍCIOS" ocupa 10,06em, por
+  isso a letra é a largura útil a dividir por 10,5, e no telemóvel "A FUNCIONAR" (6,3em)
+  a dividir por 6,6.
+- **Um só sistema de cantos:** botões e campos 6px, fotografias e painéis 10px. Sem cápsulas.
+- **Modo escuro** segue o do sistema. A faixa carmim mantém-se.
+- **Sem travessões em texto visível**, incluindo as mensagens de WhatsApp e os valores do menu
+  de serviço ("Ar condicionado: montagem / instalação"). A triagem P1 a P5 é a mesma.
+- **Medição:** o mesmo PostHog em memória e sem cookies. O Sentry não está na variante.
+
+### Mudanças de texto que precisam do sim do dono
+
+1. O título passa de "Mantemos os edifícios de Lisboa a funcionar" a "Mantemos edifícios a
+   funcionar", para caber em duas linhas de letra enorme. Lisboa passa para a frase de cima.
+2. O serviço "Manutenção preventiva" aparece como "Manutenção", com "Preventiva, com contrato
+   anual e relatório" por baixo.
+3. O cartão de ventilação passa a abrir o WhatsApp com uma mensagem própria ("Preciso de
+   ajuda com ventilação"), em vez da mensagem de avaria que usa no site oficial.
+4. Nas perguntas frequentes, os travessões passaram a pontos e vírgulas; o conteúdo é o mesmo.
+5. Entre 1024 e 1279px de largura a faixa esconde "1991 Fundação", que repete os 35 anos,
+   para os outros números caberem numa linha.
+
+### Publicar e testar
+
+- Publica-se a pasta inteira. `python3 unico.py saida.html` gera a versão de ficheiro único,
+  com tudo embutido (cerca de 990 KB), para abrir com duplo clique.
+- Verificação Playwright a 360/390/700/1024/1180/1440/1920px: sem transbordo, o título em duas
+  linhas no computador, a faixa com o botão de orçamento dentro do primeiro ecrã em todas as
+  larguras, alvos de toque com 44px. A ficha de obra recebe o foco, prende o Tab, fecha com
+  Esc e devolve o foco a quem a abriu, e as setas passam de obra. Pedir orçamento a partir da
+  ficha pré-seleciona o serviço e escreve a obra na mensagem. O formulário marca cada campo em
+  falta com a razão por baixo e leva nome, contacto e etiqueta de triagem ao WhatsApp.
+
 ## Auditoria "site feito por IA" (09/2026)
 
 Passámos o site pela lista das dezanove marcas de página gerada em série. Dezasseis não se
