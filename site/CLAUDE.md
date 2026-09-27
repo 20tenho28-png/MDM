@@ -64,9 +64,9 @@ the `:root` block **is** the source of truth.
   --wa-d:   #0B6E34;
   --ok-bg:  #E9F2EC;  --ok-fg: #1F5C33;   /* form success alert */
   --r-s: 6px;  --r-m: 10px;  --r-l: 16px; /* radii: inputs / cards / wide panels */
-  --serif: 'Lora', Georgia, serif;        /* headings */
-  --sans:  'Inter', sans-serif;           /* body, UI */
-  --mono:  'JetBrains Mono', monospace;   /* labels, numbers, kickers */
+  --display: 'Geist', ui-sans-serif, system-ui, …;   /* headings: 650/700, tight */
+  --sans:    'Geist', ui-sans-serif, system-ui, …;   /* body, UI */
+  --mono:    'Geist Mono', ui-monospace, …;          /* labels, numbers, kickers */
   --ease:  cubic-bezier(0.16, 1, 0.3, 1);
 }
 /* layout token, set later: --nav-h: 89px (81px ≤640px) */
@@ -85,14 +85,15 @@ Rules:
   --accent --on-accent --deep --field …`, Geist/Geist Mono). Do not mix the two vocabularies.
 
 ### Typography
-- Headings: `var(--serif)` (Lora 400/500/600, italic 400/500). `<em>` inside h2 gets the
-  underline accent (`.sec-head h2 em::after`).
-- Body/UI: `var(--sans)` (Inter 400/500/600). Kickers, numbers, labels: `var(--mono)`.
+- Headings: `var(--display)` — Geist 650/700 with negative tracking (−0.035 to −0.05em).
+  `<em>` inside h1/h2 is upright carmine (no italic, no underline — the carmim lettering).
+- Body/UI: `var(--sans)` (Geist 400/500/600). Kickers, numbers, labels: `var(--mono)` (Geist Mono).
 - Display sizes are fluid `clamp()` (hero `clamp(40px, 6.4vw, 80px)`, section h2
   `clamp(30px, 4.2vw, 50px)`); UI text is fixed px (11–17px). Keep new sizes on that scale;
   don't add a new px size when an existing one is within 0.5px.
-- Fonts load from Google Fonts (`<link>` in `<head>`, `display=swap`). Adding a weight means
-  editing that URL. Carmim self-hosts Geist in `variante-carmim/fonts/` (OFL files alongside).
+- Geist + Geist Mono are variable (100–900) and **embedded** as base64 `@font-face` at the top of
+  the `<style>` in `index.html` and `privacidade.html` — no Google Fonts request. `externalize.py`
+  moves them to `deploy/creme/fonts/`. Source files + OFL licences: `variante-carmim/fonts/`.
 
 ## 4. Components
 
@@ -151,7 +152,7 @@ Pattern:
   a data URI in `index.html`, then regenerate `deploy/creme/`.
 - Every `<img>` needs `width`/`height` (no layout shift) and a Portuguese `alt` describing the
   real job. Budget: `index.html` ≈ 580 KB, deploy HTML ≈ 116 KB — don't blow these up.
-- No CDN. Only external requests: Google Fonts and PostHog (EU). Keep it that way.
+- No CDN. Only external requests: PostHog (EU) and Sentry. Fonts are embedded — keep it that way.
 - Only real MDM photos. No stock photos presented as MDM work.
 
 ## 7. Styling approach and responsiveness

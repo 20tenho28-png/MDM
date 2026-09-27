@@ -42,6 +42,16 @@ def main(src, outdir, url=None):
         return nome
 
     html = re.sub(r"data:image/(jpeg|webp|png);base64,([A-Za-z0-9+/=]+)", extrai, html)
+    # tipos de letra embutidos (Geist): um ficheiro partilhado, em cache entre páginas
+    os.makedirs(os.path.join(outdir, "fonts"), exist_ok=True)
+    def fonte(m):
+        raw = base64.b64decode(m.group(1))
+        nome = "fonts/%s.woff2" % hashlib.sha1(raw).hexdigest()[:10]
+        if not os.path.exists(os.path.join(outdir, nome)):
+            open(os.path.join(outdir, nome), "wb").write(raw)
+        return nome
+    fontes = lambda t: re.sub(r"data:font/woff2;base64,([A-Za-z0-9+/=]+)", fonte, t)
+    html = fontes(html)
     open(os.path.join(outdir, "index.html"), "w", encoding="utf-8").write(html)
     # páginas soltas que acompanham o site (política de privacidade)
     paginas = []
@@ -51,7 +61,7 @@ def main(src, outdir, url=None):
             txt = open(origem, encoding="utf-8").read()
             if url:
                 txt = re.sub(r"https?://[^\"/]+(?=/privacidade\.html)", url.rstrip("/"), txt)
-            open(os.path.join(outdir, extra), "w", encoding="utf-8").write(txt)
+            open(os.path.join(outdir, extra), "w", encoding="utf-8").write(fontes(txt))
             paginas.append(extra)
     # extras de publicação: og.jpg + robots.txt + sitemap.xml (derivados do canonical)
     og = os.path.join(os.path.dirname(os.path.abspath(src)), "og.jpg")

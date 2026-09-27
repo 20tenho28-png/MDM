@@ -95,10 +95,10 @@ Já foi corrigido: "Resposta **garantida** em dias úteis" passou a "Respondemos
   `externalize.py`, que separa as imagens: o HTML desce para ~114 KB e as imagens passam a ter
   cache própria e carregamento diferido. O CSS e o JavaScript continuam embutidos de
   propósito: são ~65 KB e, numa página só, poupar dois pedidos pesa mais do que a cache.
-- **Google Fonts.** Os tipos de letra (Lora, Inter, JetBrains Mono) são carregados do Google,
-  o que comunica o endereço IP do visitante ao fornecedor. Está declarado na política de
-  privacidade. Para eliminar essa transferência é preciso alojar os ficheiros de fonte no
-  próprio domínio (acrescenta ~150–250 KB à publicação). **Decisão do dono.**
+- **Tipos de letra — resolvido (27/09).** A versão creme passou a usar Geist e Geist Mono
+  (letra da variante carmim, a pedido do dono), embutidas no próprio site: já não há pedidos
+  ao Google Fonts nem comunicação do IP do visitante. A linha "Google Fonts" saiu da política
+  de privacidade. Na publicação são dois ficheiros em `fonts/` (52 KB no total).
 - **Sem banner de cookies.** O site não usa cookies nem identifica o visitante entre visitas
   (PostHog com `persistence: 'memory'`), por isso não há consentimento a pedir para
   armazenamento. A medição assenta em interesse legítimo e pode ser recusada na política de

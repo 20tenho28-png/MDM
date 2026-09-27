@@ -59,7 +59,7 @@ A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela vol
 
 - **`privacidade.html`** cobre o art. 13.º do RGPD: responsável, dados, finalidades e
   fundamentos (al. b) para o formulário, al. f) para medição e erros), prazos de conservação,
-  subcontratantes (PostHog UE, Sentry DE, Formspree EUA com cláusulas-tipo, Google Fonts),
+  subcontratantes (PostHog UE, Sentry DE, Formspree EUA com cláusulas-tipo; desde 27/09 sem Google Fonts — letra Geist embutida),
   direitos e CNPD. **Três valores foram escritos por omissão e o dono tem de os confirmar:**
   3 anos para pedidos sem contrato, 12 meses de medição, 90 dias de registos de erro.
 - **Recusa de medição:** o botão na política grava `mdm-sem-medicao` no browser; o

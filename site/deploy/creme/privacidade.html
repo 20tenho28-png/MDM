@@ -7,16 +7,16 @@
 <meta name="description" content="Como a MDM — Manuel Domingos Melancia, Lda trata os dados pessoais recolhidos no site: finalidades, fundamentos legais, destinatários, prazos e direitos.">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://mdmassist.manus.space/privacidade.html">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+  /* Geist e Geist Mono (OFL, Vercel) embutidos: sem pedidos ao Google Fonts */
+  @font-face { font-family: 'Geist'; src: url(fonts/f49f83effe.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
+  @font-face { font-family: 'Geist Mono'; src: url(fonts/8c3cbed783.woff2) format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
 :root{
   --red:#A30711; --red-dk:#7C050D; --red-sf:#F6E4E4;
   --ink:#141D2E; --slate:#4E5871; --cream:#FAF9F5; --sand:#E8E4D9; --paper:#F0EEE6;
-  --serif:Lora,Georgia,"Times New Roman",serif;
-  --sans:Inter,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --display:'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --sans:'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --mono:'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
@@ -28,12 +28,12 @@ a:focus-visible,button:focus-visible{outline:3px solid var(--red);outline-offset
 header{border-bottom:1px solid var(--sand);background:rgba(250,249,245,.95);position:sticky;top:0;z-index:5;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .hin{max-width:820px;margin:0 auto;padding:14px 24px;display:flex;align-items:center}
 .hin svg{width:44px;height:45px;border-radius:5px;flex:none;margin-right:12px}
-.hin b{font-family:var(--serif);font-size:18px;font-weight:600;flex:1;line-height:1.2}
+.hin b{font-family:var(--display);font-size:18px;font-weight:600;flex:1;line-height:1.2}
 .hin b small{display:block;font-family:var(--sans);font-size:12.5px;font-weight:500;color:var(--slate)}
 .hin a.volta{font-size:14.5px;font-weight:600;text-decoration:none;white-space:nowrap;margin-left:14px}
 main{max-width:820px;margin:0 auto;padding:32px 24px 72px}
-h1{font-family:var(--serif);font-size:clamp(30px,5vw,42px);font-weight:500;letter-spacing:-1px;line-height:1.1;margin:0 0 10px}
-h2{font-family:var(--serif);font-size:23px;font-weight:600;letter-spacing:-.3px;margin:40px 0 10px;padding-top:14px;border-top:1px solid var(--sand)}
+h1{font-family:var(--display);font-size:clamp(30px,5vw,42px);font-weight:700;letter-spacing:-.045em;line-height:1.05;margin:0 0 10px}
+h2{font-family:var(--display);font-size:23px;font-weight:650;letter-spacing:-.03em;margin:40px 0 10px;padding-top:14px;border-top:1px solid var(--sand)}
 h3{font-size:16px;font-weight:600;margin:22px 0 6px}
 p,li{color:#2B3348}
 .lead{font-size:18.5px;color:var(--slate);margin:0 0 6px}
@@ -435,7 +435,6 @@ c206 -103 337 -223 546 -499 59 -78 177 -282 282 -489 34 -67 229 -492 243
     <tr><td><b>PostHog</b> (PostHog Inc., instância europeia)</td><td>Medição de utilização do site, sem cookies</td><td>União Europeia</td></tr>
     <tr><td><b>Sentry</b> (Functional Software, Inc. / Sentry GmbH)</td><td>Registo de erros técnicos do site, sem dados pessoais por definição</td><td>Alemanha</td></tr>
     <tr><td><b>Formspree</b> (Formspree, Inc., Estados Unidos)</td><td>Receber e reencaminhar por email os pedidos do formulário, quando o envio direto está ativo</td><td>Estados Unidos, ao abrigo das cláusulas contratuais-tipo da Comissão Europeia</td></tr>
-    <tr><td><b>Google Fonts</b> (Google Ireland Limited)</td><td>Tipos de letra do site; ao carregá-los, o seu endereço IP é comunicado ao fornecedor</td><td>União Europeia e Estados Unidos</td></tr>
     <tr><td><b>Alojamento do site</b></td><td>Publicação das páginas e registos técnicos de acesso</td><td>Ver o fornecedor indicado no rodapé do site</td></tr>
   </table></div>
   <p>Se preferir não comunicar o seu endereço IP a estes fornecedores, pode contactar-nos diretamente por telefone (218 935 050) sem usar o site.</p>
