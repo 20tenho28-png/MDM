@@ -1,0 +1,13 @@
+<svg viewBox="0 0 640 480" role="img" aria-labelledby="hp-t hp-d" style="width:100%;height:auto;display:block;border-radius:10px;background:#F0EEE6"><title id="hp-t">Esquema de uma bomba de calor ar-água</title><desc id="hp-d">A unidade exterior retira calor do ar e aquece a água de um depósito, que alimenta as torneiras e os radiadores ou o piso radiante. O eletricista liga o sistema ao quadro elétrico.</desc>
+<g font-family="Geist, Arial, sans-serif" fill="#141D2E">
+<g fill="none" stroke="#141D2E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+<rect x="48" y="170" width="190" height="140" rx="10"/><circle cx="118" cy="240" r="46"/><path d="M118 200v80M78 240h80M90 212l56 56M146 212l-56 56"/><path d="M196 200v80M214 200v80"/>
+<rect x="360" y="96" width="110" height="250" rx="44"/>
+<path d="M470 150h60v-40h50M470 290h60v70h50"/><rect x="560" y="330" width="50" height="60" rx="4"/><path d="M570 345h30M570 360h30M570 375h30"/>
+<rect x="520" y="40" width="80" height="44" rx="4"/><path d="M540 56h40"/></g>
+<g fill="none" stroke="#A30711" stroke-width="3.5" stroke-linecap="round"><path d="M238 205h122"/><path d="M238 275h122"/><path d="M560 84v30"/><path d="M415 96V60h105"/></g>
+<text x="48" y="345" font-size="17" font-weight="600">Unidade exterior</text><text x="48" y="367" font-size="15" fill="#4E5871">retira calor do ar</text>
+<text x="352" y="382" font-size="17" font-weight="600">Depósito</text><text x="352" y="404" font-size="15" fill="#4E5871">água quente</text>
+<text x="486" y="420" font-size="15" fill="#4E5871">radiadores ou piso</text><text x="540" y="136" font-size="15" fill="#4E5871">torneiras</text>
+<text x="520" y="30" font-size="15" font-weight="600">Quadro elétrico</text>
+</g></svg>

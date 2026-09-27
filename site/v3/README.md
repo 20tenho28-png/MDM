@@ -6,6 +6,7 @@ Fonte: `src/` · construção: `python3 build.py` (só biblioteca-padrão) · sa
 |---|---|---|
 | `src/mdm-site-v3.0.html` | `dist/index.html` | Home: CSS e JS inline (ficheiro autónomo); imagens em `img/` |
 | `src/ar-condicionado-lisboa.html` | `dist/ar-condicionado-lisboa/index.html` | 1.ª página de serviço; usa `assets/v3.css` |
+| `src/_servico.html` + `services.py` | `dist/<slug>/index.html` | Bombas de calor, manutenção e assistência, instalações elétricas, ventilação (conteúdo em `services.py`) |
 | `src/obrigado.html`, `src/404.html` | `dist/obrigado/`, `dist/404.html` | Sucesso sem JS e página de erro |
 | `src/partials/*` | incluídos com `{{include:…}}` | header, gaveta, barra móvel, formulário, rodapé, scripts |
 | `src/v3.css` | inline na home, `dist/assets/v3.css` nas outras | tokens do sistema v3 (DESIGN.md §13) |
@@ -15,3 +16,9 @@ Fonte: `src/` · construção: `python3 build.py` (só biblioteca-padrão) · sa
 - Formulário: Netlify Forms (`data-netlify`, honeypot `website`), 6 campos, envio por `fetch`, sucesso no ecrã sem promessa de prazo.
 - PostHog só depois de "Aceitar"; Sentry como antes (sem replay, `sendDefaultPii: false`, tracing 0.1).
 - Pré-visualização local: `cd dist && python3 -m http.server` (a 404 usa caminhos absolutos).
+
+## Estado (27/09/2026)
+- 6 páginas públicas: home + 5 serviços, 445 a 670 palavras cada, 0 travessões, 0 links partidos, JSON-LD válido.
+- Sem fotografia real de bombas de calor: usa-se um esquema, nunca uma foto que não seja da MDM.
+- `privacidade/` ainda é a página da v2.2 (copiada): atualizar na Fase 7 para o consentimento do PostHog e o Netlify Forms.
+- `/obras/` só é publicada com 12 ou mais fotos reais legendadas (decisão do dono).

@@ -3,7 +3,9 @@
 src/mdm-site-v3.0.html  -> dist/index.html (CSS e JS inline: a home é um ficheiro autónomo)
 src/<serviço>.html      -> dist/<serviço>/index.html (partilham dist/assets/v3.css)
 """
-import json, re, shutil, html
+import json, re, shutil, html, sys
+sys.path.insert(0, str(__import__('pathlib').Path(__file__).parent))
+from services import SERVICES, NAMES
 from pathlib import Path
 B = Path(__file__).parent; S = B / 'src'; P = S / 'partials'; D = B / 'dist'
 MAN = json.loads((B / 'img' / 'manifest.json').read_text())
@@ -66,19 +68,59 @@ def preload(name, root):
     ws = MAN[name]['w']
     return f'<link rel="preload" as="image" type="image/avif" imagesrcset="{", ".join(f"{root}img/{name}-{w}.avif {w}w" for w, h in ws)}" imagesizes="(min-width: 1024px) 560px, 100vw" fetchpriority="high">'
 
-def render(src, root, page, inline_css):
-    t = (S / src).read_text(encoding='utf-8')
+def render(src, root, page, inline_css, text=None):
+    t = text if text is not None else (S / src).read_text(encoding='utf-8')
     for _ in range(3):
         t = re.sub(r'\{\{include:([^}]+)\}\}', lambda m: (P / m.group(1)).read_text(encoding='utf-8').strip(), t)
     css = (S / 'v3.css').read_text(encoding='utf-8')
     t = t.replace('{{css}}', css if inline_css else '')
     t = re.sub(r'\{\{pic:([^}]+)\}\}', lambda m: pic(m.group(1), root), t)
     t = re.sub(r'\{\{preload:([^}]+)\}\}', lambda m: preload(m.group(1), root), t)
-    t = re.sub(r'\{\{faq:(\w+)\}\}', lambda m: faq_html(m.group(1)), t)
-    t = re.sub(r'\{\{schema:(\w+)\}\}', lambda m: json.dumps(SCHEMA[m.group(1)], ensure_ascii=False), t)
+    t = re.sub(r'\{\{faq:([\w-]+)\}\}', lambda m: faq_html(m.group(1)), t)
+    t = re.sub(r'\{\{schema:([\w-]+)\}\}', lambda m: json.dumps(SCHEMA[m.group(1)], ensure_ascii=False), t)
     t = t.replace('{{page}}', page).replace('{{root}}', root)
     assert '{{' not in t, re.findall(r'\{\{[^}]+\}\}', t)[:3]
     return t
+
+def service_page(slug, d):
+    """Página de serviço a partir de src/_servico.html e de services.py."""
+    esc = html.escape
+    FAQ[slug] = d['faq']
+    SCHEMA[slug] = {'@context': 'https://schema.org', '@graph': [
+        {'@type': 'Service', 'name': d['h1'], 'serviceType': d['service_type'], 'provider': {'@id': SITE + '#mdm'}, 'areaServed': ORG['areaServed'], 'url': SITE + slug + '/',
+         'hasOfferCatalog': {'@type': 'OfferCatalog', 'name': d['nav'], 'itemListElement': [{'@type': 'Offer', 'itemOffered': {'@type': 'Service', 'name': n}} for n in d['offers']]}},
+        {'@type': 'BreadcrumbList', 'itemListElement': [{'@type': 'ListItem', 'position': 1, 'name': 'Início', 'item': SITE}, {'@type': 'ListItem', 'position': 2, 'name': d['nav'], 'item': SITE + slug + '/'}]},
+        faq_ld(slug), ORG]}
+    h = d['hero']
+    if h[0] == 'pic':
+        hero = f'{{{{pic:{h[1]}|{h[2]}|(min-width: 1024px) 520px, 100vw|eager}}}}\n      <figcaption>{esc(h[3])}</figcaption>'; preload = f'{{{{preload:{h[1]}}}}}'
+    else:
+        hero = f'{{{{include:{h[1]}}}}}'; preload = ''
+    types = '\n'.join(f'      <div class="type"><h3>{esc(a)}</h3><p>{esc(b)}</p></div>' for a, b in d['types'])
+    feat = ''
+    if d['feature']:
+        f = d['feature']; aside = ''
+        if f['aside']:
+            a = f['aside']; aside = f'<figure class="project">{{{{pic:{a[1]}|{a[2]}|(min-width: 1024px) 560px, 100vw|lazy}}}}<figcaption><b>{esc(a[3])}</b></figcaption></figure>'
+        body = ''.join(f'<p>{esc(x)}</p>' for x in f['body'])
+        feat = f'''<section class="section" id="{f['id']}" aria-labelledby="h-feat">
+  <div class="wrap{' ms-grid' if aside else ''}">
+    <div class="prose"><span class="eyebrow">{esc(f['eyebrow'])}</span><h2 id="h-feat" style="margin:.75rem 0 1.25rem">{esc(f['title'])}</h2>{body}</div>
+    {aside}
+  </div>
+</section>'''
+    inc = '\n'.join(f'      <li><strong>{esc(a)}.</strong> {esc(b)}</li>' for a, b in d['included'])
+    gal = ''
+    if d['gallery']:
+        cards = ''.join(f'<figure class="project">{{{{pic:{n}|{alt}|(min-width: 1024px) 373px, 50vw|lazy}}}}<figcaption><b>{esc(b)}</b><span>{esc(sm)}</span></figcaption></figure>' for n, alt, b, sm in d['gallery'])
+        gal = f'<section class="section" aria-labelledby="h-obras-s"><div class="wrap"><div class="sec-head"><span class="eyebrow">Obras</span><h2 id="h-obras-s">Trabalho real da nossa equipa.</h2></div><div class="gallery">{cards}</div></div></section>'
+    rel = '\n'.join(f'      <a href="{{{{root}}}}{r}/">{esc(NAMES[r])} <span aria-hidden="true">→</span></a>' for r in d['related'])
+    t = (S / '_servico.html').read_text(encoding='utf-8')
+    for k, v in {'TITLE': esc(d['title']), 'DESC': esc(d['desc']), 'SLUG': slug, 'PRELOAD': preload, 'SCHEMA': slug, 'PAGE': d['page'], 'SERVICO': esc(d['servico']),
+                 'NAV': esc(d['nav']), 'EYEBROW': esc(d['eyebrow']), 'H1': esc(d['h1']), 'LEAD': esc(d['lead']), 'HERO': hero, 'TYPES_TITLE': esc(d['types_title']), 'TYPES': types,
+                 'FEATURE': feat, 'INCLUDED': inc, 'GALLERY': gal, 'FAQ': slug, 'FORM_TITLE': esc(d['form_title']), 'FORM_LEAD': esc(d['form_lead']), 'RELATED': rel}.items():
+        t = t.replace('%' + k + '%', v)
+    return render(None, '../', d['page'], False, text=t)
 
 def main():
     if D.exists(): shutil.rmtree(D)
@@ -89,13 +131,16 @@ def main():
     (D / 'index.html').write_text(render('mdm-site-v3.0.html', '', 'home', True), encoding='utf-8')
     (D / 'ar-condicionado-lisboa').mkdir()
     (D / 'ar-condicionado-lisboa' / 'index.html').write_text(render('ar-condicionado-lisboa.html', '../', 'ar-condicionado', False), encoding='utf-8')
+    for slug, d in SERVICES.items():
+        (D / slug).mkdir(); (D / slug / 'index.html').write_text(service_page(slug, d), encoding='utf-8')
     for sub, src in [('obrigado', 'obrigado.html')]:
         (D / sub).mkdir(); (D / sub / 'index.html').write_text(render(src, '../', sub, False), encoding='utf-8')
     (D / '404.html').write_text(render('404.html', '/', '404', False).replace('href="/assets', 'href="/assets'), encoding='utf-8')
     (D / 'privacidade').mkdir(); shutil.copy(B.parent / 'privacidade.html', D / 'privacidade' / 'index.html')
     shutil.copy(P / 'logo.svg', D / 'favicon.svg'); shutil.copy(B.parent / 'favicon' / 'logo-180.png', D / 'apple-touch-icon.png')
     (D / 'robots.txt').write_text('# Pré-visualização: não indexar. No lançamento: Allow e Sitemap.\nUser-agent: *\nDisallow: /\n')
-    (D / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + ''.join(f'  <url><loc>{SITE}{p}</loc></url>\n' for p in ['', 'ar-condicionado-lisboa/', 'privacidade/']) + '</urlset>\n')
+    (D / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + ''.join(f'  <url><loc>{SITE}{p}</loc></url>\n' for p in ['', 'ar-condicionado-lisboa/'] + [k + '/' for k in SERVICES] + ['privacidade/']) + '</urlset>\n')
+    SVC_LINKS = ''.join(f"- [{d['h1']}]({SITE}{k}/)\n" for k, d in SERVICES.items())
     (D / 'llms.txt').write_text(f"""# MDM · AVAC e assistência técnica (Lisboa)
 
 > M.D.M. - Manuel Domingos Melancia, Lda (NIF 502 644 761). Empresa de Lisboa, fundada em 1991, com sede no Parque das Nações. Instala e mantém ar condicionado (split, multi-split, conduta) e bombas de calor ar-água, faz instalações elétricas e ventilação, para casas, apartamentos, lojas e condomínios na Grande Lisboa. A mesma equipa instala, faz a ligação elétrica e a manutenção.
@@ -109,7 +154,7 @@ def main():
 ## Páginas
 - [Início]({SITE})
 - [Instalação de ar condicionado em Lisboa]({SITE}ar-condicionado-lisboa/)
-- [Política de privacidade]({SITE}privacidade/)
+{SVC_LINKS}- [Política de privacidade]({SITE}privacidade/)
 """)
     (D / '_headers').write_text('/*\n  X-Robots-Tag: noindex, nofollow\n/img/*\n  Cache-Control: public, max-age=31536000, immutable\n/fonts/*\n  Cache-Control: public, max-age=31536000, immutable\n')
     print('ok', sorted(str(p.relative_to(D)) for p in D.rglob('*.html')))

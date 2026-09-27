@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>%TITLE%</title>
+<meta name="description" content="%DESC%">
+<link rel="canonical" href="https://www.mdmassist.com.pt/%SLUG%/">
+<meta name="theme-color" content="#FAF9F5">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_PT">
+<meta property="og:title" content="%TITLE%">
+<meta property="og:description" content="%DESC%">
+<meta property="og:url" content="https://www.mdmassist.com.pt/%SLUG%/">
+<meta property="og:image" content="https://www.mdmassist.com.pt/img/og-v3.jpg">
+<link rel="icon" href="{{root}}favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{{root}}apple-touch-icon.png">
+<link rel="preload" href="{{root}}fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+%PRELOAD%
+<link rel="stylesheet" href="{{root}}assets/v3.css">
+{{include:head-scripts.html}}
+<script type="application/ld+json">{{schema:%SCHEMA%}}</script>
+</head>
+<body data-page="%PAGE%" data-servico="%SERVICO%">
+{{include:header.html}}
+<main id="conteudo">
+
+<nav class="crumbs wrap" aria-label="Caminho"><ol><li><a href="{{root}}">Início</a></li><li><a href="{{root}}#servicos">Serviços</a></li><li aria-current="page">%NAV%</li></ol></nav>
+
+<section class="page-hero" aria-labelledby="h-hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">%EYEBROW%</span>
+      <h1 id="h-hero" style="margin-top:1rem">%H1%</h1>
+      <p class="lead" style="margin-top:1.5rem">%LEAD%</p>
+      <div class="hero-ctas">
+        <a class="btn btn--primary" href="#orcamento">Pedir orçamento</a>
+        <a class="btn btn--secondary" href="tel:+351218935050" data-ch="call">Ligar 218 935 050</a>
+      </div>
+    </div>
+    <figure class="hero-photo">
+      %HERO%
+    </figure>
+  </div>
+</section>
+
+<section class="section section--paper" aria-labelledby="h-tipos">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">O que fazemos</span><h2 id="h-tipos">%TYPES_TITLE%</h2></div>
+    <div class="types">
+%TYPES%
+    </div>
+  </div>
+</section>
+
+%FEATURE%
+
+<section class="section section--paper" aria-labelledby="h-inclui">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">O que inclui</span><h2 id="h-inclui">Do primeiro contacto à manutenção.</h2></div>
+    <ul class="included">
+%INCLUDED%
+    </ul>
+  </div>
+</section>
+
+%GALLERY%
+
+<section class="section section--paper" id="perguntas" aria-labelledby="h-faq">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Perguntas frequentes</span><h2 id="h-faq">Respostas diretas.</h2></div>
+    <div class="faq">
+{{faq:%FAQ%}}
+    </div>
+  </div>
+</section>
+
+<section class="section" id="orcamento" aria-labelledby="h-orc">
+  <div class="wrap quote-grid">
+    <div class="quote-aside">
+      <span class="eyebrow">Pedido de orçamento</span>
+      <h2 id="h-orc" style="margin-top:.75rem">%FORM_TITLE%</h2>
+      <p class="lead" style="margin-top:1rem">%FORM_LEAD%</p>
+      <div class="alt">
+        <a href="tel:+351218935050" data-ch="call">218 935 050<small>2ª a 6ª, 8h às 17h</small></a>
+        <a href="https://wa.me/351910307579" target="_blank" rel="noopener" data-ch="whatsapp">WhatsApp 910 307 579<small>Pode enviar fotografias do local</small></a>
+      </div>
+    </div>
+    <div>
+{{include:form.html}}
+    </div>
+  </div>
+</section>
+
+<section class="section section--paper" aria-labelledby="h-rel">
+  <div class="wrap">
+    <h2 class="h3" id="h-rel" style="margin-bottom:1.5rem">Serviços relacionados</h2>
+    <div class="related">
+%RELATED%
+    </div>
+  </div>
+</section>
+
+</main>
+{{include:footer.html}}
+{{include:mbar.html}}
+<script>{{include:main.js}}</script>
+</body>
+</html>
