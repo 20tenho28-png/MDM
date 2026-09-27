@@ -17,3 +17,4 @@ htmlcov/
 *.sqlite
 *.sqlite3
 .DS_Store
+site/v3/dist/

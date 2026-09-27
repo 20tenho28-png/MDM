@@ -1,0 +1,129 @@
+{
+ "hero-split-quarto": {
+  "w": [
+   [
+    640,
+    480
+   ],
+   [
+    960,
+    720
+   ],
+   [
+    1280,
+    960
+   ],
+   [
+    1600,
+    1200
+   ]
+  ],
+  "ratio": 1.3333
+ },
+ "manutencao-conduta": {
+  "w": [
+   [
+    400,
+    300
+   ],
+   [
+    800,
+    600
+   ],
+   [
+    1200,
+    900
+   ]
+  ],
+  "ratio": 1.3333
+ },
+ "ventilacao-ventilbox": {
+  "w": [
+   [
+    400,
+    300
+   ],
+   [
+    800,
+    600
+   ],
+   [
+    1200,
+    900
+   ]
+  ],
+  "ratio": 1.3333
+ },
+ "mitsubishi-moradia": {
+  "w": [
+   [
+    360,
+    480
+   ]
+  ],
+  "ratio": 0.75
+ },
+ "duas-unidades-fachada": {
+  "w": [
+   [
+    360,
+    480
+   ]
+  ],
+  "ratio": 0.75
+ },
+ "split-sala": {
+  "w": [
+   [
+    360,
+    480
+   ]
+  ],
+  "ratio": 0.75
+ },
+ "quadro-eletrico": {
+  "w": [
+   [
+    641,
+    480
+   ]
+  ],
+  "ratio": 1.3354
+ },
+ "ventilacao-cobertura": {
+  "w": [
+   [
+    640,
+    480
+   ]
+  ],
+  "ratio": 1.3333
+ },
+ "cassete-manutencao": {
+  "w": [
+   [
+    453,
+    480
+   ]
+  ],
+  "ratio": 0.9437
+ },
+ "mitsubishi-armazem": {
+  "w": [
+   [
+    360,
+    480
+   ]
+  ],
+  "ratio": 0.75
+ },
+ "chiller-cobertura": {
+  "w": [
+   [
+    484,
+    480
+   ]
+  ],
+  "ratio": 1.0083
+ }
+}

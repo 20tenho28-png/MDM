@@ -1,0 +1,18 @@
+<script>
+  /* Sentry (só erros; Session Replay desligado, sendDefaultPii:false). Não carrega se o visitante recusou estatísticas. */
+  (function () {
+    var no = false; try { no = localStorage.getItem('mdm-consent') === 'no'; } catch (e) {}
+    if (no) return;
+    var s = document.createElement('script');
+    s.src = 'https://js-de.sentry-cdn.com/f31a40fed7d908991cf6b3b9e8932c77.min.js'; s.crossOrigin = 'anonymous'; s.async = true;
+    s.onload = function () { window.Sentry && Sentry.onLoad(function () { Sentry.init({
+      dsn: 'https://f31a40fed7d908991cf6b3b9e8932c77@o4511750499926016.ingest.de.sentry.io/4511802709573712',
+      environment: /netlify\.app$|localhost/.test(location.hostname) ? 'preview' : 'production',
+      sendDefaultPii: false, tracesSampleRate: 0.1, replaysSessionSampleRate: 0, replaysOnErrorSampleRate: 0,
+      ignoreErrors: ['Non-Error promise rejection captured', 'ResizeObserver loop limit exceeded', 'Failed to fetch'],
+      denyUrls: [/extensions\//i, /^chrome:\/\//i, /^moz-extension:\/\//i],
+      beforeSend: function (ev) { try { if (ev.request) { delete ev.request.cookies; delete ev.request.data; } delete ev.user; (ev.breadcrumbs || []).forEach(function (b) { if (b.data) delete b.data.value; }); } catch (e) {} return ev; }
+    }); }); };
+    addEventListener('load', function () { document.head.appendChild(s); });
+  })();
+</script>
