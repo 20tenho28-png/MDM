@@ -1,15 +1,17 @@
 """Conteúdo das páginas de serviço geradas a partir de src/_servico.html (PT-PT, sem travessões, sem promessas de prazo).
-Só factos confirmados pelo dono (AUDIT.md §0, STRATEGY.md §6). Marcas: MIDEA, Mitsubishi Electric, Daikin, France Air."""
+Só factos confirmados pelo dono (AUDIT.md §0, STRATEGY.md §6). Marcas: MIDEA, Mitsubishi Electric, Daikin, France Air.
+No texto visível, "ar-\u2060água" leva um word joiner (U+2060, invisível) depois do hífen para o título não partir em "ar-" / "água".
+A Geist não tem o hífen inseparável U+2011 (o browser iria buscá-lo a outra fonte). Em title, desc, service_type, offers e alt fica o hífen simples."""
 
 SERVICES = {
  'bombas-de-calor-lisboa': dict(
   nav='Bombas de calor', servico='Bomba de calor', page='bombas-de-calor',
   title='Bombas de calor ar-água em Lisboa | MDM',
   desc='Instalação e manutenção de bombas de calor ar-água para águas quentes e aquecimento em Lisboa. Técnicos certificados F-gas e eletricistas da casa.',
-  eyebrow='Bombas de calor · Lisboa', h1='Bombas de calor ar-água em Lisboa',
+  eyebrow='Bombas de calor · Lisboa', h1='Bombas de calor ar-\u2060água em Lisboa',
   lead='Águas quentes e aquecimento para casas e pequenos negócios, com a instalação, a ligação ao quadro e a manutenção feitas pela mesma equipa desde 1991.',
-  hero=('pic', 'bomba-moradia', 'Bomba de calor ar-água instalada pela MDM numa moradia', 'Bomba de calor ar-água · moradia'),
-  types_title='Para que serve uma bomba de calor ar-água.',
+  hero=('pic', 'bomba-moradia', 'Bomba de calor ar-água instalada pela MDM numa moradia', 'Bomba de calor ar-\u2060água · moradia'),
+  types_title='Para que serve uma bomba de calor ar-\u2060água.',
   types=[('Águas quentes', 'Aquece a água da casa de banho e da cozinha a partir do ar exterior, com um depósito próprio.'),
          ('Aquecimento', 'Aquece a casa através de radiadores ou piso radiante, conforme o que já existe e o que faz sentido manter.'),
          ('Tudo num só sistema', 'Águas quentes e aquecimento com o mesmo equipamento, quando a casa e o uso o justificam.')],
@@ -24,9 +26,9 @@ SERVICES = {
             ('Arranque e explicação', 'Deixamos o sistema a funcionar e explicamos as regulações.'),
             ('Manutenção', 'Revisões pela mesma equipa, pontuais ou com contrato anual.')],
   gallery=[('bomba-varanda-deposito', 'Bomba de calor com depósito de água quente numa varanda', 'Bomba de calor e depósito', 'Varanda de apartamento'),
-           ('hero-bomba-moradia-m', 'Bomba de calor ar-água no jardim de uma moradia', 'Bomba de calor ar-água', 'Jardim de moradia'),
+           ('hero-bomba-moradia-m', 'Bomba de calor ar-água no jardim de uma moradia', 'Bomba de calor ar-\u2060água', 'Jardim de moradia'),
            ('midea-cobertura', 'Unidade exterior Midea numa cobertura', 'Unidade exterior Midea', 'Cobertura')],
-  faq=[('Qual é a diferença entre uma bomba de calor ar-água e um ar condicionado?', 'O ar condicionado aquece ou arrefece o ar da divisão. A bomba de calor ar-água aquece água: a das torneiras e, se quiser, a dos radiadores ou do piso radiante.'),
+  faq=[('Qual é a diferença entre uma bomba de calor ar-\u2060água e um ar condicionado?', 'O ar condicionado aquece ou arrefece o ar da divisão. A bomba de calor ar-\u2060água aquece água: a das torneiras e, se quiser, a dos radiadores ou do piso radiante.'),
        ('A bomba de calor precisa de obras elétricas?', 'Muitas vezes precisa de um circuito próprio no quadro. Como temos eletricista certificado na equipa, tratamos disso na mesma obra.'),
        ('Posso aproveitar os radiadores que já tenho?', 'Depende dos radiadores e da temperatura de água de que precisam. Avaliamos isso na visita técnica, antes do orçamento.'),
        ('A bomba de calor precisa de manutenção?', 'Sim. Uma revisão periódica mantém o rendimento e a garantia do equipamento. A mesma equipa que instala faz a manutenção.')],
@@ -53,7 +55,7 @@ SERVICES = {
   included=[('Relatório de cada visita', 'O que foi feito, o estado de cada equipamento e o que recomendamos.'),
             ('Técnicos certificados', 'Certificação para gases fluorados (F-gas) e eletricista certificado na equipa.'),
             ('Várias marcas', 'Trabalhamos com MIDEA, Mitsubishi Electric, Daikin e France Air, entre outras.'),
-            ('Ar condicionado e bombas de calor', 'Split, multi-split, conduta, cassete e bombas de calor ar-água.'),
+            ('Ar condicionado e bombas de calor', 'Split, multi-split, conduta, cassete e bombas de calor ar-\u2060água.'),
             ('Ventilação', 'Extração e renovação de ar em cozinhas, lojas e espaços técnicos.'),
             ('A mesma equipa', 'Quem instala é quem mantém: conhece o equipamento e o local.')],
   gallery=[('manutencao-conduta', 'Técnico da MDM em manutenção de uma unidade de condutas no teto', 'Unidade de condutas', 'Manutenção em teto falso'),
@@ -84,7 +86,7 @@ SERVICES = {
   feature=dict(id='climatizacao', eyebrow='Frio, calor e eletricidade', title='Uma só equipa para o equipamento e para o quadro.',
    body=['Num ar condicionado ou numa bomba de calor, a parte elétrica decide muito: a potência disponível, o circuito próprio e a proteção certa no quadro.',
          'Como o eletricista certificado faz parte da mesma equipa, vê o quadro na visita técnica e faz a ligação na mesma obra. Um só orçamento, um só responsável.'],
-   aside=None),
+   aside=('svg', 'eletrico.svg')),
   included_title='O que está incluído.',
   included=[('Eletricista certificado', 'O trabalho elétrico é feito e acompanhado por eletricista certificado.'),
             ('Proteções adequadas', 'Disjuntores e diferenciais escolhidos para cada circuito.'),
@@ -128,6 +130,6 @@ SERVICES = {
   related=['manutencao-assistencia-avac-lisboa', 'instalacoes-eletricas-lisboa', 'ar-condicionado-lisboa']),
 }
 
-NAMES = {'ar-condicionado-lisboa': 'Ar condicionado', 'bombas-de-calor-lisboa': 'Bombas de calor ar-água',
+NAMES = {'ar-condicionado-lisboa': 'Ar condicionado', 'bombas-de-calor-lisboa': 'Bombas de calor ar-\u2060água',
          'manutencao-assistencia-avac-lisboa': 'Manutenção e assistência técnica', 'instalacoes-eletricas-lisboa': 'Instalações elétricas',
          'ventilacao-lisboa': 'Ventilação'}
