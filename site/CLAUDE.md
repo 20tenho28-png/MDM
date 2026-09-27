@@ -85,7 +85,9 @@ Rules:
   --accent --on-accent --deep --field …`, Geist/Geist Mono). Do not mix the two vocabularies.
 
 ### Typography
-- Headings: `var(--display)` — Geist 650/700 with negative tracking (−0.035 to −0.05em).
+- Headings: `var(--display)` — Geist 650/700. Tight tracking (−0.045 to −0.05em) only on the large
+  display sizes (h1, h2, service names); medium sizes (17–30px: hero doors, stats, perks, FAQ,
+  contact values) stay near normal (0 to −0.02em) so they don't get cramped.
   `<em>` inside h1/h2 is upright carmine (no italic, no underline — the carmim lettering).
 - Body/UI: `var(--sans)` (Geist 400/500/600). Kickers, numbers, labels: `var(--mono)` (Geist Mono).
 - Display sizes are fluid `clamp()` (hero `clamp(40px, 6.4vw, 80px)`, section h2

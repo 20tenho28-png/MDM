@@ -46,7 +46,7 @@ Não há modo escuro. Contraste verificado à mão: `--red` é cor de **preenchi
 ## 3. Typography
 
 **Font families** (Geist e Geist Mono, OFL, variáveis 100–900, **embutidas** no `<style>` — sem Google Fonts; na publicação `externalize.py` passa-as para `fonts/`; também disponíveis no Figma):
-- Display / títulos: `var(--display)` — Geist 650/700, espaçamento negativo (−0.035 a −0.05em)
+- Display / títulos: `var(--display)` — Geist 650/700. Espaçamento apertado **só nos títulos grandes** (≥ 30px de h1/h2/lista: −0.045 a −0.05em); nos tamanhos médios (17–30px) quase normal (0 a −0.02em), para não apertar a leitura
 - Corpo / UI: `var(--sans)` — Geist 400/500/600
 - Rótulos, números, eyebrows: `var(--mono)` — Geist Mono 400/500/600
 
@@ -56,8 +56,10 @@ Não há modo escuro. Contraste verificado à mão: `--red` é cor de **preenchi
 | Display (h1) | clamp(40px, 6.4vw, 80px) | Geist 700, −0.05em | 1 | Hero |
 | Section (h2) | clamp(30px, 4.2vw, 50px) | Geist 650, −0.045em | 1.02 | Cabeçalhos de secção; `<em>` carmim, direito |
 | List title | clamp(32px, 3.9vw, 50px) | Geist 650, −0.05em | 1 | Linhas da lista de serviços (`.svc h3`) |
-| Stat | 30px | Geist 650, −0.035em | 1.1 | Faixa de números (`.hm-num`) |
-| Question | 18.5px | Geist 550, −0.02em | 1.55 | FAQ |
+| Stat | 30px | Geist 650, −0.02em | 1.1 | Faixa de números (`.hm-num`) |
+| Door / perk | 25–26px | Geist 650, −0.012 a −0.015em | 1.1 | Entradas do hero (`.door-t`), garantias (`.perk-big`) |
+| Question | 18.5px | Geist 550, −0.005em | 1.55 | FAQ |
+| Contact value | 17px | Geist 600, 0 | — | Cartões de contacto (`.c-val`) |
 | Body lg | 17px | Geist 400 | 1.75 | Texto do hero |
 | Body | 15px | Geist 400 | 1.5–1.65 | Descrições, respostas |
 | Small | 12.5–14.5px | Geist 400/500 | 1.5 | Nav, notas, rodapé |
