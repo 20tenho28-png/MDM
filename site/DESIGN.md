@@ -156,7 +156,9 @@ Direto, técnico, sem letra pequena: "Respostas diretas, sem letra pequena." Nú
 
 ## 13. Sistema v3 (Fase 3, 27/09/2026): evolução para o relançamento
 
-Construído no Figma (ficheiro `f6utVl8Hx1POsomLjSVd9Y`, página **"Design system v3"**): quadros *Foundations* (23:69), *Components* (24:69), *Photography direction* (25:226) e *Photo library* (21:69). Variáveis e estilos do Figma espelham os tokens abaixo. **Estado:** fundações e direção fotográfica completas; o quadro de componentes precisa de uma correção de dimensionamento (`docs/figma/fix-components-v3.js`) que não correu porque o plano Figma Starter esgotou as chamadas MCP do mês.
+Construído no Figma (ficheiro `f6utVl8Hx1POsomLjSVd9Y`, página **"Design system v3"**): quadros *Foundations* (23:69), *Components* (24:69), *Photography direction* (25:226) e *Photo library* (21:69). Variáveis e estilos do Figma espelham os tokens abaixo. **Estado (Figma):** fundações e direção fotográfica completas; o quadro de componentes precisa de uma correção de dimensionamento (`docs/figma/fix-components-v3.js`) que não correu porque o plano Figma Starter esgotou as chamadas MCP do mês.
+
+**Estado (código, 27/09/2026):** o sistema está implementado em `site/v3/src/v3.css`, cujo `:root` é a fonte de verdade: `--space-1…10` é a escala canónica (`--s1…9` ficam como aliases); tokens acrescentados na Fase 5: `--on-red`, `--on-wa`, `--on-ink-muted`, `--line-on-ink`, `--scrim`, `--shadow-float`; nenhum hex solto nas regras de componentes; texto abaixo de 14px só no Mono/Eyebrow de 12px. As fotografias publicadas seguem a direção fotográfica abaixo (tratamento único refeito a 27/09) e a imagem de partilha `img/og-v3.jpg` (1200x630) está feita. Desvios conhecidos: Mono/Eyebrow aparece mais de 2 vezes nas páginas de serviço; várias legendas ainda não têm o local (ver `LAUNCH.md` §7 e §8).
 
 ### Tokens novos ou alterados (entram no `:root` na Fase 5)
 | Token | Valor | Porquê |

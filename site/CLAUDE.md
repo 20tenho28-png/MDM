@@ -1,5 +1,31 @@
 # MDM website — design system rules (Figma → code)
 
+## v3 relaunch: read this first (27/09/2026)
+
+- **`site/v3/` is the relaunch candidate** for `https://www.mdmassist.com.pt/` (canonical). It is
+  not live yet: launch steps, open items and owner to-dos are in `site/LAUNCH.md`. Sections 0 to 8
+  below describe the v2.2 site (`site/index.html`, `site/deploy/creme/`), which stays untouched.
+- **Build:** `cd site/v3 && python3 build.py` (stdlib-only Python). Output goes to `site/v3/dist/`,
+  which is gitignored and deleted and recreated on every build. Netlify runs the same command through
+  the repo-root `netlify.toml` and publishes `site/v3/dist`. Local preview:
+  `cd site/v3/dist && python3 -m http.server`.
+- **Sources:** pages, `v3.css` and `partials/` in `site/v3/src/`; service-page content in
+  `site/v3/services.py`; images in `site/v3/img/` (`manifest.json` lists the srcset widths); fonts in
+  `site/v3/fonts/`. Tokens live in the `:root` of `site/v3/src/v3.css`; design rules in
+  `site/DESIGN.md` §13; file map in `site/v3/README.md`.
+- **Consent banner before PostHog (owner decision of 27/09/2026).** v3 shows a banner with
+  "Recusar" and "Aceitar" at equal weight. PostHog (EU) loads only after "Aceitar" and then sets a
+  `ph_` cookie plus localStorage; the choice is stored in localStorage `mdm-consent`, and refusing
+  also stops Sentry from loading. For v3 this replaces the "no cookies / no consent banner /
+  `persistence: 'memory'`" rule in §0. Keep `site/v3/src/privacidade.html` in sync with
+  `partials/main.js` and `partials/head-scripts.html` whenever analytics change.
+- **v3 hard rules:** European Portuguese; no em dashes anywhere (copy, titles, meta, alt, JSON-LD);
+  no invented facts, ratings, reviews, client names, prices or response-time promises; carmine
+  `#A30711` is the only accent; Geist + Geist Mono; at most one WhatsApp entry visible per viewport;
+  real MDM photos only.
+- **The preview is noindex** (`_headers` and `robots.txt`, both written by `build.py`). Remove both
+  only at launch (`site/LAUNCH.md` §5).
+
 Rules for turning Figma designs (via the Figma MCP) into changes to the MDM site.
 Scope: everything under `site/`. The rest of the repo (Python app, `circuit-planner/`,
 `electric-simulator/`) is unrelated and does not share this design system.
