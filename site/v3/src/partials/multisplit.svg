@@ -1,10 +1,10 @@
-<svg viewBox="0 0 520 360" role="img" aria-labelledby="ms-t ms-d"><title id="ms-t">Esquema de um multi-split</title><desc id="ms-d">Uma unidade exterior na fachada liga por tubagem a três unidades interiores, uma na sala, uma no quarto e uma no escritório.</desc>
-<g font-family="Geist, Arial, sans-serif" font-size="14" fill="#141D2E">
+<svg viewBox="0 0 520 360" style="font-size:20px" role="img" aria-labelledby="ms-t ms-d"><title id="ms-t">Esquema de um multi-split</title><desc id="ms-d">Uma unidade exterior na fachada liga por tubagem a três unidades interiores, uma na sala, uma no quarto e uma no escritório.</desc>
+<g font-family="Geist, Arial, sans-serif" font-size="20" fill="#141D2E">
 <g fill="none" stroke="#141D2E" stroke-width="2.5" stroke-linejoin="round"><rect x="150" y="20" width="350" height="100" rx="8"/><rect x="150" y="130" width="170" height="210" rx="8"/><rect x="330" y="130" width="170" height="210" rx="8"/></g>
 <g fill="#FAF9F5" stroke="#141D2E" stroke-width="2.5"><rect x="330" y="44" width="120" height="30" rx="6"/><rect x="170" y="150" width="120" height="30" rx="6"/><rect x="350" y="150" width="120" height="30" rx="6"/></g>
 <g fill="none" stroke="#A30711" stroke-width="3" stroke-linecap="round"><path d="M110 250H140V59H330"/><path d="M140 165H170"/><path d="M110 270H330V165H350"/></g>
 <rect x="16" y="220" width="94" height="80" rx="8" fill="#F0EEE6" stroke="#141D2E" stroke-width="2.5"/><circle cx="52" cy="260" r="22" fill="none" stroke="#141D2E" stroke-width="2.5"/><path d="M52 242v36M34 260h36" stroke="#141D2E" stroke-width="2"/>
-<text x="16" y="324" font-weight="600">1 unidade exterior</text><text x="16" y="342" fill="#4E5871" font-size="13">na fachada ou varanda</text>
-<text x="166" y="106" font-weight="600">Sala</text><text x="170" y="220" font-weight="600">Quarto</text><text x="350" y="220" font-weight="600">Escritório</text>
-<text x="170" y="240" fill="#4E5871" font-size="13">comando próprio</text><text x="350" y="240" fill="#4E5871" font-size="13">comando próprio</text><text x="166" y="86" fill="#4E5871" font-size="13" dx="0">comando próprio</text>
+<text x="16" y="326" font-weight="600">1 unidade</text><text x="16" y="348" font-weight="600">exterior</text>
+<text x="166" y="108" font-weight="600">Sala</text><text x="170" y="220" font-weight="600">Quarto</text><text x="350" y="220" font-weight="600">Escritório</text>
+<text x="170" y="240" fill="#4E5871" font-size="17">comando próprio</text><text x="350" y="240" fill="#4E5871" font-size="17">comando próprio</text><text x="166" y="84" fill="#4E5871" font-size="17">comando próprio</text>
 </g></svg>

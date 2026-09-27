@@ -218,7 +218,7 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
 .file:focus-within { outline: 3px solid var(--red); outline-offset: 1px; }
 .hint { display: block; margin-top: var(--s2); font-size: .875rem; color: var(--slate); }
 .err-msg { display: block; margin-top: var(--s2); font-size: .875rem; font-weight: 500; color: var(--red-dk); }
-.is-invalid input, .is-invalid select, .is-invalid .chip span { border-color: var(--red); background: var(--red-sf); }
+.f.is-invalid input, .f.is-invalid select, .f.is-invalid .chip span { border-color: var(--red); background: var(--red-sf); }
 .form-summary { margin-bottom: var(--s5); padding: var(--s4); background: var(--red-sf); color: var(--red-dk); border-radius: var(--r-s); font-weight: 500; }
 .form-note { margin-top: var(--s4); font-size: .875rem; color: var(--slate); }
 .hp { position: absolute; left: -9999px; }
@@ -308,3 +308,15 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
 /* barra móvel: WhatsApp só ícone para dar espaço à ação principal */
 .mbar .mb-wa { width: 48px; padding: 0; }
 .mbar .mb-wa .mb-lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ── v3.2: correções da revisão de design ── */
+.band-photo img { opacity: 1; height: clamp(240px, 36vw, 460px); }
+.band-photo-text { position: static; padding: var(--s6) 0 var(--s7); }
+.section--paper + .section--paper { border-top: 1px solid var(--sand); }
+.footer, .consent, .section--ink, .band-photo { --focus: var(--red-on-ink); }
+:focus-visible { outline-color: var(--focus, var(--red)); }
+.contact-pair .lbl { display: block; margin-bottom: var(--s2); font-size: .875rem; font-weight: 500; color: var(--slate); }
+.project span { font-size: .875rem; }
+.included li::before { background: var(--ink); }
+.mbar.is-hidden { visibility: hidden; transition: transform .2s cubic-bezier(.7,0,.84,0), visibility 0s linear .2s; }
+@media (max-width: 1023px) { .gallery > :last-child:nth-child(odd), .projects > :last-child:nth-child(odd) { grid-column: span 2; } }

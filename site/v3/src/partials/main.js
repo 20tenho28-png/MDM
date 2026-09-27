@@ -30,7 +30,7 @@
   function setMenu(open) {
     drawer.hidden = bd.hidden = !open; burger.setAttribute('aria-expanded', String(open)); burger.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
     document.documentElement.style.overflow = open ? 'hidden' : ''; outside.forEach(function (el) { el.inert = open; });
-    if (mbar) mbar.classList.toggle('is-hidden', open || formVisible);
+    syncBar();
     if (open) drawer.querySelector('a').focus();
   }
   function closeMenu(focus) { if (drawer.hidden) return; setMenu(false); if (focus) burger.focus(); }
@@ -42,8 +42,13 @@
     matchMedia('(min-width: 1024px)').addEventListener('change', function (e) { if (e.matches) closeMenu(false); });
   }
   /* ── barra móvel escondida quando o formulário está à vista ── */
-  var formVisible = false, form = $('#quoteForm');
-  if (mbar && form && 'IntersectionObserver' in window) new IntersectionObserver(function (en) { formVisible = en[0].isIntersecting; mbar.classList.toggle('is-hidden', formVisible || (drawer && !drawer.hidden)); }, { threshold: 0.15 }).observe($('#orcamento'));
+  /* a barra só aparece quando nem os botões do topo, nem o formulário, nem o rodapé estão à vista */
+  var formVisible = false, form = $('#quoteForm'), seen = new Map();
+  function syncBar() { if (!mbar) return; var hide = formVisible || (drawer && !drawer.hidden); mbar.classList.toggle('is-hidden', hide); mbar.inert = hide; }
+  if (mbar && 'IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (en) { en.forEach(function (e) { seen.set(e.target, e.isIntersecting); }); formVisible = [...seen.values()].some(Boolean); syncBar(); }, { threshold: 0.05 });
+    ['.hero-ctas', '#orcamento', '.footer'].forEach(function (s) { var el = $(s); if (el) io.observe(el); });
+  } else if (mbar) { mbar.classList.remove('is-hidden'); mbar.inert = false; }
   /* ── pré-seleção do serviço ── */
   var servico = $('#servico');
   document.addEventListener('click', function (e) { var a = e.target.closest('[data-servico]'); if (a && servico) servico.value = a.dataset.servico; });

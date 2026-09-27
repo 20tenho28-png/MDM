@@ -85,6 +85,7 @@ SERVICES = {
    body=['Num ar condicionado ou numa bomba de calor, a parte elétrica decide muito: a potência disponível, o circuito próprio e a proteção certa no quadro.',
          'Como o eletricista certificado faz parte da mesma equipa, vê o quadro na visita técnica e faz a ligação na mesma obra. Um só orçamento, um só responsável.'],
    aside=None),
+  included_title='O que está incluído.',
   included=[('Eletricista certificado', 'O trabalho elétrico é feito e acompanhado por eletricista certificado.'),
             ('Proteções adequadas', 'Disjuntores e diferenciais escolhidos para cada circuito.'),
             ('Quadros identificados', 'Cada circuito fica identificado no quadro.'),

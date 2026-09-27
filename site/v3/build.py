@@ -135,7 +135,7 @@ def service_page(slug, d):
     t = (S / '_servico.html').read_text(encoding='utf-8')
     for k, v in {'TITLE': esc(d['title']), 'DESC': esc(d['desc']), 'SLUG': slug, 'PRELOAD': preload, 'SCHEMA': slug, 'PAGE': d['page'], 'SERVICO': esc(d['servico']),
                  'NAV': esc(d['nav']), 'EYEBROW': esc(d['eyebrow']), 'H1': esc(d['h1']), 'LEAD': esc(d['lead']), 'HERO': hero, 'TYPES_TITLE': esc(d['types_title']), 'TYPES': types,
-                 'FEATURE': feat, 'INCLUDED': inc, 'GALLERY': gal, 'FAQ': slug, 'FORM_TITLE': esc(d['form_title']), 'FORM_LEAD': esc(d['form_lead']), 'RELATED': rel}.items():
+                 'FEATURE': feat, 'INCLUDED': inc, 'INCLUDED_TITLE': esc(d.get('included_title', 'Do primeiro contacto à manutenção.')), 'GALLERY': gal, 'FAQ': slug, 'FORM_TITLE': esc(d['form_title']), 'FORM_LEAD': esc(d['form_lead']), 'RELATED': rel}.items():
         t = t.replace('%' + k + '%', v)
     return render(None, '../', d['page'], False, text=t)
 
@@ -155,7 +155,7 @@ def main():
     for sub, src in [('obrigado', 'obrigado.html')]:
         (D / sub).mkdir(); (D / sub / 'index.html').write_text(render(src, '../', sub, False), encoding='utf-8')
     (D / '404.html').write_text(render('404.html', '/', '404', False).replace('href="/assets', 'href="/assets'), encoding='utf-8')
-    (D / 'privacidade').mkdir(); shutil.copy(B.parent / 'privacidade.html', D / 'privacidade' / 'index.html')
+    (D / 'privacidade').mkdir(); (D / 'privacidade' / 'index.html').write_text((B.parent / 'privacidade.html').read_text(encoding='utf-8').replace(' — ', ', ').replace('—', ':'), encoding='utf-8')
     shutil.copy(P / 'logo.svg', D / 'favicon.svg'); shutil.copy(B.parent / 'favicon' / 'logo-180.png', D / 'apple-touch-icon.png')
     (D / 'robots.txt').write_text('# Pré-visualização: não indexar. No lançamento: Allow e Sitemap.\nUser-agent: *\nDisallow: /\n')
     (D / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + ''.join(f'  <url><loc>{SITE}{p}</loc></url>\n' for p in ['', 'ar-condicionado-lisboa/'] + [k + '/' for k in SERVICES] + ['obras/', 'privacidade/']) + '</urlset>\n')
