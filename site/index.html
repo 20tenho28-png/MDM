@@ -1339,7 +1339,12 @@ async function sendLead(payload) {
         pagina: location.href,
         referrer: document.referrer || '',
         utm: location.search.slice(1),
-        ts: new Date().toISOString()
+        ts: new Date().toISOString(),
+        /* verificação anti-robô também no servidor (um POST direto salta a do browser):
+           a armadilha segue sempre (Formspree e a função Supabase rejeitam-na) e
+           ms = tempo desde que a página abriu (robôs submetem em milissegundos) */
+        _gotcha: ($q('qGotcha') || {}).value || '',
+        ms: Math.round(performance.now())
       }))
     });
     return r.ok;

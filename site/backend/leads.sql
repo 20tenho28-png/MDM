@@ -14,7 +14,12 @@ create table if not exists public.leads (
   referrer    text,
   utm         text,
   ip          inet,
-  user_agent  text
+  user_agent  text,
+  suspeito    boolean not null default false   -- preenchido em < 2 s: rever antes de ligar
 );
 alter table public.leads enable row level security;
 create index if not exists leads_criado_em_idx on public.leads (criado_em desc);
+-- para o limite por IP da edge function
+create index if not exists leads_ip_criado_em_idx on public.leads (ip, criado_em desc);
+-- se a tabela já existir sem a coluna:
+alter table public.leads add column if not exists suspeito boolean not null default false;

@@ -110,7 +110,14 @@ A navy arquivada tem o seu em `src/src_script.html` — só interessa se ela vol
 - **Anti-spam e estados (09/2026):** campo-armadilha `_gotcha` (escondido fora do ecrã; o
   Formspree também o reconhece do lado do servidor) e estados explícitos no botão — *A
   enviar…* → *Pedido enviado ✓* ou *Tentar novamente*; à segunda falha abre o programa de
-  email com o pedido preparado. Não há armadilha temporal: bloqueava quem preenche depressa.
+  email com o pedido preparado. Não há armadilha temporal que bloqueie: bloqueava quem preenche depressa.
+- **Anti-robô no servidor (27/09/2026):** a verificação do browser salta-se com um POST direto,
+  por isso o `sendLead` envia agora sempre `_gotcha` e `ms` (tempo desde que a página abriu), e
+  a função `lead` do Supabase: descarta em silêncio pedidos com a armadilha preenchida; limita
+  a 5 pedidos por IP em 10 minutos (429 → o site cai para o email); e **marca** (`suspeito`,
+  nunca apaga) os preenchidos em menos de 2 s, com "[verificar: possível spam]" no assunto do
+  email. Erros de base de dados já não são devolvidos ao browser. Sem reCAPTCHA/Turnstile de
+  propósito: põem cookies de terceiros e obrigariam a banner de consentimento.
 - **Robustez da captação:** `sendLead` tem timeout de 8s (endpoint pendurado → fallback
   honesto, nunca spinner eterno); botões protegidos contra duplo envio; eventos disparados
   antes do PostHog carregar ficam em fila e são despachados no load; payloads levam

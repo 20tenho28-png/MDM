@@ -1061,7 +1061,9 @@ function sendLead(payload) {
     method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, signal: ctl.signal,
     body: JSON.stringify(Object.assign({}, payload, {
       prioridade: triagem(payload.servico).p, segmento: triagem(payload.servico).seg,
-      pagina: location.href, referrer: document.referrer || '', utm: location.search.slice(1), ts: new Date().toISOString()
+      pagina: location.href, referrer: document.referrer || '', utm: location.search.slice(1), ts: new Date().toISOString(),
+      /* anti-robô também no servidor: armadilha + tempo desde que a página abriu */
+      _gotcha: ($('qGotcha') || {}).value || '', ms: Math.round(performance.now())
     }))
   }).then(function (r) { return r.ok; }).catch(function () { return false; }).then(function (ok) { clearTimeout(timer); return ok; });
 }

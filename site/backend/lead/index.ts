@@ -1,6 +1,9 @@
 // Edge function "lead": recebe o POST JSON do site (faixa + formulário),
 // guarda em public.leads e, se existir RESEND_API_KEY, envia email ao escritório.
 // Público (sem JWT): validação própria + limite de tamanho + CORS restrito.
+// Anti-robô do lado do servidor (o do browser salta-se com um POST direto):
+// campo-armadilha, tempo mínimo de preenchimento e limite por IP. Sem captcha:
+// reCAPTCHA/Turnstile põem cookies de terceiros e obrigariam a banner de consentimento.
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
@@ -46,9 +49,32 @@ Deno.serve(async (req) => {
   if (!lead.telefone && !lead.email)
     return new Response(JSON.stringify({ erro: "sem contacto" }), { status: 422, headers: h });
 
+  // campo-armadilha preenchido = robô (uma pessoa não o vê nem lhe chega por tab).
+  // Responde "ok" para o robô não aprender a contorná-lo; nada é guardado.
+  if (s(b._gotcha)) return new Response(JSON.stringify({ ok: true }), { status: 200, headers: h });
+
   const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  const { error } = await db.from("leads").insert(lead);
-  if (error) return new Response(JSON.stringify({ erro: "bd", detalhe: error.message }), { status: 500, headers: h });
+
+  // limite por IP: 5 pedidos em 10 minutos chegam para qualquer cliente real
+  if (lead.ip) {
+    const desde = new Date(Date.now() - 10 * 60_000).toISOString();
+    const { count } = await db.from("leads").select("id", { count: "exact", head: true })
+      .eq("ip", lead.ip).gte("criado_em", desde);
+    if ((count ?? 0) >= 5)
+      return new Response(JSON.stringify({ erro: "demasiados pedidos" }), { status: 429, headers: h });
+  }
+
+  // preenchido em menos de 2 s desde que a página abriu: provável robô, mas o
+  // preenchimento automático do browser também é rápido. Guarda-se marcado,
+  // nunca se deita fora (perder um cliente real custa mais do que ler um spam).
+  const ms = Number(b.ms);
+  const suspeito = Number.isFinite(ms) && ms >= 0 && ms < 2000;
+
+  const { error } = await db.from("leads").insert({ ...lead, suspeito });
+  if (error) {
+    console.error("lead: falha ao gravar", error.message);   // detalhe fica nos logs, não vai para o browser
+    return new Response(JSON.stringify({ erro: "bd" }), { status: 500, headers: h });
+  }
 
   // email opcional (Resend): só se a chave estiver definida nos secrets
   const key = Deno.env.get("RESEND_API_KEY");
@@ -63,7 +89,7 @@ Deno.serve(async (req) => {
         from: Deno.env.get("LEAD_FROM") ?? "Site MDM <onboarding@resend.dev>",
         to: [DESTINO],
         reply_to: lead.email ?? undefined,
-        subject: `Novo pedido no site (${lead.origem}) — ${lead.nome ?? lead.telefone ?? lead.email}`,
+        subject: `${suspeito ? "[verificar: possível spam] " : ""}Novo pedido no site (${lead.origem}) — ${lead.nome ?? lead.telefone ?? lead.email}`,
         text: linhas,
       }),
     });
