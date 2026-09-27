@@ -7,7 +7,9 @@
   function loadPostHog() {
     if (window.posthog) return;
     var el = document.createElement('script'); el.src = 'https://eu-assets.i.posthog.com/static/array.js'; el.async = true;
-    el.onload = function () { try { window.posthog.init('phc_veB6kR2as8m8HuRMEVuTUWubWQxLkPW5D8Uf6wsJcy8A', { api_host: 'https://eu.i.posthog.com', person_profiles: 'identified_only', autocapture: false, capture_pageview: true }); while (queue.length) { var t = queue.shift(); window.posthog.capture(t[0], t[1]); } } catch (e) {} };
+    el.onload = function () { try { window.posthog.init('phc_veB6kR2as8m8HuRMEVuTUWubWQxLkPW5D8Uf6wsJcy8A', { api_host: 'https://eu.i.posthog.com', person_profiles: 'identified_only', autocapture: false, capture_pageview: true,
+      /* só o que a política de privacidade descreve: nada que se possa ligar a partir do painel do PostHog */
+      disable_session_recording: true, enable_heatmaps: false, capture_dead_clicks: false, rageclick: false, disable_surveys: true, capture_exceptions: false, capture_performance: false }); while (queue.length) { var t = queue.shift(); window.posthog.capture(t[0], t[1]); } } catch (e) {} };
     document.head.appendChild(el);
   }
   var consent = $('#consent'), choice = null;
@@ -82,6 +84,7 @@
       track('form_submit', { service: servico.value, urgencia: (form.querySelector('[name=urgencia]:checked') || {}).value });
       var ok = $('#formOk'); $('#okName').textContent = ', ' + form.nome.value.trim().split(' ')[0];
       $('#okUrgent').hidden = (form.querySelector('[name=urgencia]:checked') || {}).value !== 'Tenho uma avaria';
+      document.body.classList.add('is-sent'); /* v3.css: o botão verde do sucesso passa a ser o único WhatsApp da página */
       form.hidden = true; ok.hidden = false; ok.focus();
     }).catch(function () {
       btn.disabled = false; btn.textContent = 'Enviar pedido'; var sum = $('#formSummary');

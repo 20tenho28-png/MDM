@@ -30,7 +30,8 @@
 @media (min-width: 1024px) { :root { --nav-h: 72px; --bar-h: 0px; } }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 16px); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+/* scroll-padding-bottom: o elemento com foco (Tab) não fica escondido atrás da barra fixa móvel; --bar-h é 0 a partir de 1024px */
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 16px); scroll-padding-bottom: calc(var(--bar-h) + 16px + env(safe-area-inset-bottom)); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body { background: var(--cream); color: var(--ink); font-family: var(--sans); font-size: 1.0625rem; line-height: 1.6; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; min-height: 100vh; }
 main { flex: 1 0 auto; } /* páginas curtas (404, obrigado): o rodapé fica no fundo do ecrã */
 [hidden] { display: none !important; }
@@ -255,8 +256,21 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
 .footer a:hover { text-decoration: underline; text-decoration-color: var(--red-on-ink); text-underline-offset: 3px; }
 .footer p, .footer li { font-size: .9375rem; line-height: 1.7; }
 .footer ul { list-style: none; }
+/* ligações soltas do rodapé: alvo de toque de 44px (mínimo do projeto) */
+.footer li a, .ft-legal a { display: inline-flex; align-items: center; min-height: 44px; }
+/* WhatsApp no máximo uma vez por ecrã: no computador, nas páginas que já têm o WhatsApp junto do formulário, o rodapé mostra o número como texto;
+   depois de enviar o pedido (.is-sent, main.js), o botão verde do sucesso é o único WhatsApp da página */
+.ft-wa-txt { display: none; align-items: center; min-height: 44px; }
+.is-sent .quote-aside .alt-wa, .is-sent .ft-wa { display: none; }
+.is-sent .ft-wa-txt { display: inline-flex; }
+@media (min-width: 1024px) {
+  body:has(.quote-aside .alt-wa) .ft-wa { display: none; }
+  body:has(.quote-aside .alt-wa) .ft-wa-txt { display: inline-flex; }
+}
 .footer .ft-strong { font-size: 1.125rem; font-weight: 600; }
-.ft-legal { margin-top: var(--space-7); padding-top: var(--space-5); border-top: 1px solid var(--line-on-ink); font-size: .875rem; }
+.ft-legal { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--space-2); margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--line-on-ink); font-size: .875rem; }
+.ft-sep { display: none; } /* no telemóvel as duas ligações ficam uma por linha */
+@media (min-width: 641px) { .ft-sep { display: inline; } }
 .ft-legal a { color: var(--red-on-ink); }
 
 /* ── consentimento ── */
@@ -271,9 +285,9 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
 
 /* ── página de serviço ── */
 .crumbs { padding-top: calc(var(--nav-h) + var(--space-5)); font-size: .875rem; color: var(--slate); }
-.crumbs ol { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.crumbs ol { list-style: none; display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--space-2); margin-block: -11px; } /* margem negativa: o alvo de 44px não empurra o hero */
 .crumbs li + li::before { content: '/'; margin-right: var(--space-2); color: var(--line-strong); }
-.crumbs a { color: var(--slate); }
+.crumbs a { display: inline-flex; align-items: center; min-height: 44px; color: var(--slate); }
 .page-hero { padding: var(--space-5) 0 var(--space-7); }
 .page-hero .hero-grid { gap: var(--space-6); }
 .page-hero h1 { margin-top: var(--space-4); }
@@ -299,6 +313,8 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
 @media (min-width: 1024px) { .ms-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: var(--space-8); } }
 .ms-diagram { background: var(--field); border: 1px solid var(--sand); border-radius: var(--r-l); padding: var(--space-5); }
 .ms-diagram svg { width: 100%; height: auto; }
+/* esquemas em SVG: o texto encolhe com o desenho; no telemóvel as etiquetas sobem para ficarem com pelo menos 12px a 360px de largura */
+@media (max-width: 640px) { .dg text { font-size: 24px; } }
 .related { display: grid; gap: var(--space-3); }
 @media (min-width: 768px) { .related { grid-template-columns: repeat(2, 1fr); } }
 .related a { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); min-height: 64px; padding: 0 var(--space-5); background: var(--field); border: 1px solid var(--sand); border-radius: var(--r-m); font-weight: 600; text-decoration: none; }

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Constrói o site v3 (stdlib apenas): python3 build.py  ->  dist/
-src/mdm-site-v3.0.html  -> dist/index.html (CSS e JS inline: a home é um ficheiro autónomo)
-src/<serviço>.html      -> dist/<serviço>/index.html (partilham dist/assets/v3.css)
+src/mdm-site-v3.0.html  -> dist/index.html
+src/<serviço>.html      -> dist/<serviço>/index.html
+Todas as páginas levam o CSS (v3.css minificado) inline: sem pedido que bloqueie a primeira pintura.
 """
 import json, re, shutil, html, sys
 sys.path.insert(0, str(__import__('pathlib').Path(__file__).parent))
@@ -13,6 +14,10 @@ SITE = 'https://www.mdmassist.com.pt/'
 GBP = 'https://maps.app.goo.gl/1NTJtEvzcYW6Cra18'
 # seta das ligações "→": a Geist não tem o glifo U+2192, por isso vai como ícone SVG (traço, currentColor)
 ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg>'
+# sizes das fotografias do hero: no telemóvel e no tablet a foto ocupa a largura da .wrap (margens de 20px e, a partir de 641px, 40px).
+# O preload tem de usar exatamente a mesma string que o <picture>, senão o browser não reaproveita o ficheiro pré-carregado.
+MOB_SIZES = '(min-width: 641px) calc(100vw - 80px), calc(100vw - 40px)'
+HERO_SIZES = '(min-width: 1024px) 520px, ' + MOB_SIZES  # hero com foto ao lado do texto (páginas de serviço)
 WJ = '\u2060'  # word joiner de "ar-água" (services.py): só no texto visível, nunca em JSON-LD nem llms.txt
 
 FAQ = {
@@ -60,8 +65,18 @@ SCHEMA = {
    faq_ld('ac'), ORG]},
 }
 
+def minify_css(s):
+    """Tira comentários e espaços que não contam. Mantém os espaços dentro de calc() e entre seletores (combinador descendente)."""
+    s = re.sub(r'/\*.*?\*/', '', s, flags=re.S)
+    s = re.sub(r'\s+', ' ', s)
+    s = re.sub(r'\s*([{};,>])\s*', r'\1', s)
+    s = re.sub(r'\s*:\s*', ':', s)  # não há seletores "a :hover" (descendente seguido de pseudo-classe) no CSS do site
+    return s.replace(';}', '}').strip()
+CSS = minify_css((S / 'v3.css').read_text(encoding='utf-8'))
+
 def pic(spec, root):
     name, alt, sizes, load = spec.split('|')
+    if sizes == 'hero': sizes = HERO_SIZES
     ws = MAN[name]['w']; w0, h0 = ws[-1] if load == 'eager' else ws[min(1, len(ws) - 1)]
     ss = lambda ext: ', '.join(f'{root}img/{name}-{w}.{ext} {w}w' for w, h in ws)
     extra = ' fetchpriority="high"' if load == 'eager' else ' loading="lazy"'
@@ -73,33 +88,34 @@ def picad(spec, root):
     ss = lambda n, ext: ', '.join(f'{root}img/{n}-{w}.{ext} {w}w' for w, h in MAN[n]['w'])
     w0, h0 = MAN[mob]['w'][-1]
     srcs = ''.join(f'<source media="(min-width: 1024px)" type="image/{t}" srcset="{ss(desk, e)}" sizes="480px">' for t, e in [('avif','avif'),('webp','webp')])
-    srcs += ''.join(f'<source type="image/{t}" srcset="{ss(mob, e)}" sizes="100vw">' for t, e in [('avif','avif'),('webp','webp')])
-    return f'<picture>{srcs}<img src="{root}img/{mob}-{MAN[mob]["w"][0][0]}.jpg" srcset="{ss(mob, "jpg")}" sizes="100vw" width="{w0}" height="{h0}" alt="{html.escape(alt)}" decoding="async" fetchpriority="high"></picture>'
+    srcs += ''.join(f'<source type="image/{t}" srcset="{ss(mob, e)}" sizes="{MOB_SIZES}">' for t, e in [('avif','avif'),('webp','webp')])
+    return f'<picture>{srcs}<img src="{root}img/{mob}-{MAN[mob]["w"][0][0]}.jpg" srcset="{ss(mob, "jpg")}" sizes="{MOB_SIZES}" width="{w0}" height="{h0}" alt="{html.escape(alt)}" decoding="async" fetchpriority="high"></picture>'
 def preloadad(spec, root):
     desk, mob = spec.split('|')
     ss = lambda n: ', '.join(f'{root}img/{n}-{w}.avif {w}w' for w, h in MAN[n]['w'])
     return (f'<link rel="preload" as="image" type="image/avif" media="(min-width: 1024px)" imagesrcset="{ss(desk)}" imagesizes="480px" fetchpriority="high">'
-            f'<link rel="preload" as="image" type="image/avif" media="(max-width: 1023px)" imagesrcset="{ss(mob)}" imagesizes="100vw" fetchpriority="high">')
+            f'<link rel="preload" as="image" type="image/avif" media="(max-width: 1023px)" imagesrcset="{ss(mob)}" imagesizes="{MOB_SIZES}" fetchpriority="high">')
 def preload(name, root):
     ws = MAN[name]['w']
-    return f'<link rel="preload" as="image" type="image/avif" imagesrcset="{", ".join(f"{root}img/{name}-{w}.avif {w}w" for w, h in ws)}" imagesizes="(min-width: 1024px) 560px, 100vw" fetchpriority="high">'
+    return f'<link rel="preload" as="image" type="image/avif" imagesrcset="{", ".join(f"{root}img/{name}-{w}.avif {w}w" for w, h in ws)}" imagesizes="{HERO_SIZES}" fetchpriority="high">'
 
-def render(src, root, page, inline_css, text=None):
+def render(src, root, page, text=None):
     t = text if text is not None else (S / src).read_text(encoding='utf-8')
     for _ in range(3):
         t = re.sub(r'\{\{include:([^}]+)\}\}', lambda m: (P / m.group(1)).read_text(encoding='utf-8').strip(), t)
-    css = (S / 'v3.css').read_text(encoding='utf-8')
-    t = t.replace('{{css}}', css if inline_css else '')
+    t = t.replace('{{css}}', CSS)
     t = re.sub(r'\{\{picad:([^}]+)\}\}', lambda m: picad(m.group(1), root), t)
     t = re.sub(r'\{\{preloadad:([^}]+)\}\}', lambda m: preloadad(m.group(1), root), t)
     t = re.sub(r'\{\{pic:([^}]+)\}\}', lambda m: pic(m.group(1), root), t)
     t = re.sub(r'\{\{preload:([^}]+)\}\}', lambda m: preload(m.group(1), root), t)
     t = re.sub(r'\{\{faq:([\w-]+)\}\}', lambda m: faq_html(m.group(1)), t)
     t = re.sub(r'\{\{schema:([\w-]+)\}\}', lambda m: json.dumps(SCHEMA[m.group(1)], ensure_ascii=False).replace(WJ, ''), t)
+    t = t.replace('{{n_fotos}}', str(t.count('<figure class="project">')))  # obras: o número no texto segue a galeria
     t = t.replace('{{page}}', page).replace('{{root}}', root)
     t = t.replace('<span aria-hidden="true">→</span>', f'<span class="arr" aria-hidden="true">{ARROW}</span>')
     if 'id="orcamento"' not in t:  # página sem formulário (404, obrigado): "Pedir orçamento" leva ao formulário da home
         t = t.replace('href="#orcamento"', f'href="{root}#orcamento"')
+    t = re.sub(r'<style>(.*?)</style>', lambda m: '<style>' + minify_css(m.group(1)) + '</style>', t, flags=re.S)  # também o CSS próprio de uma página
     assert '{{' not in t, re.findall(r'\{\{[^}]+\}\}', t)[:3]
     return t
 
@@ -114,7 +130,7 @@ def service_page(slug, d):
         faq_ld(slug), ORG]}
     h = d['hero']
     if h[0] == 'pic':
-        hero = f'{{{{pic:{h[1]}|{h[2]}|(min-width: 1024px) 520px, 100vw|eager}}}}\n      <figcaption>{esc(h[3])}</figcaption>'; preload = f'{{{{preload:{h[1]}}}}}'
+        hero = f'{{{{pic:{h[1]}|{h[2]}|hero|eager}}}}\n      <figcaption>{esc(h[3])}</figcaption>'; preload = f'{{{{preload:{h[1]}}}}}'
     else:
         hero = f'{{{{include:{h[1]}}}}}'; preload = ''
     types = '\n'.join(f'      <div class="type"><h3>{esc(a)}</h3><p>{esc(b)}</p></div>' for a, b in d['types'])
@@ -143,25 +159,24 @@ def service_page(slug, d):
                  'NAV': esc(d['nav']), 'EYEBROW': esc(d['eyebrow']), 'H1': esc(d['h1']), 'LEAD': esc(d['lead']), 'HERO': hero, 'TYPES_TITLE': esc(d['types_title']), 'TYPES': types,
                  'FEATURE': feat, 'INCLUDED': inc, 'INCLUDED_TITLE': esc(d.get('included_title', 'Do primeiro contacto à manutenção.')), 'GALLERY': gal, 'FAQ': slug, 'FORM_TITLE': esc(d['form_title']), 'FORM_LEAD': esc(d['form_lead']), 'RELATED': rel}.items():
         t = t.replace('%' + k + '%', v)
-    return render(None, '../', d['page'], False, text=t)
+    return render(None, '../', d['page'], text=t)
 
 def main():
     if D.exists(): shutil.rmtree(D)
-    (D / 'assets').mkdir(parents=True)
+    D.mkdir()
     shutil.copytree(B / 'img', D / 'img', ignore=shutil.ignore_patterns('manifest.json'))
     shutil.copytree(B / 'fonts', D / 'fonts')
-    (D / 'assets' / 'v3.css').write_text((S / 'v3.css').read_text(encoding='utf-8').replace('{{root}}', '../'), encoding='utf-8')
-    (D / 'index.html').write_text(render('mdm-site-v3.0.html', '', 'home', True), encoding='utf-8')
+    (D / 'index.html').write_text(render('mdm-site-v3.0.html', '', 'home'), encoding='utf-8')
     (D / 'ar-condicionado-lisboa').mkdir()
-    (D / 'ar-condicionado-lisboa' / 'index.html').write_text(render('ar-condicionado-lisboa.html', '../', 'ar-condicionado', False), encoding='utf-8')
+    (D / 'ar-condicionado-lisboa' / 'index.html').write_text(render('ar-condicionado-lisboa.html', '../', 'ar-condicionado'), encoding='utf-8')
     for slug, d in SERVICES.items():
         (D / slug).mkdir(); (D / slug / 'index.html').write_text(service_page(slug, d), encoding='utf-8')
     SCHEMA['obras'] = {'@context': 'https://schema.org', '@graph': [{'@type': 'CollectionPage', 'name': 'Obras da MDM em Lisboa', 'url': SITE + 'obras/', 'about': {'@id': SITE + '#mdm'}}, {'@type': 'BreadcrumbList', 'itemListElement': [{'@type': 'ListItem', 'position': 1, 'name': 'Início', 'item': SITE}, {'@type': 'ListItem', 'position': 2, 'name': 'Obras', 'item': SITE + 'obras/'}]}, ORG]}
-    (D / 'obras').mkdir(); (D / 'obras' / 'index.html').write_text(render('obras.html', '../', 'obras', False), encoding='utf-8')
+    (D / 'obras').mkdir(); (D / 'obras' / 'index.html').write_text(render('obras.html', '../', 'obras'), encoding='utf-8')
     for sub, src in [('obrigado', 'obrigado.html')]:
-        (D / sub).mkdir(); (D / sub / 'index.html').write_text(render(src, '../', sub, False), encoding='utf-8')
-    (D / '404.html').write_text(render('404.html', '/', '404', False).replace('href="/assets', 'href="/assets'), encoding='utf-8')
-    (D / 'privacidade').mkdir(); (D / 'privacidade' / 'index.html').write_text(render('privacidade.html', '../', 'privacidade', False), encoding='utf-8')
+        (D / sub).mkdir(); (D / sub / 'index.html').write_text(render(src, '../', sub), encoding='utf-8')
+    (D / '404.html').write_text(render('404.html', '/', '404'), encoding='utf-8')
+    (D / 'privacidade').mkdir(); (D / 'privacidade' / 'index.html').write_text(render('privacidade.html', '../', 'privacidade'), encoding='utf-8')
     shutil.copy(P / 'logo.svg', D / 'favicon.svg'); shutil.copy(B.parent / 'favicon' / 'logo-180.png', D / 'apple-touch-icon.png')
     (D / 'robots.txt').write_text('# Pré-visualização: não indexar. No lançamento: Allow e Sitemap.\nUser-agent: *\nDisallow: /\n')
     (D / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + ''.join(f'  <url><loc>{SITE}{p}</loc></url>\n' for p in ['', 'ar-condicionado-lisboa/'] + [k + '/' for k in SERVICES] + ['obras/']) + '</urlset>\n')  # privacidade/ fica de fora: é noindex

@@ -1,5 +1,6 @@
 """Conteúdo das páginas de serviço geradas a partir de src/_servico.html (PT-PT, sem travessões, sem promessas de prazo).
-Só factos confirmados pelo dono (AUDIT.md §0, STRATEGY.md §6). Marcas: MIDEA, Mitsubishi Electric, Daikin, France Air.
+Só factos confirmados pelo dono (AUDIT.md §0, STRATEGY.md §6).
+Bombas de calor: só águas quentes até o dono confirmar por escrito se também faz aquecimento (radiadores, piso radiante) e sistemas mistos (CONTENT-NEEDED 3.6). Marcas: MIDEA, Mitsubishi Electric, Daikin, France Air.
 No texto visível, "ar-\u2060água" leva um word joiner (U+2060, invisível) depois do hífen para o título não partir em "ar-" / "água".
 A Geist não tem o hífen inseparável U+2011 (o browser iria buscá-lo a outra fonte). Em title, desc, service_type, offers e alt fica o hífen simples."""
 
@@ -7,14 +8,14 @@ SERVICES = {
  'bombas-de-calor-lisboa': dict(
   nav='Bombas de calor', servico='Bomba de calor', page='bombas-de-calor',
   title='Bombas de calor ar-água em Lisboa | MDM',
-  desc='Instalação e manutenção de bombas de calor ar-água para águas quentes e aquecimento em Lisboa. Técnicos certificados F-gas e eletricistas da casa.',
+  desc='Instalação e manutenção de bombas de calor ar-água para águas quentes em Lisboa. Técnicos certificados F-gas e eletricistas da casa.',
   eyebrow='Bombas de calor · Lisboa', h1='Bombas de calor ar-\u2060água em Lisboa',
-  lead='Águas quentes e aquecimento para casas e pequenos negócios, com a instalação, a ligação ao quadro e a manutenção feitas pela mesma equipa desde 1991.',
+  lead='Águas quentes para casas e pequenos negócios, com a instalação, a ligação ao quadro e a manutenção feitas pela mesma equipa desde 1991.',
   hero=('pic', 'bomba-moradia', 'Bomba de calor ar-água instalada pela MDM numa moradia', 'Bomba de calor ar-\u2060água · moradia'),
-  types_title='Para que serve uma bomba de calor ar-\u2060água.',
+  types_title='Bombas de calor ar-\u2060água, da escolha ao quadro elétrico.',
   types=[('Águas quentes', 'Aquece a água da casa de banho e da cozinha a partir do ar exterior, com um depósito próprio.'),
-         ('Aquecimento', 'Aquece a casa através de radiadores ou piso radiante, conforme o que já existe e o que faz sentido manter.'),
-         ('Tudo num só sistema', 'Águas quentes e aquecimento com o mesmo equipamento, quando a casa e o uso o justificam.')],
+         ('Moradias e apartamentos', 'No jardim, num terraço ou numa varanda: vemos consigo onde ficam melhor a unidade exterior e o depósito.'),
+         ('Ligação ao quadro', 'O circuito próprio e a proteção no quadro elétrico ficam feitos pelo nosso eletricista, na mesma obra.')],
   feature=dict(id='parte-eletrica', eyebrow='A parte elétrica', title='A parte que outros subcontratam, nós fazemos.',
    body=['Uma bomba de calor precisa muitas vezes de um circuito próprio e de proteção no quadro elétrico. Se o quadro for antigo, pode ser preciso adaptá-lo antes da instalação.',
          'Como temos eletricista certificado na equipa, a avaliação do quadro faz parte da visita técnica e a ligação é feita na mesma obra. Não fica à espera de um segundo profissional.'],
@@ -26,15 +27,13 @@ SERVICES = {
             ('Arranque e explicação', 'Deixamos o sistema a funcionar e explicamos as regulações.'),
             ('Manutenção', 'Revisões pela mesma equipa, pontuais ou com contrato anual.')],
   gallery=[('bomba-varanda-deposito', 'Bomba de calor com depósito de água quente numa varanda', 'Bomba de calor e depósito', 'Varanda de apartamento'),
-           ('hero-bomba-moradia-m', 'Bomba de calor ar-água no jardim de uma moradia', 'Bomba de calor ar-\u2060água', 'Jardim de moradia'),
            ('midea-cobertura', 'Unidade exterior Midea numa cobertura', 'Unidade exterior Midea', 'Cobertura')],
-  faq=[('Qual é a diferença entre uma bomba de calor ar-\u2060água e um ar condicionado?', 'O ar condicionado aquece ou arrefece o ar da divisão. A bomba de calor ar-\u2060água aquece água: a das torneiras e, se quiser, a dos radiadores ou do piso radiante.'),
+  faq=[('Qual é a diferença entre uma bomba de calor ar-\u2060água e um ar condicionado?', 'O ar condicionado aquece ou arrefece o ar da divisão. A bomba de calor ar-\u2060água aquece água, como a das torneiras, e guarda-a num depósito.'),
        ('A bomba de calor precisa de obras elétricas?', 'Muitas vezes precisa de um circuito próprio no quadro. Como temos eletricista certificado na equipa, tratamos disso na mesma obra.'),
-       ('Posso aproveitar os radiadores que já tenho?', 'Depende dos radiadores e da temperatura de água de que precisam. Avaliamos isso na visita técnica, antes do orçamento.'),
        ('A bomba de calor precisa de manutenção?', 'Sim. Uma revisão periódica mantém o rendimento e a garantia do equipamento. A mesma equipa que instala faz a manutenção.')],
   form_title='Peça o orçamento da sua bomba de calor.',
   form_lead='Sem compromisso. Fotografias do espaço técnico e do quadro elétrico ajudam-nos a preparar a visita.',
-  service_type='Instalação de bombas de calor ar-água', offers=['Bomba de calor para águas quentes', 'Bomba de calor para aquecimento', 'Manutenção de bombas de calor'],
+  service_type='Instalação de bombas de calor ar-água', offers=['Bomba de calor para águas quentes', 'Manutenção de bombas de calor'],
   related=['ar-condicionado-lisboa', 'instalacoes-eletricas-lisboa', 'manutencao-assistencia-avac-lisboa']),
 
  'manutencao-assistencia-avac-lisboa': dict(
@@ -106,7 +105,7 @@ SERVICES = {
   desc='Instalação e manutenção de ventilação e extração para casas, cozinhas, lojas e restaurantes em Lisboa. Condutas, grupos de extração e revisões.',
   eyebrow='Ventilação · Lisboa', h1='Ventilação e extração em Lisboa',
   lead='Extração e renovação de ar para casas, cozinhas, lojas e restaurantes. Condutas, grupos de extração e revisões, pela nossa própria equipa desde 1991.',
-  hero=('pic', 'ventilacao-ventilbox', 'Técnico da MDM a montar um grupo de extração com condutas', 'Montagem de grupo de extração com condutas'),
+  hero=('pic', 'ventilacao-fachada', 'Condutas de ventilação montadas pela MDM na fachada de um edifício', 'Condutas de ventilação · fachada de edifício'),
   types_title='Ventilação à medida do espaço.',
   types=[('Casas', 'Extração em cozinhas e casas de banho, para tirar humidade e cheiros.'),
          ('Lojas e restaurantes', 'Extração de cozinhas e renovação de ar em espaços com público.'),
@@ -116,8 +115,7 @@ SERVICES = {
             ('Montagem completa', 'Condutas, grupos de extração, grelhas e ligação elétrica.'),
             ('Eletricista na equipa', 'A alimentação e o comando dos ventiladores ficam feitos na mesma obra.'),
             ('Manutenção', 'Limpeza e revisão de ventiladores e filtros, pontual ou com contrato.')],
-  gallery=[('ventilacao-fachada', 'Condutas de ventilação montadas na fachada de um edifício', 'Condutas de ventilação', 'Fachada de edifício'),
-           ('conduta-teto', 'Conduta e grelha montadas num teto falso', 'Conduta e grelha', 'Teto falso'),
+  gallery=[('conduta-teto', 'Conduta e grelha montadas num teto falso', 'Conduta e grelha', 'Teto falso'),
            ('ventilacao-cobertura', 'Unidade de ventilação e condutas instaladas numa cobertura em Lisboa', 'Ventilação e condutas', 'Cobertura, Lisboa')],
   faq=[('Fazem extração para cozinhas de restaurantes?', 'Sim. Instalamos e mantemos extração em cozinhas de restaurantes e noutros espaços comerciais.'),
        ('A ventilação precisa de manutenção?', 'Sim. Ventiladores e filtros acumulam sujidade e perdem rendimento. Fazemos a limpeza e a revisão, pontualmente ou com contrato.'),

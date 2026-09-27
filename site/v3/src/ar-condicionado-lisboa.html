@@ -20,7 +20,7 @@
 <link rel="apple-touch-icon" href="{{root}}apple-touch-icon.png">
 <link rel="preload" href="{{root}}fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
 {{preload:split-cozinha}}
-<link rel="stylesheet" href="{{root}}assets/v3.css">
+<style>{{css}}</style>
 {{include:head-scripts.html}}
 <script type="application/ld+json">{{schema:ac}}</script>
 </head>
@@ -42,7 +42,7 @@
       </div>
     </div>
     <figure class="hero-photo">
-      {{pic:split-cozinha|Split mural instalado pela MDM numa cozinha de apartamento|(min-width: 1024px) 520px, 100vw|eager}}
+      {{pic:split-cozinha|Split mural instalado pela MDM numa cozinha de apartamento|hero|eager}}
       <figcaption>Split mural · cozinha de apartamento</figcaption>
     </figure>
   </div>
@@ -120,7 +120,7 @@
       <p class="lead">Sem compromisso. Uma fotografia da divisão e da fachada ajuda-nos a preparar a visita.</p>
       <div class="alt">
         <a href="tel:+351218935050" data-ch="call">218 935 050<small>2ª a 6ª, 8h às 17h</small></a>
-        <a href="https://wa.me/351910307579" target="_blank" rel="noopener" data-ch="whatsapp">WhatsApp 910 307 579<small>Pode enviar fotografias do local</small></a>
+        <a class="alt-wa" href="https://wa.me/351910307579" target="_blank" rel="noopener" data-ch="whatsapp">WhatsApp 910 307 579<small>Pode enviar fotografias do local</small></a>
       </div>
     </div>
     <div>

@@ -11,7 +11,7 @@
 <link rel="icon" href="{{root}}favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="{{root}}apple-touch-icon.png">
 <link rel="preload" href="{{root}}fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="{{root}}assets/v3.css">
+<style>{{css}}</style>
 <style>
   /* política de privacidade: só esta página (v3.css fica intacto) */
   .pv-hero { padding: var(--s5) 0 var(--s7); }
@@ -26,7 +26,7 @@
   .pv-doc { grid-area: doc; }
   .pv-toc > p { font-size: .875rem; font-weight: 600; color: var(--slate); margin-bottom: var(--s2); }
   .pv-toc ol { list-style: none; border-left: 1px solid var(--sand); font-size: .9375rem; line-height: 1.45; }
-  .pv-toc a { display: block; margin-left: -1px; padding: 6px 0 6px var(--s4); border-left: 2px solid transparent; color: var(--slate); text-decoration: none; }
+  .pv-toc a { display: block; margin-left: -1px; padding: 12px 0 12px var(--s4); /* 44px de alvo de toque */ border-left: 2px solid transparent; color: var(--slate); text-decoration: none; }
   .pv-toc a:hover { color: var(--ink); border-left-color: var(--red); }
   .pv-doc h2 { margin: var(--s7) 0 var(--s4); }
   .pv-doc > h2:first-child { margin-top: 0; }

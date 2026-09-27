@@ -4,14 +4,14 @@ Fonte: `src/` · construção: `python3 build.py` (só biblioteca-padrão) · sa
 
 | Fonte | Saída | Nota |
 |---|---|---|
-| `src/mdm-site-v3.0.html` | `dist/index.html` | Home: CSS e JS inline (ficheiro autónomo); imagens em `img/` |
-| `src/ar-condicionado-lisboa.html` | `dist/ar-condicionado-lisboa/index.html` | 1.ª página de serviço; usa `assets/v3.css` |
+| `src/mdm-site-v3.0.html` | `dist/index.html` | Home; imagens em `img/` |
+| `src/ar-condicionado-lisboa.html` | `dist/ar-condicionado-lisboa/index.html` | 1.ª página de serviço |
 | `src/_servico.html` + `services.py` | `dist/<slug>/index.html` | Bombas de calor, manutenção e assistência, instalações elétricas, ventilação (conteúdo em `services.py`) |
 | `src/obrigado.html`, `src/404.html` | `dist/obrigado/`, `dist/404.html` | Sucesso sem JS e página de erro |
 | `src/privacidade.html` | `dist/privacidade/` | Política de privacidade v3 (noindex; fora do sitemap) |
 | `src/_redirects` | `dist/_redirects` | 301 dos sites antigos (Netlify); lista do site antigo a completar após rastreio |
 | `src/partials/*` | incluídos com `{{include:…}}` | header, gaveta, barra móvel, formulário, rodapé, scripts |
-| `src/v3.css` | inline na home, `dist/assets/v3.css` nas outras | tokens do sistema v3 (DESIGN.md §13) |
+| `src/v3.css` | minificado e inline em todas as páginas (sem CSS que bloqueie a primeira pintura) | tokens do sistema v3 (DESIGN.md §13) |
 | `img/` | `dist/img/` | AVIF/WebP/JPEG com o tratamento da direção fotográfica; `manifest.json` gera os `srcset` |
 
 - A v2.2 (`site/index.html`, `site/deploy/creme/`) não é tocada.
