@@ -1,6 +1,6 @@
 # MDM website — Phase 1 audit
 
-27/09/2026 · baseline: `site/index.html` at commit `4340be4` (the owner's "v2.2"; see §0) · status: **awaiting approval**
+27/09/2026 · baseline: `site/index.html` at commit `4340be4` (the owner's "v2.2"; see §0) · status: **decisions recorded 27/09; awaiting Phase 1 approval**
 
 Scoring: **Impact** 1–5 (effect on qualified quote requests, calls, rankings or trust) × **Effort** 1–5 (1 = under an hour).
 **Priority = Impact × (6 − Effort)**, max 25. Detailed evidence (screenshots, JSON, Lighthouse reports) is in the session scratchpad `audit/` folder; each finding below cites the key measurement.
@@ -20,6 +20,22 @@ Scoring: **Impact** 1–5 (effect on qualified quote requests, calls, rankings o
 | "Do NOT reintroduce supplier references" | The FAQ still lists 6 brands (text only); JSON-LD `brand` lists 3 (one, Daikin, is not on the page). | Keep brands as FAQ text, or remove all? |
 | GBP as source of truth for NAP, hours, photos | GBP not found by search; Google Maps is unreachable from this environment. | Send the GBP share link + fields in CONTENT-NEEDED.md §1. |
 | No own domain yet | **An old MDM site is live and indexed at `www.mdmassist.com.pt`** ("MDM-Assist \| Ar condicionado \| Lisboa"). It is the only MDM site search engines return. | Which domain will the new site use; can .com.pt be 301-redirected? |
+
+### Owner decisions (27/09/2026, answers to the §0 questions)
+
+| Topic | Decision |
+|---|---|
+| Audience | **Homeowners and small businesses** in Lisboa; banca, indústria and condomínios stay as secondary proof |
+| Domain | **mdmassist.com.pt**: the new site replaces the old one there, with 301 redirects for old URLs |
+| Hosting / form | **New Netlify project** for previews (noindex until launch) and **Netlify Forms** for the quote form |
+| Sticky mobile bar | **Bring it back**: Ligar · Pedir orçamento · WhatsApp (the single WhatsApp entry on screen) |
+| Legal name | **M.D.M. - Manuel Domingos Melancia, Lda** ("Domingues" in the brief was a typo) |
+| Claims kept | APIRAC · IMPIC, certified electrician, F-gas certified (numbers still to be supplied) |
+| Claims removed | Any response-time promise ("24h", "24–48h", "menos de 24 horas úteis", "3 minutos"). Success message: no time commitment |
+| Brands | Text only, exactly: **MIDEA, Mitsubishi Electric, Daikin, France Air** (LG, Vulcano, Hitachi removed) |
+| Services | Confirmed: heat pumps (ar-água), multi-split, maintenance contracts, plus the existing AC, electrical, ventilation. **No gas** |
+| Obras photos | Photos **#1** (gas charge on outdoor unit) and **#10** (row of outdoor units) are **not MDM work: remove**. #2–#9 are real |
+| Google Business Profile | Share link: https://maps.app.goo.gl/1NTJtEvzcYW6Cra18 (not reachable from this environment; rating, reviews and exact NAP still to be copied from it) |
 
 ---
 
