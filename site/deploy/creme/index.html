@@ -310,71 +310,67 @@
   }
   h2 em { font-style: italic; color: var(--red); }
 
-  /* ── services: lista tipográfica ──
+  /* ── services: lista tipográfica com fotografia ──
      Estrutura da variante carmim (linhas com filete, nome grande, canal à direita),
-     tipografia creme (Lora + Inter + JetBrains Mono). A fotografia real fica
-     escondida e abre ao clicar na linha; só o rótulo do canal é link. */
+     tipografia creme. A fotografia real está sempre visível (é a prova de trabalho)
+     e a linha inteira é o link de contacto; o rótulo do canal é o apelo à ação. */
   #servicos { padding-top: clamp(48px, 6vw, 72px); padding-bottom: clamp(56px, 7vw, 84px); }
   .svc-row { display: grid; border-bottom: 1px solid var(--sand); }
   .svc {
     display: grid; align-items: center;
-    grid-template-columns: minmax(0, 1fr) 260px 210px;
+    grid-template-columns: 200px minmax(0, 1fr) 240px 210px;
     column-gap: clamp(18px, 2.4vw, 32px);
-    padding: 18px 0; border-top: 1px solid var(--sand); cursor: pointer;
+    padding: 20px 0; border-top: 1px solid var(--sand);
+    color: inherit; text-decoration: none;
     transition: opacity 1s var(--ease), transform .6s var(--ease);
   }
-  .svc-t { margin: 0; }
-  .svc-tog {
-    all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 16px;
-    font-family: var(--serif); font-weight: 500;
-    font-size: clamp(32px, 4.2vw, 54px); line-height: 1.04; letter-spacing: -1.4px;
+  .svc-img {
+    display: block; width: 200px; height: 136px; object-fit: cover;
+    border-radius: var(--r-m); transition: transform .5s var(--ease);
+  }
+  .svc h3 {
+    font-family: var(--serif); font-weight: 500; margin: 0;
+    font-size: clamp(32px, 3.9vw, 50px); line-height: 1.04; letter-spacing: -1.3px;
     color: var(--ink); transition: color .25s;
   }
-  .svc-tog:focus-visible { outline: 3px solid var(--red); outline-offset: 4px; border-radius: var(--r-s); }
-  /* + que roda para ×, como nas perguntas frequentes */
-  .svc-plus { position: relative; flex: none; width: 16px; height: 16px; transition: transform .3s var(--ease); }
-  .svc-plus::before, .svc-plus::after { content: ''; position: absolute; left: 0; top: 7px; width: 16px; height: 2px; background: var(--red); }
-  .svc-plus::after { transform: rotate(90deg); }
-  .svc.is-open .svc-plus { transform: rotate(45deg); }
   .svc-sub { font-size: 15px; line-height: 1.5; color: var(--slate); }
   .svc-go {
-    justify-self: end; white-space: nowrap; text-decoration: none;
+    justify-self: end; white-space: nowrap;
     display: inline-flex; align-items: center; gap: 8px;
-    font-family: var(--mono); font-size: 11.5px; font-weight: 500;
-    letter-spacing: 0.8px; text-transform: uppercase; color: var(--slate);
+    padding-bottom: 3px; border-bottom: 1.5px solid currentColor;
+    font-family: var(--mono); font-size: 11.5px; font-weight: 600;
+    letter-spacing: 0.8px; text-transform: uppercase; color: var(--red-dk);
     transition: color .25s;
   }
-  .svc-go span { color: var(--red); font-family: var(--sans); font-size: 15px; letter-spacing: 0; transition: transform .25s var(--ease); }
-  .svc-go:hover, .svc-go:focus-visible { color: var(--ink); }
-  .svc-go:hover span, .svc-go:focus-visible span { transform: translateX(4px); }
-  .svc:hover .svc-tog, .svc.is-open .svc-tog { color: var(--red); }
-  /* fotografia: fechada por omissão, abre em altura (0fr → 1fr) */
-  .svc-foto { grid-column: 1 / -1; display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s var(--ease); }
-  .svc-foto > div { overflow: hidden; min-height: 0; }
-  .svc.is-open .svc-foto { grid-template-rows: 1fr; }
-  .svc-img {
-    display: block; margin-top: 18px;
-    width: min(100%, 560px); height: clamp(220px, 30vw, 380px);
-    object-fit: cover; border-radius: var(--r-m);
-  }
-  @media (prefers-reduced-motion: reduce) { .svc-foto, .svc-plus { transition: none; } }
+  .svc-go span { font-family: var(--sans); font-size: 15px; letter-spacing: 0; transition: transform .25s var(--ease); }
+  .svc:hover h3, .svc:focus-visible h3 { color: var(--red); }
+  .svc:hover .svc-go, .svc:focus-visible .svc-go { color: var(--red); }
+  .svc:hover .svc-go span, .svc:focus-visible .svc-go span { transform: translateX(4px); }
+  .svc:hover .svc-img { transform: scale(1.03); }
   @media (max-width: 1040px) {
-    .svc { grid-template-columns: minmax(0, 1fr) 200px; row-gap: 4px; }
-    .svc-t { grid-column: 1; grid-row: 1; }
-    .svc-go { grid-column: 2; grid-row: 1; }
-    .svc-sub { grid-column: 1 / -1; grid-row: 2; }
+    .svc { grid-template-columns: 150px minmax(0, 1fr) auto; row-gap: 6px; }
+    .svc-img { width: 150px; height: 104px; grid-row: 1 / 3; }
+    .svc h3 { grid-column: 2; grid-row: 1; align-self: end; }
+    .svc-sub { grid-column: 2; grid-row: 2; align-self: start; }
+    .svc-go { grid-column: 3; grid-row: 1 / 3; }
+  }
+  @media (max-width: 760px) {
+    .svc { grid-template-columns: 150px minmax(0, 1fr); }
+    .svc-img { grid-row: 1 / 4; align-self: start; }
+    .svc-go { grid-column: 2; grid-row: 3; justify-self: start; margin-top: 4px; }
   }
   @media (max-width: 640px) {
-    .svc { grid-template-columns: minmax(0, 1fr); padding: 16px 0; }
-    .svc-tog { font-size: 30px; letter-spacing: -0.8px; gap: 12px; }
-    .svc-sub { grid-column: 1; grid-row: 2; font-size: 14px; }
-    .svc-go { grid-column: 1; grid-row: 3; justify-self: start; margin-top: 4px; }
-    .svc-img { width: 100%; height: 240px; margin-top: 14px; }
+    .svc { grid-template-columns: minmax(0, 1fr); padding: 20px 0 22px; row-gap: 4px; }
+    .svc-img { width: 100%; height: 200px; grid-row: 1; margin-bottom: 12px; }
+    .svc h3 { grid-column: 1; grid-row: 2; font-size: 30px; letter-spacing: -0.8px; }
+    .svc-sub { grid-column: 1; grid-row: 3; font-size: 14px; }
+    .svc-go { grid-column: 1; grid-row: 4; justify-self: start; margin-top: 8px; }
   }
   @media (max-width: 400px) {
-    .svc-tog { font-size: 26px; }
+    .svc h3 { font-size: 26px; }
     .svc-go { white-space: normal; }
   }
+  @media (prefers-reduced-motion: reduce) { .svc-img, .svc-go span { transition: none; } }
 
   /* ── process: numbered timeline ── */
   #processo { padding-top: 60px; }
@@ -1108,33 +1104,33 @@
     <h2>Quatro especialidades,<br>uma resposta <em>integrada.</em></h2>
   </div>
   <div class="svc-row">
-    <div class="svc svc--acd" data-r>
-      <h3 class="svc-t"><button type="button" class="svc-tog" aria-expanded="false" aria-controls="svc-foto-1">Ar Condicionado<span class="svc-plus" aria-hidden="true"></span></button></h3>
+    <a class="svc svc--acd" data-r href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM.%20Quero%20or%C3%A7amento%20para%20instalar%20ar%20condicionado.%20Envio%20j%C3%A1%20fotografias%20do%20local.%20%E2%80%94%20%5BP1%20%C2%B7%20Montagem%20AC%5D" data-lead="montagem" target="_blank" rel="noopener">
+      <img class="svc-img" src="img/6ac315ff9c.webp" alt="Técnico MDM a intervir numa unidade exterior de ar condicionado" width="360" height="480" loading="lazy" decoding="async">
+      <h3>Ar Condicionado</h3>
       <span class="svc-sub">Montagem, avarias e manutenção</span>
-      <a class="svc-go" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM.%20Quero%20or%C3%A7amento%20para%20instalar%20ar%20condicionado.%20Envio%20j%C3%A1%20fotografias%20do%20local.%20%E2%80%94%20%5BP1%20%C2%B7%20Montagem%20AC%5D" data-lead="montagem" target="_blank" rel="noopener">Montagem · envie foto <span aria-hidden="true">→</span></a>
-      <div class="svc-foto" id="svc-foto-1"><div><img class="svc-img" src="img/6ac315ff9c.webp" alt="Técnico MDM a intervir numa unidade exterior de ar condicionado" width="360" height="480" loading="lazy" decoding="async"></div></div>
-    </div>
+      <span class="svc-go">Montagem · envie foto <span aria-hidden="true">→</span></span>
+    </a>
 
-    <div class="svc" data-r>
-      <h3 class="svc-t"><button type="button" class="svc-tog" aria-expanded="false" aria-controls="svc-foto-2">Manutenção<span class="svc-plus" aria-hidden="true"></span></button></h3>
+    <a class="svc" data-r href="mailto:mdmassist@mdmassist.com?subject=%5BP2%20%C2%B7%20Manuten%C3%A7%C3%A3o%20preventiva%5D%20Pedido%20de%20proposta%20%E2%80%94%20contrato%20anual&body=Edif%C3%ADcio%20e%20equipamentos%20a%20incluir%3A%20" data-lead="manut">
+      <img class="svc-img" src="img/fe2136ede4.webp" alt="Equipa MDM em manutenção programada de edifício" width="453" height="480" loading="lazy" decoding="async">
+      <h3>Manutenção</h3>
       <span class="svc-sub">Contratos anuais, com relatório</span>
-      <a class="svc-go" href="mailto:mdmassist@mdmassist.com?subject=%5BP2%20%C2%B7%20Manuten%C3%A7%C3%A3o%20preventiva%5D%20Pedido%20de%20proposta%20%E2%80%94%20contrato%20anual&body=Edif%C3%ADcio%20e%20equipamentos%20a%20incluir%3A%20" data-lead="manut">Manutenção preventiva <span aria-hidden="true">→</span></a>
-      <div class="svc-foto" id="svc-foto-2"><div><img class="svc-img" src="img/fe2136ede4.webp" alt="Equipa MDM em manutenção programada de edifício" width="453" height="480" loading="lazy" decoding="async"></div></div>
-    </div>
+      <span class="svc-go">Manutenção preventiva <span aria-hidden="true">→</span></span>
+    </a>
 
-    <div class="svc" data-r>
-      <h3 class="svc-t"><button type="button" class="svc-tog" aria-expanded="false" aria-controls="svc-foto-3">Eletricidade<span class="svc-plus" aria-hidden="true"></span></button></h3>
+    <a class="svc" data-r href="#orcamento" data-lead="elet" data-preselect="Eletricidade — Quadros e Alimentações AVAC">
+      <img class="svc-img" src="img/1c3f80e9db.webp" alt="Quadro elétrico montado e identificado por técnico da MDM" width="418" height="480" loading="lazy" decoding="async">
+      <h3>Eletricidade</h3>
       <span class="svc-sub">Quadros e alimentações AVAC</span>
-      <a class="svc-go" href="#orcamento" data-lead="elet" data-preselect="Eletricidade — Quadros e Alimentações AVAC">Eletricista certificado <span aria-hidden="true">→</span></a>
-      <div class="svc-foto" id="svc-foto-3"><div><img class="svc-img" src="img/1c3f80e9db.webp" alt="Quadro elétrico montado e identificado por técnico da MDM" width="418" height="480" loading="lazy" decoding="async"></div></div>
-    </div>
+      <span class="svc-go">Eletricista certificado <span aria-hidden="true">→</span></span>
+    </a>
 
-    <div class="svc" data-r>
-      <h3 class="svc-t"><button type="button" class="svc-tog" aria-expanded="false" aria-controls="svc-foto-4">Ventilação<span class="svc-plus" aria-hidden="true"></span></button></h3>
+    <a class="svc" data-r href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM.%20Tenho%20uma%20avaria%20e%20envio%20j%C3%A1%20uma%20fotografia.%20%E2%80%94%20%5BP4%20%C2%B7%20Avaria%5D" data-lead="avaria" target="_blank" rel="noopener">
+      <img class="svc-img" src="img/3889bc0925.webp" alt="Condutas de ventilação instaladas pela MDM" width="640" height="480" loading="lazy" decoding="async">
+      <h3>Ventilação</h3>
       <span class="svc-sub">Extração e condutas</span>
-      <a class="svc-go" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM.%20Tenho%20uma%20avaria%20e%20envio%20j%C3%A1%20uma%20fotografia.%20%E2%80%94%20%5BP4%20%C2%B7%20Avaria%5D" data-lead="avaria" target="_blank" rel="noopener">Ventilação · envie foto <span aria-hidden="true">→</span></a>
-      <div class="svc-foto" id="svc-foto-4"><div><img class="svc-img" src="img/3889bc0925.webp" alt="Condutas de ventilação instaladas pela MDM" width="640" height="480" loading="lazy" decoding="async"></div></div>
-    </div>
+      <span class="svc-go">Ventilação · envie foto <span aria-hidden="true">→</span></span>
+    </a>
 
   </div>
 </section>
@@ -1606,17 +1602,6 @@ $q('sendWhats').addEventListener('click', () => {
 /* ═══ scroll reveal + nav ═══ */
 const nav = document.getElementById('nav');
 addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 30), { passive: true });
-
-/* serviços: a fotografia fica escondida; clicar na linha abre/fecha (o rótulo do canal continua a ser o link) */
-document.querySelectorAll('.svc').forEach(row => {
-  const btn = row.querySelector('.svc-tog'); if (!btn) return;
-  row.addEventListener('click', e => {
-    if (e.target.closest('a')) return;
-    const open = !row.classList.contains('is-open');
-    row.classList.toggle('is-open', open); btn.setAttribute('aria-expanded', String(open));
-    if (open) track('service_photo_open', { servico: btn.textContent.trim() });
-  });
-});
 
 /* porta P3 / cartão Eletricidade: pré-selecionam o serviço, o esqueleto da mensagem e o título do formulário */
 (function () {

@@ -71,7 +71,7 @@ Escala ad-hoc (sem rácio modular); os saltos grandes são intencionais (título
 | Component | Hierarchy | Purpose | Key variants |
 |-----------|-----------|---------|--------------|
 | Section head (`.sec-head`) | Component | Eyebrow mono + h2 serifado com `<em>` carmim | — |
-| Service list (`.svc-row` / `.svc`) | Pattern | **Da carmim:** linha com filete; nome grande Lora com + (roda para ×), descrição Inter, canal mono + → à direita. A fotografia real fica **escondida e abre ao clicar na linha**; só o rótulo do canal é link | Canal: WhatsApp, email, formulário; fechado/aberto |
+| Service list (`.svc-row` / `.svc`) | Pattern | **Da carmim:** linha com filete; fotografia real **sempre visível** (200×136, prova de trabalho), nome grande Lora, descrição Inter, canal mono sublinhado + → à direita como apelo à ação; a **linha inteira é o link** de contacto | Canal: WhatsApp, email, formulário |
 | Stat cells (`.meta-band .hero-meta`) | Component | **Da carmim:** números em células separadas por filetes verticais, com filete em cima e em baixo | — |
 | Hero doors (`.door`) | Component | Três entradas diretas com filete superior colorido | montagem (red), manut (ink), elet (slate) |
 | Works carousel (`.ob-shot`) | Pattern | Fotografias reais de obra, arrastável, setas + pausa | — |
@@ -100,7 +100,7 @@ Escala ad-hoc (sem rácio modular); os saltos grandes são intencionais (título
 | 2 | `0 20px 48px -28px rgba(20,29,46,.32)` | Janela do formulário |
 | Nav | fundo `rgba(250,249,245,.85)` + `backdrop-filter: blur(16px)` | Barra fixa |
 
-Raios: `--r-s` 6px (inputs, botões), `--r-m` 10px (cartões, foto de serviço aberta), `--r-l` 16px (painéis largos), 999px (pílulas).
+Raios: `--r-s` 6px (inputs, botões), `--r-m` 10px (cartões, fotos de serviço), `--r-l` 16px (painéis largos), 999px (pílulas).
 
 ## 7. Do's and Don'ts
 
@@ -108,7 +108,7 @@ Raios: `--r-s` 6px (inputs, botões), `--r-m` 10px (cartões, foto de serviço a
 - Usar os tokens do `:root`; uma cor nova é um token novo com comentário.
 - Ênfase = `<em>` em Lora itálico carmim, uma por título.
 - Separar itens de lista com filetes `--sand` (estrutura carmim).
-- Usar só fotografias reais da MDM, com `alt` em português a descrever a obra.
+- Usar só fotografias reais da MDM, com `alt` em português a descrever a obra — e mostrá-las: são a principal prova de confiança, nunca escondidas atrás de um clique.
 - Rótulos de ação em JetBrains Mono maiúsculas com seta →.
 
 ### Don't
@@ -120,7 +120,7 @@ Raios: `--r-s` 6px (inputs, botões), `--r-m` 10px (cartões, foto de serviço a
 
 ## 8. Responsive
 
-Desktop-first, `max-width`. Breakpoints em uso: 1160, 1040, 1000, 980, 900, 760, 720, 640, 400px, mais `max-height: 820px/520px` e `hover: none`. Lista de serviços: 3 colunas → (≤1040) nome + canal, descrição por baixo → (≤640) nome/descrição/canal empilhados, foto aberta a toda a largura → (≤400) nome 26px, canal pode quebrar. Verificar a 1440/1180/900/768/620/390/360: sem scroll horizontal.
+Desktop-first, `max-width`. Breakpoints em uso: 1160, 1040, 1000, 980, 900, 760, 720, 640, 400px, mais `max-height: 820px/520px` e `hover: none`. Lista de serviços: foto + 3 colunas → (≤1040) foto 150px, nome e descrição empilhados, canal à direita → (≤760) canal por baixo da descrição → (≤640) foto a toda a largura por cima, texto empilhado → (≤400) nome 26px, canal pode quebrar. Verificar a 1440/1180/900/768/620/390/360: sem scroll horizontal.
 
 ## 9. Agent Prompt Guide
 
@@ -132,7 +132,7 @@ Desktop-first, `max-width`. Breakpoints em uso: 1160, 1040, 1000, 980, 900, 760,
 
 ## 10. Motion
 
-`--ease: cubic-bezier(0.16, 1, 0.3, 1)`. Entradas por scroll (`[data-r]` → `.in`), hovers de 0.25–0.35s (cor, −2/−3px, seta +4px). Foto de serviço abre em altura em 0.45s (`grid-template-rows` 0fr → 1fr). Carrossel e revelações param com `prefers-reduced-motion: reduce`.
+`--ease: cubic-bezier(0.16, 1, 0.3, 1)`. Entradas por scroll (`[data-r]` → `.in`), hovers de 0.25–0.35s (cor, −2/−3px, seta +4px, foto de serviço ×1.03). Carrossel e revelações param com `prefers-reduced-motion: reduce`.
 
 ## 11. Voice & Tone
 
@@ -145,7 +145,7 @@ Direto, técnico, sem letra pequena: "Respostas diretas, sem letra pequena." Nú
 | Paleta base | #FAF9F5 / #141D2E / #4E5871 / #A30711 / #12823F | igual | **Alinhada** |
 | Raios | 6 / 10 / 16px | 6 / 10px | **Alinhada** |
 | Tipografia | Lora + Inter + JetBrains Mono | Geist + Geist Mono | **Divergente → creme** |
-| Serviços | cartões fotográficos com véu escuro | lista tipográfica com filetes | **Carmim adotada** (tipografia creme; foto real abre ao clicar) |
+| Serviços | cartões fotográficos com véu escuro | lista tipográfica com filetes | **Carmim adotada** (tipografia creme; foto real sempre visível; linha inteira clicável) |
 | Faixa de números | números soltos | células com filetes | **Carmim adotada** (mesmo conteúdo) |
 | Hero | foto desfocada + véu creme | campo vermelho `--field` | Só carmim — não adotado |
 | Navegação | barra fixa translúcida | barra lateral `--rail` #0F1522 | Só carmim — não adotado |
