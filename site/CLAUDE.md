@@ -4,6 +4,9 @@ Rules for turning Figma designs (via the Figma MCP) into changes to the MDM site
 Scope: everything under `site/`. The rest of the repo (Python app, `circuit-planner/`,
 `electric-simulator/`) is unrelated and does not share this design system.
 
+The merged design language (creme type and palette + carmim structure) is documented in
+`site/DESIGN.md` — read it before designing anything new; this file covers the mechanics.
+
 ## 0. Hard constraints — check before any change
 
 - **Business data is fixed.** Never change without the owner's written confirmation:
@@ -102,7 +105,7 @@ laid out in page order. Prefix = component:
 | `hero`, `hm-` | hero |
 | `obras-`, `ob-` | works carousel (14 photos) |
 | `meta-band`, `band` | numbers band |
-| `svc-` | service cards |
+| `svc-` | service list (typographic rows with hairlines — adopted from carmim, see `DESIGN.md`) |
 | `perk`, `porque` | "Porquê a MDM" |
 | `faq-` | FAQ (`<details>`) |
 | `quote-`, `mailwin`, `mw-` | quote form styled as a mail window |
