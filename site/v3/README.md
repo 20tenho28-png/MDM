@@ -8,6 +8,8 @@ Fonte: `src/` · construção: `python3 build.py` (só biblioteca-padrão) · sa
 | `src/ar-condicionado-lisboa.html` | `dist/ar-condicionado-lisboa/index.html` | 1.ª página de serviço; usa `assets/v3.css` |
 | `src/_servico.html` + `services.py` | `dist/<slug>/index.html` | Bombas de calor, manutenção e assistência, instalações elétricas, ventilação (conteúdo em `services.py`) |
 | `src/obrigado.html`, `src/404.html` | `dist/obrigado/`, `dist/404.html` | Sucesso sem JS e página de erro |
+| `src/privacidade.html` | `dist/privacidade/` | Política de privacidade v3 (noindex; fora do sitemap) |
+| `src/_redirects` | `dist/_redirects` | 301 dos sites antigos (Netlify); lista do site antigo a completar após rastreio |
 | `src/partials/*` | incluídos com `{{include:…}}` | header, gaveta, barra móvel, formulário, rodapé, scripts |
 | `src/v3.css` | inline na home, `dist/assets/v3.css` nas outras | tokens do sistema v3 (DESIGN.md §13) |
 | `img/` | `dist/img/` | AVIF/WebP/JPEG com o tratamento da direção fotográfica; `manifest.json` gera os `srcset` |
@@ -20,5 +22,6 @@ Fonte: `src/` · construção: `python3 build.py` (só biblioteca-padrão) · sa
 ## Estado (27/09/2026)
 - 6 páginas públicas: home + 5 serviços, 445 a 670 palavras cada, 0 travessões, 0 links partidos, JSON-LD válido.
 - Sem fotografia real de bombas de calor: usa-se um esquema, nunca uma foto que não seja da MDM.
-- `privacidade/` ainda é a página da v2.2 (copiada): atualizar na Fase 7 para o consentimento do PostHog e o Netlify Forms.
+- `privacidade/` é a página nova da v3 (`src/privacidade.html`), com o consentimento do PostHog e o Netlify Forms.
+- `_redirects`: só `/index.html` e `/privacidade.html` por agora. Antes do lançamento, rastrear `www.mdmassist.com.pt` e acrescentar um 301 por URL antigo.
 - `/obras/` só é publicada com 12 ou mais fotos reais legendadas (decisão do dono).

@@ -11,6 +11,9 @@ B = Path(__file__).parent; S = B / 'src'; P = S / 'partials'; D = B / 'dist'
 MAN = json.loads((B / 'img' / 'manifest.json').read_text())
 SITE = 'https://www.mdmassist.com.pt/'
 GBP = 'https://maps.app.goo.gl/1NTJtEvzcYW6Cra18'
+# seta das ligações "→": a Geist não tem o glifo U+2192, por isso vai como ícone SVG (traço, currentColor)
+ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg>'
+WJ = '\u2060'  # word joiner de "ar-água" (services.py): só no texto visível, nunca em JSON-LD nem llms.txt
 
 FAQ = {
  'home': [
@@ -92,8 +95,11 @@ def render(src, root, page, inline_css, text=None):
     t = re.sub(r'\{\{pic:([^}]+)\}\}', lambda m: pic(m.group(1), root), t)
     t = re.sub(r'\{\{preload:([^}]+)\}\}', lambda m: preload(m.group(1), root), t)
     t = re.sub(r'\{\{faq:([\w-]+)\}\}', lambda m: faq_html(m.group(1)), t)
-    t = re.sub(r'\{\{schema:([\w-]+)\}\}', lambda m: json.dumps(SCHEMA[m.group(1)], ensure_ascii=False), t)
+    t = re.sub(r'\{\{schema:([\w-]+)\}\}', lambda m: json.dumps(SCHEMA[m.group(1)], ensure_ascii=False).replace(WJ, ''), t)
     t = t.replace('{{page}}', page).replace('{{root}}', root)
+    t = t.replace('<span aria-hidden="true">→</span>', f'<span class="arr" aria-hidden="true">{ARROW}</span>')
+    if 'id="orcamento"' not in t:  # página sem formulário (404, obrigado): "Pedir orçamento" leva ao formulário da home
+        t = t.replace('href="#orcamento"', f'href="{root}#orcamento"')
     assert '{{' not in t, re.findall(r'\{\{[^}]+\}\}', t)[:3]
     return t
 
@@ -122,7 +128,7 @@ def service_page(slug, d):
         body = ''.join(f'<p>{esc(x)}</p>' for x in f['body'])
         feat = f'''<section class="section" id="{f['id']}" aria-labelledby="h-feat">
   <div class="wrap{' ms-grid' if aside else ''}">
-    <div class="prose"><span class="eyebrow">{esc(f['eyebrow'])}</span><h2 id="h-feat" style="margin:.75rem 0 1.25rem">{esc(f['title'])}</h2>{body}</div>
+    <div class="prose"><span class="eyebrow">{esc(f['eyebrow'])}</span><h2 id="h-feat">{esc(f['title'])}</h2>{body}</div>
     {aside}
   </div>
 </section>'''
@@ -158,8 +164,8 @@ def main():
     (D / 'privacidade').mkdir(); (D / 'privacidade' / 'index.html').write_text(render('privacidade.html', '../', 'privacidade', False), encoding='utf-8')
     shutil.copy(P / 'logo.svg', D / 'favicon.svg'); shutil.copy(B.parent / 'favicon' / 'logo-180.png', D / 'apple-touch-icon.png')
     (D / 'robots.txt').write_text('# Pré-visualização: não indexar. No lançamento: Allow e Sitemap.\nUser-agent: *\nDisallow: /\n')
-    (D / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + ''.join(f'  <url><loc>{SITE}{p}</loc></url>\n' for p in ['', 'ar-condicionado-lisboa/'] + [k + '/' for k in SERVICES] + ['obras/', 'privacidade/']) + '</urlset>\n')
-    SVC_LINKS = ''.join(f"- [{d['h1']}]({SITE}{k}/)\n" for k, d in SERVICES.items())
+    (D / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + ''.join(f'  <url><loc>{SITE}{p}</loc></url>\n' for p in ['', 'ar-condicionado-lisboa/'] + [k + '/' for k in SERVICES] + ['obras/']) + '</urlset>\n')  # privacidade/ fica de fora: é noindex
+    SVC_LINKS = ''.join(f"- [{d['h1'].replace(WJ, '')}]({SITE}{k}/)\n" for k, d in SERVICES.items())
     (D / 'llms.txt').write_text(f"""# MDM · AVAC e assistência técnica (Lisboa)
 
 > M.D.M. - Manuel Domingos Melancia, Lda (NIF 502 644 761). Empresa de Lisboa, fundada em 1991, com sede no Parque das Nações. Instala e mantém ar condicionado (split, multi-split, conduta) e bombas de calor ar-água, faz instalações elétricas e ventilação, para casas, apartamentos, lojas e condomínios na Grande Lisboa. A mesma equipa instala, faz a ligação elétrica e a manutenção.
@@ -176,6 +182,7 @@ def main():
 {SVC_LINKS}- [Obras (fotografias de trabalho real)]({SITE}obras/)
 - [Política de privacidade]({SITE}privacidade/)
 """)
+    shutil.copy(S / '_redirects', D / '_redirects')  # 301 dos sites antigos (lista a completar após rastreio)
     (D / '_headers').write_text('/*\n  X-Robots-Tag: noindex, nofollow\n/img/*\n  Cache-Control: public, max-age=31536000, immutable\n/fonts/*\n  Cache-Control: public, max-age=31536000, immutable\n')
     print('ok', sorted(str(p.relative_to(D)) for p in D.rglob('*.html')))
 main()

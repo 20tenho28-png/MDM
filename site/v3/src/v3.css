@@ -31,7 +31,8 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 16px); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-body { background: var(--cream); color: var(--ink); font-family: var(--sans); font-size: 1.0625rem; line-height: 1.6; padding-bottom: var(--bar-h); -webkit-font-smoothing: antialiased; }
+body { background: var(--cream); color: var(--ink); font-family: var(--sans); font-size: 1.0625rem; line-height: 1.6; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; min-height: 100vh; }
+main { flex: 1 0 auto; } /* páginas curtas (404, obrigado): o rodapé fica no fundo do ecrã */
 [hidden] { display: none !important; }
 img { display: block; max-width: 100%; height: auto; }
 a { color: inherit; }
@@ -247,7 +248,7 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
 .form-ok .btn { margin-top: var(--space-5); }
 
 /* ── rodapé ── */
-.footer { background: var(--ink); color: var(--cream); padding: var(--space-8) 0 var(--space-6); }
+.footer { background: var(--ink); color: var(--cream); padding: var(--space-8) 0 calc(var(--space-6) + var(--bar-h)); } /* + altura da barra móvel: o fim da página fica navy, não creme */
 .ft-grid { display: grid; gap: var(--space-6); }
 @media (min-width: 768px) { .ft-grid { grid-template-columns: 1.3fr 1fr 1fr; } }
 .footer a { color: var(--cream); text-decoration: none; }
@@ -300,8 +301,10 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
 .ms-diagram svg { width: 100%; height: auto; }
 .related { display: grid; gap: var(--space-3); }
 @media (min-width: 768px) { .related { grid-template-columns: repeat(2, 1fr); } }
-.related a { display: flex; justify-content: space-between; align-items: center; min-height: 64px; padding: 0 var(--space-5); background: var(--field); border: 1px solid var(--sand); border-radius: var(--r-m); font-weight: 600; text-decoration: none; }
+.related a { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); min-height: 64px; padding: 0 var(--space-5); background: var(--field); border: 1px solid var(--sand); border-radius: var(--r-m); font-weight: 600; text-decoration: none; }
 .related a:hover { border-color: var(--ink); }
+.arr { display: inline-block; vertical-align: -.2em; line-height: 0; } /* seta em SVG: a Geist não tem o glifo → */
+.arr svg { width: 1.15em; height: 1.15em; }
 .gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
 
 @media (prefers-reduced-motion: reduce) {
@@ -326,7 +329,7 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
 @media (min-width: 1024px) { .team-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-8); } }
 .band-photo { position: relative; background: var(--ink); color: var(--cream); }
 .band-photo img { width: 100%; height: clamp(240px, 36vw, 460px); object-fit: cover; }
-.band-photo-text { padding: var(--space-6) 0 var(--space-7); }
+.band-photo-text { padding-top: var(--space-6); padding-bottom: var(--space-7); } /* só vertical: o lateral vem de .wrap */
 .band-photo-text p { margin: var(--space-3) 0 var(--space-5); max-width: 36rem; color: var(--on-ink-muted); }
 .band-photo-text .h3 { font-size: clamp(1.5rem, 3.2vw, 2.5rem); letter-spacing: -.03em; max-width: 22ch; }
 /* barra móvel: WhatsApp só ícone para dar espaço à ação principal */

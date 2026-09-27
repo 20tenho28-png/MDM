@@ -1,0 +1,18 @@
+# Redirecionamentos 301 dos sites antigos para a v3 (Netlify, ficheiro _redirects).
+# build.py copia este ficheiro para dist/_redirects.
+#
+# Regras: só caminhos. Um fragmento (#...) nunca chega ao servidor, por isso não pode
+# ser origem nem destino de uma regra (ex.: "/#Contato" não se redireciona daqui).
+#
+# Nota do Netlify ("shadowing"): se o caminho de origem existir em dist/, o ficheiro é
+# servido e a regra é ignorada (a menos que termine em "!"). É o caso de /index.html,
+# que existe em dist/; a home tem canonical para "/", por isso não há conteúdo duplicado.
+#
+# POR COMPLETAR ANTES DO LANÇAMENTO: a lista de URLs do site antigo
+# www.mdmassist.com.pt tem de ser completada depois de um rastreio (crawl) desse site,
+# que não foi possível a partir deste ambiente (AUDIT.md §9, STRATEGY.md).
+# Cada URL antigo deve ir para a página nova mais próxima, com 301.
+
+# Site v2.2 (mdmassist.manus.space) e site antigo
+/index.html          /               301
+/privacidade.html    /privacidade/   301
