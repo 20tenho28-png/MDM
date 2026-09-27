@@ -28,7 +28,7 @@
   /* ── header ── */
   var nav = $('#nav'); addEventListener('scroll', function () { nav.classList.toggle('scrolled', scrollY > 8); }, { passive: true });
   var burger = $('#burger'), drawer = $('#mDrawer'), bd = $('.m-backdrop'), mbar = $('#mbar');
-  var outside = [$('main'), $('footer')].filter(Boolean);
+  var outside = [$('main'), $('footer'), $('.skip-link')].filter(Boolean);
   function setMenu(open) {
     drawer.hidden = bd.hidden = !open; burger.setAttribute('aria-expanded', String(open)); burger.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
     document.documentElement.style.overflow = open ? 'hidden' : ''; outside.forEach(function (el) { el.inert = open; });

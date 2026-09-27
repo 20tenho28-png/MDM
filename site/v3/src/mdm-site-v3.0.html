@@ -28,7 +28,7 @@
 </head>
 <body data-page="home">
 {{include:header.html}}
-<main id="conteudo">
+<main id="conteudo" tabindex="-1">
 
 <section class="hero" aria-labelledby="h-hero">
   <div class="wrap hero-grid">
@@ -51,7 +51,7 @@
 <section aria-label="Factos sobre a MDM">
   <div class="wrap">
     <div class="proof">
-      <div class="proof-cell"><span class="proof-big">1991</span><span class="proof-small">35 anos em Lisboa, sede no Parque das Nações</span></div>
+      <div class="proof-cell"><span class="proof-big">1991</span><span class="proof-small">{{anos}} anos em Lisboa, sede no Parque das Nações</span></div>
       <div class="proof-cell"><span class="proof-big">Grande Lisboa</span><span class="proof-small">Lisboa e concelhos vizinhos</span></div>
       <div class="proof-cell"><span class="proof-big">Certificados</span><span class="proof-small">F-gas, APIRAC, IMPIC e eletricista certificado</span></div>
     </div>
@@ -135,7 +135,7 @@
 
 <section class="section" id="equipa" aria-labelledby="h-equipa">
   <div class="wrap team-grid">
-    <figure class="team-photo">{{pic:reparacao-unidade|Técnico da MDM a reparar uma unidade exterior|(min-width: 1024px) 560px, 100vw|lazy}}</figure>
+    <figure class="team-photo">{{pic:reparacao-unidade|Unidade exterior aberta para reparação|(min-width: 1024px) 560px, 100vw|lazy}}</figure>
     <div class="prose">
       <h2 id="h-equipa">Uma equipa de Lisboa, desde 1991.</h2>
       <p>A M.D.M. - Manuel Domingos Melancia, Lda trabalha em Lisboa desde 1991, com sede no Parque das Nações. Os técnicos que instalam o seu equipamento são os mesmos que o ligam ao quadro e que voltam para a manutenção.</p>
@@ -145,7 +145,7 @@
 </section>
 
 <section class="band-photo" aria-labelledby="h-empresas">
-  {{pic:cobertura-unidades-solar|Unidades exteriores instaladas pela MDM na cobertura de um edifício|100vw|lazy}}
+  {{pic:cobertura-unidades-solar|Unidade exterior Midea instalada pela MDM na cobertura de um edifício|100vw|lazy}}
   <div class="band-photo-text wrap">
     <h2 id="h-empresas" class="h3">Também para lojas, condomínios e empresas.</h2>
     <p>Contratos de manutenção, edifícios de serviços e espaços comerciais na Grande Lisboa.</p>
@@ -172,7 +172,7 @@
       <p class="lead">Orçamento sem compromisso. Se preferir falar já:</p>
       <div class="alt">
         <a href="tel:+351218935050" data-ch="call">218 935 050<small>2ª a 6ª, 8h às 17h</small></a>
-        <a class="alt-wa" href="https://wa.me/351910307579" target="_blank" rel="noopener" data-ch="whatsapp">WhatsApp 910 307 579<small>Pode enviar fotografias do local</small></a>
+        <a class="alt-wa" href="https://wa.me/351910307579" target="_blank" rel="noopener" data-ch="whatsapp">WhatsApp 910 307 579<small>Pode enviar fotografias do local</small><span class="sr-only"> (abre noutra janela)</span></a>
       </div>
     </div>
     <div>

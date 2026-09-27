@@ -385,7 +385,7 @@ Notas:
 - No PostHog, comparar por página os pedidos enviados (`form_submit`), os toques no telefone (`call_tap`) e no WhatsApp (`whatsapp_tap`).
 
 ### Data a lembrar
-- **1 de janeiro de 2027:** "35 anos" deixa de estar certo. Aparece na página inicial e na de instalações elétricas. Mudar para 36 ou trocar por "desde 1991".
+- **Cada ano novo:** o número de anos na página inicial ("35 anos em Lisboa") é calculado a partir de 1991 em cada publicação. Basta publicar de novo depois de 1 de janeiro para passar a 36.
 
 ---
 
@@ -440,7 +440,7 @@ Os números entre parênteses são os de `CONTENT-NEEDED.md`, onde está o estad
 
 ## 8. Problemas encontrados que ficaram por corrigir
 
-A verificação de 27/09 encontrou 0 problemas P0, 2 P1 e 10 P2. Os P1 e P2 foram todos corrigidos, alguns retirando conteúdo até termos os seus dados. Também ficaram corrigidos três P3: o estilo dentro das páginas, as fotografias com terceiros e o texto pequeno nos esquemas. Os que ficaram são todos P3 (não bloqueiam o lançamento). Ficaram por uma de duas razões: dependem de dados seus, ou são acabamentos para a próxima ronda.
+A verificação de 27/09 encontrou 0 problemas P0, 2 P1 e 10 P2. Os P1 e P2 foram todos corrigidos, alguns retirando conteúdo até termos os seus dados. Também ficaram corrigidos três P3: o estilo dentro das páginas, as fotografias com terceiros e o texto pequeno nos esquemas. Na ronda final (27/09) foram corrigidos mais 14 pontos P3, na tabela abaixo. Os que ficaram são todos P3 (não bloqueiam o lançamento). Ficaram por uma de duas razões: dependem de dados seus, ou são acabamentos para a próxima ronda.
 
 ### Corrigidos, com uma condição
 
@@ -453,27 +453,38 @@ A verificação de 27/09 encontrou 0 problemas P0, 2 P1 e 10 P2. Os P1 e P2 fora
 | LH-06 | O estilo (CSS) vai dentro de cada página, por isso já não há um ficheiro de estilo sem cache | A compressão e a cache verificam-se no endereço real |
 | F22 | `site/CLAUDE.md` já diz que a v3 usa o banner de consentimento antes do PostHog | Nenhuma |
 
+### Corrigidos na ronda final (27/09, depois da verificação)
+
+| ID | O que foi feito |
+|---|---|
+| F09 | Legendas e textos alternativos acertados ao que a fotografia mostra: "Unidade exterior aberta para reparação" e "Unidade exterior Midea" na cobertura |
+| F12 | Números de telefone e NIF já não se partem ao meio; títulos com linhas equilibradas (`text-wrap`) |
+| F14 | Exemplo no campo de contacto encurtado para "912 345 678 ou email" |
+| F15 (parte) | "Instalação certificada" passou a "Técnicos certificados"; "eletricista da casa" no singular |
+| F16 (parte) | Frase da garantia retirada; "Vila Franca de Xira" retirada das sugestões do formulário; anos desde 1991 calculados na publicação |
+| F17 (parte) | "pára", "Que marcas assistem?", "contacto" repetido e título da lista da manutenção ("O que está incluído.") |
+| F18 (a, c) | A política diz que o Netlify regista o IP e o browser de cada pedido, e que o Sentry carrega salvo se recusar |
+| F20 | No máximo 2 etiquetas em maiúsculas por página (retiradas as de "Obras", da secção de destaque e de "Multi-split") |
+| A11Y-05 | Links longos da política partem a linha; botão do WhatsApp na barra mantém 48 px |
+| A11Y-06 | O campo da fotografia tem uma só etiqueta e a dica ligada ao campo |
+| A11Y-07 | O conteúdo principal recebe o foco com "Saltar para o conteúdo"; o contorno fica todo visível |
+| A11Y-08 | Os links que abrem noutra janela dizem-no aos leitores de ecrã |
+| A11Y-09 | Com o menu aberto, "Saltar para o conteúdo" fica inativo |
+| LH-04 | Em Obras, as três primeiras fotografias carregam logo, com prioridade |
+
+Depois desta ronda: axe-core com 0 violações nas 10 páginas a 390 e 1440 px; sem deslocamento para os lados a 320, 390 e 1440 px; sem erros de JavaScript; ligações, dados estruturados e travessões verificados sem erros.
+
 ### Por corrigir
 
 | ID | Problema | Porque ficou | Quando |
 |---|---|---|---|
-| F18 | A política de privacidade está incompleta em alguns pontos:<br>(a) não diz que o Netlify guarda, com cada pedido, o endereço IP, a identificação do browser e a página de origem, nem que passa um filtro anti-spam (Akismet);<br>(b) faltam o serviço de email e o WhatsApp como meios por onde a MDM recebe dados;<br>(c) diz "conforme a sua escolha" sobre o Sentry, mas o Sentry carrega antes da escolha;<br>(d) os toques e o início do formulário anteriores à escolha são enviados se o visitante aceitar na mesma página;<br>(e) ao retirar o consentimento, o PostHog continua na página aberta (a política já o diz);<br>(f) as medidas de segurança do §6 não estão confirmadas. | (b) e (f) dependem de respostas suas (6.3, 6.4); o resto é texto a acrescentar | **Recomendado antes do lançamento** |
-| F09 | Duas legendas dizem mais do que a fotografia mostra (`reparacao-unidade`, `cobertura-unidades-solar`) | Acertar uma só vez, com a sua confirmação (4.7) | **Recomendado antes do lançamento** |
+| F18 | A política de privacidade ainda tem pontos por completar:<br>(b) faltam o serviço de email e o WhatsApp como meios por onde a MDM recebe dados;<br>(d) os toques e o início do formulário anteriores à escolha são enviados se o visitante aceitar na mesma página;<br>(e) ao retirar o consentimento, o PostHog continua na página aberta (a política já o diz);<br>(f) as medidas de segurança do §6 não estão confirmadas.<br>Os pontos (a) IP e browser registados pelo Netlify e (c) Sentry antes da escolha já foram corrigidos. | (b) e (f) dependem de respostas suas (6.3, 6.4) | **Recomendado antes do lançamento** |
 | F11 | Duas fotografias estão em secções que talvez não sejam as certas (`midea-cobertura`, `conduta-teto`) | Depende da sua confirmação (4.7) | Antes do lançamento, com 4.7 |
-| F15 | "Certificados" junta APIRAC (associação) e IMPIC (alvará). "Instalação certificada" sugere que uma entidade aprovou a instalação, quando são os técnicos que têm certificado F-gas. A descrição da página de bombas de calor diz "eletricistas da casa", no plural, mas o confirmado é "eletricista certificado" | Acertar com os números e os títulos exatos (3.1 a 3.3) | Com 3.1 a 3.3 |
-| F16 | A frase sobre a garantia depende de 3.10. Os concelhos dependem de 3.9 (8 nos dados estruturados, 9 no formulário). "35 anos" está escrito à mão | Dados seus; "35 anos" muda a 1/1/2027 | Com 3.9 e 3.10; "35 anos" até 1/1/2027 |
-| F17 | Pormenores de texto:<br>(1) "pára" com acento antigo;<br>(2) "Que marcas assistem?" lê-se mal;<br>(3) "entrar em contacto consigo pelo contacto que indicou" repete "contacto";<br>(4) na manutenção, o título "Do primeiro contacto à manutenção." está sobre uma lista que não são passos;<br>(5) no topo, "Manuel Domingos Melancia, Lda" não é o nome legal nem o nome comercial. | P3. O ponto 5 depende do nome exato no Perfil (1.2) | Próxima ronda |
+| F15 | A faixa de prova usa a palavra "Certificados" para F-gas, APIRAC, IMPIC e eletricista. APIRAC é uma associação e IMPIC emite alvarás, por isso a palavra certa depende dos seus documentos | Acertar com os números e os títulos exatos (3.1 a 3.3). "Instalação certificada" e "eletricistas" (plural) já foram corrigidos | Com 3.1 a 3.3 |
+| F16 | Os concelhos nos dados estruturados (8) dependem de 3.9 | Dados seus. A frase sobre a garantia foi retirada, o formulário já sugere os mesmos 8 concelhos e o número de anos é calculado na publicação | Com 3.9 |
+| F17 | No topo, "Manuel Domingos Melancia, Lda" não é o nome legal nem o nome comercial | Depende do nome exato no Perfil (1.2). Os outros pormenores de texto ("pára", "Que marcas assistem?", "contacto" repetido, título da manutenção) já foram corrigidos | Com 1.2 |
 | F19 | A fotografia do topo de Instalações elétricas vem de um original de 641 px e fica pouco nítida em ecrãs de alta densidade. `ventilacao-cobertura` (640 px) aparece a toda a largura nas Obras, no telemóvel. Duas imagens estão mais saturadas do que as outras | Precisa de fotografias novas (4.2) e de retocar o tratamento de duas imagens | Com 4.2 |
 | F21 | Num recorte quadrado (WhatsApp, iMessage), a imagem de partilha corta o título a meio. Usa a promessa inteira em vez da frase curta prevista na estratégia | P3. O script `site/v3/og/render.cjs` permite fazer uma versão nova | Com a aprovação de 5.4 |
-| F12 | Em algumas larguras de ecrã, dados fixos da empresa (telefone, morada, horário, NIF) partem-se ao meio no fim de uma linha. Os títulos das páginas de serviço deixam uma palavra sozinha na última linha, a 1440 px | P3, acabamento tipográfico | Próxima ronda |
-| F14 | Em ecrãs de 1024 px ou mais, o exemplo dentro do campo "Telemóvel ou email" aparece cortado ("912 345 678 ou nome@email", sem ".pt") | P3, afeta só o texto de exemplo | Próxima ronda |
-| F20 | As pequenas etiquetas em maiúsculas (Mono/Eyebrow) aparecem mais de 2 vezes nas páginas de serviço, acima do limite do sistema de desenho | P3, acabamento de desenho | Próxima ronda |
-| A11Y-05 | Com o espaçamento de texto aumentado pelo utilizador, a 320 px: a política de privacidade ganha deslocamento para os lados (email e links longos) e o botão do WhatsApp na barra fica com 18 px de largura | P3. Só acontece com essa definição ativa; a correção é pequena | Próxima ronda |
-| A11Y-06 | O campo da fotografia tem duas etiquetas e a dica "Ajuda-nos a preparar a visita." não está ligada ao campo. As mensagens de erro escondidas são lidas como descrição do campo | P3. O axe marca "a rever", não como violação | Próxima ronda |
-| A11Y-07 | O link "Saltar para o conteúdo" funciona no Chrome, mas o destino não recebe o foco em todos os browsers. A 1440 px, parte do contorno de foco fica fora do ecrã | P3 | Próxima ronda |
-| A11Y-08 | Os links que abrem noutra janela não o dizem, exceto o WhatsApp da barra | P3, recomendação de nível AAA | Próxima ronda |
-| A11Y-09 | O menu do telemóvel não prende o foco do teclado | P3. Fecha com Escape e ao tocar fora, e devolve o foco ao botão | Próxima ronda |
 | LH-02 | A miniatura de Instalações elétricas na página inicial carrega uma imagem de 641 px para um espaço de 96x72 px (telemóvel) ou 200x150 px (computador) | P3, sem efeito na pontuação. É preciso gerar uma versão pequena | Próxima ronda |
 | LH-03 | Algumas imagens não têm largura intermédia e o browser escolhe um ficheiro maior do que o preciso | P3, sem efeito na pontuação. É preciso gerar novas larguras a partir dos originais | Próxima ronda |
-| LH-04 | No computador, em Obras, o maior elemento é uma fotografia com carregamento diferido | P3. LCP de 0,45 s mesmo assim | Próxima ronda |
 | LH-07 | A fonte Geist Mono (23 KB) só é descoberta depois do estilo | P3. Só serve etiquetas pequenas; pré-carregá-la pode atrasar a fotografia do topo | Próxima ronda |

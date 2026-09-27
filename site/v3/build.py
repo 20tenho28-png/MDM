@@ -4,6 +4,7 @@ src/mdm-site-v3.0.html  -> dist/index.html
 src/<serviço>.html      -> dist/<serviço>/index.html
 Todas as páginas levam o CSS (v3.css minificado) inline: sem pedido que bloqueie a primeira pintura.
 """
+from datetime import date
 import json, re, shutil, html, sys
 sys.path.insert(0, str(__import__('pathlib').Path(__file__).parent))
 from services import SERVICES, NAMES
@@ -18,6 +19,7 @@ ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width
 # O preload tem de usar exatamente a mesma string que o <picture>, senão o browser não reaproveita o ficheiro pré-carregado.
 MOB_SIZES = '(min-width: 641px) calc(100vw - 80px), calc(100vw - 40px)'
 HERO_SIZES = '(min-width: 1024px) 520px, ' + MOB_SIZES  # hero com foto ao lado do texto (páginas de serviço)
+ANOS = date.today().year - 1991
 WJ = '\u2060'  # word joiner de "ar-água" (services.py): só no texto visível, nunca em JSON-LD nem llms.txt
 
 FAQ = {
@@ -111,6 +113,7 @@ def render(src, root, page, text=None):
     t = re.sub(r'\{\{faq:([\w-]+)\}\}', lambda m: faq_html(m.group(1)), t)
     t = re.sub(r'\{\{schema:([\w-]+)\}\}', lambda m: json.dumps(SCHEMA[m.group(1)], ensure_ascii=False).replace(WJ, ''), t)
     t = t.replace('{{n_fotos}}', str(t.count('<figure class="project">')))  # obras: o número no texto segue a galeria
+    t = t.replace('{{anos}}', str(ANOS))  # anos desde 1991, atualiza a cada build
     t = t.replace('{{page}}', page).replace('{{root}}', root)
     t = t.replace('<span aria-hidden="true">→</span>', f'<span class="arr" aria-hidden="true">{ARROW}</span>')
     if 'id="orcamento"' not in t:  # página sem formulário (404, obrigado): "Pedir orçamento" leva ao formulário da home
@@ -144,7 +147,7 @@ def service_page(slug, d):
         body = ''.join(f'<p>{esc(x)}</p>' for x in f['body'])
         feat = f'''<section class="section" id="{f['id']}" aria-labelledby="h-feat">
   <div class="wrap{' ms-grid' if aside else ''}">
-    <div class="prose"><span class="eyebrow">{esc(f['eyebrow'])}</span><h2 id="h-feat">{esc(f['title'])}</h2>{body}</div>
+    <div class="prose"><h2 id="h-feat">{esc(f['title'])}</h2>{body}</div>
     {aside}
   </div>
 </section>'''
@@ -152,7 +155,7 @@ def service_page(slug, d):
     gal = ''
     if d['gallery']:
         cards = ''.join(f'<figure class="project">{{{{pic:{n}|{alt}|(min-width: 1024px) 373px, 50vw|lazy}}}}<figcaption><b>{esc(b)}</b><span>{esc(sm)}</span></figcaption></figure>' for n, alt, b, sm in d['gallery'])
-        gal = f'<section class="section" aria-labelledby="h-obras-s"><div class="wrap"><div class="sec-head"><span class="eyebrow">Obras</span><h2 id="h-obras-s">Trabalho real da nossa equipa.</h2></div><div class="gallery">{cards}</div></div></section>'
+        gal = f'<section class="section" aria-labelledby="h-obras-s"><div class="wrap"><div class="sec-head"><h2 id="h-obras-s">Trabalho real da nossa equipa.</h2></div><div class="gallery">{cards}</div></div></section>'
     rel = '\n'.join(f'      <a href="{{{{root}}}}{r}/">{esc(NAMES[r])} <span aria-hidden="true">→</span></a>' for r in d['related'])
     t = (S / '_servico.html').read_text(encoding='utf-8')
     for k, v in {'TITLE': esc(d['title']), 'DESC': esc(d['desc']), 'SLUG': slug, 'PRELOAD': preload, 'SCHEMA': slug, 'PAGE': d['page'], 'SERVICO': esc(d['servico']),

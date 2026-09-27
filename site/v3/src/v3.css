@@ -42,8 +42,11 @@ p a:hover, .prose a:hover { color: var(--red-dk); }
 ::selection { background: var(--red-sf); color: var(--red-dk); }
 :focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.nw, a[href^="tel:"] { white-space: nowrap; }
+h1, h2, h3 { text-wrap: balance; }
+p, li, dd { text-wrap: pretty; }
 .skip-link { position: absolute; left: -9999px; top: 0; z-index: 200; background: var(--ink); color: var(--cream); padding: 12px 20px; font-weight: 600; text-decoration: none; }
-.skip-link:focus { left: 0; }
+.skip-link:focus { left: 8px; top: 8px; }
 
 .wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 @media (min-width: 641px) { .wrap { padding: 0 40px; } }
@@ -220,7 +223,7 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
 @media (min-width: 641px) { .form { padding: var(--space-6); } }
 .form h3 { margin-bottom: var(--space-5); }
 .f { border: 0; margin: 0 0 var(--space-5); padding: 0; min-width: 0; }
-.f > label:not(.file), .f > legend { display: block; margin-bottom: var(--space-2); font-size: .9375rem; font-weight: 500; }
+.f > label:not(.file), .f > legend, .f > .f-title { display: block; margin-bottom: var(--space-2); font-size: .9375rem; font-weight: 500; }
 .f .opt { font-weight: 400; color: var(--slate); }
 .f input[type=text], .f input[type=tel], .f input[type=email], .f select { width: 100%; min-height: 52px; padding: 0 14px; font: inherit; font-size: 1rem; color: var(--ink); background: var(--field); border: 1px solid var(--line-strong); border-radius: var(--r-s); appearance: none; }
 .f select { background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%), linear-gradient(135deg, var(--ink) 50%, transparent 50%); background-position: calc(100% - 20px) 50%, calc(100% - 14px) 50%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 40px; }
@@ -300,7 +303,7 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
 .prose li + li { margin-top: var(--space-2); }
 /* título de secção dentro de texto corrido: equipa, multi-split, destaque das páginas de serviço */
 .prose > .eyebrow + h2 { margin-top: var(--space-3); }
-.prose > .eyebrow + h2, .team-grid .prose > h2 { margin-bottom: var(--space-5); }
+.prose > .eyebrow + h2, .prose > h2:first-child, .team-grid .prose > h2 { margin-bottom: var(--space-5); }
 .types { display: grid; gap: var(--space-5); }
 @media (min-width: 768px) { .types { grid-template-columns: repeat(3, 1fr); } }
 .type { padding: var(--space-5); background: var(--field); border: 1px solid var(--sand); border-radius: var(--r-m); }
@@ -349,7 +352,7 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
 .band-photo-text p { margin: var(--space-3) 0 var(--space-5); max-width: 36rem; color: var(--on-ink-muted); }
 .band-photo-text .h3 { font-size: clamp(1.5rem, 3.2vw, 2.5rem); letter-spacing: -.03em; max-width: 22ch; }
 /* barra móvel: WhatsApp só ícone para dar espaço à ação principal */
-.mbar .mb-wa { width: 48px; padding: 0; }
+.mbar .mb-wa { flex: none; width: 48px; padding: 0; }
 .mbar .mb-wa .mb-lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
 /* ── v3.2: correções da revisão de design ── */

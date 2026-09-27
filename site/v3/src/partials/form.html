@@ -38,19 +38,19 @@
   <div class="f" id="f-localidade">
     <label for="localidade">Localidade</label>
     <input type="text" id="localidade" name="localidade" list="concelhos" autocomplete="address-level2" placeholder="Ex.: Loures" required aria-describedby="e-localidade">
-    <datalist id="concelhos"><option>Lisboa</option><option>Loures</option><option>Odivelas</option><option>Amadora</option><option>Oeiras</option><option>Sintra</option><option>Cascais</option><option>Almada</option><option>Vila Franca de Xira</option></datalist>
+    <datalist id="concelhos"><option>Lisboa</option><option>Loures</option><option>Odivelas</option><option>Amadora</option><option>Oeiras</option><option>Sintra</option><option>Cascais</option><option>Almada</option></datalist>
     <span class="err-msg" id="e-localidade" hidden>Indique a localidade.</span>
   </div>
   <div class="f">
-    <label for="fotografia">Fotografia <span class="opt">(opcional)</span></label>
-    <label class="file"><input type="file" id="fotografia" name="fotografia" accept="image/*"><span id="fileName">Escolher fotografia (até 8 MB)</span></label>
-    <span class="hint">Ajuda-nos a preparar a visita.</span>
+    <span class="f-title" id="l-foto">Fotografia <span class="opt">(opcional)</span></span>
+    <label class="file"><input type="file" id="fotografia" name="fotografia" accept="image/*" aria-labelledby="l-foto fileName" aria-describedby="h-foto"><span id="fileName">Escolher fotografia (até 8 MB)</span></label>
+    <span class="hint" id="h-foto">Ajuda-nos a preparar a visita.</span>
   </div>
   <fieldset class="f" id="f-contacto">
     <legend>Como o contactamos</legend>
     <div class="contact-pair">
       <div><label class="lbl" for="nome">Nome</label><input type="text" id="nome" name="nome" autocomplete="name" placeholder="O seu nome" required aria-describedby="e-contacto"></div>
-      <div><label class="lbl" for="contacto">Telemóvel ou email</label><input type="text" id="contacto" name="contacto" autocomplete="tel" placeholder="912 345 678 ou nome@email.pt" required aria-describedby="e-contacto"></div>
+      <div><label class="lbl" for="contacto">Telemóvel ou email</label><input type="text" id="contacto" name="contacto" autocomplete="tel" placeholder="912 345 678 ou email" required aria-describedby="e-contacto"></div>
     </div>
     <span class="err-msg" id="e-contacto" hidden>Indique o seu nome e um telemóvel ou email.</span>
   </fieldset>
@@ -59,7 +59,7 @@
 </form>
 <div class="form-ok" id="formOk" tabindex="-1" hidden>
   <h3>Pedido recebido.</h3>
-  <p>Obrigado<span id="okName"></span>. Vamos analisar o seu pedido e entrar em contacto consigo pelo contacto que indicou.</p>
+  <p>Obrigado<span id="okName"></span>. Vamos analisar o seu pedido e entrar em contacto pelo telemóvel ou email que indicou.</p>
   <p id="okUrgent" hidden>Se for urgente, ligue <a href="tel:+351218935050">218 935 050</a> (2ª a 6ª, 8h às 17h).</p>
-  <a class="btn btn--wa" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%2C%20acabei%20de%20enviar%20um%20pedido%20de%20or%C3%A7amento%20e%20envio%20fotografias." target="_blank" rel="noopener" data-ch="whatsapp">Enviar fotografias por WhatsApp</a>
+  <a class="btn btn--wa" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%2C%20acabei%20de%20enviar%20um%20pedido%20de%20or%C3%A7amento%20e%20envio%20fotografias." target="_blank" rel="noopener" data-ch="whatsapp">Enviar fotografias por WhatsApp<span class="sr-only"> (abre noutra janela)</span></a>
 </div>

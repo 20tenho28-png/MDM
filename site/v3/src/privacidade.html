@@ -21,6 +21,7 @@
   .pv-sum { grid-area: sum; padding: var(--s5); background: var(--paper); border-radius: var(--r-m); }
   .pv-sum h2 { font-size: 1.1875rem; line-height: 1.3; letter-spacing: -.01em; margin-bottom: var(--s3); }
   .pv-body { padding: var(--s7) 0 var(--s8); border-top: 1px solid var(--sand); }
+  .pv-doc a, .pv-sum a { overflow-wrap: anywhere; }
   .pv-grid { display: grid; gap: var(--s6); grid-template-areas: 'sum' 'toc' 'doc'; }
   .pv-toc { grid-area: toc; }
   .pv-doc { grid-area: doc; }
@@ -55,7 +56,7 @@
 </head>
 <body data-page="privacidade">
 {{include:header.html}}
-<main id="conteudo">
+<main id="conteudo" tabindex="-1">
 
 <nav class="crumbs wrap" aria-label="Caminho"><ol><li><a href="{{root}}">Início</a></li><li aria-current="page">Política de privacidade</li></ol></nav>
 
@@ -106,7 +107,7 @@
       <div class="pv-item">
         <h3>Pedido de orçamento pelo formulário</h3>
         <dl>
-          <div><dt>Dados</dt><dd>Serviço pretendido, tipo de imóvel, urgência, localidade, nome e telemóvel ou email. Se quiser, uma fotografia do local. Fica também registada a página do site de onde enviou o pedido.</dd></div>
+          <div><dt>Dados</dt><dd>Serviço pretendido, tipo de imóvel, urgência, localidade, nome e telemóvel ou email. Se quiser, uma fotografia do local. Fica também registada a página do site de onde enviou o pedido. Com cada pedido, o Netlify regista ainda o endereço IP e o browser usados.</dd></div>
           <div><dt>Para quê</dt><dd>Responder ao pedido, preparar o orçamento e contactá-lo sobre a intervenção.</dd></div>
           <div><dt>Fundamento</dt><dd>Diligências pré-contratuais a seu pedido (art. 6.º, n.º 1, al. b)).</dd></div>
           <div><dt>Conservação</dt><dd>Enquanto for necessário para responder e acompanhar o pedido. Se não houver contrato, no máximo 3 anos após o último contacto.</dd></div>
@@ -198,7 +199,7 @@
         </dl>
       </div>
       <p>Estas três empresas têm sede nos Estados Unidos. Quando haja transferência de dados pessoais para fora do Espaço Económico Europeu, incluindo acessos a partir dos Estados Unidos, essa transferência assenta, conforme aplicável, na decisão de adequação da Comissão Europeia relativa ao Quadro de Privacidade de Dados UE-EUA (Data Privacy Framework) ou nas cláusulas contratuais-tipo aprovadas pela Comissão Europeia.</p>
-      <p>Ao abrir o site, o seu browser comunica com o Netlify e, conforme a sua escolha, com o Sentry e o PostHog, pelo que o seu endereço IP lhes chega necessariamente. Se preferir não usar o site, pode contactar-nos diretamente por telefone, para o <a href="tel:+351218935050" data-ch="call">218 935 050</a>.</p>
+      <p>Ao abrir o site, o seu browser comunica com o Netlify, com o Sentry (salvo se recusar as estatísticas) e, se as aceitar, com o PostHog, pelo que o seu endereço IP lhes chega necessariamente. Se preferir não usar o site, pode contactar-nos diretamente por telefone, para o <a href="tel:+351218935050" data-ch="call">218 935 050</a>.</p>
 
       <h2 class="h3" id="ligacoes">5. Ligações para outros serviços</h2>
       <p>As ligações de telefone e de email abrem as aplicações do seu próprio equipamento. A ligação de WhatsApp abre o WhatsApp e a ligação «Perfil no Google» abre o Google Maps. Nada disto é carregado no site antes de tocar na ligação; a partir daí, aplicam-se as políticas de privacidade do WhatsApp e da Google.</p>
