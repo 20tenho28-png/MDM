@@ -1,0 +1,11 @@
+# Pré-visualização do site MDM (projeto Netlify "mdm-site-preview").
+# Publica a pasta gerada por site/externalize.py, sem build.
+# ATENÇÃO: o cabeçalho noindex é só para a pré-visualização; retirar no lançamento (Fase 7).
+[build]
+  publish = "site/deploy/creme"
+  command = "echo 'sem build: pasta já gerada'"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
