@@ -84,6 +84,10 @@
     --red:    #A30711;   /* carmim do logótipo — um só vermelho no site */
     --red-dk: #7C050D;
     --red-sf: #F6E4E4;
+    --wa:     #12823F;   /* verde do botão WhatsApp — 4.9:1 com branco */
+    --wa-d:   #0B6E34;
+    --ok-bg:  #E9F2EC;   /* alerta de sucesso do formulário */
+    --ok-fg:  #1F5C33;
     --r-s: 6px;          /* raio pequeno (chips, inputs) */
     --r-m: 10px;         /* raio médio (cartões) */
     --r-l: 16px;         /* raio grande (faixas e painéis largos) */
@@ -443,7 +447,7 @@
     font-size: 13.5px; line-height: 1.45;
     border-left: 3px solid var(--red);
   }
-  .mw-alert--ok { background: #E9F2EC; color: #1F5C33; border-left-color: #12823F; }
+  .mw-alert--ok { background: var(--ok-bg); color: var(--ok-fg); border-left-color: var(--wa); }
   /* armadilha anti-spam: invisível para pessoas, preenchida por robôs */
   .mw-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
@@ -752,7 +756,7 @@
     font-family: var(--sans); font-weight: 700; text-decoration: none; }
   .skip-link:focus { left: 0; }
   a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-    outline: 3px solid var(--carmine, #A30711); outline-offset: 3px; border-radius: var(--r-s); }
+    outline: 3px solid var(--red); outline-offset: 3px; border-radius: var(--r-s); }
 
   /* ── navegação central: 5 ligações planas (sem dropdowns) ── */
   :root { --nav-h: 89px; }
@@ -779,11 +783,11 @@
   .nav-cam {
     display: inline-flex; align-items: center; gap: 8px;
     min-height: 44px; padding: 0 18px 0 14px; border-radius: 999px;
-    background: var(--wa, #12823F); color: #fff; text-decoration: none;
+    background: var(--wa); color: #fff; text-decoration: none;
     font-size: 13.5px; font-weight: 700; white-space: nowrap;
     transition: background .25s, transform .25s var(--ease);
   }
-  .nav-cam:hover { background: var(--wa-d, #0B6E34); transform: translateY(-2px); }
+  .nav-cam:hover { background: var(--wa-d); transform: translateY(-2px); }
   .nav-cam svg { width: 20px; height: 20px; flex: none; }
 
   /* ── ≤1160px aperta; ≤1000px vira mobile: Ligar (estado vivo) + WhatsApp + hambúrguer ── */
@@ -824,7 +828,6 @@
     .m-drawer a:last-child { border-bottom: 0; }
   }
   /* verde WhatsApp com contraste AA (4,9:1 com branco) */
-  :root { --wa: #12823F; --wa-d: #0B6E34; }
   .nav-wa, .btn.btn-red[href*="wa.me"] {
     background: var(--wa) !important; color: #fff !important; }
   .nav-wa:hover, .btn.btn-red[href*="wa.me"]:hover {
