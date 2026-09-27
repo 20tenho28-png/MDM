@@ -254,11 +254,16 @@ e a secção Contacto (confirmar); o header trata só do "agora".
   orçamento" após o carrossel, "Pedir orçamento grátis" da
   gaveta mobile. A âncora `#orcamento` passou para o formulário (`.quote-wrap`), com
   `scroll-margin-top` a compensar o header fixo e o `translateY` do reveal.
-- **Header:** menu plano Serviços · Obras · Porquê a MDM · FAQ · Contacto; um só ponto de
-  viragem a **1000px** (acima: menu + telefone com estado + WhatsApp com rótulo; abaixo:
-  "Ligar" com estado vivo por baixo + WhatsApp ícone + hambúrguer). `--nav-h` (89px / 81px
-  ≤640px) alimenta a gaveta e o `scroll-margin-top` das secções. Estado vivo:
-  "Aberto · até às 17h" / "Fechado · 2ª–6ª 8h–17h" (`[data-estado]`, versão curta no mobile).
+- **Header (v5, 27/09/2026, desenho Figma "Header v5 — proposta institucional"):**
+  `<header class="site-header">` com `#nav` (faixa creme sólida, 72px; 60px ≤1023px) e a gaveta
+  `#mDrawer`. Contentor de 1200px, grelha `1fr auto 1fr`: logótipo + "Manuel Domingos Melancia,
+  Lda" (≥1200) · Obras · Serviços · Porquê a MDM · Perguntas · Contacto · 218 935 050 em texto +
+  botão de contorno "Pedir orçamento" → `#contacto` (≥1200). ≤1023px: logótipo, número e
+  hambúrguer; a gaveta (backdrop, Escape, `inert` no resto da página, foco de volta ao botão)
+  tem as 5 ligações, telefone, WhatsApp 910 307 579, "Pedir orçamento" e o horário.
+  Saíram o estado "Aberto/Fechado" (e `lisbonOpen()`), o WhatsApp verde da barra, o "Ligar",
+  o vidro fosco, a linha de progresso e a rotação do logótipo. `html { scroll-padding-top:
+  var(--nav-h) }`; as `scroll-margin-top` das secções somam-se-lhe (aterram onde aterravam).
 - **Contacto:** três cartões que dizem para que serve cada canal (Telefone → contratos e
   urgências; WhatsApp → montagem e avarias, com fotos; Email → propostas de manutenção),
   morada em texto corrido, formulário com dois botões de envio (ver secção seguinte), "Nome *" e

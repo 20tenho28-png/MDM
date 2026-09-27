@@ -72,6 +72,7 @@ Escala ad-hoc (sem rácio modular); os saltos grandes são intencionais (título
 
 | Component | Hierarchy | Purpose | Key variants |
 |-----------|-----------|---------|--------------|
+| Header (`#nav` + `#mDrawer`) | Pattern | **Figma "Header v5"**: faixa creme sólida 72px (60px ≤1023), contentor de 1200px, grelha `1fr auto 1fr`; logótipo + nome legal (≥1200) · 5 ligações (Obras, Serviços, Porquê a MDM, Perguntas, Contacto) · telefone em texto + botão de contorno "Pedir orçamento" → `#contacto` (≥1200). ≤1023: logótipo, número, hambúrguer; gaveta com as 5 ligações, telefone, WhatsApp, pedido e horário. Geist 15/13, 500/600, só `--ink`; carmim só no logótipo, no sublinhado de hover e no foco | desktop 1200+, 1024–1199 (sem nome nem botão), ≤1023 |
 | Section head (`.sec-head`) | Component | Eyebrow mono + h2 Geist pesada com `<em>` carmim | — |
 | Service list (`.svc-row` / `.svc`) | Pattern | **Da carmim:** linha com filete; fotografia real **sempre visível** (200×136, prova de trabalho), nome grande Lora, descrição Inter, canal mono sublinhado + → à direita como apelo à ação; a **linha inteira é o link** de contacto | Canal: WhatsApp, email, formulário |
 | Stat cells (`.meta-band .hero-meta`) | Component | **Da carmim:** números em células separadas por filetes verticais, com filete em cima e em baixo | — |
@@ -100,7 +101,7 @@ Escala ad-hoc (sem rácio modular); os saltos grandes são intencionais (título
 | 0 | filete 1px `--sand` | Listas, faixas, rodapé — o default |
 | 1 | `0 10px 24px -18px rgba(20,29,46,.30)` | Cartões de obra |
 | 2 | `0 20px 48px -28px rgba(20,29,46,.32)` | Janela do formulário |
-| Nav | fundo `rgba(250,249,245,.85)` + `backdrop-filter: blur(16px)` | Barra fixa |
+| Nav | fundo `--cream` sólido, filete `--sand` ao rolar; sem blur nem sombra | Header fixo (72/60px) |
 
 Raios: `--r-s` 6px (inputs, botões), `--r-m` 10px (cartões, fotos de serviço), `--r-l` 16px (painéis largos), 999px (pílulas).
 
@@ -122,7 +123,7 @@ Raios: `--r-s` 6px (inputs, botões), `--r-m` 10px (cartões, fotos de serviço)
 
 ## 8. Responsive
 
-Desktop-first, `max-width`. Breakpoints em uso: 1160, 1040, 1000, 980, 900, 760, 720, 640, 400px, mais `max-height: 820px/520px` e `hover: none`. Lista de serviços: foto + 3 colunas → (≤1040) foto 150px, nome e descrição empilhados, canal à direita → (≤760) canal por baixo da descrição → (≤640) foto a toda a largura por cima, texto empilhado → (≤400) nome 26px, canal pode quebrar. Verificar a 1440/1180/900/768/620/390/360: sem scroll horizontal.
+Desktop-first, `max-width`. Breakpoints em uso: 1160, 1040, 1023 (colapso do header), 1000, 980, 900, 760, 720, 640, 400px, `min-width: 1200px` (nome legal e botão do header), mais `max-height: 820px/520px` e `hover: none`. Lista de serviços: foto + 3 colunas → (≤1040) foto 150px, nome e descrição empilhados, canal à direita → (≤760) canal por baixo da descrição → (≤640) foto a toda a largura por cima, texto empilhado → (≤400) nome 26px, canal pode quebrar. Verificar a 1440/1180/900/768/620/390/360: sem scroll horizontal.
 
 ## 9. Agent Prompt Guide
 
@@ -150,5 +151,5 @@ Direto, técnico, sem letra pequena: "Respostas diretas, sem letra pequena." Nú
 | Serviços | cartões fotográficos com véu escuro | lista tipográfica com filetes | **Carmim adotada** (tipografia creme; foto real sempre visível; linha inteira clicável) |
 | Faixa de números | números soltos | células com filetes | **Carmim adotada** (mesmo conteúdo) |
 | Hero | foto desfocada + véu creme | campo vermelho `--field` | Só carmim — não adotado |
-| Navegação | barra fixa translúcida | barra lateral `--rail` #0F1522 | Só carmim — não adotado |
+| Navegação | barra fixa sólida (Header v5, 27/09) | barra lateral `--rail` #0F1522 | Só carmim — não adotado |
 | Obras | carrossel | galeria dispersa em navy | Só carmim — não adotado |

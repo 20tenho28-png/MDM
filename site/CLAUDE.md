@@ -69,7 +69,7 @@ the `:root` block **is** the source of truth.
   --mono:    'Geist Mono', ui-monospace, …;          /* labels, numbers, kickers */
   --ease:  cubic-bezier(0.16, 1, 0.3, 1);
 }
-/* layout token, set later: --nav-h: 89px (81px ≤640px) */
+/* layout token, set with the header: --nav-h: 72px (60px ≤1023px) */
 ```
 
 Rules:
@@ -79,8 +79,8 @@ Rules:
 - Contrast was checked by hand: `--red` is a **fill** colour (white text on it); red *text* on
   navy fails. Re-check WCAG AA (4.5:1 body, 3:1 large) for any new pairing.
 - Tinted translucency is written as `rgba()` of a token's RGB (e.g. `rgba(20,29,46,.3)` = ink).
-- Known leftovers still hard-coded: `#fff`/`#000`, a few greys (`#8F8B80`, `#7B8598`,
-  `#CFCDC6`) and the "open now" dot `#2FA35B`. Tokenise them if you touch those rules.
+- Known leftovers still hard-coded: `#fff`/`#000` and a few greys (`#8F8B80`, `#CFCDC6`).
+  Tokenise them if you touch those rules.
 - `variante-carmim` has its **own semantic token set** (`--bg --fg --muted --line --surface
   --accent --on-accent --deep --field …`, Geist/Geist Mono). Do not mix the two vocabularies.
 
@@ -104,7 +104,7 @@ laid out in page order. Prefix = component:
 
 | Prefix | Component |
 |---|---|
-| `nav-`, `burger`, `tb-` | top bar, nav, mobile drawer, "open now" status |
+| `site-header`, `nav-`, `burger`, `m-` | header (Figma "Header v5"): `#nav` bar, `#mDrawer` mobile drawer, `.m-backdrop` |
 | `hero`, `hm-` | hero |
 | `obras-`, `ob-` | works carousel (14 photos) |
 | `meta-band`, `band` | numbers band |
