@@ -64,6 +64,19 @@ def pic(spec, root):
     extra = ' fetchpriority="high"' if load == 'eager' else ' loading="lazy"'
     return (f'<picture><source type="image/avif" srcset="{ss("avif")}" sizes="{sizes}"><source type="image/webp" srcset="{ss("webp")}" sizes="{sizes}">'
             f'<img src="{root}img/{name}-{ws[0][0]}.jpg" srcset="{ss("jpg")}" sizes="{sizes}" width="{w0}" height="{h0}" alt="{html.escape(alt)}" decoding="async"{extra}></picture>')
+def picad(spec, root):
+    """Direção de arte: vertical 4:5 no computador, 4:3 no telemóvel."""
+    desk, mob, alt = spec.split('|')
+    ss = lambda n, ext: ', '.join(f'{root}img/{n}-{w}.{ext} {w}w' for w, h in MAN[n]['w'])
+    w0, h0 = MAN[mob]['w'][-1]
+    srcs = ''.join(f'<source media="(min-width: 1024px)" type="image/{t}" srcset="{ss(desk, e)}" sizes="480px">' for t, e in [('avif','avif'),('webp','webp')])
+    srcs += ''.join(f'<source type="image/{t}" srcset="{ss(mob, e)}" sizes="100vw">' for t, e in [('avif','avif'),('webp','webp')])
+    return f'<picture>{srcs}<img src="{root}img/{mob}-{MAN[mob]["w"][0][0]}.jpg" srcset="{ss(mob, "jpg")}" sizes="100vw" width="{w0}" height="{h0}" alt="{html.escape(alt)}" decoding="async" fetchpriority="high"></picture>'
+def preloadad(spec, root):
+    desk, mob = spec.split('|')
+    ss = lambda n: ', '.join(f'{root}img/{n}-{w}.avif {w}w' for w, h in MAN[n]['w'])
+    return (f'<link rel="preload" as="image" type="image/avif" media="(min-width: 1024px)" imagesrcset="{ss(desk)}" imagesizes="480px" fetchpriority="high">'
+            f'<link rel="preload" as="image" type="image/avif" media="(max-width: 1023px)" imagesrcset="{ss(mob)}" imagesizes="100vw" fetchpriority="high">')
 def preload(name, root):
     ws = MAN[name]['w']
     return f'<link rel="preload" as="image" type="image/avif" imagesrcset="{", ".join(f"{root}img/{name}-{w}.avif {w}w" for w, h in ws)}" imagesizes="(min-width: 1024px) 560px, 100vw" fetchpriority="high">'
@@ -74,6 +87,8 @@ def render(src, root, page, inline_css, text=None):
         t = re.sub(r'\{\{include:([^}]+)\}\}', lambda m: (P / m.group(1)).read_text(encoding='utf-8').strip(), t)
     css = (S / 'v3.css').read_text(encoding='utf-8')
     t = t.replace('{{css}}', css if inline_css else '')
+    t = re.sub(r'\{\{picad:([^}]+)\}\}', lambda m: picad(m.group(1), root), t)
+    t = re.sub(r'\{\{preloadad:([^}]+)\}\}', lambda m: preloadad(m.group(1), root), t)
     t = re.sub(r'\{\{pic:([^}]+)\}\}', lambda m: pic(m.group(1), root), t)
     t = re.sub(r'\{\{preload:([^}]+)\}\}', lambda m: preload(m.group(1), root), t)
     t = re.sub(r'\{\{faq:([\w-]+)\}\}', lambda m: faq_html(m.group(1)), t)
@@ -100,7 +115,9 @@ def service_page(slug, d):
     feat = ''
     if d['feature']:
         f = d['feature']; aside = ''
-        if f['aside']:
+        if f['aside'] and f['aside'][0] == 'svg':
+            aside = f'<div>{{{{include:{f["aside"][1]}}}}}</div>'
+        elif f['aside']:
             a = f['aside']; aside = f'<figure class="project">{{{{pic:{a[1]}|{a[2]}|(min-width: 1024px) 560px, 100vw|lazy}}}}<figcaption><b>{esc(a[3])}</b></figcaption></figure>'
         body = ''.join(f'<p>{esc(x)}</p>' for x in f['body'])
         feat = f'''<section class="section" id="{f['id']}" aria-labelledby="h-feat">
@@ -133,13 +150,15 @@ def main():
     (D / 'ar-condicionado-lisboa' / 'index.html').write_text(render('ar-condicionado-lisboa.html', '../', 'ar-condicionado', False), encoding='utf-8')
     for slug, d in SERVICES.items():
         (D / slug).mkdir(); (D / slug / 'index.html').write_text(service_page(slug, d), encoding='utf-8')
+    SCHEMA['obras'] = {'@context': 'https://schema.org', '@graph': [{'@type': 'CollectionPage', 'name': 'Obras da MDM em Lisboa', 'url': SITE + 'obras/', 'about': {'@id': SITE + '#mdm'}}, {'@type': 'BreadcrumbList', 'itemListElement': [{'@type': 'ListItem', 'position': 1, 'name': 'Início', 'item': SITE}, {'@type': 'ListItem', 'position': 2, 'name': 'Obras', 'item': SITE + 'obras/'}]}, ORG]}
+    (D / 'obras').mkdir(); (D / 'obras' / 'index.html').write_text(render('obras.html', '../', 'obras', False), encoding='utf-8')
     for sub, src in [('obrigado', 'obrigado.html')]:
         (D / sub).mkdir(); (D / sub / 'index.html').write_text(render(src, '../', sub, False), encoding='utf-8')
     (D / '404.html').write_text(render('404.html', '/', '404', False).replace('href="/assets', 'href="/assets'), encoding='utf-8')
     (D / 'privacidade').mkdir(); shutil.copy(B.parent / 'privacidade.html', D / 'privacidade' / 'index.html')
     shutil.copy(P / 'logo.svg', D / 'favicon.svg'); shutil.copy(B.parent / 'favicon' / 'logo-180.png', D / 'apple-touch-icon.png')
     (D / 'robots.txt').write_text('# Pré-visualização: não indexar. No lançamento: Allow e Sitemap.\nUser-agent: *\nDisallow: /\n')
-    (D / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + ''.join(f'  <url><loc>{SITE}{p}</loc></url>\n' for p in ['', 'ar-condicionado-lisboa/'] + [k + '/' for k in SERVICES] + ['privacidade/']) + '</urlset>\n')
+    (D / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + ''.join(f'  <url><loc>{SITE}{p}</loc></url>\n' for p in ['', 'ar-condicionado-lisboa/'] + [k + '/' for k in SERVICES] + ['obras/', 'privacidade/']) + '</urlset>\n')
     SVC_LINKS = ''.join(f"- [{d['h1']}]({SITE}{k}/)\n" for k, d in SERVICES.items())
     (D / 'llms.txt').write_text(f"""# MDM · AVAC e assistência técnica (Lisboa)
 
@@ -154,7 +173,8 @@ def main():
 ## Páginas
 - [Início]({SITE})
 - [Instalação de ar condicionado em Lisboa]({SITE}ar-condicionado-lisboa/)
-{SVC_LINKS}- [Política de privacidade]({SITE}privacidade/)
+{SVC_LINKS}- [Obras (fotografias de trabalho real)]({SITE}obras/)
+- [Política de privacidade]({SITE}privacidade/)
 """)
     (D / '_headers').write_text('/*\n  X-Robots-Tag: noindex, nofollow\n/img/*\n  Cache-Control: public, max-age=31536000, immutable\n/fonts/*\n  Cache-Control: public, max-age=31536000, immutable\n')
     print('ok', sorted(str(p.relative_to(D)) for p in D.rglob('*.html')))

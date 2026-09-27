@@ -18,7 +18,7 @@
 <link rel="icon" href="{{root}}favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="{{root}}apple-touch-icon.png">
 <link rel="preload" href="{{root}}fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
-{{preload:hero-split-quarto}}
+{{preloadad:hero-bomba-moradia|hero-bomba-moradia-m}}
 <style>{{css}}</style>
 {{include:head-scripts.html}}
 <script type="application/ld+json">{{schema:home}}</script>
@@ -38,9 +38,9 @@
         <a class="btn btn--secondary" href="tel:+351218935050" data-ch="call">Ligar 218 935 050</a>
       </div>
     </div>
-    <figure class="hero-photo">
-      {{pic:hero-split-quarto|Ar condicionado mural instalado pela MDM num quarto|(min-width: 1024px) 560px, 100vw|eager}}
-      <figcaption>Split mural · quarto de habitação</figcaption>
+    <figure class="hero-photo hero-photo--tall">
+      {{picad:hero-bomba-moradia|hero-bomba-moradia-m|Bomba de calor ar-água instalada pela MDM no jardim de uma moradia}}
+      <figcaption>Bomba de calor ar-água · moradia</figcaption>
     </figure>
   </div>
 </section>
@@ -64,19 +64,19 @@
     </div>
     <div class="svc-list">
       <a class="svc" href="ar-condicionado-lisboa/">
-        <span class="svc-media">{{pic:mitsubishi-moradia|Unidade exterior Mitsubishi Electric instalada numa moradia|200px|lazy}}</span>
+        <span class="svc-media">{{pic:split-cozinha|Split mural instalado numa cozinha de apartamento|200px|lazy}}</span>
         <h3>Ar condicionado</h3>
         <span class="svc-sub">Split e conduta para casas, apartamentos e lojas.</span>
         <span class="svc-go">Ver serviço <span aria-hidden="true">→</span></span>
       </a>
       <a class="svc" href="ar-condicionado-lisboa/#multi-split">
-        <span class="svc-media">{{pic:duas-unidades-fachada|Duas unidades exteriores na fachada de uma moradia|200px|lazy}}</span>
+        <span class="svc-media">{{pic:multisplit-cobertura-midea|Unidades exteriores Midea de um multi-split numa cobertura|200px|lazy}}</span>
         <h3>Multi-split</h3>
         <span class="svc-sub">Várias divisões com uma só unidade exterior.</span>
         <span class="svc-go">Ver serviço <span aria-hidden="true">→</span></span>
       </a>
       <a class="svc" href="bombas-de-calor-lisboa/">
-        <span class="svc-media">{{include:heatpump.svg}}</span>
+        <span class="svc-media">{{pic:bomba-moradia|Bomba de calor ar-água instalada numa moradia|200px|lazy}}</span>
         <h3>Bombas de calor</h3>
         <span class="svc-sub">Ar-água para águas quentes e aquecimento.</span>
         <span class="svc-go">Ver serviço <span aria-hidden="true">→</span></span>
@@ -88,7 +88,7 @@
         <span class="svc-go">Ver serviço <span aria-hidden="true">→</span></span>
       </a>
       <a class="svc" href="ventilacao-lisboa/">
-        <span class="svc-media">{{pic:ventilacao-ventilbox|Técnico da MDM a montar um grupo de extração com condutas|200px|lazy}}</span>
+        <span class="svc-media">{{pic:ventilacao-fachada|Condutas de ventilação montadas na fachada de um edifício|200px|lazy}}</span>
         <h3>Ventilação</h3>
         <span class="svc-sub">Extração e renovação de ar em casas, cozinhas e lojas.</span>
         <span class="svc-go">Ver serviço <span aria-hidden="true">→</span></span>
@@ -106,22 +106,21 @@
 <section class="section section--paper" id="obras" aria-labelledby="h-obras">
   <div class="wrap">
     <div class="sec-head">
-      <span class="eyebrow">Obras</span>
       <h2 id="h-obras">Trabalho real, fotografado pela nossa equipa.</h2>
     </div>
     <div class="projects">
-      <figure class="project">{{pic:duas-unidades-fachada|Duas unidades exteriores empilhadas na fachada de uma moradia|(min-width: 1024px) 280px, 50vw|lazy}}<figcaption><b>Duas unidades exteriores</b><span>Fachada de moradia</span></figcaption></figure>
-      <figure class="project">{{pic:split-sala|Split mural instalado numa sala de habitação|(min-width: 1024px) 280px, 50vw|lazy}}<figcaption><b>Split mural</b><span>Sala de habitação</span></figcaption></figure>
-      <figure class="project">{{pic:ventilacao-cobertura|Unidade de ventilação e condutas numa cobertura em Lisboa|(min-width: 1024px) 280px, 50vw|lazy}}<figcaption><b>Ventilação e condutas</b><span>Cobertura, Lisboa</span></figcaption></figure>
-      <figure class="project">{{pic:cassete-manutencao|Manutenção do filtro de uma cassete de teto de ar condicionado|(min-width: 1024px) 280px, 50vw|lazy}}<figcaption><b>Cassete de teto</b><span>Manutenção de filtros</span></figcaption></figure>
+      <figure class="project">{{pic:split-cozinha|Split mural instalado numa cozinha de apartamento|(min-width: 1024px) 280px, 50vw|lazy}}<figcaption><b>Split mural</b><span>Cozinha de apartamento</span></figcaption></figure>
+      <figure class="project">{{pic:bomba-varanda-deposito|Bomba de calor com depósito de água quente numa varanda|(min-width: 1024px) 280px, 50vw|lazy}}<figcaption><b>Bomba de calor e depósito</b><span>Varanda de apartamento</span></figcaption></figure>
+      <figure class="project">{{pic:multisplit-cobertura-midea|Unidades exteriores Midea numa cobertura|(min-width: 1024px) 280px, 50vw|lazy}}<figcaption><b>Unidades exteriores Midea</b><span>Cobertura</span></figcaption></figure>
+      <figure class="project">{{pic:ventilacao-fachada|Condutas de ventilação montadas na fachada de um edifício|(min-width: 1024px) 280px, 50vw|lazy}}<figcaption><b>Ventilação e condutas</b><span>Fachada de edifício</span></figcaption></figure>
     </div>
+    <p style="margin-top:2rem"><a class="btn btn--secondary" href="obras/">Ver todas as obras</a></p>
   </div>
 </section>
 
-<section class="section" id="como-funciona" aria-labelledby="h-como">
+<section class="section section--ink" id="como-funciona" aria-labelledby="h-como">
   <div class="wrap">
     <div class="sec-head">
-      <span class="eyebrow">Como funciona</span>
       <h2 id="h-como">Três passos, a mesma equipa do início ao fim.</h2>
     </div>
     <ol class="steps">
@@ -129,6 +128,26 @@
       <li class="step"><h3>Visita e orçamento</h3><p>Um técnico vê o local, confirma a parte elétrica e envia o orçamento, sem compromisso.</p></li>
       <li class="step"><h3>Instalação e manutenção</h3><p>A mesma equipa instala, liga ao quadro e faz a manutenção quando for preciso.</p></li>
     </ol>
+  </div>
+</section>
+
+<section class="section" id="equipa" aria-labelledby="h-equipa">
+  <div class="wrap team-grid">
+    <figure class="team-photo">{{pic:manutencao-conduta|Técnico da MDM em manutenção de uma unidade de condutas no teto|(min-width: 1024px) 560px, 100vw|lazy}}</figure>
+    <div class="prose">
+      <h2 id="h-equipa" style="margin-bottom:1.25rem">Uma equipa de Lisboa, desde 1991.</h2>
+      <p>A M.D.M. - Manuel Domingos Melancia, Lda trabalha em Lisboa desde 1991, com sede no Parque das Nações. Os técnicos que instalam o seu equipamento são os mesmos que o ligam ao quadro e que voltam para a manutenção.</p>
+      <p>Técnicos com certificação para gases fluorados, eletricista certificado na equipa, e as marcas com que trabalhamos há anos: MIDEA, Mitsubishi Electric, Daikin e France Air.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band-photo" aria-labelledby="h-empresas">
+  {{pic:edificio-comercial|Fachada de edifício comercial com várias unidades exteriores de ar condicionado instaladas pela MDM|100vw|lazy}}
+  <div class="band-photo-text wrap">
+    <h2 id="h-empresas" class="h3">Também para lojas, condomínios e empresas.</h2>
+    <p>Contratos de manutenção, edifícios de serviços e espaços comerciais na Grande Lisboa.</p>
+    <a class="btn btn--primary" href="manutencao-assistencia-avac-lisboa/">Manutenção para empresas</a>
   </div>
 </section>
 
@@ -148,7 +167,6 @@
 <section class="section" id="perguntas" aria-labelledby="h-faq">
   <div class="wrap">
     <div class="sec-head">
-      <span class="eyebrow">Perguntas frequentes</span>
       <h2 id="h-faq">Respostas diretas.</h2>
     </div>
     <div class="faq">

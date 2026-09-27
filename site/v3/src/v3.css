@@ -283,3 +283,28 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+/* ── v3.1: hero vertical, faixa escura, equipa, faixa fotográfica ── */
+.hero-photo--tall img { aspect-ratio: 4 / 3; }
+@media (min-width: 1024px) {
+  .hero-grid:has(.hero-photo--tall) { grid-template-columns: minmax(0, 1.25fr) minmax(0, .85fr); }
+  .hero-photo--tall img { aspect-ratio: 4 / 5; }
+}
+.section--ink { background: var(--ink); color: var(--cream); }
+.section--ink h2, .section--ink h3 { color: var(--cream); }
+.section--ink .step { border-top-color: var(--red-on-ink); }
+.section--ink .step::before { color: var(--red-on-ink); }
+.section--ink .step p { color: rgba(250,249,245,.82); }
+.team-grid { display: grid; gap: var(--s6); align-items: center; }
+.team-photo { margin: 0; }
+.team-photo img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--r-m); }
+@media (min-width: 1024px) { .team-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s8); } }
+.band-photo { position: relative; background: var(--ink); color: var(--cream); }
+.band-photo img { width: 100%; height: clamp(280px, 42vw, 520px); object-fit: cover; opacity: .55; }
+.band-photo-text { position: absolute; inset: auto 0 0 0; padding-bottom: var(--s7); }
+.band-photo-text p { margin: var(--s3) 0 var(--s5); max-width: 36rem; color: rgba(250,249,245,.9); }
+.band-photo-text .h3 { font-size: clamp(1.5rem, 3.2vw, 2.5rem); letter-spacing: -.03em; max-width: 22ch; }
+@media (max-width: 640px) { .band-photo img { height: 420px; } }
+/* barra móvel: WhatsApp só ícone para dar espaço à ação principal */
+.mbar .mb-wa { width: 48px; padding: 0; }
+.mbar .mb-wa .mb-lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }

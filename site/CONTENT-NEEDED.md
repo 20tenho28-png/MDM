@@ -51,7 +51,7 @@ Legenda de prioridade: **P1** bloqueia a Fase 2/3 · **P2** necessário antes do
 | # | Item | Prioridade |
 |---|---|---|
 | 4.1 | Carrossel "Obras" (10 fotos): **#1 (carga de gás) e #10 (bateria de unidades) não são da MDM, retirar**; #2 a #9 confirmadas | ✔ |
-| 4.2 | 6 a 12 fotografias recentes por serviço (AC, multi-split, bomba de calor, quadro elétrico, ventilação, manutenção), com legenda "Equipamento, marca, local" (ex.: "Bomba de calor Midea, Lisboa") | P1 |
+| 4.2 | ✔ Recebidas 30 fotos (27/09, `Fotos_separadas.zip`): já usadas. Faltam só fotos de trabalho elétrico recente. Antes: 6 a 12 fotografias recentes por serviço (AC, multi-split, bomba de calor, quadro elétrico, ventilação, manutenção), com legenda "Equipamento, marca, local" (ex.: "Bomba de calor Midea, Lisboa") | P1 |
 | 4.3 | 3 a 4 obras para cartões de projeto: tipo de imóvel, zona, problema, solução (sem nomes de clientes sem autorização) | P2 |
 | 4.4 | Autorização escrita dos clientes para qualquer nome/logótipo ou testemunho a publicar | P2 |
 | 4.5 | Os 3 a 5 pontos de "Como funciona" tal como a MDM trabalha hoje (ex.: pedido → visita/orçamento → instalação → manutenção) | P2 |
