@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<title>MDM imagem de partilha</title>
+<!--
+  Imagem Open Graph (1200x630) partilhada por todas as páginas v3.
+  Gerada com: node site/v3/og/render.cjs  ->  site/v3/img/og-v3.jpg
+  O logótipo vem de src/partials/logo.svg e é injetado pelo render.cjs no #logo.
+  Legível em pré-visualizações pequenas (~500px): nada abaixo de 30px.
+-->
+<style>
+@font-face { font-family: 'Geist'; src: url('../fonts/geist.woff2') format('woff2'); font-weight: 100 900; }
+@font-face { font-family: 'Geist Mono'; src: url('../fonts/geist-mono.woff2') format('woff2'); font-weight: 100 900; }
+:root {
+  --cream: #FAF9F5; --sand: #E8E4D9;
+  --ink: #141D2E; --slate: #4E5871;
+  --red: #A30711;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1200px; height: 630px; overflow: hidden; background: var(--cream); }
+body {
+  font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+.og { display: grid; grid-template-columns: 1fr 450px; width: 1200px; height: 630px; }
+.copy { display: flex; flex-direction: column; padding: 52px 52px 50px 64px; }
+.logo { display: block; height: 76px; }
+.logo svg { height: 100%; width: auto; display: block; }
+h1 {
+  margin-top: auto;
+  font-weight: 700;
+  font-size: 60px;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+.contact {
+  margin-top: 36px;
+  padding-top: 22px;
+  border-top: 3px solid var(--red);
+  width: max-content;
+  font-weight: 600;
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.contact .dot { color: var(--slate); padding: 0 .28em; }
+.photo { position: relative; height: 630px; overflow: hidden; background: var(--sand); }
+.photo img { width: 100%; height: 100%; object-fit: cover; object-position: 100% 50%; display: block; }
+</style>
+</head>
+<body>
+<main class="og">
+  <div class="copy">
+    <div class="logo" id="logo" role="img" aria-label="MDM"></div>
+    <h1>Ar condicionado e bombas de calor em Lisboa, instalados e mantidos pela mesma equipa desde 1991.</h1>
+    <p class="contact">218 935 050<span class="dot">·</span>mdmassist.com.pt</p>
+  </div>
+  <div class="photo">
+    <img src="../img/hero-bomba-moradia-960.jpg" width="960" height="1200" alt="Bomba de calor ar-água instalada pela MDM no jardim de uma moradia">
+  </div>
+</main>
+</body>
+</html>
