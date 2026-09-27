@@ -1,6 +1,6 @@
 # MDM website — Phase 2 strategy
 
-27/09/2026 · builds on `AUDIT.md` (Phase 1, approved) and the owner decisions recorded in its §0 · status: **awaiting approval**
+27/09/2026 · builds on `AUDIT.md` (Phase 1, approved) and the owner decisions recorded in its §0 · status: **decisions answered 27/09 (§6)**
 
 All proposed copy is PT-PT with no em dashes. Anything that depends on a fact the owner has not yet supplied is marked `[[…]]` and is listed in `CONTENT-NEEDED.md`; it will not be published as a placeholder.
 
@@ -59,7 +59,7 @@ Word list: *orçamento* (never "cotação"), *visita técnica*, *assistência t�
 | `/404.html` | Página não encontrada | Recovery | n/a |
 
 ### Where the data supports the brief, and where it challenges it
-- **Keep the 5 service pages. The data is unambiguous.** Every top competitor has one URL per service, and a 651-word one-pager cannot rank for three intents (AUDIT SEO-02). Heat pumps and maintenance are the two weakest-contested intents (AUDIT §5, points 3 and 4), so they are built first.
+- **Keep the 5 service pages. The data is unambiguous.** Every top competitor has one URL per service, and a 651-word one-pager cannot rank for three intents (AUDIT SEO-02). Heat pumps and maintenance are the two weakest-contested intents (AUDIT §5, points 3 and 4); by owner decision the AC page is built first and these two follow immediately (§6).
 - **Multi-split is a section, not a page.** It shares the "ar condicionado" intent. It gets a dedicated section with the **multi-split infographic brought back**, and "multi-split Lisboa" as a secondary keyword. A separate page would cannibalise the AC page.
 - **"Instalações elétricas" is framed for the new audience.** Homeowners don't search "alimentações AVAC". The page leads with *eletricista / quadro elétrico* and uses the heat-pump and AC power supply as its differentiator. Secondary keyword: "eletricista Lisboa". This is the least competitive fit of the five; it stays because it carries proof point 2.
 - **Obras as its own page, conditionally.** Only **8 real photos** are confirmed today (#2 to #9; #1 and #10 removed). A gallery page with 8 photos is thin. Recommendation: build it at launch only if at least 12 real, captioned photos exist; otherwise keep projects as a home section and publish `/obras/` when the photos arrive. (Decision for the owner, §6.)
@@ -207,14 +207,18 @@ Desktop has no WhatsApp in the header or the hero, by design. The brief's "one p
 
 ---
 
-## 6. Decisions requested at this checkpoint
-1. **Promise:** approve *"Ar condicionado e bombas de calor em Lisboa, instalados e mantidos pela mesma equipa desde 1991."* (or edit).
-2. **Obras page:** publish at launch only with ≥ 12 real captioned photos (recommended), or publish now with 8.
-3. **Form field 6:** name + telemóvel/email counted as one "Como o contactamos" field (recommended), or drop the name to keep six single inputs.
-4. **Consent banner for PostHog:** follow the brief (recommended; it's your call), or keep today's cookieless mode without a banner.
-5. **Service-page build order:** Bombas de calor → Manutenção e assistência → Ar condicionado → Instalações elétricas → Ventilação (by opportunity, AUDIT §5).
+## 6. Owner decisions at this checkpoint (27/09/2026)
+| # | Topic | Decision |
+|---|---|---|
+| 1 | Promise | **Approved as written:** *"Ar condicionado e bombas de calor em Lisboa, instalados e mantidos pela mesma equipa desde 1991."* |
+| 2 | Obras page | **Wait for ≥ 12 real captioned photos.** Until then projects live as a home section; `/obras/` is not published and not in the sitemap |
+| 3 | Form field 6 | **"Como o contactamos": Nome + telemóvel ou email**, counted as one field |
+| 4 | Analytics | **Consent banner.** PostHog loads only after "Aceitar"; "Recusar" has equal weight |
+| 5 | Service-page build order | **Ar condicionado first**, then Bombas de calor, Manutenção e assistência, Instalações elétricas, Ventilação |
+| 6 | Google Business Profile data | Owner will **unblock Google** in the environment network settings so the profile can be read directly (link: https://maps.app.goo.gl/1NTJtEvzcYW6Cra18) |
+| 7 | Preview | Owner will **connect the GitHub repo** to the Netlify project `mdm-site-preview` (the `netlify.toml` at the repo root publishes `site/deploy/creme` with `noindex`) |
 
 ## 7. Preview and device check at this checkpoint
-- Netlify project **`mdm-site-preview`** was created (27/09): https://app.netlify.com/projects/mdm-site-preview. The first upload is **blocked by this environment's network** (`api.netlify.com` and `netlify-mcp.netlify.app` are denied). To unblock it, add both domains to the environment's allowed network domains (cloud environment menu in the session title bar, then Edit, then Network access). Or connect the GitHub repo to the project in the Netlify dashboard with publish directory `site/deploy/creme`.
+- Netlify project **`mdm-site-preview`** was created (27/09); the owner will connect the GitHub repo (decision 7): https://app.netlify.com/projects/mdm-site-preview. The first upload is **blocked by this environment's network** (`api.netlify.com` and `netlify-mcp.netlify.app` are denied). To unblock it, add both domains to the environment's allowed network domains (cloud environment menu in the session title bar, then Edit, then Network access). Or connect the GitHub repo to the project in the Netlify dashboard with publish directory `site/deploy/creme`.
 - The preview will be served `noindex, nofollow` (headers + robots.txt; ready in the preview folder).
 - Phase 2 changes no code, so the phone checklist from AUDIT §7 applies unchanged to the first preview.
