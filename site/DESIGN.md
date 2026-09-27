@@ -153,3 +153,45 @@ Direto, técnico, sem letra pequena: "Respostas diretas, sem letra pequena." Nú
 | Hero | foto desfocada + véu creme | campo vermelho `--field` | Só carmim — não adotado |
 | Navegação | barra fixa sólida (Header v5, 27/09) | barra lateral `--rail` #0F1522 | Só carmim — não adotado |
 | Obras | carrossel | galeria dispersa em navy | Só carmim — não adotado |
+
+## 13. Sistema v3 (Fase 3, 27/09/2026): evolução para o relançamento
+
+Construído no Figma (ficheiro `f6utVl8Hx1POsomLjSVd9Y`, página **"Design system v3"**): quadros *Foundations* (23:69), *Components* (24:69), *Photography direction* (25:226) e *Photo library* (21:69). Variáveis e estilos do Figma espelham os tokens abaixo. **Estado:** fundações e direção fotográfica completas; o quadro de componentes precisa de uma correção de dimensionamento (`docs/figma/fix-components-v3.js`) que não correu porque o plano Figma Starter esgotou as chamadas MCP do mês.
+
+### Tokens novos ou alterados (entram no `:root` na Fase 5)
+| Token | Valor | Porquê |
+|---|---|---|
+| `--field` | #FFFFFF | Fundo dos campos (substitui `#fff` solto) |
+| `--line-strong` | #8A8577 | Contorno dos campos: 3.7:1 sobre branco (WCAG 1.4.11; antes 1.16:1) |
+| `--red-on-ink` | #E89B8A | Ênfase sobre navy 7.6:1 (era hex solto) |
+| placeholder | `var(--slate)` | 7.1:1 (antes #8F8B80 a 3.4:1, A11Y-04) |
+| `--space-1…10` | 4, 8, 12, 16, 24, 32, 48, 64, 96, 128 | Escala única de espaço |
+| `--r-xs` / `--r-pill` | 4px / 999px | Controlos do header / só a barra móvel |
+
+### Escala tipográfica v3 (em rem no código)
+| Estilo | Tamanho / linha | Peso | Nota |
+|---|---|---|---|
+| Display/H1 | clamp(40, 6.4vw, 80) / 1.0 | 700, −5% | Promessa aprovada |
+| Display/H2 | clamp(30, 4.2vw, 50) / 1.02 | 600, −4.5% | |
+| Heading/H3 | 24 / 29 | 600 | Cartões, passos |
+| Heading/Stat | 32 / 36 | 600 | Faixa de prova |
+| Body/Lead | 19 / 30 | 400 | Intros |
+| **Body/Base** | **17 / 27** | 400 | Subiu de 15 para 17 (público particular) |
+| Body/Small | 15 / 23 | 400 | Notas, rodapé |
+| UI/Button | 16 | 600 | Botões, barra |
+| UI/Caption | 14 / 20 | 500 | Legendas de fotografia |
+| Mono/Eyebrow | 12 / 16 | Mono 500, +8%, maiúsculas | Mínimo 12px (era 11px); no máximo 2 por página |
+
+### Componentes v3
+Botão (Primary carmim · Secondary contorno tinta · WhatsApp; Default/Hover, 48px, raio 6, sem levitar) · **Barra fixa móvel** (Ligar · Pedir orçamento · WhatsApp; oculta com o formulário em vista e com o menu aberto; `env(safe-area-inset-bottom)`) · Hero (H1 promessa + frase + Pedir orçamento + Ligar; foto real nítida 3:4) · Faixa de prova (1991 · Google [oculto sem dados reais] · Grande Lisboa · Certificados) · Linha de serviço (leva à página do serviço) · Cartão de obra (legenda fora da foto) · Passo "Como funciona" · Resumo de avaliações (só com números reais) · Formulário de 6 campos (Default / Error / Success; sucesso sem prazo) · FAQ (Closed/Open) · Banner de consentimento (Aceitar/Recusar com o mesmo peso) · Rodapé navy.
+
+### Direção fotográfica
+1. Só obras reais da MDM; as fotos #1 (carga de gás) e #10 (bateria de unidades) do carrossel antigo saem.
+2. Recortes: 4:3 cartões e linhas de serviço; 3:4 hero desktop; 4:3 hero mobile. Enquadrar o equipamento.
+3. Tratamento único: neutro-quente, contraste +10, saturação −10, sem filtros, vinhetas nem desfoque; verticais direitas.
+4. Nunca texto sobre fotografia; legenda numa faixa creme por baixo.
+5. Legenda: "Equipamento marca · tipo de imóvel, local" (ex.: "Bomba de calor Midea · moradia, Loures"). Sem nomes de clientes sem autorização escrita.
+6. Técnicos só com o polo MDM; sem rostos de clientes nem matrículas.
+
+### Tipografia: nota sobre o brief
+O brief pede "uma display com carácter + uma de texto muito legível". Mantém-se Geist (decisão do dono de 27/09): Geist 700 apertada faz o papel de display, Geist 400 a 17px o de texto. Se o dono quiser um contraste maior, a alternativa sem custos de licença é uma serifa de texto (ex.: Source Serif 4, OFL) só para o corpo; não aplicada.
