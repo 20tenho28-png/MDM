@@ -66,7 +66,7 @@ def foto(ctx, args):
     extra = ' fetchpriority="high"' if loading == "eager" else ""
     return (
         f'<picture class="{cls}">'
-        + f'<source type="image/webp" srcset="{base}-800.webp 800w, {base}-1600.webp 1600w" sizes="{sizes}">'
+        + f'<source type="image/webp" srcset="{base}-800.webp {w // 2}w, {base}-1600.webp {w}w" sizes="{sizes}">'
         + f'<img src="{base}-1600.jpg" alt="{html.escape(alt, quote=True)}" width="{w}" height="{h}" '
         + f'loading="{loading}" decoding="async"{extra}></picture>'
     )
@@ -79,6 +79,9 @@ def wa(ctx, key):
 def each(ctx, args):
     name, sel = args.split(None, 1)
     sel = sel.strip()
+    eager1 = sel.endswith(" eager1")  # primeira imagem é o LCP (ex.: grelha de obras.html)
+    if eager1:
+        sel = sel[: -len(" eager1")].strip()
     if sel == "all":
         items = OBRAS
     elif sel.startswith("cat="):
@@ -92,7 +95,8 @@ def each(ctx, args):
     tpl = (SRC / "partials" / f"{name}.html").read_text(encoding="utf-8")
     out = []
     for i, o in enumerate(items):
-        c = dict(ctx, obra=o, index=i, pos=i + 1, total=len(items))
+        c = dict(ctx, obra=o, index=i, pos=i + 1, total=len(items),
+                 loading="eager" if (eager1 and i == 0) else "lazy")
         out.append(render(tpl, c))
     return "".join(out)
 
@@ -146,7 +150,7 @@ def business_ld():
         "telephone": SITE["phoneE164"],
         "email": SITE["email"],
         "foundingDate": SITE["founded"],
-        "address": {"@type": "PostalAddress", "streetAddress": "Alameda dos Oceanos, 108A, Edifício Vila do Oriente",
+        "address": {"@type": "PostalAddress", "streetAddress": "Alameda dos Oceanos 108 A, Edifício Vila do Oriente",
                     "postalCode": "1990-426", "addressLocality": "Lisboa", "addressCountry": "PT"},
         "areaServed": {"@type": "Place", "name": "Grande Lisboa"},
         "openingHoursSpecification": [{"@type": "OpeningHoursSpecification",
@@ -159,12 +163,14 @@ FAQ_RE = re.compile(r'<details class="faq-item"[^>]*>\s*<summary[^>]*>(.*?)</sum
 
 
 def strip_tags(s):
-    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", s)).strip()
+    s = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", s)).strip()
+    return re.sub(r"\s+([.,;:!?)])", r"\1", s)
 
 
 def faq_ld(body):
     qs = [{"@type": "Question", "name": html.unescape(strip_tags(q)),
-           "acceptedAnswer": {"@type": "Answer", "text": html.unescape(strip_tags(a))}} for q, a in FAQ_RE.findall(body)]
+           "acceptedAnswer": {"@type": "Answer", "text": html.unescape(strip_tags(a))}}
+          for q, a in FAQ_RE.findall(body) if not PLACEHOLDER_RE.search(a)]  # respostas por preencher não vão para o Google
     return {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": qs} if qs else None
 
 
@@ -175,7 +181,7 @@ def breadcrumb_ld(trail):
 
 
 def page_ctx(meta, file):
-    meta = {"preselect": "", "nav": "", "robots": "index,follow", **meta}
+    meta = {"preselect": "", "nav": "", "robots": "index,follow", "og": "", **meta}
     depth = file.count("/")
     # a 404 é servida em qualquer profundidade (/obras/xyz.html): precisa de caminhos absolutos
     root = "/" if file == "404.html" else "../" * depth
@@ -203,7 +209,9 @@ def build_page(meta, body_tpl, extra_ctx=None):
         '<script type="application/ld+json">' + json.dumps(x, ensure_ascii=False).replace("</", "<\\/") + "</script>\n"
         for x in lds)
     css = "".join(f'<link rel="stylesheet" href="{ctx["root"]}assets/css/{c}">\n' for c in meta.get("css", []))
-    ctx.update({"content": body, "jsonld": ld_html, "page_css": css,
+    og = meta.get("og") or ""
+    ctx.update({"og_image": SITE["baseUrl"] + "/assets/img/" + ("obras/" + og if og else "og.jpg"),
+                "content": body, "jsonld": ld_html, "page_css": css,
                 "canonical": SITE["baseUrl"] + "/" + ("" if file == "index.html" else file)})
     layout = (SRC / "templates" / "layout.html").read_text(encoding="utf-8")
     out = render(layout, ctx)
@@ -233,9 +241,9 @@ def build():
             prev_o, next_o = OBRAS[i - 1], OBRAS[(i + 1) % len(OBRAS)]
             file = f"obras/{o['slug']}.html"
             meta = {"file": file, "nav": "obras", "css": ["pag-obras.css"],
-                    "title": f"{o['title']} · Obras MDM",
-                    "description": f"{o['especialidade']}, {o['trabalho'].lower()}: {o['title'].lower()}. "
-                                   f"Obra da MDM na grande Lisboa, fotografada no local.",
+                    "title": f"{o['title']}: {o['especialidade'].lower()} · Obras MDM Lisboa",
+                    "description": f"{o['title']}. {o['especialidade']}, {o['trabalho'].lower()}: {o['equipamento']}. "
+                                   f"Obra da MDM na grande Lisboa, fotografada no local pelos técnicos.",
                     "og": f"foto-{o['n']}-1600.jpg",
                     "jsonld": ["breadcrumb"],
                     "breadcrumb": [["Início", ""], ["Obras", "obras.html"], [o["title"], file]]}

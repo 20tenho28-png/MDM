@@ -15,7 +15,7 @@ Pré-visualizar: abrir `website/public/index.html` no browser, ou `python3 -m ht
 
 ## Publicar
 
-Qualquer alojamento estático serve. Netlify: diretório base `website` (o `netlify.toml` já tem o comando e a pasta). Antes de publicar, preencher os placeholders abaixo e trocar `baseUrl` em `data/site.json` pelo domínio final.
+Qualquer alojamento estático serve, **servido na raiz do domínio** (a página 404 usa caminhos absolutos porque é mostrada em qualquer profundidade). Netlify: diretório base `website` (o `netlify.toml` já tem o comando e a pasta). Antes de publicar, preencher os placeholders abaixo e trocar `baseUrl` em `data/site.json` pelo domínio final.
 
 ## Estrutura
 
@@ -42,7 +42,7 @@ Hoje o formulário abre o email do visitante com o pedido preparado (ou o WhatsA
 
 - **Urgências fora de horas** — `[POLÍTICA DE URGÊNCIAS FORA DE HORAS]` (contacto e FAQ).
 - **Testemunhos** — `[TESTEMUNHO REAL DE CLIENTE …]`, `[NOME OU CARGO]`, `[TIPO DE CLIENTE · LOCAL]`, setores/clientes que podem ser nomeados (com autorização por escrito). Em alternativa, retirar `{{> testemunhos }}` da página inicial.
-- **Certificações** — `[Nº DE ASSOCIADO APIRAC]`, `[Nº DO ALVARÁ IMPIC]`, e confirmar a certificação de gases fluorados.
+- **Certificações** — `[Nº DE ASSOCIADO APIRAC]`, `[TIPO E Nº DO TÍTULO IMPIC]`. Se a MDM tiver certificação de gases fluorados, acrescentar um terceiro selo em `src/partials/certificacoes.html` (foi retirado por não estar confirmado).
 - **Obras** — por obra: `[DATA DA OBRA]`, `[LOCAL EXATO]`, `[TIPO DE CLIENTE]`, `[DURAÇÃO]` em `data/obras.json` (campo `factos`).
 - **Privacidade** — rever com assessoria jurídica; prazo de conservação dos pedidos; data da última atualização.
 - **Serviços** — placeholders das perguntas frequentes de cada serviço (periodicidades, condições de contrato).

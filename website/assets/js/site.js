@@ -11,6 +11,7 @@
   /* ═══ Medição: PostHog na UE, sem cookies (persistence memory), respeita a recusa ═══ */
   var _trackQueue = [];
   function track(event, props) {
+    if (window.MDM_SEM_MEDICAO) return;
     try {
       if (window.posthog && window.posthog.capture) window.posthog.capture(event, props || {});
       else _trackQueue.push([event, props || {}]);
@@ -23,6 +24,8 @@
     el.src = 'https://eu-assets.i.posthog.com/static/array.js';
     el.async = true;
     el.onload = function () {
+      /* o visitante pode ter recusado enquanto o script descarregava (privacidade.html) */
+      if (window.MDM_SEM_MEDICAO) { _trackQueue.length = 0; return; }
       try {
         window.posthog.init('phc_veB6kR2as8m8HuRMEVuTUWubWQxLkPW5D8Uf6wsJcy8A', {
           api_host: 'https://eu.i.posthog.com', persistence: 'memory', person_profiles: 'identified_only',
@@ -100,18 +103,20 @@
     qsa('[data-menu]').forEach(function (b) { b.addEventListener('click', function () { abre(b); }); });
     qsa('[data-fecha-menu]').forEach(function (b) { b.addEventListener('click', function () { fecha(); }); });
     qsa('a', gaveta).forEach(function (a) { a.addEventListener('click', function () { fecha(true); }); });
-    gaveta.addEventListener('keydown', function (e) { if (e.key === 'Escape') fecha(); prende(gaveta, e); });
+    gaveta.addEventListener('keydown', function (e) { if (gaveta.hidden) return; if (e.key === 'Escape') fecha(); prende(gaveta, e); });
   })();
 
   /* ═══ Barra fixa no telemóvel: sai do caminho no rodapé e no formulário ═══ */
   (function () {
     var barra = document.querySelector('[data-barra-movel]');
     if (!barra || !('IntersectionObserver' in window)) return;
-    var alvos = qsa('.rodape, #orcamento');
+    var alvos = qsa('.rodape, #orcamento, .hero-acoes');
     var visiveis = new Set();
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (en) { if (en.isIntersecting) visiveis.add(en.target); else visiveis.delete(en.target); });
-      barra.classList.toggle('escondida', visiveis.size > 0);
+      var esconde = visiveis.size > 0;
+      barra.classList.toggle('escondida', esconde);
+      barra.inert = esconde;
     }, { threshold: 0.05 });
     alvos.forEach(function (a) { io.observe(a); });
   })();
@@ -257,6 +262,7 @@
       var d = quoteData();
       if (id === 'qNome' && d.empresa) erroCampo('qNome');
       if ((id === 'qEmail' || id === 'qTel') && (d.tel || /^\S+@\S+\.\S+$/.test(d.email))) { erroCampo('qEmail'); erroCampo('qTel'); }
+      if (!qsa('#qNome[aria-invalid],#qEmail[aria-invalid],#qTel[aria-invalid]').length && !$('quoteAlert').classList.contains('ok')) quoteAlert('');
     });
   });
   function sendLead(payload) {
@@ -293,7 +299,7 @@
       btn.removeAttribute('aria-busy');
       if (ok) {
         lbl.textContent = 'Pedido enviado';
-        quoteAlert('Pedido recebido. Respondemos por email em menos de 24 horas úteis (2ª a 6ª, 8h-17h). Guardámos o seu contacto apenas para esta resposta. Se for urgente:', true, true);
+        quoteAlert('Pedido recebido. Respondemos por email em menos de 24 horas úteis (2ª a 6ª, 8h–17h). Guardámos o seu contacto apenas para esta resposta. Se for urgente:', true, true);
         form.reset(); track('quote_form_ok', { servico: d.servico, segmento: triagem(d.servico).seg });
         setTimeout(function () { lbl.textContent = 'Enviar pedido'; }, 6000);
         return;
@@ -330,7 +336,7 @@
     var sel = $('qServico');
     function escolhe(v) {
       if (!v) return;
-      for (var i = 0; i < sel.options.length; i++) if (sel.options[i].text === v) { sel.selectedIndex = i; return true; }
+      for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === v || sel.options[i].text === v) { sel.selectedIndex = i; return true; }
     }
     escolhe(form.getAttribute('data-preselect'));
     document.addEventListener('click', function (e) {

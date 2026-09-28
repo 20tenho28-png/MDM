@@ -15,7 +15,7 @@
   "address2": "1990-426 Lisboa · Parque das Nações",
   "hours": "2ª a 6ª, 8h–17h",
   "certifications": "APIRAC · IMPIC",
-  "brands": ["Mitsubishi Electric", "Daikin", "Panasonic", "MIDEA", "LG", "Hitachi", "Climaveneta", "Vulcano", "France Air"],
+  "brands": ["Mitsubishi Electric", "Daikin", "Panasonic", "Midea", "LG", "Hitachi", "Climaveneta", "Vulcano", "France Air"],
   "wa": {
     "avaria": "Olá MDM. Tenho uma avaria e envio já uma fotografia. [P4 · Avaria]",
     "montagem": "Olá MDM. Quero orçamento para instalar ar condicionado. Envio já fotografias do local. [P1 · Montagem AC]",

@@ -47,7 +47,7 @@
     if (!s.ok) { mostra(s); return; }
     try {
       if (s.recusada) localStorage.removeItem(CHAVE);
-      else { localStorage.setItem(CHAVE, '1'); paraNestaPagina(); }
+      else { localStorage.setItem(CHAVE, '1'); window.MDM_SEM_MEDICAO = true; paraNestaPagina(); }
     } catch (e) { mostra({ ok: false }); return; }
     mostra(le(), true);
   });

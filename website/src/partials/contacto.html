@@ -1,22 +1,25 @@
 <section class="sec sec-areia contacto" id="contacto" aria-labelledby="contactoT">
   <div class="grelha">
     <div class="contacto-canais" data-r>
-      <p class="rotulo rotulo-accent">Contacto</p>
-      <h2 class="h2" id="contactoT">Fale connosco.</h2>
+      <div>
+        <p class="rotulo rotulo-accent">Contacto</p>
+        <h2 class="h2" id="contactoT">Fale connosco.</h2>
+      </div>
       <dl class="canais">
-        <div><dt>Telefone</dt><dd><a class="canal-v" data-lead="tel" href="{{ site.phoneHref }}">{{ site.phone }}</a><span>Contratos e urgências · {{ site.hours }}</span></dd></div>
+        <div><dt>Telefone</dt><dd><a class="canal-v" data-lead="tel" href="{{ site.phoneHref }}">{{ site.phone }}</a><span>Contratos e urgências · <span class="nowrap">{{ site.hours }}</span></span></dd></div>
         <div><dt>WhatsApp</dt><dd><a class="canal-v" data-lead="montagem" href="{{wa montagem}}" target="_blank" rel="noopener">{{ site.whatsapp }}</a><span>Montagem e avarias · envie fotografias</span></dd></div>
         <div><dt>Email</dt><dd><a class="canal-v canal-mail" data-lead="email" href="mailto:{{ site.email }}">{{ site.email }}</a><span>Propostas de manutenção preventiva</span></dd></div>
         <div><dt>Morada</dt><dd><span class="canal-morada">{{ site.address1 }}<br>{{ site.address2 }}</span></dd></div>
       </dl>
       <div class="fora-horas">
         <p class="rotulo">Fora de horas e fins de semana</p>
-        <p>[POLÍTICA DE URGÊNCIAS FORA DE HORAS — por exemplo: "Deixe mensagem no WhatsApp; respondemos no dia útil seguinte a partir das 8h" ou "Linha de urgência para clientes com contrato: …"]</p>
+        <!-- Exemplos de política: "Deixe mensagem no WhatsApp; respondemos no dia útil seguinte a partir das 8h" ou "Linha de urgência para clientes com contrato". -->
+        <p>[POLÍTICA DE URGÊNCIAS FORA DE HORAS]</p>
       </div>
     </div>
 
     <div class="form-caixa" id="orcamento" data-r>
-      <h3 class="form-t" id="quoteTitle">Peça o seu orçamento em 3 minutos.</h3>
+      <h3 class="form-t" id="quoteTitle">Peça o seu orçamento.</h3>
       <form id="quoteForm" novalidate data-preselect="{{ page.preselect }}" aria-labelledby="quoteTitle">
         <div class="campo">
           <label for="qNome">Nome *</label>
@@ -39,13 +42,13 @@
           <label for="qServico">Serviço</label>
           <select class="campo-in" id="qServico" name="servico">
             <option value="">Escolha o tipo de serviço</option>
-            <option>Ar condicionado: montagem / instalação</option>
-            <option>Manutenção preventiva: contrato anual</option>
-            <option>Eletricidade: quadros e alimentações AVAC</option>
-            <option>Ar condicionado: avaria / reparação</option>
-            <option>Eletricidade: avaria / reparação</option>
-            <option>Ventilação: instalação / revisão</option>
-            <option>Outro / vários serviços</option>
+            <option value="Ar condicionado: montagem / instalação">Ar condicionado: montagem</option>
+            <option value="Manutenção preventiva: contrato anual">Manutenção: contrato anual</option>
+            <option value="Eletricidade: quadros e alimentações AVAC">Eletricidade: quadros AVAC</option>
+            <option value="Ar condicionado: avaria / reparação">Ar condicionado: avaria</option>
+            <option value="Eletricidade: avaria / reparação">Eletricidade: avaria</option>
+            <option value="Ventilação: instalação / revisão">Ventilação: instalação</option>
+            <option value="Outro / vários serviços">Outro ou vários serviços</option>
           </select>
         </div>
         <div class="campo">
