@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  /* Recusa de medição (privacidade.html): a única coisa que o site guarda no equipamento, e só a pedido do visitante. */
+  window.MDM_SEM_MEDICAO = (function () { try { return localStorage.getItem('mdm-sem-medicao') === '1'; } catch (e) { return false; } })();
+  document.documentElement.className += ' js';
+</script>
+<title>{{ page.title }}</title>
+<meta name="description" content="{{ page.description }}">
+<link rel="canonical" href="{{ canonical }}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{ site.name }}">
+<meta property="og:title" content="{{ page.title }}">
+<meta property="og:description" content="{{ page.description }}">
+<meta property="og:url" content="{{ canonical }}">
+<meta property="og:locale" content="pt_PT">
+<meta property="og:image" content="{{ site.baseUrl }}/assets/img/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#A30711">
+<link rel="icon" type="image/svg+xml" href="{{ root }}assets/img/logo-mdm.svg">
+<link rel="preload" href="{{ root }}assets/fonts/archivo-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{ root }}assets/fonts/newsreader-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{ root }}assets/css/site.css">
+{{& page_css }}{{& jsonld }}</head>
+<body data-nav="{{ page.nav }}">
+<a class="skip" href="#conteudo">Saltar para o conteúdo</a>
+{{> header }}
+<main id="conteudo" tabindex="-1">
+{{& content }}
+</main>
+{{> footer }}
+{{> barra-movel }}
+<script src="{{ root }}assets/js/site.js" defer></script>
+</body>
+</html>

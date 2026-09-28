@@ -1,0 +1,49 @@
+<header class="topo" data-topo>
+  <div class="topo-in">
+    <a class="marca" href="{{ root }}index.html" aria-label="MDM Assistência Técnica, página inicial">
+      <img class="marca-logo" src="{{ root }}assets/img/logo-mdm.svg" alt="" width="40" height="42">
+      <span class="marca-txt"><span class="marca-nome">MDM</span><span class="marca-sub">Assistência técnica · 1991</span></span>
+    </a>
+    <nav class="nav" aria-label="Principal">
+      <a class="nav-a" data-nav-item="servicos" href="{{ root }}index.html#especialidades">Especialidades</a>
+      <a class="nav-a" data-nav-item="obras" href="{{ root }}obras.html">Obras</a>
+      <a class="nav-a" data-nav-item="metodo" href="{{ root }}index.html#metodo">Como trabalhamos</a>
+      <a class="nav-a" data-nav-item="perguntas" href="{{ root }}index.html#perguntas">Perguntas</a>
+      <a class="nav-a" data-nav-item="contacto" href="{{ root }}index.html#contacto">Contacto</a>
+    </nav>
+    <a class="topo-tel nav-a" data-lead="tel" href="{{ site.phoneHref }}">{{ site.phone }}</a>
+    <a class="btn btn-accent topo-cta" data-lead="orcamento" href="{{ root }}index.html#orcamento">Pedir orçamento</a>
+    <button class="menu-btn" type="button" data-menu aria-expanded="false" aria-controls="gaveta" aria-label="Abrir menu">
+      <svg class="ico" viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="veu" data-fecha-menu hidden></div>
+<div class="gaveta" id="gaveta" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+  <div class="gaveta-topo">
+    <span class="gaveta-marca"><img src="{{ root }}assets/img/logo-mdm.svg" alt="" width="32" height="33"> MDM</span>
+    <button class="menu-btn" type="button" data-fecha-menu aria-label="Fechar menu">
+      <svg class="ico" viewBox="0 0 256 256" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>
+    </button>
+  </div>
+  <nav class="gaveta-nav" aria-label="Menu">
+    <a href="{{ root }}index.html">Início</a>
+    <a href="{{ root }}index.html#especialidades">Especialidades</a>
+    <a href="{{ root }}obras.html">Obras</a>
+    <a href="{{ root }}index.html#metodo">Como trabalhamos</a>
+    <a href="{{ root }}index.html#perguntas">Perguntas</a>
+    <a href="{{ root }}index.html#contacto">Contacto</a>
+  </nav>
+  <div class="gaveta-servicos">
+    <p class="rotulo">Serviços</p>
+    <a href="{{ root }}servicos/ar-condicionado.html">Ar condicionado</a>
+    <a href="{{ root }}servicos/manutencao.html">Manutenção</a>
+    <a href="{{ root }}servicos/eletricidade.html">Eletricidade</a>
+    <a href="{{ root }}servicos/ventilacao.html">Ventilação</a>
+  </div>
+  <div class="gaveta-acoes">
+    <a class="btn btn-accent btn-bloco" data-lead="orcamento" href="{{ root }}index.html#orcamento">Pedir orçamento</a>
+    <a class="gaveta-tel" data-lead="tel" href="{{ site.phoneHref }}">{{ site.phone }} <span>{{ site.hours }}</span></a>
+  </div>
+</div>

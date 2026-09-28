@@ -1,0 +1,34 @@
+<footer class="rodape">
+  <div class="rodape-in">
+    <div class="rodape-marca">
+      <img src="{{ root }}assets/img/logo-mdm.svg" alt="MDM" width="56" height="58" loading="lazy">
+      <p>Assistência técnica desde {{ site.founded }}.<br>Ar condicionado, ventilação, eletricidade e manutenção na grande Lisboa.</p>
+    </div>
+    <nav class="rodape-col" aria-label="Serviços">
+      <p class="rotulo">Serviços</p>
+      <a href="{{ root }}servicos/ar-condicionado.html">Ar condicionado</a>
+      <a href="{{ root }}servicos/manutencao.html">Manutenção</a>
+      <a href="{{ root }}servicos/eletricidade.html">Eletricidade</a>
+      <a href="{{ root }}servicos/ventilacao.html">Ventilação</a>
+      <a href="{{ root }}obras.html">Obras</a>
+    </nav>
+    <div class="rodape-col">
+      <p class="rotulo">Contacto</p>
+      <a data-lead="tel" href="{{ site.phoneHref }}">{{ site.phone }}</a>
+      <a data-lead="avaria" href="{{wa avaria}}" target="_blank" rel="noopener">WhatsApp {{ site.whatsapp }}</a>
+      <a data-lead="email" href="mailto:{{ site.email }}">{{ site.email }}</a>
+      <span>{{ site.hours }}</span>
+    </div>
+    <div class="rodape-col">
+      <p class="rotulo">Empresa</p>
+      <span>{{ site.legalName }}</span>
+      <span>NIF {{ site.nif }}</span>
+      <span>{{ site.address1 }}, {{ site.address2 }}</span>
+      <span class="rodape-cert">{{ site.certifications }}</span>
+    </div>
+  </div>
+  <div class="rodape-base">
+    <span>© <span data-ano-atual>{{ year }}</span> {{ site.name }}, Lisboa</span>
+    <a href="{{ root }}privacidade.html">Política de privacidade</a>
+  </div>
+</footer>

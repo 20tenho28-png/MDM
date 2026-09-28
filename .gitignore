@@ -17,3 +17,6 @@ htmlcov/
 *.sqlite
 *.sqlite3
 .DS_Store
+
+# Site gerado (python3 website/build.py)
+website/public/
