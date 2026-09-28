@@ -61,10 +61,10 @@
 <section class="sec obra-rel" aria-labelledby="obraRelT">
   <div class="sec-cab" data-r>
     <div>
-      <p class="rotulo rotulo-accent">Mesmo tipo de local</p>
-      <h2 class="h2" id="obraRelT">Outras obras de {{ obra.catLabel }}</h2>
+      <p class="rotulo rotulo-accent">Obras semelhantes</p>
+      <h2 class="h2" id="obraRelT">Outras obras {{ obra.catFrase }}</h2>
     </div>
-    <a class="btn btn-contorno" href="{{ root }}obras.html#{{ obra.cat }}">Ver todas de {{ obra.catLabel }} <svg class="seta" viewBox="0 0 256 256" aria-hidden="true"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg></a>
+    <a class="btn btn-contorno" href="{{ root }}obras.html#{{ obra.cat }}">Ver todas as obras {{ obra.catFrase }} <svg class="seta" viewBox="0 0 256 256" aria-hidden="true"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg></a>
   </div>
   <div class="obras-grelha" data-r>
     {{each obra-card ctx:related}}
