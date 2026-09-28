@@ -1,0 +1,32 @@
+/* Índice de obras (obras.html) e página de cada obra (obras/<slug>.html). Complementa site.css. */
+
+/* Índice: título à medida da coluna de 7/12 */
+@media (min-width: 1100px) { .obras-cab .h1 { font-size: clamp(56px, 5vw, 72px); } }
+.filtros-rot { margin-right: 6px; }
+/* Sem JavaScript os filtros não fazem nada: escondem-se e aparecem as 24 obras */
+html:not(.js) .filtros-wrap { display: none; }
+/* No telemóvel os seis filtros ocupam três linhas: não ficam colados ao topo */
+@media (max-width: 699px) { .filtros-wrap { position: static; } }
+
+/* Obra: título */
+.obra-pag-t { font-size: clamp(34px, 4.6vw, 64px); line-height: 1; letter-spacing: -.03em; max-width: 16ch; }
+.obra-pag-cab .registo { max-width: 360px; }
+
+/* Obra: resumo e lista vazios não deixam títulos soltos nem uma coluna em branco */
+.obra-resumo:empty { display: none; }
+.obra-detalhes { display: flex; flex-direction: column; gap: 14px; }
+.obra-detalhes:has(> ul:empty) { display: none; }
+.obra-texto:not(:has(.obra-resumo:not(:empty), li)) { display: none; }
+@media (min-width: 1000px) {
+  .obra-corpo:not(:has(.obra-resumo:not(:empty), li)) { grid-template-columns: minmax(0, 1fr); }
+  .obra-corpo:not(:has(.obra-resumo:not(:empty), li)) .ficha { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.obra-ficha-t { margin-bottom: 12px; }
+
+/* Obra: relacionadas e navegação anterior/seguinte */
+.obra-rel { border-bottom: 0; }
+.obra-nav-sec { padding-top: 0; }
+.obra-nav { border-bottom: 1px solid var(--linha); }
+.obra-nav-todas { margin-top: 28px; }
+/* A ficha em duas colunas também no telemóvel: nove linhas curtas não precisam de ecrã e meio */
+@media (max-width: 639px) { .ficha { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 16px; } .ficha dd { font-size: 15px; overflow-wrap: anywhere; } }

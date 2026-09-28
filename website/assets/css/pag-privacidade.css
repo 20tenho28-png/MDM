@@ -1,0 +1,31 @@
+/* Política de privacidade (privacidade.html). Complementa site.css. */
+
+/* Cabeçalho */
+.priv-rever { display: inline-block; margin-bottom: 18px; padding: 4px 10px; border: 1px dashed var(--aco); font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: .1em; color: var(--aco-2); }
+.priv-t { font-size: clamp(40px, 6vw, 76px); }
+.priv-cab-lado { display: flex; flex-direction: column; gap: 14px; }
+@media (min-width: 1100px) { .pag-cab-in > .priv-cab-lado { grid-column: 3; } }
+.priv-sec { border-top: 2px solid var(--tinta); }
+
+/* Índice lateral: no telemóvel é uma lista curta antes do texto; no ecrã largo fica colado ao lado */
+.priv-indice { display: flex; flex-direction: column; gap: 10px; }
+.priv-indice ol { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--linha); counter-reset: priv; }
+.priv-indice li { border-bottom: 1px solid var(--linha); counter-increment: priv; }
+.priv-indice a { display: flex; align-items: center; gap: 14px; min-height: 44px; padding: 8px 0; font-family: var(--sans); font-size: 15px; font-weight: 600; color: var(--tinta); text-decoration: none; }
+.priv-indice a::before { content: counter(priv, decimal-leading-zero); width: 22px; flex-shrink: 0; font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--carmim); }
+.priv-indice a:hover { color: var(--carmim); }
+@media (min-width: 1100px) {
+  .priv-indice { grid-column: span 4; position: sticky; top: calc(var(--topo-h) + 24px); align-self: start; max-width: 320px; }
+  .priv-texto { grid-column: 6 / span 7; }
+}
+@media (max-width: 1099px) { .priv-indice { margin-bottom: 8px; } }
+
+.priv-texto h2 { scroll-margin-top: calc(var(--topo-h) + 20px); }
+.priv-texto code { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; font-size: .86em; background: var(--areia); padding: 1px 5px; overflow-wrap: anywhere; }
+
+/* Controlo da medição */
+.priv-controlo { margin: 6px 0 4px; padding: clamp(20px, 2.6vw, 28px); background: var(--branco); border: 1px solid var(--linha); border-left: 3px solid var(--carmim); display: flex; flex-direction: column; gap: 14px; scroll-margin-top: calc(var(--topo-h) + 20px); }
+.priv-estado { font-family: var(--sans); font-size: 16px; font-weight: 600; line-height: 1.45; }
+.priv-acoes { display: flex; flex-wrap: wrap; gap: 12px; }
+.priv-acoes .btn[hidden] { display: none; }
+.priv-nota { font-size: 15px; color: var(--aco); }

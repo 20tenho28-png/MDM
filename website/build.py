@@ -175,9 +175,11 @@ def breadcrumb_ld(trail):
 
 
 def page_ctx(meta, file):
-    meta = {"preselect": "", "nav": "", **meta}
+    meta = {"preselect": "", "nav": "", "robots": "index,follow", **meta}
     depth = file.count("/")
-    return {"site": SITE, "page": meta, "root": "../" * depth, "_file": file,
+    # a 404 é servida em qualquer profundidade (/obras/xyz.html): precisa de caminhos absolutos
+    root = "/" if file == "404.html" else "../" * depth
+    return {"site": SITE, "page": meta, "root": root, "_file": file,
             "categorias": OBRAS_DATA["categorias"], "year": "2026"}
 
 
@@ -230,7 +232,7 @@ def build():
         for i, o in enumerate(OBRAS):
             prev_o, next_o = OBRAS[i - 1], OBRAS[(i + 1) % len(OBRAS)]
             file = f"obras/{o['slug']}.html"
-            meta = {"file": file, "nav": "obras",
+            meta = {"file": file, "nav": "obras", "css": ["pag-obras.css"],
                     "title": f"{o['title']} · Obras MDM",
                     "description": f"{o['especialidade']}, {o['trabalho'].lower()}: {o['title'].lower()}. "
                                    f"Obra da MDM na grande Lisboa, fotografada no local.",
@@ -248,7 +250,8 @@ def build():
     return files
 
 
-PLACEHOLDER_RE = re.compile(r"\[[A-ZÀ-Ý][A-ZÀ-Ý0-9 ./,ªº-]{2,}\]")
+# começa por pelo menos três maiúsculas; pode continuar com explicação em minúsculas até ao "]"
+PLACEHOLDER_RE = re.compile(r"\[[A-ZÀ-Ý][A-ZÀ-Ý0-9 ./,ªº·-]{2,}[^\]<]*\]")
 REF_RE = re.compile(r'(?:href|src)="([^"#?]+)|srcset="([^"]+)"|url\(([^)]+)\)')
 
 
@@ -267,7 +270,7 @@ def check(files):
             for r in refs:
                 if not r or re.match(r"^(https?:|mailto:|tel:|data:|//)", r):
                     continue
-                target = (path.parent / r).resolve()
+                target = (OUT / r.lstrip("/")) if r.startswith("/") else (path.parent / r).resolve()
                 if not target.exists():
                     problems.append(f"{f}: referência partida → {r}")
     for css in (OUT / "assets" / "css").glob("*.css"):
@@ -281,7 +284,7 @@ def check(files):
     if placeholders:
         print("\nPlaceholders por preencher (dados que só a MDM tem):")
         for k in sorted(placeholders):
-            print(f"  {k}  ({len(placeholders[k])} páginas)")
+            print(f"  {k if len(k) < 90 else k[:87] + '…]'}  ({len(placeholders[k])} páginas)")
     if problems:
         print("\nPROBLEMAS:")
         for p in problems:

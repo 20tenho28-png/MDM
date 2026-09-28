@@ -1,0 +1,47 @@
+<!--meta {"file": "obras.html", "title": "Obras: ar condicionado e ventilação na grande Lisboa | MDM", "description": "Índice de obras da MDM: ar condicionado, ventilação e climatização em coberturas, centrais técnicas, fachadas e interiores. Fotografias reais de cada trabalho.", "nav": "obras", "jsonld": ["breadcrumb"], "breadcrumb": [["Início", ""], ["Obras", "obras.html"]], "css": ["pag-obras.css"]} -->
+<section class="pag-cab obras-cab" aria-labelledby="obrasT">
+  <div class="pag-cab-in">
+    <div>
+      <nav class="migalhas" aria-label="Migalhas">
+        <a href="{{ root }}index.html">Início</a>
+        <span aria-hidden="true">›</span>
+        <span aria-current="page">Obras</span>
+      </nav>
+      <p class="rotulo rotulo-accent">Índice de obras</p>
+      <h1 class="h1" id="obrasT">Cada fotografia<br> é uma obra nossa.</h1>
+    </div>
+    <p class="lead">Sem imagens de banco. Tiradas pelos técnicos no fim de cada trabalho, com a ficha do que foi feito por baixo.</p>
+  </div>
+</section>
+
+<div class="filtros-wrap">
+  <div class="filtros" role="group" aria-label="Filtrar obras por tipo de local">
+    <span class="rotulo filtros-rot">Filtrar</span>
+    <button class="chip" type="button" data-filtro="todas" aria-pressed="true">Todas <span class="chip-n">24</span></button>
+    <button class="chip" type="button" data-filtro="cob" aria-pressed="false">{{ categorias.cob }} <span class="chip-n">6</span></button>
+    <button class="chip" type="button" data-filtro="cen" aria-pressed="false">{{ categorias.cen }} <span class="chip-n">2</span></button>
+    <button class="chip" type="button" data-filtro="fac" aria-pressed="false">{{ categorias.fac }} <span class="chip-n">6</span></button>
+    <button class="chip" type="button" data-filtro="int" aria-pressed="false">{{ categorias.int }} <span class="chip-n">7</span></button>
+    <button class="chip" type="button" data-filtro="vent" aria-pressed="false">{{ categorias.vent }} <span class="chip-n">3</span></button>
+    <span class="filtros-conta" data-obras-conta aria-live="polite">24 obras</span>
+  </div>
+</div>
+
+<section class="obras-wrap" aria-label="Obras">
+  <div class="obras-grelha" data-obras-grelha>
+    {{each obra-card all}}
+  </div>
+</section>
+
+<section class="cta-faixa" aria-labelledby="obrasCtaT">
+  <div class="cta-faixa-in">
+    <h2 class="h2" id="obrasCtaT">Tem um trabalho parecido para fazer?</h2>
+    <div class="acoes">
+      <a class="btn btn-accent" data-lead="orcamento" href="{{ root }}index.html#orcamento">Pedir orçamento <svg class="seta" viewBox="0 0 256 256" aria-hidden="true"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg></a>
+      <a class="btn btn-wa" data-lead="obra" href="{{wa obra}}" target="_blank" rel="noopener">
+        <svg class="ico" viewBox="0 0 256 256" aria-hidden="true"><path d="M187.58,144.84l-32-16a8,8,0,0,0-8,.5l-14.69,9.8a40.55,40.55,0,0,1-16-16l9.8-14.69a8,8,0,0,0,.5-8l-16-32A8,8,0,0,0,104,64a40,40,0,0,0-40,40,88.1,88.1,0,0,0,88,88,40,40,0,0,0,40-40A8,8,0,0,0,187.58,144.84ZM152,176a72.08,72.08,0,0,1-72-72A24,24,0,0,1,99.29,80.46l11.48,23L101,118a8,8,0,0,0-.73,7.51,56.47,56.47,0,0,0,30.15,30.15A8,8,0,0,0,138,155l14.61-9.74,23,11.48A24,24,0,0,1,152,176ZM128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm0,192a87.87,87.87,0,0,1-44.06-11.81,8,8,0,0,0-6.54-.67L40,216,52.47,178.6a8,8,0,0,0-.66-6.54A88,88,0,1,1,128,216Z"/></svg>
+        Enviar fotografias
+      </a>
+    </div>
+  </div>
+</section>

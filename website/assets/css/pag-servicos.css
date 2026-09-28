@@ -1,0 +1,33 @@
+/* Páginas de serviço (servicos/*.html): só o que site.css não cobre. */
+
+/* Enquadramento da fotografia do hero, por serviço */
+.pag-hero .foto-ac img { object-position: 50% 62%; }
+.pag-hero .foto-man img { object-position: 56% 40%; }
+.pag-hero .foto-ele img { object-position: 60% 22%; }
+.pag-hero .foto-ven img { object-position: 50% 45%; }
+
+.serv-h2 { text-wrap: balance; }
+
+/* A legenda do hero não pisa os botões: reserva-se espaço por baixo quando ela aparece */
+@media (min-width: 900px) { .pag-hero-in { padding-bottom: clamp(88px, 8vw, 116px); } }
+
+/* O que fazemos: o título fica por cima do texto, com o mesmo corpo do resto da página */
+.serv-h2 { margin-bottom: 24px; }
+@media (min-width: 1000px) { .duas .lista-traco { margin-top: 40px; } }
+
+/* Obras: grupos por registo fotográfico (máquina / casa) nunca se misturam na mesma grelha */
+.serv-grupo + .serv-grupo { margin-top: clamp(40px, 5vw, 56px); }
+.serv-grupo-t { font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--tinta); padding-bottom: 12px; margin-bottom: 20px; border-bottom: 1px solid var(--linha-2); }
+.serv-mais { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(32px, 4vw, 44px); }
+
+/* Célula de aviso na grelha de obras (eletricidade: fotografias por juntar) */
+.serv-nota { display: flex; flex-direction: column; gap: 10px; justify-content: flex-start; padding: 20px 0 0; border-top: 2px solid var(--tinta); font-size: 16px; color: var(--aco-2); }
+@media (min-width: 640px) and (max-width: 899px) { .serv-nota { grid-column: 1 / -1; } }
+@media (min-width: 1200px) { .serv-nota { grid-column: span 2; } }
+
+/* Ligação dentro de um passo do método */
+.passo span a { color: var(--carmim); }
+
+@media (max-width: 559px) {
+  .serv-mais .btn { width: 100%; }
+}
