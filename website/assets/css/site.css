@@ -137,8 +137,10 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 .topo-ligar { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 0 8px; font-family: var(--sans); font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--tinta); text-decoration: none; }
 .topo-ligar:hover { color: var(--carmim); }
 .topo-ligar .ico { width: 18px; height: 18px; }
-@media (max-width: 359px) { .marca-sub { letter-spacing: .06em; } .topo-ligar span { display: none; } }
-.menu-btn { width: 48px; height: 48px; margin-right: -12px; border: 0; background: transparent; color: var(--tinta); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+@media (max-width: 429px) { .topo-ligar { min-width: 44px; justify-content: center; padding: 0; } .topo-ligar span { display: none; } }
+@media (max-width: 699px) { .topo-in { gap: 6px; } }
+@media (max-width: 399px) { .marca-sub { display: none; } }
+.menu-btn { flex-shrink: 0; width: 48px; height: 48px; margin-right: -12px; border: 0; background: transparent; color: var(--tinta); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
 .menu-btn .ico { width: 24px; height: 24px; }
 @media (min-width: 700px) { .topo-cta { display: inline-flex; } }
 @media (min-width: 1220px) {
