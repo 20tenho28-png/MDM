@@ -155,7 +155,7 @@ def service_page(slug, d):
     gal = ''
     if d['gallery']:
         cards = ''.join(f'<figure class="project">{{{{pic:{n}|{alt}|(min-width: 1024px) 373px, 50vw|lazy}}}}<figcaption><b>{esc(b)}</b><span>{esc(sm)}</span></figcaption></figure>' for n, alt, b, sm in d['gallery'])
-        gal = f'<section class="section" aria-labelledby="h-obras-s"><div class="wrap"><div class="sec-head"><h2 id="h-obras-s">Trabalho real da nossa equipa.</h2></div><div class="gallery">{cards}</div></div></section>'
+        gal = f'<section class="section" aria-labelledby="h-obras-s"><div class="wrap"><div class="sec-head"><h2 id="h-obras-s">Trabalho real da nossa equipa.</h2></div><div class="gallery">{cards}</div><p class="gal-more"><a class="btn btn--secondary" href="{{{{root}}}}obras/">Ver todas as obras</a></p></div></section>'
     rel = '\n'.join(f'      <a href="{{{{root}}}}{r}/">{esc(NAMES[r])} <span aria-hidden="true">→</span></a>' for r in d['related'])
     t = (S / '_servico.html').read_text(encoding='utf-8')
     for k, v in {'TITLE': esc(d['title']), 'DESC': esc(d['desc']), 'SLUG': slug, 'PRELOAD': preload, 'SCHEMA': slug, 'PAGE': d['page'], 'SERVICO': esc(d['servico']),

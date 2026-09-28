@@ -40,7 +40,7 @@ alegação que já está no site) · **P2** logo depois do lançamento (melhora 
 | 3.3 | Certificação F-gas | home ("técnicos com certificação para gases fluorados"), ar condicionado, bombas de calor, manutenção | **Confirmado.** Falta o número do certificado de empresa | P2 |
 | 3.4 | Prazos de resposta | (nenhum) | **Decidido: nenhuma promessa de prazo.** Retirados todos | ✔ |
 | 3.5 | "Peça o seu orçamento em 3 minutos" | (nenhum) | **Retirado** (decisão do dono: nenhuma promessa de tempo, AUDIT.md §0) | ✔ |
-| 3.6 | Bombas de calor ar-água | página `/bombas-de-calor-lisboa/`, linha na home, FAQ | **Confirmado como serviço; fotografias recebidas** (moradia e varanda). O site fala **só de águas quentes (AQS)** até o dono dizer por escrito que tipos faz: AQS, aquecimento central, piso radiante, sistemas mistos. Se confirmar o aquecimento, repõe-se o que foi retirado (está no histórico do git) | P1 |
+| 3.6 | Bombas de calor ar-água | página `/bombas-de-calor-lisboa/`, linha na home, FAQ | **Respondido a 28/09/2026:** águas quentes e sistemas combinados águas quentes + aquecimento. Radiadores e piso radiante não confirmados em separado, por isso não são nomeados. | P1 |
 | 3.7 | Multi-split | secção na página de ar condicionado; linha na home com esquema | **Confirmado como serviço.** Faltam fotografias de um multi-split real. A unidade Midea grande em `multisplit-cobertura-midea` é de um multi-split? | P2 |
 | 3.8 | Gás | (nenhum) | **Decidido: não é serviço.** | ✔ |
 | 3.9 | Zona servida | dados estruturados (8 concelhos: Lisboa, Loures, Odivelas, Amadora, Oeiras, Sintra, Cascais, Almada); lista do formulário (os mesmos + Vila Franca de Xira) | Confirmar a lista | P1 |
@@ -59,7 +59,7 @@ alegação que já está no site) · **P2** logo depois do lançamento (melhora 
 | 4.4 | Autorização escrita dos clientes para qualquer nome/logótipo ou testemunho a publicar; e do técnico, se a fotografia `ventilacao-ventilbox` voltar a ser usada (com o polo MDM) | Em falta | P3 |
 | 4.5 | Os passos de "Como funciona" tal como a MDM trabalha hoje | No site: 1 Pedido (formulário, telefone ou WhatsApp) · 2 Visita e orçamento (sem compromisso) · 3 Instalação e manutenção pela mesma equipa. Confirmar | P1 |
 | 4.6 | Local de cada fotografia (concelho ou bairro), sem nomes de clientes, para as legendas "Equipamento marca · tipo de imóvel, local" | Só uma legenda tem local ("Cobertura, Lisboa") | P2 |
-| 4.7 | Confirmar as legendas deduzidas: `reparacao-unidade` (o texto diz técnico, não aparece ninguém), `cobertura-unidades-solar` (plural, vê-se uma unidade), `midea-cobertura` (bomba de calor ou loja?), `conduta-teto` (ventilação ou ar condicionado de condutas?), `multisplit-cobertura-midea` (é multi-split?) | Pormenores no `LAUNCH.md` §7 | P1 |
+| 4.7 | Confirmar as legendas deduzidas: `reparacao-unidade` (o texto diz técnico, não aparece ninguém), `cobertura-unidades-solar` (plural, vê-se uma unidade), `midea-cobertura` (bomba de calor ou loja?), `conduta-teto` (ventilação ou ar condicionado de condutas?), `multisplit-cobertura-midea` (é multi-split?) | Pormenores no `LAUNCH.md` §7 | P1 **28/09:** `midea-cobertura` = ar condicionado/edifício; `conduta-teto` = ar condicionado de conduta. Faltam as restantes. |
 | 4.8 | Fotografias retiradas das páginas (`ventilacao-ventilbox`: técnico sem polo e sem proteção visível; `split-sala-porta`: quadro na casa do cliente): apagar também do servidor? | Os ficheiros ainda estão em `site/v3/img/` e são publicados sem ligação | P1 |
 
 ## 5. Operação dos contactos

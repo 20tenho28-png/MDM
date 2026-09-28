@@ -175,7 +175,7 @@ A v2.2 era uma só página, por isso só a página inicial tem comparação dire
 
 ### Ativar o formulário e os emails
 8. Abrir o separador **Forms**. Deve aparecer o formulário **orcamento**. Se, em vez disso, aparecer um botão para ativar a deteção de formulários (*Enable form detection*), ativar e publicar de novo em *Deploys > Trigger deploy*.
-9. Ligar os avisos por email: **Forms > Form notifications > Add notification > Email notification**.
+9. Ligar os avisos por email: **Forms > Form notifications > Add notification > Email notification**, para **mdmassist@mdmassist.com** (escolhido pelo dono a 28/09/2026).
    - Evento: novo pedido (*New form submission*).
    - Formulário: `orcamento`.
    - Email: o endereço que escolher para receber os pedidos (pendente 5.1 da secção 7).
@@ -402,7 +402,6 @@ Os números entre parênteses são os de `CONTENT-NEEDED.md`, onde está o estad
 | 2.2 | Quem aloja o site antigo `www.mdmassist.com.pt` | Rastreá-lo e fazer os redirecionamentos 301 |
 | 2.3 | O que fazer a `mdmassist.manus.space` | Não deixar um segundo site no ar |
 | 1.2 a 1.4 | Nome, morada, telefone e horário exatamente como estão no Perfil de Empresa Google. Em alternativa, desbloquear o acesso ao Google neste ambiente | Dados iguais em todo o lado (secção 5, passo 15) |
-| 3.6 | Que trabalhos de bomba de calor fazem: águas quentes, aquecimento central, piso radiante, sistemas mistos | Hoje o site só fala de águas quentes. Se confirmar o aquecimento, repomos o que foi retirado |
 | 3.10 | Que garantia escrita dão | A página de bombas de calor diz que uma revisão periódica mantém a garantia do equipamento: confirmar ou retirar |
 | 3.9 | Os concelhos que servem | Os dados estruturados nomeiam 8 (Lisboa, Loures, Odivelas, Amadora, Oeiras, Sintra, Cascais, Almada) e a lista do formulário tem também Vila Franca de Xira |
 | 4.5 | Confirmar os 3 passos de "Como funciona": pedido; visita e orçamento; instalação e manutenção pela mesma equipa | Descrevem como a MDM trabalha |
@@ -447,11 +446,19 @@ A verificação de 27/09 encontrou 0 problemas P0, 2 P1 e 10 P2. Os P1 e P2 fora
 | ID | O que foi feito | Condição |
 |---|---|---|
 | LH-01 | LCP da página inicial no telemóvel: 1,73 s com compressão | Sem compressão fica em 2,18 s. Confirmar no endereço real que o Netlify comprime as páginas (secção 5, passo 21) |
-| F03, F04, F05 | Retirados a fotografia errada do multi-split, a faixa de avaliações sem números e o aquecimento com bomba de calor | Voltam quando chegarem os seus dados (secção 7: 3.7, 1.6, 3.6) |
+| F03, F04 | Retirados a fotografia errada do multi-split e a faixa de avaliações sem números (o aquecimento combinado das bombas de calor voltou a 28/09, confirmado pelo dono) | Voltam quando chegarem os seus dados (secção 7: 3.7, 1.6, 3.6) |
 | F06 | O banner diz agora o que fica guardado, que "Recusar" também desliga o Sentry e tem "Saber mais" | O texto ficou mais comprido: ocupa cerca de 270 px acima da barra, a 390 px de largura. Precisa da sua leitura (6.1) |
 | F02 | A mesma bomba de calor já não aparece duas vezes na mesma página | A imagem de partilha usa a mesma fotografia do topo. Ficou assim porque não aparece em nenhuma página |
 | LH-06 | O estilo (CSS) vai dentro de cada página, por isso já não há um ficheiro de estilo sem cache | A compressão e a cache verificam-se no endereço real |
 | F22 | `site/CLAUDE.md` já diz que a v3 usa o banner de consentimento antes do PostHog | Nenhuma |
+
+### Respostas do dono (28/09)
+
+- Bombas de calor: águas quentes e sistemas combinados águas quentes + aquecimento. O site já o diz (página, linha na página inicial, FAQ e dados estruturados). Radiadores e piso radiante não são nomeados em separado.
+- `midea-cobertura` é obra de ar condicionado/edifício: saiu da galeria das bombas de calor e fica em "Lojas, empresas e edifícios" nas Obras.
+- `conduta-teto` é ar condicionado de conduta: passou da Ventilação para a página de ar condicionado e para "Casas e apartamentos" nas Obras (F11 resolvido).
+- Email dos pedidos do formulário: mdmassist@mdmassist.com.
+- Ligação ao Netlify: mais tarde.
 
 ### Corrigidos na ronda final (27/09, depois da verificação)
 
@@ -479,7 +486,6 @@ Depois desta ronda: axe-core com 0 violações nas 10 páginas a 390 e 1440 px; 
 | ID | Problema | Porque ficou | Quando |
 |---|---|---|---|
 | F18 | A política de privacidade ainda tem pontos por completar:<br>(b) faltam o serviço de email e o WhatsApp como meios por onde a MDM recebe dados;<br>(d) os toques e o início do formulário anteriores à escolha são enviados se o visitante aceitar na mesma página;<br>(e) ao retirar o consentimento, o PostHog continua na página aberta (a política já o diz);<br>(f) as medidas de segurança do §6 não estão confirmadas.<br>Os pontos (a) IP e browser registados pelo Netlify e (c) Sentry antes da escolha já foram corrigidos. | (b) e (f) dependem de respostas suas (6.3, 6.4) | **Recomendado antes do lançamento** |
-| F11 | Duas fotografias estão em secções que talvez não sejam as certas (`midea-cobertura`, `conduta-teto`) | Depende da sua confirmação (4.7) | Antes do lançamento, com 4.7 |
 | F15 | A faixa de prova usa a palavra "Certificados" para F-gas, APIRAC, IMPIC e eletricista. APIRAC é uma associação e IMPIC emite alvarás, por isso a palavra certa depende dos seus documentos | Acertar com os números e os títulos exatos (3.1 a 3.3). "Instalação certificada" e "eletricistas" (plural) já foram corrigidos | Com 3.1 a 3.3 |
 | F16 | Os concelhos nos dados estruturados (8) dependem de 3.9 | Dados seus. A frase sobre a garantia foi retirada, o formulário já sugere os mesmos 8 concelhos e o número de anos é calculado na publicação | Com 3.9 |
 | F17 | No topo, "Manuel Domingos Melancia, Lda" não é o nome legal nem o nome comercial | Depende do nome exato no Perfil (1.2). Os outros pormenores de texto ("pára", "Que marcas assistem?", "contacto" repetido, título da manutenção) já foram corrigidos | Com 1.2 |

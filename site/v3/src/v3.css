@@ -43,6 +43,7 @@ p a:hover, .prose a:hover { color: var(--red-dk); }
 :focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .nw, a[href^="tel:"] { white-space: nowrap; }
+.gal-more { margin-top: var(--space-6); text-align: center; }
 h1, h2, h3 { text-wrap: balance; }
 p, li, dd { text-wrap: pretty; }
 .skip-link { position: absolute; left: -9999px; top: 0; z-index: 200; background: var(--ink); color: var(--cream); padding: 12px 20px; font-weight: 600; text-decoration: none; }
