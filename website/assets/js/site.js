@@ -10,11 +10,14 @@
 
   /* ═══ Medição: PostHog na UE, sem cookies (persistence memory), respeita a recusa ═══ */
   var _trackQueue = [];
+  var ORIGEM = '';   /* só na página das carrinhas: "Carrinha 01 · traseira" (ver abaixo) */
   function track(event, props) {
     if (window.MDM_SEM_MEDICAO) return;
+    props = props || {};
+    if (ORIGEM && !props.origem) props.origem = ORIGEM;
     try {
-      if (window.posthog && window.posthog.capture) window.posthog.capture(event, props || {});
-      else _trackQueue.push([event, props || {}]);
+      if (window.posthog && window.posthog.capture) window.posthog.capture(event, props);
+      else _trackQueue.push([event, props]);
     } catch (e) {}
   }
   window.mdmTrack = track;
@@ -35,6 +38,29 @@
       } catch (e) {}
     };
     document.head.appendChild(el);
+  })();
+
+  /* ═══ Origem: código QR das carrinhas (carrinha.html?v=01&p=t, gerado por marketing/gerar_qr.py) ═══
+     Junta a carrinha e o lado ao WhatsApp, ao formulário e à medição, para saber que carrinha traz contactos.
+     Vale só nesta página e nesta visita: nada fica guardado no equipamento. */
+  (function () {
+    var alvo = document.querySelector('[data-origem-qr]');
+    if (!alvo) return;
+    var LADOS = { t: 'traseira', e: 'lateral esquerda', d: 'lateral direita', m: 'íman', c: 'cartão de vizinho' };
+    var v = '', p = '';
+    try { var q = new URLSearchParams(location.search); v = (q.get('v') || '').replace(/\D/g, '').slice(0, 3); p = LADOS[q.get('p')] || ''; } catch (e) {}
+    if (v.length === 1) v = '0' + v;
+    var txt = 'Carrinha' + (v ? ' ' + v : '') + (p ? ' · ' + p : '');
+    if (v || p) { var t = alvo.querySelector('[data-origem-texto]'); if (t) t.textContent = txt; alvo.hidden = false; }
+    track('qr_carrinha', { carrinha: v || 'sem número', lado: p || 'desconhecido', origem: txt });
+    ORIGEM = txt;
+    /* a etiqueta da origem vai no fim da mensagem de WhatsApp pré-preenchida */
+    qsa('a[href^="https://wa.me/"]').forEach(function (a) { a.href += encodeURIComponent(' [' + txt + ']'); });
+    /* ligações para secções que também existem nesta página ficam nesta página (e a origem não se perde) */
+    qsa('a[href*="index.html#"]').forEach(function (a) {
+      var id = a.getAttribute('href').split('#')[1];
+      if (id && document.getElementById(id)) a.setAttribute('href', '#' + id);
+    });
   })();
 
   /* cliques nos caminhos de contacto: um evento com o nome do caminho */
@@ -110,7 +136,7 @@
   (function () {
     var barra = document.querySelector('[data-barra-movel]');
     if (!barra || !('IntersectionObserver' in window)) return;
-    var alvos = qsa('.rodape, #orcamento, .hero-acoes');
+    var alvos = qsa('.rodape, #orcamento, .hero-acoes, [data-esconde-barra]');
     var visiveis = new Set();
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (en) { if (en.isIntersecting) visiveis.add(en.target); else visiveis.delete(en.target); });
@@ -224,15 +250,17 @@
              servico: $('qServico').value, msg: $('qMsg').value.trim() };
   }
   function quoteBody(d) {
-    return ['Pedido de orçamento MDM', '', 'Nome/Empresa: ' + (d.empresa || '-'), 'Email: ' + (d.email || '-'),
-            'Telefone: ' + (d.tel || '-'), 'Serviço: ' + (d.servico || '-'), 'Triagem: ' + etiqueta(d.servico), '', d.msg || ''].join('\n');
+    var l = ['Pedido de orçamento MDM', '', 'Nome/Empresa: ' + (d.empresa || '-'), 'Email: ' + (d.email || '-'),
+             'Telefone: ' + (d.tel || '-'), 'Serviço: ' + (d.servico || '-'), 'Triagem: ' + etiqueta(d.servico)];
+    if (ORIGEM) l.push('Origem: ' + ORIGEM);
+    return l.concat(['', d.msg || '']).join('\n');
   }
   function quoteAlert(msg, ok, comWhats) {
     var a = $('quoteAlert');
     a.textContent = msg; a.classList.toggle('ok', !!ok);
     if (comWhats) {
       var l = document.createElement('a');
-      l.href = WA_BASE + encodeURIComponent('Olá MDM. Acabei de enviar um pedido de orçamento pelo site.');
+      l.href = WA_BASE + encodeURIComponent('Olá MDM. Acabei de enviar um pedido de orçamento pelo site.' + (ORIGEM ? ' [' + ORIGEM + ']' : ''));
       l.target = '_blank'; l.rel = 'noopener'; l.textContent = 'Falar agora por WhatsApp';
       a.appendChild(document.createTextNode(' ')); a.appendChild(l);
     }
@@ -272,7 +300,7 @@
       method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, signal: ctl.signal,
       body: JSON.stringify(Object.assign({}, payload, {
         prioridade: triagem(payload.servico).p, segmento: triagem(payload.servico).seg,
-        pagina: location.href, referrer: document.referrer || '', utm: location.search.slice(1), ts: new Date().toISOString()
+        pagina: location.href, referrer: document.referrer || '', utm: location.search.slice(1), carrinha: ORIGEM, ts: new Date().toISOString()
       }))
     }).then(function (r) { return r.ok; }).catch(function () { return false; }).then(function (ok) { clearTimeout(timer); return ok; });
   }

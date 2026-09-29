@@ -221,12 +221,33 @@ def build_page(meta, body_tpl, extra_ctx=None):
     return file
 
 
+def vcard():
+    """Cartão de contacto (mdm.vcf) para guardar no telemóvel: botão da página das carrinhas."""
+    esc = lambda t: t.replace("\\", "\\\\").replace(",", "\\,").replace(";", "\\;")
+    rua, resto = SITE["address1"], SITE["address2"]           # "1990-426 Lisboa · Parque das Nações"
+    cp, cidade = resto.split(" ", 1)[0], resto.split(" ", 1)[1].split(" · ")[0]
+    linhas = [
+        "BEGIN:VCARD", "VERSION:3.0",
+        f"N:{esc(SITE['name'])};;;;", f"FN:{esc(SITE['name'])}", f"ORG:{esc(SITE['name'])}",
+        "X-ABShowAs:COMPANY",
+        f"TEL;TYPE=WORK,VOICE:{SITE['phoneE164']}",
+        f"TEL;TYPE=CELL:+351{SITE['whatsapp'].replace(' ', '')}",
+        f"EMAIL;TYPE=WORK:{SITE['email']}",
+        f"URL:{SITE['baseUrl']}/",
+        f"ADR;TYPE=WORK:;;{esc(rua)};{esc(cidade)};;{cp};Portugal",
+        "NOTE:" + esc(f"Ar condicionado, ventilação, eletricidade e manutenção na grande Lisboa desde {SITE['founded']}. "
+                      f"{SITE['hours']}. WhatsApp {SITE['whatsapp']}: envie uma fotografia da avaria."),
+        "END:VCARD", ""]
+    (OUT / "mdm.vcf").write_bytes("\r\n".join(linhas).encode("utf-8"))
+
+
 def build():
     if OUT.exists():
         shutil.rmtree(OUT)
     OUT.mkdir()
     shutil.copytree(ASSETS, OUT / "assets")
-    files = []
+    vcard()
+    files, fora_do_mapa = [], set()
     for p in sorted((SRC / "pages").rglob("*.html")):
         text = p.read_text(encoding="utf-8")
         m = META_RE.match(text)
@@ -234,6 +255,8 @@ def build():
             raise SystemExit(f"{p}: falta o bloco <!--meta {{...}} -->")
         meta = json.loads(m.group(1))
         files.append(build_page(meta, text[m.end():]))
+        if "noindex" in meta.get("robots", ""):
+            fora_do_mapa.add(meta["file"])   # 404 e página das carrinhas
     obra_tpl_path = SRC / "templates" / "obra.html"
     if obra_tpl_path.exists():
         tpl = obra_tpl_path.read_text(encoding="utf-8")
@@ -250,7 +273,7 @@ def build():
             files.append(build_page(meta, tpl, {"obra": o, "prev": prev_o, "next": next_o,
                                                 "related": [x for x in OBRAS if x["cat"] == o["cat"] and x is not o][:3]}))
     urls = "".join(f"<url><loc>{SITE['baseUrl']}/{'' if f == 'index.html' else f}</loc></url>\n"
-                   for f in files if f not in ("404.html",))
+                   for f in files if f not in fora_do_mapa)
     (OUT / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         + urls + "</urlset>\n", encoding="utf-8")

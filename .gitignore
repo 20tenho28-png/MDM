@@ -20,3 +20,6 @@ htmlcov/
 
 # Site gerado (python3 website/build.py)
 website/public/
+
+# Códigos QR das carrinhas: gerados com o domínio final (python3 website/marketing/gerar_qr.py)
+website/marketing/qr/

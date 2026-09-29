@@ -24,6 +24,12 @@
   [headers.values]
     Cache-Control = "public, max-age=3600"
 
+# cartão de contacto da página das carrinhas: abre a ficha "adicionar contacto" no telemóvel
+[[headers]]
+  for = "/mdm.vcf"
+  [headers.values]
+    Content-Type = "text/vcard; charset=utf-8"
+
 [[headers]]
   for = "/*"
   [headers.values]
