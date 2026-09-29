@@ -169,23 +169,32 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 .gaveta-tel span { font-size: 13px; font-weight: 500; letter-spacing: .02em; color: var(--aco); }
 body.menu-aberto { overflow: hidden; }
 
-/* ── Hero ── */
-.hero { position: relative; min-height: min(88vh, 760px); display: flex; overflow: hidden; background: var(--tinta-2); color: #fff; }
-.hero-foto { position: absolute; inset: 0; }
-.hero-foto img { object-position: 50% 45%; }
-.hero-veu { position: absolute; inset: 0; background: rgba(12, 16, 21, .66); }
-.hero-in { position: relative; width: 100%; max-width: var(--max); margin: 0 auto; padding: clamp(64px, 10vw, 120px) var(--margem) clamp(72px, 9vw, 110px); display: flex; flex-direction: column; justify-content: flex-end; gap: 24px; }
-@media (min-width: 700px) { .hero-in { justify-content: center; gap: 28px; } }
+/* ── Hero ──
+   Fundo claro e fotografia inteira, sem corte nem zoom (grande angular): a obra vê-se toda.
+   Telemóvel: fotografia, legenda, texto. Computador: texto à esquerda, fotografia à direita até à margem. */
+.hero, .pag-hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "foto" "leg" "texto"; background: var(--gesso); color: var(--tinta); border-bottom: 1px solid var(--linha); }
+.hero-foto { grid-area: foto; position: relative; background: var(--areia); overflow: hidden; }
+.hero-foto picture.foto { height: auto; }
+.hero-foto picture.foto img { height: auto; display: block; }
+.hero-in, .pag-hero-in { grid-area: texto; position: relative; width: 100%; box-sizing: border-box; padding: 28px var(--margem) clamp(44px, 6vw, 64px); display: flex; flex-direction: column; justify-content: flex-start; gap: 22px; }
 .hero-rot { display: flex; align-items: center; gap: 14px; }
 .hero-risco { display: block; width: 44px; height: 3px; background: var(--carmim); flex-shrink: 0; }
-.hero-rot .rotulo { color: #C9CFD7; letter-spacing: .18em; }
-.hero .h1 { color: #fff; max-width: 1080px; }
-.hero-lead { max-width: 610px; font-size: clamp(17px, 1.6vw, 21px); line-height: 1.55; color: #D6DBE1; }
+.hero-rot .rotulo { color: var(--aco); letter-spacing: .18em; }
+.hero .h1, .pag-hero .h1 { color: var(--tinta); max-width: 16ch; font-size: clamp(40px, 9vw, 64px); text-wrap: balance; }
+.hero-lead { max-width: 610px; font-size: clamp(17px, 1.6vw, 20px); line-height: 1.55; color: var(--aco-2); }
 .hero-acoes { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
 @media (min-width: 560px) { .hero-acoes { flex-direction: row; flex-wrap: wrap; } }
 .hero-acoes .btn { min-height: 54px; padding: 16px 28px; font-size: 15px; }
-.hero-leg { position: absolute; right: var(--margem); bottom: 24px; max-width: 340px; text-align: right; font-family: var(--sans); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: rgba(255, 255, 255, .72); line-height: 1.7; display: none; }
-@media (min-width: 900px) { .hero-leg { display: block; } }
+.hero-leg { grid-area: leg; margin: 0; padding: 10px var(--margem) 0; font-family: var(--sans); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--aco); line-height: 1.7; }
+@media (min-width: 1000px) {
+  .hero, .pag-hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); grid-template-rows: auto auto; align-content: start; grid-template-areas: "texto foto" "texto leg"; }
+  .hero-in, .pag-hero-in { align-self: center; padding: clamp(48px, 5vw, 80px) clamp(32px, 4vw, 64px) clamp(48px, 5vw, 80px) var(--margem); }
+  .hero .h1, .pag-hero .h1 { font-size: clamp(44px, 4.4vw, 66px); }
+  .pag-hero .h1 { max-width: none; font-size: clamp(40px, 3.6vw, 54px); }
+  .hero-leg { align-self: start; padding: 12px var(--margem) 24px 0; text-align: right; }
+  /* fotografia ao alto: inteira, sem ocupar o ecrã todo */
+  .hero-foto picture.foto img[height="1600"] { width: auto; max-width: 100%; max-height: min(80vh, 760px); margin: 0 auto; }
+}
 
 /* ── Faixa de dados ── */
 .faixa { background: var(--tinta); color: var(--gesso); }
@@ -444,11 +453,6 @@ body.topo-compacto .filtros-wrap { top: 60px; }
 .cta-faixa .acoes { display: flex; flex-wrap: wrap; gap: 12px; }
 
 /* ── Páginas de serviço e texto ── */
-.pag-hero { position: relative; background: var(--tinta-2); color: #fff; overflow: hidden; }
-.pag-hero .hero-foto img { object-position: 50% 50%; }
-.pag-hero-in { position: relative; max-width: var(--max); margin: 0 auto; padding: clamp(56px, 8vw, 104px) var(--margem) clamp(48px, 6vw, 80px); display: flex; flex-direction: column; gap: 22px; }
-.pag-hero .h1 { color: #fff; font-size: clamp(38px, 6vw, 76px); max-width: 1060px; text-wrap: balance; }
-.pag-hero .migalhas, .pag-hero .migalhas a { color: #fff; }
 .lista-traco { list-style: none; margin: 0; padding: 0; }
 .lista-traco li { padding: 14px 0 14px 28px; border-top: 1px solid var(--linha); position: relative; }
 .lista-traco li:last-child { border-bottom: 1px solid var(--linha); }
@@ -466,11 +470,11 @@ body.topo-compacto .filtros-wrap { top: 60px; }
 .entra-2 { animation-delay: 80ms; } .entra-3 { animation-delay: 160ms; } .entra-4 { animation-delay: 280ms; } .entra-5 { animation-delay: 400ms; }
 .hero-leg { animation: mdm-sobe 700ms var(--mover) 600ms both; }
 .hero-risco { transform-origin: left center; animation: mdm-risco 700ms var(--mover) both; }
-.hero-foto picture.foto img { animation: mdm-assenta 1400ms var(--mover) both; }
+.hero-foto picture.foto img { animation: mdm-aparece 900ms var(--mover) both; }
 
 @keyframes mdm-sobe { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes mdm-risco { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-@keyframes mdm-assenta { from { transform: scale(1.06); } to { transform: scale(1); } }
+@keyframes mdm-aparece { from { opacity: 0; } to { opacity: 1; } }
 @keyframes mdm-cai { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 @keyframes mdm-rede { to { opacity: 1; transform: none; } }
 
