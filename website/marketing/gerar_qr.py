@@ -30,7 +30,7 @@ POSICOES = [
     ("t", "traseira", 500),          # lida da rua, a 3–5 m: o código grande
     ("e", "lateral-esquerda", 350),  # lida do passeio, de perto
     ("d", "lateral-direita", 350),
-    ("m", "iman", 240),              # painel magnético "Hoje estamos a trabalhar aqui"
+    ("m", "iman", 200),              # íman de 60 × 40 cm na porta de correr: "Hoje estamos aqui a:"
     ("c", "cartao-vizinho", 30),     # cartão deixado nas caixas do correio do prédio
 ]
 MARGEM = 4  # módulos brancos à volta, o mínimo da norma
