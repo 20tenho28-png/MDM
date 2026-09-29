@@ -202,6 +202,22 @@ body.menu-aberto { overflow: hidden; }
   .hero-leg { top: auto; bottom: 24px; }
 }
 
+/* Fotografia ao alto (o camião da MDM com a plataforma, na página inicial). Inteira, sem corte:
+   no telemóvel ocupa a largura toda e o texto começa onde ela se desvanece; no computador fica à direita,
+   à altura do ecrã, e funde-se no fundo claro onde está o texto. */
+.hero-retrato { display: block; min-height: 0; background: var(--gesso); }
+.hero-retrato .hero-foto { position: relative; inset: auto; }
+.hero-retrato .hero-foto picture.foto, .hero-retrato .hero-foto picture.foto img { height: auto; }
+.hero-retrato .hero-foto::after { inset: -1px; background: linear-gradient(0deg, var(--gesso) 0%, rgba(244, 242, 237, .92) 16%, rgba(244, 242, 237, 0) 40%); }
+.hero-retrato .hero-in { margin-top: clamp(-96px, -12vw, -40px); padding-top: 0; }
+@media (min-width: 900px) {
+  .hero-retrato { display: flex; min-height: calc(100vh - var(--topo-h)); min-height: calc(100svh - var(--topo-h)); }
+  .hero-retrato .hero-foto { position: absolute; inset: 0 0 0 auto; height: 100%; aspect-ratio: 3 / 4; }
+  .hero-retrato .hero-foto picture.foto, .hero-retrato .hero-foto picture.foto img { width: 100%; height: 100%; }
+  .hero-retrato .hero-foto::after { background: linear-gradient(90deg, var(--gesso) 0%, rgba(244, 242, 237, .75) 9%, rgba(244, 242, 237, 0) 30%); }
+  .hero-retrato .hero-in { margin-top: 0; padding: clamp(56px, 7vw, 96px) var(--margem); }
+}
+
 /* ── Faixa de dados ── */
 .faixa { background: var(--tinta); color: var(--gesso); }
 .faixa-in { max-width: var(--max); margin: 0 auto; padding: 0 var(--margem); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
