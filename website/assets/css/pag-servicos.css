@@ -1,5 +1,11 @@
 /* Páginas de serviço (servicos/*.html): só o que site.css não cobre. */
 
+/* Enquadramento da fotografia do hero, por serviço (o motivo fica fora do degradê claro da esquerda) */
+.pag-hero .foto-ac img { object-position: 50% 62%; }
+.pag-hero .foto-man img { object-position: 56% 40%; }
+.pag-hero .foto-ele img { object-position: 60% 30%; }
+.pag-hero .foto-ven img { object-position: 50% 45%; }
+
 .serv-h2 { text-wrap: balance; }
 
 /* O que fazemos: o título fica por cima do texto, com o mesmo corpo do resto da página */
