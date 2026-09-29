@@ -1,9 +1,10 @@
 /* Página do código QR das carrinhas (carrinha.html). Complementa site.css.
    Quem chega está na rua, de telemóvel na mão, ao lado da carrinha: a escolha tem de caber no primeiro ecrã e meio. */
 
-/* hero: o mesmo da página inicial (fotografia a toda a largura, degradê claro), mais baixo para as escolhas
-   aparecerem depressa */
-.car-hero { min-height: min(74svh, 620px); }
+/* hero: o mesmo sistema da página inicial, mais baixo no computador para as escolhas aparecerem depressa */
+@media (min-width: 900px) and (min-aspect-ratio: 2/3), (max-height: 520px) and (min-aspect-ratio: 3/2) {
+  .car-hero { --hero-h: min(74svh, 620px); }
+}
 .car-hero .h1 { max-width: 12ch; }
 
 /* a origem do código, escrita como a legenda de uma ficha de obra */

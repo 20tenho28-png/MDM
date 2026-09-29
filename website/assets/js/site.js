@@ -139,11 +139,15 @@
     var alvos = qsa('.rodape, #orcamento, .hero-acoes, [data-esconde-barra]');
     var visiveis = new Set();
     var io = new IntersectionObserver(function (es) {
-      es.forEach(function (en) { if (en.isIntersecting) visiveis.add(en.target); else visiveis.delete(en.target); });
+      es.forEach(function (en) {
+        /* os botões do topo só substituem a barra quando estão quase inteiros à vista */
+        var minimo = en.target.classList.contains('hero-acoes') ? 0.6 : 0.05;
+        if (en.isIntersecting && en.intersectionRatio >= minimo) visiveis.add(en.target); else visiveis.delete(en.target);
+      });
       var esconde = visiveis.size > 0;
       barra.classList.toggle('escondida', esconde);
       barra.inert = esconde;
-    }, { threshold: 0.05 });
+    }, { threshold: [0.05, 0.6] });
     alvos.forEach(function (a) { io.observe(a); });
   })();
 

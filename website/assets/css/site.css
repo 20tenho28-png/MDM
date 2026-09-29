@@ -170,52 +170,64 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 body.menu-aberto { overflow: hidden; }
 
 /* ── Hero ──
-   Fotografia a ecrã inteiro, clara e aberta (grande angular). Sem véu escuro e sem zoom: o texto escuro assenta
-   num degradê cor de gesso que vem de baixo no telemóvel e da esquerda no computador; o resto da fotografia fica limpo. */
-.hero, .pag-hero { position: relative; display: flex; overflow: hidden; background: var(--areia); color: var(--tinta); border-bottom: 1px solid var(--linha); }
-.hero { min-height: calc(100vh - var(--topo-h)); min-height: calc(100svh - var(--topo-h)); }
-.pag-hero { min-height: min(76svh, 680px); }
-.hero-foto { position: absolute; inset: 0; }
-.hero-foto img { object-position: var(--foto-pos, 50% 50%); }
-.hero-foto::after { content: ''; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(0deg, rgba(244, 242, 237, .97) 0%, rgba(244, 242, 237, .93) 50%, rgba(244, 242, 237, .55) 66%, rgba(244, 242, 237, 0) 82%); }
-.hero-in, .pag-hero-in { position: relative; z-index: 1; width: 100%; max-width: var(--max); margin: 0 auto; box-sizing: border-box; padding: clamp(96px, 30vh, 280px) var(--margem) clamp(40px, 6vw, 72px); display: flex; flex-direction: column; justify-content: flex-end; gap: 20px; }
+   A fotografia da obra inteira e clara, sem véu escuro e sem zoom. --foto-ar é a proporção da fotografia
+   (1.3333 deitada, .75 ao alto). No telemóvel e no tablet ao alto fica em cima, a toda a largura, com altura
+   limitada para o título caber no primeiro ecrã, e desvanece-se onde o texto começa. No computador fica à direita,
+   à altura do topo, e funde-se no fundo cor de gesso onde está o texto; o texto entra no máximo 10% na fotografia,
+   sempre sobre o degradê. */
+.hero, .pag-hero { --foto-ar: 1.3333; position: relative; display: block; background: var(--gesso); color: var(--tinta); border-bottom: 1px solid var(--linha); }
+.hero-foto { position: relative; overflow: hidden; background: var(--areia) center / cover no-repeat;
+  height: min(calc(100vw / var(--foto-ar)), max(46vh, calc(100vw / var(--foto-ar) * .56)));
+  height: min(calc(100vw / var(--foto-ar)), max(46svh, calc(100vw / var(--foto-ar) * .56))); }
+.hero-foto picture.foto img { object-position: var(--foto-pos-m, 50% 50%); }
+.hero-foto::after { content: ''; position: absolute; inset: -1px; pointer-events: none;
+  background: linear-gradient(0deg, var(--gesso) 0, rgba(244, 242, 237, .92) 24px, rgba(244, 242, 237, 0) 56px); }
+.hero-in, .pag-hero-in { position: relative; z-index: 1; max-width: var(--max); margin: -24px auto 0; box-sizing: border-box; padding: 0 var(--margem) clamp(40px, 6vw, 64px); display: flex; flex-direction: column; gap: 20px; }
 .hero-rot { display: flex; align-items: center; gap: 14px; }
 .hero-risco { display: block; width: 44px; height: 3px; background: var(--carmim); flex-shrink: 0; }
-.hero-rot .rotulo { color: var(--aco-2); letter-spacing: .18em; }
-.hero .h1, .pag-hero .h1 { color: var(--tinta); max-width: 14ch; font-size: clamp(40px, 9vw, 64px); text-wrap: balance; }
+.hero-rot .rotulo { min-width: 0; color: var(--aco-2); letter-spacing: .18em; }
+/* lista do rótulo: quando parte, o "·" nunca fica pendurado no fim nem no início de uma linha */
+.rotulo-lista { overflow: hidden; }
+.rotulo-lista > span { display: flex; flex-wrap: wrap; margin-left: -1.6em; }
+.rotulo-lista > span > span { white-space: nowrap; }
+.rotulo-lista > span > span::before { content: '·'; display: inline-block; width: 1.6em; text-align: center; }
+.hero .h1, .pag-hero .h1 { color: var(--tinta); max-width: 14ch; font-size: clamp(40px, 9vw, 64px); text-wrap: balance; overflow-wrap: break-word; hyphens: auto; }
 .pag-hero .h1 { max-width: 20ch; }
-.hero-lead { max-width: 560px; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.55; color: var(--aco-2); }
+.hero-lead { max-width: 560px; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.55; color: var(--aco-2); text-wrap: pretty; }
 .hero-acoes { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
 @media (min-width: 560px) { .hero-acoes { flex-direction: row; flex-wrap: wrap; } }
 .hero-acoes .btn { min-height: 54px; padding: 16px 28px; font-size: 15px; }
-/* legenda da obra, como uma etiqueta de ficha no canto da fotografia */
+/* legenda da obra, como uma etiqueta de ficha no canto de cima da fotografia (em baixo taparia as rodas) */
 .hero-leg { position: absolute; z-index: 1; right: var(--margem); top: 18px; max-width: 360px; margin: 0; padding: 6px 10px; background: rgba(244, 242, 237, .9); font-family: var(--sans); font-size: 10.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--tinta); line-height: 1.5; display: none; }
 @media (min-width: 700px) { .hero-leg { display: block; } }
-@media (min-width: 900px) {
-  .hero-foto img { object-position: var(--foto-pos-d, var(--foto-pos, 50% 50%)); }
-  .hero-foto::after { background: linear-gradient(90deg, rgba(244, 242, 237, .96) 0%, rgba(244, 242, 237, .9) 34%, rgba(244, 242, 237, .5) 50%, rgba(244, 242, 237, 0) 64%); }
-  .hero-in, .pag-hero-in { justify-content: center; padding: clamp(56px, 7vw, 96px) var(--margem); }
-  .hero-in > *, .pag-hero-in > * { max-width: min(620px, 46vw); }
-  .hero .h1 { font-size: clamp(48px, 5.2vw, 80px); }
-  .pag-hero .h1 { font-size: clamp(40px, 4vw, 60px); }
-  .hero-leg { top: auto; bottom: 24px; }
-}
+/* a fotografia do camião (página inicial): prévia minúscula enquanto descarrega */
+.hero-retrato { --foto-ar: .75; --foto-pos-m: 50% 55%; --foto-pos-d: 33% 50%; }
+.hero-retrato .hero-foto { background-image: url(data:image/webp;base64,UklGRugAAABXRUJQVlA4INwAAADQBQCdASoSABgAPu1srFEppaQiqAqpMB2JZQDIYagcYFUEndotEzGajNSQv2ho+9kphOP9+ICAAP6Pt4HCINxpqj6AKE8PbMbGj7Azf4JR2SWejPJ092qLo2TLjbdep0XFKErAlRKCEJ7+eEwD3K4ctjdk/JGf3hvJep2gnnt3nn7Z1sv3ClteYSd9a0YSk9XyJqdiEHPmJ1+Oq61szHFFFM6NMkRZ7nhwXjiEMikpyGF+MIumXy7sKfjtTNhrnyC2o10+nYugAxB3/9wB0ggNGqmm08MegLmLlAAA); }
 
-/* Fotografia ao alto (o camião da MDM com a plataforma, na página inicial). Inteira, sem corte:
-   no telemóvel ocupa a largura toda e o texto começa onde ela se desvanece; no computador fica à direita,
-   à altura do ecrã, e funde-se no fundo claro onde está o texto. */
-.hero-retrato { display: block; min-height: 0; background: var(--gesso); }
-.hero-retrato .hero-foto { position: relative; inset: auto; }
-.hero-retrato .hero-foto picture.foto, .hero-retrato .hero-foto picture.foto img { height: auto; }
-.hero-retrato .hero-foto::after { inset: -1px; background: linear-gradient(0deg, var(--gesso) 0%, rgba(244, 242, 237, .92) 16%, rgba(244, 242, 237, 0) 40%); }
-.hero-retrato .hero-in { margin-top: clamp(-96px, -12vw, -40px); padding-top: 0; }
-@media (min-width: 900px) {
-  .hero-retrato { display: flex; min-height: calc(100vh - var(--topo-h)); min-height: calc(100svh - var(--topo-h)); }
-  .hero-retrato .hero-foto { position: absolute; inset: 0 0 0 auto; height: 100%; aspect-ratio: 3 / 4; }
-  .hero-retrato .hero-foto picture.foto, .hero-retrato .hero-foto picture.foto img { width: 100%; height: 100%; }
-  .hero-retrato .hero-foto::after { background: linear-gradient(90deg, var(--gesso) 0%, rgba(244, 242, 237, .75) 9%, rgba(244, 242, 237, 0) 30%); }
-  .hero-retrato .hero-in { margin-top: 0; padding: clamp(56px, 7vw, 96px) var(--margem); }
+/* Computador (e telemóvel deitado): fotografia à direita, texto à esquerda sobre o gesso */
+@media (min-width: 900px) and (min-aspect-ratio: 2/3), (max-height: 520px) and (min-aspect-ratio: 3/2) {
+  .hero, .pag-hero {
+    display: flex; align-items: center; min-height: var(--hero-h);
+    --foto-a: calc(var(--hero-h) * var(--foto-ar));                              /* largura natural à altura do topo */
+    --texto-x: calc(max(0px, (100vw - var(--max)) / 2) + var(--margem));         /* onde o texto começa */
+    --foto-w: min(var(--foto-a), max(calc(var(--foto-a) * .7), calc(100vw - var(--texto-x) - 360px)));
+    --texto-max: calc(100vw - var(--texto-x) - var(--foto-w) * .9);               /* o texto entra no máximo 10% na foto */
+  }
+  .hero { --hero-h: calc(100svh - var(--topo-h)); }
+  .pag-hero { --hero-h: min(76svh, 680px); }
+  .hero-foto { position: absolute; top: 0; right: 0; bottom: 0; width: var(--foto-w); height: auto; }
+  .hero-foto picture.foto img { object-position: var(--foto-pos-d, 50% 50%); }
+  .hero-foto::after { background: linear-gradient(90deg, var(--gesso) 0%, rgba(244, 242, 237, .75) 9%, rgba(244, 242, 237, 0) 30%); }
+  .hero-in, .pag-hero-in { width: 100%; margin: 0 auto; padding: clamp(40px, 6vw, 96px) var(--margem); }
+  .hero-in > :not(.hero-acoes), .pag-hero-in > :not(.hero-acoes) { max-width: min(620px, 46vw, var(--texto-max)); }
+  /* os botões são opacos: podem entrar na fotografia, mas partem para a linha de baixo antes de a tapar */
+  .hero-acoes { max-width: max(var(--texto-max), 290px); }
+  .hero .h1 { font-size: clamp(44px, 5.2vw, 80px); max-width: min(14ch, var(--texto-max)); }
+  .pag-hero .h1 { font-size: clamp(38px, 4vw, 60px); max-width: min(20ch, var(--texto-max)); }
+}
+/* ecrã largo com a fotografia ao alto: o texto nem chega à fotografia, o degradê só esbate a borda */
+@media (min-width: 1200px) and (min-aspect-ratio: 3/2) {
+  .hero-retrato .hero-foto::after { background: linear-gradient(90deg, var(--gesso) 0%, rgba(244, 242, 237, .6) 4%, rgba(244, 242, 237, 0) 12%); }
 }
 
 /* ── Faixa de dados ── */
