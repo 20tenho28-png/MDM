@@ -1,10 +1,18 @@
 /* Página do código QR das carrinhas (carrinha.html). Complementa site.css.
    Quem chega está na rua, de telemóvel na mão, ao lado da carrinha: a escolha tem de caber no primeiro ecrã e meio. */
 
-/* hero: o mesmo sistema da página inicial, mais baixo no computador para as escolhas aparecerem depressa */
-@media (min-width: 900px) and (min-aspect-ratio: 2/3), (max-height: 520px) and (min-aspect-ratio: 3/2) {
+/* hero: o mesmo sistema da página inicial, mais baixo para as escolhas aparecerem depressa.
+   No telemóvel a fotografia fica numa faixa curta e o texto aperta-se. */
+.car-hero .hero-foto { height: min(calc(100vw / var(--foto-ar)), 24svh); }
+.car-hero .hero-in { padding-bottom: 28px; gap: 14px; }
+.car-escolha { padding-top: 28px; }
+@media (min-width: 900px) and (min-aspect-ratio: 2/3), (min-width: 700px) and (min-aspect-ratio: 6/5), (max-height: 520px) and (min-aspect-ratio: 3/2) {
   .car-hero { --hero-h: min(74svh, 620px); }
+  .car-hero .hero-foto { height: auto; }
+  .car-hero .hero-in { padding-bottom: clamp(40px, 6vw, 96px); gap: 20px; }
+  .car-escolha { padding-top: clamp(40px, 6vw, 72px); }
 }
+@media (max-height: 520px) and (min-aspect-ratio: 3/2) { .car-hero .hero-foto { height: var(--hero-h); } }
 .car-hero .h1 { max-width: 12ch; }
 
 /* a origem do código, escrita como a legenda de uma ficha de obra */
@@ -13,7 +21,6 @@
 @keyframes car-ping { 0% { box-shadow: 0 0 0 0 rgba(163, 7, 17, .45); } 100% { box-shadow: 0 0 0 10px rgba(163, 7, 17, 0); } }
 
 /* as quatro escolhas */
-.car-escolha { padding-top: clamp(40px, 6vw, 72px); }
 .car-escolha-in { max-width: calc(var(--max) - 160px); margin: 0 auto; }
 .car-escolha-cab { margin-bottom: 24px; }
 .car-opcoes { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
