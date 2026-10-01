@@ -1,0 +1,13 @@
+/* Página de agradecimento do formulário (obrigado.html). Complementa site.css. */
+.obg-cab .h1 { max-width: 12ch; }
+.obg-rot { text-transform: uppercase; font-family: var(--sans); font-size: 13px; font-weight: 700; letter-spacing: .14em; color: var(--carmim); }
+.obg-contacto { display: flex; flex-direction: column; gap: 18px; }
+.obg-acoes { display: flex; flex-direction: column; gap: 12px; }
+@media (min-width: 560px) { .obg-acoes { flex-direction: row; flex-wrap: wrap; } }
+.obg-links strong { display: flex; align-items: center; gap: 8px; }
+.obg-links a { display: block; color: var(--tinta); text-decoration: none; }
+.obg-links a:hover strong { color: var(--carmim); }
+.obg-links a span { font-size: 16px; color: var(--aco); }
+.obg-links .seta { width: 16px; height: 16px; color: var(--carmim); }
+.obg-links a:hover .seta { transform: translateX(4px); }
+@media (prefers-reduced-motion: reduce) { .obg-links a:hover .seta { transform: none; } }

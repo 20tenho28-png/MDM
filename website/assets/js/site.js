@@ -385,11 +385,19 @@
     d.addEventListener('toggle', function () { if (d.open) track('faq_aberta', { pergunta: d.querySelector('summary').textContent.trim() }); });
   });
 
-  /* ═══ Pedido de orçamento ═══ */
+  /* ═══ Pedido de orçamento ═══
+     No site: Netlify Forms (formulário "orcamento" em src/partials/contacto.html). Com JavaScript, valida aqui,
+     envia com fetch para "/" sem sair da página e, se falhar, deixa o que foi escrito e oferece telefone e WhatsApp.
+     Sem JavaScript, o envio é normal e o Netlify mostra obrigado.html.
+     No ficheiro único (MDM-index.html, aberto de file://) não há servidor: o botão abre o email do visitante com o
+     pedido preparado e o campo da fotografia não aparece (a fotografia segue por WhatsApp). */
   var form = $('quoteForm');
   if (!form) return;
+  form.noValidate = true;   /* a validação do browser só serve sem JavaScript; daqui em diante é a de baixo */
 
-  var LEAD_ENDPOINT = '';   /* receptor de pedidos (Supabase ou Base44). Vazio: o botão abre o email do visitante */
+  var SEM_ENVIO = location.protocol === 'file:' || form.hasAttribute('data-sem-envio');
+  var FOTO_MAX = 8 * 1000 * 1000;   /* o Netlify aceita até 8 MB por pedido */
+  var TEL = '218 935 050', TEL_HREF = 'tel:+351218935050', EMAIL = 'mdmassist@mdmassist.com';
   var WA_BASE = 'https://wa.me/351910307579?text=';
   var TRIAGEM = {
     'Ar condicionado: montagem / instalação':   { p: 'P1', seg: 'Montagem AC' },
@@ -402,9 +410,11 @@
   };
   function triagem(s) { return TRIAGEM[s] || { p: 'P5', seg: s ? 'Outro' : 'Por classificar' }; }
   function etiqueta(s) { var t = triagem(s); return '[' + t.p + ' · ' + t.seg + ']'; }
+  var foto = $('qFoto');
   function quoteData() {
     return { empresa: $('qNome').value.trim(), email: $('qEmail').value.trim(), tel: $('qTel').value.trim(),
-             servico: $('qServico').value, msg: $('qMsg').value.trim() };
+             servico: $('qServico').value, msg: $('qMsg').value.trim(),
+             foto: !SEM_ENVIO && foto && foto.files && foto.files[0] || null };
   }
   function quoteBody(d) {
     var l = ['Pedido de orçamento MDM', '', 'Nome/Empresa: ' + (d.empresa || '-'), 'Email: ' + (d.email || '-'),
@@ -412,15 +422,19 @@
     if (ORIGEM) l.push('Origem: ' + ORIGEM);
     return l.concat(['', d.msg || '']).join('\n');
   }
-  function quoteAlert(msg, ok, comWhats) {
+  function assunto(d) { return etiqueta(d.servico) + ' Pedido de orçamento, ' + (d.servico || 'serviços MDM') + (ORIGEM ? ' [' + ORIGEM + ']' : ''); }
+  /* a mensagem e, se houver, ligações no fim: "…, [ligue 218 935 050] ou [envie-o por WhatsApp]." */
+  function quoteAlert(msg, ok, ligacoes) {
     var a = $('quoteAlert');
     a.textContent = msg; a.classList.toggle('ok', !!ok);
-    if (comWhats) {
-      var l = document.createElement('a');
-      l.href = WA_BASE + encodeURIComponent('Olá MDM. Acabei de enviar um pedido de orçamento pelo site.' + (ORIGEM ? ' [' + ORIGEM + ']' : ''));
-      l.target = '_blank'; l.rel = 'noopener'; l.textContent = 'Falar agora por WhatsApp';
-      a.appendChild(document.createTextNode(' ')); a.appendChild(l);
-    }
+    if (!ligacoes) return;
+    ligacoes.forEach(function (l, i) {
+      var el = document.createElement('a');
+      el.href = l[0]; el.textContent = l[1];
+      if (/^https:/.test(l[0])) { el.target = '_blank'; el.rel = 'noopener'; }
+      a.appendChild(document.createTextNode(i ? ' ou ' : ' ')); a.appendChild(el);
+    });
+    a.appendChild(document.createTextNode('.'));
   }
   function erroCampo(id, msg) {
     var inp = $(id), e = $('e' + id.slice(1));
@@ -450,26 +464,49 @@
       if (!qsa('#qNome[aria-invalid],#qEmail[aria-invalid],#qTel[aria-invalid]').length && !$('quoteAlert').classList.contains('ok')) quoteAlert('');
     });
   });
-  function sendLead(payload) {
-    if (!LEAD_ENDPOINT) return Promise.resolve(false);
-    var ctl = new AbortController(), timer = setTimeout(function () { ctl.abort(); }, 8000);
-    return fetch(LEAD_ENDPOINT, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }, signal: ctl.signal,
-      body: JSON.stringify(Object.assign({}, payload, {
-        prioridade: triagem(payload.servico).p, segmento: triagem(payload.servico).seg,
-        pagina: location.href, referrer: document.referrer || '', utm: location.search.slice(1), carrinha: ORIGEM, ts: new Date().toISOString()
-      }))
-    }).then(function (r) { return r.ok; }).catch(function () { return false; }).then(function (ok) { clearTimeout(timer); return ok; });
+
+  /* fotografia (opcional): uma imagem até 8 MB. Se não servir, sai do pedido e o erro diz porquê */
+  function fotoErro(f) {
+    if (!f) return '';
+    if (f.size > FOTO_MAX) return 'A fotografia tem mais de 8 MB e não segue com o pedido. Escolha uma mais pequena ou envie-a depois por WhatsApp.';
+    if (f.type && !/^image\//.test(f.type)) return 'Este ficheiro não é uma fotografia e não segue com o pedido. Escolha uma imagem (JPG, PNG ou HEIC).';
+    return '';
+  }
+  function confereFoto() {
+    var msg = fotoErro(foto.files && foto.files[0]);
+    erroCampo('qFoto', msg);
+    if (msg) foto.value = '';
+    return !msg;
+  }
+  if (foto) {
+    if (SEM_ENVIO) { foto.disabled = true; foto.closest('[data-campo-foto]').hidden = true; }
+    else foto.addEventListener('change', confereFoto);
+  }
+
+  /* campos escondidos que o Netlify guarda com o pedido: triagem, origem (carrinha) e o assunto do email de aviso */
+  var campoOrigem = form.querySelector('[data-origem-campo]');
+  if (ORIGEM && campoOrigem) campoOrigem.value = ORIGEM;
+  function preparaCampos(d) {
+    form.querySelector('[data-triagem]').value = etiqueta(d.servico);
+    form.querySelector('[data-assunto]').value = assunto(d);
+    if (ORIGEM && campoOrigem) campoOrigem.value = ORIGEM;
+  }
+  function enviaNetlify(d) {
+    var ctl = window.AbortController ? new AbortController() : null;
+    /* uma fotografia grande demora a subir numa rede móvel fraca */
+    var timer = ctl && setTimeout(function () { ctl.abort(); }, d.foto ? 120000 : 20000);
+    return fetch('/', { method: 'POST', body: new FormData(form), signal: ctl ? ctl.signal : undefined })
+      .then(function (r) { return r.ok; }, function () { return false; })
+      .then(function (ok) { clearTimeout(timer); return ok; });
   }
   function quoteMailto(d) {
-    location.href = 'mailto:mdmassist@mdmassist.com?subject=' + encodeURIComponent(etiqueta(d.servico) + ' Pedido de orçamento, ' + (d.servico || 'serviços MDM'))
-      + '&body=' + encodeURIComponent(quoteBody(d));
-    quoteAlert('Abrimos o seu programa de email com o pedido preparado, falta só carregar em enviar. Se nada aconteceu, escreva para mdmassist@mdmassist.com ou ligue 218 935 050.', true);
+    location.href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent(assunto(d)) + '&body=' + encodeURIComponent(quoteBody(d));
+    quoteAlert('Abrimos o seu programa de email com o pedido preparado, falta só carregar em enviar. Se nada aconteceu, escreva para ' + EMAIL + ' ou ligue ' + TEL + '.', true);
   }
-  if (LEAD_ENDPOINT) $('sendEmailLbl').textContent = 'Enviar pedido';
+  if (SEM_ENVIO) $('sendEmailLbl').textContent = 'Enviar por email';
   function bloqueado() {
     if (!$('qGotcha').value) return false;
-    quoteAlert('Não foi possível validar o pedido. Escreva-nos para mdmassist@mdmassist.com ou ligue 218 935 050.');
+    quoteAlert('Não foi possível validar o pedido. Escreva-nos para ' + EMAIL + ' ou ligue ' + TEL + '.');
     return true;
   }
   form.addEventListener('submit', function (e) {
@@ -477,36 +514,38 @@
     var btn = $('sendEmail'), lbl = $('sendEmailLbl');
     if (btn.getAttribute('aria-busy') === 'true' || bloqueado()) return;
     var d = quoteData(); if (!quoteValidate(d)) return;
-    track('quote_form_submit', { via: LEAD_ENDPOINT ? 'endpoint' : 'mailto', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg });
-    if (!LEAD_ENDPOINT) { quoteMailto(d); return; }
-    btn.setAttribute('aria-busy', 'true'); lbl.textContent = 'A enviar…'; quoteAlert('');
-    sendLead(Object.assign({}, d, { origem: 'formulario' })).then(function (ok) {
+    if (d.foto && !confereFoto()) { foto.focus(); return; }
+    preparaCampos(d);
+    track('quote_form_submit', { via: SEM_ENVIO ? 'mailto' : 'netlify', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg });
+    if (SEM_ENVIO) { quoteMailto(d); return; }
+    btn.setAttribute('aria-busy', 'true'); lbl.textContent = d.foto ? 'A enviar a fotografia…' : 'A enviar…'; quoteAlert('');
+    enviaNetlify(d).then(function (ok) {
       btn.removeAttribute('aria-busy');
       if (ok) {
         lbl.textContent = 'Pedido enviado';
-        quoteAlert('Pedido recebido, obrigado. Vamos analisar o seu pedido e responder pelo email ou telefone que indicou. Guardámos o seu contacto apenas para esta resposta. Se for urgente:', true, true);
-        form.reset(); track('quote_form_ok', { servico: d.servico, segmento: triagem(d.servico).seg });
-        setTimeout(function () { lbl.textContent = 'Enviar pedido'; }, 6000);
+        quoteAlert('Pedido recebido, obrigado. Vamos analisar o seu pedido e responder pelo email ou telefone que indicou. Se for urgente,', true,
+          [[TEL_HREF, 'ligue ' + TEL],
+           [WA_BASE + encodeURIComponent('Olá MDM. Acabei de enviar um pedido de orçamento pelo site.' + (ORIGEM ? ' [' + ORIGEM + ']' : '')), 'fale connosco por WhatsApp']]);
+        form.reset(); erroCampo('qFoto'); escolheServico(form.getAttribute('data-preselect'));
+        track('quote_form_ok', { servico: d.servico, segmento: triagem(d.servico).seg });
+        setTimeout(function () { if (lbl.textContent === 'Pedido enviado') lbl.textContent = 'Enviar pedido'; }, 6000);
         return;
       }
+      /* falhou (rede, tempo ou serviço): nada se apaga; o mesmo pedido pode seguir por telefone ou WhatsApp */
       track('quote_form_erro', { servico: d.servico });
-      if (!btn.dataset.falhou) {
-        btn.dataset.falhou = '1'; lbl.textContent = 'Tentar novamente';
-        quoteAlert('Não conseguimos enviar o pedido (falha de rede ou serviço indisponível). Toque em "Tentar novamente". Se continuar, abrimos o seu email com o pedido preparado.');
-        return;
-      }
-      quoteMailto(d);   /* 2.ª falha: o pedido não se perde, segue pelo email */
+      lbl.textContent = 'Tentar novamente';
+      quoteAlert('Não conseguimos enviar o pedido agora. O que escreveu continua no formulário: tente de novo,', false,
+        [[TEL_HREF, 'ligue ' + TEL], [WA_BASE + encodeURIComponent(quoteBody(d)), 'envie-o por WhatsApp']]);
     });
   });
-  /* segunda via: o mesmo pedido validado, entregue por WhatsApp.
+  /* segunda via: o mesmo pedido validado, entregue por WhatsApp (a fotografia junta-se lá).
      Abre dentro do clique: depois de uma espera o browser bloqueia a janela. */
   $('sendWhats').addEventListener('click', function () {
     if (bloqueado()) return;
     var d = quoteData(); if (!quoteValidate(d)) return;
     track('quote_form_submit', { via: 'whatsapp', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg });
     window.open(WA_BASE + encodeURIComponent(quoteBody(d)), '_blank', 'noopener');
-    if (LEAD_ENDPOINT) sendLead(Object.assign({}, d, { origem: 'formulario-whatsapp' }));
-    quoteAlert('Abrimos o WhatsApp com o pedido preenchido, falta só carregar em enviar.', true);
+    quoteAlert('Abrimos o WhatsApp com o pedido preenchido, falta só carregar em enviar.' + (d.foto ? ' Junte lá a fotografia.' : ''), true);
   });
   /* início do preenchimento: um evento por visita */
   (function () {
@@ -517,17 +556,15 @@
     });
   })();
   /* serviço pré-escolhido: pela página (data-preselect) ou por uma ligação com data-preselect */
-  (function () {
+  function escolheServico(v) {
     var sel = $('qServico');
-    function escolhe(v) {
-      if (!v) return;
-      for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === v || sel.options[i].text === v) { sel.selectedIndex = i; return true; }
-    }
-    escolhe(form.getAttribute('data-preselect'));
-    document.addEventListener('click', function (e) {
-      var a = e.target.closest && e.target.closest('a[data-preselect]');
-      if (!a) return;
-      if (escolhe(a.getAttribute('data-preselect'))) track('form_preselect', { servico: a.getAttribute('data-preselect') });
-    });
-  })();
+    if (!v) return;
+    for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === v || sel.options[i].text === v) { sel.selectedIndex = i; return true; }
+  }
+  escolheServico(form.getAttribute('data-preselect'));
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[data-preselect]');
+    if (!a) return;
+    if (escolheServico(a.getAttribute('data-preselect'))) track('form_preselect', { servico: a.getAttribute('data-preselect') });
+  });
 })();

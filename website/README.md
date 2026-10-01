@@ -50,10 +50,10 @@ Todas as páginas levam a empresa em JSON-LD (`HVACBusiness` e `Electrician`): n
 | `data/dados-mdm.json` | Dados que só a MDM pode dar (números das certificações, testemunhos, perguntas por responder, privacidade). Vazio = escondido no site |
 | `src/templates/layout.html` | Cabeçalho `<head>`, recusa de medição, estrutura comum |
 | `src/partials/` | Cabeçalho e menu em gaveta, rodapé, barra fixa do telemóvel, contacto + formulário, certificações, testemunhos, cartões de obra |
-| `src/pages/` | Página inicial, obras, 5 serviços (ar condicionado, bombas de calor, manutenção, eletricidade, ventilação), privacidade, 404, página do QR das carrinhas. Cada serviço descreve-se no `<!--meta-->` em `servico` (nome, tipo e ofertas) para os dados estruturados `Service` |
+| `src/pages/` | Página inicial, obras, 5 serviços (ar condicionado, bombas de calor, manutenção, eletricidade, ventilação), privacidade, 404, página do QR das carrinhas, `obrigado.html` (depois de enviar o formulário sem JavaScript). Cada serviço descreve-se no `<!--meta-->` em `servico` (nome, tipo e ofertas) para os dados estruturados `Service` |
 | `src/templates/obra.html` | Modelo das 24 páginas de obra (`obras/<slug>.html`) |
 | `assets/css/site.css` | Sistema visual completo e movimento |
-| `assets/js/site.js` | Medição (PostHog UE, sem cookies), formulário, gaveta, carrossel, filtros, revelação |
+| `assets/js/site.js` | Medição (PostHog UE, sem cookies), formulário (envio para o Netlify), gaveta, carrossel, filtros, revelação |
 | `assets/fonts/` | Archivo e Newsreader alojadas no site (licença OFL incluída): nenhum pedido ao Google |
 | `assets/img/obras/` | Fotografias com correção de cor ligeira, em WebP (800/1600) e JPEG |
 | `marketing/gerar_qr.py` | Códigos QR das carrinhas, em vetor, com a carrinha e o lado na ligação |
@@ -71,9 +71,22 @@ Os códigos usam o `baseUrl` de `data/site.json` (`https://www.mdmassist.com.pt`
 
 A página oferece ainda `mdm.vcf`, o cartão de contacto para guardar no telemóvel, gerado a partir de `data/site.json`.
 
-## Receber pedidos num servidor
+## Formulário de orçamento (Netlify Forms)
 
-Hoje o formulário abre o email do visitante com o pedido preparado (ou o WhatsApp). Para receber os pedidos diretamente, preencher `LEAD_ENDPOINT` em `assets/js/site.js` com o endereço de um recetor (Supabase, Base44…). O código já trata o envio, o tempo limite de 8 s, a nova tentativa e a passagem para email à segunda falha.
+O formulário (`src/partials/contacto.html`, em todas as páginas que o têm) é um formulário Netlify com o nome `orcamento`. O Netlify encontra-o no HTML gerado e guarda cada pedido em **Forms** no painel do projeto. Campos: `nome`, `email`, `telefone`, `servico`, `mensagem`, `fotografia` (opcional, uma imagem até 8 MB, o limite do Netlify por pedido) e os escondidos `pagina` (de onde foi enviado), `triagem` (`[P1 · Montagem AC]`…), `origem` (a carrinha, em `carrinha.html`) e `subject` (o assunto do email de aviso, com a triagem). `empresa_web` é a armadilha para robôs (`netlify-honeypot`). `--check` falha se o formulário de alguma página perder um destes campos ou atributos.
+
+- **Com JavaScript**, `site.js` valida (nome e um email ou telefone; fotografia até 8 MB e só imagens), envia para `/` sem sair da página e mostra a confirmação no próprio formulário, sem prazos. Se o envio falhar (rede, tempo, serviço), nada se apaga: a mensagem oferece telefone e WhatsApp, este já com o pedido escrito.
+- **Sem JavaScript**, o envio é normal e o Netlify mostra `obrigado.html` (fora do mapa do site, `noindex`).
+- O botão **Enviar por WhatsApp** continua ao lado, com o mesmo pedido validado; a fotografia junta-se na conversa.
+- No ficheiro único para o cliente (aberto do disco, sem servidor), o formulário volta ao email do visitante e ao WhatsApp, e o campo da fotografia não aparece.
+
+**O que a MDM tem de fazer no Netlify** (uma vez, depois da primeira publicação):
+
+1. **Forms → Enable form detection** e voltar a publicar (o Netlify só procura formulários depois disto).
+2. **Forms → Form notifications → Add notification → Email notification**: o email que recebe os pedidos (**falta saber qual**: `mdmassist@mdmassist.com` ou outro).
+3. Enviar um pedido de teste com fotografia e confirmar que chega ao email e aparece em **Forms**. Apagar depois o pedido de teste.
+
+O filtro de spam do Netlify está ligado por omissão; os pedidos marcados como spam ficam em **Forms → Spam**, convém espreitar de vez em quando.
 
 ## Antes de publicar: dados que só a MDM tem
 
@@ -93,5 +106,6 @@ Resumo do que falta hoje:
 - **Privacidade**: revisão jurídica, prazo de conservação dos pedidos (até lá, «apenas pelo tempo necessário»), se o PostHog descarta o IP, data da última atualização.
 - **Bombas de calor**: confirmar se a obra F29 (unidade e depósito numa varanda) é uma bomba de calor, como dizia a v3, ou um chiller, como diz a ficha; fotografias de outras bombas de calor montadas pela MDM (hoje a página mostra só F04 e F29). A página fala só de águas quentes e de sistemas combinados (águas quentes e aquecimento), como o dono confirmou; radiadores e piso radiante não são nomeados.
 - **Outras**: fotografias de quadros elétricos AVAC; confirmar «peças originais» e se há garantia a anunciar.
+- **Formulário**: o email que recebe os pedidos no Netlify, e ligar a deteção de formulários (ver «Formulário de orçamento»).
 
 `--check` falha se chegar a `public/` um placeholder (`[MAIÚSCULAS…]`, `[[CHAVE]]`, «por preencher») ou algo que o dono retirou a 27/09/2026: promessas de prazo de resposta («24 horas», «24–48h», «mesmo dia», «N minutos»), idade em anos («35 anos»: só «1991»), marcas fora de Midea, Mitsubishi Electric, Daikin e France Air, ou o nome legal com outra grafia («M.D.M. - Manuel Domingos Melancia, Lda»). Verifica as páginas, a meta, o JSON-LD, as mensagens de WhatsApp, os scripts e o cartão de contacto.

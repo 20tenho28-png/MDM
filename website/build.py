@@ -282,7 +282,8 @@ def breadcrumb_ld(trail):
 
 def page_ctx(meta, file):
     # wa: mensagem de WhatsApp da barra do telemóvel, do rodapé e do contacto (site.wa.*); cada serviço usa a sua
-    meta = {"preselect": "", "nav": "", "robots": "index,follow", "og": "", "wa": "geral", **meta}
+    # origem: valor inicial do campo escondido "origem" do formulário (carrinha.html; site.js junta a carrinha e o lado)
+    meta = {"preselect": "", "nav": "", "robots": "index,follow", "og": "", "wa": "geral", "origem": "", **meta}
     if PREVIEW and "noindex" not in meta["robots"]:
         meta["robots"] = "noindex"   # pré-visualização: nenhuma página entra no Google antes do lançamento
     depth = file.count("/")
@@ -412,7 +413,14 @@ PROIBIDO = [
      "marca fora da lista do dono (Midea, Mitsubishi Electric, Daikin, France Air)"),
     (re.compile(r"Domingues|M\.D\.M\.\s*[—–]"), "nome legal: «M.D.M. - Manuel Domingos Melancia, Lda»"),
 ]
-REF_RE = re.compile(r'(?:href|src)="([^"#?]+)|srcset="([^"]+)"|url\(([^)]+)\)')
+REF_RE = re.compile(r'(?:href|src|action)="([^"#?]+)|srcset="([^"]+)"|url\(([^)]+)\)')
+# Netlify Forms: o formulário de orçamento tem de chegar ao HTML gerado com o nome, os campos escondidos,
+# a armadilha para robôs e o campo da fotografia, e ser igual em todas as páginas (o Netlify regista um só "orcamento").
+FORM_RE = re.compile(r'<form\b[^>]*\bid="quoteForm"[^>]*>.*?</form>', re.S)
+FORM_EXIGE = [' name="orcamento"', ' method="POST"', ' data-netlify="true"', ' netlify-honeypot="empresa_web"',
+              ' enctype="multipart/form-data"', ' action="/obrigado.html"']
+FORM_CAMPOS = {"form-name", "subject", "pagina", "triagem", "origem", "nome", "email", "telefone", "servico",
+               "mensagem", "fotografia", "empresa_web"}
 
 
 def texto_proibido(nome, text):
@@ -434,6 +442,7 @@ def check(files):
             problems.append(f"{f}: sobra sintaxe de modelo {{{{ }}}}")
         problems += texto_proibido(f, text)
         problems += check_cabeca(f, text)
+        problems += check_formulario(f, text)
         for a, b, c in REF_RE.findall(text):
             refs = [a] if a else ([s.strip().split()[0] for s in b.split(",")] if b else [c.strip("'\"")])
             for r in refs:
@@ -492,6 +501,25 @@ def check_cabeca(f, text):
             out.append(f"{f}: {prop} fora de {base}")
         elif prop == "og:image" and not (OUT / m.group(1)[len(base):]).exists():
             out.append(f"{f}: og:image não existe → {m.group(1)}")
+    return out
+
+
+def check_formulario(f, text):
+    """O formulário de orçamento, onde existir, é o mesmo formulário Netlify em todas as páginas."""
+    m = FORM_RE.search(text)
+    if not m:
+        return []
+    form = m.group(0)
+    abre = form[:form.index(">") + 1]
+    out = [f"{f}: formulário sem{x}" for x in FORM_EXIGE if x not in abre]
+    campos = set(re.findall(r'<(?:input|select|textarea)\b[^>]*\bname="([^"]+)"', form))
+    if campos != FORM_CAMPOS:
+        out.append(f"{f}: campos do formulário diferentes do esperado → a mais {sorted(campos - FORM_CAMPOS)}, "
+                   f"em falta {sorted(FORM_CAMPOS - campos)}")
+    if not re.search(r'<input type="hidden" name="form-name" value="orcamento">', form):
+        out.append(f"{f}: falta o campo escondido form-name=orcamento")
+    if not re.search(r'<input[^>]*name="fotografia"[^>]*type="file"[^>]*accept="image/\*"', form):
+        out.append(f"{f}: falta o campo da fotografia (type=file, accept=image/*)")
     return out
 
 

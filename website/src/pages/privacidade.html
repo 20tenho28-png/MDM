@@ -47,11 +47,11 @@
       <p>Para qualquer questão sobre os seus dados, escreva para <a href="mailto:{{ site.email }}">{{ site.email }}</a> ou ligue <a href="{{ site.phoneHref }}">{{ site.phone }}</a> ({{ site.hours }}).</p>
 
       <h2 id="pedidos">Pedidos de orçamento</h2>
-      <p>O formulário de orçamento pede o seu <strong>nome</strong> (ou o da empresa ou condomínio), um <strong>email</strong> ou um <strong>telefone</strong>, o <strong>serviço</strong> que procura e, se quiser, uma <strong>mensagem</strong>. Usamos estes dados só para responder ao seu pedido, preparar o orçamento e, se o aceitar, marcar e fazer o trabalho.</p>
-      <p>Hoje, o formulário não envia nada para um servidor nosso. Depende do botão que escolher:</p>
+      <p>O formulário de orçamento pede o seu <strong>nome</strong> (ou o da empresa ou condomínio), um <strong>email</strong> ou um <strong>telefone</strong>, o <strong>serviço</strong> que procura e, se quiser, uma <strong>mensagem</strong> e uma <strong>fotografia</strong>. Usamos estes dados só para responder ao seu pedido, preparar o orçamento e, se o aceitar, marcar e fazer o trabalho.</p>
+      <p>O caminho do pedido depende do botão que escolher:</p>
       <ul>
-        <li><strong>Enviar por email:</strong> o site abre o programa de email do seu equipamento com o pedido já escrito, dirigido a {{ site.email }}. O pedido só nos chega quando carrega em enviar nesse programa.</li>
-        <li><strong>Enviar por WhatsApp:</strong> o site abre o WhatsApp com o pedido já preenchido. Também aqui, só nos chega quando carrega em enviar.</li>
+        <li><strong>Enviar pedido:</strong> o pedido, com a fotografia se a juntar, fica guardado no serviço de formulários da Netlify, a empresa que aloja este site, e é-nos enviado por email. Com ele seguem a página de onde o enviou e, se chegou pelo código de uma carrinha nossa, que carrinha era.</li>
+        <li><strong>Enviar por WhatsApp:</strong> o site abre o WhatsApp com o pedido já preenchido. O pedido só nos chega quando carrega em enviar no WhatsApp.</li>
       </ul>
       <p>O pedido leva uma etiqueta com o tipo de serviço (por exemplo, «Montagem AC»), para chegar mais depressa ao técnico certo. Enquanto escreve, o site não guarda nem envia o que escreveu.</p>
       <p>{{#se dados.prazoPedidos}}Guardamos os pedidos durante {{ dados.prazoPedidos }}.{{/se}}{{#sem dados.prazoPedidos}}Guardamos os pedidos apenas pelo tempo necessário para lhe responder e para acompanhar o trabalho que deles resultar.{{/sem}} Se o pedido der origem a um trabalho, as faturas e os dados fiscais são guardados pelo tempo que a lei fiscal obriga.</p>
@@ -97,7 +97,7 @@
       <p>Se entender que não tratámos bem os seus dados, pode apresentar reclamação à Comissão Nacional de Proteção de Dados (<a href="https://www.cnpd.pt" target="_blank" rel="noopener">www.cnpd.pt</a>).</p>
 
       <h2 id="alteracoes">Alterações</h2>
-      <p>Se mudarmos o que o site faz com os dados (por exemplo, se o formulário passar a enviar os pedidos diretamente para nós), atualizamos esta página{{#se dados.privacidadeData}} e a data no topo{{/se}}.</p>
+      <p>Se mudarmos o que o site faz com os dados (por exemplo, se mudarmos o serviço que guarda os pedidos), atualizamos esta página{{#se dados.privacidadeData}} e a data no topo{{/se}}.</p>
     </div>
   </div>
 </section>

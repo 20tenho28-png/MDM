@@ -1,6 +1,8 @@
 # Netlify: base directory = website
 # Pré-visualização: o noindex (X-Robots-Tag) vem de public/_headers, gerado por build.py enquanto
 # data/site.json tiver "preview": true. No lançamento muda-se só esse valor (README.md, "Lançamento").
+# Formulário de orçamento: Netlify Forms ("orcamento"), detetado no HTML gerado; ligar a deteção e o email
+# de aviso no painel (README.md, "Formulário de orçamento").
 [build]
   command = "python3 build.py --check"
   publish = "public"

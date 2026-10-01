@@ -434,6 +434,13 @@ textarea.campo-in { resize: vertical; min-height: 110px; }
 .campo-in[aria-invalid="true"] { border-color: var(--carmim); background-color: var(--erro-bg); }
 .campo-erro { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--carmim); min-height: 0; }
 .campo-erro:empty { display: none; }
+.campo-ajuda { font-size: 14px; color: var(--aco); }
+/* fotografia: o campo nativo do browser (acessível e com o texto na língua do browser), com o botão no tom do site */
+.campo-ficheiro { padding: 7px; font-family: var(--sans); font-size: 15px; cursor: pointer; }
+.campo-ficheiro::file-selector-button { margin-right: 12px; min-height: 32px; padding: 6px 14px; font: 600 14px/1.2 var(--sans); color: #fff; background: var(--tinta); border: 0; border-radius: 0; cursor: pointer; }
+.campo-ficheiro:hover::file-selector-button { background: var(--carmim); }
+/* sem JavaScript o botão do WhatsApp não faz nada: fica o envio normal (e o WhatsApp do bloco de contacto) */
+html:not(.js) #sendWhats { display: none; }
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .form-nota { font-size: 14px; color: var(--aco); }
 .form-alerta:empty { display: none; }

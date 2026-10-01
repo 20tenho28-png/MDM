@@ -99,6 +99,7 @@
     "Rever a política de privacidade com assessoria jurídica antes de publicar.",
     "Fotografias de quadros elétricos AVAC montados pela MDM, para a página de Eletricidade.",
     "Confirmar a frase «peças originais» e se há alguma garantia a anunciar (a «garantia de fabricante» foi retirada por não estar confirmada).",
-    "Bombas de calor: confirmar se a obra F29 (unidade de dois ventiladores e depósito numa varanda) é uma bomba de calor para águas quentes, como dizia a versão anterior do site, ou um chiller, como diz hoje a ficha. Enviar fotografias de outras bombas de calor montadas pela MDM: hoje a página mostra só F04 e F29."
+    "Bombas de calor: confirmar se a obra F29 (unidade de dois ventiladores e depósito numa varanda) é uma bomba de calor para águas quentes, como dizia a versão anterior do site, ou um chiller, como diz hoje a ficha. Enviar fotografias de outras bombas de calor montadas pela MDM: hoje a página mostra só F04 e F29.",
+    "Netlify (formulário de orçamento): depois da primeira publicação, ligar a deteção de formulários (Forms → Enable form detection) e voltar a publicar; em Forms → Form notifications, escolher o email que recebe os pedidos. Dizer qual é esse email."
   ]
 }
