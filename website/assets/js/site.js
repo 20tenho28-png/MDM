@@ -198,6 +198,136 @@
     upd();
   });
 
+  /* ═══ Visor: tocar numa fotografia da galeria abre-a em ecrã inteiro ═══
+     Grupos [data-visor] com itens [data-visor-item] (a fotografia, o título em data-visor-t e o registo em data-visor-m).
+     Desliza-se entre fotografias, setas e teclado também servem; o botão "voltar" do telemóvel fecha.
+     No ficheiro único (MDM-index.html) as páginas das obras não existem: um <template data-visor-todas>
+     traz as 24 fotografias e as ligações para obras.html e obras/*.html abrem o visor em vez de uma página em falta. */
+  (function () {
+    var todas = document.querySelector('template[data-visor-todas]');
+    if (!document.querySelector('[data-visor]') && !todas) return;
+    if (typeof HTMLDialogElement !== 'function') return;   /* sem <dialog>: ficam as ligações normais */
+    var X = '<svg class="ico" viewBox="0 0 256 256" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>';
+    var ANT = '<svg class="ico" viewBox="0 0 256 256" aria-hidden="true"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></svg>';
+    var SEG = '<svg class="ico" viewBox="0 0 256 256" aria-hidden="true"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></svg>';
+    var d = document.createElement('dialog');
+    d.className = 'visor';
+    d.setAttribute('aria-label', 'Fotografias das obras');
+    d.innerHTML = '<div class="visor-topo"><span class="visor-conta" aria-live="polite"></span>' +
+      '<button class="visor-fechar" type="button" aria-label="Fechar">' + X + '</button></div>' +
+      '<div class="visor-trilho"></div>' +
+      '<button class="visor-seta visor-ant" type="button" aria-label="Fotografia anterior">' + ANT + '</button>' +
+      '<button class="visor-seta visor-seg" type="button" aria-label="Fotografia seguinte">' + SEG + '</button>';
+    document.body.appendChild(d);
+    var trilho = d.querySelector('.visor-trilho'), conta = d.querySelector('.visor-conta');
+    var ant = d.querySelector('.visor-ant'), seg = d.querySelector('.visor-seg');
+    var n = 0, idx = 0, comHistorico = false;
+
+    function itensDe(raiz) { return qsa('[data-visor-item]', raiz); }
+    function legenda(it) {
+      var c = document.createElement('figcaption');
+      var t = document.createElement('strong'); t.textContent = it.getAttribute('data-visor-t') || ''; c.appendChild(t);
+      var m = it.getAttribute('data-visor-m');
+      if (m) { var s = document.createElement('span'); s.className = 'registo'; s.textContent = m; c.appendChild(s); }
+      /* no site, a ligação para a página da obra; no ficheiro único essas páginas não existem */
+      var href = it.getAttribute('href') || '';
+      if (!todas && /obras\/[^/]+\.html$/.test(href)) {
+        var a = document.createElement('a'); a.href = href; a.textContent = 'Ver a obra'; c.appendChild(a);
+      }
+      return c;
+    }
+    function atual() { return trilho.clientWidth ? Math.round(trilho.scrollLeft / trilho.clientWidth) : 0; }
+    function upd() {
+      var i = idx = Math.max(0, Math.min(n - 1, atual()));
+      conta.textContent = (i + 1) + ' / ' + n;
+      ant.disabled = i <= 0; seg.disabled = i >= n - 1;
+      ant.hidden = seg.hidden = n < 2;
+    }
+    function vai(k) {
+      var i = Math.max(0, Math.min(n - 1, atual() + k));
+      trilho.scrollTo({ left: i * trilho.clientWidth, behavior: reduceMotion ? 'auto' : 'smooth' });
+    }
+    function abre(lista, i) {
+      trilho.textContent = '';
+      n = lista.length;
+      lista.forEach(function (it, k) {
+        var fig = document.createElement('figure'); fig.className = 'visor-item';
+        var pic = it.querySelector('picture');
+        pic = pic ? pic.cloneNode(true) : document.createElement('picture');
+        qsa('source', pic).forEach(function (s) { s.setAttribute('sizes', '100vw'); });
+        var img = pic.querySelector('img');
+        if (img) {
+          img.removeAttribute('fetchpriority');
+          img.setAttribute('sizes', '100vw');
+          img.loading = Math.abs(k - i) <= 1 ? 'eager' : 'lazy';
+        }
+        fig.appendChild(pic); fig.appendChild(legenda(it));
+        trilho.appendChild(fig);
+      });
+      document.documentElement.classList.add('visor-aberto');
+      d.showModal();
+      trilho.scrollLeft = i * trilho.clientWidth;
+      upd();
+      d.querySelector('.visor-fechar').focus();
+      try { history.pushState({ visor: 1 }, ''); comHistorico = true; } catch (e) { comHistorico = false; }
+      track('visor_aberto', { fotografias: n, pagina: location.pathname });
+    }
+    function fecha() { if (d.open) d.close(); }
+    d.addEventListener('close', function () {
+      document.documentElement.classList.remove('visor-aberto');
+      trilho.textContent = '';
+      /* fechado no botão ou com Esc: tira a entrada que o visor pôs no histórico */
+      if (comHistorico) { comHistorico = false; try { if (history.state && history.state.visor) history.back(); } catch (e) {} }
+    });
+    window.addEventListener('popstate', function () { if (d.open) { comHistorico = false; fecha(); } });
+    d.querySelector('.visor-fechar').addEventListener('click', fecha);
+    ant.addEventListener('click', function () { vai(-1); });
+    seg.addEventListener('click', function () { vai(1); });
+    d.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); vai(-1); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); vai(1); }
+    });
+    var tick = false;
+    trilho.addEventListener('scroll', function () { if (!tick) { tick = true; requestAnimationFrame(function () { tick = false; upd(); }); } }, { passive: true });
+    /* ao rodar o telemóvel, fica na mesma fotografia */
+    window.addEventListener('resize', function () { if (d.open) { var i = idx; trilho.scrollLeft = i * trilho.clientWidth; upd(); } });
+
+    /* a fotografia do carrossel passa a ser um botão que abre o visor */
+    qsa('[data-visor] [data-visor-item]').forEach(function (it) {
+      it.removeAttribute('aria-hidden'); it.removeAttribute('tabindex');
+      it.setAttribute('role', 'button');
+      it.setAttribute('aria-label', 'Ver em grande: ' + (it.getAttribute('data-visor-t') || 'fotografia'));
+      it.addEventListener('keydown', function (e) { if (e.key === ' ') { e.preventDefault(); it.click(); } });
+    });
+
+    /* ficheiro único: as 24 fotografias vêm num <template> */
+    var listaTodas = todas ? itensDe(todas.content) : [];
+    function obraDe(href) { var m = /obras\/([^/#?]+)\.html/.exec(href); return m ? m[1] : ''; }
+
+    document.addEventListener('click', function (e) {
+      if (e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      var it = e.target.closest && e.target.closest('[data-visor] [data-visor-item]');
+      if (it) {
+        var lista = itensDe(it.closest('[data-visor]'));
+        e.preventDefault(); abre(lista, Math.max(0, lista.indexOf(it)));
+        return;
+      }
+      if (!todas) return;
+      var a = e.target.closest && e.target.closest('a[href]');
+      if (!a) return;
+      var href = a.getAttribute('href');
+      var obra = obraDe(href);
+      if (!obra && !/^obras\.html/.test(href)) return;
+      /* obras.html#vent abre só as obras dessa categoria; obras/<obra>.html abre nessa fotografia */
+      var cat = obra ? '' : (href.split('#')[1] || '');
+      var lista = listaTodas.filter(function (x) { return !cat || x.getAttribute('data-cat') === cat; });
+      if (!lista.length) lista = listaTodas;
+      var i = 0;
+      if (obra) lista.forEach(function (x, k) { if (x.getAttribute('data-slug') === obra) i = k; });
+      e.preventDefault(); abre(lista, i);
+    });
+  })();
+
   /* ═══ Filtros da página de obras (com endereço partilhável: obras.html#vent) ═══ */
   (function () {
     var grelha = document.querySelector('[data-obras-grelha]');

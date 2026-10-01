@@ -1,5 +1,5 @@
 <div class="slide" role="group" aria-roledescription="diapositivo" aria-label="{{ pos }} de {{ total }}: {{ obra.title }}" data-slide>
-  <a class="slide-link" href="{{ root }}obras/{{ obra.slug }}.html" tabindex="-1" aria-hidden="true">
+  <a class="slide-link" href="{{ root }}obras/{{ obra.slug }}.html" tabindex="-1" aria-hidden="true" data-visor-item data-visor-t="{{ obra.title }}" data-visor-m="{{ obra.especialidade }} · {{ obra.trabalho }} · {{ obra.equipamento }}">
     <span class="slide-quadro">{{foto {{ obra.n }} sizes="(min-width: 1100px) 600px, 85vw"}}</span>
   </a>
   <div class="slide-leg">

@@ -16,7 +16,7 @@
 </section>
 
 <div class="obra-pag-foto">
-  <div class="obra-pag-foto-in">{{foto {{ obra.n }} loading="eager" sizes="(min-width: 1280px) 1280px, 100vw"}}</div>
+  <div class="obra-pag-foto-in" data-visor><a class="obra-pag-ampliar" href="{{ root }}assets/img/obras/foto-{{ obra.n }}-1600.jpg" data-visor-item data-visor-t="{{ obra.title }}" data-visor-m="{{ obra.especialidade }} · {{ obra.trabalho }} · {{ obra.equipamento }}">{{foto {{ obra.n }} loading="eager" sizes="(min-width: 1280px) 1280px, 100vw"}}</a></div>
 </div>
 
 <section class="sec" aria-label="Sobre a obra">
