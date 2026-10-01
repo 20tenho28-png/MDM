@@ -8,6 +8,7 @@ Só biblioteca padrão. Uso:
 
 Sintaxe dos modelos (src/):
     <!--meta {...json...} -->            no topo de cada página: title, description, file, nav, jsonld, css
+                                          (jsonld: business, faq, breadcrumb, servico; este lê "servico": {nome, tipo, ofertas})
     {{ caminho.ponto }}                   valor de site.*, page.*, obra.*, root (prefixo relativo à raiz)
     {{> nome }}                           inclui src/partials/nome.html com o mesmo contexto
     {{foto NN sizes="..." class="..." loading="eager" alt="..."}}   <picture> webp + jpg da obra NN
@@ -200,10 +201,14 @@ def render(text, ctx, depth=0):
     return text
 
 
+AREA_LD = {"@type": "Place", "name": "Grande Lisboa"}
+
+
 def business_ld():
     return {
         "@context": "https://schema.org",
         "@type": ["HVACBusiness", "Electrician"],
+        "@id": SITE["baseUrl"] + "/#mdm",
         "name": SITE["name"],
         "legalName": SITE["legalName"],
         "vatID": SITE["vatID"],
@@ -215,11 +220,24 @@ def business_ld():
         "foundingDate": SITE["founded"],
         "address": {"@type": "PostalAddress", "streetAddress": "Alameda dos Oceanos 108 A, Edifício Vila do Oriente",
                     "postalCode": "1990-426", "addressLocality": "Lisboa", "addressCountry": "PT"},
-        "areaServed": {"@type": "Place", "name": "Grande Lisboa"},
+        "areaServed": AREA_LD,
         "openingHoursSpecification": [{"@type": "OpeningHoursSpecification",
                                        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
                                        "opens": "08:00", "closes": "17:00"}],
     }
+
+
+def servico_ld(meta):
+    """Service de cada página de serviço: "servico" no <!--meta--> (nome, tipo e ofertas, só o que a página diz)."""
+    s = meta["servico"]
+    ld = {"@context": "https://schema.org", "@type": "Service", "name": s["nome"], "serviceType": s["tipo"],
+          "description": meta["description"], "url": SITE["baseUrl"] + "/" + meta["file"], "areaServed": AREA_LD,
+          "provider": {"@type": ["HVACBusiness", "Electrician"], "@id": SITE["baseUrl"] + "/#mdm",
+                       "name": SITE["name"], "url": SITE["baseUrl"], "telephone": SITE["phoneE164"]}}
+    if s.get("ofertas"):
+        ld["hasOfferCatalog"] = {"@type": "OfferCatalog", "name": s["nome"], "itemListElement": [
+            {"@type": "Offer", "itemOffered": {"@type": "Service", "name": n}} for n in s["ofertas"]]}
+    return ld
 
 
 FAQ_RE = re.compile(r'<details class="faq-item"[^>]*>\s*<summary[^>]*>(.*?)</summary>(.*?)</details>', re.S)
@@ -269,6 +287,8 @@ def build_page(meta, body_tpl, extra_ctx=None):
                 lds.append(f)
         elif kind == "breadcrumb":
             lds.append(breadcrumb_ld(meta["breadcrumb"]))
+        elif kind == "servico":
+            lds.append(servico_ld(meta))
     ld_html = "".join(
         '<script type="application/ld+json">' + json.dumps(x, ensure_ascii=False).replace("</", "<\\/") + "</script>\n"
         for x in lds)
@@ -299,7 +319,7 @@ def vcard():
         f"EMAIL;TYPE=WORK:{SITE['email']}",
         f"URL:{SITE['baseUrl']}/",
         f"ADR;TYPE=WORK:;;{esc(rua)};{esc(cidade)};;{cp};Portugal",
-        "NOTE:" + esc(f"Ar condicionado, ventilação, eletricidade e manutenção na grande Lisboa desde {SITE['founded']}. "
+        "NOTE:" + esc(f"Ar condicionado, bombas de calor, ventilação, eletricidade e manutenção na grande Lisboa desde {SITE['founded']}. "
                       f"{SITE['hours']}. WhatsApp {SITE['whatsapp']}: envie uma fotografia da avaria."),
         "END:VCARD", ""]
     (OUT / "mdm.vcf").write_bytes("\r\n".join(linhas).encode("utf-8"))

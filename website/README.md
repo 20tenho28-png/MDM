@@ -1,6 +1,6 @@
 # Site da MDM Assistência Técnica
 
-Site estático em português europeu para a MDM (ar condicionado, ventilação, eletricidade e manutenção na grande Lisboa, desde 1991). Substitui o `index-carmim.html`: mesma lógica de pedidos, triagem e medição, novo desenho feito a partir das fotografias reais das obras.
+Site estático em português europeu para a MDM (ar condicionado, bombas de calor, ventilação, eletricidade e manutenção na grande Lisboa, desde 1991). Substitui o `index-carmim.html`: mesma lógica de pedidos, triagem e medição, novo desenho feito a partir das fotografias reais das obras.
 
 ## Gerar
 
@@ -27,7 +27,7 @@ Qualquer alojamento estático serve, **servido na raiz do domínio** (a página 
 | `data/dados-mdm.json` | Dados que só a MDM pode dar (números das certificações, testemunhos, perguntas por responder, privacidade). Vazio = escondido no site |
 | `src/templates/layout.html` | Cabeçalho `<head>`, recusa de medição, estrutura comum |
 | `src/partials/` | Cabeçalho e menu em gaveta, rodapé, barra fixa do telemóvel, contacto + formulário, certificações, testemunhos, cartões de obra |
-| `src/pages/` | Página inicial, obras, 4 serviços, privacidade, 404, página do QR das carrinhas |
+| `src/pages/` | Página inicial, obras, 5 serviços (ar condicionado, bombas de calor, manutenção, eletricidade, ventilação), privacidade, 404, página do QR das carrinhas. Cada serviço descreve-se no `<!--meta-->` em `servico` (nome, tipo e ofertas) para os dados estruturados `Service` |
 | `src/templates/obra.html` | Modelo das 24 páginas de obra (`obras/<slug>.html`) |
 | `assets/css/site.css` | Sistema visual completo e movimento |
 | `assets/js/site.js` | Medição (PostHog UE, sem cookies), formulário, gaveta, carrossel, filtros, revelação |
@@ -68,6 +68,7 @@ Resumo do que falta hoje:
 - **Obras**: data, local exato, tipo de cliente e duração de cada obra. A ficha mostra só os que existem.
 - **Serviços**: preço indicativo de ar condicionado (se quiser), duração de uma montagem, plano e periodicidade da manutenção, avarias no contrato, reparação de placas, âmbito do trabalho elétrico, extração de cozinhas, periodicidade da limpeza de condutas. Cada pergunta sem resposta fica escondida.
 - **Privacidade**: revisão jurídica, prazo de conservação dos pedidos (até lá, «apenas pelo tempo necessário»), se o PostHog descarta o IP, data da última atualização.
+- **Bombas de calor**: confirmar se a obra F29 (unidade e depósito numa varanda) é uma bomba de calor, como dizia a v3, ou um chiller, como diz a ficha; fotografias de outras bombas de calor montadas pela MDM (hoje a página mostra só F04 e F29). A página fala só de águas quentes e de sistemas combinados (águas quentes e aquecimento), como o dono confirmou; radiadores e piso radiante não são nomeados.
 - **Outras**: fotografias de quadros elétricos AVAC; confirmar «peças originais» e se há garantia a anunciar.
 
 `--check` falha se chegar a `public/` um placeholder (`[MAIÚSCULAS…]`, `[[CHAVE]]`, «por preencher») ou algo que o dono retirou a 27/09/2026: promessas de prazo de resposta («24 horas», «24–48h», «mesmo dia», «N minutos»), idade em anos («35 anos»: só «1991»), marcas fora de Midea, Mitsubishi Electric, Daikin e France Air, ou o nome legal com outra grafia («M.D.M. - Manuel Domingos Melancia, Lda»). Verifica as páginas, a meta, o JSON-LD, as mensagens de WhatsApp, os scripts e o cartão de contacto.

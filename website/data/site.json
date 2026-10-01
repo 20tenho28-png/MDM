@@ -20,6 +20,7 @@
     "geral": "Olá MDM. Gostava de pedir informação sobre um serviço. [P5 · Geral]",
     "avaria": "Olá MDM. Tenho uma avaria e envio já uma fotografia. [P4 · Avaria]",
     "montagem": "Olá MDM. Quero orçamento para instalar ar condicionado. Envio já fotografias do local. [P1 · Montagem AC]",
+    "bombaCalor": "Olá MDM. Quero orçamento para uma bomba de calor. Envio já fotografias do local e do quadro elétrico. [P1 · Bomba de calor]",
     "manutencao": "Olá MDM. Quero proposta de manutenção preventiva (contrato anual). [P2 · Manutenção preventiva]",
     "eletricidade": "Olá MDM. Preciso de um eletricista certificado para quadros ou alimentações AVAC. [P3 · Eletricista certificado]",
     "ventilacao": "Olá MDM. Preciso de ajuda com ventilação e envio já uma fotografia. [P4 · Ventilação]",

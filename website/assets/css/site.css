@@ -291,6 +291,24 @@ body.menu-aberto { overflow: hidden; }
 .esp-card:hover .seta, .esp-card:focus-visible .seta { transform: translateX(4px); }
 .esp-corpo p { font-size: 16px; color: var(--aco); flex-grow: 1; }
 .esp-marcas { font-family: var(--sans); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--aco); border-top: 1px solid #E6E2DA; padding-top: 12px; }
+.esp-card .foto-bc img { object-position: 50% 72%; }   /* bomba de calor (fotografia ao alto): a máquina, não o céu */
+/* A especialidade que fica sozinha na última linha ocupa-a toda: fotografia com a largura de uma coluna
+   (alinhada com as de cima, descontadas as bordas) e o texto ao lado, sem células vazias. A fotografia acompanha a altura do texto. */
+@media (min-width: 640px) and (max-width: 1099px) {
+  .esp-card:last-child:nth-child(odd) { grid-column: 1 / -1; display: grid; grid-template-columns: calc((100% + 2px - var(--gap)) / 2 - 2px) minmax(0, 1fr); }
+  .esp-card:last-child:nth-child(odd) .quadro { aspect-ratio: auto; position: relative; min-height: 240px; }
+  .esp-card:last-child:nth-child(odd) .quadro picture { position: absolute; inset: 0; }
+  .esp-card:last-child:nth-child(odd) .esp-corpo { justify-content: center; }
+  .esp-card:last-child:nth-child(odd) .esp-corpo p { flex-grow: 0; }
+}
+@media (min-width: 1100px) {
+  .esp-card:last-child:nth-child(4n+1) { grid-column: 1 / -1; display: grid; grid-template-columns: calc((100% + 2px - 3 * var(--gap)) / 4 - 2px) minmax(0, 1fr); }
+  .esp-card:last-child:nth-child(4n+1) .quadro { aspect-ratio: auto; position: relative; min-height: 220px; }
+  .esp-card:last-child:nth-child(4n+1) .quadro picture { position: absolute; inset: 0; }
+  .esp-card:last-child:nth-child(4n+1) .esp-corpo { justify-content: center; padding-left: 28px; }
+  .esp-card:last-child:nth-child(4n+1) .esp-corpo > * { max-width: 640px; }
+  .esp-card:last-child:nth-child(4n+1) .esp-corpo p { flex-grow: 0; }
+}
 
 /* ── Onde trabalhamos ── */
 .onde-grelha { display: grid; gap: 28px var(--gap); grid-template-columns: minmax(0, 1fr); }

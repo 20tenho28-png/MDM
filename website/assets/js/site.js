@@ -393,6 +393,7 @@
   var WA_BASE = 'https://wa.me/351910307579?text=';
   var TRIAGEM = {
     'Ar condicionado: montagem / instalação':   { p: 'P1', seg: 'Montagem AC' },
+    'Bomba de calor: instalação / manutenção':  { p: 'P1', seg: 'Bomba de calor' },
     'Manutenção preventiva: contrato anual':    { p: 'P2', seg: 'Manutenção preventiva' },
     'Eletricidade: quadros e alimentações AVAC': { p: 'P3', seg: 'Eletricista certificado' },
     'Ar condicionado: avaria / reparação':      { p: 'P4', seg: 'Avaria AC' },
