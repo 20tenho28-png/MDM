@@ -225,4 +225,6 @@ Pedido do dono com referência aos guias da Prismic sobre técnicas de layout e 
 - **Como funciona**: `subgrid` alinha número, título e texto dos três passos; linha do tempo quente-frio a ligar os números.
 - **Perguntas**: duas colunas com o título fixo (`position: sticky`) via `:has(> .sec-head + .faq)`, em todas as páginas com FAQ.
 - **Pedido de orçamento**: contactos diretos fixos ao lado do formulário enquanto se preenche.
+- **Cartões de tipos** (páginas de serviço): `grid-template-rows: subgrid` alinha títulos de uma e duas linhas e o início dos textos, como no exemplo de cartões do guia de subgrid.
+Grid para a estrutura da página, flex para o interior das peças (legendas, menus, botões). O site não usa Tailwind; as mesmas propriedades vão em CSS próprio.
 Tudo a partir de 1024px (subgrid a partir de 768px); no telemóvel mantém-se uma coluna. Versão anterior: tag `versao-03-fundos-fortes`.

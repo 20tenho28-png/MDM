@@ -611,3 +611,12 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
 @media (min-width: 1024px) {
   .quote-aside { position: sticky; top: calc(var(--nav-h) + var(--space-6)); }
 }
+
+/* 7. Cartões de tipos nas páginas de serviço: subgrid nas linhas, como no exemplo de cartões do guia de subgrid.
+      Títulos de uma e de duas linhas ficam alinhados, e os textos começam todos à mesma altura. */
+@media (min-width: 768px) {
+  .types { grid-template-rows: auto 1fr; row-gap: 0; }
+  .type { display: grid; grid-row: span 2; grid-template-rows: subgrid; row-gap: var(--space-3); }
+  .type p { margin-top: 0; }
+  .type h3 { align-self: end; }
+}
