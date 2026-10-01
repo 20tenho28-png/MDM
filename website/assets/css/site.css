@@ -115,8 +115,10 @@ main:focus { outline: none; }
 /* Foco por teclado: anel duplo gesso + tinta; o contorno transparente aparece no modo de alto contraste */
 a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline: 2px solid transparent; outline-offset: 2px; box-shadow: 0 0 0 2px var(--gesso), 0 0 0 4px var(--tinta); }
 .btn-claro:focus-visible { box-shadow: 0 0 0 2px var(--tinta), 0 0 0 4px var(--gesso); }
-/* a fotografia do carrossel encosta à borda do trilho (que corta o que sai): o anel de foco fica por dentro */
-.sec-escura .slide-link:focus-visible { box-shadow: inset 0 0 0 2px var(--gesso), inset 0 0 0 4px var(--tinta); }
+/* a fotografia do carrossel encosta à borda do trilho (que corta o que sai): o anel de foco fica por dentro,
+   numa camada por cima da imagem (uma sombra interior no próprio link ficaria tapada pela fotografia) */
+.sec-escura .slide-link:focus-visible { box-shadow: none; outline-offset: -4px; }
+.slide-link:focus-visible::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 0 2px var(--gesso), inset 0 0 0 4px var(--tinta); }
 .foco-dentro:focus-visible { box-shadow: inset 0 0 0 2px var(--gesso), inset 0 0 0 4px var(--tinta); }
 
 /* ── Topo ── */
@@ -316,7 +318,7 @@ body.menu-aberto { overflow: hidden; }
 .carrossel-trilho { display: flex; gap: var(--gap); overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; overscroll-behavior-x: contain; padding-bottom: 4px; padding-right: var(--margem); scrollbar-width: none; }
 .carrossel-trilho::-webkit-scrollbar { display: none; }
 .slide { flex: 0 0 min(85vw, 596px); margin: 0; scroll-snap-align: start; display: flex; flex-direction: column; }
-.slide-link { display: block; }
+.slide-link { display: block; position: relative; }
 .slide-quadro { display: block; aspect-ratio: 596 / 440; overflow: hidden; background: #1C232D; }
 .slide-leg { border-top: 2px solid var(--carmim); padding-top: 14px; display: flex; flex-direction: column; gap: 8px; }
 .slide-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
