@@ -446,3 +446,108 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
 @media (prefers-reduced-motion: reduce) {
   .hero::after, .page-hero::after, .footer::after { animation: none; }
 }
+
+/* ── v3.4: fundos com mais presença (01/10) ── */
+@property --mdm-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+
+/* Hero: ar quente e frio mais intensos, com um terceiro tom morno a fazer a mistura. */
+.hero::after, .page-hero::after {
+  background:
+    radial-gradient(closest-side at 72% 34%, rgb(163 7 17 / .20), transparent),
+    radial-gradient(closest-side at 26% 60%, rgb(64 118 196 / .20), transparent),
+    radial-gradient(closest-side at 52% 50%, rgb(214 160 90 / .12), transparent);
+}
+.hero::before, .page-hero::before {
+  background:
+    linear-gradient(to right, rgb(20 29 46 / .11) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(to bottom, rgb(20 29 46 / .11) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(to right, rgb(20 29 46 / .055) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(to bottom, rgb(20 29 46 / .055) 1px, transparent 1px) 0 0 / 24px 24px;
+}
+
+/* Hero: fluxo de ar. Três ondas em SVG que correm da esquerda para a direita junto à base. */
+.hero-grid, .page-hero .hero-grid { position: relative; }
+.hero-grid::before {
+  content: ''; position: absolute; z-index: -1; pointer-events: none;
+  left: -400px; right: -60px; bottom: -104px; height: 180px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='180' fill='none' stroke-linecap='round'%3E%3Cpath d='M0 60c50-26 150-26 200 0s150 26 200 0' stroke='%234076C4' stroke-opacity='.35' stroke-width='1.5'/%3E%3Cpath d='M0 95c50-20 150-20 200 0s150 20 200 0' stroke='%23141D2E' stroke-opacity='.18' stroke-width='1'/%3E%3Cpath d='M0 130c50-30 150-30 200 0s150 30 200 0' stroke='%23A30711' stroke-opacity='.28' stroke-width='1.5'/%3E%3C/svg%3E") 0 0 / 400px 180px repeat-x;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 30%, #000 70%, transparent);
+          mask-image: linear-gradient(90deg, transparent 0, #000 30%, #000 70%, transparent);
+  animation: mdm-fluxo 9s linear infinite;
+}
+@keyframes mdm-fluxo { to { transform: translateX(400px); } }
+
+/* Hero: moldura que roda de quente para frio à volta da fotografia. */
+.hero-photo picture { position: relative; display: block; isolation: isolate; }
+.hero-photo picture::before {
+  content: ''; position: absolute; inset: -4px; z-index: -1; border-radius: calc(var(--r-m) + 4px);
+  background: conic-gradient(from var(--mdm-a), var(--red), rgb(214 160 90) 18%, transparent 30%, rgb(64 118 196) 52%, transparent 70%, var(--red));
+  animation: mdm-moldura 7s linear infinite;
+}
+.hero-photo picture::after {
+  content: ''; position: absolute; inset: 6% 4% -4%; z-index: -2; border-radius: var(--r-m);
+  background: linear-gradient(120deg, rgb(163 7 17 / .45), rgb(64 118 196 / .45)); filter: blur(28px); opacity: .55;
+}
+@keyframes mdm-moldura { to { --mdm-a: 1turn; } }
+
+/* Lanterna: um foco quente segue o cursor nas linhas de serviço, factos e cartões de obra (main.js define --mx/--my). */
+@media (hover: hover) and (pointer: fine) {
+  .svc, .proof-cell, .project { position: relative; isolation: isolate; }
+  .svc::before, .proof-cell::before, .project::before {
+    content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: inherit; opacity: 0; transition: opacity .25s var(--ease);
+    background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), rgb(163 7 17 / .10), rgb(64 118 196 / .05) 45%, transparent 70%);
+  }
+  .project::before { z-index: 1; mix-blend-mode: multiply; }
+  .svc:hover::before, .proof-cell:hover::before, .project:hover::before { opacity: 1; }
+}
+
+/* Botão principal: brilho que atravessa ao passar o rato. */
+.btn--primary { background-image: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / .2) 50%, transparent 65%); background-size: 250% 100%; background-position: 130% 0; background-repeat: no-repeat; transition: background-color .15s var(--ease), background-position .6s var(--ease); }
+.btn--primary:hover { background-position: -30% 0; }
+
+/* Faixa escura: as linhas de temperatura pulsam como ondas de calor; brilho mais forte. */
+.section--ink::before {
+  background:
+    repeating-radial-gradient(circle at 88% 12%, transparent 0 30px, rgb(232 155 138 / .13) 30px 31px),
+    radial-gradient(ellipse 60% 80% at 88% 12%, rgb(163 7 17 / .45), transparent 70%),
+    radial-gradient(ellipse 50% 60% at 6% 100%, rgb(64 118 196 / .28), transparent 70%);
+  -webkit-mask-image: none; mask-image: none;
+  transform-origin: 88% 12%; animation: mdm-calor 6s ease-in-out infinite alternate;
+}
+@keyframes mdm-calor { to { transform: scale(1.08); } }
+
+/* Pedido de orçamento: halo quente e frio à volta do formulário. */
+.form { position: relative; isolation: isolate; }
+.section:has(.form) { overflow: clip; } /* o halo não pode criar deslocamento lateral no telemóvel */
+.form::before {
+  content: ''; position: absolute; inset: -48px; z-index: -1; pointer-events: none;
+  background: radial-gradient(50% 45% at 80% 18%, rgb(163 7 17 / .2), transparent 75%), radial-gradient(50% 45% at 20% 85%, rgb(64 118 196 / .2), transparent 75%);
+  -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent); mask-image: radial-gradient(closest-side, #000 55%, transparent);
+}
+
+/* Rodapé: ventoinha mais visível e uma segunda, mais pequena, ao contrário. */
+.footer::after { background:
+    radial-gradient(circle, rgb(250 249 245 / .1) 0 9%, transparent 9.5% 13%, rgb(250 249 245 / .06) 13.5% 14%, transparent 14.5%),
+    repeating-conic-gradient(from 0deg, rgb(250 249 245 / .08) 0deg 34deg, transparent 34deg 72deg); }
+.footer > .wrap { position: relative; }
+.footer > .wrap::before {
+  content: ''; position: absolute; z-index: -1; pointer-events: none; width: 220px; aspect-ratio: 1; left: -150px; top: -170px; border-radius: 50%;
+  background: repeating-conic-gradient(from 20deg, rgb(232 155 138 / .1) 0deg 30deg, transparent 30deg 90deg);
+  -webkit-mask-image: radial-gradient(circle, #000 50%, transparent 70%); mask-image: radial-gradient(circle, #000 50%, transparent 70%);
+  animation: mdm-ventoinha 30s linear infinite reverse;
+}
+
+/* Termómetro de leitura: barra sob o menu que passa de quente a frio à medida que se desce a página. */
+@supports (animation-timeline: scroll()) {
+  #nav::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; pointer-events: none;
+    background: linear-gradient(90deg, var(--red), rgb(214 160 90) 45%, rgb(64 118 196));
+    animation: mdm-termometro linear both; animation-timeline: scroll(root);
+  }
+  @keyframes mdm-termometro { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-grid::before, .hero-photo picture::before, .section--ink::before, .footer > .wrap::before { animation: none; }
+  .btn--primary { transition: background-color .15s var(--ease); }
+}

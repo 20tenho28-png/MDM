@@ -205,3 +205,14 @@ Pedido do dono: fundos com efeitos CSS (referência: artigo da Prismic sobre efe
 - **Rodapé**: grão e uma ventoinha (`repeating-conic-gradient`) a rodar a 48 s no canto.
 - **Secções em papel**: pontos de quadrícula a 7,5% da tinta.
 Versão anterior: tag git `versao-01-sem-fundos`.
+
+### Fundos com mais presença (v3.4, 01/10/2026)
+Segunda ronda, a pedido do dono ("está muito sem sal"):
+- **Hero**: ar quente e frio mais intensos (com um tom morno no meio), quadrícula mais marcada, **fluxo de ar** (três ondas em SVG a correr na base, `translateX`) e **moldura quente-frio** a rodar à volta da fotografia (`conic-gradient` com `@property --mdm-a`) com brilho desfocado por trás.
+- **Lanterna**: foco quente que segue o cursor nas linhas de serviço, factos e cartões de obra (só em rato; `main.js` define `--mx/--my`).
+- **Botão principal**: brilho que atravessa ao passar o rato.
+- **Faixa escura**: linhas de temperatura mais visíveis a pulsar (`scale`), brilho carmim e azul.
+- **Formulário**: halo quente e frio à volta (a secção corta o excesso no telemóvel).
+- **Rodapé**: ventoinha mais visível e uma segunda, mais pequena, a rodar ao contrário.
+- **Termómetro de leitura**: barra de 3px sob o menu, de carmim a azul, ligada ao scroll (`animation-timeline: scroll()`, só onde há suporte).
+Versões: `versao-01-sem-fundos`, `versao-02-fundos`, `versao-03-fundos-fortes`.

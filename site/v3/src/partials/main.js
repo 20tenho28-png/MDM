@@ -91,4 +91,11 @@
       sum.innerHTML = 'Não foi possível enviar agora. Tente de novo ou ligue <a href="tel:+351218935050">218 935 050</a>.'; sum.hidden = false; sum.focus && sum.setAttribute('tabindex', '-1'); sum.focus();
     });
   });
+  /* Lanterna (v3.css): posição do cursor nas linhas de serviço, factos e cartões de obra. */
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.addEventListener('pointermove', function (e) {
+      var el = e.target.closest && e.target.closest('.svc, .proof-cell, .project'); if (!el) return;
+      var r = el.getBoundingClientRect(); el.style.setProperty('--mx', (e.clientX - r.left) + 'px'); el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    }, { passive: true });
+  }
 })();
