@@ -228,3 +228,11 @@ Pedido do dono com referência aos guias da Prismic sobre técnicas de layout e 
 - **Cartões de tipos** (páginas de serviço): `grid-template-rows: subgrid` alinha títulos de uma e duas linhas e o início dos textos, como no exemplo de cartões do guia de subgrid.
 Grid para a estrutura da página, flex para o interior das peças (legendas, menus, botões). O site não usa Tailwind; as mesmas propriedades vão em CSS próprio.
 Tudo a partir de 1024px (subgrid a partir de 768px); no telemóvel mantém-se uma coluna. Versão anterior: tag `versao-03-fundos-fortes`.
+
+### Menus, acordeões e slider (v3.6–3.7, 01/10/2026)
+Com base nos artigos da Prismic sobre menus, acordeões e sliders em CSS (texto colado pelo dono):
+- **Menu fixo em vidro** (sticky com `backdrop-filter`): fica translúcido ao descer e encolhe 12px no computador. **Sublinhado animado** que cresce da esquerda (carmim, dourado, azul) e fica cheio na secção atual.
+- **Menu do telemóvel**: entra a descer (`@starting-style`) com as linhas em cascata e um marcador quente-frio.
+- **Acordeões** (perguntas): `details`/`summary` nativos (o método recomendado), altura animada com `::details-content` + `interpolate-size`, "+" que roda para "×" num círculo, barra quente à esquerda na resposta aberta; `name="faq-…"` deixa só uma aberta de cada vez.
+- **Slider das obras** (home, abaixo de 1024px): carrossel só em CSS com `scroll-snap`, o cartão seguinte a espreitar e barra de progresso ligada ao deslize (`scroll-timeline` + `timeline-scope`). No computador mantém-se o bento.
+Versão anterior: tag `versao-04-layout`.

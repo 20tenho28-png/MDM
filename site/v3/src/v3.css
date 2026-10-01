@@ -620,3 +620,82 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
   .type p { margin-top: 0; }
   .type h3 { align-self: end; }
 }
+
+/* ── v3.6: menus e acordeões (01/10) ── */
+
+/* Menu fixo em vidro: ao descer, o fundo fica translúcido e desfocado e a barra encolhe no computador. */
+#nav { transition: height .25s var(--ease), background-color .25s var(--ease), border-color .25s var(--ease); }
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  #nav.scrolled { background: rgb(250 249 245 / .78); -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4); }
+}
+@media (min-width: 1024px) { #nav.scrolled { height: calc(var(--nav-h) - 12px); } }
+
+/* Sublinhado que cresce da esquerda, de quente para frio; fica cheio na secção atual. */
+.nav-menu a { position: relative; text-decoration: none; }
+.nav-menu a::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 9px; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--red), rgb(214 160 90), rgb(64 118 196));
+  transform: scaleX(0); transform-origin: left; transition: transform .3s var(--ease);
+}
+.nav-menu a:hover::after, .nav-menu a:focus-visible::after, .nav-menu a[aria-current]::after { transform: scaleX(1); }
+.nav-menu a:hover { color: var(--red-dk); }
+
+/* Menu do telemóvel: desce e as linhas entram uma a uma (@starting-style, sem JS). */
+.m-drawer { transition: transform .3s var(--ease), opacity .3s var(--ease); }
+@starting-style { .m-drawer { transform: translateY(-12px); opacity: 0; } }
+.m-backdrop { transition: opacity .3s var(--ease); }
+@starting-style { .m-backdrop { opacity: 0; } }
+.m-menu li { animation: mdm-entra .35s var(--ease) both; }
+.m-menu li:nth-child(2) { animation-delay: .04s; } .m-menu li:nth-child(3) { animation-delay: .08s; }
+.m-menu li:nth-child(4) { animation-delay: .12s; } .m-menu li:nth-child(5) { animation-delay: .16s; } .m-menu li:nth-child(6) { animation-delay: .2s; }
+@keyframes mdm-entra { from { opacity: 0; transform: translateX(-10px); } }
+.m-menu a::before { content: ''; width: 8px; height: 8px; margin-right: 12px; border-radius: 2px; background: linear-gradient(135deg, var(--red), rgb(64 118 196)); flex: none; }
+
+/* Acordeões (perguntas): details/summary nativos, abrem com animação de altura onde há suporte,
+   o "+" roda para "×" dentro de um círculo, a pergunta aberta ganha uma barra quente à esquerda.
+   name="faq-…" (build.py): só uma resposta aberta de cada vez. */
+:root { interpolate-size: allow-keywords; }
+.faq details::details-content { block-size: 0; overflow: clip; transition: block-size .35s var(--ease), content-visibility .35s allow-discrete; }
+.faq details[open]::details-content { block-size: auto; }
+.faq details { position: relative; transition: background-color .25s var(--ease); }
+.faq details::before { content: ''; position: absolute; left: -16px; top: 12px; bottom: 12px; width: 3px; border-radius: 3px; background: linear-gradient(var(--red), rgb(64 118 196)); transform: scaleY(0); transition: transform .3s var(--ease); }
+.faq details[open]::before { transform: scaleY(1); }
+.faq summary { transition: color .2s var(--ease); }
+.faq summary:hover { color: var(--red-dk); }
+.faq summary::after, .faq details[open] summary::after {
+  content: '+' / ''; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
+  border: 1.5px solid currentColor; font-size: 1.25rem; line-height: 1; transition: transform .3s var(--ease), background-color .2s var(--ease), color .2s var(--ease);
+}
+.faq details[open] summary::after { transform: rotate(45deg); background: var(--red); border-color: var(--red); color: var(--on-red); }
+@media (max-width: 1023px) { .faq details::before { left: -12px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .m-menu li { animation: none; }
+  .faq details::details-content { transition: none; }
+}
+
+/* ── v3.7: slider das obras no telemóvel (01/10) ──
+   Carrossel só em CSS: scroll-snap com o cartão seguinte a espreitar, e barra de progresso ligada
+   ao deslize (scroll-timeline + timeline-scope, onde há suporte). No computador mantém-se o bento. */
+@media (max-width: 1023px) {
+  #obras .wrap { timeline-scope: --obras; }
+  .projects {
+    display: flex; gap: var(--space-4); overflow-x: auto; overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory; scroll-padding-inline: 20px; margin-inline: -20px; padding: 4px 20px 8px;
+    scrollbar-width: none; scroll-timeline: --obras x;
+  }
+  .projects::-webkit-scrollbar { display: none; }
+  .projects > .project { flex: 0 0 min(78%, 340px); scroll-snap-align: start; }
+  .projects:focus-visible { outline-offset: -3px; }
+  .proj-progress { display: none; }
+  @supports (animation-timeline: scroll()) {
+    .proj-progress { display: block; height: 3px; margin-top: var(--space-4); border-radius: 3px; background: var(--sand); overflow: hidden; }
+    .proj-progress span { display: block; height: 100%; background: linear-gradient(90deg, var(--red), rgb(214 160 90), rgb(64 118 196)); transform-origin: left; animation: mdm-prog linear both; animation-timeline: --obras; }
+    @keyframes mdm-prog { from { transform: scaleX(.3); } to { transform: scaleX(1); } }
+  }
+}
+@media (min-width: 641px) and (max-width: 1023px) {
+  .projects { scroll-padding-inline: 40px; margin-inline: -40px; padding-inline: 40px; }
+  .projects > .project { flex-basis: min(46%, 380px); }
+}
+@media (min-width: 1024px) { .proj-progress { display: none; } }

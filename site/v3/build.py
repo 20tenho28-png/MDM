@@ -41,7 +41,7 @@ FAQ = {
 }
 
 def faq_html(k):
-    return '\n'.join(f'      <details><summary>{html.escape(q)}</summary><div><p>{html.escape(a)}</p></div></details>' for q, a in FAQ[k])
+    return '\n'.join(f'      <details name="faq-{k}"><summary>{html.escape(q)}</summary><div><p>{html.escape(a)}</p></div></details>' for q, a in FAQ[k])
 def faq_ld(k):
     return {'@type': 'FAQPage', 'mainEntity': [{'@type': 'Question', 'name': q, 'acceptedAnswer': {'@type': 'Answer', 'text': a}} for q, a in FAQ[k]]}
 
