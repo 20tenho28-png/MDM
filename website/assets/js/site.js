@@ -213,15 +213,16 @@
     var d = document.createElement('dialog');
     d.className = 'visor';
     d.setAttribute('aria-label', 'Fotografias das obras');
+    /* o trilho é focável (Safari não foca sozinho uma zona que se desliza); as setas do teclado também mudam de fotografia */
     d.innerHTML = '<div class="visor-topo"><span class="visor-conta" aria-live="polite"></span>' +
       '<button class="visor-fechar" type="button" aria-label="Fechar">' + X + '</button></div>' +
-      '<div class="visor-trilho"></div>' +
+      '<div class="visor-trilho" role="group" aria-label="Fotografias: deslize ou use as setas" tabindex="0"></div>' +
       '<button class="visor-seta visor-ant" type="button" aria-label="Fotografia anterior">' + ANT + '</button>' +
       '<button class="visor-seta visor-seg" type="button" aria-label="Fotografia seguinte">' + SEG + '</button>';
     document.body.appendChild(d);
     var trilho = d.querySelector('.visor-trilho'), conta = d.querySelector('.visor-conta');
     var ant = d.querySelector('.visor-ant'), seg = d.querySelector('.visor-seg');
-    var n = 0, idx = 0, comHistorico = false;
+    var n = 0, idx = 0, alvo = -1, comHistorico = false, volta = null;
 
     function itensDe(raiz) { return qsa('[data-visor-item]', raiz); }
     function legenda(it) {
@@ -233,23 +234,41 @@
       var href = it.getAttribute('href') || '';
       if (!todas && /obras\/[^/]+\.html$/.test(href)) {
         var a = document.createElement('a'); a.href = href; a.textContent = 'Ver a obra'; c.appendChild(a);
+        /* substitui a entrada do visor no histórico: ao voltar da obra, um só "voltar" chega a esta página */
+        a.addEventListener('click', function (e) {
+          if (e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          e.preventDefault(); comHistorico = false; location.replace(a.href);
+        });
       }
       return c;
     }
     function atual() { return trilho.clientWidth ? Math.round(trilho.scrollLeft / trilho.clientWidth) : 0; }
     function upd() {
       var i = idx = Math.max(0, Math.min(n - 1, atual()));
-      conta.textContent = (i + 1) + ' / ' + n;
-      ant.disabled = i <= 0; seg.disabled = i >= n - 1;
+      if (alvo >= 0 && Math.abs(trilho.scrollLeft - alvo * trilho.clientWidth) < 2) alvo = -1;
+      conta.textContent = n < 2 ? '' : (i + 1) + ' / ' + n;
+      /* aria-disabled em vez de disabled: um botão desativado com foco deixaria o teclado fora do visor */
+      ant.setAttribute('aria-disabled', i <= 0 ? 'true' : 'false');
+      seg.setAttribute('aria-disabled', i >= n - 1 ? 'true' : 'false');
       ant.hidden = seg.hidden = n < 2;
+      /* só a fotografia à vista é alcançável com Tab (as outras "Ver a obra" ficam de fora) */
+      qsa('.visor-item', trilho).forEach(function (f, k) { f.inert = k !== i; });
     }
     function vai(k) {
-      var i = Math.max(0, Math.min(n - 1, atual() + k));
+      /* várias setas seguidas somam-se, mesmo a meio do deslize anterior */
+      var i = Math.max(0, Math.min(n - 1, (alvo >= 0 ? alvo : atual()) + k));
+      alvo = i;
       trilho.scrollTo({ left: i * trilho.clientWidth, behavior: reduceMotion ? 'auto' : 'smooth' });
     }
-    function abre(lista, i) {
+    function rotulo(it) {
+      var img = it.querySelector('img');
+      return 'Ver em grande: ' + ((img && img.alt) || it.getAttribute('data-visor-t') || 'fotografia');
+    }
+    function abre(lista, i, origem) {
       trilho.textContent = '';
-      n = lista.length;
+      n = lista.length; alvo = -1;
+      /* aberto a partir do menu (que se fecha): ao fechar o visor, o foco volta ao botão do menu */
+      volta = origem && origem.closest && origem.closest('#gaveta') ? document.querySelector('.topo [data-menu]') : null;
       lista.forEach(function (it, k) {
         var fig = document.createElement('figure'); fig.className = 'visor-item';
         var pic = it.querySelector('picture');
@@ -269,20 +288,25 @@
       trilho.scrollLeft = i * trilho.clientWidth;
       upd();
       d.querySelector('.visor-fechar').focus();
-      try { history.pushState({ visor: 1 }, ''); comHistorico = true; } catch (e) { comHistorico = false; }
+      /* o "voltar" do telemóvel fecha o visor; a posição da página não salta para uma secção (#) ao voltar */
+      try { history.scrollRestoration = 'manual'; history.pushState({ visor: 1 }, ''); comHistorico = true; } catch (e) { comHistorico = false; }
       track('visor_aberto', { fotografias: n, pagina: location.pathname });
     }
     function fecha() { if (d.open) d.close(); }
     d.addEventListener('close', function () {
       document.documentElement.classList.remove('visor-aberto');
       trilho.textContent = '';
+      if (volta) { volta.focus(); volta = null; }
       /* fechado no botão ou com Esc: tira a entrada que o visor pôs no histórico */
       if (comHistorico) { comHistorico = false; try { if (history.state && history.state.visor) history.back(); } catch (e) {} }
     });
-    window.addEventListener('popstate', function () { if (d.open) { comHistorico = false; fecha(); } });
+    window.addEventListener('popstate', function () {
+      requestAnimationFrame(function () { try { history.scrollRestoration = 'auto'; } catch (e) {} });
+      if (d.open) { comHistorico = false; fecha(); }
+    });
     d.querySelector('.visor-fechar').addEventListener('click', fecha);
-    ant.addEventListener('click', function () { vai(-1); });
-    seg.addEventListener('click', function () { vai(1); });
+    ant.addEventListener('click', function () { if (ant.getAttribute('aria-disabled') !== 'true') vai(-1); });
+    seg.addEventListener('click', function () { if (seg.getAttribute('aria-disabled') !== 'true') vai(1); });
     d.addEventListener('keydown', function (e) {
       if (e.key === 'ArrowLeft') { e.preventDefault(); vai(-1); }
       else if (e.key === 'ArrowRight') { e.preventDefault(); vai(1); }
@@ -290,13 +314,13 @@
     var tick = false;
     trilho.addEventListener('scroll', function () { if (!tick) { tick = true; requestAnimationFrame(function () { tick = false; upd(); }); } }, { passive: true });
     /* ao rodar o telemóvel, fica na mesma fotografia */
-    window.addEventListener('resize', function () { if (d.open) { var i = idx; trilho.scrollLeft = i * trilho.clientWidth; upd(); } });
+    window.addEventListener('resize', function () { if (d.open) { alvo = -1; trilho.scrollLeft = idx * trilho.clientWidth; upd(); } });
 
-    /* a fotografia do carrossel passa a ser um botão que abre o visor */
+    /* a fotografia do carrossel (ou da obra) passa a ser um botão que abre o visor */
     qsa('[data-visor] [data-visor-item]').forEach(function (it) {
       it.removeAttribute('aria-hidden'); it.removeAttribute('tabindex');
       it.setAttribute('role', 'button');
-      it.setAttribute('aria-label', 'Ver em grande: ' + (it.getAttribute('data-visor-t') || 'fotografia'));
+      it.setAttribute('aria-label', rotulo(it));
       it.addEventListener('keydown', function (e) { if (e.key === ' ') { e.preventDefault(); it.click(); } });
     });
 
@@ -309,7 +333,7 @@
       var it = e.target.closest && e.target.closest('[data-visor] [data-visor-item]');
       if (it) {
         var lista = itensDe(it.closest('[data-visor]'));
-        e.preventDefault(); abre(lista, Math.max(0, lista.indexOf(it)));
+        e.preventDefault(); abre(lista, Math.max(0, lista.indexOf(it)), it);
         return;
       }
       if (!todas) return;
@@ -324,7 +348,7 @@
       if (!lista.length) lista = listaTodas;
       var i = 0;
       if (obra) lista.forEach(function (x, k) { if (x.getAttribute('data-slug') === obra) i = k; });
-      e.preventDefault(); abre(lista, i);
+      e.preventDefault(); abre(lista, i, a);
     });
   })();
 

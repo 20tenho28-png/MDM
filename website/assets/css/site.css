@@ -114,7 +114,9 @@ main:focus { outline: none; }
 
 /* Foco por teclado: anel duplo gesso + tinta; o contorno transparente aparece no modo de alto contraste */
 a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline: 2px solid transparent; outline-offset: 2px; box-shadow: 0 0 0 2px var(--gesso), 0 0 0 4px var(--tinta); }
-.btn-claro:focus-visible, .sec-escura .slide-link:focus-visible { box-shadow: 0 0 0 2px var(--tinta), 0 0 0 4px var(--gesso); }
+.btn-claro:focus-visible { box-shadow: 0 0 0 2px var(--tinta), 0 0 0 4px var(--gesso); }
+/* a fotografia do carrossel encosta à borda do trilho (que corta o que sai): o anel de foco fica por dentro */
+.sec-escura .slide-link:focus-visible { box-shadow: inset 0 0 0 2px var(--gesso), inset 0 0 0 4px var(--tinta); }
 .foco-dentro:focus-visible { box-shadow: inset 0 0 0 2px var(--gesso), inset 0 0 0 4px var(--tinta); }
 
 /* ── Topo ── */
@@ -510,12 +512,22 @@ html.visor-aberto { overflow: hidden; }
 .visor-item figcaption a { align-self: flex-start; margin-top: 4px; padding: 8px 0; font-family: var(--sans); font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #fff; }
 .visor-seta { position: absolute; top: 50%; z-index: 2; margin-top: -24px; background: rgba(12, 16, 21, .55); }
 .visor-seta[hidden] { display: none; }
-.visor-seta:disabled { opacity: .3; cursor: default; }
+.visor-seta[aria-disabled="true"] { opacity: .3; cursor: default; }
 .visor-ant { left: 8px; }
 .visor-seg { right: 8px; }
 .visor a:focus-visible, .visor button:focus-visible { box-shadow: 0 0 0 2px var(--tinta-2), 0 0 0 4px #fff; }
 /* no telemóvel desliza-se com o dedo: as setas só tapariam a fotografia */
 @media (hover: none) and (pointer: coarse) { .visor-seta { display: none; } }
+/* ecrã baixo (telemóvel deitado, zoom a 400%): a fotografia ocupa a altura toda e a legenda vai por cima, em baixo */
+@media (max-height: 500px) {
+  .visor-item { position: relative; padding: 0; }
+  .visor-item figcaption { position: absolute; left: 0; right: 0; bottom: 0; max-width: none; padding: 28px var(--margem) max(6px, env(safe-area-inset-bottom)); flex-direction: row; flex-wrap: wrap; align-items: baseline; column-gap: 14px; row-gap: 0; background: linear-gradient(rgba(12, 16, 21, 0), rgba(12, 16, 21, .85)); }
+  .visor-item figcaption a { margin-top: 0; }
+  /* as setas passam para a barra de cima, ao lado de Fechar, para não taparem a legenda */
+  .visor-seta { top: max(6px, env(safe-area-inset-top)); margin-top: 0; }
+  .visor-ant { left: auto; right: 108px; }
+  .visor-seg { right: 58px; }
+}
 .ficha { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); border-top: 2px solid var(--tinta); }
 @media (min-width: 640px) { .ficha { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--gap); } }
 .ficha > div { display: flex; flex-direction: column; gap: 4px; padding: 14px 0; border-bottom: 1px solid var(--linha); }
