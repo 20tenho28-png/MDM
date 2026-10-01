@@ -216,3 +216,13 @@ Segunda ronda, a pedido do dono ("está muito sem sal"):
 - **Rodapé**: ventoinha mais visível e uma segunda, mais pequena, a rodar ao contrário.
 - **Termómetro de leitura**: barra de 3px sob o menu, de carmim a azul, ligada ao scroll (`animation-timeline: scroll()`, só onde há suporte).
 Versões: `versao-01-sem-fundos`, `versao-02-fundos`, `versao-03-fundos-fortes`.
+
+### Layout (v3.5, 01/10/2026)
+Pedido do dono com referência aos guias da Prismic sobre técnicas de layout e flexbox vs grid (bloqueados neste ambiente; código próprio). Grid para estruturas a duas dimensões, flex para alinhar dentro de cada peça:
+- **Obras na home**: grelha bento (`grid-template-areas: "a a b b" "a a c d"`), uma fotografia grande, uma larga e duas pequenas; zoom suave ao passar o rato.
+- **Cartões de obra**: container query; num cartão largo a legenda fica numa linha (flex, equipamento à esquerda, local à direita).
+- **Factos**: sobrepostos ao fim do hero (margem negativa, vidro com `backdrop-filter`).
+- **Como funciona**: `subgrid` alinha número, título e texto dos três passos; linha do tempo quente-frio a ligar os números.
+- **Perguntas**: duas colunas com o título fixo (`position: sticky`) via `:has(> .sec-head + .faq)`, em todas as páginas com FAQ.
+- **Pedido de orçamento**: contactos diretos fixos ao lado do formulário enquanto se preenche.
+Tudo a partir de 1024px (subgrid a partir de 768px); no telemóvel mantém-se uma coluna. Versão anterior: tag `versao-03-fundos-fortes`.

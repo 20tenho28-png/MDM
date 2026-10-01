@@ -551,3 +551,63 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
   .hero-grid::before, .hero-photo picture::before, .section--ink::before, .footer > .wrap::before { animation: none; }
   .btn--primary { transition: background-color .15s var(--ease); }
 }
+
+/* ── v3.5: layout (01/10) ──
+   Técnicas de layout em CSS moderno: grelha "bento" com grid-template-areas, sobreposição em grelha,
+   colunas fixas com position: sticky, subgrid para alinhar os passos, :has() para ligar layouts ao conteúdo
+   e container queries nos cartões de obra. Só a partir de 1024px; no telemóvel fica tudo numa coluna. */
+
+/* 1. Obras na home: bento. Uma fotografia grande, uma larga e duas pequenas, com legenda sobre faixa creme. */
+@media (min-width: 1024px) {
+  .projects:has(> :nth-child(4):last-child) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(2, clamp(220px, 19vw, 290px));
+    grid-template-areas: "a a b b" "a a c d";
+  }
+  .projects:has(> :nth-child(4):last-child) > :nth-child(1) { grid-area: a; }
+  .projects:has(> :nth-child(4):last-child) > :nth-child(2) { grid-area: b; }
+  .projects:has(> :nth-child(4):last-child) > :nth-child(3) { grid-area: c; }
+  .projects:has(> :nth-child(4):last-child) > :nth-child(4) { grid-area: d; }
+  .projects:has(> :nth-child(4):last-child) .project { display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+  .projects:has(> :nth-child(4):last-child) .project picture { min-height: 0; }
+  .projects:has(> :nth-child(4):last-child) .project img { height: 100%; aspect-ratio: auto; transition: transform .6s var(--ease); }
+  .projects:has(> :nth-child(4):last-child) .project:hover img { transform: scale(1.04); }
+  .projects:has(> :nth-child(4):last-child) .project picture { overflow: hidden; display: block; }
+  .projects:has(> :nth-child(4):last-child) > :nth-child(1) figcaption b { font-size: 1.125rem; font-weight: 600; }
+}
+
+/* 2. Cartões de obra: container query. Num cartão largo, a legenda fica numa linha (equipamento · local). */
+.project { container-type: inline-size; }
+@container (min-width: 440px) {
+  .project figcaption { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); }
+  .project figcaption span { margin-top: 0; }
+}
+
+/* 3. Factos sobrepostos ao hero: a faixa sobe e fica a meio caminho entre o hero e a secção seguinte. */
+@media (min-width: 1024px) {
+  .hero + section .proof { position: relative; z-index: 2; margin-top: calc(var(--space-7) * -1); box-shadow: 0 1px 0 var(--sand), 0 24px 48px -28px rgb(20 29 46 / .35); backdrop-filter: blur(8px); background: rgb(240 238 230 / .88); }
+}
+
+/* 4. Como funciona: subgrid. Número, título e texto alinham-se em linha nos três passos, ligados por uma linha do tempo. */
+@media (min-width: 768px) {
+  .steps { grid-template-rows: auto auto auto; row-gap: 0; position: relative; }
+  .step { display: grid; grid-row: span 3; grid-template-rows: subgrid; border-top: 0; padding-top: 0; }
+  .step::before {
+    width: 48px; height: 48px; display: grid; place-items: center; margin-bottom: var(--space-4);
+    border: 2px solid currentColor; border-radius: 50%; background: var(--ink); font-size: .875rem; position: relative; z-index: 1;
+  }
+  .steps::before { content: ''; position: absolute; left: 24px; right: 24px; top: 23px; height: 2px; background: linear-gradient(90deg, var(--red-on-ink), rgb(214 160 90) 50%, rgb(120 160 220)); opacity: .6; }
+  .step h3 { align-self: end; }
+}
+
+/* 5. Perguntas: duas colunas, título fixo à esquerda enquanto as respostas correm (sticky + :has). */
+@media (min-width: 1024px) {
+  .wrap:has(> .sec-head + .faq) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: var(--space-8); align-items: start; }
+  .wrap:has(> .sec-head + .faq) > .sec-head { position: sticky; top: calc(var(--nav-h) + var(--space-6)); margin-bottom: 0; }
+  .wrap:has(> .sec-head + .faq) > .faq { max-width: none; }
+}
+
+/* 6. Pedido de orçamento: o contacto direto acompanha o formulário enquanto se preenche (sticky). */
+@media (min-width: 1024px) {
+  .quote-aside { position: sticky; top: calc(var(--nav-h) + var(--space-6)); }
+}
