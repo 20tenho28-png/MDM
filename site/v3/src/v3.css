@@ -699,3 +699,6 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
   .projects > .project { flex-basis: min(46%, 380px); }
 }
 @media (min-width: 1024px) { .proj-progress { display: none; } }
+
+/* Movimento reduzido: as duas barras ligadas ao scroll (termómetro e progresso do carrossel) também desaparecem. */
+@media (prefers-reduced-motion: reduce) { #nav::after, .proj-progress { display: none !important; } }
