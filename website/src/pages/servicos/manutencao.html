@@ -1,4 +1,4 @@
-<!--meta {"file": "servicos/manutencao.html", "title": "Manutenção AVAC em Lisboa: contratos anuais | MDM", "description": "Manutenção AVAC na grande Lisboa: contrato anual, visitas programadas e relatório escrito, para empresas, condomínios, banca, indústria e escolas.", "nav": "servicos", "preselect": "Manutenção preventiva: contrato anual", "jsonld": ["breadcrumb", "faq"], "breadcrumb": [["Início", ""], ["Manutenção", "servicos/manutencao.html"]], "css": ["pag-servicos.css"]} -->
+<!--meta {"file": "servicos/manutencao.html", "title": "Manutenção AVAC em Lisboa: contratos anuais | MDM", "description": "Manutenção AVAC na grande Lisboa: contrato anual, visitas programadas e relatório escrito, para empresas, condomínios, banca, indústria e escolas.", "nav": "servicos", "preselect": "Manutenção preventiva: contrato anual", "wa": "manutencao", "jsonld": ["breadcrumb", "faq"], "breadcrumb": [["Início", ""], ["Manutenção", "servicos/manutencao.html"]], "css": ["pag-servicos.css"]} -->
 <section class="pag-hero" aria-labelledby="servT" style="--foto-ar: 1.3333; --foto-pos-m: 56% 45%; --foto-pos-d: 56% 40%">
   <div class="hero-foto">{{foto 02 loading="eager" sizes="(min-width: 900px) and (min-aspect-ratio: 2/3) min(101vh, 907px), 100vw" class="foto-man"}}</div>
   <div class="pag-hero-in">
@@ -28,7 +28,7 @@
       <h2 class="h2 serv-h2" id="fazemosT">Preventiva para não parar, corretiva quando para.</h2>
       <div class="prosa">
         <p>Um equipamento que ninguém abre durante anos acaba por falhar no dia em que faz mais falta. A manutenção preventiva serve para isso: numa visita programada, o técnico limpa filtros e baterias, verifica o gás, os condensados e as ligações elétricas, e vê que peças dão sinais de desgaste antes de pararem.</p>
-        <p>No contrato anual fica escrito que equipamentos estão incluídos e quando são as visitas: [PERIODICIDADE DAS VISITAS NO CONTRATO]. No fim de cada visita recebe um relatório com o estado de cada máquina e o que foi feito, pronto a mostrar à administração do condomínio ou a quem gere o edifício.</p>
+        <p>No contrato anual fica escrito que equipamentos estão incluídos e quando são as visitas. No fim de cada visita recebe um relatório com o estado de cada máquina e o que foi feito, pronto a mostrar à administração do condomínio ou a quem gere o edifício.</p>
         <p>Quando há uma avaria, fazemos também a manutenção corretiva. A assistência é multimarca, com peças originais. E se o problema estiver no quadro ou na alimentação, os nossos técnicos de <a href="{{ root }}servicos/eletricidade.html">eletricidade</a> também tratam disso.</p>
       </div>
     </div>
@@ -67,7 +67,7 @@
     <div class="metodo-intro" data-r>
       <p class="rotulo rotulo-accent">Como trabalhamos</p>
       <h2 class="h2" id="metodoServT">Do levantamento ao relatório.</h2>
-      <p class="texto-aco">A proposta de contrato é gratuita e sem compromisso. Respondemos em menos de 24 horas úteis.</p>
+      <p class="texto-aco">A proposta de contrato é gratuita e sem compromisso.</p>
     </div>
     <ol class="passos" data-r>
       <li class="passo"><span class="passo-n">01</span><div><strong>Levantamento</strong><span>Visitamos o edifício e fazemos a lista dos equipamentos: marca, tipo, onde estão e em que estado.</span></div></li>
@@ -87,10 +87,10 @@
       <h2 class="h2" id="perguntasServT">Sobre o contrato de manutenção.</h2>
     </div>
     <div class="faq-lista" data-r>
-      <details class="faq-item"><summary>O que inclui uma visita de manutenção preventiva? <svg class="faq-mais" viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg></summary><div><p>Em regra, limpeza de filtros e baterias, verificação do gás, dos esgotos de condensados e das ligações elétricas, e teste de funcionamento de cada equipamento. A lista exata fica no contrato e em cada relatório. [LISTA DE OPERAÇÕES DO PLANO DE MANUTENÇÃO DA MDM]</p></div></details>
-      <details class="faq-item"><summary>Quantas visitas por ano estão incluídas? <svg class="faq-mais" viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg></summary><div><p>Depende do número e do tipo de equipamentos e de quantas horas trabalham. [PERIODICIDADE DAS VISITAS NO CONTRATO]</p></div></details>
+      <details class="faq-item"><summary>O que inclui uma visita de manutenção preventiva? <svg class="faq-mais" viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg></summary><div><p>Em regra, limpeza de filtros e baterias, verificação do gás, dos esgotos de condensados e das ligações elétricas, e teste de funcionamento de cada equipamento. A lista exata fica no contrato e em cada relatório.{{#se dados.planoManutencao}} {{ dados.planoManutencao }}{{/se}}</p></div></details>
+      <details class="faq-item"><summary>Quantas visitas por ano estão incluídas? <svg class="faq-mais" viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg></summary><div><p>Depende do número e do tipo de equipamentos e de quantas horas trabalham.{{#se dados.periodicidadeVisitas}} {{ dados.periodicidadeVisitas }}{{/se}}</p></div></details>
       <details class="faq-item"><summary>Fazem manutenção a equipamentos instalados por outra empresa? <svg class="faq-mais" viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg></summary><div><p>Sim. A assistência é multimarca. Antes de propor o contrato fazemos o levantamento dos equipamentos e do estado em que estão, para saber ao certo o que vamos manter.</p></div></details>
-      <details class="faq-item"><summary>As avarias estão incluídas no contrato? <svg class="faq-mais" viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg></summary><div><p>[CONDIÇÕES DAS AVARIAS PARA CLIENTES COM CONTRATO, MÃO DE OBRA, DESLOCAÇÃO, PEÇAS E PRIORIDADE]. As peças usadas nas reparações são originais.</p></div></details>
+      {{#se dados.avariasContrato}}<details class="faq-item"><summary>As avarias estão incluídas no contrato? <svg class="faq-mais" viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg></summary><div><p>{{ dados.avariasContrato }} As peças usadas nas reparações são originais.</p></div></details>{{/se}}
       <details class="faq-item"><summary>Como peço uma proposta? <svg class="faq-mais" viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg></summary><div><p>Pelo formulário abaixo, por email para <a data-lead="email" href="mailto:{{ site.email }}">{{ site.email }}</a> ou pelo telefone <a data-lead="tel" href="{{ site.phoneHref }}">{{ site.phone }}</a> ({{ site.hours }}). Diga-nos o tipo de edifício e, se souber, quantos equipamentos tem.</p></div></details>
     </div>
   </div>

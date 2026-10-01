@@ -7,15 +7,14 @@
       </div>
       <dl class="canais">
         <div><dt>Telefone</dt><dd><a class="canal-v" data-lead="tel" href="{{ site.phoneHref }}">{{ site.phone }}</a><span>Contratos e urgências · <span class="nowrap">{{ site.hours }}</span></span></dd></div>
-        <div><dt>WhatsApp</dt><dd><a class="canal-v" data-lead="montagem" href="{{wa montagem}}" target="_blank" rel="noopener">{{ site.whatsapp }}</a><span>Montagem e avarias · envie fotografias</span></dd></div>
+        <div><dt>WhatsApp</dt><dd><a class="canal-v" data-lead="{{ page.wa }}" href="{{wa {{ page.wa }}}}" target="_blank" rel="noopener">{{ site.whatsapp }}</a><span>Montagem e avarias · envie fotografias</span></dd></div>
         <div><dt>Email</dt><dd><a class="canal-v canal-mail" data-lead="email" href="mailto:{{ site.email }}">{{ site.email }}</a><span>Propostas de manutenção preventiva</span></dd></div>
         <div><dt>Morada</dt><dd><span class="canal-morada">{{ site.address1 }}<br>{{ site.address2 }}</span></dd></div>
       </dl>
-      <div class="fora-horas">
+      {{#se dados.foraDeHoras}}<div class="fora-horas">
         <p class="rotulo">Fora de horas e fins de semana</p>
-        <!-- Exemplos de política: "Deixe mensagem no WhatsApp; respondemos no dia útil seguinte a partir das 8h" ou "Linha de urgência para clientes com contrato". -->
-        <p>[POLÍTICA DE URGÊNCIAS FORA DE HORAS]</p>
-      </div>
+        <p>{{ dados.foraDeHoras }}</p>
+      </div>{{/se}}
     </div>
 
     <div class="form-caixa" id="orcamento" data-r>

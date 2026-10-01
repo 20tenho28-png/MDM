@@ -483,7 +483,7 @@
       btn.removeAttribute('aria-busy');
       if (ok) {
         lbl.textContent = 'Pedido enviado';
-        quoteAlert('Pedido recebido. Respondemos por email em menos de 24 horas úteis (2ª a 6ª, 8h–17h). Guardámos o seu contacto apenas para esta resposta. Se for urgente:', true, true);
+        quoteAlert('Pedido recebido, obrigado. Vamos analisar o seu pedido e responder pelo email ou telefone que indicou. Guardámos o seu contacto apenas para esta resposta. Se for urgente:', true, true);
         form.reset(); track('quote_form_ok', { servico: d.servico, segmento: triagem(d.servico).seg });
         setTimeout(function () { lbl.textContent = 'Enviar pedido'; }, 6000);
         return;

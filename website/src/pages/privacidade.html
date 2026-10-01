@@ -7,13 +7,12 @@
         <span aria-hidden="true">›</span>
         <span aria-current="page">Política de privacidade</span>
       </nav>
-      <p class="priv-rever">[REVER COM ASSESSORIA JURÍDICA ANTES DE PUBLICAR]</p>
       <p class="rotulo rotulo-accent">Privacidade</p>
       <h1 class="h1 priv-t" id="privT">Política de privacidade</h1>
     </div>
     <div class="priv-cab-lado">
       <p class="lead">O que este site recolhe, para quê, e como pode recusar. Escrito para se ler em cinco minutos.</p>
-      <p class="registo">Última atualização: [DATA]</p>
+      {{#se dados.privacidadeData}}<p class="registo">Última atualização: {{ dados.privacidadeData }}</p>{{/se}}
     </div>
   </div>
 </section>
@@ -55,7 +54,7 @@
         <li><strong>Enviar por WhatsApp:</strong> o site abre o WhatsApp com o pedido já preenchido. Também aqui, só nos chega quando carrega em enviar.</li>
       </ul>
       <p>O pedido leva uma etiqueta com o tipo de serviço (por exemplo, «Montagem AC»), para chegar mais depressa ao técnico certo. Enquanto escreve, o site não guarda nem envia o que escreveu.</p>
-      <p>Guardamos os pedidos durante [PRAZO DE CONSERVAÇÃO DOS PEDIDOS]. Se o pedido der origem a um trabalho, as faturas e os dados fiscais são guardados pelo tempo que a lei fiscal obriga.</p>
+      <p>{{#se dados.prazoPedidos}}Guardamos os pedidos durante {{ dados.prazoPedidos }}.{{/se}}{{#sem dados.prazoPedidos}}Guardamos os pedidos apenas pelo tempo necessário para lhe responder e para acompanhar o trabalho que deles resultar.{{/sem}} Se o pedido der origem a um trabalho, as faturas e os dados fiscais são guardados pelo tempo que a lei fiscal obriga.</p>
 
       <h2 id="medicao">Medição de audiência</h2>
       <p>Para saber que páginas são úteis e que contactos as pessoas preferem, o site usa o <strong>PostHog</strong>, com os dados alojados na União Europeia (eu.i.posthog.com). A medição foi configurada assim:</p>
@@ -65,7 +64,7 @@
         <li><strong>O que se regista:</strong> as páginas vistas; os cliques nos contactos (telefone, WhatsApp, email, orçamento); o uso dos filtros de obras, do carrossel, do menu e das perguntas frequentes; o início e o envio do formulário, com o tipo de serviço escolhido; e onde se clica em cada página (mapa de cliques).</li>
         <li><strong>O que nunca se regista:</strong> o que escreve no formulário (nome, email, telefone ou mensagem).</li>
       </ul>
-      <p>Como em qualquer ligação à internet, o PostHog recebe o endereço IP do seu equipamento e dados técnicos do browser. [CONFIRMAR NA CONTA POSTHOG SE O ENDEREÇO IP É DESCARTADO]</p>
+      <p>Como em qualquer ligação à internet, o PostHog recebe o endereço IP do seu equipamento e dados técnicos do browser.{{#se dados.posthogIP}} {{ dados.posthogIP }}{{/se}}</p>
       <p>Fazemos esta medição porque temos interesse em perceber como o site é usado e em melhorá-lo. Pode opor-se a qualquer momento, aqui:</p>
 
       <div class="priv-controlo" id="controlo" data-medicao>
@@ -98,7 +97,7 @@
       <p>Se entender que não tratámos bem os seus dados, pode apresentar reclamação à Comissão Nacional de Proteção de Dados (<a href="https://www.cnpd.pt" target="_blank" rel="noopener">www.cnpd.pt</a>).</p>
 
       <h2 id="alteracoes">Alterações</h2>
-      <p>Se mudarmos o que o site faz com os dados (por exemplo, se o formulário passar a enviar os pedidos diretamente para nós), atualizamos esta página e a data no topo.</p>
+      <p>Se mudarmos o que o site faz com os dados (por exemplo, se o formulário passar a enviar os pedidos diretamente para nós), atualizamos esta página{{#se dados.privacidadeData}} e a data no topo{{/se}}.</p>
     </div>
   </div>
 </section>

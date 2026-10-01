@@ -38,10 +38,10 @@
         "Esteira de cabos e tubagem isolada por baixo do equipamento"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -68,10 +68,10 @@
         "Duas saídas de conduta em curva junto ao piso inferior"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -98,10 +98,10 @@
         "Técnico de colete MDM a trabalhar de escadote"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -127,10 +127,10 @@
         "Etiqueta MDM colada em cada unidade"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -156,10 +156,10 @@
         "Coletores solares e vaso de expansão ao lado da unidade"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -185,10 +185,10 @@
         "Tubagem com isolamento preto até à entrada na parede"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -215,10 +215,10 @@
         "Painéis retirados e pousados em cima da máquina"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -244,10 +244,10 @@
         "Unidade fixa a perfil metálico perfurado sobre a chapa"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -273,10 +273,10 @@
         "Tubagem e cabos encaminhados ao longo da cobertura"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -291,10 +291,10 @@
       "title": "Central de sete unidades",
       "especialidade": "Ar condicionado",
       "trabalho": "Instalação",
-      "equipamento": "Panasonic ECOi (VRF)",
+      "equipamento": "Sistema VRF",
       "local": "Cave técnica",
-      "alt": "Sete unidades exteriores Panasonic alinhadas e sobrepostas numa central técnica em cave.",
-      "resumo": "Central técnica em cave com sete unidades exteriores Panasonic. Quatro estão sobrepostas duas a duas, com as de cima fixas por varões ao teto; as restantes estão alinhadas ao longo da parede. A tubagem sobe e segue em esteira pelo teto.",
+      "alt": "Sete unidades exteriores de um sistema VRF, alinhadas e sobrepostas numa central técnica em cave.",
+      "resumo": "Central técnica em cave com sete unidades exteriores de um sistema VRF. Quatro estão sobrepostas duas a duas, com as de cima fixas por varões ao teto; as restantes estão alinhadas ao longo da parede. A tubagem sobe e segue em esteira pelo teto.",
       "detalhes": [
         "Sete unidades exteriores na mesma sala técnica",
         "Unidades sobrepostas, com as superiores seguras por varões ao teto",
@@ -302,10 +302,10 @@
         "Tubagem encaminhada em esteira junto ao teto"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -331,10 +331,10 @@
         "Tubagem encaminhada por esteira metálica na parede"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -360,10 +360,10 @@
         "Unidades montadas junto às janelas do piso superior"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -389,10 +389,10 @@
         "Ferramentas e luvas pousadas em cima da caixa"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -418,10 +418,10 @@
         "Tampa das válvulas de serviço colocada"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -447,10 +447,10 @@
         "Unidade encostada ao canto, afastada da porta"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -465,10 +465,10 @@
       "title": "Chiller e depósito na varanda",
       "especialidade": "Climatização",
       "trabalho": "Instalação",
-      "equipamento": "Climaveneta e depósito de acumulação",
+      "equipamento": "Chiller e depósito de acumulação",
       "local": "Varanda",
-      "alt": "Chiller Climaveneta e depósito de acumulação instalados numa varanda.",
-      "resumo": "Chiller Climaveneta e depósito de acumulação numa varanda. A tubagem hidráulica sobe a parede com isolamento preto e tem um purgador no ponto alto. Um nível está pousado em cima do chiller.",
+      "alt": "Chiller e depósito de acumulação instalados numa varanda.",
+      "resumo": "Chiller e depósito de acumulação numa varanda. A tubagem hidráulica sobe a parede com isolamento preto e tem um purgador no ponto alto. Um nível está pousado em cima do chiller.",
       "detalhes": [
         "Chiller de dois ventiladores assente em pés sobre o pavimento",
         "Depósito de acumulação ao lado do chiller",
@@ -477,10 +477,10 @@
         "Nível pousado em cima do chiller"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -506,10 +506,10 @@
         "Unidade afastada da casa, no jardim"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -535,10 +535,10 @@
         "Quadro na parede mantido no lugar"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -564,10 +564,10 @@
         "Cortinados mantidos no lugar"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -592,10 +592,10 @@
         "Cadeiras e eletrodomésticos ainda com plástico"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -621,10 +621,10 @@
         "Estante e mobiliário no lugar"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -649,10 +649,10 @@
         "Unidade ao lado do cortinado"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -679,10 +679,10 @@
         "Escadote em uso junto ao móvel"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     },
     {
@@ -697,10 +697,10 @@
       "title": "Termoacumulador em armário",
       "especialidade": "Águas quentes",
       "trabalho": "Substituição",
-      "equipamento": "Vulcano",
+      "equipamento": "Termoacumulador vertical",
       "local": "Habitação",
-      "alt": "Termoacumulador Vulcano instalado dentro de um armário, com ligações flexíveis.",
-      "resumo": "Termoacumulador Vulcano instalado na vertical dentro de um armário. A água liga por tubos flexíveis de malha inox. Em baixo ficam as válvulas de corte, à mão.",
+      "alt": "Termoacumulador instalado dentro de um armário, com ligações flexíveis.",
+      "resumo": "Termoacumulador instalado na vertical dentro de um armário. A água liga por tubos flexíveis de malha inox. Em baixo ficam as válvulas de corte, à mão.",
       "detalhes": [
         "Termoacumulador vertical dentro de um armário",
         "Ligações em tubo flexível de malha inox",
@@ -708,10 +708,10 @@
         "Cabo de alimentação ligado por baixo do aparelho"
       ],
       "factos": {
-        "data": "[DATA DA OBRA]",
-        "localExato": "[LOCAL EXATO]",
-        "cliente": "[TIPO DE CLIENTE]",
-        "duracao": "[DURAÇÃO]"
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
       }
     }
   ]

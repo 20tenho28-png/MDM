@@ -1,0 +1,103 @@
+{
+  "_leia": "Dados que só a MDM pode dar. Escreva cada um em \"valor\" (em português de Portugal, sem prazos de resposta). Enquanto um valor estiver vazio, a frase, a linha ou a secção que o usa não aparece no site. `python3 website/build.py --faltam` lista o que falta e em que páginas entra. Nunca escrever aqui um número ou um facto que não esteja confirmado.",
+  "apirac": {
+    "grupo": "Certificações",
+    "pedido": "Número de associado APIRAC (aparece por baixo do selo APIRAC)",
+    "valor": ""
+  },
+  "impic": {
+    "grupo": "Certificações",
+    "pedido": "Tipo e número do título IMPIC, por exemplo o alvará (aparece por baixo do selo IMPIC)",
+    "valor": ""
+  },
+  "gasesFluorados": {
+    "grupo": "Certificações",
+    "pedido": "Número do certificado da empresa para gases fluorados (aparece por baixo do selo F-gas)",
+    "valor": ""
+  },
+  "eletricista": {
+    "grupo": "Certificações",
+    "pedido": "Certificação do eletricista: entidade e número, numa frase completa, se a MDM quiser publicar (pergunta «Os técnicos são certificados?»)",
+    "valor": ""
+  },
+  "foraDeHoras": {
+    "grupo": "Contactos",
+    "pedido": "O que fazer fora do horário e ao fim de semana: uma ou duas frases, sem prazos de resposta (bloco «Fora de horas» no contacto e pergunta na página inicial)",
+    "valor": ""
+  },
+  "testemunhos": {
+    "grupo": "Prova",
+    "pedido": "Testemunhos reais de clientes, com autorização por escrito. Lista de {\"texto\": \"…\", \"nome\": \"nome ou cargo\", \"tipo\": \"tipo de cliente · local\"}. Sem testemunhos, a secção não aparece",
+    "valor": []
+  },
+  "clientesNomeaveis": {
+    "grupo": "Prova",
+    "pedido": "Setores ou clientes que podem ser nomeados, com autorização por escrito: uma frase (aparece por baixo dos testemunhos)",
+    "valor": ""
+  },
+  "precoAC": {
+    "grupo": "Serviços",
+    "pedido": "Preço indicativo ou gama de preços da montagem de ar condicionado, numa frase completa, só se a MDM quiser publicar (pergunta «Quanto custa instalar ar condicionado?»)",
+    "valor": ""
+  },
+  "duracaoMontagem": {
+    "grupo": "Serviços",
+    "pedido": "Duração típica da montagem de um split e de um multi-split, numa frase completa (sem ela, a pergunta «Quanto tempo demora a montagem?» não aparece)",
+    "valor": ""
+  },
+  "planoManutencao": {
+    "grupo": "Serviços",
+    "pedido": "Lista de operações do plano de manutenção da MDM, numa frase (pergunta «O que inclui uma visita de manutenção preventiva?»)",
+    "valor": ""
+  },
+  "periodicidadeVisitas": {
+    "grupo": "Serviços",
+    "pedido": "Quantas visitas por ano tem o contrato de manutenção, numa frase completa (pergunta «Quantas visitas por ano estão incluídas?»)",
+    "valor": ""
+  },
+  "avariasContrato": {
+    "grupo": "Serviços",
+    "pedido": "Condições das avarias para clientes com contrato: mão de obra, deslocação, peças e prioridade (sem elas, a pergunta «As avarias estão incluídas no contrato?» não aparece)",
+    "valor": ""
+  },
+  "placas": {
+    "grupo": "Serviços",
+    "pedido": "Se a MDM repara placas de comando ou só as substitui, numa frase (sem ela, a pergunta «Reparam placas de comando ou substituem?» não aparece)",
+    "valor": ""
+  },
+  "ambitoEletrico": {
+    "grupo": "Serviços",
+    "pedido": "Âmbito do trabalho elétrico: só AVAC ou também instalações elétricas gerais, numa frase (sem ela, a pergunta «Fazem instalações elétricas que não sejam de AVAC?» não aparece)",
+    "valor": ""
+  },
+  "extracaoCozinhas": {
+    "grupo": "Serviços",
+    "pedido": "Se a MDM faz extração de cozinhas e se fornece e monta a hotte e a filtragem de gorduras, numa ou duas frases (sem elas, a pergunta «Fazem extração de cozinhas?» não aparece)",
+    "valor": ""
+  },
+  "periodicidadeVentilacao": {
+    "grupo": "Serviços",
+    "pedido": "Periodicidade recomendada para a limpeza de condutas e filtros de ventilação, numa frase (pergunta «Fazem manutenção de sistemas de ventilação?»)",
+    "valor": ""
+  },
+  "prazoPedidos": {
+    "grupo": "Privacidade",
+    "pedido": "Prazo de conservação dos pedidos de orçamento: completa a frase «Guardamos os pedidos durante …». Enquanto faltar, a política diz «apenas pelo tempo necessário»",
+    "valor": ""
+  },
+  "posthogIP": {
+    "grupo": "Privacidade",
+    "pedido": "Se a conta PostHog descarta o endereço IP (ver nas definições do projeto), numa frase completa",
+    "valor": ""
+  },
+  "privacidadeData": {
+    "grupo": "Privacidade",
+    "pedido": "Data da última atualização da política de privacidade, depois da revisão jurídica",
+    "valor": ""
+  },
+  "_tarefas": [
+    "Rever a política de privacidade com assessoria jurídica antes de publicar.",
+    "Fotografias de quadros elétricos AVAC montados pela MDM, para a página de Eletricidade.",
+    "Confirmar a frase «peças originais» e se há alguma garantia a anunciar (a «garantia de fabricante» foi retirada por não estar confirmada)."
+  ]
+}

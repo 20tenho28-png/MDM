@@ -6,7 +6,8 @@ Site estático em português europeu para a MDM (ar condicionado, ventilação, 
 
 ```bash
 python3 website/build.py            # gera website/public/
-python3 website/build.py --check    # gera e valida ligações, recursos e sintaxe; lista placeholders
+python3 website/build.py --check    # gera e valida ligações, recursos, sintaxe, placeholders e decisões do dono
+python3 website/build.py --faltam   # lista os dados que só a MDM pode dar (não falha)
 ```
 
 Só precisa de Python 3.11+ (biblioteca padrão). `public/` não entra no git: é sempre gerado.
@@ -15,14 +16,15 @@ Pré-visualizar: abrir `website/public/index.html` no browser, ou `python3 -m ht
 
 ## Publicar
 
-Qualquer alojamento estático serve, **servido na raiz do domínio** (a página 404 usa caminhos absolutos porque é mostrada em qualquer profundidade). Netlify: diretório base `website` (o `netlify.toml` já tem o comando e a pasta). Antes de publicar, preencher os placeholders abaixo e trocar `baseUrl` em `data/site.json` pelo domínio final.
+Qualquer alojamento estático serve, **servido na raiz do domínio** (a página 404 usa caminhos absolutos porque é mostrada em qualquer profundidade). Netlify: diretório base `website` (o `netlify.toml` já tem o comando e a pasta). Antes de publicar, trocar `baseUrl` em `data/site.json` pelo domínio final e ver a lista de `--faltam` (abaixo).
 
 ## Estrutura
 
 | Onde | O quê |
 |---|---|
-| `data/site.json` | Contactos, horário, NIF, mensagens de WhatsApp pré-preenchidas (com a etiqueta de triagem `[P1 · …]`) |
-| `data/obras.json` | As 24 obras: título, especialidade, equipamento, texto, pormenores e factos por preencher |
+| `data/site.json` | Contactos, horário, NIF, nome legal, marcas, mensagens de WhatsApp pré-preenchidas (com a etiqueta de triagem `[P1 · …]`). A barra do telemóvel, o rodapé e o contacto usam a mensagem da página: `wa` no `<!--meta-->` de cada serviço, `geral` nas outras |
+| `data/obras.json` | As 24 obras: título, especialidade, equipamento, texto, pormenores e factos (data, local exato, cliente, duração: só aparecem na ficha quando preenchidos) |
+| `data/dados-mdm.json` | Dados que só a MDM pode dar (números das certificações, testemunhos, perguntas por responder, privacidade). Vazio = escondido no site |
 | `src/templates/layout.html` | Cabeçalho `<head>`, recusa de medição, estrutura comum |
 | `src/partials/` | Cabeçalho e menu em gaveta, rodapé, barra fixa do telemóvel, contacto + formulário, certificações, testemunhos, cartões de obra |
 | `src/pages/` | Página inicial, obras, 4 serviços, privacidade, 404, página do QR das carrinhas |
@@ -52,11 +54,20 @@ Hoje o formulário abre o email do visitante com o pedido preparado (ou o WhatsA
 
 ## Antes de publicar: dados que só a MDM tem
 
-`python3 website/build.py --check` lista todos. Resumo:
+O site nunca mostra um dado por preencher. Cada um tem um lugar em `data/dados-mdm.json` (e, para as obras, em `factos` de `data/obras.json`); enquanto o valor estiver vazio, a frase, a linha da ficha, a pergunta ou a secção que o usa não aparece. Basta escrever o valor e voltar a gerar. Nunca escrever um número ou um facto que não esteja confirmado.
 
-- **Urgências fora de horas** — `[POLÍTICA DE URGÊNCIAS FORA DE HORAS]` (contacto e FAQ).
-- **Testemunhos** — `[TESTEMUNHO REAL DE CLIENTE …]`, `[NOME OU CARGO]`, `[TIPO DE CLIENTE · LOCAL]`, setores/clientes que podem ser nomeados (com autorização por escrito). Em alternativa, retirar `{{> testemunhos }}` da página inicial.
-- **Certificações** — `[Nº DE ASSOCIADO APIRAC]`, `[TIPO E Nº DO TÍTULO IMPIC]`. Se a MDM tiver certificação de gases fluorados, acrescentar um terceiro selo em `src/partials/certificacoes.html` (foi retirado por não estar confirmado).
-- **Obras** — por obra: `[DATA DA OBRA]`, `[LOCAL EXATO]`, `[TIPO DE CLIENTE]`, `[DURAÇÃO]` em `data/obras.json` (campo `factos`).
-- **Privacidade** — rever com assessoria jurídica; prazo de conservação dos pedidos; data da última atualização.
-- **Serviços** — placeholders das perguntas frequentes de cada serviço (periodicidades, condições de contrato).
+```bash
+python3 website/build.py --faltam   # o que falta, em que páginas entra, e outras tarefas
+```
+
+Resumo do que falta hoje:
+
+- **Certificações**: número de associado APIRAC, tipo e número do título IMPIC, número do certificado de gases fluorados (o selo F-gas já aparece, sem número), certificação do eletricista se a MDM a quiser publicar.
+- **Contactos**: o que fazer fora do horário e ao fim de semana (sem prazos de resposta). Sem isto não aparece o bloco «Fora de horas» nem a pergunta da página inicial.
+- **Testemunhos**: só reais e com autorização por escrito. Sem eles a secção «Clientes» não aparece.
+- **Obras**: data, local exato, tipo de cliente e duração de cada obra. A ficha mostra só os que existem.
+- **Serviços**: preço indicativo de ar condicionado (se quiser), duração de uma montagem, plano e periodicidade da manutenção, avarias no contrato, reparação de placas, âmbito do trabalho elétrico, extração de cozinhas, periodicidade da limpeza de condutas. Cada pergunta sem resposta fica escondida.
+- **Privacidade**: revisão jurídica, prazo de conservação dos pedidos (até lá, «apenas pelo tempo necessário»), se o PostHog descarta o IP, data da última atualização.
+- **Outras**: fotografias de quadros elétricos AVAC; confirmar «peças originais» e se há garantia a anunciar.
+
+`--check` falha se chegar a `public/` um placeholder (`[MAIÚSCULAS…]`, `[[CHAVE]]`, «por preencher») ou algo que o dono retirou a 27/09/2026: promessas de prazo de resposta («24 horas», «24–48h», «mesmo dia», «N minutos»), idade em anos («35 anos»: só «1991»), marcas fora de Midea, Mitsubishi Electric, Daikin e France Air, ou o nome legal com outra grafia («M.D.M. - Manuel Domingos Melancia, Lda»). Verifica as páginas, a meta, o JSON-LD, as mensagens de WhatsApp, os scripts e o cartão de contacto.

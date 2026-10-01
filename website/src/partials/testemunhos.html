@@ -1,3 +1,4 @@
+{{#se dados.testemunhos}}<!-- só aparece com testemunhos reais, autorizados por escrito (data/dados-mdm.json) -->
 <section class="sec testemunhos" aria-labelledby="testT">
   <div class="sec-cab" data-r>
     <div>
@@ -6,18 +7,12 @@
     </div>
   </div>
   <div class="test-grelha" data-r>
-    <figure class="test">
-      <blockquote><p>[TESTEMUNHO REAL DE CLIENTE — uma ou duas frases, com autorização por escrito]</p></blockquote>
-      <figcaption><strong>[NOME OU CARGO]</strong><span>[TIPO DE CLIENTE · LOCAL]</span></figcaption>
+    {{#cada dados.testemunhos}}<figure class="test">
+      <blockquote><p>{{ item.texto }}</p></blockquote>
+      <figcaption><strong>{{ item.nome }}</strong>{{#se item.tipo}}<span>{{ item.tipo }}</span>{{/se}}</figcaption>
     </figure>
-    <figure class="test">
-      <blockquote><p>[TESTEMUNHO REAL DE CLIENTE — de preferência um condomínio ou empresa com contrato de manutenção]</p></blockquote>
-      <figcaption><strong>[NOME OU CARGO]</strong><span>[TIPO DE CLIENTE · LOCAL]</span></figcaption>
-    </figure>
-    <figure class="test">
-      <blockquote><p>[TESTEMUNHO REAL DE CLIENTE — de preferência uma avaria resolvida depressa]</p></blockquote>
-      <figcaption><strong>[NOME OU CARGO]</strong><span>[TIPO DE CLIENTE · LOCAL]</span></figcaption>
-    </figure>
+    {{/cada}}
   </div>
-  <p class="test-nota" data-r>[SETORES OU CLIENTES QUE PODEM SER NOMEADOS, COM AUTORIZAÇÃO — por exemplo banca, indústria, condomínios, escolas]</p>
+  {{#se dados.clientesNomeaveis}}<p class="test-nota" data-r>{{ dados.clientesNomeaveis }}</p>{{/se}}
 </section>
+{{/se}}

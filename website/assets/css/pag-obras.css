@@ -20,6 +20,7 @@ html:not(.js) .filtros-wrap { display: none; }
 @media (min-width: 1000px) {
   .obra-corpo:not(:has(.obra-resumo:not(:empty), li)) { grid-template-columns: minmax(0, 1fr); }
   .obra-corpo:not(:has(.obra-resumo:not(:empty), li)) .ficha { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .obra-corpo:not(:has(.obra-resumo:not(:empty), li)) .ficha > div:last-child { grid-column: auto; }
 }
 .obra-ficha-t { margin-bottom: 12px; }
 
@@ -28,8 +29,10 @@ html:not(.js) .filtros-wrap { display: none; }
 .obra-nav-sec { padding-top: 0; }
 .obra-nav { border-bottom: 1px solid var(--linha); }
 .obra-nav-todas { margin-top: 28px; }
-/* A ficha em duas colunas também no telemóvel: nove linhas curtas não precisam de ecrã e meio */
+/* A ficha em duas colunas também no telemóvel: linhas curtas não precisam de ecrã e meio */
 @media (max-width: 639px) { .ficha { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 16px; } .ficha dd { font-size: 15px; overflow-wrap: anywhere; } }
+/* Só aparecem os factos que existem (data/obras.json): um número ímpar de linhas fecha com a última a toda a largura */
+.ficha > div:nth-child(odd):last-child { grid-column: 1 / -1; }
 
 /* Com os filtros colados ao topo, o foco por teclado não pode ficar por baixo deles */
 @media (min-width: 700px) { html { scroll-padding-top: calc(var(--topo-h) + 84px); } }

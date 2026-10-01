@@ -36,10 +36,10 @@
         <div><dt>Trabalho</dt><dd>{{ obra.trabalho }}</dd></div>
         <div><dt>Equipamento</dt><dd>{{ obra.equipamento }}</dd></div>
         <div><dt>Local</dt><dd>{{ obra.local }}</dd></div>
-        <div><dt>Data</dt><dd>{{ obra.factos.data }}</dd></div>
-        <div><dt>Local exato</dt><dd>{{ obra.factos.localExato }}</dd></div>
-        <div><dt>Cliente</dt><dd>{{ obra.factos.cliente }}</dd></div>
-        <div><dt>Duração</dt><dd>{{ obra.factos.duracao }}</dd></div>
+        {{#se obra.factos.data}}<div><dt>Data</dt><dd>{{ obra.factos.data }}</dd></div>{{/se}}
+        {{#se obra.factos.localExato}}<div><dt>Local exato</dt><dd>{{ obra.factos.localExato }}</dd></div>{{/se}}
+        {{#se obra.factos.cliente}}<div><dt>Cliente</dt><dd>{{ obra.factos.cliente }}</dd></div>{{/se}}
+        {{#se obra.factos.duracao}}<div><dt>Duração</dt><dd>{{ obra.factos.duracao }}</dd></div>{{/se}}
       </dl>
     </div>
   </div>

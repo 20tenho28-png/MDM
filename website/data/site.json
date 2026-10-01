@@ -1,6 +1,6 @@
 {
   "name": "MDM Assistência Técnica",
-  "legalName": "M.D.M. — Manuel Domingos Melancia, Lda",
+  "legalName": "M.D.M. - Manuel Domingos Melancia, Lda",
   "nif": "502 644 761",
   "vatID": "PT502644761",
   "founded": "1991",
@@ -14,9 +14,10 @@
   "address1": "Alameda dos Oceanos 108 A, Edifício Vila do Oriente",
   "address2": "1990-426 Lisboa · Parque das Nações",
   "hours": "2ª a 6ª, 8h–17h",
-  "certifications": "APIRAC · IMPIC",
-  "brands": ["Mitsubishi Electric", "Daikin", "Panasonic", "Midea", "LG", "Hitachi", "Climaveneta", "Vulcano", "France Air"],
+  "certifications": "APIRAC · IMPIC · Gases fluorados",
+  "brands": ["Midea", "Mitsubishi Electric", "Daikin", "France Air"],
   "wa": {
+    "geral": "Olá MDM. Gostava de pedir informação sobre um serviço. [P5 · Geral]",
     "avaria": "Olá MDM. Tenho uma avaria e envio já uma fotografia. [P4 · Avaria]",
     "montagem": "Olá MDM. Quero orçamento para instalar ar condicionado. Envio já fotografias do local. [P1 · Montagem AC]",
     "manutencao": "Olá MDM. Quero proposta de manutenção preventiva (contrato anual). [P2 · Manutenção preventiva]",

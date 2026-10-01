@@ -28,7 +28,7 @@
       <p class="texto-aco">{{ site.hours }}. Orçamento gratuito e sem compromisso.</p>
       <div class="p404-acoes">
         <a class="btn btn-tinta" data-lead="tel" href="{{ site.phoneHref }}">Ligar {{ site.phone }}</a>
-        <a class="btn btn-wa" data-lead="avaria" href="{{wa avaria}}" target="_blank" rel="noopener">WhatsApp {{ site.whatsapp }}</a>
+        <a class="btn btn-wa" data-lead="{{ page.wa }}" href="{{wa {{ page.wa }}}}" target="_blank" rel="noopener">WhatsApp {{ site.whatsapp }}</a>
       </div>
       <p><a href="mailto:{{ site.email }}" data-lead="email">{{ site.email }}</a></p>
     </div>

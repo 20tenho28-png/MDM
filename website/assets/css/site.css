@@ -353,9 +353,10 @@ html:not(.js) .topo-in > .menu-btn { display: none; }
 .cert-in { max-width: calc(var(--max) - 160px); margin: 0 auto; display: grid; gap: 32px; }
 @media (min-width: 1100px) { .cert-in { gap: 28px; } .cert-marcas { display: flex; align-items: baseline; gap: 28px; border-top: 1px solid var(--linha-2); padding-top: 20px; } .cert-marcas .marcas { margin: 0; } }
 .cert-selos { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 640px) { .cert-selos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Três selos (APIRAC, IMPIC, F-gas): um por linha até haver largura para os três lado a lado */
+@media (min-width: 900px) { .cert-selos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .selo { display: grid; grid-template-columns: 5.4em minmax(0, 1fr); gap: 14px; align-items: start; border-left: 3px solid var(--carmim); padding-left: 14px; }
-@media (min-width: 640px) and (max-width: 1099px) { .selo { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
+@media (min-width: 900px) and (max-width: 1099px) { .selo { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
 .selo-sigla { font-family: var(--sans); font-size: 17px; font-weight: 800; letter-spacing: .02em; white-space: nowrap; }
 .selo-txt { font-size: 15px; line-height: 1.45; color: var(--aco-2); }
 @media (min-width: 1100px) { .cert-selos { gap: 32px; } .selo { gap: 18px; grid-template-columns: auto minmax(0, 1fr); } .selo-sigla { font-size: 19px; } }
