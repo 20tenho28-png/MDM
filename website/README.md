@@ -16,13 +16,36 @@ Pré-visualizar: abrir `website/public/index.html` no browser, ou `python3 -m ht
 
 ## Publicar
 
-Qualquer alojamento estático serve, **servido na raiz do domínio** (a página 404 usa caminhos absolutos porque é mostrada em qualquer profundidade). Netlify: diretório base `website` (o `netlify.toml` já tem o comando e a pasta). Antes de publicar, trocar `baseUrl` em `data/site.json` pelo domínio final e ver a lista de `--faltam` (abaixo).
+Qualquer alojamento estático serve, **servido na raiz do domínio** (a página 404 usa caminhos absolutos porque é mostrada em qualquer profundidade). Netlify: diretório base `website` (o `netlify.toml` já tem o comando e a pasta). O domínio é `https://www.mdmassist.com.pt` (`baseUrl` em `data/site.json`): dele saem o endereço canónico, `og:url`, `og:image`, o mapa do site, o `robots.txt`, os dados estruturados, o cartão `mdm.vcf` e os códigos QR. Antes de publicar, ver a lista de `--faltam` (abaixo).
+
+### Pré-visualização (até ao lançamento)
+
+Enquanto `data/site.json` tiver `"preview": true`, o site pede aos motores de busca para não o indexar, em três sítios ao mesmo tempo:
+
+- `<meta name="robots" content="noindex">` em todas as páginas;
+- `public/_headers`, gerado pelo `build.py`, com `X-Robots-Tag: noindex` para todos os endereços (o Netlify junta-o aos cabeçalhos do `netlify.toml`, que não aceita condições);
+- `robots.txt` com `Disallow: /`.
+
+`--check` confirma que os três estão lá. A imagem de partilha só aparece no WhatsApp ou no Facebook quando o domínio já abrir este site.
+
+### Lançamento: desligar a pré-visualização
+
+1. Ligar `www.mdmassist.com.pt` (e o domínio sem `www`, a redirecionar para ele) ao projeto Netlify e esperar pelo certificado HTTPS. Não mexer nos registos de email do DNS.
+2. Em `data/site.json`, passar `"preview": true` a `"preview": false`. Mais nada muda: `robots.txt` passa a `Allow: /` com a linha `Sitemap:`, `_headers` deixa de ser gerado e as páginas voltam a `index,follow` (a 404 e a página das carrinhas continuam `noindex`, de propósito).
+3. `python3 website/build.py --check` tem de passar (falha se sobrar algum `noindex` ou se `baseUrl` não for o domínio final). Fazer commit e esperar pelo deploy.
+4. Confirmar: `curl -I https://www.mdmassist.com.pt/` já não mostra `X-Robots-Tag`, e `https://www.mdmassist.com.pt/robots.txt` mostra `Allow: /`.
+5. Na Google Search Console, enviar `https://www.mdmassist.com.pt/sitemap.xml`. No Perfil da Empresa no Google, pôr `https://www.mdmassist.com.pt` como site.
+6. Só agora gerar os códigos QR das carrinhas para a gráfica (secção seguinte).
+
+### Dados para o Google
+
+Todas as páginas levam a empresa em JSON-LD (`HVACBusiness` e `Electrician`): nome legal, NIF, morada, telefone, email, horário, área servida (Lisboa e Grande Lisboa), ano de fundação, logótipo, imagem, frase e a ligação ao Perfil da Empresa no Google (`googleMaps` em `data/site.json`, também no rodapé). Cada serviço tem ainda o seu `Service` com a lista do que inclui. Sem classificações nem número de avaliações: não as temos. A imagem de partilha (`assets/img/og-mdm.jpg`, 1200×630; nome novo porque `assets/img/` tem cache de um ano e a imagem antiga mostrava um técnico) mostra o logótipo, a frase, o telefone e o camião com a matrícula desfocada; as páginas de obra partilham a fotografia da obra.
 
 ## Estrutura
 
 | Onde | O quê |
 |---|---|
-| `data/site.json` | Contactos, horário, NIF, nome legal, marcas, mensagens de WhatsApp pré-preenchidas (com a etiqueta de triagem `[P1 · …]`). A barra do telemóvel, o rodapé e o contacto usam a mensagem da página: `wa` no `<!--meta-->` de cada serviço, `geral` nas outras |
+| `data/site.json` | Domínio (`baseUrl`), pré-visualização (`preview`), Perfil da Empresa no Google (`googleMaps`), contactos, horário, NIF, nome legal, marcas, mensagens de WhatsApp pré-preenchidas (com a etiqueta de triagem `[P1 · …]`). A barra do telemóvel, o rodapé e o contacto usam a mensagem da página: `wa` no `<!--meta-->` de cada serviço, `geral` nas outras |
 | `data/obras.json` | As 24 obras: título, especialidade, equipamento, texto, pormenores e factos (data, local exato, cliente, duração: só aparecem na ficha quando preenchidos) |
 | `data/dados-mdm.json` | Dados que só a MDM pode dar (números das certificações, testemunhos, perguntas por responder, privacidade). Vazio = escondido no site |
 | `src/templates/layout.html` | Cabeçalho `<head>`, recusa de medição, estrutura comum |
@@ -44,7 +67,7 @@ pip install segno
 python3 website/marketing/gerar_qr.py --carrinhas 3   # SVG à medida final em website/marketing/qr/
 ```
 
-Os códigos usam o `baseUrl` de `data/site.json`. **Trocar pelo domínio final antes de gerar os ficheiros para a gráfica**, e ler cada código com dois telemóveis antes de imprimir. `marketing/qr/` não entra no git.
+Os códigos usam o `baseUrl` de `data/site.json` (`https://www.mdmassist.com.pt`). **Gerar os ficheiros para a gráfica só depois do lançamento** (`"preview": false` e o domínio já a abrir o site novo; o script avisa enquanto o site estiver em pré-visualização), e ler cada código com dois telemóveis antes de imprimir. `marketing/qr/` não entra no git.
 
 A página oferece ainda `mdm.vcf`, o cartão de contacto para guardar no telemóvel, gerado a partir de `data/site.json`.
 

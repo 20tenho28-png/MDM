@@ -1,4 +1,6 @@
 # Netlify: base directory = website
+# Pré-visualização: o noindex (X-Robots-Tag) vem de public/_headers, gerado por build.py enquanto
+# data/site.json tiver "preview": true. No lançamento muda-se só esse valor (README.md, "Lançamento").
 [build]
   command = "python3 build.py --check"
   publish = "public"

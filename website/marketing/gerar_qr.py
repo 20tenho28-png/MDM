@@ -8,9 +8,10 @@ carrinha e de que lado veio.
     python3 website/marketing/gerar_qr.py                 # carrinha 01
     python3 website/marketing/gerar_qr.py --carrinhas 3   # carrinhas 01, 02 e 03
 
-O domínio vem de data/site.json (baseUrl). ANTES DE IMPRIMIR: trocar baseUrl pelo domínio
-final, gerar de novo e ler cada código com dois telemóveis diferentes. Um código impresso
-com o domínio errado não se corrige depois.
+O domínio vem de data/site.json (baseUrl, hoje https://www.mdmassist.com.pt). Gerar os códigos
+para a gráfica só depois do lançamento ("preview": false e o domínio já a abrir o site novo):
+gerar de novo e ler cada código com dois telemóveis diferentes. Um código impresso com o
+domínio errado não se corrige depois.
 """
 import argparse
 import json
@@ -68,5 +69,6 @@ if __name__ == "__main__":
     for nome, url, ver, mod, mm, codigo, total in feitos:
         print(f"  {nome:40s} v{ver} · {mod}×{mod} módulos de {mm} mm · código {codigo} mm · {total} mm com margem")
         print(f"  {'':40s} {url}")
-    if "manus.space" in SITE["baseUrl"]:
-        print("\nATENÇÃO: baseUrl ainda é o domínio provisório. Não mandar imprimir estes códigos.")
+    if SITE.get("preview") or "manus.space" in SITE["baseUrl"]:
+        print("\nATENÇÃO: o site ainda não foi lançado (\"preview\": true ou baseUrl provisório em data/site.json)."
+              "\nNão mandar imprimir estes códigos antes do lançamento.")

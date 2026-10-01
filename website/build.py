@@ -8,7 +8,8 @@ Só biblioteca padrão. Uso:
 
 Sintaxe dos modelos (src/):
     <!--meta {...json...} -->            no topo de cada página: title, description, file, nav, jsonld, css
-                                          (jsonld: business, faq, breadcrumb, servico; este lê "servico": {nome, tipo, ofertas})
+                                          (jsonld: faq, breadcrumb, servico; este lê "servico": {nome, tipo, ofertas};
+                                          a empresa, HVACBusiness, vai sempre em todas as páginas)
     {{ caminho.ponto }}                   valor de site.*, page.*, obra.*, root (prefixo relativo à raiz)
     {{> nome }}                           inclui src/partials/nome.html com o mesmo contexto
     {{foto NN sizes="..." class="..." loading="eager" alt="..."}}   <picture> webp + jpg da obra NN
@@ -18,6 +19,10 @@ Sintaxe dos modelos (src/):
     {{#se caminho}}…{{/se}}               só aparece se o valor existir e não estiver vazio (dados.*, obra.factos.*)
     {{#sem caminho}}…{{/sem}}             só aparece se o valor estiver vazio
     {{#cada caminho}}…{{/cada}}           repete o bloco por cada elemento da lista, com o elemento em {{ item }}
+
+Pré-visualização: "preview": true em data/site.json pede aos motores de busca para não indexar
+(meta robots noindex em todas as páginas, cabeçalho X-Robots-Tag em public/_headers, robots.txt Disallow).
+No lançamento passa a false: ver README.md, "Lançamento".
 
 Dados por preencher: data/dados-mdm.json. Um valor vazio esconde a frase, a linha ou a secção que o usa;
 nunca se mostra um [PLACEHOLDER] e --check falha se algum chegar a public/.
@@ -201,29 +206,43 @@ def render(text, ctx, depth=0):
     return text
 
 
-AREA_LD = {"@type": "Place", "name": "Grande Lisboa"}
+# os concelhos à volta de Lisboa ainda não foram confirmados pelo dono: fica "Grande Lisboa"
+AREA_LD = [{"@type": "City", "name": "Lisboa"}, {"@type": "AdministrativeArea", "name": "Grande Lisboa"}]
+PREVIEW = bool(SITE.get("preview"))
+# imagem de partilha (og-mdm.jpg): logótipo, frase, telefone e o camião com a matrícula desfocada
+OG_IMG = {"src": "og-mdm.jpg", "w": 1200, "h": 630,
+          "alt": f"MDM Assistência Técnica. Clima, ar e corrente. Desde {SITE['founded']}. Telefone {SITE['phone']}."}
 
 
 def business_ld():
+    """A empresa, igual em todas as páginas (Google: ficha da empresa, painel de conhecimento)."""
+    b = SITE["baseUrl"]
+    cp, cidade = SITE["address2"].split(" ", 1)[0], SITE["address2"].split(" ", 1)[1].split(" · ")[0]
     return {
         "@context": "https://schema.org",
         "@type": ["HVACBusiness", "Electrician"],
-        "@id": SITE["baseUrl"] + "/#mdm",
+        "@id": b + "/#mdm",
         "name": SITE["name"],
         "legalName": SITE["legalName"],
         "vatID": SITE["vatID"],
-        "url": SITE["baseUrl"],
-        "logo": SITE["baseUrl"] + "/assets/img/logo-mdm.svg",
-        "image": SITE["baseUrl"] + "/assets/img/og.jpg",
+        "taxID": SITE["nif"].replace(" ", ""),
+        "url": b + "/",
+        "logo": b + "/assets/img/logo-mdm.svg",
+        "image": [b + "/assets/img/" + OG_IMG["src"], b + "/assets/img/hero/mdm-plataforma-1200.jpg"],
+        "slogan": f"Clima, ar e corrente. Desde {SITE['founded']}.",
         "telephone": SITE["phoneE164"],
         "email": SITE["email"],
         "foundingDate": SITE["founded"],
-        "address": {"@type": "PostalAddress", "streetAddress": "Alameda dos Oceanos 108 A, Edifício Vila do Oriente",
-                    "postalCode": "1990-426", "addressLocality": "Lisboa", "addressCountry": "PT"},
+        "address": {"@type": "PostalAddress", "streetAddress": SITE["address1"],
+                    "postalCode": cp, "addressLocality": cidade, "addressCountry": "PT"},
         "areaServed": AREA_LD,
         "openingHoursSpecification": [{"@type": "OpeningHoursSpecification",
                                        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
                                        "opens": "08:00", "closes": "17:00"}],
+        "hasMap": SITE["googleMaps"],
+        "sameAs": [SITE["googleMaps"]],
+        "knowsAbout": ["Ar condicionado", "Multi-split", "Bombas de calor ar-água", "Manutenção AVAC",
+                       "Instalações elétricas", "Ventilação"],
     }
 
 
@@ -233,7 +252,7 @@ def servico_ld(meta):
     ld = {"@context": "https://schema.org", "@type": "Service", "name": s["nome"], "serviceType": s["tipo"],
           "description": meta["description"], "url": SITE["baseUrl"] + "/" + meta["file"], "areaServed": AREA_LD,
           "provider": {"@type": ["HVACBusiness", "Electrician"], "@id": SITE["baseUrl"] + "/#mdm",
-                       "name": SITE["name"], "url": SITE["baseUrl"], "telephone": SITE["phoneE164"]}}
+                       "name": SITE["name"], "url": SITE["baseUrl"] + "/", "telephone": SITE["phoneE164"]}}
     if s.get("ofertas"):
         ld["hasOfferCatalog"] = {"@type": "OfferCatalog", "name": s["nome"], "itemListElement": [
             {"@type": "Offer", "itemOffered": {"@type": "Service", "name": n}} for n in s["ofertas"]]}
@@ -264,6 +283,8 @@ def breadcrumb_ld(trail):
 def page_ctx(meta, file):
     # wa: mensagem de WhatsApp da barra do telemóvel, do rodapé e do contacto (site.wa.*); cada serviço usa a sua
     meta = {"preselect": "", "nav": "", "robots": "index,follow", "og": "", "wa": "geral", **meta}
+    if PREVIEW and "noindex" not in meta["robots"]:
+        meta["robots"] = "noindex"   # pré-visualização: nenhuma página entra no Google antes do lançamento
     depth = file.count("/")
     # a 404 é servida em qualquer profundidade (/obras/xyz.html): precisa de caminhos absolutos
     root = "/" if file == "404.html" else "../" * depth
@@ -277,11 +298,9 @@ def build_page(meta, body_tpl, extra_ctx=None):
     if extra_ctx:
         ctx.update(extra_ctx)
     body = render(body_tpl, ctx)
-    lds = []
+    lds = [business_ld()]
     for kind in meta.get("jsonld", []):
-        if kind == "business":
-            lds.append(business_ld())
-        elif kind == "faq":
+        if kind == "faq":
             f = faq_ld(body)
             if f:
                 lds.append(f)
@@ -294,7 +313,14 @@ def build_page(meta, body_tpl, extra_ctx=None):
         for x in lds)
     css = "".join(f'<link rel="stylesheet" href="{ctx["root"]}assets/css/{c}">\n' for c in meta.get("css", []))
     og = meta.get("og") or ""
-    ctx.update({"og_image": SITE["baseUrl"] + "/assets/img/" + ("obras/" + og if og else "og.jpg"),
+    if og:   # fotografia de uma obra: foto-NN-1600.jpg
+        o = OBRA_BY_N[re.match(r"foto-(\d+)-", og).group(1)]
+        w, h = (1600, 1200) if o["orient"] == "landscape" else (1200, 1600)
+        og_img = {"src": "obras/" + og, "w": w, "h": h, "alt": o["alt"]}
+    else:
+        og_img = OG_IMG
+    ctx.update({"og_image": SITE["baseUrl"] + "/assets/img/" + og_img["src"],
+                "og_w": og_img["w"], "og_h": og_img["h"], "og_alt": og_img["alt"],
                 "content": body, "jsonld": ld_html, "page_css": css,
                 "canonical": SITE["baseUrl"] + "/" + ("" if file == "index.html" else file)})
     layout = (SRC / "templates" / "layout.html").read_text(encoding="utf-8")
@@ -361,7 +387,14 @@ def build():
     (OUT / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
         + urls + "</urlset>\n", encoding="utf-8")
-    (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE['baseUrl']}/sitemap.xml\n", encoding="utf-8")
+    if PREVIEW:
+        # Netlify lê public/_headers e junta-o aos [[headers]] do netlify.toml (que não aceita condições)
+        (OUT / "robots.txt").write_text("# Pré-visualização: não indexar. No lançamento, \"preview\": false em data/site.json.\n"
+                                        "User-agent: *\nDisallow: /\n", encoding="utf-8")
+        (OUT / "_headers").write_text("# Pré-visualização: gerado por build.py a partir de \"preview\" em data/site.json\n"
+                                      "/*\n  X-Robots-Tag: noindex\n", encoding="utf-8")
+    else:
+        (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE['baseUrl']}/sitemap.xml\n", encoding="utf-8")
     return files
 
 
@@ -400,6 +433,7 @@ def check(files):
         if "{{" in sem_scripts or "}}" in sem_scripts:
             problems.append(f"{f}: sobra sintaxe de modelo {{{{ }}}}")
         problems += texto_proibido(f, text)
+        problems += check_cabeca(f, text)
         for a, b, c in REF_RE.findall(text):
             refs = [a] if a else ([s.strip().split()[0] for s in b.split(",")] if b else [c.strip("'\"")])
             for r in refs:
@@ -408,6 +442,7 @@ def check(files):
                 target = (OUT / r.lstrip("/")) if r.startswith("/") else (path.parent / r).resolve()
                 if not target.exists():
                     problems.append(f"{f}: referência partida → {r}")
+    problems += check_preview()
     for css in (OUT / "assets" / "css").glob("*.css"):
         for c in re.findall(r"url\(([^)]+)\)", css.read_text(encoding="utf-8")):
             c = c.strip("'\"")
@@ -419,6 +454,8 @@ def check(files):
     for extra in [*sorted((OUT / "assets" / "js").glob("*.js")), OUT / "mdm.vcf"]:
         problems += texto_proibido(str(extra.relative_to(OUT)), extra.read_text(encoding="utf-8"))
     print(f"{len(files)} páginas geradas em {OUT}")
+    if PREVIEW:
+        print("Pré-visualização: noindex em todas as páginas. No lançamento: \"preview\": false em data/site.json (README.md).")
     n = sum(1 for _ in em_falta())
     if n:
         print(f"\n{n} dados por preencher pela MDM, escondidos no site até lá: python3 website/build.py --faltam")
@@ -429,6 +466,48 @@ def check(files):
         return 1
     print("\nSem ligações ou recursos partidos.")
     return 0
+
+
+LD_RE = re.compile(r'<script type="application/ld\+json">(.*?)</script>', re.S)
+
+
+def check_cabeca(f, text):
+    """JSON-LD válido e com a empresa; robots de acordo com o modo; endereços absolutos que existem em public/."""
+    out = []
+    tipos = []
+    for bloco in LD_RE.findall(text):
+        try:
+            tipos.append(json.loads(bloco).get("@type"))
+        except json.JSONDecodeError as e:
+            out.append(f"{f}: JSON-LD inválido ({e})")
+    if ["HVACBusiness", "Electrician"] not in tipos:
+        out.append(f"{f}: falta o JSON-LD da empresa")
+    robots = re.search(r'<meta name="robots" content="([^"]*)"', text)
+    if PREVIEW and not (robots and "noindex" in robots.group(1)):
+        out.append(f"{f}: pré-visualização sem <meta name=\"robots\" content=\"noindex\">")
+    base = SITE["baseUrl"] + "/"
+    for prop in ("og:image", "og:url"):
+        m = re.search(r'<meta property="%s" content="([^"]*)"' % prop, text)
+        if not (m and m.group(1).startswith(base)):
+            out.append(f"{f}: {prop} fora de {base}")
+        elif prop == "og:image" and not (OUT / m.group(1)[len(base):]).exists():
+            out.append(f"{f}: og:image não existe → {m.group(1)}")
+    return out
+
+
+def check_preview():
+    """O modo de pré-visualização e o lançamento nunca ficam a meio caminho."""
+    robots = (OUT / "robots.txt").read_text(encoding="utf-8")
+    cab = OUT / "_headers"
+    tem_noindex = cab.exists() and "X-Robots-Tag: noindex" in cab.read_text(encoding="utf-8")
+    if PREVIEW:
+        return [] if ("Disallow: /\n" in robots and tem_noindex) else ["pré-visualização: falta Disallow em robots.txt ou X-Robots-Tag em _headers"]
+    out = []
+    if "Disallow: /\n" in robots or tem_noindex:
+        out.append("lançamento: robots.txt ou _headers ainda pedem para não indexar")
+    if not SITE["baseUrl"].startswith("https://") or "manus.space" in SITE["baseUrl"]:
+        out.append(f"lançamento: baseUrl não é o domínio final → {SITE['baseUrl']}")
+    return out
 
 
 def em_falta():
