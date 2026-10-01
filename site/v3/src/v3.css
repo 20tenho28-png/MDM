@@ -376,3 +376,73 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
   .gallery:has(> :nth-child(4):last-child) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .gallery:has(> :nth-child(4):last-child) > * { grid-column: auto; }
 }
+
+/* ── v3.3: fundos (01/10) ──
+   Técnicas de fundo só em CSS, sem imagens nem JS: papel de projeto (grelhas com linear-gradient),
+   ar quente e ar frio (radial-gradient a derivar devagar), grão (feTurbulence em SVG embutido),
+   linhas de temperatura (repeating-radial-gradient) e ventoinha (repeating-conic-gradient).
+   Tudo em pseudo-elementos atrás do conteúdo; só se anima transform. Sem movimento com reduced-motion. */
+.hero, .page-hero, .section--ink, .footer { position: relative; isolation: isolate; overflow: clip; }
+
+/* 1. Hero: papel de projeto. Quadrícula fina de 24px e linha mestra a cada 120px, a desvanecer para as margens. */
+.hero::before, .page-hero::before {
+  content: ''; position: absolute; inset: 0; z-index: -2; pointer-events: none;
+  background:
+    linear-gradient(to right, rgb(20 29 46 / .07) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(to bottom, rgb(20 29 46 / .07) 1px, transparent 1px) 0 0 / 120px 120px,
+    linear-gradient(to right, rgb(20 29 46 / .035) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(to bottom, rgb(20 29 46 / .035) 1px, transparent 1px) 0 0 / 24px 24px;
+  -webkit-mask-image: radial-gradient(ellipse 75% 70% at 72% 45%, #000 20%, transparent 78%);
+          mask-image: radial-gradient(ellipse 75% 70% at 72% 45%, #000 20%, transparent 78%);
+}
+/* 2. Hero: ar quente (carmim) e ar frio (azul) a circular devagar, como o que a MDM instala. */
+.hero::after, .page-hero::after {
+  content: ''; position: absolute; inset: -25%; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(closest-side at 70% 38%, rgb(163 7 17 / .10), transparent),
+    radial-gradient(closest-side at 30% 58%, rgb(64 118 196 / .11), transparent);
+  -webkit-mask-image: linear-gradient(to bottom, #000 50%, transparent 76%);
+          mask-image: linear-gradient(to bottom, #000 50%, transparent 76%);
+  animation: mdm-ar 22s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes mdm-ar {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50%  { transform: translate3d(-4%, 3%, 0) rotate(8deg); }
+  100% { transform: translate3d(3%, -2%, 0) rotate(-6deg); }
+}
+
+/* 3. Faixa escura ("Como funciona"): linhas de temperatura e grão. */
+.section--ink::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    repeating-radial-gradient(circle at 88% 12%, transparent 0 34px, rgb(232 155 138 / .07) 34px 35px),
+    radial-gradient(ellipse 60% 80% at 88% 12%, rgb(163 7 17 / .28), transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 90% at 88% 12%, #000 25%, transparent 75%);
+          mask-image: radial-gradient(ellipse 70% 90% at 88% 12%, #000 25%, transparent 75%);
+}
+.section--ink::after, .footer::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .14; mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+/* 4. Rodapé: ventoinha. Pás em repeating-conic-gradient, a rodar devagar no canto. */
+.footer::after {
+  content: ''; position: absolute; z-index: -1; pointer-events: none;
+  width: min(560px, 90vw); aspect-ratio: 1; right: max(-180px, -14vw); bottom: -200px; border-radius: 50%;
+  background:
+    radial-gradient(circle, rgb(250 249 245 / .07) 0 9%, transparent 9.5% 13%, rgb(250 249 245 / .04) 13.5% 14%, transparent 14.5%),
+    repeating-conic-gradient(from 0deg, rgb(250 249 245 / .05) 0deg 34deg, transparent 34deg 72deg);
+  -webkit-mask-image: radial-gradient(circle, #000 55%, transparent 71%);
+          mask-image: radial-gradient(circle, #000 55%, transparent 71%);
+  animation: mdm-ventoinha 48s linear infinite;
+  will-change: transform;
+}
+@keyframes mdm-ventoinha { to { transform: rotate(1turn); } }
+
+/* 5. Secções em papel: pontos de quadrícula muito discretos. */
+.section--paper { background-image: radial-gradient(circle at 1px 1px, rgb(20 29 46 / .075) 1px, transparent 1.5px); background-size: 22px 22px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero::after, .page-hero::after, .footer::after { animation: none; }
+}

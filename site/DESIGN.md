@@ -197,3 +197,11 @@ Botão (Primary carmim · Secondary contorno tinta · WhatsApp; Default/Hover, 4
 
 ### Tipografia: nota sobre o brief
 O brief pede "uma display com carácter + uma de texto muito legível". Mantém-se Geist (decisão do dono de 27/09): Geist 700 apertada faz o papel de display, Geist 400 a 17px o de texto. Se o dono quiser um contraste maior, a alternativa sem custos de licença é uma serifa de texto (ex.: Source Serif 4, OFL) só para o corpo; não aplicada.
+
+### Fundos (v3.3, 01/10/2026)
+Pedido do dono: fundos com efeitos CSS (referência: artigo da Prismic sobre efeitos de fundo em CSS; o artigo não pôde ser lido deste ambiente, por isso o código é próprio). Todos em pseudo-elementos atrás do conteúdo, sem imagens nem JS, só `transform` animado e sem movimento com `prefers-reduced-motion`:
+- **Hero** (home e páginas de serviço): papel de projeto (quadrícula de 24px com linha mestra a 120px, `linear-gradient`, a desvanecer com `mask-image`) e "ar quente / ar frio" (dois `radial-gradient`, carmim e azul, a derivar em 22 s).
+- **Faixa escura** ("Como funciona"): linhas de temperatura (`repeating-radial-gradient` no tom `--red-on-ink`) com brilho carmim e grão (`feTurbulence` em SVG embutido).
+- **Rodapé**: grão e uma ventoinha (`repeating-conic-gradient`) a rodar a 48 s no canto.
+- **Secções em papel**: pontos de quadrícula a 7,5% da tinta.
+Versão anterior: tag git `versao-01-sem-fundos`.
