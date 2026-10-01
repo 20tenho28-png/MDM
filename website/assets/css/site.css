@@ -241,6 +241,19 @@ body.menu-aberto { overflow: hidden; }
 @media (min-width: 1200px) and (min-aspect-ratio: 3/2) {
   .hero-retrato .hero-foto::after { background: linear-gradient(90deg, var(--gesso) 0%, rgba(244, 242, 237, .6) 4%, rgba(244, 242, 237, 0) 12%); }
 }
+/* Página inicial em ecrã deitado: a fotografia ocupa o ecrã todo, sem zoom.
+   A foto do camião é ao alto, por isso usa-se uma versão larga (mdm-plataforma-largo-*): a foto inteira à direita
+   e, à esquerda, a parede da própria foto esticada e desfocada, onde assenta o texto sobre um véu de gesso.
+   O media tem de ser igual ao das <source> largas em index.html. */
+@media (min-width: 700px) and (min-aspect-ratio: 4/3), (max-height: 520px) and (min-aspect-ratio: 3/2) {
+  .hero-retrato { --texto-max: min(620px, 46vw); }
+  .hero-retrato .hero-foto { left: 0; width: auto; background-image: url(data:image/webp;base64,UklGRrwAAABXRUJQVlA4ILAAAADwBACdASobABIAPuVcpk2pJSOiMAwBIByJZQDLpCLQGQaa+5dIffZY9bIB2bLotgAA4iAzJ1o5b9A251YEaBUo8tnc8CqTCMrwcq+ckrcerQlmY6NgRxN3io+GgTGJ1Ql3ucbDLdBVFCxBUTVJo13BRWW0Lt9X3QZdTjVUGRoMPIA9WP4WC+46hzwQ9/fwghrepeAQG5KIDY+CwKkdse5qOPLGMYFwHi/8gVjZyVXAAA==); }
+  .hero-retrato .hero-foto { background-position: 100% 62%; }
+  .hero-retrato .hero-foto picture.foto img { object-position: 100% 62%; }
+  /* véu: cobre a coluna de texto com folga e desaparece antes do camião */
+  .hero-retrato .hero-foto::after { background: linear-gradient(90deg, rgba(244, 242, 237, .92) 0%, rgba(244, 242, 237, .84) calc(var(--texto-x) + var(--texto-max)), rgba(244, 242, 237, 0) calc(var(--texto-x) + var(--texto-max) + 200px)); }
+  .hero-retrato .hero-acoes { max-width: none; }
+}
 
 /* ── Faixa de dados ── */
 .faixa { background: var(--tinta); color: var(--gesso); }
