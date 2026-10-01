@@ -69,12 +69,10 @@
     if (a) track('lead_click', { caminho: a.getAttribute('data-lead'), pagina: location.pathname });
   });
 
-  /* ═══ Ano corrente e anos de ofício ═══ */
+  /* ═══ Ano corrente ═══ */
   (function () {
     var y = new Date().getFullYear();
     if (y >= 2026) qsa('[data-ano-atual]').forEach(function (e) { e.textContent = y; });
-    var anos = y - 1991;
-    if (anos >= 35) qsa('[data-anos]').forEach(function (e) { e.textContent = anos; });
   })();
 
   /* ═══ Menu atual ═══ */

@@ -266,7 +266,7 @@ body.menu-aberto { overflow: hidden; }
 .faixa-item:hover { color: inherit; }
 @media (max-width: 999px) { .faixa-item:last-child:nth-child(odd) { grid-column: 1 / -1; border-right: 0; } }
 @media (min-width: 1000px) {
-  .faixa-in { grid-template-columns: repeat(5, minmax(0, 1fr)); min-height: 104px; }
+  .faixa-in { grid-template-columns: repeat(4, minmax(0, 1fr)); min-height: 104px; }
   .faixa-item { border-bottom: 0; border-right: 1px solid var(--linha-esc); padding: 28px 24px 24px; justify-content: center; }
   .faixa-item:first-child { padding-left: 0; }
   .faixa-item:last-child { border-right: 0; }
