@@ -146,6 +146,11 @@
     });
   })();
 
+  /* «Orçamento» numa página com o seu próprio formulário (serviços, carrinha): fica nesta página, com o serviço já escolhido */
+  if (document.getElementById('orcamento')) {
+    qsa('a[href$="index.html#orcamento"]').forEach(function (a) { a.setAttribute('href', '#orcamento'); });
+  }
+
   /* cliques nos caminhos de contacto: um evento com o nome do caminho */
   document.addEventListener('click', function (e) {
     var a = e.target.closest && e.target.closest('[data-lead]');
@@ -404,8 +409,9 @@
       trilho.scrollLeft = i * trilho.clientWidth;
       upd();
       d.querySelector('.visor-fechar').focus();
-      /* o "voltar" do telemóvel fecha o visor; a posição da página não salta para uma secção (#) ao voltar */
-      try { history.scrollRestoration = 'manual'; history.pushState({ visor: 1 }, ''); comHistorico = true; } catch (e) { comHistorico = false; }
+      /* o "voltar" do telemóvel fecha o visor; a posição da página não salta para uma secção (#) ao voltar.
+         'manual' depois do pushState: só na entrada do visor, para que a página, ao voltar da obra, reponha a posição */
+      try { history.pushState({ visor: 1 }, ''); history.scrollRestoration = 'manual'; comHistorico = true; } catch (e) { comHistorico = false; }
       track('visor_aberto', { fotografias: n, pagina: location.pathname });
     }
     function fecha() { if (d.open) d.close(); }

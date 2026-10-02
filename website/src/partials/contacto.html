@@ -25,7 +25,7 @@
            e o Netlify mostra obrigado.html; com JavaScript, site.js valida e envia sem sair da página.
            O browser só valida sozinho sem JavaScript: site.js desliga essa validação e usa a sua. -->
       <form id="quoteForm" name="orcamento" method="POST" action="/obrigado.html" enctype="multipart/form-data"
-            data-netlify="true" netlify-honeypot="empresa_web" data-preselect="{{ page.preselect }}" aria-labelledby="quoteTitle">
+            data-netlify="true" netlify-honeypot="bot-field" data-preselect="{{ page.preselect }}" aria-labelledby="quoteTitle">
         <input type="hidden" name="form-name" value="orcamento">
         <input type="hidden" name="subject" value="Pedido de orçamento MDM" data-assunto>
         <input type="hidden" name="pagina" value="{{ _file }}">
@@ -72,7 +72,7 @@
           <p class="campo-ajuda" id="hFoto">Da máquina, da avaria ou do sítio onde imagina o equipamento.</p>
           <p class="campo-erro" id="eFoto"></p>
         </div>
-        <div class="hp" aria-hidden="true"><label for="qGotcha">Não preencher</label><input id="qGotcha" name="empresa_web" type="text" tabindex="-1" autocomplete="off"></div>
+        <div class="hp" aria-hidden="true"><label for="qGotcha">Não preencher</label><input id="qGotcha" name="bot-field" type="text" tabindex="-1" autocomplete="off"></div>
         <p class="form-nota">* obrigatório: o nome e um contacto (email ou telefone). Usamos os seus dados só para responder ao pedido: ver a <a href="{{ root }}privacidade.html">política de privacidade</a>.</p>
         <div class="form-alerta" id="quoteAlert" role="status" aria-live="polite"></div>
         <div class="form-btns">

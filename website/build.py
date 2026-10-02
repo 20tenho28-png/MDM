@@ -448,10 +448,10 @@ REF_RE = re.compile(r'(?:href|src|action)="([^"#?]+)|srcset="([^"]+)"|url\(([^)]
 # Netlify Forms: o formulário de orçamento tem de chegar ao HTML gerado com o nome, os campos escondidos,
 # a armadilha para robôs e o campo da fotografia, e ser igual em todas as páginas (o Netlify regista um só "orcamento").
 FORM_RE = re.compile(r'<form\b[^>]*\bid="quoteForm"[^>]*>.*?</form>', re.S)
-FORM_EXIGE = [' name="orcamento"', ' method="POST"', ' data-netlify="true"', ' netlify-honeypot="empresa_web"',
+FORM_EXIGE = [' name="orcamento"', ' method="POST"', ' data-netlify="true"', ' netlify-honeypot="bot-field"',
               ' enctype="multipart/form-data"', ' action="/obrigado.html"']
 FORM_CAMPOS = {"form-name", "subject", "pagina", "triagem", "origem", "nome", "email", "telefone", "servico",
-               "mensagem", "fotografia", "empresa_web"}
+               "mensagem", "fotografia", "bot-field"}
 
 
 def texto_proibido(nome, text):
