@@ -17,7 +17,7 @@ Sintaxe dos modelos (src/):
     {{wa chave}}                          ligação de WhatsApp com a mensagem pré-preenchida site.wa.chave
     {{li obra.detalhes}}                  um <li> por texto de uma lista
     {{each parcial NN,NN,...}} / {{each parcial all}} / {{each parcial cat=vent}} / {{each parcial ctx:related}}   repete um parcial por obra
-                                          (… eager8 no fim: as 8 primeiras imagens sem lazy)
+                                          (… eagerN no fim: as N primeiras imagens sem lazy, ex.: eager1)
     {{#se caminho}}…{{/se}}               só aparece se o valor existir e não estiver vazio (dados.*, obra.factos.*)
     {{#sem caminho}}…{{/sem}}             só aparece se o valor estiver vazio
     {{#cada caminho}}…{{/cada}}           repete o bloco por cada elemento da lista, com o elemento em {{ item }}
@@ -125,7 +125,8 @@ def wa(ctx, key):
 def each(ctx, args):
     name, sel = args.split(None, 1)
     sel = sel.strip()
-    # " eagerN": as N primeiras imagens estão no primeiro ecrã e não esperam (ex.: grelha de obras.html);
+    # " eagerN": as N primeiras imagens não esperam (ex.: eager1 na grelha de obras.html). No telemóvel só a
+    # primeira cabe no primeiro ecrã e o lazy do browser já traz as seguintes, por isso N > 1 só pesa mais;
     # só a primeira, a maior candidata a LCP, leva fetchpriority="high"
     m = re.search(r"\s+eager(\d+)$", sel)
     eager = int(m.group(1)) if m else 0
