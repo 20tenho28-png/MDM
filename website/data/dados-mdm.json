@@ -27,7 +27,7 @@
   },
   "testemunhos": {
     "grupo": "Prova",
-    "pedido": "Testemunhos reais de clientes, com autorização por escrito. Lista de {\"texto\": \"…\", \"nome\": \"nome ou cargo\", \"tipo\": \"tipo de cliente · local\"}. Sem testemunhos, a secção não aparece",
+    "pedido": "Testemunhos reais de clientes, com autorização por escrito. Lista de {\"texto\": \"…\", \"nome\": \"nome ou cargo\", \"tipo\": \"tipo de cliente · local\"}; o «tipo» é opcional e pode ficar de fora. Sem testemunhos, a secção não aparece",
     "valor": []
   },
   "clientesNomeaveis": {
@@ -42,7 +42,7 @@
   },
   "duracaoMontagem": {
     "grupo": "Serviços",
-    "pedido": "Duração típica da montagem de um split e de um multi-split, numa frase completa (sem ela, a pergunta «Quanto tempo demora a montagem?» não aparece)",
+    "pedido": "Duração típica da montagem de um split e de um multi-split, numa frase completa: quanto tempo leva o trabalho, não em quanto tempo a MDM chega (sem ela, a pergunta «Quanto tempo demora a montagem?» não aparece)",
     "valor": ""
   },
   "planoManutencao": {

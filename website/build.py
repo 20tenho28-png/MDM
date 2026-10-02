@@ -49,6 +49,11 @@ OBRAS = OBRAS_DATA["obras"]
 OBRA_BY_N = {o["n"]: o for o in OBRAS}
 DADOS_DOC = json.loads((DATA / "dados-mdm.json").read_text(encoding="utf-8"))
 DADOS = {k: v["valor"] for k, v in DADOS_DOC.items() if not k.startswith("_")}
+# testemunhos: "tipo" é opcional (sem ele, só o nome); texto e nome em falta são erro de --check, não do modelo
+for _t in DADOS.get("testemunhos") or []:
+    if isinstance(_t, dict):
+        for _c in ("texto", "nome", "tipo"):
+            _t.setdefault(_c, "")
 DADOS_USO = {}   # chave de dados-mdm.json → páginas onde entra (para --faltam)
 # campos de "factos" de cada obra em obras.json: vazios, a linha não aparece na ficha
 FACTOS_OBRA = {"data": "Data da obra", "localExato": "Local exato (bairro ou concelho, sem nome do cliente)",
@@ -436,10 +441,11 @@ def build():
 PLACEHOLDER_RE = re.compile(r"\[(?!P\d ·)[^\[\]<>\"']*?[A-ZÀ-Ý]{3}[^\[\]<>\"']*\]|\[\[[^\]]*\]\]"
                             r"|(?i:\b(?:por preencher|lorem ipsum)\b)")
 # Decisões do dono (AUDIT.md da v3, 27/09/2026): nada disto volta ao site, nem em meta, JSON-LD ou mensagens de WhatsApp.
+PRAZO = (re.compile(r"\b\d+\s*(?:h|horas)\s+úteis|\b(?:24|48)\s*(?:h|horas)\b|\b\d+\s*(?:a|–|-)\s*\d+\s*(?:h|horas)\b"
+                    r"|mesmo dia|\b\d+\s*minutos\b", re.I),
+         "promessa de prazo de resposta (retiradas pelo dono)")
 PROIBIDO = [
-    (re.compile(r"\b\d+\s*(?:h|horas)\s+úteis|\b(?:24|48)\s*(?:h|horas)\b|\b\d+\s*(?:a|–|-)\s*\d+\s*(?:h|horas)\b"
-                r"|mesmo dia|\b\d+\s*minutos\b", re.I),
-     "promessa de prazo de resposta (retiradas pelo dono)"),
+    PRAZO,
     (re.compile(r"\b[34]\d\s+anos\b"), "idade da empresa: só «1991», nunca «N anos»"),
     (re.compile(r"\b(?:LG|Hitachi|Vulcano|Panasonic|Climaveneta)\b"),
      "marca fora da lista do dono (Midea, Mitsubishi Electric, Daikin, France Air)"),
@@ -455,13 +461,43 @@ FORM_CAMPOS = {"form-name", "subject", "pagina", "triagem", "origem", "nome", "e
                "mensagem", "fotografia", "bot-field"}
 
 
+# Durações dadas pela MDM (quanto tempo leva o trabalho, de quanto em quanto tempo se faz a visita): são factos,
+# não prazos de resposta. A regra dos prazos não as lê no site (as outras regras sim); check_duracoes() vê-as à parte.
+DURACOES = {**{f"dados-mdm.json «{k}»": DADOS.get(k, "")
+               for k in ("duracaoMontagem", "periodicidadeVisitas", "periodicidadeVentilacao")},
+            **{f"obras.json «factos.duracao» da obra {o['n']}": o.get("factos", {}).get("duracao", "") for o in OBRAS}}
+# uma duração que fala em responder, chegar ou atender é um prazo de resposta disfarçado
+RESPOSTA_RE = re.compile(r"\b(?:respo\w*|cheg\w*|atend\w*|desloc\w*|urgênc\w*)", re.I)
+
+
+def sem_duracoes(t):
+    for v in DURACOES.values():
+        if not isinstance(v, str) or not v.strip():
+            continue
+        for forma in {v, re.sub(r"\s+", " ", v).strip(), json.dumps(v, ensure_ascii=False)[1:-1]}:
+            t = t.replace(forma, " ")
+    return t
+
+
+def check_duracoes():
+    return [f"{onde}: {PRAZO[1]} → «{v}»" for onde, v in DURACOES.items()
+            if isinstance(v, str) and PRAZO[0].search(v) and RESPOSTA_RE.search(v)]
+
+
 def texto_proibido(nome, text):
     """Placeholders e frases retiradas pelo dono, também dentro de ligações (WhatsApp), meta e JSON-LD."""
     t = unquote(html.unescape(re.sub(r"<!--.*?-->", "", text, flags=re.S)))
     out = [f"{nome}: placeholder visível → {m}" for m in sorted(set(PLACEHOLDER_RE.findall(t)))]
     for rx, porque in PROIBIDO:
-        out += [f"{nome}: {porque} → «{m}»" for m in sorted(set(rx.findall(t)))]
+        alvo = sem_duracoes(t) if (rx, porque) == PRAZO else t
+        out += [f"{nome}: {porque} → «{m}»" for m in sorted(set(rx.findall(alvo)))]
     return out
+
+
+def check_testemunhos():
+    return [f"dados-mdm.json «testemunhos» n.º {i}: falta o texto ou o nome (o tipo é opcional)"
+            for i, t in enumerate(DADOS.get("testemunhos") or [], 1)
+            if not isinstance(t, dict) or not tem(t.get("texto", "")) or not tem(t.get("nome", ""))]
 
 
 def check(files):
@@ -484,6 +520,7 @@ def check(files):
                 if not target.exists():
                     problems.append(f"{f}: referência partida → {r}")
     problems += check_preview()
+    problems += check_duracoes() + check_testemunhos()
     for css in (OUT / "assets" / "css").glob("*.css"):
         for c in re.findall(r"url\(([^)]+)\)", css.read_text(encoding="utf-8")):
             c = c.strip("'\"")
