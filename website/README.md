@@ -46,7 +46,7 @@ Todas as páginas levam a empresa em JSON-LD (`HVACBusiness` e `Electrician`): n
 | Onde | O quê |
 |---|---|
 | `data/site.json` | Domínio (`baseUrl`), pré-visualização (`preview`), Perfil da Empresa no Google (`googleMaps`), contactos, horário, NIF, nome legal, marcas, mensagens de WhatsApp pré-preenchidas (com a etiqueta de triagem `[P1 · …]`). A barra do telemóvel, o rodapé e o contacto usam a mensagem da página: `wa` no `<!--meta-->` de cada serviço, `geral` nas outras |
-| `data/obras.json` | As 24 obras: título, especialidade, equipamento, texto, pormenores e factos (data, local exato, cliente, duração: só aparecem na ficha quando preenchidos) |
+| `data/obras.json` | As 24 obras: título, especialidade, equipamento, texto, pormenores e factos (data, local exato, cliente, duração: só aparecem na ficha quando preenchidos) e, se a fotografia ficar mal cortada no cartão, `foco` (ex.: `"50% 22%"`, o ponto que fica à vista) |
 | `data/dados-mdm.json` | Dados que só a MDM pode dar (números das certificações, testemunhos, perguntas por responder, privacidade). Vazio = escondido no site |
 | `src/templates/layout.html` | Cabeçalho `<head>`, estrutura comum (topo, barra das estatísticas, rodapé, barra do telemóvel) |
 | `src/partials/` | Cabeçalho e menu em gaveta, rodapé (com a política de privacidade e o Livro de Reclamações Eletrónico), barra fixa do telemóvel, barra das estatísticas (`consentimento.html`), contacto + formulário, certificações, testemunhos, cartões de obra |

@@ -109,6 +109,8 @@ def foto(ctx, args):
     sizes = f"{FOTO_3X} calc({estreito} * 2 / 3), {sizes}"
     loading = attrs.get("loading", "lazy")
     cls = ("foto " + attrs.get("class", "")).strip()
+    # "foco" em obras.json: o ponto da fotografia que fica à vista quando o cartão a corta (object-position)
+    foco = f' style="object-position: {o["foco"]}"' if o.get("foco") else ""
     # eager leva fetchpriority="high", salvo prioridade="normal" (imagens no primeiro ecrã que não são a principal)
     extra = ' fetchpriority="high"' if loading == "eager" and attrs.get("prioridade") != "normal" else ""
 
@@ -118,7 +120,7 @@ def foto(ctx, args):
         f'<picture class="{cls}">'
         + f'<source type="image/avif" srcset="{srcset("avif")}" sizes="{sizes}">'
         + f'<source type="image/webp" srcset="{srcset("webp")}" sizes="{sizes}">'
-        + f'<img src="{base}-1600.jpg" alt="{html.escape(alt, quote=True)}" width="{w}" height="{h}" '
+        + f'<img src="{base}-1600.jpg" alt="{html.escape(alt, quote=True)}" width="{w}" height="{h}"{foco} '
         + f'loading="{loading}" decoding="async"{extra}></picture>'
     )
 
