@@ -68,7 +68,7 @@ python3 website/gerar_fotos.py        # só o que falta; --todas refaz tudo; 31 
 
 O `{{foto NN …}}` do `build.py` escreve um `<picture>` com os três formatos, `width`/`height` e um `sizes` à medida de cada sítio (cartão, carrossel, topo de serviço, página da obra). O browser escolhe o tamanho; o visor de ecrã inteiro pede outro, à medida do ecrã. Nos telemóveis com ecrã de 3x pede-se a imagem de 2x, como no topo da página inicial: à vista é igual e pesa metade. Só as imagens do primeiro ecrã carregam logo (`loading="eager"`; na grelha de `obras.html` as 8 primeiras); as outras esperam pela rolagem.
 
-Uma obra nova: pôr o `foto-NN-1600.jpg` na pasta, correr `gerar_fotos.py` e depois `build.py --check`, que falha se faltar algum tamanho. Na página inicial, num telemóvel, as fotografias pesam cerca de 0,7 MB (antes 2,5 MB).
+Enquanto uma fotografia descarrega, o cartão mostra uma prévia de 16 px da mesma fotografia (`data/lqip.json`, feita pelo `gerar_fotos.py`), em vez de um rectângulo vazio. Uma obra nova: pôr o `foto-NN-1600.jpg` na pasta, correr `gerar_fotos.py` e depois `build.py --check`, que falha se faltar algum tamanho. Na página inicial, num telemóvel, as fotografias pesam cerca de 0,7 MB (antes 2,5 MB).
 
 ## Formulário de orçamento (Netlify Forms)
 

@@ -47,6 +47,8 @@ SITE = json.loads((DATA / "site.json").read_text(encoding="utf-8"))
 OBRAS_DATA = json.loads((DATA / "obras.json").read_text(encoding="utf-8"))
 OBRAS = OBRAS_DATA["obras"]
 OBRA_BY_N = {o["n"]: o for o in OBRAS}
+# prévias de 16 px das fotografias (gerar_fotos.py): ficam por trás da fotografia enquanto descarrega; sem o ficheiro, nada
+LQIP = json.loads((DATA / "lqip.json").read_text(encoding="utf-8")) if (DATA / "lqip.json").exists() else {}
 DADOS_DOC = json.loads((DATA / "dados-mdm.json").read_text(encoding="utf-8"))
 DADOS = {k: v["valor"] for k, v in DADOS_DOC.items() if not k.startswith("_")}
 # testemunhos: "tipo" é opcional (sem ele, só o nome); texto e nome em falta são erro de --check, não do modelo
@@ -111,13 +113,14 @@ def foto(ctx, args):
     cls = ("foto " + attrs.get("class", "")).strip()
     # "foco" em obras.json: o ponto da fotografia que fica à vista quando o cartão a corta (object-position)
     foco = f' style="object-position: {o["foco"]}"' if o.get("foco") else ""
+    previa = f' style="--lqip: url({LQIP[n]}){"; --lqip-pos: " + o["foco"] if o.get("foco") else ""}"' if n in LQIP else ""
     # eager leva fetchpriority="high", salvo prioridade="normal" (imagens no primeiro ecrã que não são a principal)
     extra = ' fetchpriority="high"' if loading == "eager" and attrs.get("prioridade") != "normal" else ""
 
     def srcset(ext):
         return ", ".join(f"{base}-{lado}.{ext} {w * lado // 1600}w" for lado in FOTO_LADOS)
     return (
-        f'<picture class="{cls}">'
+        f'<picture class="{cls}"{previa}>'
         + f'<source type="image/avif" srcset="{srcset("avif")}" sizes="{sizes}">'
         + f'<source type="image/webp" srcset="{srcset("webp")}" sizes="{sizes}">'
         + f'<img src="{base}-1600.jpg" alt="{html.escape(alt, quote=True)}" width="{w}" height="{h}"{foco} '
