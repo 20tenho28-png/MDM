@@ -122,7 +122,10 @@
     consent.addEventListener('focusout', function () { setTimeout(consentRecolhe, 0); });
     consent.addEventListener('click', function (e) {
       var b = e.target.closest && e.target.closest('[data-consent-escolha]');
-      if (b) defineEscolha(b.getAttribute('data-consent-escolha'));
+      if (!b) return;
+      var guardada = defineEscolha(b.getAttribute('data-consent-escolha'));
+      /* a política de privacidade (privacidade.js) atualiza a sua caixa «A sua escolha neste browser» */
+      try { document.dispatchEvent(new CustomEvent('mdm-estatisticas', { detail: { guardada: guardada } })); } catch (er) {}
     });
     mede();
   })();

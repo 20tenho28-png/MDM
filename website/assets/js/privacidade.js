@@ -25,6 +25,8 @@ document.addEventListener('DOMContentLoaded', function () {
   botoes.forEach(function (b) {
     b.addEventListener('click', function () { mostra(true, api.define(b.getAttribute('data-est'))); });
   });
+  /* escolha feita na barra de baixo (site.js), que também aparece nesta página */
+  document.addEventListener('mdm-estatisticas', function (e) { mostra(true, e.detail && e.detail.guardada); });
   acoes.hidden = false;
   mostra(false);
 });
