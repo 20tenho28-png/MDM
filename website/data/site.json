@@ -18,6 +18,17 @@
   "hours": "2ª a 6ª, 8h–17h",
   "certifications": "APIRAC · IMPIC · Gases fluorados",
   "brands": ["Midea", "Mitsubishi Electric", "Daikin", "France Air"],
+  "btu": {
+    "porM2": 400,
+    "tipos": {"Quarto": 1.0, "Sala": 1.1, "Cozinha": 1.25, "Escritório": 1.15, "Outra divisão": 1.0},
+    "sol": 1.15,
+    "ultimoAndar": 1.10,
+    "tamanhos": [7000, 9000, 12000, 18000, 24000],
+    "btuPorKw": 3412,
+    "areaMin": 2,
+    "areaMax": 200,
+    "maxDivisoes": 8
+  },
   "wa": {
     "geral": "Olá MDM. Gostava de pedir informação sobre um serviço. [P5 · Geral]",
     "avaria": "Olá MDM. Tenho uma avaria e envio já uma fotografia. [P4 · Avaria]",

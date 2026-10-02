@@ -20,3 +20,7 @@
 @media (max-width: 559px) {
   .serv-mais .btn { width: 100%; }
 }
+
+/* Ar condicionado: ligação para a estimativa de potência no formulário desta página (só com JavaScript) */
+.faq-pot { margin-top: 18px; max-width: 420px; font-family: var(--sans); font-size: 16px; font-weight: 600; line-height: 1.45; }
+.faq-pot a { display: inline-block; padding: 4px 0; }

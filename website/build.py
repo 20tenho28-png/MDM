@@ -459,7 +459,7 @@ REF_RE = re.compile(r'(?:href|src|action)="([^"#?]+)|srcset="([^"]+)"|url\(([^)]
 FORM_RE = re.compile(r'<form\b[^>]*\bid="quoteForm"[^>]*>.*?</form>', re.S)
 FORM_EXIGE = [' name="orcamento"', ' method="POST"', ' data-netlify="true"', ' netlify-honeypot="bot-field"',
               ' enctype="multipart/form-data"', ' action="/obrigado.html"']
-FORM_CAMPOS = {"form-name", "subject", "pagina", "triagem", "origem", "nome", "email", "telefone", "servico",
+FORM_CAMPOS = {"form-name", "subject", "pagina", "triagem", "origem", "potencia", "nome", "email", "telefone", "servico",
                "mensagem", "fotografia", "bot-field"}
 
 
@@ -522,7 +522,7 @@ def check(files):
                 if not target.exists():
                     problems.append(f"{f}: referência partida → {r}")
     problems += check_preview()
-    problems += check_duracoes() + check_testemunhos()
+    problems += check_duracoes() + check_testemunhos() + check_btu()
     for css in (OUT / "assets" / "css").glob("*.css"):
         for c in re.findall(r"url\(([^)]+)\)", css.read_text(encoding="utf-8")):
             c = c.strip("'\"")
@@ -591,6 +591,30 @@ def check_formulario(f, text):
         out.append(f"{f}: falta o campo escondido form-name=orcamento")
     if not re.search(r'<input[^>]*name="fotografia"[^>]*type="file"[^>]*accept="image/\*"', form):
         out.append(f"{f}: falta o campo da fotografia (type=file, accept=image/*)")
+    if not re.search(r'<input type="hidden" name="potencia" value=""', form):
+        out.append(f"{f}: falta o campo escondido potencia (vazio; site.js põe lá a estimativa de potência)")
+    if "data-btu=" not in form:
+        out.append(f"{f}: falta a estimativa de potência (data-btu) no formulário")
+    return out
+
+
+def check_btu():
+    """Os números da estimativa de potência (site.json «btu»), que o dono pode mudar: todos positivos e coerentes."""
+    b, out = SITE.get("btu"), []
+    num = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0
+    if not isinstance(b, dict):
+        return ["site.json: falta «btu» (estimativa de potência do formulário)"]
+    for k in ("porM2", "sol", "ultimoAndar", "btuPorKw", "areaMin", "areaMax", "maxDivisoes"):
+        if not num(b.get(k)):
+            out.append(f"site.json «btu.{k}»: tem de ser um número maior do que zero")
+    tipos = b.get("tipos")
+    if not (isinstance(tipos, dict) and tipos and all(num(v) for v in tipos.values())):
+        out.append("site.json «btu.tipos»: lista de tipos de divisão, cada um com um fator maior do que zero")
+    t = b.get("tamanhos")
+    if not (isinstance(t, list) and t and all(num(x) for x in t) and t == sorted(set(t))):
+        out.append("site.json «btu.tamanhos»: tamanhos de aparelho em BTU/h, do mais pequeno para o maior, sem repetir")
+    if not out and b["areaMin"] >= b["areaMax"]:
+        out.append("site.json «btu»: areaMin tem de ser menor do que areaMax")
     return out
 
 

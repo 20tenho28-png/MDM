@@ -45,7 +45,7 @@ Todas as páginas levam a empresa em JSON-LD (`HVACBusiness` e `Electrician`): n
 
 | Onde | O quê |
 |---|---|
-| `data/site.json` | Domínio (`baseUrl`), pré-visualização (`preview`), Perfil da Empresa no Google (`googleMaps`), contactos, horário, NIF, nome legal, marcas, mensagens de WhatsApp pré-preenchidas (com a etiqueta de triagem `[P1 · …]`). A barra do telemóvel, o rodapé e o contacto usam a mensagem da página: `wa` no `<!--meta-->` de cada serviço, `geral` nas outras |
+| `data/site.json` | Domínio (`baseUrl`), pré-visualização (`preview`), Perfil da Empresa no Google (`googleMaps`), contactos, horário, NIF, nome legal, marcas, mensagens de WhatsApp pré-preenchidas (com a etiqueta de triagem `[P1 · …]`), números da estimativa de potência do formulário (`btu`). A barra do telemóvel, o rodapé e o contacto usam a mensagem da página: `wa` no `<!--meta-->` de cada serviço, `geral` nas outras |
 | `data/obras.json` | As 24 obras: título, especialidade, equipamento, texto, pormenores e factos (data, local exato, cliente, duração: só aparecem na ficha quando preenchidos) e, se a fotografia ficar mal cortada no cartão, `foco` (ex.: `"50% 22%"`, o ponto que fica à vista) |
 | `data/dados-mdm.json` | Dados que só a MDM pode dar (números das certificações, testemunhos, perguntas por responder, privacidade). Vazio = escondido no site |
 | `src/templates/layout.html` | Cabeçalho `<head>`, estrutura comum (topo, barra das estatísticas, rodapé, barra do telemóvel) |
@@ -53,7 +53,7 @@ Todas as páginas levam a empresa em JSON-LD (`HVACBusiness` e `Electrician`): n
 | `src/pages/` | Página inicial, obras, 5 serviços (ar condicionado, bombas de calor, manutenção, eletricidade, ventilação), privacidade, 404, página do QR das carrinhas, `obrigado.html` (depois de enviar o formulário sem JavaScript). Cada serviço descreve-se no `<!--meta-->` em `servico` (nome, tipo e ofertas) para os dados estruturados `Service` |
 | `src/templates/obra.html` | Modelo das 24 páginas de obra (`obras/<slug>.html`) |
 | `assets/css/site.css` | Sistema visual completo e movimento |
-| `assets/js/site.js` | Estatísticas (PostHog UE, sem cookies, só depois de «Aceitar»), formulário (envio para o Netlify), gaveta, carrossel, filtros, revelação |
+| `assets/js/site.js` | Estatísticas (PostHog UE, sem cookies, só depois de «Aceitar»), formulário (envio para o Netlify, estimativa de potência), gaveta, carrossel, filtros, revelação |
 | `assets/fonts/` | Archivo e Newsreader alojadas no site (licença OFL incluída): nenhum pedido ao Google |
 | `assets/img/obras/` | Fotografias com correção de cor ligeira: o original `foto-NN-1600.jpg` e os tamanhos 400 a 1600 em AVIF e WebP (ver «Fotografias das obras») |
 | `gerar_fotos.py` | Faz os tamanhos AVIF e WebP das fotografias a partir do JPEG de 1600 |
@@ -87,12 +87,13 @@ A página oferece ainda `mdm.vcf`, o cartão de contacto para guardar no telemó
 
 ## Formulário de orçamento (Netlify Forms)
 
-O formulário (`src/partials/contacto.html`, em todas as páginas que o têm) é um formulário Netlify com o nome `orcamento`. O Netlify encontra-o no HTML gerado e guarda cada pedido em **Forms** no painel do projeto. Campos: `nome`, `email`, `telefone`, `servico`, `mensagem`, `fotografia` (opcional, uma imagem até 8 MB, o limite do Netlify por pedido) e os escondidos `pagina` (de onde foi enviado), `triagem` (`[P1 · Montagem AC]`…), `origem` (a carrinha, em `carrinha.html`) e `subject` (o assunto do email de aviso, com a triagem). `bot-field` é a armadilha para robôs (`netlify-honeypot`). `--check` falha se o formulário de alguma página perder um destes campos ou atributos.
+O formulário (`src/partials/contacto.html`, em todas as páginas que o têm) é um formulário Netlify com o nome `orcamento`. O Netlify encontra-o no HTML gerado e guarda cada pedido em **Forms** no painel do projeto. Campos: `nome`, `email`, `telefone`, `servico`, `mensagem`, `fotografia` (opcional, uma imagem até 8 MB, o limite do Netlify por pedido) e os escondidos `pagina` (de onde foi enviado), `triagem` (`[P1 · Montagem AC]`…), `origem` (a carrinha, em `carrinha.html`), `potencia` (a estimativa de potência, se o visitante a juntar) e `subject` (o assunto do email de aviso, com a triagem). `bot-field` é a armadilha para robôs (`netlify-honeypot`). `--check` falha se o formulário de alguma página perder um destes campos ou atributos.
 
 - **Com JavaScript**, `site.js` valida (nome e um email ou telefone; fotografia até 8 MB e só imagens), envia para `/` sem sair da página e mostra a confirmação no próprio formulário, sem prazos. Se o envio falhar (rede, tempo, serviço), nada se apaga: a mensagem oferece telefone e WhatsApp, este já com o pedido escrito.
 - **Sem JavaScript**, o envio é normal e o Netlify mostra `obrigado.html` (fora do mapa do site, `noindex`).
 - O botão **Enviar por WhatsApp** continua ao lado, com o mesmo pedido validado; a fotografia junta-se na conversa.
 - No ficheiro único para o cliente (aberto do disco, sem servidor), o formulário volta ao email do visitante e ao WhatsApp, e o campo da fotografia não aparece.
+- **«Não sabe a potência? Calcule por divisão»**: bloco opcional e fechado dentro do formulário (só com JavaScript). Por divisão: tipo, área e «Muito sol ou janelas grandes» / «Último andar ou sótão». Conta `área × porM2 × fator do tipo × sol × último andar` e arredonda ao tamanho de aparelho seguinte; acima do maior, diz que a MDM dimensiona na visita. Os números estão em `data/site.json`, em `btu` (`porM2`, `tipos`, `sol`, `ultimoAndar`, `tamanhos`, `btuPorKw`, `areaMin`, `areaMax`, `maxDivisoes`): mudam-se aí, sem mexer no código, e `--check` confirma que são válidos. «Juntar ao pedido» põe o resumo no campo `potencia` (por exemplo `Quarto 12 m² (muito sol): 7 000 BTU/h · Sala 25 m²: 12 000 BTU/h · Total 19 000 BTU/h (5,6 kW)`), que acompanha as mudanças até «Retirar»; sem serviço escolhido, escolhe a montagem de ar condicionado. O resumo vai também no email e no WhatsApp; nas estatísticas vão só o número de divisões e o total. A página do ar condicionado tem uma ligação que abre o bloco.
 
 **O que a MDM tem de fazer no Netlify** (uma vez, depois da primeira publicação):
 
@@ -142,5 +143,6 @@ Resumo do que falta hoje:
 - **Bombas de calor**: confirmar se a obra F29 (unidade e depósito numa varanda) é uma bomba de calor, como dizia a v3, ou um chiller, como diz a ficha; fotografias de outras bombas de calor montadas pela MDM (hoje a página mostra só F04 e F29). A página fala só de águas quentes e de sistemas combinados (águas quentes e aquecimento), como o dono confirmou; radiadores e piso radiante não são nomeados.
 - **Outras**: fotografias de quadros elétricos AVAC; confirmar «peças originais» e se há garantia a anunciar.
 - **Formulário**: o email que recebe os pedidos no Netlify, e ligar a deteção de formulários (ver «Formulário de orçamento»).
+- **Estimativa de potência**: os técnicos da MDM confirmam os números de `btu` em `data/site.json`. Hoje: 400 BTU/h por m² (cerca de 117 W/m², uma regra prudente para casas em Lisboa), quarto 1,0, sala 1,1, cozinha 1,25, escritório 1,15, outra divisão 1,0, muito sol × 1,15, último andar × 1,10, aparelhos de 7 000, 9 000, 12 000, 18 000 e 24 000 BTU/h.
 
 `--check` falha se chegar a `public/` um placeholder (`[MAIÚSCULAS…]`, `[[CHAVE]]`, «por preencher») ou algo que o dono retirou a 27/09/2026: promessas de prazo de resposta («24 horas», «24–48h», «mesmo dia», «N minutos»), idade em anos («35 anos»: só «1991»), marcas fora de Midea, Mitsubishi Electric, Daikin e France Air, ou o nome legal com outra grafia («M.D.M. - Manuel Domingos Melancia, Lda»). Verifica as páginas, a meta, o JSON-LD, as mensagens de WhatsApp, os scripts e o cartão de contacto.

@@ -559,12 +559,13 @@
   var foto = $('qFoto');
   function quoteData() {
     return { empresa: $('qNome').value.trim(), email: $('qEmail').value.trim(), tel: $('qTel').value.trim(),
-             servico: $('qServico').value, msg: $('qMsg').value.trim(),
+             servico: $('qServico').value, msg: $('qMsg').value.trim(), potencia: pot.resumo(),
              foto: !SEM_ENVIO && foto && foto.files && foto.files[0] || null };
   }
   function quoteBody(d) {
     var l = ['Pedido de orçamento MDM', '', 'Nome/Empresa: ' + (d.empresa || '-'), 'Email: ' + (d.email || '-'),
              'Telefone: ' + (d.tel || '-'), 'Serviço: ' + (d.servico || '-'), 'Triagem: ' + etiqueta(d.servico)];
+    if (d.potencia) l.push('Potência estimada: ' + d.potencia);
     if (ORIGEM) l.push('Origem: ' + ORIGEM);
     return l.concat(['', d.msg || '']).join('\n');
   }
@@ -629,6 +630,295 @@
     else foto.addEventListener('change', confereFoto);
   }
 
+  /* ═══ Estimativa de potência por divisão («Não sabe a potência?», dentro do formulário) ═══
+     Os números vêm de "btu" em data/site.json: o build.py põe-nos em data-btu (nada se pede à rede; serve no ficheiro único).
+     Por divisão: BTU/h = área × porM2 × fator do tipo × sol × último andar, arredondado ao tamanho seguinte de "tamanhos".
+     Os campos das divisões não têm name e não seguem com o pedido. Só segue o resumo, no campo escondido "potencia",
+     depois de «Juntar ao pedido»; a partir daí acompanha cada mudança até «Retirar». Sem JavaScript o bloco fica escondido.
+     Na medição vão só números (quantas divisões e o total em BTU/h). */
+  var pot = (function () {
+    var raiz = form.querySelector('[data-potencia]'), campo = form.querySelector('[data-potencia-campo]');
+    var sem = {
+      resumo: function () { return campo ? campo.value : ''; },
+      numeros: function (p) { return p; }
+    };
+    var cfg = null;
+    try { cfg = JSON.parse(raiz.getAttribute('data-btu')); } catch (e) {}
+    var tipos = cfg && cfg.tipos ? Object.keys(cfg.tipos) : [];
+    var tamanhos = cfg && cfg.tamanhos ? cfg.tamanhos.slice().sort(function (a, b) { return a - b; }) : [];
+    var modelo = raiz && raiz.querySelector('template[data-pot-modelo]');
+    if (!campo || !modelo || !tipos.length || !tamanhos.length || !(cfg.porM2 > 0) || !(cfg.btuPorKw > 0)) return sem;
+    var MAIOR = tamanhos[tamanhos.length - 1], MAX = cfg.maxDivisoes || 8;
+    var AREA_MIN = cfg.areaMin || 2, AREA_MAX = cfg.areaMax || 200;
+    var POT_AC = 'Ar condicionado: montagem / instalação';
+    var det = raiz.querySelector('details'), resumoEl = raiz.querySelector('[data-pot-resumo]');
+    var lista = raiz.querySelector('[data-pot-divs]'), adiciona = raiz.querySelector('[data-pot-adiciona]');
+    var maxNota = raiz.querySelector('[data-pot-max]'), totalEl = raiz.querySelector('[data-pot-total]');
+    var multi = raiz.querySelector('[data-pot-multi]'), juntar = raiz.querySelector('[data-pot-juntar]');
+    var caixa = raiz.querySelector('[data-pot-junta]'), caixaTxt = raiz.querySelector('[data-pot-junta-txt]');
+    var notaServico = raiz.querySelector('[data-pot-servico]'), retirar = raiz.querySelector('[data-pot-retirar]');
+    var anuncio = raiz.querySelector('[data-pot-anuncio]');
+    var linhas = [], seq = 0, junto = false, atual = null;
+
+    /* números à portuguesa: 9 000 BTU/h · 2,6 kW · 12,5 m² (espaço inseparável, para não partir a linha) */
+    var NB = '\u00a0';
+    function milhares(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, NB); }
+    function decimal(n) { return String(Math.round(n * 100) / 100).replace('.', ','); }
+    function kw(btu) { return (btu / cfg.btuPorKw).toFixed(1).replace('.', ','); }
+    function btuh(n) { return milhares(n) + NB + 'BTU/h'; }
+
+    /* aceita 12, 12,5 e 12.5 (e um «m²» no fim) */
+    function leArea(txt) {
+      var t = String(txt || '').trim().replace(/\s*m(²|2)$/i, '').replace(',', '.');
+      if (!t) return { vazio: true };
+      if (!/^(\d+(\.\d*)?|\.\d+)$/.test(t)) return { erro: 'Escreva a área só com números, por exemplo 12 ou 12,5.' };
+      var a = Math.round(parseFloat(t) * 100) / 100;
+      if (a < AREA_MIN) return { erro: 'A área tem de ter pelo menos ' + decimal(AREA_MIN) + ' m².' };
+      if (a > AREA_MAX) return { erro: 'Até ' + decimal(AREA_MAX) + ' m² por divisão. Um espaço maior, a MDM dimensiona-o na visita.' };
+      return { area: a };
+    }
+    function calcula(tipo, area, sol, topo) {
+      var est = Math.round(area * cfg.porM2 * (cfg.tipos[tipo] || 1) * (sol ? cfg.sol || 1 : 1) * (topo ? cfg.ultimoAndar || 1 : 1));
+      for (var i = 0; i < tamanhos.length; i++) if (tamanhos[i] >= est) return { est: est, tam: tamanhos[i] };
+      return { est: est, tam: 0 };   /* acima do maior tamanho */
+    }
+
+    function estado() {
+      var r = { divs: [], n: 0, total: 0, acima: false };
+      linhas.forEach(function (l, i) {
+        l.leitura = leArea(l.area.value);
+        l.calc = null;
+        if (l.leitura.area == null) return;
+        var d = { i: i, tipo: l.tipo.value, area: l.leitura.area, sol: l.sol.checked, topo: l.topo.checked };
+        l.calc = calcula(d.tipo, d.area, d.sol, d.topo);
+        d.tam = l.calc.tam;
+        r.divs.push(d);
+        r.total += d.tam || MAIOR;
+        if (!d.tam) r.acima = true;
+      });
+      r.n = r.divs.length;
+      return r;
+    }
+    /* uma parte por divisão e o total. No pedido seguem numa linha, com espaços normais:
+       "Quarto 12 m² (muito sol): 7 000 BTU/h · Sala 25 m²: 12 000 BTU/h · Total 19 000 BTU/h (5,6 kW)" */
+    function partesResumo(r) {
+      if (!r || !r.n) return [];
+      var partes = r.divs.map(function (d) {
+        var extra = [];
+        if (d.sol) extra.push('muito sol');
+        if (d.topo) extra.push('último andar');
+        return d.tipo + ' ' + decimal(d.area) + NB + 'm²' + (extra.length ? ' (' + extra.join(', ') + ')' : '') + ': ' +
+          (d.tam ? btuh(d.tam) : 'mais de ' + btuh(MAIOR) + ', a dimensionar na visita');
+      });
+      partes.push('Total ' + (r.acima ? 'mais de ' : '') + btuh(r.total) + ' (' + kw(r.total) + NB + 'kW)');
+      return partes;
+    }
+    function resumo(r) { return partesResumo(r).join(' · ').replace(/\u00a0/g, ' '); }
+    function totalTexto(r) {
+      return r.n ? 'Total: ' + (r.acima ? 'mais de ' : '') + btuh(r.total) + ', ' + kw(r.total) + ' kW.' : '';
+    }
+
+    /* o que muda no ecrã; o leitor de ecrã ouve só o que conta (anuncia), não cada tecla */
+    function poeTexto(el, partes) {
+      el.textContent = '';
+      partes.forEach(function (p) {
+        if (typeof p === 'string') { el.appendChild(document.createTextNode(p)); return; }
+        var s = document.createElement(p[0]); if (p[2]) s.className = p[2]; s.textContent = p[1]; el.appendChild(s);
+      });
+    }
+    function mostraLinha(l) {
+      var a = l.leitura, c = l.calc;
+      if (c && c.tam) poeTexto(l.res, [['strong', btuh(c.tam)], ' · ' + kw(c.tam) + NB + 'kW']);
+      else if (c) poeTexto(l.res, [['strong', 'Mais de ' + btuh(MAIOR)],
+        ['span', 'Pode precisar de mais do que um aparelho ou de um sistema de condutas. A MDM dimensiona-a na visita.', 'pot-res-nota']]);
+      else poeTexto(l.res, [a.vazio ? 'Falta a área.' : 'Sem estimativa: veja a área.']);
+    }
+    function mostraTotal(r) {
+      totalEl.classList.toggle('vazio', !r.n);
+      if (!r.n) poeTexto(totalEl, ['Escreva a área de pelo menos uma divisão.']);
+      else poeTexto(totalEl, [(r.acima ? 'Mais de ' : '') + btuh(r.total),
+        ['span', (r.acima ? 'mais de ' : '') + kw(r.total) + NB + 'kW · ' + (r.n === 1 ? '1 divisão' : r.n + ' divisões'), 'pot-total-s']]);
+      multi.hidden = r.n < 2;
+    }
+    /* no campo do pedido, o texto seguido; no ecrã, uma linha por divisão */
+    function sincroniza() {
+      campo.value = junto ? resumo(atual) : '';
+      caixa.hidden = !junto;
+      juntar.hidden = junto;
+      if (!junto) return;
+      var partes = partesResumo(atual);
+      poeTexto(resumoEl, partes.length ? partes.map(function (p) { return ['span', p, 'pot-junta-l']; })
+        : ['falta a área das divisões. Escreva pelo menos uma.']);
+    }
+    function atualiza() {
+      atual = estado();
+      linhas.forEach(mostraLinha);
+      mostraTotal(atual);
+      sincroniza();
+      return atual;
+    }
+    var ultimo = '', tAnuncio = 0;
+    function anuncia(txt, ja) {
+      clearTimeout(tAnuncio);
+      function vai() { if (txt && txt !== ultimo) { ultimo = txt; anuncio.textContent = txt; } }
+      if (ja) vai(); else tAnuncio = setTimeout(vai, 400);
+    }
+    function anunciaLinha(l, ja) {
+      var i = linhas.indexOf(l), c = l.calc;
+      if (!c) return;
+      anuncia('Divisão ' + (i + 1) + ': ' + (c.tam ? btuh(c.tam) : 'mais de ' + btuh(MAIOR) + ', a dimensionar na visita') + '. ' + totalTexto(atual), ja);
+    }
+
+    function poeErro(l, msg) {
+      l.erro.textContent = msg || '';
+      if (msg) l.area.setAttribute('aria-invalid', 'true'); else l.area.removeAttribute('aria-invalid');
+    }
+    /* o erro aparece ao sair do campo ou com Enter (não a meio de escrever) */
+    function confere(l, forcado) {
+      var a = l.leitura || leArea(l.area.value);
+      var msg = a.erro || (a.vazio && forcado ? 'Escreva a área desta divisão, por exemplo 12 ou 12,5.' : '');
+      poeErro(l, msg);
+      if (msg) anuncia('Divisão ' + (linhas.indexOf(l) + 1) + ': ' + msg, true);
+      return !msg;
+    }
+
+    function numera() {
+      linhas.forEach(function (l, i) {
+        qsa('[data-pot-n]', l.el).forEach(function (s) { s.textContent = i + 1; });
+        l.retira.hidden = i === 0;
+      });
+      var cheio = linhas.length >= MAX;
+      adiciona.hidden = cheio;
+      maxNota.hidden = !cheio;
+    }
+    function novaLinha() {
+      seq++;
+      var el = modelo.content.firstElementChild.cloneNode(true);
+      var q = function (k) { return el.querySelector('[data-pot="' + k + '"]'); };
+      var l = { el: el, tipo: q('tipo'), area: q('area'), sol: q('sol'), topo: q('topo'), erro: q('erro'), res: q('res'), retira: q('retira') };
+      tipos.forEach(function (t) { var o = document.createElement('option'); o.value = t; o.textContent = t; l.tipo.appendChild(o); });
+      ['tipo', 'area', 'sol', 'topo', 'erro'].forEach(function (k) { l[k].id = 'pot-' + k + '-' + seq; });
+      qsa('label[data-pot-para]', el).forEach(function (lb) { lb.htmlFor = l[lb.getAttribute('data-pot-para')].id; });
+      l.area.setAttribute('aria-describedby', l.erro.id);
+      el.setAttribute('data-pot-linha', seq);
+      lista.appendChild(el);
+      linhas.push(l);
+      return l;
+    }
+    function linhaDe(el) {
+      var f = el.closest && el.closest('[data-pot-linha]');
+      for (var i = 0; f && i < linhas.length; i++) if (linhas[i].el === f) return linhas[i];
+      return null;
+    }
+
+    lista.addEventListener('input', function (e) {
+      var l = linhaDe(e.target);
+      if (!l || e.target !== l.area) return;
+      atualiza();
+      /* com o erro à vista, acompanha o que se escreve (some logo que a área fica certa) */
+      if (l.area.getAttribute('aria-invalid') === 'true') poeErro(l, l.leitura.erro || '');
+      anunciaLinha(l, false);
+    });
+    lista.addEventListener('change', function (e) {
+      var l = linhaDe(e.target);
+      if (!l) return;
+      atualiza();
+      if (e.target === l.area && !confere(l)) return;
+      anunciaLinha(l, true);
+    });
+    /* Enter numa área ou numa caixa de escolha não envia o pedido; na área, confirma o valor */
+    lista.addEventListener('keydown', function (e) {
+      var l = linhaDe(e.target);
+      if (!l || e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+      e.preventDefault();
+      if (e.target !== l.area) return;
+      atualiza();
+      if (confere(l)) anunciaLinha(l, true);
+    });
+    lista.addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('[data-pot="retira"]');
+      var l = b && linhaDe(b), i = l ? linhas.indexOf(l) : -1;
+      if (i < 1) return;
+      linhas.splice(i, 1);
+      l.el.remove();
+      numera();
+      atualiza();
+      /* o foco passa para a divisão que ficou no lugar desta ou, se era a última, para «Adicionar divisão» */
+      (linhas[i] ? linhas[i].tipo : adiciona).focus();
+      anuncia('Divisão ' + (i + 1) + ' retirada. ' + totalTexto(atual), true);
+    });
+    adiciona.addEventListener('click', function () {
+      if (linhas.length >= MAX) return;
+      var l = novaLinha();
+      numera();
+      atualiza();
+      l.tipo.focus();
+    });
+    juntar.addEventListener('click', function () {
+      var r = atualiza();
+      if (!r.n) {
+        var primeira = null;
+        linhas.forEach(function (l) { if (!confere(l, true) && !primeira) primeira = l; });
+        (primeira || linhas[0]).area.focus();
+        return;
+      }
+      junto = true;
+      /* sem serviço escolhido, a estimativa é de ar condicionado: escolhe a montagem (e a triagem [P1 · Montagem AC]) */
+      var sel = $('qServico'), antes = sel.value;
+      if (!antes) escolheServico(POT_AC);
+      notaServico.hidden = !!antes || sel.value !== POT_AC;
+      sincroniza();
+      caixaTxt.focus();
+      track('potencia_junta', { divisoes: r.n, btu: r.total });
+    });
+    retirar.addEventListener('click', function () {
+      junto = false;
+      sincroniza();
+      anuncia('Estimativa retirada do pedido.', true);
+      (det.open ? juntar : det.querySelector('summary')).focus();
+    });
+    /* depois de um envio, o formulário limpa-se: a estimativa volta a uma divisão vazia */
+    form.addEventListener('reset', function () {
+      setTimeout(function () {
+        linhas.slice(1).forEach(function (l) { l.el.remove(); });
+        linhas.length = Math.min(linhas.length, 1);
+        linhas.forEach(function (l) { poeErro(l, ''); });
+        junto = false; ultimo = '';
+        numera();
+        atualiza();
+      }, 0);
+    });
+
+    /* ligações para #potencia (página do ar condicionado): abrem o bloco e levam lá o foco */
+    function abre() {
+      det.open = true;
+      raiz.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
+      det.querySelector('summary').focus({ preventScroll: true });
+    }
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest && e.target.closest('a[href="#potencia"]');
+      if (!a || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      e.preventDefault();
+      abre();
+    });
+
+    novaLinha();
+    numera();
+    atualiza();
+    raiz.hidden = false;
+    qsa('[data-pot-ligacao]').forEach(function (el) { el.hidden = false; });
+    if (location.hash === '#potencia') abre();
+
+    return {
+      resumo: function () { return campo.value; },
+      /* para a medição: só números, e só com a estimativa junta ao pedido */
+      numeros: function (p) {
+        if (junto && atual && atual.n) { p.divisoes = atual.n; p.btu = atual.total; }
+        return p;
+      }
+    };
+  })();
+
   /* campos escondidos que o Netlify guarda com o pedido: triagem, origem (carrinha) e o assunto do email de aviso */
   var campoOrigem = form.querySelector('[data-origem-campo]');
   if (ORIGEM && campoOrigem) campoOrigem.value = ORIGEM;
@@ -662,7 +952,7 @@
     var d = quoteData(); if (!quoteValidate(d)) return;
     if (d.foto && !confereFoto()) { foto.focus(); return; }
     preparaCampos(d);
-    track('quote_form_submit', { via: SEM_ENVIO ? 'mailto' : 'netlify', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg });
+    track('quote_form_submit', pot.numeros({ via: SEM_ENVIO ? 'mailto' : 'netlify', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg }));
     if (SEM_ENVIO) { quoteMailto(d); return; }
     btn.setAttribute('aria-busy', 'true'); lbl.textContent = d.foto ? 'A enviar a fotografia…' : 'A enviar…'; quoteAlert('');
     enviaNetlify(d).then(function (ok) {
@@ -671,7 +961,7 @@
         lbl.textContent = 'Pedido enviado';
         quoteAlert('Pedido recebido, obrigado. Vamos analisar o seu pedido e responder pelo email ou telefone que indicou. Se for urgente,', true,
           [[TEL_HREF, 'ligue ' + TEL],
-           [WA_BASE + encodeURIComponent('Olá MDM. Acabei de enviar um pedido de orçamento pelo site. ' + etiqueta(d.servico) + (ORIGEM ? ' [' + ORIGEM + ']' : '')), 'fale connosco por WhatsApp']]);
+           [WA_BASE + encodeURIComponent('Olá MDM. Acabei de enviar um pedido de orçamento pelo site.' + (d.potencia ? ' Potência estimada: ' + d.potencia + '.' : '') + ' ' + etiqueta(d.servico) + (ORIGEM ? ' [' + ORIGEM + ']' : '')), 'fale connosco por WhatsApp']]);
         form.reset(); erroCampo('qFoto'); escolheServico(form.getAttribute('data-preselect'));
         track('quote_form_ok', { servico: d.servico, segmento: triagem(d.servico).seg });
         setTimeout(function () { if (lbl.textContent === 'Pedido enviado') lbl.textContent = 'Enviar pedido'; }, 6000);
@@ -689,7 +979,7 @@
   $('sendWhats').addEventListener('click', function () {
     if (bloqueado()) return;
     var d = quoteData(); if (!quoteValidate(d)) return;
-    track('quote_form_submit', { via: 'whatsapp', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg });
+    track('quote_form_submit', pot.numeros({ via: 'whatsapp', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg }));
     window.open(WA_BASE + encodeURIComponent(quoteBody(d)), '_blank', 'noopener');
     quoteAlert('Abrimos o WhatsApp com o pedido preenchido, falta só carregar em enviar.' + (d.foto ? ' Junte lá a fotografia.' : ''), true);
   });

@@ -31,6 +31,7 @@
         <input type="hidden" name="pagina" value="{{ _file }}">
         <input type="hidden" name="triagem" value="" data-triagem>
         <input type="hidden" name="origem" value="{{ page.origem }}" data-origem-campo>
+        <input type="hidden" name="potencia" value="" data-potencia-campo>
         <div class="campo">
           <label for="qNome">Nome *</label>
           <input class="campo-in" id="qNome" name="nome" type="text" autocomplete="name" placeholder="Empresa, condomínio ou particular" aria-describedby="eNome" required>
@@ -61,6 +62,68 @@
             <option value="Ventilação: instalação / revisão">Ventilação: instalação</option>
             <option value="Outro / vários serviços">Outro ou vários serviços</option>
           </select>
+        </div>
+        <!-- Estimativa de potência por divisão (site.js), opcional. Os números vêm de "btu" em data/site.json, aqui em data-btu.
+             Sem JavaScript fica escondida. Os campos das divisões não têm name e não seguem com o pedido: só segue o resumo,
+             no campo escondido "potencia", depois de «Juntar ao pedido». -->
+        <div class="pot" data-potencia data-btu="{{ site.btu }}" hidden>
+          <details class="pot-det" id="potencia">
+            <summary class="pot-cab">
+              <span class="pot-cab-txt">
+                <span class="pot-cab-t">Não sabe a potência? <span class="nowrap">Calcule por divisão</span></span>
+                <span class="pot-cab-s">Opcional · pela área de cada divisão</span>
+              </span>
+              <svg class="pot-mais" viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>
+            </summary>
+            <div class="pot-corpo">
+              <p class="pot-intro">Escolha o tipo e escreva a área de cada divisão. A estimativa aparece logo, em BTU/h (a medida da potência dos aparelhos) e em kW.</p>
+              <div class="pot-divs" data-pot-divs></div>
+              <button class="pot-adiciona" type="button" data-pot-adiciona>
+                <svg class="ico" viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>
+                Adicionar divisão
+              </button>
+              <p class="pot-max" data-pot-max hidden>Pode juntar até {{ site.btu.maxDivisoes }} divisões. Se forem mais, diga-nos na mensagem.</p>
+              <div class="pot-total">
+                <p class="rotulo">Total estimado</p>
+                <p class="pot-total-v" data-pot-total></p>
+                <p class="pot-multi" data-pot-multi hidden>Com várias divisões, um multi-split (uma só unidade exterior para várias divisões) pode ser uma opção.</p>
+              </div>
+              <p class="pot-aviso">É uma estimativa, arredondada ao tamanho de aparelho seguinte. A potência certa confirma-se na visita: depende do isolamento, da orientação, das janelas e do uso de cada divisão.</p>
+              <button class="btn btn-tinta pot-juntar" type="button" data-pot-juntar>Juntar ao pedido</button>
+            </div>
+          </details>
+          <div class="pot-junta" data-pot-junta hidden>
+            <p class="pot-junta-txt" tabindex="-1" data-pot-junta-txt><strong>Estimativa junta ao pedido:</strong> <span data-pot-resumo></span></p>
+            <p class="pot-junta-nota">Se mudar as divisões, o pedido acompanha.<span data-pot-servico hidden> Escolhemos também o serviço «Ar condicionado: montagem».</span></p>
+            <button class="pot-retirar" type="button" data-pot-retirar>Retirar<span class="so-leitor"> a estimativa do pedido</span></button>
+          </div>
+          <p class="so-leitor" aria-live="polite" data-pot-anuncio></p>
+          <template data-pot-modelo>
+            <fieldset class="pot-div">
+              <legend class="pot-div-t">Divisão <span data-pot-n>1</span></legend>
+              <div class="pot-div-in">
+                <div class="pot-div-campos">
+                  <div class="campo">
+                    <label data-pot-para="tipo">Tipo<span class="so-leitor"> da divisão <span data-pot-n>1</span></span></label>
+                    <select class="campo-in" data-pot="tipo"></select>
+                  </div>
+                  <div class="campo">
+                    <label data-pot-para="area">Área<span class="so-leitor"> da divisão <span data-pot-n>1</span>, em m²</span></label>
+                    <span class="pot-area"><input class="campo-in" data-pot="area" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" placeholder="Ex.: 12,5"><span class="pot-unid" aria-hidden="true">m²</span></span>
+                    <p class="campo-erro" data-pot="erro"></p>
+                  </div>
+                </div>
+                <div class="pot-opcoes">
+                  <label class="pot-check"><input type="checkbox" data-pot="sol"><span>Muito sol ou janelas grandes<span class="so-leitor"> (divisão <span data-pot-n>1</span>)</span></span></label>
+                  <label class="pot-check"><input type="checkbox" data-pot="topo"><span>Último andar ou sótão<span class="so-leitor"> (divisão <span data-pot-n>1</span>)</span></span></label>
+                </div>
+                <div class="pot-div-pe">
+                  <p class="pot-res" data-pot="res"></p>
+                  <button class="pot-retira" type="button" data-pot="retira"><svg class="ico" viewBox="0 0 256 256" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>Retirar<span class="so-leitor"> a divisão <span data-pot-n>1</span></span></button>
+                </div>
+              </div>
+            </fieldset>
+          </template>
         </div>
         <div class="campo">
           <label for="qMsg">Mensagem <span class="opcional">(opcional)</span></label>
