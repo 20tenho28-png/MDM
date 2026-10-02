@@ -55,8 +55,22 @@ Todas as páginas levam a empresa em JSON-LD (`HVACBusiness` e `Electrician`): n
 | `assets/css/site.css` | Sistema visual completo e movimento |
 | `assets/js/site.js` | Estatísticas (PostHog UE, sem cookies, só depois de «Aceitar»), formulário (envio para o Netlify), gaveta, carrossel, filtros, revelação |
 | `assets/fonts/` | Archivo e Newsreader alojadas no site (licença OFL incluída): nenhum pedido ao Google |
-| `assets/img/obras/` | Fotografias com correção de cor ligeira, em WebP (800/1600) e JPEG |
+| `assets/img/obras/` | Fotografias com correção de cor ligeira: o original `foto-NN-1600.jpg` e os tamanhos 400 a 1600 em AVIF e WebP (ver «Fotografias das obras») |
+| `gerar_fotos.py` | Faz os tamanhos AVIF e WebP das fotografias a partir do JPEG de 1600 |
 | `marketing/gerar_qr.py` | Códigos QR das carrinhas, em vetor, com a carrinha e o lado na ligação |
+
+## Fotografias das obras
+
+Cada obra tem um original, `assets/img/obras/foto-NN-1600.jpg` (1600×1200, ou 1200×1600 ao alto), já com a correção de cor e o corte finais e sem dados de localização. É também a reserva para browsers antigos e a imagem de partilha da página da obra. A partir dele, `gerar_fotos.py` faz seis tamanhos, pelo lado maior (400, 600, 800, 1000, 1200 e 1600), em AVIF e em WebP:
+
+```bash
+pip install "Pillow>=11.3"
+python3 website/gerar_fotos.py        # só o que falta; --todas refaz tudo; 31 32 só estas obras
+```
+
+O `{{foto NN …}}` do `build.py` escreve um `<picture>` com os três formatos, `width`/`height` e um `sizes` à medida de cada sítio (cartão, carrossel, topo de serviço, página da obra). O browser escolhe o tamanho; o visor de ecrã inteiro pede outro, à medida do ecrã. Nos telemóveis com ecrã de 3x pede-se a imagem de 2x, como no topo da página inicial: à vista é igual e pesa metade. Só as imagens do primeiro ecrã carregam logo (`loading="eager"`; na grelha de `obras.html` as 8 primeiras); as outras esperam pela rolagem.
+
+Uma obra nova: pôr o `foto-NN-1600.jpg` na pasta, correr `gerar_fotos.py` e depois `build.py --check`, que falha se faltar algum tamanho. Na página inicial, num telemóvel, as fotografias pesam cerca de 0,7 MB (antes 2,5 MB).
 
 ## Carrinhas: código QR e página de destino
 

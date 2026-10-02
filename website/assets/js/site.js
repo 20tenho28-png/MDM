@@ -386,11 +386,14 @@
         var fig = document.createElement('figure'); fig.className = 'visor-item';
         var pic = it.querySelector('picture');
         pic = pic ? pic.cloneNode(true) : document.createElement('picture');
-        qsa('source', pic).forEach(function (s) { s.setAttribute('sizes', '100vw'); });
         var img = pic.querySelector('img');
+        /* ecrã inteiro, sem cortar: a fotografia ocupa a largura ou a altura do ecrã, a que chegar primeiro */
+        var w = img && +img.getAttribute('width'), h = img && +img.getAttribute('height');
+        var tam = w && h ? 'min(100vw, ' + Math.round(100 * w / h) + 'vh)' : '100vw';
+        qsa('source', pic).forEach(function (s) { s.setAttribute('sizes', tam); });
         if (img) {
           img.removeAttribute('fetchpriority');
-          img.setAttribute('sizes', '100vw');
+          img.setAttribute('sizes', tam);
           img.loading = Math.abs(k - i) <= 1 ? 'eager' : 'lazy';
         }
         fig.appendChild(pic); fig.appendChild(legenda(it));

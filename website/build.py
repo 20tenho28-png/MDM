@@ -12,10 +12,12 @@ Sintaxe dos modelos (src/):
                                           a empresa, HVACBusiness, vai sempre em todas as páginas)
     {{ caminho.ponto }}                   valor de site.*, page.*, obra.*, root (prefixo relativo à raiz)
     {{> nome }}                           inclui src/partials/nome.html com o mesmo contexto
-    {{foto NN sizes="..." class="..." loading="eager" alt="..."}}   <picture> webp + jpg da obra NN
+    {{foto NN sizes="..." class="..." loading="eager" alt="..."}}   <picture> avif + webp + jpg da obra NN
+                                          (FOTO_LADOS; tamanhos feitos por gerar_fotos.py)
     {{wa chave}}                          ligação de WhatsApp com a mensagem pré-preenchida site.wa.chave
     {{li obra.detalhes}}                  um <li> por texto de uma lista
     {{each parcial NN,NN,...}} / {{each parcial all}} / {{each parcial cat=vent}} / {{each parcial ctx:related}}   repete um parcial por obra
+                                          (… eager8 no fim: as 8 primeiras imagens sem lazy)
     {{#se caminho}}…{{/se}}               só aparece se o valor existir e não estiver vazio (dados.*, obra.factos.*)
     {{#sem caminho}}…{{/sem}}             só aparece se o valor estiver vazio
     {{#cada caminho}}…{{/cada}}           repete o bloco por cada elemento da lista, com o elemento em {{ item }}
@@ -70,6 +72,24 @@ def lookup(ctx, path):
     return cur
 
 
+# lado maior de cada tamanho das fotografias das obras (foto-NN-400.avif … foto-NN-1600.avif, e .webp);
+# o JPEG de 1600 é o original e a reserva para browsers antigos. gerar_fotos.py faz os ficheiros.
+FOTO_LADOS = (400, 600, 800, 1000, 1200, 1600)
+# telemóvel com ecrã de 3x: pede-se a imagem de 2x, como no topo da página inicial (à vista é igual e pesa
+# metade). Vai antes do sizes de cada fotografia; o último valor do sizes é sempre o dos ecrãs estreitos.
+FOTO_3X = "(max-width: 599px) and (min-resolution: 2.5dppx)"
+
+
+def ultima_entrada(sizes):
+    """Última entrada de um sizes (a dos ecrãs estreitos): a vírgula conta só fora de parênteses, como em min(a, b)."""
+    nivel, ini = 0, 0
+    for i, c in enumerate(sizes):
+        nivel += (c == "(") - (c == ")")
+        if c == "," and nivel == 0:
+            ini = i + 1
+    return sizes[ini:].strip()
+
+
 def foto(ctx, args):
     parts = args.split(None, 1)
     n = parts[0].zfill(2)
@@ -80,12 +100,19 @@ def foto(ctx, args):
     w, h = (1600, 1200) if o["orient"] == "landscape" else (1200, 1600)
     alt = attrs.get("alt", o["alt"])
     sizes = attrs.get("sizes", "100vw")
+    estreito = ultima_entrada(sizes)
+    sizes = f"{FOTO_3X} calc({estreito} * 2 / 3), {sizes}"
     loading = attrs.get("loading", "lazy")
     cls = ("foto " + attrs.get("class", "")).strip()
-    extra = ' fetchpriority="high"' if loading == "eager" else ""
+    # eager leva fetchpriority="high", salvo prioridade="normal" (imagens no primeiro ecrã que não são a principal)
+    extra = ' fetchpriority="high"' if loading == "eager" and attrs.get("prioridade") != "normal" else ""
+
+    def srcset(ext):
+        return ", ".join(f"{base}-{lado}.{ext} {w * lado // 1600}w" for lado in FOTO_LADOS)
     return (
         f'<picture class="{cls}">'
-        + f'<source type="image/webp" srcset="{base}-800.webp {w // 2}w, {base}-1600.webp {w}w" sizes="{sizes}">'
+        + f'<source type="image/avif" srcset="{srcset("avif")}" sizes="{sizes}">'
+        + f'<source type="image/webp" srcset="{srcset("webp")}" sizes="{sizes}">'
         + f'<img src="{base}-1600.jpg" alt="{html.escape(alt, quote=True)}" width="{w}" height="{h}" '
         + f'loading="{loading}" decoding="async"{extra}></picture>'
     )
@@ -98,9 +125,12 @@ def wa(ctx, key):
 def each(ctx, args):
     name, sel = args.split(None, 1)
     sel = sel.strip()
-    eager1 = sel.endswith(" eager1")  # primeira imagem é o LCP (ex.: grelha de obras.html)
-    if eager1:
-        sel = sel[: -len(" eager1")].strip()
+    # " eagerN": as N primeiras imagens estão no primeiro ecrã e não esperam (ex.: grelha de obras.html);
+    # só a primeira, a maior candidata a LCP, leva fetchpriority="high"
+    m = re.search(r"\s+eager(\d+)$", sel)
+    eager = int(m.group(1)) if m else 0
+    if m:
+        sel = sel[: m.start()].strip()
     if sel == "all":
         items = OBRAS
     elif sel.startswith("cat="):
@@ -113,11 +143,12 @@ def each(ctx, args):
         items = [OBRA_BY_N[x.strip().zfill(2)] for x in sel.split(",")]
     tpl = (SRC / "partials" / f"{name}.html").read_text(encoding="utf-8")
     # tamanho dos cartões de obra na grelha (sizes da imagem); uma página com outra grelha muda-o no <!--meta-->
-    sizes = ctx["page"].get("cartaoSizes") or "(min-width: 1200px) 300px, (min-width: 900px) 30vw, (min-width: 640px) 45vw, 100vw"
+    sizes = ctx["page"].get("cartaoSizes") or ("(min-width: 1200px) min(calc(22.25vw - 18px), 302px), "
+                                               "(min-width: 900px) calc(29.67vw - 16px), (min-width: 640px) calc(44.5vw - 12px), 89vw")
     out = []
     for i, o in enumerate(items):
         c = dict(ctx, obra=o, index=i, pos=i + 1, total=len(items), cartaoSizes=sizes,
-                 loading="eager" if (eager1 and i == 0) else "lazy")
+                 loading="eager" if i < eager else "lazy", prioridade="alta" if i == 0 and eager else "normal")
         out.append(render(tpl, c))
     return "".join(out)
 
