@@ -743,16 +743,6 @@ html.visor-aberto { overflow: hidden; }
 .hero-risco { transform-origin: left center; animation: mdm-risco 700ms var(--mover) both; }
 .hero-foto picture.foto img { animation: mdm-aparece 900ms var(--mover) both; }
 
-/* ── Secções que «derretem» ao entrar no ecrã (scroll-driven animation, sem JavaScript) ──
-   Desfocagem curta enquanto os primeiros 320px da secção sobem do fundo do ecrã; depois o efeito sai (sem filtro a ficar na secção).
-   Sem saltos nem scroll preso; nunca some por completo (opacidade mínima .2); sem suporte ou com menos movimento, nada muda. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    main > .sec, main > .cert { animation: mdm-derrete linear backwards; animation-timeline: view(); animation-range: entry 0% entry 320px; }
-  }
-}
-@keyframes mdm-derrete { from { opacity: .2; filter: blur(10px) contrast(1.6); } to { opacity: 1; filter: none; } }
-
 @keyframes mdm-sobe { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes mdm-risco { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes mdm-aparece { from { opacity: 0; } to { opacity: 1; } }
