@@ -529,6 +529,16 @@ html.com-consent body { padding-bottom: var(--consent-h, 0px); }
   html.com-consent:not(.barra-fora) .consent { transform: translateY(calc(-1 * var(--barra-movel-h, 59px))); }
   html.com-consent { scroll-padding-bottom: calc(var(--barra-movel-h, 59px) + var(--consent-h, 0px) + 16px); }
 }
+/* ecrãs baixos (telemóvel deitado, zoom de 400 %): fixa, a barra deixava só uma fresta para o conteúdo e o foco ficava por baixo dela.
+   Aí fica no topo da página, antes do cabeçalho, e sai com o resto ao deslizar. */
+@media (max-height: 500px) {
+  .consent, html.com-consent:not(.barra-fora) .consent { position: static; transform: none; border-top: 0; border-bottom: 2px solid var(--tinta); padding-bottom: 10px; }
+  html.com-consent body { padding-bottom: 0; }
+  html.com-consent { scroll-padding-bottom: auto; }
+}
+@media (max-height: 500px) and (max-width: 699px) {
+  html.com-consent { scroll-padding-bottom: calc(58px + 16px + env(safe-area-inset-bottom)); }
+}
 
 /* ── Página de obras: filtros e grelha ── */
 .pag-cab { padding: clamp(48px, 6vw, 72px) var(--margem) clamp(24px, 3vw, 34px); }

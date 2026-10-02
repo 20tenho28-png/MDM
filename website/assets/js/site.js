@@ -103,6 +103,8 @@
     /* compara com o sítio onde a barra fica (não com o da animação): por cima da barra móvel, se estiver à vista */
     consentRecolhe = function () {
       if (!consent || consent.hidden || !acoes) return;
+      /* em ecrãs baixos a barra está no topo da página, sem tapar nada (site.css) */
+      if (getComputedStyle(consent).position !== 'fixed') { consent.classList.remove('recolhida'); return; }
       var movel = barraMovel && barraMovel.getClientRects().length && !barraMovel.classList.contains('escondida') ? barraMovel.offsetHeight : 0;
       var fundo = window.innerHeight - movel, topo = fundo - consent.offsetHeight;
       var r = acoes.getBoundingClientRect();
@@ -250,7 +252,7 @@
       try { if (!el.matches(':focus-visible')) return; } catch (e) {}
       var limite = window.innerHeight;
       barras.forEach(function (b) {
-        if (!b.isConnected || !b.getClientRects().length || b.classList.contains('escondida') || b.classList.contains('recolhida')) return;
+        if (!b.isConnected || !b.getClientRects().length || b.classList.contains('escondida') || b.classList.contains('recolhida') || getComputedStyle(b).position !== 'fixed') return;
         limite = Math.min(limite, b.getBoundingClientRect().top);
       });
       /* desliza o que falta, sem empurrar o topo do elemento para baixo do cabeçalho fixo */
