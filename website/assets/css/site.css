@@ -156,7 +156,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 .marca-sub { white-space: nowrap; font-family: var(--sans); font-weight: 500; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--aco); line-height: 1; }
 .nav { display: none; align-items: center; gap: 28px; }
 .nav-a { white-space: nowrap; font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--tinta); text-decoration: none; padding: 12px 0 8px; background-image: linear-gradient(var(--carmim), var(--carmim)); background-repeat: no-repeat; background-position: 0 calc(100% - 4px); background-size: 0% 2px; transition: background-size 220ms var(--mover); }
-.nav-a:hover, .nav-a:focus-visible, .nav-a[aria-current="page"] { color: var(--tinta); background-size: 100% 2px; }
+.nav-a:hover, .nav-a:focus-visible, .nav-a[aria-current] { color: var(--tinta); background-size: 100% 2px; }
 .topo-tel { display: none; font-weight: 700; font-size: 15px; }
 .topo-cta { display: none; min-height: 44px; padding: 12px 20px; white-space: nowrap; }
 .topo-ligar { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 0 8px; font-family: var(--sans); font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--tinta); text-decoration: none; }
@@ -187,6 +187,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 .gaveta-nav { display: flex; flex-direction: column; border-top: 1px solid var(--linha); }
 .gaveta-nav a { font-family: var(--sans); font-size: 19px; font-weight: 700; letter-spacing: -.01em; color: var(--tinta); text-decoration: none; padding: 12px 0; border-bottom: 1px solid var(--linha); }
 .gaveta-nav a:hover { color: var(--carmim); }
+.gaveta-nav a[aria-current] { color: var(--carmim); box-shadow: inset 3px 0 0 var(--carmim); padding-left: 14px; }
 .gaveta-acoes { margin-top: auto; display: flex; flex-direction: column; gap: 14px; }
 .gaveta-tel { font-family: var(--sans); font-size: 20px; font-weight: 700; color: var(--tinta); text-decoration: none; display: flex; flex-direction: column; }
 .gaveta-tel span { font-size: 13px; font-weight: 500; letter-spacing: .02em; color: var(--aco); }
@@ -311,6 +312,13 @@ body.menu-aberto { overflow: hidden; }
 .esp-cab .seta { color: var(--carmim); }
 .esp-card:hover .seta, .esp-card:focus-visible .seta { transform: translateX(4px); }
 .esp-corpo p { font-size: 16px; color: var(--aco); flex-grow: 1; }
+/* Subgrid: nos cartões lado a lado, fotografia, título, texto e marcas alinham entre cartões (o último cartão largo fica como está) */
+@supports (grid-template-rows: subgrid) {
+  @media (min-width: 640px) {
+    .esp-grelha > .esp-card:not(:last-child) { display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 0; }
+    .esp-grelha > .esp-card:not(:last-child) .esp-corpo { display: grid; grid-row: span 3; grid-template-rows: subgrid; row-gap: 12px; }
+  }
+}
 .esp-marcas { font-family: var(--sans); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--aco); border-top: 1px solid #E6E2DA; padding-top: 12px; }
 .esp-card .foto-bc img { object-position: 50% 72%; }   /* bomba de calor (fotografia ao alto): a máquina, não o céu */
 /* A especialidade que fica sozinha na última linha ocupa-a toda: fotografia com a largura de uma coluna
@@ -394,7 +402,7 @@ html:not(.js) .topo-in > .menu-btn { display: none; }
 .cert-selos { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
 /* Três selos (APIRAC, IMPIC, F-gas): um por linha até haver largura para os três lado a lado */
 @media (min-width: 900px) { .cert-selos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.selo { display: grid; grid-template-columns: 5.4em minmax(0, 1fr); gap: 14px; align-items: start; border-left: 3px solid var(--carmim); padding-left: 14px; }
+.selo { display: grid; grid-template-columns: 5.4em minmax(0, 1fr); gap: 14px; align-items: start; align-content: start; border-left: 3px solid var(--carmim); padding-left: 14px; }
 @media (min-width: 900px) and (max-width: 1099px) { .selo { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
 .selo-sigla { font-family: var(--sans); font-size: 17px; font-weight: 800; letter-spacing: .02em; white-space: nowrap; }
 .selo-txt { font-size: 15px; line-height: 1.45; color: var(--aco-2); }
@@ -645,6 +653,12 @@ body.topo-compacto .filtros-wrap { top: 60px; }
 .obra-card .registo { margin-top: 7px; font-size: 10.5px; }
 .obras-grelha.entra .obra-card:not([hidden]) { animation: mdm-sobe 380ms var(--mover) both; animation-delay: calc(min(var(--i, 0), 11) * 30ms); }
 .obras-vazio { text-align: center; padding: 40px 0; color: var(--aco); }
+/* Subgrid: em cada linha da grelha, o título e a linha de registo de todos os cartões ficam à mesma altura
+   (o gap da subgrid é o da grelha-mãe; 7px repõe o espaço entre título e registo) */
+@supports (grid-template-rows: subgrid) {
+  .obras-grelha > .obra-card { display: grid; grid-row: span 2; grid-template-rows: subgrid; row-gap: 7px; }
+  .obras-grelha > .obra-card .registo { margin-top: 0; }
+}
 
 /* ── Página de uma obra ── */
 .obra-pag-foto { background: var(--tinta-2); }

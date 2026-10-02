@@ -37,3 +37,4 @@
 .priv-acoes .btn { min-width: 140px; }
 .priv-acoes .btn[aria-pressed="true"] { background: var(--tinta); color: #fff; }
 .priv-nota { font-size: 15px; color: var(--aco); }
+.priv-indice a[aria-current] { color: var(--carmim); }

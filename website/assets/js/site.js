@@ -148,7 +148,36 @@
   /* ═══ Menu atual ═══ */
   (function () {
     var nav = document.body.getAttribute('data-nav');
-    if (nav) qsa('[data-nav-item="' + nav + '"]').forEach(function (a) { a.setAttribute('aria-current', 'page'); });
+    /* "page" só quando o link aponta mesmo para esta página; numa página de serviço ou de obra, o link da secção-mãe leva "true" */
+    if (nav) qsa('[data-nav-item="' + nav + '"]').forEach(function (a) { a.setAttribute('aria-current', a.pathname === location.pathname && !a.hash ? 'page' : 'true'); });
+    /* Página inicial: o link da secção à vista fica marcado (aria-current="location"); "Obras" acompanha a secção #obras */
+    if (!nav && 'IntersectionObserver' in window) {
+      var mapa = new Map();
+      qsa('.nav-a[data-nav-item], .gaveta-nav a[data-nav-item]').forEach(function (a) {
+        var id = a.hash && a.pathname === location.pathname ? a.hash.slice(1) : a.getAttribute('data-nav-item') === 'obras' ? 'obras' : '';
+        var sec = id && document.getElementById(id); if (!sec) return;
+        (mapa.get(sec) || mapa.set(sec, []).get(sec)).push(a);
+      });
+      var io = new IntersectionObserver(function (en) {
+        en.forEach(function (e) { mapa.get(e.target).forEach(function (a) {
+          if (e.isIntersecting) a.setAttribute('aria-current', 'location');
+          else if (a.getAttribute('aria-current') === 'location') a.removeAttribute('aria-current');
+        }); });
+      }, { rootMargin: '-45% 0px -50% 0px' });
+      mapa.forEach(function (_, sec) { io.observe(sec); });
+    }
+    /* Privacidade: no índice, fica marcado o último título que já passou a linha dos 40% do ecrã */
+    var indice = qsa('.priv-indice a[href^="#"]');
+    if (indice.length) {
+      var alvos = indice.map(function (a) { return document.getElementById(a.hash.slice(1)); }), tick = false;
+      var marca = function () {
+        tick = false; var linha = window.innerHeight * .4, atual = -1;
+        alvos.forEach(function (h, i) { if (h && h.getBoundingClientRect().top < linha) atual = i; });
+        indice.forEach(function (a, i) { if (i === atual) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current'); });
+      };
+      window.addEventListener('scroll', function () { if (!tick) { tick = true; requestAnimationFrame(marca); } }, { passive: true });
+      marca();
+    }
   })();
 
   /* ═══ Topo compacto depois de 80 px ═══ */
