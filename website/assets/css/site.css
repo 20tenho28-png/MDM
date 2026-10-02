@@ -467,6 +467,9 @@ html:not(.js) #sendWhats { display: none; }
 .rodape .rodape-mapa { gap: 8px; color: #fff; }   /* Perfil da Empresa no Google: abre noutro separador */
 .rodape-cert { font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .12em; color: #fff; margin-top: 6px; }
 .rodape-base { max-width: calc(var(--max) - 160px); margin: 44px auto 0; padding-top: 20px; border-top: 1px solid var(--linha-esc); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-family: var(--sans); font-size: 12px; letter-spacing: .06em; }
+/* privacidade e Livro de Reclamações Eletrónico (obrigatório para empresas em Portugal) */
+.rodape-legal { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+.rodape-legal a { display: inline-flex; align-items: center; min-height: 32px; }
 .rodape a:focus-visible, .sec-escura a:focus-visible, .sec-escura button:focus-visible { box-shadow: 0 0 0 2px var(--tinta), 0 0 0 4px var(--gesso); }
 
 /* ── Barra fixa no telemóvel ── */
@@ -480,6 +483,24 @@ html:not(.js) #sendWhats { display: none; }
 .barra-orc { background: var(--carmim); }
 @media (max-width: 699px) { html { scroll-padding-bottom: calc(58px + 16px + env(safe-area-inset-bottom)); } }
 @media (min-width: 700px) { .barra-movel { display: none; } }
+
+/* ── Barra das estatísticas: pequena, em baixo, por cima da barra móvel; some depois da escolha ──
+   Os dois botões têm o mesmo peso. site.js mede a altura (--consent-h) para o foco nunca ficar por baixo dela
+   e recolhe-a enquanto taparia os botões do topo (.recolhida: transparente e sem cliques; volta com o foco do teclado). */
+.consent { position: fixed; left: 0; right: 0; bottom: 0; z-index: 49; background: var(--branco); border-top: 2px solid var(--tinta); padding: 10px var(--margem) max(10px, env(safe-area-inset-bottom)); transition: transform 250ms var(--mover), opacity 150ms var(--resposta); }
+.consent.recolhida { opacity: 0; pointer-events: none; }
+.consent-in { max-width: calc(var(--max) - 160px); margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; }
+.consent-txt { flex: 1 1 300px; margin: 0; font-family: var(--sans); font-size: 14px; font-weight: 500; line-height: 1.45; color: var(--tinta); }
+.consent-txt a { color: var(--tinta); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.consent-acoes { display: flex; gap: 8px; flex: 1 1 auto; max-width: 340px; }
+.consent-acoes .btn { flex: 1 1 0; min-height: 44px; padding: 10px 18px; font-size: 13px; }
+html.com-consent { scroll-padding-bottom: calc(var(--consent-h, 0px) + 16px); }
+html.com-consent body { padding-bottom: var(--consent-h, 0px); }
+@media (max-width: 699px) {
+  .consent-acoes { max-width: none; flex-basis: 100%; }
+  html.com-consent:not(.barra-fora) .consent { transform: translateY(calc(-1 * var(--barra-movel-h, 59px))); }
+  html.com-consent { scroll-padding-bottom: calc(var(--barra-movel-h, 59px) + var(--consent-h, 0px) + 16px); }
+}
 
 /* ── Página de obras: filtros e grelha ── */
 .pag-cab { padding: clamp(48px, 6vw, 72px) var(--margem) clamp(24px, 3vw, 34px); }
@@ -614,7 +635,7 @@ html.visor-aberto { overflow: hidden; }
 }
 
 @media print {
-  .topo, .barra-movel, .gaveta, .veu, .carrossel-ctrl, .form-caixa { display: none !important; }
+  .topo, .barra-movel, .consent, .gaveta, .veu, .carrossel-ctrl, .form-caixa { display: none !important; }
   .js [data-r] { opacity: 1; transform: none; }
   body { background: #fff; padding: 0; }
 }

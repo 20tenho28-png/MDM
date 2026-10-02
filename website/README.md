@@ -48,19 +48,19 @@ Todas as páginas levam a empresa em JSON-LD (`HVACBusiness` e `Electrician`): n
 | `data/site.json` | Domínio (`baseUrl`), pré-visualização (`preview`), Perfil da Empresa no Google (`googleMaps`), contactos, horário, NIF, nome legal, marcas, mensagens de WhatsApp pré-preenchidas (com a etiqueta de triagem `[P1 · …]`). A barra do telemóvel, o rodapé e o contacto usam a mensagem da página: `wa` no `<!--meta-->` de cada serviço, `geral` nas outras |
 | `data/obras.json` | As 24 obras: título, especialidade, equipamento, texto, pormenores e factos (data, local exato, cliente, duração: só aparecem na ficha quando preenchidos) |
 | `data/dados-mdm.json` | Dados que só a MDM pode dar (números das certificações, testemunhos, perguntas por responder, privacidade). Vazio = escondido no site |
-| `src/templates/layout.html` | Cabeçalho `<head>`, recusa de medição, estrutura comum |
-| `src/partials/` | Cabeçalho e menu em gaveta, rodapé, barra fixa do telemóvel, contacto + formulário, certificações, testemunhos, cartões de obra |
+| `src/templates/layout.html` | Cabeçalho `<head>`, estrutura comum (topo, barra das estatísticas, rodapé, barra do telemóvel) |
+| `src/partials/` | Cabeçalho e menu em gaveta, rodapé (com a política de privacidade e o Livro de Reclamações Eletrónico), barra fixa do telemóvel, barra das estatísticas (`consentimento.html`), contacto + formulário, certificações, testemunhos, cartões de obra |
 | `src/pages/` | Página inicial, obras, 5 serviços (ar condicionado, bombas de calor, manutenção, eletricidade, ventilação), privacidade, 404, página do QR das carrinhas, `obrigado.html` (depois de enviar o formulário sem JavaScript). Cada serviço descreve-se no `<!--meta-->` em `servico` (nome, tipo e ofertas) para os dados estruturados `Service` |
 | `src/templates/obra.html` | Modelo das 24 páginas de obra (`obras/<slug>.html`) |
 | `assets/css/site.css` | Sistema visual completo e movimento |
-| `assets/js/site.js` | Medição (PostHog UE, sem cookies), formulário (envio para o Netlify), gaveta, carrossel, filtros, revelação |
+| `assets/js/site.js` | Estatísticas (PostHog UE, sem cookies, só depois de «Aceitar»), formulário (envio para o Netlify), gaveta, carrossel, filtros, revelação |
 | `assets/fonts/` | Archivo e Newsreader alojadas no site (licença OFL incluída): nenhum pedido ao Google |
 | `assets/img/obras/` | Fotografias com correção de cor ligeira, em WebP (800/1600) e JPEG |
 | `marketing/gerar_qr.py` | Códigos QR das carrinhas, em vetor, com a carrinha e o lado na ligação |
 
 ## Carrinhas: código QR e página de destino
 
-Cada carrinha leva códigos QR que abrem `carrinha.html?v=01&p=t` (carrinha 01, traseira). A página está fora do menu e do mapa do site (`noindex`) e junta a origem, por exemplo `[Carrinha 01 · traseira]`, às mensagens de WhatsApp, ao pedido do formulário e ao evento `qr_carrinha` na medição. Assim fica a saber que carrinha e que lado trazem contactos. Não guarda nada no equipamento do visitante. Lados: `t` traseira, `e` lateral esquerda, `d` lateral direita, `m` íman, `c` cartão de vizinho.
+Cada carrinha leva códigos QR que abrem `carrinha.html?v=01&p=t` (carrinha 01, traseira). A página está fora do menu e do mapa do site (`noindex`) e junta a origem, por exemplo `[Carrinha 01 · traseira]`, às mensagens de WhatsApp, ao pedido do formulário e ao evento `qr_carrinha` nas estatísticas (se o visitante as aceitar). Assim fica a saber que carrinha e que lado trazem contactos. Não guarda nada no equipamento do visitante. Lados: `t` traseira, `e` lateral esquerda, `d` lateral direita, `m` íman, `c` cartão de vizinho.
 
 ```bash
 pip install segno
@@ -88,6 +88,16 @@ O formulário (`src/partials/contacto.html`, em todas as páginas que o têm) é
 
 O filtro de spam do Netlify está ligado por omissão; os pedidos marcados como spam ficam em **Forms → Spam**, convém espreitar de vez em quando.
 
+## Estatísticas e consentimento
+
+O PostHog (instância europeia, `persistence: 'memory'`, sem cookies nem perfis) **só carrega depois de o visitante carregar em «Aceitar»**. Até lá, o site não faz nenhum pedido ao PostHog.
+
+- **A pergunta.** Uma barra pequena no fundo do ecrã (`src/partials/consentimento.html`): uma frase, «Aceitar» e «Recusar» com o mesmo peso e a ligação para a política. No telemóvel fica por cima da barra Ligar / WhatsApp / Orçamento. Enquanto taparia os botões do topo, recolhe-se. `site.js` mede a altura para o foco do teclado nunca ficar por baixo dela.
+- **A escolha.** Fica no `localStorage` como `mdm-estatisticas` = `sim` ou `nao`. Depois de escolher, a barra não volta. Se o browser enviar «não seguir» (Global Privacy Control ou Do Not Track), a barra não aparece e nada se mede.
+- **Mudar de ideias.** A política de privacidade (`privacidade.html#estatisticas`) tem os botões «Aceitar» e «Recusar» (`assets/js/privacidade.js`). Recusar depois de aceitar para o envio logo nessa página.
+- **Os eventos** (`track()` em `site.js`) nunca falham antes da escolha. Ficam só na memória da página e seguem se o visitante aceitar ali. Com «Recusar», perdem-se.
+- **No ficheiro único** (aberto do disco) não há estatísticas nem barra.
+
 ## Antes de publicar: dados que só a MDM tem
 
 O site nunca mostra um dado por preencher. Cada um tem um lugar em `data/dados-mdm.json` (e, para as obras, em `factos` de `data/obras.json`); enquanto o valor estiver vazio, a frase, a linha da ficha, a pergunta ou a secção que o usa não aparece. Basta escrever o valor e voltar a gerar. Nunca escrever um número ou um facto que não esteja confirmado.
@@ -103,7 +113,7 @@ Resumo do que falta hoje:
 - **Testemunhos**: só reais e com autorização por escrito. Sem eles a secção «Clientes» não aparece.
 - **Obras**: data, local exato, tipo de cliente e duração de cada obra. A ficha mostra só os que existem.
 - **Serviços**: preço indicativo de ar condicionado (se quiser), duração de uma montagem, plano e periodicidade da manutenção, avarias no contrato, reparação de placas, âmbito do trabalho elétrico, extração de cozinhas, periodicidade da limpeza de condutas. Cada pergunta sem resposta fica escondida.
-- **Privacidade**: revisão jurídica, prazo de conservação dos pedidos (até lá, «apenas pelo tempo necessário»), se o PostHog descarta o IP, data da última atualização.
+- **Privacidade**: a política foi reescrita a 01/10/2026 e **não teve revisão jurídica**: falta a revisão por um jurista antes do lançamento. Confirmar também os prazos de conservação que vêm da versão anterior do site (pedidos e contactos sem trabalho: no máximo 3 anos; estatísticas: 12 meses, a acertar no projeto PostHog) e apagar no Netlify os pedidos mais antigos do que isso. Falta ainda saber se o PostHog descarta o IP e, se a MDM quiser nomeá-lo, que serviço de email recebe os pedidos. Se a política mudar, mudar também a data no topo.
 - **Bombas de calor**: confirmar se a obra F29 (unidade e depósito numa varanda) é uma bomba de calor, como dizia a v3, ou um chiller, como diz a ficha; fotografias de outras bombas de calor montadas pela MDM (hoje a página mostra só F04 e F29). A página fala só de águas quentes e de sistemas combinados (águas quentes e aquecimento), como o dono confirmou; radiadores e piso radiante não são nomeados.
 - **Outras**: fotografias de quadros elétricos AVAC; confirmar «peças originais» e se há garantia a anunciar.
 - **Formulário**: o email que recebe os pedidos no Netlify, e ligar a deteção de formulários (ver «Formulário de orçamento»).

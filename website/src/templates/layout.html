@@ -5,11 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- o site só tem tema claro: impede o browser do telemóvel de o escurecer sozinho (logótipo e cores trocados) -->
 <meta name="color-scheme" content="only light">
-<script>
-  /* Recusa de medição (privacidade.html): a única coisa que o site guarda no equipamento, e só a pedido do visitante. */
-  window.MDM_SEM_MEDICAO = (function () { try { return localStorage.getItem('mdm-sem-medicao') === '1'; } catch (e) { return false; } })();
-  document.documentElement.className += ' js';
-</script>
+<script>document.documentElement.className += ' js';</script>
 <title>{{ page.title }}</title>
 <meta name="description" content="{{ page.description }}">
 <meta name="robots" content="{{ page.robots }}">
@@ -34,6 +30,7 @@
 {{& page_css }}{{& jsonld }}</head>
 <body data-nav="{{ page.nav }}">
 <a class="skip" href="#conteudo">Saltar para o conteúdo</a>
+{{> consentimento }}
 {{> header }}
 <main id="conteudo" tabindex="-1">
 {{& content }}

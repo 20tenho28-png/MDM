@@ -8,36 +8,119 @@
   var qsa = function (sel, root) { return [].slice.call((root || document).querySelectorAll(sel)); };
   var reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ═══ Medição: PostHog na UE, sem cookies (persistence memory), respeita a recusa ═══ */
+  /* ═══ Estatísticas: PostHog na UE, sem cookies (persistence memory), só depois de «Aceitar» ═══
+     A escolha fica no localStorage ('mdm-estatisticas' = 'sim' ou 'nao'). Sem escolha aparece a barra
+     (partials/consentimento.html); a política de privacidade tem o controlo para mudar de ideias.
+     Com o sinal «não seguir» do browser (Global Privacy Control ou Do Not Track) a barra não aparece e nada se mede,
+     a não ser que o visitante aceite na política. No ficheiro único (file:) não há estatísticas nem barra.
+     Antes da escolha, os eventos ficam só na memória desta página: seguem se aceitar aqui, perdem-se se não. */
+  var CHAVE_EST = 'mdm-estatisticas';
+  var SEM_REDE = location.protocol === 'file:';
+  var NAO_SEGUIR = navigator.globalPrivacyControl === true || navigator.doNotTrack === '1' || window.doNotTrack === '1';
+  var escolha = (function () {
+    try { var v = localStorage.getItem(CHAVE_EST); return v === 'sim' || v === 'nao' ? v : ''; } catch (e) { return ''; }
+  })();
   var _trackQueue = [];
+  var phPronto = false, phCapture = null;
   var ORIGEM = '';   /* só na página das carrinhas: "Carrinha 01 · traseira" (ver abaixo) */
   function track(event, props) {
-    if (window.MDM_SEM_MEDICAO) return;
+    if (SEM_REDE || escolha === 'nao' || (!escolha && NAO_SEGUIR)) return;
     props = props || {};
     if (ORIGEM && !props.origem) props.origem = ORIGEM;
     try {
-      if (window.posthog && window.posthog.capture) window.posthog.capture(event, props);
-      else _trackQueue.push([event, props]);
+      if (phPronto) window.posthog.capture(event, props);
+      else if (_trackQueue.length < 50) _trackQueue.push([event, props]);
     } catch (e) {}
   }
   window.mdmTrack = track;
-  (function () {
-    if (window.MDM_SEM_MEDICAO || location.protocol === 'file:') return;
+  function carregaPostHog() {
+    if (SEM_REDE || carregaPostHog.feito) return;
+    carregaPostHog.feito = true;
     var el = document.createElement('script');
     el.src = 'https://eu-assets.i.posthog.com/static/array.js';
     el.async = true;
     el.onload = function () {
-      /* o visitante pode ter recusado enquanto o script descarregava (privacidade.html) */
-      if (window.MDM_SEM_MEDICAO) { _trackQueue.length = 0; return; }
+      /* o visitante pode ter recusado enquanto o script descarregava */
+      if (escolha !== 'sim') { _trackQueue.length = 0; return; }
       try {
         window.posthog.init('phc_veB6kR2as8m8HuRMEVuTUWubWQxLkPW5D8Uf6wsJcy8A', {
           api_host: 'https://eu.i.posthog.com', persistence: 'memory', person_profiles: 'identified_only',
           autocapture: false, enable_heatmaps: true, capture_dead_clicks: true
         });
+        phCapture = window.posthog.capture; phPronto = true;
         while (_trackQueue.length) { var t = _trackQueue.shift(); window.posthog.capture(t[0], t[1]); }
       } catch (e) {}
     };
     document.head.appendChild(el);
+  }
+  /* «Recusar» depois de aceitar: o PostHog já carregado deixa de enviar a partir de agora
+     (sem opt_out_capturing, que gravaria outra entrada no localStorage) */
+  function paraPostHog() {
+    _trackQueue.length = 0;
+    try { if (phPronto) window.posthog.capture = function () {}; } catch (e) {}
+  }
+  function defineEscolha(v) {
+    if (v !== 'sim' && v !== 'nao') return false;
+    escolha = v;
+    var guardada = true;
+    try { localStorage.setItem(CHAVE_EST, v); } catch (e) { guardada = false; }
+    fechaConsent();
+    if (v === 'sim') {
+      if (phPronto && phCapture) { try { window.posthog.capture = phCapture; } catch (e) {} }
+      carregaPostHog();
+    } else paraPostHog();
+    return guardada;
+  }
+  /* para a política de privacidade (assets/js/privacidade.js) */
+  window.mdmEstatisticas = {
+    escolha: function () { return escolha; }, define: defineEscolha, naoSeguir: NAO_SEGUIR, semRede: SEM_REDE
+  };
+  if (escolha === 'sim') carregaPostHog();
+
+  /* barra das estatísticas: fica por cima da barra fixa do telemóvel e sai do caminho dos botões do topo */
+  var consent = document.querySelector('[data-consent]');
+  var consentRecolhe = function () {};
+  function fechaConsent() {
+    if (!consent) return;
+    var tinhaFoco = consent.contains(document.activeElement);
+    consent.hidden = true;
+    document.documentElement.classList.remove('com-consent');
+    if (tinhaFoco) { var m = $('conteudo'); if (m) m.focus({ preventScroll: true }); }
+  }
+  (function () {
+    if (!consent) return;
+    if (escolha || NAO_SEGUIR || SEM_REDE) { consent.remove(); consent = null; return; }
+    var raiz = document.documentElement, acoes = document.querySelector('.hero-acoes');
+    var barraMovel = document.querySelector('[data-barra-movel]');
+    consent.hidden = false;
+    raiz.classList.add('com-consent');
+    function mede() {
+      if (consent.hidden) return;
+      raiz.style.setProperty('--consent-h', consent.offsetHeight + 'px');
+      if (barraMovel && barraMovel.offsetHeight) raiz.style.setProperty('--barra-movel-h', barraMovel.offsetHeight + 'px');
+      consentRecolhe();
+    }
+    /* compara com o sítio onde a barra fica (não com o da animação): por cima da barra móvel, se estiver à vista */
+    consentRecolhe = function () {
+      if (!consent || consent.hidden || !acoes) return;
+      var movel = barraMovel && barraMovel.getClientRects().length && !barraMovel.classList.contains('escondida') ? barraMovel.offsetHeight : 0;
+      var fundo = window.innerHeight - movel, topo = fundo - consent.offsetHeight;
+      var r = acoes.getBoundingClientRect();
+      /* com o foco do teclado lá dentro, fica à vista (os botões do topo não têm o foco nesse momento) */
+      var tapa = r.bottom > topo && r.top < fundo && r.height > 0 && !consent.contains(document.activeElement);
+      consent.classList.toggle('recolhida', tapa);
+    };
+    var tick = false;
+    function agenda() { if (!tick) { tick = true; requestAnimationFrame(function () { tick = false; consentRecolhe(); }); } }
+    window.addEventListener('scroll', agenda, { passive: true });
+    window.addEventListener('resize', function () { requestAnimationFrame(mede); });
+    consent.addEventListener('focusin', function () { consentRecolhe(); });
+    consent.addEventListener('focusout', function () { setTimeout(consentRecolhe, 0); });
+    consent.addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('[data-consent-escolha]');
+      if (b) defineEscolha(b.getAttribute('data-consent-escolha'));
+    });
+    mede();
   })();
 
   /* ═══ Origem: código QR das carrinhas (carrinha.html?v=01&p=t, gerado por marketing/gerar_qr.py) ═══
@@ -145,8 +228,38 @@
       var esconde = visiveis.size > 0;
       barra.classList.toggle('escondida', esconde);
       barra.inert = esconde;
+      document.documentElement.classList.toggle('barra-fora', esconde);
+      consentRecolhe();
     }, { threshold: [0.05, 0.6] });
     alvos.forEach(function (a) { io.observe(a); });
+  })();
+
+  /* ═══ Foco do teclado nunca por baixo das barras fixas de baixo (estatísticas e barra do telemóvel) ═══
+     O browser só desliza até um elemento focado se ele estiver fora do ecrã; por baixo de uma barra fixa conta como visível. */
+  (function () {
+    var barras = qsa('[data-consent], [data-barra-movel]');
+    if (!barras.length) return;
+    function ajusta(el) {
+      if (document.activeElement !== el) return;
+      /* só o foco do teclado (um clique do rato não faz saltar a página) */
+      try { if (!el.matches(':focus-visible')) return; } catch (e) {}
+      var limite = window.innerHeight;
+      barras.forEach(function (b) {
+        if (!b.isConnected || !b.getClientRects().length || b.classList.contains('escondida') || b.classList.contains('recolhida')) return;
+        limite = Math.min(limite, b.getBoundingClientRect().top);
+      });
+      /* desliza o que falta, sem empurrar o topo do elemento para baixo do cabeçalho fixo */
+      var topo = document.querySelector('[data-topo]'), cima = topo ? topo.getBoundingClientRect().bottom : 0;
+      var r = el.getBoundingClientRect(), falta = Math.min(r.bottom + 12 - limite, r.top - cima - 8);
+      if (falta > 0) window.scrollBy({ top: falta, behavior: 'instant' });
+    }
+    document.addEventListener('focusin', function (e) {
+      var el = e.target;
+      if (!el.getBoundingClientRect || el.closest('[data-consent], [data-barra-movel], dialog, .gaveta')) return;
+      requestAnimationFrame(function () { ajusta(el); });
+      /* depois de deslizar, as barras podem mudar de sítio (a do telemóvel entra ou sai): volta a ver */
+      setTimeout(function () { ajusta(el); }, 320);
+    });
   })();
 
   /* ═══ Revelação ao percorrer: uma vez, 16 px, 70 ms entre irmãos ═══ */
