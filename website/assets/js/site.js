@@ -628,9 +628,19 @@
     if (msg) foto.value = '';
     return !msg;
   }
+  /* o nome da fotografia escolhida, no lugar do «Nenhuma escolhida» (o campo nativo, invisível por cima, diz o mesmo ao leitor de ecrã) */
+  function nomeFoto() {
+    var caixa = foto.closest('[data-ficheiro]'), f = foto.files && foto.files[0];
+    if (!caixa) return;
+    caixa.classList.toggle('tem', !!f);
+    caixa.querySelector('[data-ficheiro-nome]').textContent = f ? f.name : 'Nenhuma escolhida';
+  }
   if (foto) {
     if (SEM_ENVIO) { foto.disabled = true; foto.closest('[data-campo-foto]').hidden = true; }
-    else foto.addEventListener('change', confereFoto);
+    else {
+      foto.addEventListener('change', function () { confereFoto(); nomeFoto(); });
+      foto.form.addEventListener('reset', function () { setTimeout(nomeFoto, 0); });
+    }
   }
 
   /* ═══ Estimativa de potência por divisão («Não sabe a potência?», dentro do formulário) ═══
