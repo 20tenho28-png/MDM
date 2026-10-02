@@ -348,6 +348,19 @@
     var trilho = d.querySelector('.visor-trilho'), conta = d.querySelector('.visor-conta');
     var ant = d.querySelector('.visor-ant'), seg = d.querySelector('.visor-seg');
     var n = 0, idx = 0, alvo = -1, comHistorico = false, volta = null;
+    function esqueceY() {
+      try { if (history.state && 'visorY' in history.state) { var st = Object.assign({}, history.state); delete st.visorY; history.replaceState(st, ''); } } catch (e) {}
+    }
+
+    /* de volta de «Ver a obra» com a página recarregada: repõe a posição em que o visor foi aberto */
+    (function () {
+      var st = history.state, nav = window.performance && performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+      if (!st || typeof st.visorY !== 'number' || !nav || nav.type !== 'back_forward') return;
+      var ir = function () { window.scrollTo({ top: st.visorY, left: 0, behavior: 'instant' }); };
+      ir(); window.addEventListener('load', ir);
+      try { history.scrollRestoration = 'auto'; } catch (e) {}
+      esqueceY();
+    })();
 
     function itensDe(raiz) { return qsa('[data-visor-item]', raiz); }
     function legenda(it) {
@@ -416,9 +429,13 @@
       trilho.scrollLeft = i * trilho.clientWidth;
       upd();
       d.querySelector('.visor-fechar').focus();
-      /* o "voltar" do telemóvel fecha o visor; a posição da página não salta para uma secção (#) ao voltar.
-         'manual' depois do pushState: só na entrada do visor, para que a página, ao voltar da obra, reponha a posição */
-      try { history.pushState({ visor: 1 }, ''); history.scrollRestoration = 'manual'; comHistorico = true; } catch (e) { comHistorico = false; }
+      /* o "voltar" do telemóvel fecha o visor. 'manual' antes do pushState: ao voltar, a página não salta para uma secção (#).
+         A posição fica guardada nesta entrada para se repor ao voltar de «Ver a obra» (o navegador não a repõe em 'manual') */
+      try {
+        history.replaceState(Object.assign({}, history.state, { visorY: Math.round(window.scrollY) }), '');
+        history.scrollRestoration = 'manual';
+        history.pushState({ visor: 1 }, ''); comHistorico = true;
+      } catch (e) { comHistorico = false; }
       track('visor_aberto', { fotografias: n, pagina: location.pathname });
     }
     function fecha() { if (d.open) d.close(); }
@@ -430,7 +447,7 @@
       if (comHistorico) { comHistorico = false; try { if (history.state && history.state.visor) history.back(); } catch (e) {} }
     });
     window.addEventListener('popstate', function () {
-      requestAnimationFrame(function () { try { history.scrollRestoration = 'auto'; } catch (e) {} });
+      requestAnimationFrame(function () { try { history.scrollRestoration = 'auto'; } catch (e) {} esqueceY(); });
       if (d.open) { comHistorico = false; fecha(); }
     });
     d.querySelector('.visor-fechar').addEventListener('click', fecha);
