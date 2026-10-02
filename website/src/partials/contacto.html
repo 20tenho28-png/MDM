@@ -71,7 +71,7 @@
             <summary class="pot-cab">
               <span class="pot-cab-txt">
                 <span class="pot-cab-t">Não sabe a potência? <span class="nowrap">Calcule por divisão</span></span>
-                <span class="pot-cab-s">Opcional · pela área de cada divisão</span>
+                <span class="pot-cab-s">Opcional · pela área</span>
               </span>
               <svg class="pot-mais" viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>
             </summary>
@@ -86,15 +86,15 @@
               <div class="pot-total">
                 <p class="rotulo">Total estimado</p>
                 <p class="pot-total-v" data-pot-total></p>
-                <p class="pot-multi" data-pot-multi hidden>Com várias divisões, um multi-split (uma só unidade exterior para várias divisões) pode ser uma opção.</p>
+                <p class="pot-multi" data-pot-multi hidden>Um multi-split (uma só unidade exterior para várias divisões) pode ser uma opção.</p>
               </div>
               <p class="pot-aviso">É uma estimativa, arredondada ao tamanho de aparelho seguinte. A potência certa confirma-se na visita: depende do isolamento, da orientação, das janelas e do uso de cada divisão.</p>
               <button class="btn btn-tinta pot-juntar" type="button" data-pot-juntar>Juntar ao pedido</button>
             </div>
           </details>
           <div class="pot-junta" data-pot-junta hidden>
-            <p class="pot-junta-txt" tabindex="-1" data-pot-junta-txt><strong>Estimativa junta ao pedido:</strong> <span data-pot-resumo></span></p>
-            <p class="pot-junta-nota">Se mudar as divisões, o pedido acompanha.<span data-pot-servico hidden> Escolhemos também o serviço «Ar condicionado: montagem».</span></p>
+            <p class="pot-junta-txt" tabindex="-1" data-pot-junta-txt aria-describedby="pot-junta-nota"><strong>Estimativa junta ao pedido:</strong> <span data-pot-resumo></span></p>
+            <p class="pot-junta-nota" id="pot-junta-nota">Se mudar as divisões, o pedido acompanha.<span data-pot-servico hidden> Escolhemos também o serviço «Ar condicionado: montagem».</span></p>
             <button class="pot-retirar" type="button" data-pot-retirar>Retirar<span class="so-leitor"> a estimativa do pedido</span></button>
           </div>
           <p class="so-leitor" aria-live="polite" data-pot-anuncio></p>
@@ -109,9 +109,9 @@
                   </div>
                   <div class="campo">
                     <label data-pot-para="area">Área<span class="so-leitor"> da divisão <span data-pot-n>1</span>, em m²</span></label>
-                    <span class="pot-area"><input class="campo-in" data-pot="area" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" placeholder="Ex.: 12,5"><span class="pot-unid" aria-hidden="true">m²</span></span>
-                    <p class="campo-erro" data-pot="erro"></p>
+                    <span class="pot-area"><input class="campo-in" data-pot="area" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" placeholder="12,5"><span class="pot-unid" aria-hidden="true">m²</span></span>
                   </div>
+                  <p class="campo-erro" data-pot="erro"></p>
                 </div>
                 <div class="pot-opcoes">
                   <label class="pot-check"><input type="checkbox" data-pot="sol"><span>Muito sol ou janelas grandes<span class="so-leitor"> (divisão <span data-pot-n>1</span>)</span></span></label>

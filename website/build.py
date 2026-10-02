@@ -604,9 +604,12 @@ def check_btu():
     num = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0
     if not isinstance(b, dict):
         return ["site.json: falta «btu» (estimativa de potência do formulário)"]
-    for k in ("porM2", "sol", "ultimoAndar", "btuPorKw", "areaMin", "areaMax", "maxDivisoes"):
+    for k in ("porM2", "sol", "ultimoAndar", "btuPorKw", "areaMin", "areaMax"):
         if not num(b.get(k)):
             out.append(f"site.json «btu.{k}»: tem de ser um número maior do que zero")
+    m = b.get("maxDivisoes")   # um número de divisões: inteiro (2.5 ou 8.0 apareciam assim na página)
+    if not (isinstance(m, int) and not isinstance(m, bool) and m >= 1):
+        out.append("site.json «btu.maxDivisoes»: tem de ser um número inteiro, 1 ou mais")
     tipos = b.get("tipos")
     if not (isinstance(tipos, dict) and tipos and all(num(v) for v in tipos.values())):
         out.append("site.json «btu.tipos»: lista de tipos de divisão, cada um com um fator maior do que zero")

@@ -674,7 +674,7 @@
       if (!/^(\d+(\.\d*)?|\.\d+)$/.test(t)) return { erro: 'Escreva a área só com números, por exemplo 12 ou 12,5.' };
       var a = Math.round(parseFloat(t) * 100) / 100;
       if (a < AREA_MIN) return { erro: 'A área tem de ter pelo menos ' + decimal(AREA_MIN) + ' m².' };
-      if (a > AREA_MAX) return { erro: 'Até ' + decimal(AREA_MAX) + ' m² por divisão. Um espaço maior, a MDM dimensiona-o na visita.' };
+      if (a > AREA_MAX) return { erro: 'Até ' + decimal(AREA_MAX) + ' m² por divisão. Para um espaço maior, a MDM dimensiona a instalação na visita.' };
       return { area: a };
     }
     function calcula(tipo, area, sol, topo) {
@@ -727,11 +727,12 @@
       });
     }
     function mostraLinha(l) {
-      var a = l.leitura, c = l.calc;
+      var c = l.calc;
       if (c && c.tam) poeTexto(l.res, [['strong', btuh(c.tam)], ' · ' + kw(c.tam) + NB + 'kW']);
       else if (c) poeTexto(l.res, [['strong', 'Mais de ' + btuh(MAIOR)],
-        ['span', 'Pode precisar de mais do que um aparelho ou de um sistema de condutas. A MDM dimensiona-a na visita.', 'pot-res-nota']]);
-      else poeTexto(l.res, [a.vazio ? 'Falta a área.' : 'Sem estimativa: veja a área.']);
+        ['span', 'Pode precisar de mais do que um aparelho ou de um sistema de condutas. A MDM dimensiona a instalação na visita.', 'pot-res-nota']]);
+      /* sem área (ou com uma área errada) a linha fica em branco: o pedido de área já está no total e o erro no campo */
+      else poeTexto(l.res, []);
     }
     function mostraTotal(r) {
       totalEl.classList.toggle('vazio', !r.n);
@@ -757,15 +758,25 @@
       sincroniza();
       return atual;
     }
+    /* «ultimo» evita repetir o que acabou de se ouvir (a estimativa dita ao parar de escrever não se repete ao sair do
+       campo). Retirar uma divisão ou a estimativa, «Juntar» sem área e uma área que fica vazia ou errada limpam-no:
+       aí o mesmo texto volta a ouvir-se. Se for igual ao que está na região, esvazia-a primeiro, para ser lido outra vez. */
     var ultimo = '', tAnuncio = 0;
     function anuncia(txt, ja) {
       clearTimeout(tAnuncio);
-      function vai() { if (txt && txt !== ultimo) { ultimo = txt; anuncio.textContent = txt; } }
+      function vai() {
+        if (!txt || txt === ultimo) return;
+        ultimo = txt;
+        if (anuncio.textContent !== txt) { anuncio.textContent = txt; return; }
+        anuncio.textContent = '';
+        tAnuncio = setTimeout(function () { anuncio.textContent = txt; }, 60);
+      }
       if (ja) vai(); else tAnuncio = setTimeout(vai, 400);
     }
     function anunciaLinha(l, ja) {
       var i = linhas.indexOf(l), c = l.calc;
-      if (!c) return;
+      /* sem estimativa (área vazia ou errada): cancela a que estava para sair, que já não é verdade */
+      if (!c) { clearTimeout(tAnuncio); ultimo = ''; return; }
       anuncia('Divisão ' + (i + 1) + ': ' + (c.tam ? btuh(c.tam) : 'mais de ' + btuh(MAIOR) + ', a dimensionar na visita') + '. ' + totalTexto(atual), ja);
     }
 
@@ -774,11 +785,11 @@
       if (msg) l.area.setAttribute('aria-invalid', 'true'); else l.area.removeAttribute('aria-invalid');
     }
     /* o erro aparece ao sair do campo ou com Enter (não a meio de escrever) */
-    function confere(l, forcado) {
+    function confere(l, forcado, calado) {
       var a = l.leitura || leArea(l.area.value);
       var msg = a.erro || (a.vazio && forcado ? 'Escreva a área desta divisão, por exemplo 12 ou 12,5.' : '');
       poeErro(l, msg);
-      if (msg) anuncia('Divisão ' + (linhas.indexOf(l) + 1) + ': ' + msg, true);
+      if (msg && !calado) anuncia('Divisão ' + (linhas.indexOf(l) + 1) + ': ' + msg, true);
       return !msg;
     }
 
@@ -819,12 +830,32 @@
       if (l.area.getAttribute('aria-invalid') === 'true') poeErro(l, l.leitura.erro || '');
       anunciaLinha(l, false);
     });
+    /* Ao sair da área com um clique (num botão, noutro campo), o erro só aparece depois de o clique acabar:
+       se aparecesse logo, empurrava o que está por baixo e o clique perdia-se. Com Tab aparece logo a seguir. */
+    var premido = false;
+    document.addEventListener('pointerdown', function () { premido = true; }, true);
+    document.addEventListener('pointerup', function () { premido = false; }, true);
+    document.addEventListener('pointercancel', function () { premido = false; }, true);
+    function depoisDoClique(fn) {
+      if (!premido) { setTimeout(fn, 0); return; }
+      function vai() {
+        document.removeEventListener('pointerup', vai, true);
+        document.removeEventListener('pointercancel', vai, true);
+        setTimeout(fn, 0);
+      }
+      document.addEventListener('pointerup', vai, true);
+      document.addEventListener('pointercancel', vai, true);
+    }
     lista.addEventListener('change', function (e) {
       var l = linhaDe(e.target);
       if (!l) return;
       atualiza();
-      if (e.target === l.area && !confere(l)) return;
-      anunciaLinha(l, true);
+      if (e.target !== l.area) { anunciaLinha(l, true); return; }
+      /* só mostra um erro (o que se escreve já o apaga quando a área fica certa): assim não desfaz o de «Juntar ao pedido» */
+      depoisDoClique(function () {
+        if (linhas.indexOf(l) < 0) return;
+        if (l.leitura.erro) confere(l); else if (l.calc) anunciaLinha(l, true);
+      });
     });
     /* Enter numa área ou numa caixa de escolha não envia o pedido; na área, confirma o valor */
     lista.addEventListener('keydown', function (e) {
@@ -845,6 +876,7 @@
       atualiza();
       /* o foco passa para a divisão que ficou no lugar desta ou, se era a última, para «Adicionar divisão» */
       (linhas[i] ? linhas[i].tipo : adiciona).focus();
+      ultimo = '';
       anuncia('Divisão ' + (i + 1) + ' retirada. ' + totalTexto(atual), true);
     });
     adiciona.addEventListener('click', function () {
@@ -857,9 +889,12 @@
     juntar.addEventListener('click', function () {
       var r = atualiza();
       if (!r.n) {
+        /* o erro de cada divisão fica no seu campo; o foco vai para a primeira e ouve-se uma só mensagem */
         var primeira = null;
-        linhas.forEach(function (l) { if (!confere(l, true) && !primeira) primeira = l; });
+        linhas.forEach(function (l) { if (!confere(l, true, true) && !primeira) primeira = l; });
         (primeira || linhas[0]).area.focus();
+        ultimo = '';
+        anuncia('Escreva a área de pelo menos uma divisão.', false);
         return;
       }
       junto = true;
@@ -874,9 +909,12 @@
     retirar.addEventListener('click', function () {
       junto = false;
       sincroniza();
+      ultimo = '';
       anuncia('Estimativa retirada do pedido.', true);
       (det.open ? juntar : det.querySelector('summary')).focus();
     });
+    /* «Escolhemos também o serviço…» só vale enquanto o visitante não muda o serviço (escolheServico não dispara change) */
+    $('qServico').addEventListener('change', function () { notaServico.hidden = true; });
     /* depois de um envio, o formulário limpa-se: a estimativa volta a uma divisão vazia */
     form.addEventListener('reset', function () {
       setTimeout(function () {

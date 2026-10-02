@@ -507,11 +507,13 @@ html:not(.js) #sendWhats { display: none; }
 .pot-div-t { float: left; width: 100%; margin: 0 0 10px; padding: 0; font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--carmim); }
 .pot-div-in { clear: both; display: flex; flex-direction: column; gap: 12px; }
 .pot-div-campos { display: grid; gap: 12px; }
-.pot-div .campo-in { background-color: var(--branco); }
+.pot-div .campo-in:not([aria-invalid="true"]) { background-color: var(--branco); }
+/* o erro da área ocupa a largura da ficha (na coluna estreita da área partia-se em muitas linhas) */
+.pot-div-campos > .campo-erro { grid-column: 1 / -1; margin-top: -4px; }
 /* tipo e área lado a lado assim que cabem (a área precisa de pouco: «12,5 m²») */
 @container (min-width: 250px) {
   .pot-div-campos { grid-template-columns: minmax(0, 1fr) 104px; }
-  .pot-div select.campo-in { padding-right: 34px; background-position: right 12px center; }
+  .pot-div select.campo-in { padding-left: 12px; padding-right: 30px; background-position: right 10px center; }
 }
 @container (min-width: 440px) { .pot-div-campos { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); } }
 .pot-area { position: relative; display: block; }
@@ -542,7 +544,9 @@ html:not(.js) #sendWhats { display: none; }
 @media (max-width: 559px) { .pot-juntar { align-self: stretch; } }
 .pot-junta { padding: 12px 16px 4px; border-left: 3px solid var(--wa); background: var(--ok-bg); font-family: var(--sans); font-size: 14px; font-weight: 500; line-height: 1.5; animation: mdm-cai 300ms var(--mover) both; }
 .pot-junta-txt { color: var(--tinta); }
-.pot-junta-l { display: block; }
+/* uma divisão por linha; se partir, a continuação fica recolhida debaixo da sua divisão */
+.pot-junta-l { display: block; padding-left: 1em; text-indent: -1em; }
+.pot-junta-l + .pot-junta-l { margin-top: 4px; }
 .pot-junta-l:last-child { font-weight: 700; }
 .pot-junta-txt:focus-visible { box-shadow: 0 0 0 2px var(--ok-bg), 0 0 0 4px var(--tinta); }
 .pot-junta-nota { margin-top: 4px; color: var(--aco-2); }
