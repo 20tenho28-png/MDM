@@ -82,7 +82,17 @@
   },
   "posthogIP": {
     "grupo": "Privacidade",
-    "pedido": "Se a conta PostHog descarta o endereço IP (ver nas definições do projeto), numa frase completa (acrescenta-se à política de privacidade, no ponto «Estatísticas do site»)",
+    "pedido": "Se a conta PostHog descarta o endereço IP e não estima a localização (definições do projeto: «Discard client IP data» e GeoIP), numa frase completa (acrescenta-se à política de privacidade, no ponto «Estatísticas do site»; enquanto estiver vazio, a política diz que o PostHog pode guardar o IP e estimar o país e a cidade)",
+    "valor": ""
+  },
+  "conservatoria": {
+    "grupo": "Empresa",
+    "pedido": "Conservatória do Registo Comercial onde a sociedade está matriculada, como consta da certidão permanente (aparece no rodapé, por baixo do NIF, e na política de privacidade)",
+    "valor": ""
+  },
+  "capitalSocial": {
+    "grupo": "Empresa",
+    "pedido": "Capital social, com o símbolo do euro, como consta da certidão permanente (obrigatório nos sites das sociedades por quotas; aparece no rodapé e na política de privacidade)",
     "valor": ""
   },
   "_tarefas": [

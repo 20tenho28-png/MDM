@@ -44,7 +44,7 @@
       </ul>
 
       <h2 id="responsavel">Quem é responsável</h2>
-      <p>O responsável pelo tratamento dos dados é a <strong>{{ site.legalName }}</strong>, NIF {{ site.nif }}, com sede na {{ site.address1 }}, {{ site.address2 }}.</p>
+      <p>O responsável pelo tratamento dos dados é a <strong>{{ site.legalName }}</strong>, NIF e número de matrícula {{ site.nif }}{{#se dados.conservatoria}} ({{ dados.conservatoria }}){{/se}}{{#se dados.capitalSocial}}, capital social {{ dados.capitalSocial }}{{/se}}, com sede na {{ site.address1 }}, {{ site.address2 }}.</p>
       <p>Para qualquer questão sobre os seus dados, incluindo os direitos descritos <a href="#direitos">mais abaixo</a>, escreva para <a href="mailto:{{ site.email }}">{{ site.email }}</a>, ligue <a href="{{ site.phoneHref }}">{{ site.phone }}</a> ({{ site.hours }}) ou escreva para a morada acima. A MDM não designou um encarregado de proteção de dados.</p>
 
       <h2 id="dados">Que dados tratamos e porquê</h2>
@@ -102,7 +102,7 @@
         <li><strong>O que se regista:</strong> as páginas vistas e o site de onde chegou; os toques nos contactos (telefone, WhatsApp, email, orçamento); o uso do menu, do carrossel, do visor de fotografias, dos filtros de obras e das perguntas frequentes; o início e o envio do formulário, com o serviço escolhido; na página das carrinhas, que carrinha e que lado; onde se clica em cada página (mapa de cliques); e o tipo de equipamento e de browser. Se aceitar, conta também o que fez nessa página antes de escolher.</li>
         <li><strong>O que nunca se regista:</strong> o que escreve no formulário (nome, email, telefone, mensagem) nem a fotografia.</li>
       </ul>
-      <p>Como em qualquer ligação à internet, o PostHog recebe o endereço IP do seu equipamento.{{#se dados.posthogIP}} {{ dados.posthogIP }}{{/se}}</p>
+      <p>Como em qualquer ligação à internet, o PostHog recebe o endereço IP do seu equipamento.{{#se dados.posthogIP}} {{ dados.posthogIP }}{{/se}}{{#sem dados.posthogIP}} O PostHog pode guardar esse endereço e usá-lo para estimar a localização aproximada (país e cidade).{{/sem}}</p>
       <p>Pode mudar de ideias a qualquer momento, aqui:</p>
 
       <div class="priv-controlo" id="controlo" data-est-controlo>

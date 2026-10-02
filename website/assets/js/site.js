@@ -45,7 +45,9 @@
       try {
         window.posthog.init('phc_veB6kR2as8m8HuRMEVuTUWubWQxLkPW5D8Uf6wsJcy8A', {
           api_host: 'https://eu.i.posthog.com', persistence: 'memory', person_profiles: 'identified_only',
-          autocapture: false, enable_heatmaps: true, capture_dead_clicks: true
+          autocapture: false, enable_heatmaps: true, capture_dead_clicks: true,
+          /* só o que a política de privacidade descreve, mesmo que se ligue mais alguma coisa na conta PostHog */
+          disable_session_recording: true, disable_surveys: true, capture_exceptions: false, capture_performance: false
         });
         phCapture = window.posthog.capture; phPronto = true;
         while (_trackQueue.length) { var t = _trackQueue.shift(); window.posthog.capture(t[0], t[1]); }
@@ -649,7 +651,7 @@
         lbl.textContent = 'Pedido enviado';
         quoteAlert('Pedido recebido, obrigado. Vamos analisar o seu pedido e responder pelo email ou telefone que indicou. Se for urgente,', true,
           [[TEL_HREF, 'ligue ' + TEL],
-           [WA_BASE + encodeURIComponent('Olá MDM. Acabei de enviar um pedido de orçamento pelo site.' + (ORIGEM ? ' [' + ORIGEM + ']' : '')), 'fale connosco por WhatsApp']]);
+           [WA_BASE + encodeURIComponent('Olá MDM. Acabei de enviar um pedido de orçamento pelo site. ' + etiqueta(d.servico) + (ORIGEM ? ' [' + ORIGEM + ']' : '')), 'fale connosco por WhatsApp']]);
         form.reset(); erroCampo('qFoto'); escolheServico(form.getAttribute('data-preselect'));
         track('quote_form_ok', { servico: d.servico, segmento: triagem(d.servico).seg });
         setTimeout(function () { if (lbl.textContent === 'Pedido enviado') lbl.textContent = 'Enviar pedido'; }, 6000);
