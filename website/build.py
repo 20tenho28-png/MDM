@@ -616,6 +616,9 @@ def check_btu():
     t = b.get("tamanhos")
     if not (isinstance(t, list) and t and all(num(x) for x in t) and t == sorted(set(t))):
         out.append("site.json «btu.tamanhos»: tamanhos de aparelho em BTU/h, do mais pequeno para o maior, sem repetir")
+    f = b.get("folga", 0)   # margem para não saltar de tamanho por pouco: 0 a 0,49
+    if not (isinstance(f, (int, float)) and not isinstance(f, bool) and 0 <= f < 0.5):
+        out.append("site.json «btu.folga»: margem entre 0 e 0,49 (0,1 = 10%)")
     if not out and b["areaMin"] >= b["areaMax"]:
         out.append("site.json «btu»: areaMin tem de ser menor do que areaMax")
     return out

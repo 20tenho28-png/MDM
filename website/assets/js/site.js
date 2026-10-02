@@ -632,7 +632,8 @@
 
   /* ═══ Estimativa de potência por divisão («Não sabe a potência?», dentro do formulário) ═══
      Os números vêm de "btu" em data/site.json: o build.py põe-nos em data-btu (nada se pede à rede; serve no ficheiro único).
-     Por divisão: BTU/h = área × porM2 × fator do tipo × sol × último andar, arredondado ao tamanho seguinte de "tamanhos".
+     Por divisão: BTU/h = área × porM2 × fator do tipo × sol × último andar, arredondado ao tamanho de "tamanhos" que serve:
+     o primeiro que chega à conta com uma folga de "folga" (10%: 12 100 BTU/h fica num aparelho de 12 000, não salta para 18 000).
      Os campos das divisões não têm name e não seguem com o pedido. Só segue o resumo, no campo escondido "potencia",
      depois de «Juntar ao pedido»; a partir daí acompanha cada mudança até «Retirar». Sem JavaScript o bloco fica escondido.
      Na medição vão só números (quantas divisões e o total em BTU/h). */
@@ -649,6 +650,7 @@
     var modelo = raiz && raiz.querySelector('template[data-pot-modelo]');
     if (!campo || !modelo || !tipos.length || !tamanhos.length || !(cfg.porM2 > 0) || !(cfg.btuPorKw > 0)) return sem;
     var MAIOR = tamanhos[tamanhos.length - 1], MAX = cfg.maxDivisoes || 8;
+    var FOLGA = cfg.folga >= 0 && cfg.folga < 0.5 ? cfg.folga : 0;
     var AREA_MIN = cfg.areaMin || 2, AREA_MAX = cfg.areaMax || 200;
     var POT_AC = 'Ar condicionado: montagem / instalação';
     var det = raiz.querySelector('details'), resumoEl = raiz.querySelector('[data-pot-resumo]');
@@ -679,7 +681,7 @@
     }
     function calcula(tipo, area, sol, topo) {
       var est = Math.round(area * cfg.porM2 * (cfg.tipos[tipo] || 1) * (sol ? cfg.sol || 1 : 1) * (topo ? cfg.ultimoAndar || 1 : 1));
-      for (var i = 0; i < tamanhos.length; i++) if (tamanhos[i] >= est) return { est: est, tam: tamanhos[i] };
+      for (var i = 0; i < tamanhos.length; i++) if (tamanhos[i] >= est * (1 - FOLGA)) return { est: est, tam: tamanhos[i] };
       return { est: est, tam: 0 };   /* acima do maior tamanho */
     }
 

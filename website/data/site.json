@@ -24,6 +24,7 @@
     "sol": 1.15,
     "ultimoAndar": 1.10,
     "tamanhos": [7000, 9000, 12000, 18000, 24000],
+    "folga": 0.1,
     "btuPorKw": 3412,
     "areaMin": 2,
     "areaMax": 200,
