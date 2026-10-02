@@ -17,7 +17,7 @@ correr o script e depois python3 website/build.py --check, que falha se faltar a
 import sys
 from pathlib import Path
 
-from PIL import Image, features
+from PIL import Image, ImageOps, features
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build import FOTO_LADOS  # noqa: E402  (os mesmos tamanhos que o srcset pede)
@@ -30,7 +30,15 @@ FORMATOS = {"avif": dict(quality=60, speed=4), "webp": dict(quality=80, method=6
 
 def gera(jpg, todas=False):
     n = jpg.name[len("foto-"):-len("-1600.jpg")]
-    im = Image.open(jpg).convert("RGB")
+    src = Image.open(jpg)
+    exif = src.getexif()
+    # foto de telemóvel com rodar na EXIF (274) ou com localização (GPS, 0x8825): os tamanhos saem já direitos,
+    # mas o JPEG de reserva continua com a EXIF e o build.py mede-o pela orientação de obras.json
+    if exif.get(274, 1) != 1 or 0x8825 in exif:
+        print(f"Aviso: {jpg.name} tem {'rotação' if exif.get(274, 1) != 1 else ''}"
+              f"{' e ' if exif.get(274, 1) != 1 and 0x8825 in exif else ''}{'localização' if 0x8825 in exif else ''}"
+              " na EXIF; guardar o JPEG de novo, direito e sem EXIF, e correr com --todas", file=sys.stderr)
+    im = ImageOps.exif_transpose(src).convert("RGB")
     feitos = []
     for lado in FOTO_LADOS:
         escala = lado / max(im.size)
