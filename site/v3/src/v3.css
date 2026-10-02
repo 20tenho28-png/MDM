@@ -702,3 +702,7 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
 
 /* Movimento reduzido: as duas barras ligadas ao scroll (termómetro e progresso do carrossel) também desaparecem. */
 @media (prefers-reduced-motion: reduce) { #nav::after, .proj-progress { display: none !important; } }
+
+/* ── v3.8: menu marca onde está (scroll-spy em main.js) ── */
+/* aria-current="location" na secção à vista, "page" na página Obras; no menu do telemóvel, barra vermelha à esquerda. */
+.m-menu a[aria-current] { color: var(--red-dk); box-shadow: inset 3px 0 0 var(--red); padding-left: 12px; }

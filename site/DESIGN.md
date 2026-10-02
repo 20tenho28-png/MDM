@@ -231,9 +231,14 @@ Tudo a partir de 1024px (subgrid a partir de 768px); no telemóvel mantém-se um
 
 ### Menus, acordeões e slider (v3.6–3.7, 01/10/2026)
 Com base nos artigos da Prismic sobre menus, acordeões e sliders em CSS (texto colado pelo dono):
-- **Menu fixo em vidro** (sticky com `backdrop-filter`): fica translúcido ao descer e encolhe 12px no computador. **Sublinhado animado** que cresce da esquerda (carmim, dourado, azul) ao passar o rato ou com o teclado (a regra para `aria-current` existe, mas nenhum link do menu o recebe ainda).
+- **Menu fixo em vidro** (sticky com `backdrop-filter`): fica translúcido ao descer e encolhe 12px no computador. **Sublinhado animado** que cresce da esquerda (carmim, dourado, azul) ao passar o rato ou com o teclado e, desde a v3.8, na secção à vista.
 - **Menu do telemóvel**: entra a descer (`@starting-style`) com as linhas em cascata e um marcador quente-frio.
 - **Acordeões** (perguntas): `details`/`summary` nativos (o método recomendado), altura animada com `::details-content` + `interpolate-size`, "+" que roda para "×" num círculo, barra quente à esquerda na resposta aberta; `name="faq-…"` deixa só uma aberta de cada vez.
 - **Slider das obras** (home, abaixo de 1024px): carrossel só em CSS com `scroll-snap`, o cartão seguinte a espreitar e barra de progresso ligada ao deslize (`scroll-timeline` + `timeline-scope`). No computador mantém-se o bento.
 Versão anterior: tag `versao-04-layout`.
 Correção (01/10, ao rever o relatório): com movimento reduzido, as barras do termómetro e do carrossel ficam escondidas; antes continuavam a acompanhar o scroll.
+
+### Menu marca onde está (v3.8, 02/10/2026)
+- **Scroll-spy** (`main.js`, `IntersectionObserver`): o link da secção que está a meio do ecrã recebe `aria-current="location"` e fica com o sublinhado cheio; na página Obras, o link Obras recebe `aria-current="page"`. Na home, "Obras" acompanha a secção `#obras` (`data-spy="obras"` no header). Entre secções sem link (equipa, empresas) nenhum fica marcado.
+- No menu do telemóvel, o link atual fica carmim com uma barra à esquerda.
+Versão anterior: tag `versao-05b-antes-scrollspy`.

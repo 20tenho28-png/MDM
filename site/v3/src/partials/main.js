@@ -91,6 +91,20 @@
       sum.innerHTML = 'Não foi possível enviar agora. Tente de novo ou ligue <a href="tel:+351218935050">218 935 050</a>.'; sum.hidden = false; sum.focus && sum.setAttribute('tabindex', '-1'); sum.focus();
     });
   });
+  /* Menu: marca a página atual (aria-current="page") e, nas secções desta página, a secção à vista (aria-current="location", sublinhado cheio em v3.css). */
+  var spyLinks = [].slice.call(document.querySelectorAll('.nav-menu a, .m-menu a')), spyMap = new Map();
+  spyLinks.forEach(function (a) {
+    var u = new URL(a.href, location.href), same = u.pathname === location.pathname;
+    if (same && !u.hash) { a.setAttribute('aria-current', 'page'); return; }
+    var sec = document.getElementById(same ? u.hash.slice(1) : a.dataset.spy || ''); if (!sec) return;
+    (spyMap.get(sec) || spyMap.set(sec, []).get(sec)).push(a);
+  });
+  if (spyMap.size && 'IntersectionObserver' in window) {
+    var spyIo = new IntersectionObserver(function (en) {
+      en.forEach(function (e) { spyMap.get(e.target).forEach(function (a) { if (e.isIntersecting) a.setAttribute('aria-current', 'location'); else if (a.getAttribute('aria-current') === 'location') a.removeAttribute('aria-current'); }); });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    spyMap.forEach(function (_, sec) { spyIo.observe(sec); });
+  }
   /* Lanterna (v3.css): posição do cursor nas linhas de serviço, factos e cartões de obra. */
   if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
     document.addEventListener('pointermove', function (e) {
