@@ -494,7 +494,7 @@ html:not(.js) #sendWhats { display: none; }
 .rodape a:hover { color: #fff; text-decoration: underline; }
 .rodape .rodape-mapa { gap: 8px; color: #fff; }   /* Perfil da Empresa no Google: abre noutro separador */
 .rodape-cert { font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .12em; color: #fff; margin-top: 6px; }
-.rodape-base { max-width: calc(var(--max) - 160px); margin: 44px auto 0; padding-top: 20px; border-top: 1px solid var(--linha-esc); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-family: var(--sans); font-size: 12px; letter-spacing: .06em; }
+.rodape-base { max-width: calc(var(--max) - 160px); margin: 44px auto 0; padding-top: 20px; border-top: 1px solid var(--linha-esc); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; font-family: var(--sans); font-size: 12px; letter-spacing: .06em; }
 /* privacidade e Livro de Reclamações Eletrónico (obrigatório para empresas em Portugal) */
 .rodape-legal { display: flex; flex-wrap: wrap; gap: 4px 24px; }
 .rodape-legal a { display: inline-flex; align-items: center; min-height: 32px; }
