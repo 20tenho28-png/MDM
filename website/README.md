@@ -117,7 +117,7 @@ O PostHog (instância europeia, `persistence: 'memory'`, sem cookies nem perfis)
 Poucos efeitos, todos em `assets/css/site.css`, sem bibliotecas e sem nada a correr com a página parada:
 
 - **Topo:** encolhe depois de descer 80 px e passa a vidro (gesso a 86%, desfocado). Onde o browser não desfoca, fica opaco. Por baixo corre o **termómetro de leitura**, um filete do carmim ao azul que enche com o scroll (só onde o browser liga animações ao scroll).
-- **Perguntas:** a resposta abre e fecha a deslizar (`::details-content`). Noutros browsers abre de imediato. Funciona sem JavaScript e com o teclado.
+- **Perguntas (páginas de serviço):** a resposta abre e fecha a deslizar (`::details-content`). Noutros browsers abre de imediato. Funciona sem JavaScript e com o teclado.
 - **Botão principal (carmim):** um brilho atravessa-o uma vez ao passar o rato ou com o foco do teclado.
 - **Revelação** das secções ao descer, entrada do topo da página inicial, fotografias que crescem ao passar o rato.
 
