@@ -242,3 +242,11 @@ Correção (01/10, ao rever o relatório): com movimento reduzido, as barras do 
 - **Scroll-spy** (`main.js`, `IntersectionObserver`): o link da secção que está a meio do ecrã recebe `aria-current="location"` e fica com o sublinhado cheio; na página Obras, o link Obras recebe `aria-current="page"`. Na home, "Obras" acompanha a secção `#obras` (`data-spy="obras"` no header). Entre secções sem link (equipa, empresas) nenhum fica marcado.
 - No menu do telemóvel, o link atual fica carmim com uma barra à esquerda.
 Versão anterior: tag `versao-05b-antes-scrollspy`.
+
+### Auditoria dos artigos (v3.9, 02/10/2026)
+Os quatro pontos "a acrescentar" da auditoria dos 6 artigos colados:
+- **Galeria em subgrid** (Obras e páginas de serviço): cada cartão ocupa 3 linhas da galeria (foto, título, local) com `grid-template-rows: subgrid`; o local fica à mesma altura em todos os cartões da linha. Os cartões da galeria deixam de ser contentores de consultas (`container-type: normal`), porque um contentor não pode ser subgrid.
+- **Botões ‹ › no carrossel das obras** (home, abaixo de 1024px): avançam um cartão, ficam inativos nas pontas, saltam sem animação com movimento reduzido; só aparecem com JS.
+- **"Serviços" marcado** no menu das 5 páginas de serviço (`aria-current="true"`).
+- **Rodapé com 4.ª coluna** "Serviços e obras" (5 serviços e Obras); a página atual fica sublinhada.
+Versão anterior: tag `versao-06-scrollspy`.

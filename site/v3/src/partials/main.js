@@ -92,18 +92,32 @@
     });
   });
   /* Menu: marca a página atual (aria-current="page") e, nas secções desta página, a secção à vista (aria-current="location", sublinhado cheio em v3.css). */
-  var spyLinks = [].slice.call(document.querySelectorAll('.nav-menu a, .m-menu a')), spyMap = new Map();
+  var spyLinks = [].slice.call(document.querySelectorAll('.nav-menu a, .m-menu a, .ft-nav a')), spyMap = new Map();
   spyLinks.forEach(function (a) {
     var u = new URL(a.href, location.href), same = u.pathname === location.pathname;
     if (same && !u.hash) { a.setAttribute('aria-current', 'page'); return; }
     var sec = document.getElementById(same ? u.hash.slice(1) : a.dataset.spy || ''); if (!sec) return;
     (spyMap.get(sec) || spyMap.set(sec, []).get(sec)).push(a);
   });
+  /* Páginas de serviço (têm "Serviços" no caminho): o link Serviços do menu fica marcado como secção atual. */
+  if (document.querySelector('.crumbs a[href$="#servicos"]')) document.querySelectorAll('.nav-menu a[href$="#servicos"], .m-menu a[href$="#servicos"]').forEach(function (a) { a.setAttribute('aria-current', 'true'); });
   if (spyMap.size && 'IntersectionObserver' in window) {
     var spyIo = new IntersectionObserver(function (en) {
       en.forEach(function (e) { spyMap.get(e.target).forEach(function (a) { if (e.isIntersecting) a.setAttribute('aria-current', 'location'); else if (a.getAttribute('aria-current') === 'location') a.removeAttribute('aria-current'); }); });
     }, { rootMargin: '-40% 0px -55% 0px' });
     spyMap.forEach(function (_, sec) { spyIo.observe(sec); });
+  }
+  /* Carrossel das obras (abaixo de 1024px): botões ‹ › avançam um cartão; ficam inativos nas pontas. */
+  var pl = $('#projList'), pn = $('.proj-nav');
+  if (pl && pn) {
+    var pb = pn.querySelectorAll('button'), still = matchMedia('(prefers-reduced-motion: reduce)');
+    var pSync = function () { var max = pl.scrollWidth - pl.clientWidth - 2; pb[0].disabled = pl.scrollLeft <= 2; pb[1].disabled = pl.scrollLeft >= max; };
+    pn.hidden = false; pSync();
+    pl.addEventListener('scroll', pSync, { passive: true }); addEventListener('resize', pSync);
+    pb.forEach(function (b) { b.addEventListener('click', function () {
+      var card = pl.querySelector('.project'), step = card ? card.getBoundingClientRect().width + parseFloat(getComputedStyle(pl).columnGap || 0) : pl.clientWidth * .8;
+      pl.scrollBy({ left: step * +b.dataset.dir, behavior: still.matches ? 'auto' : 'smooth' });
+    }); });
   }
   /* Lanterna (v3.css): posição do cursor nas linhas de serviço, factos e cartões de obra. */
   if (matchMedia('(hover: hover) and (pointer: fine)').matches) {

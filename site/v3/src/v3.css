@@ -706,3 +706,26 @@ h3, .h3 { font-size: 1.5rem; line-height: 1.2; font-weight: 600; letter-spacing:
 /* ── v3.8: menu marca onde está (scroll-spy em main.js) ── */
 /* aria-current="location" na secção à vista, "page" na página Obras; no menu do telemóvel, barra vermelha à esquerda. */
 .m-menu a[aria-current] { color: var(--red-dk); box-shadow: inset 3px 0 0 var(--red); padding-left: 12px; }
+
+/* ── v3.9: auditoria dos artigos (02/10) ── */
+/* 1. Galeria (Obras e páginas de serviço): subgrid nas linhas, como no exemplo de cartões do guia de subgrid.
+      Cada cartão ocupa 3 linhas da galeria (foto, título, local); títulos de 1 a 3 linhas deixam o local à mesma altura. */
+.gallery { row-gap: 0; }
+.gallery > .project { display: grid; grid-row: span 3; grid-template-rows: subgrid; row-gap: 0; margin-bottom: var(--space-4); container-type: normal; } /* um contentor de consultas não pode ser subgrid */
+.gallery > .project > figcaption { display: grid; grid-row: span 2; grid-template-rows: subgrid; row-gap: 0; }
+.gallery > .project > figcaption > b { align-self: start; }
+
+/* 2. Carrossel das obras: botões ‹ › ao lado da barra de progresso (abaixo de 1024px; aparecem só com JS). */
+.proj-nav { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-3); }
+.proj-nav[hidden] { display: none; }
+.proj-btn { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--ink); border-radius: 50%; background: var(--cream); color: var(--ink); cursor: pointer; transition: background .2s var(--ease), color .2s var(--ease); }
+.proj-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.proj-btn:hover:not(:disabled) { background: var(--ink); color: var(--cream); }
+.proj-btn:disabled { opacity: .35; cursor: default; }
+@media (min-width: 1024px) { .proj-nav { display: none !important; } }
+
+/* 4. Rodapé: 4.ª coluna com as páginas (5 serviços e Obras). */
+@media (min-width: 768px) and (max-width: 1023px) { .ft-grid { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1024px) { .ft-grid { grid-template-columns: 1.3fr 1fr 1fr 1fr; } }
+.ft-nav .ft-strong { margin-bottom: var(--space-1); }
+.ft-nav a[aria-current] { text-decoration: underline; text-decoration-color: var(--red-on-ink); text-underline-offset: 3px; }
