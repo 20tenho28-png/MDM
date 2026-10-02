@@ -1,0 +1,65 @@
+<form class="form" id="quoteForm" name="orcamento" method="POST" action="{{root}}obrigado/" data-netlify="true" netlify-honeypot="website" enctype="multipart/form-data" novalidate>
+  <input type="hidden" name="form-name" value="orcamento">
+  <input type="hidden" name="pagina" value="{{page}}">
+  <p class="hp"><label>Não preencher: <input name="website" tabindex="-1" autocomplete="off"></label></p>
+  <h3>Pedir orçamento</h3>
+  <div class="form-summary" id="formSummary" role="alert" hidden></div>
+  <div class="f" id="f-servico">
+    <label for="servico">O que precisa?</label>
+    <select id="servico" name="servico" required aria-describedby="e-servico">
+      <option value="">Escolha o serviço</option>
+      <option>Instalar ar condicionado</option>
+      <option>Multi-split</option>
+      <option>Bomba de calor</option>
+      <option>Instalação elétrica</option>
+      <option>Ventilação</option>
+      <option>Manutenção ou avaria</option>
+    </select>
+    <span class="err-msg" id="e-servico" hidden>Escolha o serviço de que precisa.</span>
+  </div>
+  <fieldset class="f" id="f-imovel" aria-describedby="e-imovel">
+    <legend>Tipo de imóvel</legend>
+    <div class="chips">
+      <label class="chip"><input type="radio" name="imovel" value="Casa" required><span>Casa</span></label>
+      <label class="chip"><input type="radio" name="imovel" value="Apartamento"><span>Apartamento</span></label>
+      <label class="chip"><input type="radio" name="imovel" value="Comércio"><span>Comércio</span></label>
+    </div>
+    <span class="err-msg" id="e-imovel" hidden>Escolha o tipo de imóvel.</span>
+  </fieldset>
+  <fieldset class="f" id="f-urgencia" aria-describedby="e-urgencia">
+    <legend>Urgência</legend>
+    <div class="chips">
+      <label class="chip"><input type="radio" name="urgencia" value="Tenho uma avaria" required><span>Tenho uma avaria</span></label>
+      <label class="chip"><input type="radio" name="urgencia" value="Nas próximas semanas"><span>Nas próximas semanas</span></label>
+      <label class="chip"><input type="radio" name="urgencia" value="Estou só a planear"><span>Estou só a planear</span></label>
+    </div>
+    <span class="err-msg" id="e-urgencia" hidden>Diga-nos a urgência.</span>
+  </fieldset>
+  <div class="f" id="f-localidade">
+    <label for="localidade">Localidade</label>
+    <input type="text" id="localidade" name="localidade" list="concelhos" autocomplete="address-level2" placeholder="Ex.: Loures" required aria-describedby="e-localidade">
+    <datalist id="concelhos"><option>Lisboa</option><option>Loures</option><option>Odivelas</option><option>Amadora</option><option>Oeiras</option><option>Sintra</option><option>Cascais</option><option>Almada</option></datalist>
+    <span class="err-msg" id="e-localidade" hidden>Indique a localidade.</span>
+  </div>
+  <div class="f">
+    <span class="f-title" id="l-foto">Fotografia <span class="opt">(opcional)</span></span>
+    <label class="file"><input type="file" id="fotografia" name="fotografia" accept="image/*" aria-labelledby="l-foto fileName" aria-describedby="h-foto"><span id="fileName">Escolher fotografia (até 8 MB)</span></label>
+    <span class="hint" id="h-foto">Ajuda-nos a preparar a visita.</span>
+  </div>
+  <fieldset class="f" id="f-contacto">
+    <legend>Como o contactamos</legend>
+    <div class="contact-pair">
+      <div><label class="lbl" for="nome">Nome</label><input type="text" id="nome" name="nome" autocomplete="name" placeholder="O seu nome" required aria-describedby="e-contacto"></div>
+      <div><label class="lbl" for="contacto">Telemóvel ou email</label><input type="text" id="contacto" name="contacto" autocomplete="tel" placeholder="912 345 678 ou email" required aria-describedby="e-contacto"></div>
+    </div>
+    <span class="err-msg" id="e-contacto" hidden>Indique o seu nome e um telemóvel ou email.</span>
+  </fieldset>
+  <button class="btn btn--primary btn--block" type="submit">Enviar pedido</button>
+  <p class="form-note">Os seus dados servem só para responder a este pedido. <a href="{{root}}privacidade/">Política de privacidade</a>.</p>
+</form>
+<div class="form-ok" id="formOk" tabindex="-1" hidden>
+  <h3>Pedido recebido.</h3>
+  <p>Obrigado<span id="okName"></span>. Vamos analisar o seu pedido e entrar em contacto pelo telemóvel ou email que indicou.</p>
+  <p id="okUrgent" hidden>Se for urgente, ligue <a href="tel:+351218935050">218 935 050</a> (2ª a 6ª, 8h às 17h).</p>
+  <a class="btn btn--wa" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%2C%20acabei%20de%20enviar%20um%20pedido%20de%20or%C3%A7amento%20e%20envio%20fotografias." target="_blank" rel="noopener" data-ch="whatsapp">Enviar fotografias por WhatsApp<span class="sr-only"> (abre noutra janela)</span></a>
+</div>

@@ -1,0 +1,129 @@
+(function () {
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var PAGE = document.body.dataset.page || 'home';
+  /* ── estatísticas: PostHog só depois de "Aceitar" ── */
+  var queue = [];
+  function track(ev, props) { props = Object.assign({ page: PAGE }, props || {}); if (window.posthog && window.posthog.capture) window.posthog.capture(ev, props); else queue.push([ev, props]); }
+  function loadPostHog() {
+    if (window.posthog) return;
+    var el = document.createElement('script'); el.src = 'https://eu-assets.i.posthog.com/static/array.js'; el.async = true;
+    el.onload = function () { try { window.posthog.init('phc_veB6kR2as8m8HuRMEVuTUWubWQxLkPW5D8Uf6wsJcy8A', { api_host: 'https://eu.i.posthog.com', person_profiles: 'identified_only', autocapture: false, capture_pageview: true,
+      /* só o que a política de privacidade descreve: nada que se possa ligar a partir do painel do PostHog */
+      disable_session_recording: true, enable_heatmaps: false, capture_dead_clicks: false, rageclick: false, disable_surveys: true, capture_exceptions: false, capture_performance: false }); while (queue.length) { var t = queue.shift(); window.posthog.capture(t[0], t[1]); } } catch (e) {} };
+    document.head.appendChild(el);
+  }
+  var consent = $('#consent'), choice = null;
+  try { choice = localStorage.getItem('mdm-consent'); } catch (e) {}
+  if (choice === 'yes') loadPostHog(); else if (!choice && consent) consent.hidden = false;
+  if (consent) consent.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-consent]'); if (!b) return;
+    try { localStorage.setItem('mdm-consent', b.dataset.consent); } catch (err) {}
+    consent.hidden = true; if (b.dataset.consent === 'yes') loadPostHog(); else queue.length = 0;
+  });
+  var reopen = $('#consentReopen'); if (reopen) reopen.addEventListener('click', function (e) { e.preventDefault(); if (consent) { consent.hidden = false; consent.querySelector('button').focus(); } });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('[data-ch]'); if (!a) return;
+    track(a.dataset.ch === 'call' ? 'call_tap' : 'whatsapp_tap', { service: servico ? servico.value : '' });
+  });
+  /* ── header ── */
+  var nav = $('#nav'); addEventListener('scroll', function () { nav.classList.toggle('scrolled', scrollY > 8); }, { passive: true });
+  var burger = $('#burger'), drawer = $('#mDrawer'), bd = $('.m-backdrop'), mbar = $('#mbar');
+  var outside = [$('main'), $('footer'), $('.skip-link')].filter(Boolean);
+  function setMenu(open) {
+    drawer.hidden = bd.hidden = !open; burger.setAttribute('aria-expanded', String(open)); burger.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+    document.documentElement.style.overflow = open ? 'hidden' : ''; outside.forEach(function (el) { el.inert = open; });
+    syncBar();
+    if (open) drawer.querySelector('a').focus();
+  }
+  function closeMenu(focus) { if (drawer.hidden) return; setMenu(false); if (focus) burger.focus(); }
+  if (burger) {
+    burger.addEventListener('click', function () { drawer.hidden ? setMenu(true) : closeMenu(true); });
+    bd.addEventListener('click', function () { closeMenu(true); });
+    drawer.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', function () { closeMenu(false); }); });
+    addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMenu(true); });
+    matchMedia('(min-width: 1024px)').addEventListener('change', function (e) { if (e.matches) closeMenu(false); });
+  }
+  /* ── barra móvel escondida quando o formulário está à vista ── */
+  /* a barra só aparece quando nem os botões do topo, nem o formulário, nem o rodapé estão à vista */
+  var formVisible = false, form = $('#quoteForm'), seen = new Map();
+  function syncBar() { if (!mbar) return; var hide = formVisible || (drawer && !drawer.hidden); mbar.classList.toggle('is-hidden', hide); mbar.inert = hide; }
+  if (mbar && 'IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (en) { en.forEach(function (e) { seen.set(e.target, e.isIntersecting); }); formVisible = [...seen.values()].some(Boolean); syncBar(); }, { threshold: 0.05 });
+    ['.hero-ctas', '#orcamento', '.footer'].forEach(function (s) { var el = $(s); if (el) io.observe(el); });
+  } else if (mbar) { mbar.classList.remove('is-hidden'); mbar.inert = false; }
+  /* ── pré-seleção do serviço ── */
+  var servico = $('#servico');
+  document.addEventListener('click', function (e) { var a = e.target.closest('[data-servico]'); if (a && servico) servico.value = a.dataset.servico; });
+  if (servico && document.body.dataset.servico) servico.value = document.body.dataset.servico;
+  if (!form) return;
+  /* ── formulário ── */
+  var started = false; form.addEventListener('focusin', function () { if (!started) { started = true; track('form_start', { service: servico.value }); } });
+  var file = $('#fotografia'), fileName = $('#fileName');
+  file.addEventListener('change', function () { var f = file.files[0]; if (f && f.size > 8 * 1024 * 1024) { file.value = ''; fileName.textContent = 'A fotografia tem mais de 8 MB. Escolha outra.'; } else fileName.textContent = f ? f.name : 'Escolher fotografia (até 8 MB)'; });
+  var checks = [
+    ['f-servico', function () { return !!servico.value; }, 'o serviço'],
+    ['f-imovel', function () { return !!form.querySelector('[name=imovel]:checked'); }, 'o tipo de imóvel'],
+    ['f-urgencia', function () { return !!form.querySelector('[name=urgencia]:checked'); }, 'a urgência'],
+    ['f-localidade', function () { return form.localidade.value.trim().length > 1; }, 'a localidade'],
+    ['f-contacto', function () { var c = form.contacto.value.trim(); return form.nome.value.trim().length > 1 && (/^\S+@\S+\.\S+$/.test(c) || c.replace(/\D/g, '').length >= 9); }, 'o nome e um contacto']
+  ];
+  function validate() {
+    var missing = [], first = null;
+    checks.forEach(function (c) { var box = document.getElementById(c[0]), ok = c[1](); box.classList.toggle('is-invalid', !ok); box.querySelector('.err-msg').hidden = ok;
+      box.querySelectorAll('input,select').forEach(function (i) { if (ok) i.removeAttribute('aria-invalid'); else i.setAttribute('aria-invalid', 'true'); });
+      if (!ok) { missing.push(c[2]); if (!first) first = box.querySelector('input,select'); } });
+    var sum = $('#formSummary');
+    if (missing.length) { sum.textContent = (missing.length === 1 ? 'Falta ' : 'Faltam ') + missing.join(', ').replace(/, ([^,]*)$/, ' e $1') + '.'; sum.hidden = false; first.focus(); return false; }
+    sum.hidden = true; return true;
+  }
+  form.addEventListener('submit', function (e) {
+    e.preventDefault(); if (!validate()) return;
+    var btn = form.querySelector('[type=submit]'); btn.disabled = true; btn.textContent = 'A enviar…';
+    fetch(form.getAttribute('action'), { method: 'POST', body: new FormData(form) }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      track('form_submit', { service: servico.value, urgencia: (form.querySelector('[name=urgencia]:checked') || {}).value });
+      var ok = $('#formOk'); $('#okName').textContent = ', ' + form.nome.value.trim().split(' ')[0];
+      $('#okUrgent').hidden = (form.querySelector('[name=urgencia]:checked') || {}).value !== 'Tenho uma avaria';
+      document.body.classList.add('is-sent'); /* v3.css: o botão verde do sucesso passa a ser o único WhatsApp da página */
+      form.hidden = true; ok.hidden = false; ok.focus();
+    }).catch(function () {
+      btn.disabled = false; btn.textContent = 'Enviar pedido'; var sum = $('#formSummary');
+      sum.innerHTML = 'Não foi possível enviar agora. Tente de novo ou ligue <a href="tel:+351218935050">218 935 050</a>.'; sum.hidden = false; sum.focus && sum.setAttribute('tabindex', '-1'); sum.focus();
+    });
+  });
+  /* Menu: marca a página atual (aria-current="page") e, nas secções desta página, a secção à vista (aria-current="location", sublinhado cheio em v3.css). */
+  var spyLinks = [].slice.call(document.querySelectorAll('.nav-menu a, .m-menu a, .ft-nav a')), spyMap = new Map();
+  spyLinks.forEach(function (a) {
+    var u = new URL(a.href, location.href), same = u.pathname === location.pathname;
+    if (same && !u.hash) { a.setAttribute('aria-current', 'page'); return; }
+    var sec = document.getElementById(same ? u.hash.slice(1) : a.dataset.spy || ''); if (!sec) return;
+    (spyMap.get(sec) || spyMap.set(sec, []).get(sec)).push(a);
+  });
+  /* Páginas de serviço (têm "Serviços" no caminho): o link Serviços do menu fica marcado como secção atual. */
+  if (document.querySelector('.crumbs a[href$="#servicos"]')) document.querySelectorAll('.nav-menu a[href$="#servicos"], .m-menu a[href$="#servicos"]').forEach(function (a) { a.setAttribute('aria-current', 'true'); });
+  if (spyMap.size && 'IntersectionObserver' in window) {
+    var spyIo = new IntersectionObserver(function (en) {
+      en.forEach(function (e) { spyMap.get(e.target).forEach(function (a) { if (e.isIntersecting) a.setAttribute('aria-current', 'location'); else if (a.getAttribute('aria-current') === 'location') a.removeAttribute('aria-current'); }); });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    spyMap.forEach(function (_, sec) { spyIo.observe(sec); });
+  }
+  /* Carrossel das obras (abaixo de 1024px): botões ‹ › avançam um cartão; ficam inativos nas pontas. */
+  var pl = $('#projList'), pn = $('.proj-nav');
+  if (pl && pn) {
+    var pb = pn.querySelectorAll('button'), still = matchMedia('(prefers-reduced-motion: reduce)');
+    var pSync = function () { var max = pl.scrollWidth - pl.clientWidth - 2; pb[0].disabled = pl.scrollLeft <= 2; pb[1].disabled = pl.scrollLeft >= max; };
+    pn.hidden = false; pSync();
+    pl.addEventListener('scroll', pSync, { passive: true }); addEventListener('resize', pSync);
+    pb.forEach(function (b) { b.addEventListener('click', function () {
+      var card = pl.querySelector('.project'), step = card ? card.getBoundingClientRect().width + parseFloat(getComputedStyle(pl).columnGap || 0) : pl.clientWidth * .8;
+      pl.scrollBy({ left: step * +b.dataset.dir, behavior: still.matches ? 'auto' : 'smooth' });
+    }); });
+  }
+  /* Lanterna (v3.css): posição do cursor nas linhas de serviço, factos e cartões de obra. */
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.addEventListener('pointermove', function (e) {
+      var el = e.target.closest && e.target.closest('.svc, .proof-cell, .project'); if (!el) return;
+      var r = el.getBoundingClientRect(); el.style.setProperty('--mx', (e.clientX - r.left) + 'px'); el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    }, { passive: true });
+  }
+})();

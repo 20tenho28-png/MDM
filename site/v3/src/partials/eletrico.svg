@@ -1,0 +1,26 @@
+<svg class="dg" viewBox="0 0 640 480" role="img" aria-labelledby="el-t el-d" style="width:100%;height:auto;display:block;border-radius:10px;background:#F0EEE6"><title id="el-t">Esquema de um quadro elétrico com circuitos próprios para a climatização</title><desc id="el-d">O quadro elétrico tem um interruptor geral e um disjuntor para cada circuito. O ar condicionado e a bomba de calor ficam cada um com o seu circuito próprio, separado dos circuitos gerais das tomadas e da iluminação.</desc>
+<g font-family="Geist, Arial, sans-serif" fill="#141D2E">
+<g fill="none" stroke="#141D2E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+<rect x="276" y="36" width="340" height="160" rx="10"/>
+<rect x="296" y="64" width="64" height="76" rx="4"/><rect x="386" y="64" width="36" height="76" rx="4"/><rect x="442" y="64" width="36" height="76" rx="4"/>
+<path d="M404 140v76H84v60M460 140v92H172v44"/>
+<rect x="52" y="276" width="64" height="64" rx="12"/><circle cx="84" cy="308" r="20"/>
+<path d="M162 309a18 18 0 1 1 20 0v11h-20zM166 328h12"/>
+<rect x="248" y="268" width="128" height="80" rx="8"/><circle cx="292" cy="308" r="26"/><path d="M292 282v52M266 308h52M274 290l36 36M310 290l-36 36M336 284v48M356 284v48"/>
+<rect x="440" y="280" width="104" height="68" rx="8"/><circle cx="476" cy="314" r="22"/><path d="M476 292v44M454 314h44M460 298l32 32M492 298l-32 32M510 292v44M524 292v44"/>
+<rect x="566" y="252" width="46" height="104" rx="23"/><path d="M544 298h22M544 330h22"/>
+<path d="M330 446h36"/></g>
+<g fill="none" stroke="#A30711" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+<rect x="498" y="64" width="36" height="76" rx="4"/><rect x="554" y="64" width="36" height="76" rx="4"/>
+<path d="M516 140v108H348v20"/><path d="M572 140v100H520v40"/>
+<path d="M48 446h36"/></g>
+<rect x="316" y="80" width="24" height="28" rx="3"/><rect x="398" y="80" width="12" height="22" rx="2"/><rect x="454" y="80" width="12" height="22" rx="2"/>
+<rect x="510" y="80" width="12" height="22" rx="2" fill="#A30711"/><rect x="566" y="80" width="12" height="22" rx="2" fill="#A30711"/>
+<circle cx="76" cy="308" r="4"/><circle cx="92" cy="308" r="4"/>
+<text x="328" y="172" font-size="19" fill="#4E5871" text-anchor="middle">geral</text>
+<text x="36" y="98" font-size="21" font-weight="600">Quadro elétrico</text><text x="36" y="127" font-size="19" fill="#4E5871">interruptor geral</text><text x="36" y="154" font-size="19" fill="#4E5871">e disjuntores</text>
+<text x="36" y="388" font-size="21" font-weight="600">Tomadas</text><text x="36" y="416" font-size="19" fill="#4E5871">e iluminação</text>
+<text x="312" y="388" font-size="21" font-weight="600" text-anchor="middle">Ar condicionado</text><text x="312" y="416" font-size="19" fill="#4E5871" text-anchor="middle">unidade exterior</text>
+<text x="526" y="388" font-size="21" font-weight="600" text-anchor="middle">Bomba de calor</text><text x="526" y="416" font-size="19" fill="#4E5871" text-anchor="middle">ar-água</text>
+<text x="96" y="452" font-size="19" fill="#4E5871">circuito próprio</text><text x="378" y="452" font-size="19" fill="#4E5871">circuitos gerais</text>
+</g></svg>

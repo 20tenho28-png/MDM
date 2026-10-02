@@ -1,0 +1,7 @@
+# Pré-visualização do site MDM v3 (projeto Netlify "mdm-site-preview").
+# O Netlify corre o build (Python da imagem de build, só biblioteca-padrão) e publica site/v3/dist.
+# Os cabeçalhos (noindex durante a pré-visualização, cache longa de img/fontes) vêm de dist/_headers.
+# No lançamento (Fase 7): tirar o noindex de _headers e o Disallow de robots.txt em build.py.
+[build]
+  command = "cd site/v3 && python3 build.py"
+  publish = "site/v3/dist"

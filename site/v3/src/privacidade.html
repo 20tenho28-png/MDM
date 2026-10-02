@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Política de privacidade | MDM</title>
+<meta name="description" content="Como a MDM trata os dados pessoais recolhidos no site: formulário de orçamento, estatísticas só com consentimento, fornecedores, prazos de conservação e os seus direitos.">
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="https://www.mdmassist.com.pt/privacidade/">
+<meta name="theme-color" content="#FAF9F5">
+<link rel="icon" href="{{root}}favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{{root}}apple-touch-icon.png">
+<link rel="preload" href="{{root}}fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+<style>{{css}}</style>
+<style>
+  /* política de privacidade: só esta página (v3.css fica intacto) */
+  .pv-hero { padding: var(--s5) 0 var(--s7); }
+  .pv-hero h1 { margin-top: var(--space-4); }
+  .pv-hero .lead { margin-top: var(--space-5); max-width: 40rem; }
+  .pv-date { margin-top: var(--s4); font-family: var(--mono); font-size: .875rem; color: var(--slate); }
+  .pv-sum { grid-area: sum; padding: var(--s5); background: var(--paper); border-radius: var(--r-m); }
+  .pv-sum h2 { font-size: 1.1875rem; line-height: 1.3; letter-spacing: -.01em; margin-bottom: var(--s3); }
+  .pv-body { padding: var(--s7) 0 var(--s8); border-top: 1px solid var(--sand); }
+  .pv-doc a, .pv-sum a { overflow-wrap: anywhere; }
+  .pv-grid { display: grid; gap: var(--s6); grid-template-areas: 'sum' 'toc' 'doc'; }
+  .pv-toc { grid-area: toc; }
+  .pv-doc { grid-area: doc; }
+  .pv-toc > p { font-size: .875rem; font-weight: 600; color: var(--slate); margin-bottom: var(--s2); }
+  .pv-toc ol { list-style: none; border-left: 1px solid var(--sand); font-size: .9375rem; line-height: 1.45; }
+  .pv-toc a { display: block; margin-left: -1px; padding: 12px 0 12px var(--s4); /* 44px de alvo de toque */ border-left: 2px solid transparent; color: var(--slate); text-decoration: none; }
+  .pv-toc a:hover { color: var(--ink); border-left-color: var(--red); }
+  .pv-doc h2 { margin: var(--s7) 0 var(--s4); }
+  .pv-doc > h2:first-child { margin-top: 0; }
+  .pv-item { margin-top: var(--s5); padding-top: var(--s4); border-top: 1px solid var(--sand); }
+  .pv-item h3 { font-size: 1.1875rem; line-height: 1.3; letter-spacing: -.01em; }
+  .pv-item dl { margin-top: var(--s3); display: grid; gap: var(--s3); }
+  .pv-item dl > div { display: grid; gap: 2px; }
+  .pv-item dt { font-size: .875rem; font-weight: 600; color: var(--slate); }
+  .pv-item dd { font-size: 1rem; }
+  .pv-doc .pv-item + p { margin-top: var(--s5); }
+  .pv-prefs { margin-top: var(--s5); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); padding: var(--s4) var(--s5); background: var(--paper); border-radius: var(--r-m); }
+  .pv-doc .pv-prefs p { margin: 0; font-weight: 500; }
+  .pv-doc .pv-prefs + p { margin-top: var(--s5); }
+  .pv-quote { border-top: 1px solid var(--sand); }
+  @media (min-width: 641px) {
+    .pv-item dl > div { grid-template-columns: 8.5rem minmax(0, 1fr); gap: var(--s4); }
+    .pv-item dt { padding-top: .1em; }
+  }
+  @media (min-width: 1024px) {
+    .pv-grid { grid-template-columns: 15rem minmax(0, 68ch); grid-template-areas: 'toc sum' 'toc doc'; gap: var(--s7) var(--s8); }
+    .pv-toc { position: sticky; top: calc(var(--nav-h) + var(--s5)); align-self: start; }
+  }
+</style>
+{{include:head-scripts.html}}
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebPage", "@id": "https://www.mdmassist.com.pt/privacidade/", "url": "https://www.mdmassist.com.pt/privacidade/", "name": "Política de privacidade", "inLanguage": "pt-PT", "dateModified": "2026-09-27", "publisher": {"@id": "https://www.mdmassist.com.pt/#mdm"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Início", "item": "https://www.mdmassist.com.pt/"}, {"@type": "ListItem", "position": 2, "name": "Política de privacidade", "item": "https://www.mdmassist.com.pt/privacidade/"}]}]}</script>
+</head>
+<body data-page="privacidade">
+{{include:header.html}}
+<main id="conteudo" tabindex="-1">
+
+<nav class="crumbs wrap" aria-label="Caminho"><ol><li><a href="{{root}}">Início</a></li><li aria-current="page">Política de privacidade</li></ol></nav>
+
+<section class="pv-hero" aria-labelledby="h-hero">
+  <div class="wrap">
+    <span class="eyebrow">Privacidade</span>
+    <h1 id="h-hero">Política de privacidade.</h1>
+    <p class="lead">Que dados pessoais este site recolhe, para quê, quem os trata por nossa conta e como pode exercer os seus direitos.</p>
+    <p class="pv-date">Última atualização: <time datetime="2026-09-27">27 de setembro de 2026</time></p>
+  </div>
+</section>
+
+<section class="pv-body" aria-label="Texto da política">
+  <div class="wrap pv-grid">
+    <div class="pv-sum prose">
+      <h2 id="h-resumo">Em resumo</h2>
+      <ul>
+        <li>Os dados do formulário de orçamento servem só para responder ao seu pedido.</li>
+        <li>As estatísticas de visitas (PostHog, alojado na União Europeia) só funcionam depois de escolher «Aceitar». Se escolher «Recusar», nunca são carregadas.</li>
+        <li>Não usamos cookies de publicidade nem de redes sociais, e as fontes de letra são servidas pelo próprio site.</li>
+        <li>Não vendemos nem cedemos os seus dados para fins comerciais.</li>
+        <li>Para ver, corrigir ou apagar os seus dados, escreva para <a href="mailto:mdmassist@mdmassist.com">mdmassist@mdmassist.com</a>.</li>
+      </ul>
+    </div>
+
+    <nav class="pv-toc" aria-labelledby="h-toc">
+      <p id="h-toc">Nesta página</p>
+      <ol>
+        <li><a href="#responsavel">1. Responsável pelo tratamento</a></li>
+        <li><a href="#dados">2. Que dados tratamos e porquê</a></li>
+        <li><a href="#estatisticas">3. Estatísticas e cookies</a></li>
+        <li><a href="#fornecedores">4. Quem trata dados por nossa conta</a></li>
+        <li><a href="#ligacoes">5. Ligações para outros serviços</a></li>
+        <li><a href="#seguranca">6. Segurança</a></li>
+        <li><a href="#direitos">7. Os seus direitos</a></li>
+        <li><a href="#alteracoes">8. Alterações a esta política</a></li>
+      </ol>
+    </nav>
+
+    <div class="pv-doc prose">
+      <h2 class="h3" id="responsavel">1. Quem é o responsável pelo tratamento</h2>
+      <p><strong>M.D.M. - Manuel Domingos Melancia, Lda</strong><br>NIF 502 644 761 · C.R.C. de Loures n.º 20 423<br>Alameda dos Oceanos 108A, Edifício Vila do Oriente, 1990-426 Lisboa<br>Telefone <a href="tel:+351218935050" data-ch="call">218 935 050</a> (2ª a 6ª, 8h às 17h) · <a href="mailto:mdmassist@mdmassist.com">mdmassist@mdmassist.com</a></p>
+      <p>Para qualquer questão sobre os seus dados pessoais, incluindo o exercício dos direitos descritos no ponto 7, use estes contactos. A empresa não está obrigada a designar um encarregado de proteção de dados e não o designou.</p>
+
+      <h2 class="h3" id="dados">2. Que dados tratamos e porquê</h2>
+      <p>Tratamos apenas os dados necessários em cada uma destas situações. As referências legais são ao Regulamento Geral sobre a Proteção de Dados (RGPD).</p>
+
+      <div class="pv-item">
+        <h3>Pedido de orçamento pelo formulário</h3>
+        <dl>
+          <div><dt>Dados</dt><dd>Serviço pretendido, tipo de imóvel, urgência, localidade, nome e telemóvel ou email. Se quiser, uma fotografia do local. Fica também registada a página do site de onde enviou o pedido. Com cada pedido, o Netlify regista ainda o endereço IP e o browser usados.</dd></div>
+          <div><dt>Para quê</dt><dd>Responder ao pedido, preparar o orçamento e contactá-lo sobre a intervenção.</dd></div>
+          <div><dt>Fundamento</dt><dd>Diligências pré-contratuais a seu pedido (art. 6.º, n.º 1, al. b)).</dd></div>
+          <div><dt>Conservação</dt><dd>Enquanto for necessário para responder e acompanhar o pedido. Se não houver contrato, no máximo 3 anos após o último contacto.</dd></div>
+        </dl>
+      </div>
+      <div class="pv-item">
+        <h3>Contacto por telefone, WhatsApp ou email</h3>
+        <dl>
+          <div><dt>Dados</dt><dd>Número de telefone, nome, conteúdo da mensagem e fotografias que nos enviar.</dd></div>
+          <div><dt>Para quê</dt><dd>Atendimento, diagnóstico e resposta.</dd></div>
+          <div><dt>Fundamento</dt><dd>Diligências pré-contratuais ou execução do contrato (art. 6.º, n.º 1, al. b)).</dd></div>
+          <div><dt>Conservação</dt><dd>3 anos após o último contacto.</dd></div>
+        </dl>
+      </div>
+      <div class="pv-item">
+        <h3>Clientes com serviço ou contrato</h3>
+        <dl>
+          <div><dt>Dados</dt><dd>Dados de faturação e registos das intervenções.</dd></div>
+          <div><dt>Para quê</dt><dd>Execução do contrato, faturação e registos obrigatórios.</dd></div>
+          <div><dt>Fundamento</dt><dd>Execução do contrato e cumprimento de obrigações legais (art. 6.º, n.º 1, als. b) e c)).</dd></div>
+          <div><dt>Conservação</dt><dd>10 anos para os documentos fiscais; 5 anos para os registos de gases fluorados.</dd></div>
+        </dl>
+      </div>
+      <div class="pv-item">
+        <h3>Estatísticas de utilização, só com o seu consentimento</h3>
+        <dl>
+          <div><dt>Dados</dt><dd>Páginas vistas e o site de onde chegou; toques nos botões de telefone e de WhatsApp; início e envio do formulário, com o serviço e a urgência escolhidos, nunca o nome nem o contacto; tipo de dispositivo e browser; endereço IP, tratado pelo fornecedor.</dd></div>
+          <div><dt>Para quê</dt><dd>Perceber que páginas ajudam quem nos procura e corrigir o que não funciona.</dd></div>
+          <div><dt>Fundamento</dt><dd>O seu consentimento (art. 6.º, n.º 1, al. a)), que pode retirar a qualquer momento (ponto 3).</dd></div>
+          <div><dt>Conservação</dt><dd>12 meses.</dd></div>
+        </dl>
+      </div>
+      <div class="pv-item">
+        <h3>Registo de erros técnicos</h3>
+        <dl>
+          <div><dt>Dados</dt><dd>Mensagem de erro, página, browser e sistema operativo, e tempos de carregamento de uma amostra das visitas. Não enviamos o conteúdo do formulário, cookies nem dados de utilizador.</dd></div>
+          <div><dt>Para quê</dt><dd>Detetar e corrigir falhas do site.</dd></div>
+          <div><dt>Fundamento</dt><dd>Interesse legítimo em manter o site a funcionar (art. 6.º, n.º 1, al. f)). Pode opor-se: se recusar as estatísticas, o registo de erros também deixa de ser carregado.</dd></div>
+          <div><dt>Conservação</dt><dd>90 dias.</dd></div>
+        </dl>
+      </div>
+      <div class="pv-item">
+        <h3>Visita ao site</h3>
+        <dl>
+          <div><dt>Dados</dt><dd>Endereço IP e dados técnicos de cada pedido ao servidor (página, data e hora, browser), necessários para entregar as páginas.</dd></div>
+          <div><dt>Para quê</dt><dd>Publicar o site e protegê-lo contra abusos.</dd></div>
+          <div><dt>Fundamento</dt><dd>Interesse legítimo (art. 6.º, n.º 1, al. f)).</dd></div>
+          <div><dt>Conservação</dt><dd>A MDM não guarda estes registos. O fornecedor de alojamento (ponto 4) trata-os pelos prazos que define.</dd></div>
+        </dl>
+      </div>
+      <p>A fotografia do formulário é opcional e serve só para preparar a visita. Evite enviar fotografias em que apareçam pessoas ou documentos.</p>
+      <p>Não recolhemos dados que não sejam necessários a estas finalidades, não tomamos decisões automatizadas nem fazemos definição de perfis, e não vendemos nem cedemos dados a terceiros para fins comerciais.</p>
+
+      <h2 class="h3" id="estatisticas">3. Estatísticas, cookies e armazenamento no seu equipamento</h2>
+      <p>Na primeira visita aparece um aviso com dois botões com o mesmo peso, «Aceitar» e «Recusar». Enquanto não escolher, as estatísticas não são carregadas.</p>
+      <ul>
+        <li><strong>Se escolher «Aceitar»</strong>, o site carrega o PostHog (instância europeia). O PostHog guarda no seu browser um identificador aleatório, num cookie com nome começado por «ph_» e no armazenamento local, para distinguir visitas. O cookie dura até um ano, se não o apagar antes. Não associamos este identificador ao seu nome nem aos dados do formulário.</li>
+        <li><strong>Se escolher «Recusar»</strong>, o PostHog nunca é carregado e o registo de erros (Sentry) também deixa de ser carregado.</li>
+      </ul>
+      <p>A sua escolha fica guardada no armazenamento local do browser, com o nome «mdm-consent». Serve só para respeitar essa escolha e não é enviada a ninguém. Pode mudar de ideias em qualquer altura na ligação «Preferências de estatísticas», no rodapé de todas as páginas, ou aqui:</p>
+      <div class="pv-prefs" id="pvPrefs" hidden>
+        <p id="pvState" aria-live="polite"></p>
+        <button class="btn btn--secondary" type="button" id="pvChange">Alterar preferências</button>
+      </div>
+      <p>Se retirar o consentimento, o PostHog deixa de ser carregado a partir da página seguinte. Para apagar também o identificador já guardado, limpe os dados deste site nas definições do browser.</p>
+      <p>Não usamos cookies de publicidade nem de redes sociais. O site não tem anúncios, vídeos, mapas nem botões de redes sociais incorporados, e as fontes de letra (Geist) são servidas pelo próprio site, sem pedidos ao Google Fonts.</p>
+
+      <h2 class="h3" id="fornecedores">4. Quem trata dados por nossa conta</h2>
+      <p>Recorremos a estes fornecedores, que atuam como subcontratantes da MDM: tratam os dados só por nossa conta e segundo as nossas instruções.</p>
+      <div class="pv-item">
+        <h3>Netlify (Netlify, Inc.)</h3>
+        <dl>
+          <div><dt>Para quê</dt><dd>Alojamento do site e receção dos pedidos do formulário de orçamento (Netlify Forms). Os pedidos, incluindo a fotografia, ficam guardados pelo Netlify por conta da MDM. O Netlify aplica filtros automáticos contra spam.</dd></div>
+          <div><dt>Onde ficam</dt><dd>Servidores do Netlify, que podem ficar fora do Espaço Económico Europeu, nomeadamente nos Estados Unidos.</dd></div>
+        </dl>
+      </div>
+      <div class="pv-item">
+        <h3>PostHog (PostHog, Inc., instância europeia)</h3>
+        <dl>
+          <div><dt>Para quê</dt><dd>Estatísticas de utilização, só depois de «Aceitar».</dd></div>
+          <div><dt>Onde ficam</dt><dd>União Europeia.</dd></div>
+        </dl>
+      </div>
+      <div class="pv-item">
+        <h3>Sentry (Functional Software, Inc.)</h3>
+        <dl>
+          <div><dt>Para quê</dt><dd>Registo de erros técnicos do site, sem gravação de sessões e sem dados de utilizador.</dd></div>
+          <div><dt>Onde ficam</dt><dd>Alemanha, na região de dados da União Europeia.</dd></div>
+        </dl>
+      </div>
+      <p>Estas três empresas têm sede nos Estados Unidos. Quando haja transferência de dados pessoais para fora do Espaço Económico Europeu, incluindo acessos a partir dos Estados Unidos, essa transferência assenta, conforme aplicável, na decisão de adequação da Comissão Europeia relativa ao Quadro de Privacidade de Dados UE-EUA (Data Privacy Framework) ou nas cláusulas contratuais-tipo aprovadas pela Comissão Europeia.</p>
+      <p>Ao abrir o site, o seu browser comunica com o Netlify, com o Sentry (salvo se recusar as estatísticas) e, se as aceitar, com o PostHog, pelo que o seu endereço IP lhes chega necessariamente. Se preferir não usar o site, pode contactar-nos diretamente por telefone, para o <a href="tel:+351218935050" data-ch="call">218 935 050</a>.</p>
+
+      <h2 class="h3" id="ligacoes">5. Ligações para outros serviços</h2>
+      <p>As ligações de telefone e de email abrem as aplicações do seu próprio equipamento. A ligação de WhatsApp abre o WhatsApp e a ligação «Perfil no Google» abre o Google Maps. Nada disto é carregado no site antes de tocar na ligação; a partir daí, aplicam-se as políticas de privacidade do WhatsApp e da Google.</p>
+      <p>Se tiver aceitado as estatísticas, registamos apenas que tocou no botão de telefone ou de WhatsApp, nunca o conteúdo da chamada ou da conversa.</p>
+
+      <h2 class="h3" id="seguranca">6. Segurança</h2>
+      <p>O site é servido por ligação cifrada (HTTPS). O acesso aos pedidos recebidos está limitado às pessoas da empresa que têm de os tratar. Os equipamentos usados no atendimento e no terreno estão protegidos por bloqueio de ecrã, e os relatórios de intervenção são exportados para o arquivo da empresa e apagados dos equipamentos quando deixam de ser necessários.</p>
+
+      <h2 class="h3" id="direitos">7. Os seus direitos</h2>
+      <p>Nos termos do RGPD, tem direito a:</p>
+      <ul>
+        <li><strong>Acesso:</strong> saber que dados seus tratamos e obter uma cópia.</li>
+        <li><strong>Retificação:</strong> corrigir dados incorretos ou incompletos.</li>
+        <li><strong>Apagamento:</strong> pedir a eliminação, quando não exista obrigação legal de conservar.</li>
+        <li><strong>Limitação e oposição:</strong> restringir o tratamento ou opor-se aos tratamentos baseados em interesse legítimo.</li>
+        <li><strong>Portabilidade:</strong> receber os dados que nos forneceu num formato de uso corrente.</li>
+        <li><strong>Retirar o consentimento</strong> às estatísticas, a qualquer momento, sem afetar o tratamento feito antes.</li>
+      </ul>
+      <p>Para exercer qualquer destes direitos, escreva para <a href="mailto:mdmassist@mdmassist.com">mdmassist@mdmassist.com</a> ou para a morada indicada no ponto 1. Respondemos no prazo de um mês. Se entender que os seus dados não estão a ser tratados corretamente, pode apresentar reclamação à autoridade de controlo: Comissão Nacional de Proteção de Dados (CNPD), Av. D. Carlos I, 134, 1.º, 1200-651 Lisboa, <a href="https://www.cnpd.pt/" target="_blank" rel="noopener">www.cnpd.pt</a>.</p>
+
+      <h2 class="h3" id="alteracoes">8. Alterações a esta política</h2>
+      <p>Esta política pode ser atualizada sempre que mudarmos as ferramentas do site ou a forma como tratamos os dados. A data da última atualização está no topo da página.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section pv-quote" id="orcamento" aria-labelledby="h-orc">
+  <div class="wrap quote-grid">
+    <div class="quote-aside">
+      <span class="eyebrow">Pedido de orçamento</span>
+      <h2 id="h-orc">Precisa de um orçamento?</h2>
+      <p class="lead">Diga-nos o que precisa. Os dados que indicar são tratados como descrito nesta página.</p>
+      <div class="alt">
+        <a href="tel:+351218935050" data-ch="call">218 935 050<small>2ª a 6ª, 8h às 17h</small></a>
+      </div>
+    </div>
+    <div>
+{{include:form.html}}
+    </div>
+  </div>
+</section>
+
+</main>
+{{include:footer.html}}
+{{include:mbar.html}}
+<script>{{include:main.js}}</script>
+<script>
+  /* estado das estatísticas neste browser; o botão reabre o aviso do rodapé */
+  (function () {
+    var box = document.getElementById('pvPrefs'), state = document.getElementById('pvState'), reopen = document.getElementById('consentReopen');
+    if (!box || !reopen) return;
+    function show() {
+      var c = null; try { c = localStorage.getItem('mdm-consent'); } catch (e) {}
+      state.textContent = c === 'yes' ? 'Neste browser: estatísticas aceites.' : c === 'no' ? 'Neste browser: estatísticas recusadas.' : 'Neste browser: ainda não escolheu.';
+    }
+    show(); box.hidden = false;
+    document.getElementById('pvChange').addEventListener('click', function () { reopen.click(); });
+    document.addEventListener('click', function (e) { if (e.target.closest('[data-consent]')) show(); });
+  })();
+</script>
+</body>
+</html>

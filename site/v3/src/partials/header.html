@@ -1,0 +1,42 @@
+<a class="skip-link" href="#conteudo">Saltar para o conteúdo</a>
+<div class="consent" id="consent" role="region" aria-label="Estatísticas" hidden>
+  <p>Usamos estatísticas de visitas (PostHog, alojado na UE) para perceber que páginas ajudam quem nos procura. Se aceitar, fica guardado neste browser um identificador aleatório (cookie «ph_» e armazenamento local). Se recusar, o registo de erros (Sentry) também deixa de ser carregado. Pode mudar de ideias no rodapé. <a href="{{root}}privacidade/#estatisticas">Saber mais</a></p>
+  <div class="consent-btns"><button type="button" data-consent="no">Recusar</button><button type="button" data-consent="yes">Aceitar</button></div>
+</div>
+<header class="site-header">
+<nav id="nav" aria-label="Principal">
+  <div class="nav-in">
+    <div class="nav-brand">
+      <a class="logo" href="{{root}}" aria-label="MDM, início">{{include:logo.svg}}</a>
+      <span class="logo-name">Manuel Domingos Melancia, Lda</span>
+    </div>
+    <ul class="nav-menu">
+      <li><a href="{{root}}#servicos">Serviços</a></li>
+      <li><a href="{{root}}obras/" data-spy="obras">Obras</a></li>
+      <li><a href="{{root}}#como-funciona">Como funciona</a></li>
+      <li><a href="{{root}}#perguntas">Perguntas</a></li>
+      <li><a href="#orcamento">Contacto</a></li>
+    </ul>
+    <div class="nav-contact">
+      <a class="nav-tel" href="tel:+351218935050" data-ch="call">218 935 050</a>
+      <a class="nav-cta" href="#orcamento">Pedir orçamento</a>
+      <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="mDrawer" aria-label="Abrir menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+<div class="m-backdrop" hidden></div>
+<nav id="mDrawer" class="m-drawer" aria-label="Menu" hidden>
+  <ul class="m-menu">
+    <li><a href="{{root}}#servicos">Serviços</a></li>
+    <li><a href="{{root}}obras/" data-spy="obras">Obras</a></li>
+    <li><a href="{{root}}#como-funciona">Como funciona</a></li>
+    <li><a href="{{root}}#perguntas">Perguntas</a></li>
+    <li><a href="#orcamento">Contacto</a></li>
+  </ul>
+  <div class="m-contact">
+    <a href="tel:+351218935050" data-ch="call">218 935 050</a>
+    <a href="#orcamento">Pedir orçamento</a>
+  </div>
+  <p class="m-hours">2ª a 6ª, 8h às 17h</p>
+</nav>
+</header>
