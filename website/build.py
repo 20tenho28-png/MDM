@@ -321,8 +321,7 @@ def breadcrumb_ld(trail):
 
 def page_ctx(meta, file):
     # wa: mensagem de WhatsApp da barra do telemóvel, do rodapé e do contacto (site.wa.*); cada serviço usa a sua
-    # origem: valor inicial do campo escondido "origem" do formulário (carrinha.html; site.js junta a carrinha e o lado)
-    meta = {"preselect": "", "nav": "", "robots": "index,follow", "og": "", "wa": "geral", "origem": "", **meta}
+    meta = {"preselect": "", "nav": "", "robots": "index,follow", "og": "", "wa": "geral", **meta}
     if PREVIEW and "noindex" not in meta["robots"]:
         meta["robots"] = "noindex"   # pré-visualização: nenhuma página entra no Google antes do lançamento
     depth = file.count("/")
@@ -371,32 +370,11 @@ def build_page(meta, body_tpl, extra_ctx=None):
     return file
 
 
-def vcard():
-    """Cartão de contacto (mdm.vcf) para guardar no telemóvel: botão da página das carrinhas."""
-    esc = lambda t: t.replace("\\", "\\\\").replace(",", "\\,").replace(";", "\\;")
-    rua, resto = SITE["address1"], SITE["address2"]           # "1990-426 Lisboa · Parque das Nações"
-    cp, cidade = resto.split(" ", 1)[0], resto.split(" ", 1)[1].split(" · ")[0]
-    linhas = [
-        "BEGIN:VCARD", "VERSION:3.0",
-        f"N:{esc(SITE['name'])};;;;", f"FN:{esc(SITE['name'])}", f"ORG:{esc(SITE['name'])}",
-        "X-ABShowAs:COMPANY",
-        f"TEL;TYPE=WORK,VOICE:{SITE['phoneE164']}",
-        f"TEL;TYPE=CELL:+351{SITE['whatsapp'].replace(' ', '')}",
-        f"EMAIL;TYPE=WORK:{SITE['email']}",
-        f"URL:{SITE['baseUrl']}/",
-        f"ADR;TYPE=WORK:;;{esc(rua)};{esc(cidade)};;{cp};Portugal",
-        "NOTE:" + esc(f"Ar condicionado, bombas de calor, ventilação, eletricidade e manutenção na grande Lisboa desde {SITE['founded']}. "
-                      f"{SITE['hours']}. WhatsApp {SITE['whatsapp']}: envie uma fotografia da avaria."),
-        "END:VCARD", ""]
-    (OUT / "mdm.vcf").write_bytes("\r\n".join(linhas).encode("utf-8"))
-
-
 def build():
     if OUT.exists():
         shutil.rmtree(OUT)
     OUT.mkdir()
     shutil.copytree(ASSETS, OUT / "assets")
-    vcard()
     files, fora_do_mapa = [], set()
     for p in sorted((SRC / "pages").rglob("*.html")):
         text = p.read_text(encoding="utf-8")
@@ -406,7 +384,7 @@ def build():
         meta = json.loads(m.group(1))
         files.append(build_page(meta, text[m.end():]))
         if "noindex" in meta.get("robots", ""):
-            fora_do_mapa.add(meta["file"])   # 404 e página das carrinhas
+            fora_do_mapa.add(meta["file"])   # 404 e página de agradecimento
     obra_tpl_path = SRC / "templates" / "obra.html"
     if obra_tpl_path.exists():
         tpl = obra_tpl_path.read_text(encoding="utf-8")
@@ -439,7 +417,7 @@ def build():
 
 
 # o que sobra de um dado por preencher: [MAIÚSCULAS…], [[CHAVE]], "por preencher", "lorem ipsum" (comentários HTML à parte).
-# Não contam as etiquetas de triagem ([P1 · Montagem AC]) nem a da origem das carrinhas ([Carrinha 01 · traseira]).
+# Não contam as etiquetas de triagem ([P1 · Montagem AC]).
 PLACEHOLDER_RE = re.compile(r"\[(?!P\d ·)[^\[\]<>\"']*?[A-ZÀ-Ý]{3}[^\[\]<>\"']*\]|\[\[[^\]]*\]\]"
                             r"|(?i:\b(?:por preencher|lorem ipsum)\b)")
 # Decisões do dono (AUDIT.md da v3, 27/09/2026): nada disto volta ao site, nem em meta, JSON-LD ou mensagens de WhatsApp.
@@ -459,7 +437,7 @@ REF_RE = re.compile(r'(?:href|src|action)="([^"#?]+)|srcset="([^"]+)"|url\(([^)]
 FORM_RE = re.compile(r'<form\b[^>]*\bid="quoteForm"[^>]*>.*?</form>', re.S)
 FORM_EXIGE = [' name="orcamento"', ' method="POST"', ' data-netlify="true"', ' netlify-honeypot="bot-field"',
               ' enctype="multipart/form-data"', ' action="/obrigado.html"']
-FORM_CAMPOS = {"form-name", "subject", "pagina", "triagem", "origem", "potencia", "nome", "email", "telefone", "servico",
+FORM_CAMPOS = {"form-name", "subject", "pagina", "triagem", "potencia", "nome", "email", "telefone", "servico",
                "mensagem", "fotografia", "bot-field"}
 
 
@@ -530,8 +508,8 @@ def check(files):
                 continue
             if not (css.parent / c).resolve().exists():
                 problems.append(f"{css.name}: url partido → {c}")
-    # o que o visitante lê também vem dos scripts (mensagens do formulário) e do cartão de contacto
-    for extra in [*sorted((OUT / "assets" / "js").glob("*.js")), OUT / "mdm.vcf"]:
+    # o que o visitante lê também vem dos scripts (mensagens do formulário)
+    for extra in sorted((OUT / "assets" / "js").glob("*.js")):
         problems += texto_proibido(str(extra.relative_to(OUT)), extra.read_text(encoding="utf-8"))
     print(f"{len(files)} páginas geradas em {OUT}")
     if PREVIEW:

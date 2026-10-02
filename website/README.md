@@ -16,7 +16,7 @@ Pré-visualizar: abrir `website/public/index.html` no browser, ou `python3 -m ht
 
 ## Publicar
 
-Qualquer alojamento estático serve, **servido na raiz do domínio** (a página 404 usa caminhos absolutos porque é mostrada em qualquer profundidade). Netlify: diretório base `website` (o `netlify.toml` já tem o comando e a pasta). O domínio é `https://www.mdmassist.com.pt` (`baseUrl` em `data/site.json`): dele saem o endereço canónico, `og:url`, `og:image`, o mapa do site, o `robots.txt`, os dados estruturados, o cartão `mdm.vcf` e os códigos QR. Antes de publicar, ver a lista de `--faltam` (abaixo).
+Qualquer alojamento estático serve, **servido na raiz do domínio** (a página 404 usa caminhos absolutos porque é mostrada em qualquer profundidade). Netlify: diretório base `website` (o `netlify.toml` já tem o comando e a pasta). O domínio é `https://www.mdmassist.com.pt` (`baseUrl` em `data/site.json`): dele saem o endereço canónico, `og:url`, `og:image`, o mapa do site, o `robots.txt` e os dados estruturados. Antes de publicar, ver a lista de `--faltam` (abaixo).
 
 ### Pré-visualização (até ao lançamento)
 
@@ -31,11 +31,10 @@ Enquanto `data/site.json` tiver `"preview": true`, o site pede aos motores de bu
 ### Lançamento: desligar a pré-visualização
 
 1. Ligar `www.mdmassist.com.pt` (e o domínio sem `www`, a redirecionar para ele) ao projeto Netlify e esperar pelo certificado HTTPS. Não mexer nos registos de email do DNS.
-2. Em `data/site.json`, passar `"preview": true` a `"preview": false`. Mais nada muda: `robots.txt` passa a `Allow: /` com a linha `Sitemap:`, `_headers` deixa de ser gerado e as páginas voltam a `index,follow` (a 404 e a página das carrinhas continuam `noindex`, de propósito).
+2. Em `data/site.json`, passar `"preview": true` a `"preview": false`. Mais nada muda: `robots.txt` passa a `Allow: /` com a linha `Sitemap:`, `_headers` deixa de ser gerado e as páginas voltam a `index,follow` (a 404 e `obrigado.html` continuam `noindex`, de propósito).
 3. `python3 website/build.py --check` tem de passar (falha se sobrar algum `noindex` ou se `baseUrl` não for o domínio final). Fazer commit e esperar pelo deploy.
 4. Confirmar: `curl -I https://www.mdmassist.com.pt/` já não mostra `X-Robots-Tag`, e `https://www.mdmassist.com.pt/robots.txt` mostra `Allow: /`.
 5. Na Google Search Console, enviar `https://www.mdmassist.com.pt/sitemap.xml`. No Perfil da Empresa no Google, pôr `https://www.mdmassist.com.pt` como site.
-6. Só agora gerar os códigos QR das carrinhas para a gráfica (secção seguinte).
 
 ### Dados para o Google
 
@@ -50,14 +49,13 @@ Todas as páginas levam a empresa em JSON-LD (`HVACBusiness` e `Electrician`): n
 | `data/dados-mdm.json` | Dados que só a MDM pode dar (números das certificações, testemunhos, perguntas por responder, privacidade). Vazio = escondido no site |
 | `src/templates/layout.html` | Cabeçalho `<head>`, estrutura comum (topo, barra das estatísticas, rodapé, barra do telemóvel) |
 | `src/partials/` | Cabeçalho e menu em gaveta, rodapé (com a política de privacidade e o Livro de Reclamações Eletrónico), barra fixa do telemóvel, barra das estatísticas (`consentimento.html`), contacto + formulário, certificações, testemunhos, cartões de obra |
-| `src/pages/` | Página inicial, obras, 5 serviços (ar condicionado, bombas de calor, manutenção, eletricidade, ventilação), privacidade, 404, página do QR das carrinhas, `obrigado.html` (depois de enviar o formulário sem JavaScript). Cada serviço descreve-se no `<!--meta-->` em `servico` (nome, tipo e ofertas) para os dados estruturados `Service` |
+| `src/pages/` | Página inicial, obras, 5 serviços (ar condicionado, bombas de calor, manutenção, eletricidade, ventilação), privacidade, 404, `obrigado.html` (depois de enviar o formulário sem JavaScript). Cada serviço descreve-se no `<!--meta-->` em `servico` (nome, tipo e ofertas) para os dados estruturados `Service` |
 | `src/templates/obra.html` | Modelo das 24 páginas de obra (`obras/<slug>.html`) |
 | `assets/css/site.css` | Sistema visual completo e movimento |
 | `assets/js/site.js` | Estatísticas (PostHog UE, sem cookies, só depois de «Aceitar»), formulário (envio para o Netlify, estimativa de potência), gaveta, carrossel, filtros, revelação |
 | `assets/fonts/` | Archivo e Newsreader alojadas no site (licença OFL incluída): nenhum pedido ao Google |
 | `assets/img/obras/` | Fotografias com correção de cor ligeira: o original `foto-NN-1600.jpg` e os tamanhos 400 a 1600 em AVIF e WebP (ver «Fotografias das obras») |
 | `gerar_fotos.py` | Faz os tamanhos AVIF e WebP das fotografias a partir do JPEG de 1600 |
-| `marketing/gerar_qr.py` | Códigos QR das carrinhas, em vetor, com a carrinha e o lado na ligação |
 
 ## Fotografias das obras
 
@@ -72,22 +70,9 @@ O `{{foto NN …}}` do `build.py` escreve um `<picture>` com os três formatos, 
 
 Uma obra nova: pôr o `foto-NN-1600.jpg` na pasta, correr `gerar_fotos.py` e depois `build.py --check`, que falha se faltar algum tamanho. Na página inicial, num telemóvel, as fotografias pesam cerca de 0,7 MB (antes 2,5 MB).
 
-## Carrinhas: código QR e página de destino
-
-Cada carrinha leva códigos QR que abrem `carrinha.html?v=01&p=t` (carrinha 01, traseira). A página está fora do menu e do mapa do site (`noindex`) e junta a origem, por exemplo `[Carrinha 01 · traseira]`, às mensagens de WhatsApp, ao pedido do formulário e ao evento `qr_carrinha` nas estatísticas (se o visitante as aceitar). Assim fica a saber que carrinha e que lado trazem contactos. Não guarda nada no equipamento do visitante. Lados: `t` traseira, `e` lateral esquerda, `d` lateral direita, `m` íman, `c` cartão de vizinho.
-
-```bash
-pip install segno
-python3 website/marketing/gerar_qr.py --carrinhas 3   # SVG à medida final em website/marketing/qr/
-```
-
-Os códigos usam o `baseUrl` de `data/site.json` (`https://www.mdmassist.com.pt`). **Gerar os ficheiros para a gráfica só depois do lançamento** (`"preview": false` e o domínio já a abrir o site novo; o script avisa enquanto o site estiver em pré-visualização), e ler cada código com dois telemóveis antes de imprimir. `marketing/qr/` não entra no git.
-
-A página oferece ainda `mdm.vcf`, o cartão de contacto para guardar no telemóvel, gerado a partir de `data/site.json`.
-
 ## Formulário de orçamento (Netlify Forms)
 
-O formulário (`src/partials/contacto.html`, em todas as páginas que o têm) é um formulário Netlify com o nome `orcamento`. O Netlify encontra-o no HTML gerado e guarda cada pedido em **Forms** no painel do projeto. Campos: `nome`, `email`, `telefone`, `servico`, `mensagem`, `fotografia` (opcional, uma imagem até 8 MB, o limite do Netlify por pedido) e os escondidos `pagina` (de onde foi enviado), `triagem` (`[P1 · Montagem AC]`…), `origem` (a carrinha, em `carrinha.html`), `potencia` (a estimativa de potência, se o visitante a juntar) e `subject` (o assunto do email de aviso, com a triagem). `bot-field` é a armadilha para robôs (`netlify-honeypot`). `--check` falha se o formulário de alguma página perder um destes campos ou atributos.
+O formulário (`src/partials/contacto.html`, em todas as páginas que o têm) é um formulário Netlify com o nome `orcamento`. O Netlify encontra-o no HTML gerado e guarda cada pedido em **Forms** no painel do projeto. Campos: `nome`, `email`, `telefone`, `servico`, `mensagem`, `fotografia` (opcional, uma imagem até 8 MB, o limite do Netlify por pedido) e os escondidos `pagina` (de onde foi enviado), `triagem` (`[P1 · Montagem AC]`…), `potencia` (a estimativa de potência, se o visitante a juntar) e `subject` (o assunto do email de aviso, com a triagem). `bot-field` é a armadilha para robôs (`netlify-honeypot`). `--check` falha se o formulário de alguma página perder um destes campos ou atributos.
 
 - **Com JavaScript**, `site.js` valida (nome e um email ou telefone; fotografia até 8 MB e só imagens), envia para `/` sem sair da página e mostra a confirmação no próprio formulário, sem prazos. Se o envio falhar (rede, tempo, serviço), nada se apaga: a mensagem oferece telefone e WhatsApp, este já com o pedido escrito.
 - **Sem JavaScript**, o envio é normal e o Netlify mostra `obrigado.html` (fora do mapa do site, `noindex`).

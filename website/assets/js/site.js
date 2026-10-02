@@ -22,11 +22,9 @@
   })();
   var _trackQueue = [];
   var phPronto = false, phCapture = null;
-  var ORIGEM = '';   /* só na página das carrinhas: "Carrinha 01 · traseira" (ver abaixo) */
   function track(event, props) {
     if (SEM_REDE || escolha === 'nao' || (!escolha && NAO_SEGUIR)) return;
     props = props || {};
-    if (ORIGEM && !props.origem) props.origem = ORIGEM;
     try {
       if (phPronto) window.posthog.capture(event, props);
       else if (_trackQueue.length < 50) _trackQueue.push([event, props]);
@@ -130,30 +128,7 @@
     mede();
   })();
 
-  /* ═══ Origem: código QR das carrinhas (carrinha.html?v=01&p=t, gerado por marketing/gerar_qr.py) ═══
-     Junta a carrinha e o lado ao WhatsApp, ao formulário e à medição, para saber que carrinha traz contactos.
-     Vale só nesta página e nesta visita: nada fica guardado no equipamento. */
-  (function () {
-    var alvo = document.querySelector('[data-origem-qr]');
-    if (!alvo) return;
-    var LADOS = { t: 'traseira', e: 'lateral esquerda', d: 'lateral direita', m: 'íman', c: 'cartão de vizinho' };
-    var v = '', p = '';
-    try { var q = new URLSearchParams(location.search); v = (q.get('v') || '').replace(/\D/g, '').slice(0, 3); p = LADOS[q.get('p')] || ''; } catch (e) {}
-    if (v.length === 1) v = '0' + v;
-    var txt = 'Carrinha' + (v ? ' ' + v : '') + (p ? ' · ' + p : '');
-    if (v || p) { var t = alvo.querySelector('[data-origem-texto]'); if (t) t.textContent = txt; alvo.hidden = false; }
-    track('qr_carrinha', { carrinha: v || 'sem número', lado: p || 'desconhecido', origem: txt });
-    ORIGEM = txt;
-    /* a etiqueta da origem vai no fim da mensagem de WhatsApp pré-preenchida */
-    qsa('a[href^="https://wa.me/"]').forEach(function (a) { a.href += encodeURIComponent(' [' + txt + ']'); });
-    /* ligações para secções que também existem nesta página ficam nesta página (e a origem não se perde) */
-    qsa('a[href*="index.html#"]').forEach(function (a) {
-      var id = a.getAttribute('href').split('#')[1];
-      if (id && document.getElementById(id)) a.setAttribute('href', '#' + id);
-    });
-  })();
-
-  /* «Orçamento» numa página com o seu próprio formulário (serviços, carrinha): fica nesta página, com o serviço já escolhido */
+  /* «Orçamento» numa página com o seu próprio formulário (serviços): fica nesta página, com o serviço já escolhido */
   if (document.getElementById('orcamento')) {
     qsa('a[href$="index.html#orcamento"]').forEach(function (a) { a.setAttribute('href', '#orcamento'); });
   }
@@ -566,10 +541,9 @@
     var l = ['Pedido de orçamento MDM', '', 'Nome/Empresa: ' + (d.empresa || '-'), 'Email: ' + (d.email || '-'),
              'Telefone: ' + (d.tel || '-'), 'Serviço: ' + (d.servico || '-'), 'Triagem: ' + etiqueta(d.servico)];
     if (d.potencia) l.push('Potência estimada: ' + d.potencia);
-    if (ORIGEM) l.push('Origem: ' + ORIGEM);
     return l.concat(['', d.msg || '']).join('\n');
   }
-  function assunto(d) { return etiqueta(d.servico) + ' Pedido de orçamento, ' + (d.servico || 'serviços MDM') + (ORIGEM ? ' [' + ORIGEM + ']' : ''); }
+  function assunto(d) { return etiqueta(d.servico) + ' Pedido de orçamento, ' + (d.servico || 'serviços MDM'); }
   /* a mensagem e, se houver, ligações no fim: "…, [ligue 218 935 050] ou [envie-o por WhatsApp]." */
   function quoteAlert(msg, ok, ligacoes) {
     var a = $('quoteAlert');
@@ -959,13 +933,10 @@
     };
   })();
 
-  /* campos escondidos que o Netlify guarda com o pedido: triagem, origem (carrinha) e o assunto do email de aviso */
-  var campoOrigem = form.querySelector('[data-origem-campo]');
-  if (ORIGEM && campoOrigem) campoOrigem.value = ORIGEM;
+  /* campos escondidos que o Netlify guarda com o pedido: triagem e o assunto do email de aviso */
   function preparaCampos(d) {
     form.querySelector('[data-triagem]').value = etiqueta(d.servico);
     form.querySelector('[data-assunto]').value = assunto(d);
-    if (ORIGEM && campoOrigem) campoOrigem.value = ORIGEM;
   }
   function enviaNetlify(d) {
     var ctl = window.AbortController ? new AbortController() : null;
@@ -1001,7 +972,7 @@
         lbl.textContent = 'Pedido enviado';
         quoteAlert('Pedido recebido, obrigado. Vamos analisar o seu pedido e responder pelo email ou telefone que indicou. Se for urgente,', true,
           [[TEL_HREF, 'ligue ' + TEL],
-           [WA_BASE + encodeURIComponent('Olá MDM. Acabei de enviar um pedido de orçamento pelo site.' + (d.potencia ? ' Potência estimada: ' + d.potencia + '.' : '') + ' ' + etiqueta(d.servico) + (ORIGEM ? ' [' + ORIGEM + ']' : '')), 'fale connosco por WhatsApp']]);
+           [WA_BASE + encodeURIComponent('Olá MDM. Acabei de enviar um pedido de orçamento pelo site.' + (d.potencia ? ' Potência estimada: ' + d.potencia + '.' : '') + ' ' + etiqueta(d.servico)), 'fale connosco por WhatsApp']]);
         form.reset(); erroCampo('qFoto'); escolheServico(form.getAttribute('data-preselect'));
         track('quote_form_ok', { servico: d.servico, segmento: triagem(d.servico).seg });
         setTimeout(function () { if (lbl.textContent === 'Pedido enviado') lbl.textContent = 'Enviar pedido'; }, 6000);
