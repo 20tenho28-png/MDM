@@ -326,7 +326,7 @@ function renderRoomResult(load) {
       <details class="why">
         <summary>Como chegámos a este valor</summary>
         <div class="breakdown">
-          <span>Paredes, teto, ar exterior (${fmtDec(load.volume)} m³)</span><b>${fmtInt(load.parts.envelope)} W</b>
+          <span>Paredes, ar exterior e inércia (${fmtDec(load.volume)} m³)</span><b>${fmtInt(load.parts.envelope)} W</b>
           <span>Sol pelas janelas (${fmtDec(load.room.windows)} m², ${esc(load.labels.orientation)}, ${esc(load.labels.shading).toLowerCase()})</span><b>${fmtInt(load.parts.solar)} W</b>
           <span>Pessoas (${load.room.people == null ? 2 : load.room.people}) e equipamentos</span><b>${fmtInt(load.parts.internal)} W</b>
           ${load.parts.roof ? `<span>Telhado (último andar)</span><b>${fmtInt(load.parts.roof)} W</b>` : ""}

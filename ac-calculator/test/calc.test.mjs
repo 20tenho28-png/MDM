@@ -9,6 +9,7 @@ import {
   K,
   LIMITS,
   MAX_WALL_UNIT_W,
+  SPLIT_TOLERANCE,
   METHOD_PT,
   MULTI_OUTDOOR,
   ORIENTATIONS,
@@ -172,6 +173,19 @@ test("espaço aberto enorme a poente passa de 24k: divide por várias unidades e
   assert.equal(p.totalUnitBTU, l.unit.btu * l.units);
   assert.ok(p.options[0].title.startsWith(`${l.units} aparelhos`));
 });
+test("até 5 % acima de 7 kW mantém uma só unidade de 24 000 (no limite); acima divide", () => {
+  let hold = null, split = null;
+  for (let a = 30; a <= 80 && !(hold && split); a += 0.5) {
+    const l = roomLoad(room({ area: a, windows: 5, orientation: "O", people: 3 }), { zone: "V2", building: "mid" });
+    if (!hold && l.loadW > MAX_WALL_UNIT_W && l.loadW <= MAX_WALL_UNIT_W * SPLIT_TOLERANCE) hold = l;
+    if (!split && l.loadW > MAX_WALL_UNIT_W * SPLIT_TOLERANCE) split = l;
+  }
+  assert.ok(hold && split, "fixtures");
+  assert.equal(hold.units, 1); assert.equal(hold.unit.btu, 24000);
+  assert.ok(hold.warnings.some((w) => w.text.includes("No limite")), JSON.stringify(hold.warnings));
+  assert.ok(split.units >= 2);
+  assert.ok(split.warnings.some((w) => w.text.includes("7 kW")));
+});
 test("no limite da classe avisa e sugere a seguinte", () => {
   // Procura uma área que caia entre 95 % e 100 % de uma classe.
   let hit = null;
@@ -225,7 +239,8 @@ test("sem pedido de aquecimento não calcula", () => {
 test("aquecimento de um quarto normal é coberto pela unidade", () => {
   const l = roomLoad(room({ area: 12, windows: 1.5, orientation: "N" }), { zone: "V2", heating: true, building: "mid" });
   assert.ok(l.heating);
-  close(l.heating.loadW, 12 * 2.6 * K.heatingWPerM3, K.roundW / 2 + 1e-6, "carga de calor");
+  const mid = BUILDING_OPTIONS.find((o) => o.key === "mid");
+  close(l.heating.loadW, 12 * 2.6 * K.heatingWPerM3 + 1.5 * mid.uGlass * K.heatingDeltaT, K.roundW / 2 + 1e-6, "carga de calor");
   assert.equal(l.heating.ok, true);
 });
 test("em Lisboa (I1) uma unidade dimensionada para o frio aquece bem", () => {
@@ -239,10 +254,16 @@ test("em Lisboa (I1) uma unidade dimensionada para o frio aquece bem", () => {
 test("inverno frio (I3), edifício antigo a norte: aquecimento fica curto e sugere maior", () => {
   const l = roomLoad(room({ area: 36, windows: 1, orientation: "N", shading: "blinds_out", people: 1 }), { zone: "V2", winter: "I3", heating: true, building: "old" });
   assert.equal(l.unit.btu, 18000, `frio pede ${l.unit.btu}`);
-  close(l.heating.loadW, 36 * 2.6 * K.heatingWPerM3 * 1.25 * WINTER_ZONES.I3.factor, K.roundW / 2 + 1e-6, "carga de calor");
+  const old = BUILDING_OPTIONS.find((o) => o.key === "old");
+  close(l.heating.loadW, (36 * 2.6 * K.heatingWPerM3 * old.heat + 1 * old.uGlass * K.heatingDeltaT) * WINTER_ZONES.I3.factor, K.roundW / 2 + 1e-6, "carga de calor");
   close(l.heating.unitHeatKW, l.unit.heatKW * WINTER_ZONES.I3.derate, 1e-9, "capacidade num dia frio");
   assert.equal(l.heating.ok, false);
   assert.ok(l.heating.suggest && l.heating.suggest.btu > l.unit.btu, JSON.stringify(l.heating));
+});
+test("no inverno o vidro conta: mais janelas, mais perdas; vidro antigo perde mais", () => {
+  const h = (w, b) => roomLoad(room({ area: 10, windows: w, orientation: "N" }), { zone: "V2", winter: "I1", heating: true, building: b }).heating.loadW;
+  assert.ok(h(6, "old") > h(0, "old"));
+  assert.ok(h(6, "old") > h(6, "new"));
 });
 test("capacidade de calor cai com o frio: derate decrescente de I1 para I3", () => {
   assert.ok(WINTER_ZONES.I1.derate > WINTER_ZONES.I2.derate && WINTER_ZONES.I2.derate > WINTER_ZONES.I3.derate);
@@ -261,20 +282,29 @@ test("rejeita códigos curtos, longos ou abaixo de 1000", () => {
   for (const s of ["", "199", "1990-42", "1990-4261", "0990-426", "abc"]) assert.equal(parsePostal(s).valid, false, s);
   assert.equal(postalInfo("0990-426").valid, false);
 });
-test("Lisboa e AML: zona V2 e dentro da área de intervenção", () => {
-  for (const cp of ["1990-426", "1000-001", "2610-000", "2750-000", "2780-000", "2700-000", "2660-000", "2600-000", "2640-000", "2800-000", "2840-000", "2830-000", "2900-000", "2950-000", "2970-000", "2890-000", "2870-000"]) {
+test("Lisboa e AML norte: zona V2, inverno I1, dentro da área de intervenção", () => {
+  for (const cp of ["1990-426", "1000-001", "2610-000", "2750-000", "2780-000", "2700-000", "2660-000", "2600-000", "2640-000", "2635-000"]) {
     const i = postalInfo(cp);
     assert.equal(i.valid, true, cp);
     assert.equal(i.inAML, true, cp);
     assert.equal(i.zone, "V2", cp);
+    assert.equal(i.winter, "I1", cp);
   }
 });
-test("fora da AML: Torres Vedras, Santarém, Leiria, Évora, Porto", () => {
-  for (const cp of ["2560-000", "2000-000", "2400-000", "7000-000", "4000-000"]) assert.equal(postalInfo(cp).inAML, false, cp);
+test("Península de Setúbal: AML, verão quente V3, inverno I1", () => {
+  for (const cp of ["2800-000", "2840-000", "2830-000", "2900-000", "2950-000", "2970-000", "2890-000", "2870-000"]) {
+    const i = postalInfo(cp);
+    assert.equal(i.inAML, true, cp);
+    assert.equal(i.zone, "V3", cp);
+    assert.equal(i.winter, "I1", cp);
+  }
 });
-test("zonas de verão: litoral norte V1, Lisboa V2, Alentejo e Algarve V3", () => {
-  assert.equal(postalInfo("4000-000").zone, "V1");
-  assert.equal(postalInfo("4700-000").zone, "V1");
+test("fora da AML: Torres Vedras, Arruda dos Vinhos, Santarém, Leiria, Évora, Porto", () => {
+  for (const cp of ["2560-000", "2630-000", "2000-000", "2400-000", "7000-000", "4000-000"]) assert.equal(postalInfo(cp).inAML, false, cp);
+});
+test("zonas de verão: Porto V2, Lisboa V2, Alentejo e Algarve V3, ilhas V1", () => {
+  assert.equal(postalInfo("4000-000").zone, "V2");
+  assert.equal(postalInfo("4700-000").zone, "V2");
   assert.equal(postalInfo("1000-000").zone, "V2");
   assert.equal(postalInfo("7000-000").zone, "V3");
   assert.equal(postalInfo("7800-000").zone, "V3");
@@ -287,9 +317,10 @@ test("zonas de verão: litoral norte V1, Lisboa V2, Alentejo e Algarve V3", () =
     assert.ok(ZONES[i.zone] && WINTER_ZONES[i.winter], `prefixo ${p} com zona inválida`);
   }
 });
-test("zonas de inverno: Lisboa I1, Porto I2, Bragança e Guarda I3", () => {
+test("zonas de inverno: Lisboa e Porto I1, Braga I2, Bragança e Guarda I3", () => {
   assert.equal(postalInfo("1000-000").winter, "I1");
-  assert.equal(postalInfo("4000-000").winter, "I2");
+  assert.equal(postalInfo("4000-000").winter, "I1");
+  assert.equal(postalInfo("4700-000").winter, "I2");
   assert.equal(postalInfo("5300-000").winter, "I3");
   assert.equal(postalInfo("6300-000").winter, "I3");
 });
@@ -344,6 +375,21 @@ test("unidade exterior respeita a soma máxima de interiores", () => {
   const p = sizeProject(loads.map((l) => l.room), { zone: "V2", building: "mid" });
   assert.equal(p.options.length, 1);
   assert.ok(p.warnings.some((w) => w.text.includes("multi-split")));
+});
+test("num inverno frio a exterior multi tem de aquecer todas as divisões ao mesmo tempo", () => {
+  const rooms = [1, 2, 3].map(() => room({ area: 20, windows: 4, orientation: "S", people: 3 }));
+  const summer = sizeProject(rooms, { zone: "V2", winter: "I3", building: "mid" });
+  const winter = sizeProject(rooms, { zone: "V2", winter: "I3", building: "mid", heating: true });
+  const outS = summer.options.find((o) => o.kind === "multi").outdoor;
+  const multiW = winter.options.find((o) => o.kind === "multi");
+  const heatNeed = winter.rooms.reduce((s, l) => s + l.heating.loadW, 0) / 1000;
+  if (multiW) {
+    assert.ok(multiW.outdoor.heatKW * WINTER_ZONES.I3.derate >= heatNeed, "exterior aquece tudo num dia frio");
+    assert.ok(multiW.outdoor.coolKW >= outS.coolKW);
+  } else {
+    assert.ok(winter.warnings.some((w) => w.text.includes("multi-split")));
+    assert.equal(winter.options[0].recommended, true, "sem multi, o mono fica sugerido");
+  }
 });
 test("divisão com várias unidades: só mono-split é comparado", () => {
   const huge = room({ area: 60, windows: 15, orientation: "O", people: 6, equipment: "kitchen" });

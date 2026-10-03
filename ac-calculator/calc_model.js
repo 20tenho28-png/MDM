@@ -31,11 +31,13 @@ export const SHADING_OPTIONS = [
 // "Não sei" usa os fatores do edifício antigo: na dúvida, dimensiona-se por cima.
 // cool/heat: paredes e telhado; glass: vidro simples (antigo) deixa entrar mais sol
 // do que vidro duplo (1990-2006) ou vidro duplo de controlo solar (recente).
+// roof: cobertura (laje antiga sem isolamento perde muito mais); uGlass: W/m²K do
+// vidro no inverno (simples 5,8; duplo 2,9; duplo recente 1,8).
 export const BUILDING_OPTIONS = [
-  { key: "unknown", label: "Não sei (assumimos pouco isolamento)", cool: 1.15, heat: 1.25, glass: 1.1 },
-  { key: "old", label: "Antes de 1990 (pouco isolamento)", cool: 1.15, heat: 1.25, glass: 1.1 },
-  { key: "mid", label: "Entre 1990 e 2006", cool: 1.0, heat: 1.0, glass: 1.0 },
-  { key: "new", label: "Depois de 2006 (bem isolado)", cool: 0.85, heat: 0.75, glass: 0.85 },
+  { key: "unknown", label: "Não sei (assumimos pouco isolamento)", cool: 1.15, heat: 1.25, glass: 1.1, roof: 1.5, uGlass: 5.8 },
+  { key: "old", label: "Antes de 1990 (pouco isolamento)", cool: 1.15, heat: 1.25, glass: 1.1, roof: 1.5, uGlass: 5.8 },
+  { key: "mid", label: "Entre 1990 e 2006", cool: 1.0, heat: 1.0, glass: 1.0, roof: 1.0, uGlass: 2.9 },
+  { key: "new", label: "Depois de 2006 (bem isolado)", cool: 0.85, heat: 0.75, glass: 0.85, roof: 0.7, uGlass: 1.8 },
 ];
 
 export const EQUIPMENT_OPTIONS = [
@@ -54,9 +56,9 @@ export const ROOM_PRESETS = [
 
 // Zonas climáticas de verão do REH (Despacho 15793-F/2013): V1 ameno, V3 quente.
 export const ZONES = {
-  V1: { label: "Verão ameno", factor: 0.9, hint: "Litoral norte e ilhas: verões mais frescos." },
+  V1: { label: "Verão ameno", factor: 0.9, hint: "Ilhas e zonas de altitude: verões mais frescos." },
   V2: { label: "Verão moderado", factor: 1.0, hint: "Lisboa e grande parte do litoral centro." },
-  V3: { label: "Verão quente", factor: 1.12, hint: "Interior, Alentejo e Algarve: mais calor, mais potência." },
+  V3: { label: "Verão quente", factor: 1.12, hint: "Península de Setúbal, interior, Alentejo e Algarve: mais calor, mais potência." },
 };
 
 // Zonas de inverno do REH. factor multiplica as necessidades de aquecimento;
@@ -77,7 +79,8 @@ export const UNIT_CLASSES = [
 ];
 
 // Unidades exteriores multi-split: N×1 com capacidade nominal de frio/calor.
-// maxIndoorKW = soma máxima de capacidades interiores ligáveis (sobre-rácio ~130 %).
+// maxIndoorKW = soma máxima de capacidades interiores ligáveis segundo as tabelas
+// dos fabricantes (cerca de 140 a 155 % da capacidade nominal da exterior).
 export const MULTI_OUTDOOR = [
   { rooms: 2, label: "2×1", coolKW: 4.0, heatKW: 4.6, maxIndoorKW: 6.0 },
   { rooms: 2, label: "2×1", coolKW: 5.0, heatKW: 5.6, maxIndoorKW: 7.0 },
@@ -96,7 +99,8 @@ export const LIMITS = {
   people: { min: 0, max: 12 },
 };
 
-export const MAX_WALL_UNIT_W = 7000; // acima disto uma só unidade mural não chega
+export const MAX_WALL_UNIT_W = 7000; // capacidade da maior unidade mural (24 000 BTU)
+export const SPLIT_TOLERANCE = 1.05; // só dividimos em várias unidades acima de 5 % sobre a maior mural
 
 // ------------------------------------------------------------- constantes
 export const K = {
@@ -104,13 +108,14 @@ export const K = {
   solarWPerM2: { N: 60, NE: 120, E: 240, SE: 260, S: 220, SO: 310, O: 320, NO: 160 }, // ganho pelo vidro duplo, verão, ~38,7° N, já amortecido pela inércia
   personW: 100, // calor sensível + latente por pessoa sentada
   baseEquipmentW: 100, // iluminação, televisão, carregadores (sempre)
-  roofWPerM2: 35, // ganho pela cobertura em último andar (U × ΔT de uma laje corrente)
+  roofWPerM2: 35, // ganho pela cobertura em último andar, laje 1990-2006 (× fator roof do edifício)
   minHeightCm: 240, // tetos baixos não reduzem a carga (fail-safe)
   marginFactor: 1.05, // margem de dimensionamento (a envolvente já é conservadora)
   maxWPerM2: 250, // acima disto os dados merecem confirmação (vidro ou pessoas a mais)
   roundW: 10, // arredondamento da carga (precisão a mais engana)
   atLimitRatio: 0.95, // acima disto a divisão está no limite da classe
-  heatingWPerM3: 30, // necessidades de aquecimento por m³ num dia frio de inverno (zona I1, edifício 1990-2006)
+  heatingWPerM3: 25, // paredes, teto e renovação de ar num dia frio de inverno, por m³ (zona I1, edifício 1990-2006)
+  heatingDeltaT: 15, // ΔT de inverno (20 °C dentro, ~5 °C fora) para a perda pelo vidro
   simultaneity: { 2: 0.85, 3: 0.8, 4: 0.75, 5: 0.7 }, // multi-split: as divisões raramente pedem o máximo todas ao mesmo tempo
   smallRoomRatio: 0.45, // abaixo disto a unidade mais pequena fica muito folgada
   bigOpenPlanM2: 50, // acima disto sugerimos distribuir o ar por 2 unidades
@@ -121,7 +126,7 @@ export const METHOD_PT =
   "o calor do sol que entra pelas janelas (depende da área de vidro, da orientação e do sombreamento), o calor das pessoas e dos equipamentos " +
   "e, em último andar, o calor do telhado. Ajustamos o que vem de fora à zona climática de verão do seu código postal e acrescentamos 5 % de margem. " +
   "Convertemos o resultado de watts para BTU/h (1 kW são 3 412 BTU/h) e escolhemos a unidade comercial mais pequena que cobre essa carga: " +
-  "9 000, 12 000, 18 000 ou 24 000 BTU/h; acima disso dividimos a carga por duas ou mais unidades. Se pediu aquecimento, confirmamos que a potência de calor da unidade chega para um dia frio de inverno na sua zona.";
+  "9 000, 12 000, 18 000 ou 24 000 BTU/h; acima disso dividimos a carga por duas ou mais unidades. Se pediu aquecimento, estimamos as perdas de calor num dia frio da sua zona de inverno (paredes, ar e vidro) e confirmamos que a potência de calor da unidade, já reduzida pelo frio, chega. A zona climática é a da sua região ao nível de referência, sem correção de altitude.";
 
 // ------------------------------------------------------------ utilidades
 let roomCounter = 0;
@@ -167,6 +172,13 @@ export function pickUnit(loadW) {
 
 const roundTo = (n, step) => Math.round(n / step) * step;
 
+// Texto simples: milhares com espaço ("9 000"), decimais com vírgula.
+export const fmt = (n, d = 0) => {
+  const [int, dec] = Number(n).toFixed(d).split(".");
+  const grouped = int.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return dec && /[1-9]/.test(dec) ? `${grouped},${dec}` : grouped;
+};
+
 /**
  * Carga térmica de uma divisão e unidade recomendada.
  * ctx: { zone: 'V1'|'V2'|'V3', winter: 'I1'|'I2'|'I3', building: 'old'|'mid'|'new', heating: boolean }
@@ -188,26 +200,28 @@ export function roomLoad(room, ctx = {}) {
   const envelope = volume * K.envelopeWPerM3 * building.cool;
   const solar = room.windows * K.solarWPerM2[orientation.key] * shading.factor * building.glass;
   const internal = people * K.personW + K.baseEquipmentW + equipment.W;
-  const roof = room.topFloor ? room.area * K.roofWPerM2 * building.cool : 0;
+  const roof = room.topFloor ? room.area * K.roofWPerM2 * building.roof : 0;
   const sum = envelope + solar + internal + roof;
   // O clima só pesa no que vem de fora (envolvente, sol, telhado); pessoas e
   // equipamentos aquecem o mesmo em Braga ou em Beja. A margem aplica-se a tudo.
   const climate = ZONES[zone].factor;
   const loadW = roundTo((envelope + solar + roof) * climate * K.marginFactor + internal * K.marginFactor, K.roundW);
   const loadBTU = roundTo(loadW * W_TO_BTU, K.roundW);
-  // Acima de uma mural grande, divide-se a carga por n unidades iguais.
-  const units = Math.max(1, Math.ceil(loadW / MAX_WALL_UNIT_W));
-  const unit = pickUnit(loadW / units);
-  const ratio = unit ? loadW / units / (unit.coolKW * 1000) : 1;
+  // Acima da maior mural (com 5 % de tolerância, a carga já traz margem),
+  // divide-se a carga por n unidades iguais.
+  const units = loadW <= MAX_WALL_UNIT_W * SPLIT_TOLERANCE ? 1 : Math.ceil(loadW / MAX_WALL_UNIT_W);
+  const unit = units === 1 ? pickUnit(loadW) || UNIT_CLASSES[UNIT_CLASSES.length - 1] : pickUnit(loadW / units);
+  const ratio = loadW / units / (unit.coolKW * 1000);
 
   const warnings = [];
   if (units > 1) {
-    warnings.push({ level: "warn", text: `Carga acima de 24 000 BTU/h: uma só unidade mural não chega. Sugerimos ${units} unidades de ${unit.btu.toLocaleString("pt-PT")} BTU para distribuir o ar, ou uma solução de cassete ou conduta. O técnico confirma na visita.` });
+    warnings.push({ level: "warn", text: `Carga acima de 7 kW: uma só unidade mural, mesmo de 24 000 BTU, já não chega. Sugerimos ${units} unidades de ${fmt(unit.btu)} BTU para distribuir o ar, ou uma solução de cassete ou conduta. O técnico confirma na visita.` });
   } else if (ratio < K.smallRoomRatio) {
-    warnings.push({ level: "info", text: `Divisão pequena: a unidade mais pequena do mercado (${unit.btu.toLocaleString("pt-PT")} BTU) é mais do que suficiente e vai trabalhar a baixa rotação. Em divisões muito pequenas pondere servir duas divisões com uma só unidade.` });
+    warnings.push({ level: "info", text: `Divisão pequena: a unidade mais pequena do mercado (${fmt(unit.btu)} BTU) é mais do que suficiente e vai trabalhar a baixa rotação. Em divisões muito pequenas pondere servir duas divisões com uma só unidade.` });
   } else if (ratio >= K.atLimitRatio) {
     const next = UNIT_CLASSES[UNIT_CLASSES.indexOf(unit) + 1];
-    warnings.push({ level: "info", text: `No limite da classe: a carga fica a ${Math.round((1 - ratio) * 100)} % da capacidade da unidade. Se a divisão for muito usada nos dias mais quentes${next ? `, pondere ${next.btu.toLocaleString("pt-PT")} BTU` : ""}. O técnico confirma na visita.` });
+    const headroom = Math.round((1 - ratio) * 100);
+    warnings.push({ level: "info", text: `No limite da classe: a carga fica a ${headroom >= 1 ? `${headroom} %` : "menos de 1 %"} da capacidade da unidade. Se a divisão for muito usada nos dias mais quentes, pondere ${next ? `${fmt(next.btu)} BTU` : "dividir a potência por duas unidades"}. O técnico confirma na visita.` });
   }
   if (room.area >= K.bigOpenPlanM2 && units === 1) {
     warnings.push({ level: "warn", text: "Espaço aberto grande: uma só unidade mural pode não distribuir bem o ar. Muitas vezes compensa dividir a potência por duas unidades." });
@@ -221,7 +235,11 @@ export function roomLoad(room, ctx = {}) {
   let heating = null;
   if (ctx.heating) {
     const wz = WINTER_ZONES[winter];
-    const heatW = roundTo(volume * K.heatingWPerM3 * building.heat * wz.factor * (room.topFloor ? 1.15 : 1), K.roundW);
+    // Paredes, teto e ar (por volume) + perda pelo vidro (U × área × ΔT), ambos
+    // agravados pela zona de inverno; último andar perde mais pelo teto.
+    const heatBody = volume * K.heatingWPerM3 * building.heat * (room.topFloor ? 1.15 : 1);
+    const heatGlass = room.windows * building.uGlass * K.heatingDeltaT;
+    const heatW = roundTo((heatBody + heatGlass) * wz.factor, K.roundW);
     const effective = (u) => u.heatKW * wz.derate; // kW que a unidade dá num dia frio
     const perUnit = heatW / units;
     const heatOk = effective(unit) * 1000 >= perUnit;
@@ -250,20 +268,24 @@ export function roomLoad(room, ctx = {}) {
 }
 
 // ------------------------------------------------------------ código postal
-// Prefixos de 4 dígitos: distrito aproximado, zonas REH de verão (V) e inverno (I) e AML.
+// Prefixos de 4 dígitos: região aproximada, zonas REH de verão (V) e inverno (I)
+// (Despacho 15793-F/2013, por NUTS III, sem correção de altitude) e AML.
+// Intervalos mais específicos primeiro: a pesquisa usa o primeiro que encaixa.
 const POSTAL_RANGES = [
   { from: 1000, to: 1999, district: "Lisboa", zone: "V2", aml: true, winter: "I1" },
   { from: 2000, to: 2399, district: "Santarém", zone: "V3", aml: false, winter: "I2" },
   { from: 2400, to: 2549, district: "Leiria", zone: "V2", aml: false, winter: "I2" },
-  { from: 2550, to: 2599, district: "Lisboa (Oeste)", zone: "V2", aml: false, winter: "I2" },
+  { from: 2550, to: 2599, district: "Lisboa (Oeste)", zone: "V2", aml: false, winter: "I1" },
+  { from: 2630, to: 2634, district: "Lisboa (Oeste, Arruda dos Vinhos)", zone: "V2", aml: false, winter: "I1" },
   { from: 2600, to: 2799, district: "Lisboa (Área Metropolitana)", zone: "V2", aml: true, winter: "I1" },
-  { from: 2800, to: 2999, district: "Setúbal (Área Metropolitana)", zone: "V2", aml: true, winter: "I1" },
+  // Península de Setúbal: NUTS III de verão quente (V3) no REH, inverno ameno.
+  { from: 2800, to: 2999, district: "Setúbal (Área Metropolitana)", zone: "V3", aml: true, winter: "I1" },
   { from: 3000, to: 3499, district: "Coimbra", zone: "V2", aml: false, winter: "I2" },
   { from: 3500, to: 3699, district: "Viseu", zone: "V2", aml: false, winter: "I2" },
-  { from: 3700, to: 3899, district: "Aveiro", zone: "V1", aml: false, winter: "I2" },
-  { from: 4000, to: 4699, district: "Porto", zone: "V1", aml: false, winter: "I2" },
-  { from: 4700, to: 4899, district: "Braga", zone: "V1", aml: false, winter: "I2" },
-  { from: 4900, to: 4999, district: "Viana do Castelo", zone: "V1", aml: false, winter: "I2" },
+  { from: 3700, to: 3899, district: "Aveiro", zone: "V2", aml: false, winter: "I1" },
+  { from: 4000, to: 4699, district: "Porto", zone: "V2", aml: false, winter: "I1" },
+  { from: 4700, to: 4899, district: "Braga", zone: "V2", aml: false, winter: "I2" },
+  { from: 4900, to: 4999, district: "Viana do Castelo", zone: "V2", aml: false, winter: "I2" },
   { from: 5000, to: 5299, district: "Vila Real", zone: "V2", aml: false, winter: "I3" },
   { from: 5300, to: 5499, district: "Bragança", zone: "V2", aml: false, winter: "I3" },
   { from: 6000, to: 6299, district: "Castelo Branco", zone: "V3", aml: false, winter: "I2" },
@@ -320,9 +342,13 @@ function multiPrice(loads, outdoor, prices) {
   return total;
 }
 
-export function pickOutdoor(loads) {
+export function pickOutdoor(loads, ctx = {}) {
   const n = loads.length;
   if (n < 2 || loads.some((l) => !l.unit || l.units !== 1)) return null;
+  // No inverno todas as divisões pedem calor à mesma hora: sem simultaneidade.
+  const winter = WINTER_ZONES[ctx.winter] ? ctx.winter : "I1";
+  const heatNeedKW = ctx.heating ? loads.reduce((s, l) => s + (l.heating ? l.heating.loadW : 0), 0) / 1000 : 0;
+  const heatsAll = (o) => o.heatKW * WINTER_ZONES[winter].derate >= heatNeedKW;
   const indoorKW = loads.reduce((s, l) => s + l.unit.coolKW, 0);
   const loadKW = loads.reduce((s, l) => s + l.loadW, 0) / 1000;
   // Simultaneidade: nem todas as divisões pedem o máximo ao mesmo tempo (norte e
@@ -331,7 +357,7 @@ export function pickOutdoor(loads) {
   const largestKW = Math.max(...loads.map((l) => l.loadW)) / 1000;
   const needKW = Math.max((K.simultaneity[n] || 0.7) * loadKW, largestKW);
   // Uma exterior com mais portas (ex. 4×1) também serve menos divisões.
-  return MULTI_OUTDOOR.find((o) => o.rooms >= n && o.coolKW >= needKW && o.maxIndoorKW >= indoorKW) || null;
+  return MULTI_OUTDOOR.find((o) => o.rooms >= n && o.coolKW >= needKW && o.maxIndoorKW >= indoorKW && heatsAll(o)) || null;
 }
 
 /**
@@ -350,9 +376,10 @@ export function sizeProject(rooms, ctx = {}) {
   if (allValid) {
     const n = loads.length;
     const monoP = monoPrice(loads, ctx.prices);
+    const outdoor = n >= 2 && totalUnits === n ? pickOutdoor(loads, ctx) : null;
     options.push({
       kind: "mono",
-      recommended: n <= 2,
+      recommended: n <= 2 || !outdoor,
       title: totalUnits === 1 ? "1 aparelho mono-split" : `${totalUnits} aparelhos mono-split`,
       lines: totalUnits === 1
         ? ["1 unidade interior mural e 1 unidade exterior", "Instalação simples, normalmente num só dia", "Funciona em frio e em calor (bomba de calor)"]
@@ -362,14 +389,13 @@ export function sizeProject(rooms, ctx = {}) {
     if (n >= 2 && totalUnits > n) {
       warnings.push({ level: "info", text: "Uma das divisões precisa de mais do que uma unidade; nesse caso comparamos só a solução mono-split. O técnico avalia um multi-split na visita." });
     } else if (n >= 2) {
-      const outdoor = pickOutdoor(loads);
       if (outdoor) {
         options.push({
           kind: "multi",
           recommended: n >= 3,
           title: `1 multi-split ${outdoor.label}`,
           lines: [
-            `${n} unidades interiores ligadas a 1 unidade exterior de ${outdoor.coolKW.toLocaleString("pt-PT")} kW (as divisões raramente pedem o máximo todas ao mesmo tempo)`,
+            `${n} unidades interiores ligadas a 1 unidade exterior de ${fmt(outdoor.coolKW, 1)} kW de frio${ctx.heating ? ` e ${fmt(outdoor.heatKW, 1)} kW de calor` : ""} (no verão as divisões raramente pedem o máximo todas ao mesmo tempo)`,
             "Só uma unidade exterior: menos espaço de fachada e menos ruído lá fora",
             "As divisões devem ficar perto umas das outras (tubagem até cerca de 20 m)",
           ],
@@ -377,7 +403,7 @@ export function sizeProject(rooms, ctx = {}) {
           price: multiPrice(loads, outdoor, ctx.prices),
         });
       } else {
-        warnings.push({ level: "info", text: "Com esta potência total não existe uma unidade exterior multi-split corrente que sirva todas as divisões. Sugerimos aparelhos mono-split ou dois multi-splits; o técnico confirma na visita." });
+        warnings.push({ level: "info", text: `Com esta potência total${ctx.heating ? " (e o aquecimento de todas as divisões ao mesmo tempo num dia frio)" : ""} não existe uma unidade exterior multi-split corrente que sirva todas as divisões. Sugerimos aparelhos mono-split ou dois multi-splits; o técnico confirma na visita.` });
       }
     }
     if (ctx.heating && loads.some((l) => l.heating && !l.heating.ok)) {
@@ -398,11 +424,7 @@ export function sizeProject(rooms, ctx = {}) {
 }
 
 // Texto simples: milhares com espaço ("9 000"), decimais com vírgula.
-const fmt = (n, d = 0) => {
-  const [int, dec] = Number(n).toFixed(d).split(".");
-  const grouped = int.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-  return dec && /[1-9]/.test(dec) ? `${grouped},${dec}` : grouped;
-};
+
 
 /** Resumo em texto simples para WhatsApp ou email. */
 export function summaryText(project, rooms, ctx = {}) {
