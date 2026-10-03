@@ -1,0 +1,106 @@
+{
+  "_leia": "Dados que só a MDM pode dar. Escreva cada um em \"valor\" (em português de Portugal, sem prazos de resposta). Enquanto um valor estiver vazio, a frase, a linha ou a secção que o usa não aparece no site. `python3 website/build.py --faltam` lista o que falta e em que páginas entra. Nunca escrever aqui um número ou um facto que não esteja confirmado.",
+  "apirac": {
+    "grupo": "Certificações",
+    "pedido": "Número de associado APIRAC (aparece por baixo do selo APIRAC)",
+    "valor": ""
+  },
+  "impic": {
+    "grupo": "Certificações",
+    "pedido": "Tipo e número do título IMPIC, por exemplo o alvará (aparece por baixo do selo IMPIC)",
+    "valor": ""
+  },
+  "gasesFluorados": {
+    "grupo": "Certificações",
+    "pedido": "Número do certificado da empresa para gases fluorados (aparece por baixo do selo F-gas)",
+    "valor": ""
+  },
+  "eletricista": {
+    "grupo": "Certificações",
+    "pedido": "Certificação do eletricista: entidade e número, numa frase completa, se a MDM quiser publicar (pergunta «Os técnicos são certificados?»)",
+    "valor": ""
+  },
+  "foraDeHoras": {
+    "grupo": "Contactos",
+    "pedido": "O que fazer fora do horário e ao fim de semana: uma ou duas frases, sem prazos de resposta (bloco «Fora de horas» no contacto e pergunta na página inicial)",
+    "valor": "Deixe mensagem por WhatsApp ou no formulário; respondemos no dia útil seguinte."
+  },
+  "testemunhos": {
+    "grupo": "Prova",
+    "pedido": "Testemunhos reais de clientes, com autorização por escrito. Lista de {\"texto\": \"…\", \"nome\": \"nome ou cargo\", \"tipo\": \"tipo de cliente · local\"}; o «tipo» é opcional e pode ficar de fora. Sem testemunhos, a secção não aparece",
+    "valor": []
+  },
+  "clientesNomeaveis": {
+    "grupo": "Prova",
+    "pedido": "Setores ou clientes que podem ser nomeados, com autorização por escrito: uma frase (aparece por baixo dos testemunhos)",
+    "valor": ""
+  },
+  "precoAC": {
+    "grupo": "Serviços",
+    "pedido": "Preço indicativo ou gama de preços da montagem de ar condicionado, numa frase completa, só se a MDM quiser publicar (pergunta «Quanto custa instalar ar condicionado?»)",
+    "valor": ""
+  },
+  "duracaoMontagem": {
+    "grupo": "Serviços",
+    "pedido": "Duração típica da montagem de um split e de um multi-split, numa frase completa: quanto tempo leva o trabalho, não em quanto tempo a MDM chega (sem ela, a pergunta «Quanto tempo demora a montagem?» não aparece)",
+    "valor": ""
+  },
+  "planoManutencao": {
+    "grupo": "Serviços",
+    "pedido": "Lista de operações do plano de manutenção da MDM, numa frase (pergunta «O que inclui uma visita de manutenção preventiva?»)",
+    "valor": ""
+  },
+  "periodicidadeVisitas": {
+    "grupo": "Serviços",
+    "pedido": "Quantas visitas por ano tem o contrato de manutenção, numa frase completa (pergunta «Quantas visitas por ano estão incluídas?»)",
+    "valor": ""
+  },
+  "avariasContrato": {
+    "grupo": "Serviços",
+    "pedido": "Condições das avarias para clientes com contrato: mão de obra, deslocação, peças e prioridade (sem elas, a pergunta «As avarias estão incluídas no contrato?» não aparece)",
+    "valor": ""
+  },
+  "placas": {
+    "grupo": "Serviços",
+    "pedido": "Se a MDM repara placas de comando ou só as substitui, numa frase (sem ela, a pergunta «Reparam placas de comando ou substituem?» não aparece)",
+    "valor": ""
+  },
+  "ambitoEletrico": {
+    "grupo": "Serviços",
+    "pedido": "Âmbito do trabalho elétrico: só AVAC ou também instalações elétricas gerais, numa frase (sem ela, a pergunta «Fazem instalações elétricas que não sejam de AVAC?» não aparece)",
+    "valor": ""
+  },
+  "extracaoCozinhas": {
+    "grupo": "Serviços",
+    "pedido": "Se a MDM faz extração de cozinhas e se fornece e monta a hotte e a filtragem de gorduras, numa ou duas frases (sem elas, a pergunta «Fazem extração de cozinhas?» não aparece)",
+    "valor": ""
+  },
+  "periodicidadeVentilacao": {
+    "grupo": "Serviços",
+    "pedido": "Periodicidade recomendada para a limpeza de condutas e filtros de ventilação, numa frase (pergunta «Fazem manutenção de sistemas de ventilação?»)",
+    "valor": ""
+  },
+  "posthogIP": {
+    "grupo": "Privacidade",
+    "pedido": "Se a conta PostHog descarta o endereço IP e não estima a localização (definições do projeto: «Discard client IP data» e GeoIP), numa frase completa (acrescenta-se à política de privacidade, no ponto «Estatísticas do site»; enquanto estiver vazio, a política diz que o PostHog pode guardar o IP e estimar o país e a cidade)",
+    "valor": ""
+  },
+  "conservatoria": {
+    "grupo": "Empresa",
+    "pedido": "Conservatória do Registo Comercial onde a sociedade está matriculada, como consta da certidão permanente (aparece no rodapé, por baixo do NIF, e na política de privacidade)",
+    "valor": ""
+  },
+  "capitalSocial": {
+    "grupo": "Empresa",
+    "pedido": "Capital social, com o símbolo do euro, como consta da certidão permanente (obrigatório nos sites das sociedades por quotas; aparece no rodapé e na política de privacidade)",
+    "valor": ""
+  },
+  "_tarefas": [
+    "Política de privacidade (escrita a 01/10/2026, sem revisão jurídica): revisão por um jurista antes do lançamento. Confirmar os prazos de conservação que vêm da versão anterior do site (pedidos e contactos sem trabalho: no máximo 3 anos; estatísticas: 12 meses, a acertar nas definições do projeto PostHog) e apagar no Netlify os pedidos mais antigos do que isso. Dizer qual é o serviço de email que recebe os pedidos, se quiser que fique nomeado.",
+    "Fotografias de quadros elétricos AVAC montados pela MDM, para a página de Eletricidade.",
+    "Confirmar a frase «peças originais» e se há alguma garantia a anunciar (a «garantia de fabricante» foi retirada por não estar confirmada).",
+    "Bombas de calor: confirmar se a obra F29 (unidade de dois ventiladores e depósito numa varanda) é uma bomba de calor para águas quentes, como dizia a versão anterior do site, ou um chiller, como diz hoje a ficha. Enviar fotografias de outras bombas de calor montadas pela MDM: hoje a página mostra só F04 e F29.",
+    "Estimativa de potência do formulário: os técnicos confirmam os números de «btu» em data/site.json (400 BTU/h por m²; fatores por tipo de divisão, sol e último andar; tamanhos de aparelho). Mudam-se aí, sem mexer no código.",
+    "Netlify (formulário de orçamento): depois da primeira publicação, ligar a deteção de formulários (Forms → Enable form detection) e voltar a publicar; em Forms → Form notifications, escolher o email que recebe os pedidos. Dizer qual é esse email."
+  ]
+}

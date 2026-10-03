@@ -1,0 +1,181 @@
+<section class="sec sec-areia contacto" id="contacto" aria-labelledby="contactoT">
+  <div class="grelha">
+    <div class="contacto-canais" data-r>
+      <div>
+        <p class="rotulo rotulo-accent">Contacto</p>
+        <h2 class="h2" id="contactoT">Fale connosco.</h2>
+      </div>
+      <dl class="canais">
+        <div><dt>Telefone</dt><dd><a class="canal-v" data-lead="tel" href="{{ site.phoneHref }}">{{ site.phone }}</a><span>Para falar já connosco · <span class="nowrap">{{ site.hours }}</span></span></dd></div>
+        <div><dt>WhatsApp</dt><dd><a class="canal-v" data-lead="{{ page.wa }}" href="{{wa {{ page.wa }}}}" target="_blank" rel="noopener">{{ site.whatsapp }}</a><span>Para enviar fotografias da avaria ou do local</span></dd></div>
+        <div><dt>Email</dt><dd><a class="canal-v canal-mail" data-lead="email" href="mailto:{{ site.email }}">{{ site.email }}</a><span>Para propostas e documentos</span></dd></div>
+        <div><dt>Morada</dt><dd><span class="canal-morada">{{ site.address1 }}<br>{{ site.address2 }}</span></dd></div>
+      </dl>
+      {{#se dados.foraDeHoras}}<div class="fora-horas">
+        <p class="rotulo">Fora de horas e fins de semana</p>
+        <p>{{ dados.foraDeHoras }}</p>
+      </div>{{/se}}
+    </div>
+
+    <div class="form-caixa" id="orcamento" data-r>
+      <h3 class="form-t" id="quoteTitle">Peça orçamento ou assistência.</h3>
+      <!-- Netlify Forms: o Netlify encontra o formulário "orcamento" no HTML gerado e guarda cada pedido.
+           O mesmo nome e os mesmos campos em todas as páginas (este parcial); os campos escondidos dizem a página,
+           a triagem ([P1 · Montagem AC], posta por site.js) e a estimativa de potência. Sem JavaScript, o envio é normal
+           e o Netlify mostra obrigado.html; com JavaScript, site.js valida e envia sem sair da página.
+           O browser só valida sozinho sem JavaScript: site.js desliga essa validação e usa a sua. -->
+      <form id="quoteForm" name="orcamento" method="POST" action="/obrigado.html" enctype="multipart/form-data"
+            data-netlify="true" netlify-honeypot="bot-field" data-preselect="{{ page.preselect }}" aria-labelledby="quoteTitle">
+        <input type="hidden" name="form-name" value="orcamento">
+        <input type="hidden" name="subject" value="Pedido de orçamento MDM" data-assunto>
+        <input type="hidden" name="pagina" value="{{ _file }}">
+        <input type="hidden" name="triagem" value="" data-triagem>
+        <input type="hidden" name="potencia" value="" data-potencia-campo>
+        <div class="campo">
+          <label for="qNome">Nome *</label>
+          <input class="campo-in" id="qNome" name="nome" type="text" autocomplete="name" placeholder="O seu nome ou o da empresa" aria-describedby="eNome" required>
+          <p class="campo-erro" id="eNome"></p>
+        </div>
+        <fieldset class="campo-par">
+          <legend class="campo-legenda">Email ou telefone <span class="opcional">(basta um)</span> *</legend>
+          <div class="campo-2">
+            <div class="campo">
+              <label for="qEmail">Email</label>
+              <input class="campo-in" id="qEmail" name="email" type="email" inputmode="email" autocomplete="email" placeholder="email@empresa.pt" aria-describedby="eEmail">
+              <p class="campo-erro" id="eEmail"></p>
+            </div>
+            <div class="campo">
+              <label for="qTel">Telefone</label>
+              <input class="campo-in" id="qTel" name="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+351 9xx xxx xxx" aria-describedby="eTel">
+              <p class="campo-erro" id="eTel"></p>
+            </div>
+          </div>
+        </fieldset>
+        <div class="campo">
+          <label for="qServico">Serviço</label>
+          <select class="campo-in" id="qServico" name="servico">
+            <!-- os value são as chaves de site.js (triagem, frases do WhatsApp): mudam-se só os textos visíveis -->
+            <option value="">Escolha o tipo de serviço</option>
+            <optgroup label="Avaria ou reparação">
+              <option value="Ar condicionado: avaria / reparação">Ar condicionado avariado</option>
+              <option value="Bomba de calor: avaria / reparação">Bomba de calor avariada</option>
+              <option value="Eletricidade: avaria / reparação">Avaria elétrica no equipamento</option>
+              <option value="Ventilação: avaria / reparação">Ventilação avariada</option>
+            </optgroup>
+            <optgroup label="Instalação ou substituição">
+              <option value="Ar condicionado: montagem / instalação">Ar condicionado: instalação ou substituição</option>
+              <option value="Bomba de calor: instalação / manutenção">Bomba de calor: instalação</option>
+              <option value="Ventilação: instalação / revisão">Ventilação: instalação ou revisão</option>
+              <option value="Eletricidade: quadros e alimentações AVAC">Quadros e ligações elétricas do ar condicionado</option>
+            </optgroup>
+            <optgroup label="Manutenção">
+              <option value="Manutenção preventiva: contrato anual">Contrato anual de manutenção</option>
+            </optgroup>
+            <option value="Outro / vários serviços">Outro ou vários serviços</option>
+          </select>
+        </div>
+        <!-- Estimativa de potência por divisão (site.js), opcional. Os números vêm de "btu" em data/site.json, aqui em data-btu.
+             Sem JavaScript fica escondida. Os campos das divisões não têm name e não seguem com o pedido: só segue o resumo,
+             no campo escondido "potencia", depois de «Juntar ao pedido». -->
+        <div class="pot" data-potencia data-btu="{{ site.btu }}" hidden>
+          <details class="pot-det" id="potencia">
+            <summary class="pot-cab">
+              <span class="pot-cab-txt">
+                <span class="pot-cab-t">Não sabe a potência do ar condicionado? <span class="nowrap">Calcule por divisão</span></span>
+                <span class="pot-cab-s">Opcional · pela área de cada divisão</span>
+              </span>
+              <svg class="pot-mais" viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>
+            </summary>
+            <div class="pot-corpo">
+              <p class="pot-intro">Escolha o tipo e escreva a área de cada divisão. A estimativa aparece logo, em BTU/h (a medida da potência dos aparelhos) e em kW, e segue com o pedido.</p>
+              <div class="pot-divs" data-pot-divs></div>
+              <button class="pot-adiciona" type="button" data-pot-adiciona>
+                <svg class="ico" viewBox="0 0 256 256" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>
+                Adicionar divisão
+              </button>
+              <p class="pot-max" data-pot-max hidden>Pode juntar até {{ site.btu.maxDivisoes }} divisões. Se forem mais, diga-nos na mensagem.</p>
+              <div class="pot-total">
+                <p class="rotulo">Soma das divisões</p>
+                <p class="pot-total-v" data-pot-total></p>
+                <p class="pot-multi" data-pot-multi hidden>Um multi-split (uma só unidade exterior para várias divisões) pode ser uma opção.</p>
+              </div>
+              <p class="pot-aviso">É uma estimativa, arredondada ao tamanho de aparelho que serve. A potência certa confirma-se na visita: depende do isolamento, da orientação, das janelas e do uso de cada divisão.</p>
+              <button class="btn btn-tinta pot-juntar" type="button" data-pot-juntar>Juntar ao pedido</button>
+            </div>
+          </details>
+          <div class="pot-junta" data-pot-junta hidden>
+            <p class="pot-junta-txt" tabindex="-1" data-pot-junta-txt aria-describedby="pot-junta-nota"><strong>Estimativa junta ao pedido:</strong> <span data-pot-resumo></span></p>
+            <p class="pot-junta-nota" id="pot-junta-nota">Se mudar as divisões, o pedido acompanha.<span data-pot-servico hidden> Escolhemos também o serviço «Ar condicionado: instalação ou substituição».</span></p>
+            <button class="pot-retirar" type="button" data-pot-retirar>Retirar<span class="so-leitor"> a estimativa do pedido</span></button>
+          </div>
+          <p class="so-leitor" aria-live="polite" data-pot-anuncio></p>
+          <template data-pot-modelo>
+            <fieldset class="pot-div">
+              <legend class="pot-div-t">Divisão <span data-pot-n>1</span></legend>
+              <div class="pot-div-in">
+                <div class="pot-div-campos">
+                  <div class="campo">
+                    <label data-pot-para="tipo">Tipo<span class="so-leitor"> da divisão <span data-pot-n>1</span></span></label>
+                    <select class="campo-in" data-pot="tipo"></select>
+                  </div>
+                  <div class="campo">
+                    <label data-pot-para="area">Área<span class="so-leitor"> da divisão <span data-pot-n>1</span>, em m²</span></label>
+                    <span class="pot-area"><input class="campo-in" data-pot="area" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" placeholder="12,5"><span class="pot-unid" aria-hidden="true">m²</span></span>
+                  </div>
+                  <p class="campo-erro" data-pot="erro"></p>
+                </div>
+                <p class="pot-res" data-pot="res"></p>
+                <div class="pot-opcoes">
+                  <label class="pot-check"><input type="checkbox" data-pot="sol"><span>Muito sol ou janelas grandes<span class="so-leitor"> (divisão <span data-pot-n>1</span>)</span></span></label>
+                  <label class="pot-check"><input type="checkbox" data-pot="topo"><span>Último andar ou sótão<span class="so-leitor"> (divisão <span data-pot-n>1</span>)</span></span></label>
+                </div>
+                <div class="pot-div-pe">
+                  <button class="pot-retira" type="button" data-pot="retira"><svg class="ico" viewBox="0 0 256 256" aria-hidden="true"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg>Retirar<span class="so-leitor"> a divisão <span data-pot-n>1</span></span></button>
+                </div>
+              </div>
+            </fieldset>
+          </template>
+        </div>
+        <div class="campo">
+          <label for="qMsg">Mensagem <span class="opcional">(opcional)</span></label>
+          <textarea class="campo-in" id="qMsg" name="mensagem" rows="4" placeholder="Ex.: apartamento em Lisboa, split na sala que pinga água."></textarea>
+        </div>
+        <div class="campo" data-campo-foto>
+          <label for="qFoto">Fotografia <span class="opcional">(opcional, até 8 MB)</span></label>
+          <div class="ficheiro" data-ficheiro>
+            <input class="ficheiro-in" id="qFoto" name="fotografia" type="file" accept="image/*" aria-describedby="hFoto eFoto">
+            <span class="ficheiro-btn" aria-hidden="true"><svg class="ico" viewBox="0 0 256 256"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"/></svg>Escolher fotografia</span>
+            <span class="ficheiro-nome" data-ficheiro-nome aria-hidden="true">Nenhuma escolhida</span>
+          </div>
+          <p class="campo-ajuda" id="hFoto">Da máquina, da avaria ou do sítio onde imagina o equipamento.</p>
+          <p class="campo-erro" id="eFoto" aria-live="polite"></p>
+        </div>
+        <div class="hp" aria-hidden="true"><label for="qGotcha">Não preencher</label><input id="qGotcha" name="bot-field" type="text" tabindex="-1" autocomplete="off"></div>
+        <p class="form-nota">* obrigatório: o nome e um contacto (email ou telefone). Usamos os seus dados para responder ao pedido e, se avançar, para fazer o trabalho: ver a <a href="{{ root }}privacidade.html">política de privacidade</a>.</p>
+        <div class="form-alerta" id="quoteAlert" role="status" aria-live="polite"></div>
+        <div class="form-btns">
+          <button class="btn btn-accent" type="submit" id="sendEmail">
+            <svg class="ico" viewBox="0 0 256 256" aria-hidden="true"><path d="M223.87,114l-168-95.89A16,16,0,0,0,32.93,37.32l31,90.47a.42.42,0,0,0,0,.1.3.3,0,0,0,0,.1l-31,90.67A16,16,0,0,0,48,240a16.14,16.14,0,0,0,7.92-2.1l167.91-96.05a16,16,0,0,0,.05-27.89ZM48,224l0-.09L78.14,136H136a8,8,0,0,0,0-16H78.22L48.06,32.13,48,32l168,95.83Z"/></svg>
+            <span id="sendEmailLbl">Enviar pedido</span>
+          </button>
+          <button class="btn btn-contorno" type="button" id="sendWhats">
+            <svg class="ico" viewBox="0 0 256 256" aria-hidden="true"><path d="M187.58,144.84l-32-16a8,8,0,0,0-8,.5l-14.69,9.8a40.55,40.55,0,0,1-16-16l9.8-14.69a8,8,0,0,0,.5-8l-16-32A8,8,0,0,0,104,64a40,40,0,0,0-40,40,88.1,88.1,0,0,0,88,88,40,40,0,0,0,40-40A8,8,0,0,0,187.58,144.84ZM152,176a72.08,72.08,0,0,1-72-72A24,24,0,0,1,99.29,80.46l11.48,23L101,118a8,8,0,0,0-.73,7.51,56.47,56.47,0,0,0,30.15,30.15A8,8,0,0,0,138,155l14.61-9.74,23,11.48A24,24,0,0,1,152,176ZM128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm0,192a87.87,87.87,0,0,1-44.06-11.81,8,8,0,0,0-6.54-.67L40,216,52.47,178.6a8,8,0,0,0-.66-6.54A88,88,0,1,1,128,216Z"/></svg>
+            Enviar por WhatsApp
+          </button>
+        </div>
+        <p class="form-garantia">Orçamento gratuito e sem compromisso. Fatura com dados fiscais.</p>
+      </form>
+      <!-- Confirmação depois de enviar (site.js esconde o formulário e mostra isto; sem este bloco, volta ao aviso no formulário).
+           site.js escreve a frase em data-feito-txt e põe o nome do visitante na mensagem de WhatsApp. -->
+      <div class="form-feito" data-form-feito hidden tabindex="-1">
+        <p class="form-feito-t">Pedido enviado. Obrigado.</p>
+        <p class="form-feito-txt" data-feito-txt></p>
+        <p class="form-feito-urg">Se for urgente, ligue <a data-lead="tel" href="{{ site.phoneHref }}">{{ site.phone }}</a>.</p>
+        <div class="form-feito-acoes">
+          <a class="btn btn-contorno" data-lead="pedido" data-feito-wa href="{{wa pedido}}" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 256 256" aria-hidden="true"><path d="M187.58,144.84l-32-16a8,8,0,0,0-8,.5l-14.69,9.8a40.55,40.55,0,0,1-16-16l9.8-14.69a8,8,0,0,0,.5-8l-16-32A8,8,0,0,0,104,64a40,40,0,0,0-40,40,88.1,88.1,0,0,0,88,88,40,40,0,0,0,40-40A8,8,0,0,0,187.58,144.84ZM152,176a72.08,72.08,0,0,1-72-72A24,24,0,0,1,99.29,80.46l11.48,23L101,118a8,8,0,0,0-.73,7.51,56.47,56.47,0,0,0,30.15,30.15A8,8,0,0,0,138,155l14.61-9.74,23,11.48A24,24,0,0,1,152,176ZM128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm0,192a87.87,87.87,0,0,1-44.06-11.81,8,8,0,0,0-6.54-.67L40,216,52.47,178.6a8,8,0,0,0-.66-6.54A88,88,0,1,1,128,216Z"/></svg> Juntar fotografias por WhatsApp</a>
+          <button class="form-feito-novo" type="button" data-feito-novo>Enviar outro pedido</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

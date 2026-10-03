@@ -1,0 +1,18 @@
+{{#se dados.testemunhos}}<!-- só aparece com testemunhos reais, autorizados por escrito (data/dados-mdm.json) -->
+<section class="sec testemunhos" aria-labelledby="testT">
+  <div class="sec-cab" data-r>
+    <div>
+      <p class="rotulo rotulo-accent">Clientes</p>
+      <h2 class="h2" id="testT">O que diz quem nos chama todos os anos.</h2>
+    </div>
+  </div>
+  <div class="test-grelha" data-r>
+    {{#cada dados.testemunhos}}<figure class="test">
+      <blockquote><p>{{ item.texto }}</p></blockquote>
+      <figcaption><strong>{{ item.nome }}</strong>{{#se item.tipo}}<span>{{ item.tipo }}</span>{{/se}}</figcaption>
+    </figure>
+    {{/cada}}
+  </div>
+  {{#se dados.clientesNomeaveis}}<p class="test-nota" data-r>{{ dados.clientesNomeaveis }}</p>{{/se}}
+</section>
+{{/se}}

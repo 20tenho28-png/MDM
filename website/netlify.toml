@@ -1,0 +1,42 @@
+# Netlify: base directory = website
+# Pré-visualização: o noindex (X-Robots-Tag) vem de public/_headers, gerado por build.py enquanto
+# data/site.json tiver "preview": true. No lançamento muda-se só esse valor (README.md, "Lançamento").
+# Formulário de orçamento: Netlify Forms ("orcamento"), detetado no HTML gerado; ligar a deteção e o email
+# de aviso no painel (README.md, "Formulário de orçamento").
+[build]
+  command = "python3 build.py --check"
+  publish = "public"
+
+# Imagens e letras não mudam de nome nem de conteúdo. CSS e JS levam ?v=<versão> no HTML (build.py, pelo conteúdo do
+# ficheiro): uma versão nova é um endereço novo, por isso também podem ficar um ano em cache.
+[[headers]]
+  for = "/assets/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404

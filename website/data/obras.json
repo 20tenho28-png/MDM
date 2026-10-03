@@ -1,0 +1,719 @@
+{
+  "categorias": {
+    "cob": "Coberturas",
+    "cen": "Centrais técnicas",
+    "fac": "Fachadas e terraços",
+    "int": "Interiores",
+    "vent": "Ventilação"
+  },
+  "catFrase": {
+    "cob": "em coberturas",
+    "cen": "em centrais técnicas",
+    "fac": "em fachadas e terraços",
+    "int": "em interiores",
+    "vent": "de ventilação"
+  },
+  "obras": [
+    {
+      "n": "25",
+      "code": "F25",
+      "slug": "grupo-de-aspiracao-em-cave",
+      "cat": "vent",
+      "catLabel": "Ventilação",
+      "catFrase": "de ventilação",
+      "registo": "maquina",
+      "orient": "landscape",
+      "title": "Grupo de aspiração em cave",
+      "especialidade": "Ventilação",
+      "trabalho": "Instalação",
+      "equipamento": "Ventilbox e condutas flexíveis",
+      "local": "Cave técnica",
+      "alt": "Técnico da MDM a cortar varão roscado com rebarbadora sob um grupo de aspiração, com faíscas.",
+      "resumo": "Grupo de aspiração Ventilbox suspenso do teto de uma cave técnica, ligado a conduta espiralada de um lado e a conduta flexível isolada do outro. A caixa assenta em perfis metálicos presos por varão roscado. Na fotografia, o técnico acerta o comprimento do varão com a rebarbadora.",
+      "detalhes": [
+        "Caixa de aspiração suspensa por varão roscado e perfis metálicos",
+        "Conduta espiralada em aço galvanizado na entrada",
+        "Conduta flexível com isolamento em alumínio na saída",
+        "Varão cortado à medida com rebarbadora, no local",
+        "Esteira de cabos e tubagem isolada por baixo do equipamento"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "24",
+      "code": "F24",
+      "slug": "condutas-espiraladas-em-fachada",
+      "cat": "vent",
+      "catLabel": "Ventilação",
+      "catFrase": "de ventilação",
+      "registo": "maquina",
+      "orient": "landscape",
+      "title": "Condutas espiraladas em fachada",
+      "especialidade": "Ventilação",
+      "trabalho": "Instalação",
+      "equipamento": "UTA e condutas galvanizadas",
+      "local": "Fachada",
+      "alt": "Condutas espiraladas em aço galvanizado e unidade de tratamento de ar montadas na fachada de um edifício.",
+      "resumo": "Unidade de tratamento de ar montada na fachada, sobre uma estrutura metálica com escoras até à parede. As condutas espiraladas em aço galvanizado sobem, curvam e descem ao longo da fachada. O quadro elétrico da unidade fica à vista, com o interruptor de corte.",
+      "detalhes": [
+        "Unidade assente em perfis metálicos com escoras diagonais",
+        "Condutas espiraladas galvanizadas com curvas de raio largo",
+        "Uniões das condutas seladas com fita",
+        "Quadro elétrico com interruptor de corte na lateral da unidade",
+        "Duas saídas de conduta em curva junto ao piso inferior"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "16",
+      "code": "F16",
+      "slug": "revisao-de-conduta-em-teto-falso",
+      "cat": "vent",
+      "catLabel": "Ventilação",
+      "catFrase": "de ventilação",
+      "registo": "maquina",
+      "orient": "landscape",
+      "title": "Revisão de conduta em teto falso",
+      "especialidade": "Ventilação",
+      "trabalho": "Manutenção",
+      "equipamento": "Plenum e conduta flexível",
+      "local": "Teto falso",
+      "alt": "Técnico da MDM, de colete com o logótipo, num escadote a trabalhar numa conduta dentro do teto falso.",
+      "resumo": "Revisão de uma unidade de condutas instalada num teto falso. O técnico trabalha de escadote, com as placas do teto retiradas e encostadas à parede. Plenum, grelha e condutas flexíveis ficam à vista durante a intervenção.",
+      "detalhes": [
+        "Placas do teto falso retiradas e encostadas à parede",
+        "Plenum com grelha de lâminas na boca da unidade",
+        "Condutas flexíveis com isolamento em alumínio",
+        "Tubagem isolada a correr junto à unidade",
+        "Técnico de colete MDM a trabalhar de escadote"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "01",
+      "code": "F01",
+      "slug": "par-de-unidades-em-cobertura",
+      "cat": "cob",
+      "catLabel": "Coberturas",
+      "catFrase": "em coberturas",
+      "registo": "maquina",
+      "orient": "landscape",
+      "title": "Par de unidades em cobertura",
+      "especialidade": "Ar condicionado",
+      "trabalho": "Instalação",
+      "equipamento": "Mitsubishi Electric, maciços e apoios",
+      "local": "Cobertura",
+      "alt": "Duas unidades exteriores Mitsubishi Electric com etiqueta MDM, assentes em maciços de betão numa cobertura.",
+      "resumo": "Duas unidades exteriores Mitsubishi Electric numa cobertura com gravilha. Estão assentes num maciço sobre a impermeabilização, apoiadas em pés metálicos. A tubagem segue encostada ao muro, protegida por uma calha metálica.",
+      "detalhes": [
+        "Unidades assentes num maciço sobre a impermeabilização",
+        "Apoios metálicos entre o maciço e a base das unidades",
+        "Calha metálica a proteger a tubagem ao longo do muro",
+        "Etiqueta MDM colada em cada unidade"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "28",
+      "code": "F28",
+      "slug": "vrf-ao-lado-do-solar-termico",
+      "cat": "cob",
+      "catLabel": "Coberturas",
+      "catFrase": "em coberturas",
+      "registo": "maquina",
+      "orient": "landscape",
+      "title": "VRF ao lado do solar térmico",
+      "especialidade": "Ar condicionado",
+      "trabalho": "Instalação",
+      "equipamento": "Midea V4 Plus",
+      "local": "Cobertura, Lisboa",
+      "alt": "Unidade exterior VRF Midea numa cobertura de Lisboa, ao lado de coletores solares.",
+      "resumo": "Unidade exterior VRF Midea V4 Plus numa cobertura plana, ao lado de um campo de coletores solares. A unidade assenta num maciço e a tubagem sai por calhas metálicas fechadas que atravessam a cobertura. Os coletores ficam na sua estrutura, lastrada com blocos.",
+      "detalhes": [
+        "Unidade VRF assente num maciço sobre a cobertura",
+        "Tubagem protegida em calhas metálicas fechadas",
+        "Calhas assentes em blocos sobre a cobertura",
+        "Coletores solares e vaso de expansão ao lado da unidade"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "26",
+      "code": "F26",
+      "slug": "unidade-midea-sobre-moscavide",
+      "cat": "cob",
+      "catLabel": "Coberturas",
+      "catFrase": "em coberturas",
+      "registo": "maquina",
+      "orient": "landscape",
+      "title": "Unidade Midea numa cobertura em Moscavide",
+      "especialidade": "Ar condicionado",
+      "trabalho": "Instalação",
+      "equipamento": "Vaso de expansão e circuito hidráulico",
+      "local": "Moscavide",
+      "alt": "Unidade de dois ventiladores com vaso de expansão numa cobertura de chapa sobre os telhados de Moscavide.",
+      "resumo": "Unidade exterior Midea de dois ventiladores numa cobertura de chapa, assente numa zona plana. O circuito hidráulico sai da unidade com válvulas e um vaso de expansão, e segue isolado até à parede técnica. A unidade apoia-se em pés antivibráticos.",
+      "detalhes": [
+        "Unidade de dois ventiladores sobre pés antivibráticos",
+        "Vaso de expansão ligado no circuito hidráulico",
+        "Válvulas de corte à saída da unidade",
+        "Tubagem com isolamento preto até à entrada na parede"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "02",
+      "code": "F02",
+      "slug": "diagnostico-com-a-maquina-aberta",
+      "cat": "cob",
+      "catLabel": "Coberturas",
+      "catFrase": "em coberturas",
+      "registo": "maquina",
+      "orient": "landscape",
+      "title": "Diagnóstico com a máquina aberta",
+      "especialidade": "Manutenção",
+      "trabalho": "Reparação",
+      "equipamento": "Placas de comando e kit hidráulico",
+      "local": "Cobertura",
+      "alt": "Unidade exterior aberta numa cobertura, com placas de comando, compressor e kit hidráulico à vista.",
+      "resumo": "Unidade exterior com os painéis retirados numa cobertura, durante um diagnóstico de avaria. Ficam à vista as placas de comando, os contactores, o circuito frigorífico e o kit hidráulico com bomba circuladora e manómetro. A unidade assenta numa estrutura metálica sobre o pavimento.",
+      "detalhes": [
+        "Duas placas de comando e contactores à vista",
+        "Kit hidráulico com bomba circuladora e manómetro",
+        "Tubagem hidráulica com isolamento preto no interior",
+        "Unidade assente em estrutura metálica sobre o pavimento",
+        "Painéis retirados e pousados em cima da máquina"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "06",
+      "code": "F06",
+      "slug": "reparacao-no-telhado",
+      "cat": "cob",
+      "catLabel": "Coberturas",
+      "catFrase": "em coberturas",
+      "registo": "maquina",
+      "orient": "landscape",
+      "title": "Reparação no telhado",
+      "especialidade": "Manutenção",
+      "trabalho": "Reparação",
+      "equipamento": "Carcaça fora, manómetros ligados",
+      "local": "Cobertura de chapa",
+      "alt": "Unidade exterior desmontada num telhado de chapa, com o ventilador azul, o compressor e os manómetros ligados.",
+      "resumo": "Unidade exterior num telhado de chapa, com a carcaça retirada para reparação. Veem-se o ventilador, a bateria, o compressor e a caixa elétrica. Os manómetros estão ligados às válvulas de serviço.",
+      "detalhes": [
+        "Carcaça retirada, com ventilador e bateria à vista",
+        "Compressor com manta de isolamento",
+        "Mangueiras dos manómetros ligadas às válvulas de serviço",
+        "Unidade fixa a perfil metálico perfurado sobre a chapa"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "07",
+      "code": "F07",
+      "slug": "tres-unidades-em-pavilhao",
+      "cat": "cob",
+      "catLabel": "Coberturas",
+      "catFrase": "em coberturas",
+      "registo": "maquina",
+      "orient": "landscape",
+      "title": "Três unidades em pavilhão",
+      "especialidade": "Ar condicionado",
+      "trabalho": "Instalação",
+      "equipamento": "Midea sobre perfis",
+      "local": "Cobertura industrial",
+      "alt": "Três unidades exteriores Midea sobre perfis metálicos numa cobertura de chapa branca.",
+      "resumo": "Três unidades exteriores numa cobertura de chapa de um pavilhão, duas delas Midea. Cada unidade assenta em perfis metálicos apoiados nas nervuras da chapa. A tubagem e os cabos seguem pela cobertura até à entrada no edifício.",
+      "detalhes": [
+        "Três unidades exteriores lado a lado na cobertura",
+        "Cada unidade assente em dois perfis metálicos",
+        "Perfis apoiados nas nervuras da chapa",
+        "Tubagem e cabos encaminhados ao longo da cobertura"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "03",
+      "code": "F03",
+      "slug": "central-de-sete-unidades",
+      "cat": "cen",
+      "catLabel": "Centrais técnicas",
+      "catFrase": "em centrais técnicas",
+      "registo": "maquina",
+      "orient": "landscape",
+      "title": "Central de sete unidades",
+      "especialidade": "Ar condicionado",
+      "trabalho": "Instalação",
+      "equipamento": "Sistema VRF",
+      "local": "Cave técnica",
+      "alt": "Sete unidades exteriores de um sistema VRF, alinhadas e sobrepostas numa central técnica em cave.",
+      "resumo": "Central técnica em cave com sete unidades exteriores de um sistema VRF. Quatro estão sobrepostas duas a duas, com as de cima fixas por varões ao teto; as restantes estão alinhadas ao longo da parede. A tubagem sobe e segue em esteira pelo teto.",
+      "detalhes": [
+        "Sete unidades exteriores na mesma sala técnica",
+        "Unidades sobrepostas, com as superiores seguras por varões ao teto",
+        "Unidades do piso assentes em apoios sobre a laje",
+        "Tubagem encaminhada em esteira junto ao teto"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "15",
+      "code": "F15",
+      "slug": "unidade-suspensa-quadro-aberto",
+      "cat": "cen",
+      "catLabel": "Centrais técnicas",
+      "catFrase": "em centrais técnicas",
+      "registo": "maquina",
+      "orient": "portrait",
+      "title": "Unidade suspensa, quadro aberto",
+      "especialidade": "Eletricidade",
+      "trabalho": "Diagnóstico",
+      "equipamento": "Placa de comando",
+      "local": "Central técnica",
+      "alt": "Unidade exterior suspensa por varão roscado, com o painel de comando aberto e a placa eletrónica à vista.",
+      "resumo": "Unidade exterior suspensa numa central técnica, com o painel frontal retirado para diagnóstico. A placa de comando, os bornes e as válvulas de serviço ficam à vista. A tubagem isolada sai pela lateral e sobe por uma esteira metálica.",
+      "detalhes": [
+        "Unidade suspensa por varão roscado e perfis metálicos",
+        "Painel retirado, com a placa de comando à vista",
+        "Válvulas de serviço com tubagem de isolamento preto",
+        "Tubagem encaminhada por esteira metálica na parede"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "17",
+      "code": "F17",
+      "slug": "parque-de-unidades-em-pavilhao",
+      "cat": "fac",
+      "catLabel": "Fachadas e terraços",
+      "catFrase": "em fachadas e terraços",
+      "registo": "maquina",
+      "orient": "landscape",
+      "title": "Parque de unidades em pavilhão",
+      "especialidade": "Ar condicionado e ventilação",
+      "trabalho": "Instalação",
+      "equipamento": "Unidades exteriores e condutas de extração",
+      "local": "Fachada industrial",
+      "alt": "Cinco unidades exteriores e condutas de extração montadas junto às janelas do piso superior, na fachada de um edifício industrial.",
+      "resumo": "Fachada de um edifício industrial com cinco unidades exteriores Midea montadas junto às janelas do piso superior. Ao lado, duas caixas de ventilação com condutas galvanizadas que sobem e correm pela fachada. Todas as unidades estão em suportes metálicos de parede.",
+      "detalhes": [
+        "Cinco unidades exteriores em suportes metálicos de parede",
+        "Duas caixas de ventilação com condutas espiraladas",
+        "Condutas galvanizadas a prumo e na horizontal pela fachada",
+        "Unidades montadas junto às janelas do piso superior"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "20",
+      "code": "F20",
+      "slug": "substituicao-em-rua-comercial",
+      "cat": "fac",
+      "catLabel": "Fachadas e terraços",
+      "catFrase": "em fachadas e terraços",
+      "registo": "maquina",
+      "orient": "portrait",
+      "title": "Substituição em rua comercial",
+      "especialidade": "Ar condicionado",
+      "trabalho": "Substituição",
+      "equipamento": "Unidade inverter",
+      "local": "Rua comercial, Lisboa",
+      "alt": "Escadotes e unidades antigas numa fachada comercial, com o equipamento novo ainda embalado no passeio.",
+      "resumo": "Substituição de unidades de ar condicionado na fachada de uma loja, a partir do passeio. A unidade antiga está a ser descida com um elevador de material, com escadotes e um cone a marcar a zona. O equipamento novo, Daikin, espera embalado ao lado.",
+      "detalhes": [
+        "Unidade antiga apoiada num elevador de material",
+        "Dois escadotes e cone de sinalização no passeio",
+        "Equipamento novo ainda na caixa, junto à montra",
+        "Ferramentas e luvas pousadas em cima da caixa"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "12",
+      "code": "F12",
+      "slug": "montagem-em-consola",
+      "cat": "fac",
+      "catLabel": "Fachadas e terraços",
+      "catFrase": "em fachadas e terraços",
+      "registo": "maquina",
+      "orient": "portrait",
+      "foco": "50% 22%",
+      "title": "Montagem em consola",
+      "especialidade": "Ar condicionado",
+      "trabalho": "Instalação",
+      "equipamento": "Midea, carga de gás",
+      "local": "Fachada rebocada",
+      "alt": "Unidade exterior Midea montada em consola numa parede rebocada, com o grupo manométrico e as mangueiras de carga no escadote.",
+      "resumo": "Unidade exterior Midea montada em consola numa fachada rebocada. A tubagem sai isolada a branco e entra na parede. Em baixo, o grupo manométrico e as mangueiras de carga estão no escadote.",
+      "detalhes": [
+        "Unidade assente em consola metálica fixa à parede",
+        "Tubagem com isolamento branco até à entrada na parede",
+        "Mangueiras de carga e grupo manométrico no escadote",
+        "Tampa das válvulas de serviço colocada"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "23",
+      "code": "F23",
+      "slug": "tubagem-a-prumo-no-terraco",
+      "cat": "fac",
+      "catLabel": "Fachadas e terraços",
+      "catFrase": "em fachadas e terraços",
+      "registo": "maquina",
+      "orient": "portrait",
+      "title": "Tubagem a prumo no terraço",
+      "especialidade": "Ar condicionado",
+      "trabalho": "Instalação",
+      "equipamento": "Mitsubishi Electric",
+      "local": "Moradia",
+      "alt": "Unidade exterior Mitsubishi Electric num terraço, com a tubagem isolada a branco a descer a parede a prumo.",
+      "resumo": "Unidade exterior Mitsubishi Electric no terraço de uma moradia em obra. A unidade assenta no pavimento sobre pés reguláveis. A tubagem desce a parede a prumo, isolada a branco, desde o furo até à unidade.",
+      "detalhes": [
+        "Unidade sobre pés reguláveis no pavimento do terraço",
+        "Tubagem isolada a branco, a prumo na parede",
+        "Furo de passagem selado junto ao topo da tubagem",
+        "Unidade encostada ao canto, afastada da porta"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "29",
+      "code": "F29",
+      "slug": "chiller-e-deposito-na-varanda",
+      "cat": "fac",
+      "catLabel": "Fachadas e terraços",
+      "catFrase": "em fachadas e terraços",
+      "registo": "maquina",
+      "orient": "landscape",
+      "title": "Chiller e depósito na varanda",
+      "especialidade": "Climatização",
+      "trabalho": "Instalação",
+      "equipamento": "Chiller e depósito de acumulação",
+      "local": "Varanda",
+      "alt": "Chiller e depósito de acumulação instalados numa varanda.",
+      "resumo": "Chiller e depósito de acumulação numa varanda. A tubagem hidráulica sobe a parede com isolamento preto e tem um purgador no ponto alto. Um nível está pousado em cima do chiller.",
+      "detalhes": [
+        "Chiller de dois ventiladores assente em pés sobre o pavimento",
+        "Depósito de acumulação ao lado do chiller",
+        "Tubagem com isolamento preto a prumo na parede",
+        "Purgador de ar no ponto alto da tubagem",
+        "Nível pousado em cima do chiller"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "04",
+      "code": "F04",
+      "slug": "bomba-de-calor-para-moradia",
+      "cat": "fac",
+      "catLabel": "Fachadas e terraços",
+      "catFrase": "em fachadas e terraços",
+      "registo": "maquina",
+      "orient": "portrait",
+      "title": "Bomba de calor para moradia",
+      "especialidade": "Bombas de calor",
+      "trabalho": "Instalação",
+      "equipamento": "Bomba de calor monobloco",
+      "local": "Moradia",
+      "alt": "Bomba de calor monobloco preta assente em lajetas de betão, no jardim de uma moradia.",
+      "resumo": "Bomba de calor monobloco instalada no jardim de uma moradia. A unidade assenta em lajetas de betão, com os pés aparafusados. A tubagem chega pelo chão, junto ao muro de pedra.",
+      "detalhes": [
+        "Unidade monobloco assente em lajetas de betão",
+        "Unidade apoiada nos pés sobre as lajetas",
+        "Tubagem a chegar pelo chão, junto ao muro",
+        "Unidade afastada da casa, no jardim"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "09",
+      "code": "F09",
+      "slug": "sala-com-mobiliario-protegido",
+      "cat": "int",
+      "catLabel": "Interiores",
+      "catFrase": "em interiores",
+      "registo": "casa",
+      "orient": "landscape",
+      "title": "Sala com mobiliário protegido",
+      "especialidade": "Ar condicionado",
+      "trabalho": "Instalação",
+      "equipamento": "Unidade mural",
+      "local": "Habitação",
+      "alt": "Unidade mural instalada numa sala, por cima de um quadro de moldura dourada, com o sofá coberto de plástico.",
+      "resumo": "Unidade mural instalada numa sala, junto ao teto. Não se vê tubagem na parede. O sofá e os objetos da sala estão cobertos com plástico durante o trabalho.",
+      "detalhes": [
+        "Unidade mural junto ao teto, no canto da sala",
+        "Parede sem tubagem à vista",
+        "Sofá e objetos cobertos com plástico",
+        "Quadro na parede mantido no lugar"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "10",
+      "code": "F10",
+      "slug": "quarto-com-cortinados-claros",
+      "cat": "int",
+      "catLabel": "Interiores",
+      "catFrase": "em interiores",
+      "registo": "casa",
+      "orient": "landscape",
+      "title": "Quarto com cortinados claros",
+      "especialidade": "Ar condicionado",
+      "trabalho": "Instalação",
+      "equipamento": "Unidade mural",
+      "local": "Habitação",
+      "alt": "Unidade mural num quarto com cortinados translúcidos, junto ao teto, com a cama protegida.",
+      "resumo": "Unidade mural num quarto, montada junto ao teto e ao canto da janela. Não há tubagem à vista na parede. A cama está coberta com plástico.",
+      "detalhes": [
+        "Unidade mural junto ao teto, ao canto da janela",
+        "Parede sem tubagem à vista",
+        "Cama coberta com plástico",
+        "Cortinados mantidos no lugar"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "21",
+      "code": "F21",
+      "slug": "cozinha-em-acabamento-escuro",
+      "cat": "int",
+      "catLabel": "Interiores",
+      "catFrase": "em interiores",
+      "registo": "casa",
+      "orient": "landscape",
+      "title": "Cozinha em acabamento escuro",
+      "especialidade": "Ar condicionado",
+      "trabalho": "Instalação",
+      "equipamento": "Unidade mural",
+      "local": "Cozinha",
+      "alt": "Unidade mural numa cozinha moderna em tons escuros, com as cadeiras ainda embaladas.",
+      "resumo": "Unidade mural numa sala com cozinha em acabamento escuro. A unidade fica junto ao teto, sem tubagem à vista na parede. As cadeiras da cozinha ainda estão embaladas.",
+      "detalhes": [
+        "Unidade mural junto ao teto",
+        "Parede sem tubagem à vista",
+        "Cadeiras e eletrodomésticos ainda com plástico"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "30",
+      "code": "F30",
+      "slug": "escritorio-com-vista-para-a-ponte",
+      "cat": "int",
+      "catLabel": "Interiores",
+      "catFrase": "em interiores",
+      "registo": "casa",
+      "orient": "landscape",
+      "title": "Escritório com vista para a ponte",
+      "especialidade": "Ar condicionado",
+      "trabalho": "Instalação",
+      "equipamento": "Unidade mural",
+      "local": "Sala com vista para a ponte",
+      "alt": "Unidade mural numa sala com estante de livros e a Ponte Vasco da Gama à janela.",
+      "resumo": "Unidade mural numa sala de trabalho, montada junto ao teto e ao lado da janela. Por baixo, uma calha branca desce a parede a prumo junto ao vão. A estante e a sala ficam como estavam.",
+      "detalhes": [
+        "Unidade mural junto ao teto, ao lado da janela",
+        "Calha branca a prumo junto ao vão da janela",
+        "Tomada junto ao rodapé, por baixo da unidade",
+        "Estante e mobiliário no lugar"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "11",
+      "code": "F11",
+      "slug": "mural-em-parede-lisa",
+      "cat": "int",
+      "catLabel": "Interiores",
+      "catFrase": "em interiores",
+      "registo": "casa",
+      "orient": "landscape",
+      "title": "Mural em parede lisa",
+      "especialidade": "Ar condicionado",
+      "trabalho": "Instalação",
+      "equipamento": "Mitsubishi Electric",
+      "local": "Habitação",
+      "alt": "Unidade mural Mitsubishi Electric numa parede clara, junto a um cortinado.",
+      "resumo": "Unidade mural Mitsubishi Electric numa parede clara, junto ao teto e a um cortinado. Não há tubagem à vista na parede.",
+      "detalhes": [
+        "Unidade mural junto ao teto",
+        "Parede sem tubagem à vista",
+        "Unidade ao lado do cortinado"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "08",
+      "code": "F08",
+      "slug": "unidade-de-condutas-em-teto",
+      "cat": "int",
+      "catLabel": "Interiores",
+      "catFrase": "em interiores",
+      "registo": "casa",
+      "orient": "landscape",
+      "title": "Unidade de condutas em teto",
+      "especialidade": "Ar condicionado",
+      "trabalho": "Substituição",
+      "equipamento": "Unidade de condutas",
+      "local": "Habitação ocupada",
+      "alt": "Unidade de condutas embutida numa sanca sobre a cozinha, com o mobiliário protegido em plástico.",
+      "resumo": "Substituição de uma unidade de condutas embutida numa sanca, numa casa habitada. A abertura na sanca deixa ver a unidade e as ligações da tubagem isolada. O móvel por baixo está coberto com plástico.",
+      "detalhes": [
+        "Unidade de condutas embutida na sanca",
+        "Abertura na sanca para acesso à unidade",
+        "Ligações da tubagem com isolamento branco",
+        "Móvel de cozinha coberto com plástico",
+        "Escadote em uso junto ao móvel"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    },
+    {
+      "n": "14",
+      "code": "F14",
+      "slug": "termoacumulador-em-armario",
+      "cat": "int",
+      "catLabel": "Interiores",
+      "catFrase": "em interiores",
+      "registo": "casa",
+      "orient": "portrait",
+      "title": "Termoacumulador em armário",
+      "especialidade": "Águas quentes",
+      "trabalho": "Substituição",
+      "equipamento": "Termoacumulador vertical",
+      "local": "Habitação",
+      "alt": "Termoacumulador instalado dentro de um armário, com ligações flexíveis.",
+      "resumo": "Termoacumulador instalado na vertical dentro de um armário. A água liga por tubos flexíveis de malha inox. Em baixo ficam as válvulas de corte, à mão.",
+      "detalhes": [
+        "Termoacumulador vertical dentro de um armário",
+        "Ligações em tubo flexível de malha inox",
+        "Válvulas de corte acessíveis na base do armário",
+        "Cabo de alimentação ligado por baixo do aparelho"
+      ],
+      "factos": {
+        "data": "",
+        "localExato": "",
+        "cliente": "",
+        "duracao": ""
+      }
+    }
+  ]
+}

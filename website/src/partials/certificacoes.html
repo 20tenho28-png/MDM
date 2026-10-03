@@ -1,0 +1,25 @@
+<section class="cert" aria-label="Certificações e marcas">
+  <div class="cert-in">
+    <!-- números por preencher em data/dados-mdm.json: enquanto faltarem, o selo mostra só o nome. Nunca inventar um número. -->
+    <div class="cert-selos">
+      <div class="selo">
+        <span class="selo-sigla">APIRAC</span>
+        <span class="selo-txt">Associação Portuguesa da Indústria de Refrigeração e Ar Condicionado{{#se dados.apirac}}<br><span class="selo-num">{{ dados.apirac }}</span>{{/se}}</span>
+      </div>
+      <div class="selo">
+        <span class="selo-sigla">IMPIC</span>
+        <span class="selo-txt">Instituto dos Mercados Públicos, do Imobiliário e da Construção{{#se dados.impic}}<br><span class="selo-num">{{ dados.impic }}</span>{{/se}}</span>
+      </div>
+      <div class="selo">
+        <span class="selo-sigla">F-gas</span>
+        <span class="selo-txt">Certificação para gases fluorados, usados no ar condicionado e nas bombas de calor{{#se dados.gasesFluorados}}<br><span class="selo-num">{{ dados.gasesFluorados }}</span>{{/se}}</span>
+      </div>
+    </div>
+    <div class="cert-marcas">
+      <p class="rotulo">Multimarca, peças originais</p>
+      <ul class="marcas">
+        {{#cada site.brands}}<li>{{ item }}</li>{{/cada}}
+      </ul>
+    </div>
+  </div>
+</section>
