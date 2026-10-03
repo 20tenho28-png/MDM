@@ -29,6 +29,10 @@ cd circuit-planner && npm test   # if you touched circuit-planner/
   generated file under `alembic/versions/`.
 - **The simulator's solver** (`electric-simulator/circuit.js`) must stay
   DOM-free — it is exercised from Node in tests.
+- **The AC calculator's model** (`ac-calculator/calc_model.js`) must also stay
+  DOM-free (Node-tested from pytest). It is client-facing: European Portuguese,
+  no em dashes, and never invent prices — `prices.js` stays `null` until MDM
+  fills in its own table.
 
 ## Reporting issues
 
