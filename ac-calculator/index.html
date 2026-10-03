@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MDM Assist | Calculadora de Ar Condicionado</title>
-    <meta name="description" content="Descubra a potência de ar condicionado (BTU e kW) que cada divisão da sua casa precisa. Calculadora gratuita da MDM Assist, Lisboa." />
+    <meta name="description" content="Descubra a potência de ar condicionado (BTU e kW) de que cada divisão da sua casa precisa. Calculadora gratuita da MDM Assist, Lisboa." />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext y='13' font-size='13'%3E%E2%9D%84%3C/text%3E%3C/svg%3E" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -20,13 +20,11 @@
         --sand-dk: #d9d3c4;
         --ink: #141d2e;
         --slate: #4e5871;
-        --slate-lt: #7b849a;
+        --slate-lt: #646d85;
         --red: #a30711;
         --red-dk: #7c050d;
         --red-tint: #fbeeee;
         --green: #12823f;
-        --amber-tint: #fdf4e3;
-        --amber-ink: #7a4b00;
         --white: #ffffff;
         --serif: "Lora", Georgia, "Times New Roman", serif;
         --sans: "Inter", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
@@ -86,7 +84,7 @@
       .btn.primary:hover:not(:disabled) { background: var(--red-dk); border-color: var(--red-dk); }
       .btn.whatsapp { background: var(--green); border-color: var(--green); color: var(--white); }
       .btn.whatsapp:hover { background: #0e6a33; border-color: #0e6a33; }
-      .btn.small { padding: 7px 14px; font-size: 13.5px; }
+      .btn.small { padding: 10px 16px; font-size: 13.5px; min-height: 42px; }
       .btn.block { width: 100%; }
       .btn svg { flex: none; }
       .btn.ghost { background: transparent; border-color: transparent; color: var(--slate); }
@@ -95,12 +93,14 @@
       /* ---------------------------------------------------------- page band */
       .page-band { border-bottom: 1px solid var(--sand); background: var(--cream); }
       .page-band .wrap { max-width: 760px; margin: 0 auto; padding: 18px 16px 14px; }
-      .page-band h1 { font-size: 24px; font-weight: 600; color: var(--ink); }
+      .page-band h1 { font-size: 18px; font-weight: 600; color: var(--ink); }
       .page-band p { color: var(--slate); font-size: 14px; margin-top: 4px; }
 
       /* ------------------------------------------------------------ stepper */
       .stepbar { background: var(--white); border-bottom: 1px solid var(--sand); position: sticky; top: var(--header-h, 61px); z-index: 20; }
-      .stepbar .wrap { max-width: 760px; margin: 0 auto; padding: 10px 8px 0; display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; }
+      .stepbar .wrap { max-width: 760px; margin: 0 auto; padding: 10px 8px 0; }
+      .stepbar .wrap.nav { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; }
+      .stepbar .wrap.bar { padding: 0 16px; }
       .stepbar .back {
         width: 44px; height: 44px; border: none; background: transparent; border-radius: 50%;
         color: var(--red); cursor: pointer; display: grid; place-items: center;
@@ -110,14 +110,14 @@
       .stepbar .title { text-align: center; }
       .stepbar .title b { display: block; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); }
       .stepbar .title span { display: block; font-size: 13.5px; color: var(--slate); margin-top: 1px; }
-      .progress { display: flex; gap: 4px; padding: 10px 0 0; }
+      .progress { display: flex; gap: 4px; padding: 10px 0 8px; }
       .progress i { flex: 1; height: 4px; background: var(--sand); border-radius: 2px; }
       .progress i.done { background: var(--red); }
       .progress i.now { background: linear-gradient(90deg, var(--red) 55%, var(--sand) 55%); }
 
       /* ----------------------------------------------------------- content */
-      main { max-width: 760px; margin: 0 auto; padding: 22px 16px 140px; }
-      .lead { font-family: var(--serif); font-size: 26px; font-weight: 600; line-height: 1.25; margin-bottom: 8px; }
+      main { max-width: 760px; margin: 0 auto; padding: 22px 16px calc(var(--sticky-h, 140px) + 20px); }
+      .lead { font-family: var(--serif); font-size: 26px; font-weight: 600; line-height: 1.25; margin-bottom: 8px; outline: none; }
       .lead em { font-style: normal; color: var(--red); }
       .sub { color: var(--slate); font-size: 15.5px; margin-bottom: 20px; }
       .card {
@@ -131,7 +131,7 @@
       .checklist li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; }
       .checklist li svg { flex: none; margin-top: 3px; color: var(--red); }
 
-      .choice-grid { display: grid; gap: 12px; }
+      .choice-grid { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
       .choice {
         background: var(--white); border: 1.5px solid var(--sand); border-radius: var(--radius);
         padding: 26px 16px 20px; text-align: center; cursor: pointer; width: 100%;
@@ -142,7 +142,7 @@
       .choice svg { display: block; margin: 0 auto 12px; color: var(--ink); }
       .choice b { display: block; font-family: var(--serif); font-size: 19px; font-weight: 600; color: var(--ink); }
       .choice small { display: block; color: var(--slate); font-size: 13.5px; margin-top: 4px; }
-      @media (min-width: 560px) { .choice-grid { grid-template-columns: 1fr 1fr; } }
+      @media (max-width: 559px) { .choice { padding: 18px 10px 14px; } .choice svg { width: 48px; height: 48px; } .choice b { font-size: 17px; } .choice small { font-size: 12.5px; } }
 
       /* ------------------------------------------------------------- forms */
       .field { margin-bottom: 16px; }
@@ -167,19 +167,19 @@
       .stepper button:hover { background: var(--sand); }
       .stepper button:disabled { color: var(--sand-dk); cursor: default; background: var(--paper); }
       .stepper output { display: grid; place-items: center; font-family: var(--serif); font-size: 22px; font-weight: 600; }
-      .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
       .chip {
         border: 1px solid var(--sand-dk); background: var(--white); color: var(--slate);
-        border-radius: 999px; padding: 5px 12px; font-size: 13px; cursor: pointer;
+        border-radius: 999px; padding: 10px 14px; font-size: 13.5px; cursor: pointer; min-height: 40px;
       }
       .chip:hover { border-color: var(--ink); color: var(--ink); }
       .chip.on { border-color: var(--red); background: var(--red-tint); color: var(--red); font-weight: 600; }
       .toggle { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--sand); cursor: pointer; }
       .toggle:first-of-type { border-top: none; }
       .toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
-      .toggle .sw { flex: none; width: 44px; height: 26px; border-radius: 999px; background: var(--sand-dk); position: relative; transition: background .15s; }
+      .toggle .sw { flex: none; width: 44px; height: 26px; border-radius: 999px; background: var(--sand-dk); box-shadow: inset 0 0 0 1.5px var(--slate-lt); position: relative; transition: background .15s, box-shadow .15s; }
       .toggle .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--white); transition: left .15s; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
-      .toggle input:checked + .sw { background: var(--red); }
+      .toggle input:checked + .sw { background: var(--red); box-shadow: none; }
       .toggle input:checked + .sw::after { left: 21px; }
       .toggle input:focus-visible + .sw { outline: 2px solid var(--ink); outline-offset: 2px; }
       .toggle .txt b { display: block; font-size: 15px; font-weight: 600; }
@@ -187,14 +187,15 @@
       .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
       /* --------------------------------------------------------- room cards */
-      .room { border: 1px solid var(--sand); border-radius: var(--radius); background: var(--white); margin-bottom: 12px; overflow: hidden; }
+      .room { border: 1px solid var(--sand); border-radius: var(--radius); background: var(--white); margin-bottom: 12px; overflow: hidden; scroll-margin-top: calc(var(--header-h, 61px) + 90px); }
+      .room-head-h { margin: 0; font-size: inherit; }
       .room-head {
         display: flex; align-items: center; gap: 10px; padding: 14px 16px; background: var(--paper);
         cursor: pointer; border: none; width: 100%; text-align: left;
       }
       .room-head .chev { color: var(--red); transition: transform .15s; flex: none; }
       .room.open .room-head .chev { transform: rotate(180deg); }
-      .room-head h3 { font-size: 19px; margin: 0; flex: 1; }
+      .room-head .room-title { font-family: var(--serif); font-size: 19px; font-weight: 600; flex: 1; }
       .room-head .pill { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--red); background: var(--white); border: 1px solid var(--sand-dk); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
       .room-head .pill.muted { color: var(--slate-lt); }
       .room-body { padding: 16px; display: none; }
@@ -202,18 +203,20 @@
       .room-result { background: var(--paper); border-radius: 8px; padding: 14px 16px; margin-top: 6px; }
       .room-result .k { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); }
       .room-result .big { font-family: var(--serif); font-size: 30px; font-weight: 700; color: var(--red); line-height: 1.1; margin-top: 4px; }
-      .room-result .big small { font-size: 15px; font-weight: 500; color: var(--slate); font-family: var(--sans); margin-left: 6px; }
+      .room-result .big small { display: block; font-size: 15px; font-weight: 500; color: var(--slate); font-family: var(--sans); margin-top: 2px; }
       .room-result .detail { font-size: 13.5px; color: var(--slate); margin-top: 8px; }
       .room-result .bar { height: 8px; border-radius: 4px; background: var(--sand); margin-top: 10px; overflow: hidden; }
       .room-result .bar i { display: block; height: 100%; background: var(--red); border-radius: 4px; }
       .notice { border-radius: 8px; padding: 10px 12px; font-size: 13.5px; margin-top: 10px; display: flex; gap: 8px; align-items: flex-start; }
       .notice svg { flex: none; margin-top: 2px; }
-      .notice.warn { background: var(--amber-tint); color: var(--amber-ink); }
+      .notice.warn { background: var(--sand); color: var(--ink); }
+      .notice.warn svg { color: var(--red); }
       .notice.bad { background: var(--red-tint); color: var(--red-dk); }
-      .notice.ok { background: #eaf5ee; color: #0f5a2d; }
+      .notice.ok { background: var(--paper); color: var(--ink); }
+      .notice.ok svg { color: var(--red); }
       .notice.info { background: var(--paper); color: var(--slate); }
       details.why { margin-top: 10px; }
-      details.why summary { cursor: pointer; color: var(--red); font-weight: 600; font-size: 13.5px; list-style: none; }
+      details.why summary { cursor: pointer; color: var(--red); font-weight: 600; font-size: 13.5px; list-style: none; display: block; padding: 10px 0; }
       details.why summary::-webkit-details-marker { display: none; }
       details.why summary::before { content: "+ "; }
       details.why[open] summary::before { content: "− "; }
@@ -227,7 +230,7 @@
       .add-room b { display: block; font-family: var(--mono); font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
       .add-room small { display: block; color: var(--slate); font-size: 13px; margin-top: 4px; }
       .add-room:disabled { border-color: var(--sand-dk); color: var(--slate-lt); background: var(--paper); cursor: default; }
-      .remove-room { background: none; border: none; color: var(--slate); font-size: 13px; cursor: pointer; text-decoration: underline; padding: 6px 0; }
+      .remove-room { background: none; border: none; color: var(--slate); font-size: 13px; cursor: pointer; text-decoration: underline; padding: 12px 0; min-height: 44px; display: inline-block; }
       .remove-room:hover { color: var(--red); }
 
       /* -------------------------------------------------------- sticky bar */
@@ -238,23 +241,24 @@
       }
       .sticky .wrap { max-width: 760px; margin: 0 auto; padding: 10px 16px 14px; }
       .sticky .total { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 8px; }
-      .sticky .total .k { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); }
+      .sticky .total .k { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); white-space: nowrap; }
       .sticky .total .v { font-family: var(--serif); font-size: 20px; font-weight: 700; color: var(--red); white-space: nowrap; }
       .sticky .total .v small { font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--slate); margin-left: 6px; }
       .sticky .note { font-size: 12.5px; color: var(--slate); margin-bottom: 8px; }
       .sticky .note.bad { color: var(--red); }
-      .sticky .btn { width: 100%; justify-content: space-between; padding: 14px 20px; font-size: 16px; letter-spacing: 0.04em; text-transform: uppercase; font-family: var(--mono); }
+      .sticky .btn { width: 100%; justify-content: space-between; padding: 14px 20px; font-size: 16px; }
 
       /* ------------------------------------------------------------ result */
       .result-hero { background: var(--ink); color: var(--cream); border-radius: var(--radius); padding: 22px 18px; margin-bottom: 14px; }
-      .result-hero .k { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: #b7bdcc; }
+      .result-hero .k { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(250, 249, 245, 0.7); }
       .result-hero .big { font-family: var(--serif); font-size: 38px; font-weight: 700; line-height: 1.05; margin-top: 6px; }
-      .result-hero .big small { display: block; font-size: 16px; font-family: var(--sans); font-weight: 500; color: #b7bdcc; margin-top: 4px; }
-      .result-hero p { color: #d8dce6; font-size: 14.5px; margin-top: 10px; }
-      table.rooms { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+      .result-hero .big small { display: block; font-size: 16px; font-family: var(--sans); font-weight: 500; color: rgba(250, 249, 245, 0.7); margin-top: 4px; }
+      .result-hero p { color: rgba(250, 249, 245, 0.85); font-size: 14.5px; margin-top: 10px; }
+      table.rooms { width: 100%; border-collapse: collapse; font-size: 14.5px; table-layout: fixed; }
+      table.rooms th:first-child { width: 58%; }
       table.rooms th { text-align: left; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate); font-weight: 600; padding: 6px 0; border-bottom: 1px solid var(--sand); }
       table.rooms td { padding: 10px 0; border-bottom: 1px solid var(--sand); vertical-align: top; }
-      table.rooms td.num { font-family: var(--serif); font-weight: 700; color: var(--red); text-align: right; padding-left: 14px; max-width: 46%; }
+      table.rooms td.num { font-family: var(--serif); font-weight: 700; color: var(--red); text-align: right; padding-left: 14px; }
       table.rooms td.num .nw { white-space: nowrap; }
       table.rooms td.num small { display: block; font-family: var(--sans); font-weight: 500; color: var(--slate); font-size: 12.5px; }
       table.rooms td small { color: var(--slate); font-size: 12.5px; display: block; }
@@ -277,18 +281,24 @@
       /* ------------------------------------------------------------ modal */
       .overlay { position: fixed; inset: 0; background: rgba(20, 29, 46, 0.5); z-index: 40; display: flex; align-items: flex-end; justify-content: center; }
       @media (min-width: 560px) { .overlay { align-items: center; } }
-      .sheet { background: var(--white); border-radius: 16px 16px 0 0; width: 100%; max-width: 520px; padding: 22px 18px 26px; box-shadow: 0 20px 60px rgba(20, 29, 46, 0.3); }
-      @media (min-width: 560px) { .sheet { border-radius: 16px; } }
+      .sheet { background: var(--white); border-radius: var(--radius) var(--radius) 0 0; width: 100%; max-width: 520px; padding: 22px 18px 26px; box-shadow: 0 20px 60px rgba(20, 29, 46, 0.3); }
+      @media (min-width: 560px) { .sheet { border-radius: var(--radius); } }
       .sheet h2 { font-size: 22px; margin-bottom: 4px; }
       .sheet p { color: var(--slate); font-size: 14.5px; margin-bottom: 14px; }
       .sheet .cta-grid { grid-template-columns: 1fr; }
 
+      .print-only { display: none; }
       @media print {
-        .site-header, .stepbar, .sticky, .no-print { display: none !important; }
+        .stepbar, .sticky, .no-print, #contact-btn, .page-band { display: none !important; }
+        .site-header { position: static; border-bottom: 1px solid var(--sand); }
+        .brand-sub { display: inline !important; }
         body { background: #fff; }
         main { padding-bottom: 0; }
         .result-hero { background: #fff; color: var(--ink); border: 1px solid var(--sand); }
         .result-hero .k, .result-hero p, .result-hero .big small { color: var(--slate); }
+        .option .tag { color: var(--red); background: none; border: 1px solid var(--red); }
+        .print-only { display: block; margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--sand); font-size: 12.5px; color: var(--slate); }
+        .print-only b { font-family: var(--mono); color: var(--ink); }
       }
     </style>
   </head>
@@ -314,28 +324,29 @@
     </div>
 
     <div class="stepbar" id="stepbar">
-      <div class="wrap">
+      <div class="wrap nav">
         <button class="back" id="back-btn" type="button" aria-label="Voltar ao passo anterior">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+          <svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
         </button>
         <div class="title"><b id="step-title">Selecionar</b><span id="step-count">Passo 1 de 4</span></div>
         <span></span>
       </div>
-      <div class="wrap" style="padding-top:0"><div class="progress" id="progress"></div></div>
+      <div class="wrap bar"><div class="progress" id="progress" aria-hidden="true"></div></div>
     </div>
 
     <main id="app"></main>
+    <p class="print-only">MDM Assist · Telefone <b>218 935 050</b> · WhatsApp <b>910 307 579</b> · mdmassist@mdmassist.com · Alameda dos Oceanos 108A, 1990-426 Lisboa · Orçamento gratuito, resposta em menos de 24 horas úteis.</p>
 
     <div class="sticky hidden" id="sticky">
       <div class="wrap">
         <div class="total" aria-live="polite">
-          <span class="k" id="sticky-k">Potência total estimada</span>
+          <span class="k" id="sticky-k">Potência total</span>
           <span class="v" id="sticky-v">...</span>
         </div>
         <div class="note" id="sticky-note"></div>
         <button class="btn primary" id="next-btn" type="button">
           <span id="next-label">Continuar</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+          <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
         </button>
       </div>
     </div>

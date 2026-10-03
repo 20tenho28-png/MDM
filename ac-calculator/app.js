@@ -39,19 +39,19 @@ const STEPS = [
 
 // ------------------------------------------------------------------ icons
 const I = {
-  check: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
-  one: '<svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="10" y="12" width="44" height="40" rx="3"/><path d="M26 52h12" stroke="#faf9f5" stroke-width="5"/><path d="M16 42h14M20 20h24"/></svg>',
-  many: '<svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="10" y="10" width="44" height="44" rx="3"/><path d="M32 10v24M10 34h44M32 34v20M43 34v12"/></svg>',
-  chev: '<svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
-  plus: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
-  warn: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2L12 3zM12 10v5M12 18.5v.5"/></svg>',
-  info: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
-  ok: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.8 2.8L16.5 9.5"/></svg>',
-  phone: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"/></svg>',
-  wa: '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm0 1.8a8.2 8.2 0 11-4.2 15.3l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0112 3.8zm-3 4.4c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4l-.6-.3-2-1c-.3-.1-.5-.2-.7.2l-1 1.2c-.2.2-.3.2-.6.1a7 7 0 01-2-1.3 7.8 7.8 0 01-1.5-1.8c-.1-.3 0-.4.1-.6l.5-.5.3-.5v-.5l-1-2.2c-.2-.5-.4-.5-.6-.5H9z"/></svg>',
-  mail: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>',
-  print: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v7H6z"/></svg>',
-  pin: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-7.1 7-12a7 7 0 10-14 0c0 4.9 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  check: '<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  one: '<svg aria-hidden="true" focusable="false" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M26 52H13a3 3 0 0 1-3-3V15a3 3 0 0 1 3-3h38a3 3 0 0 1 3 3v34a3 3 0 0 1-3 3H38"/><path d="M16 42h14M20 20h24"/></svg>',
+  many: '<svg aria-hidden="true" focusable="false" width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="10" y="10" width="44" height="44" rx="3"/><path d="M32 10v24M10 34h44M32 34v20M43 34v12"/></svg>',
+  chev: '<svg aria-hidden="true" focusable="false" class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  plus: '<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  warn: '<svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2L12 3zM12 10v5M12 18.5v.5"/></svg>',
+  info: '<svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+  ok: '<svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.8 2.8L16.5 9.5"/></svg>',
+  phone: '<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"/></svg>',
+  wa: '<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm0 1.8a8.2 8.2 0 11-4.2 15.3l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0112 3.8zm-3 4.4c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.2-1.4l-.6-.3-2-1c-.3-.1-.5-.2-.7.2l-1 1.2c-.2.2-.3.2-.6.1a7 7 0 01-2-1.3 7.8 7.8 0 01-1.5-1.8c-.1-.3 0-.4.1-.6l.5-.5.3-.5v-.5l-1-2.2c-.2-.5-.4-.5-.6-.5H9z"/></svg>',
+  mail: '<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>',
+  print: '<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v7H6z"/></svg>',
+  pin: '<svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7-7.1 7-12a7 7 0 10-14 0c0 4.9 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>',
 };
 
 // ------------------------------------------------------------------ state
@@ -71,14 +71,17 @@ function loadState() {
     if (!raw) return null;
     const s = JSON.parse(raw);
     if (!s || !Array.isArray(s.rooms) || !s.rooms.length) return null;
-    // Nunca reabrir diretamente no resultado: o utilizador vê o resumo do que já tinha.
-    if (s.step > 3) s.step = 3;
+    if (!s.rooms.every((r) => r && typeof r === "object")) return null;
     // Estados guardados por versões anteriores da calculadora.
     for (const r of s.rooms) {
       if (r.equipment == null) r.equipment = r.kitchen ? "kitchen" : "none";
       delete r.kitchen;
     }
     if (!BUILDING_OPTIONS.some((o) => o.key === s.building)) s.building = "unknown";
+    // Nunca reabrir diretamente no resultado: o utilizador vê o resumo do que já tinha.
+    s.step = Number.isInteger(s.step) ? Math.max(0, Math.min(3, s.step)) : 0;
+    // Divisões que já não validam (regras novas) mandam de volta ao passo 2.
+    if (s.step > 2 && !sizeProject(s.rooms, { building: s.building }).allValid) s.step = 2;
     return s;
   } catch {
     return null;
@@ -121,6 +124,13 @@ const parseNum = (v) => {
 };
 const notice = (kind, html) => `<div class="notice ${kind}">${kind === "ok" ? I.ok : kind === "info" ? I.info : I.warn}<span>${html}</span></div>`;
 
+// Valor numérico guardado -> texto do campo (vírgula decimal; NaN ou vazio -> "").
+const numVal = (v) => (Number.isFinite(v) ? String(v).replace(".", ",") : "");
+// Erro só depois de o campo ter algum valor: um campo por preencher não é um erro.
+const fieldErr = (room, load, f) => (room[f] == null ? "" : load.errors[f] || "");
+const postalErr = (v) => (String(v).replace(/\D/g, "").length >= 7 && !postalInfo(v).valid ? "Indique um código postal português com 7 dígitos (ex. 1990-426)." : "");
+const formatPostal = (v) => { const d = String(v).replace(/\D/g, "").slice(0, 7); return d.length > 4 ? `${d.slice(0, 4)}-${d.slice(4)}` : d; };
+
 function roomLabel(room, index) {
   return room.name && room.name.trim() ? room.name.trim() : `Divisão ${index + 1}`;
 }
@@ -146,12 +156,12 @@ function renderStepbar() {
 // ------------------------------------------------------------- step 0
 function renderIntro() {
   return `
-    <p class="lead">Vamos dimensionar o seu <em>ar condicionado</em></p>
-    <p class="sub">Em quatro passos curtos calculamos a potência que cada divisão precisa e preparamos o pedido de orçamento. Demora menos de cinco minutos.</p>
+    <h2 class="lead" tabindex="-1">Vamos dimensionar o seu <em>ar condicionado</em></h2>
+    <p class="sub">Em quatro passos curtos calculamos a potência de que cada divisão precisa e preparamos o pedido de orçamento. Demora menos de cinco minutos.</p>
     <div class="card">
       <h2>O que vai precisar</h2>
       <p>Pode configurar até ${LIMITS.rooms.max} divisões. Para cada uma, tenha à mão:</p>
-      <ul class="checklist">
+      <ul class="checklist" role="list">
         <li>${I.check}<span>Área da divisão em m² (comprimento × largura)</span></li>
         <li>${I.check}<span>Altura do teto em cm (o normal são 260 cm)</span></li>
         <li>${I.check}<span>Área total das janelas em m²</span></li>
@@ -170,7 +180,7 @@ function renderSelect() {
   const multi = state.mode === "multi";
   const single = state.mode === "single";
   return `
-    <p class="lead">Para quantas divisões precisa de ar condicionado?</p>
+    <h2 class="lead" tabindex="-1">Para quantas divisões precisa de ar condicionado?</h2>
     <p class="sub">Escolha uma opção. Pode acrescentar ou retirar divisões no passo seguinte.</p>
     <div class="choice-grid">
       <button class="choice ${single ? "on" : ""}" type="button" data-action="mode" data-mode="single">
@@ -217,7 +227,7 @@ function renderSelect() {
 function renderRooms() {
   const openId = state.rooms.some((r) => r.id === state.openRoom) ? state.openRoom : state.rooms[0].id;
   return `
-    <p class="lead">Descreva cada <em>divisão</em></p>
+    <h2 class="lead" tabindex="-1">Descreva cada <em>divisão</em></h2>
     <p class="sub">A potência recomendada atualiza à medida que preenche. Valores aproximados chegam: o técnico confirma na visita.</p>
     ${state.rooms.map((r, i) => renderRoom(r, i, r.id === openId)).join("")}
     <button class="add-room" type="button" data-action="add-room" ${state.rooms.length >= LIMITS.rooms.max ? "disabled" : ""}>
@@ -231,12 +241,14 @@ function renderRoom(room, index, open) {
   const load = roomLoad(room, ctx());
   return `
     <section class="room ${open ? "open" : ""}" data-room="${room.id}">
-      <button class="room-head" type="button" data-action="toggle-room" data-id="${room.id}" aria-expanded="${open}">
-        ${I.chev}
-        <h3 data-role="title">${esc(roomLabel(room, index))}</h3>
-        <span class="pill ${load.ok ? "" : "muted"}" data-role="pill">${unitLabel(load)}</span>
-      </button>
-      <div class="room-body">
+      <h3 class="room-head-h">
+        <button class="room-head" type="button" data-action="toggle-room" data-id="${room.id}" aria-expanded="${open}" aria-controls="b-${room.id}">
+          ${I.chev}
+          <span class="room-title" data-role="title">${esc(roomLabel(room, index))}</span>
+          <span class="pill ${load.ok ? "" : "muted"}" data-role="pill">${unitLabel(load)}</span>
+        </button>
+      </h3>
+      <div class="room-body" id="b-${room.id}">
         <div class="field">
           <label class="label" for="f-${room.id}-name"><b>Nome da divisão</b></label>
           <div class="control"><input id="f-${room.id}-name" type="text" data-field="name" data-id="${room.id}" value="${esc(room.name)}" placeholder="Divisão ${index + 1}" maxlength="40" /></div>
@@ -247,25 +259,25 @@ function renderRoom(room, index, open) {
         <div class="row2">
           <div class="field">
             <label class="label" for="f-${room.id}-area"><b>Área <span class="req" aria-hidden="true">*</span></b></label>
-            <div class="control"><input id="f-${room.id}-area" class="has-unit" type="text" inputmode="decimal" required data-field="area" data-id="${room.id}" value="${room.area ?? ""}" placeholder="ex. 18" aria-invalid="${load.errors.area ? "true" : "false"}" aria-describedby="e-${room.id}-area" /><span class="unit" aria-hidden="true">m²</span></div>
-            <div class="error" id="e-${room.id}-area" data-err="area">${esc(load.errors.area || "")}</div>
+            <div class="control"><input id="f-${room.id}-area" class="has-unit" type="text" inputmode="decimal" required data-field="area" data-id="${room.id}" value="${numVal(room.area)}" placeholder="ex. 18" aria-invalid="${fieldErr(room, load, "area") ? "true" : "false"}" aria-describedby="u-${room.id}-area e-${room.id}-area" /><span class="unit" id="u-${room.id}-area">m²</span></div>
+            <div class="error" id="e-${room.id}-area" data-err="area">${esc(fieldErr(room, load, "area"))}</div>
           </div>
           <div class="field">
             <label class="label" for="f-${room.id}-height"><b>Altura <span class="req" aria-hidden="true">*</span></b></label>
-            <div class="control"><input id="f-${room.id}-height" class="has-unit" type="text" inputmode="numeric" required data-field="height" data-id="${room.id}" value="${room.height ?? ""}" placeholder="260" aria-invalid="${load.errors.height ? "true" : "false"}" aria-describedby="e-${room.id}-height" /><span class="unit" aria-hidden="true">cm</span></div>
-            <div class="error" id="e-${room.id}-height" data-err="height">${esc(load.errors.height || "")}</div>
+            <div class="control"><input id="f-${room.id}-height" class="has-unit" type="text" inputmode="numeric" required data-field="height" data-id="${room.id}" value="${numVal(room.height)}" placeholder="260" aria-invalid="${fieldErr(room, load, "height") ? "true" : "false"}" aria-describedby="u-${room.id}-height e-${room.id}-height" /><span class="unit" id="u-${room.id}-height">cm</span></div>
+            <div class="error" id="e-${room.id}-height" data-err="height">${esc(fieldErr(room, load, "height"))}</div>
           </div>
         </div>
         <div class="row2">
           <div class="field">
             <label class="label" for="f-${room.id}-windows"><b>Janelas <span class="req" aria-hidden="true">*</span></b></label>
-            <div class="control"><input id="f-${room.id}-windows" class="has-unit" type="text" inputmode="decimal" required data-field="windows" data-id="${room.id}" value="${room.windows ?? ""}" placeholder="ex. 2" aria-invalid="${load.errors.windows ? "true" : "false"}" aria-describedby="e-${room.id}-windows" /><span class="unit" aria-hidden="true">m²</span></div>
-            <div class="error" id="e-${room.id}-windows" data-err="windows">${esc(load.errors.windows || "")}</div>
+            <div class="control"><input id="f-${room.id}-windows" class="has-unit" type="text" inputmode="decimal" required data-field="windows" data-id="${room.id}" value="${numVal(room.windows)}" placeholder="ex. 2" aria-invalid="${fieldErr(room, load, "windows") ? "true" : "false"}" aria-describedby="u-${room.id}-windows e-${room.id}-windows" /><span class="unit" id="u-${room.id}-windows">m²</span></div>
+            <div class="error" id="e-${room.id}-windows" data-err="windows">${esc(fieldErr(room, load, "windows"))}</div>
           </div>
           <div class="field">
             <label class="label" for="f-${room.id}-people"><b>Pessoas</b></label>
-            <div class="control"><input id="f-${room.id}-people" class="has-unit" type="text" inputmode="numeric" data-field="people" data-id="${room.id}" value="${room.people ?? ""}" placeholder="2" aria-invalid="${load.errors.people ? "true" : "false"}" aria-describedby="e-${room.id}-people" /><span class="unit" aria-hidden="true">pessoas</span></div>
-            <div class="error" id="e-${room.id}-people" data-err="people">${esc(load.errors.people || "")}</div>
+            <div class="control"><input id="f-${room.id}-people" class="has-unit" type="text" inputmode="numeric" data-field="people" data-id="${room.id}" value="${numVal(room.people)}" placeholder="2" aria-invalid="${fieldErr(room, load, "people") ? "true" : "false"}" aria-describedby="u-${room.id}-people e-${room.id}-people" /><span class="unit" id="u-${room.id}-people">pessoas</span></div>
+            <div class="error" id="e-${room.id}-people" data-err="people">${esc(fieldErr(room, load, "people"))}</div>
           </div>
         </div>
         <div class="field">
@@ -310,10 +322,13 @@ function renderRoomResult(load) {
   }
   const u = load.unit;
   const pct = Math.min(100, Math.round(load.ratio * 100));
+  // Linhas arredondadas uma a uma; a última fecha a soma com o total.
+  const rows = { envelope: Math.round(load.parts.envelope), solar: Math.round(load.parts.solar), internal: Math.round(load.parts.internal), roof: Math.round(load.parts.roof) };
+  rows.rest = Math.round(load.loadW) - rows.envelope - rows.solar - rows.internal - rows.roof;
   const warnHtml = load.warnings.map((w) => notice(w.level, esc(w.text))).join("");
   const heat = load.heating
     ? load.heating.ok
-      ? notice("ok", `Aquecimento: num dia frio ${load.units > 1 ? `as ${load.units} unidades de ${fmtInt(u.btu)} BTU ainda dão` : `a unidade de ${fmtInt(u.btu)} BTU ainda dá`} cerca de ${fmtKW1(load.heating.unitHeatKW)} kW de calor, acima dos ${fmtKW(load.heating.loadW)} kW que esta divisão precisa.`)
+      ? notice("ok", `Aquecimento: num dia frio ${load.units > 1 ? `as ${load.units} unidades de ${fmtInt(u.btu)} BTU ainda dão` : `a unidade de ${fmtInt(u.btu)} BTU ainda dá`} cerca de ${fmtKW1(load.heating.unitHeatKW)} kW de calor, acima dos ${fmtKW(load.heating.loadW)} kW de que esta divisão precisa.`)
       : notice("warn", `Aquecimento: num dia frio esta divisão precisa de cerca de ${fmtKW(load.heating.loadW)} kW de calor e ${load.units > 1 ? "as unidades só dão" : "a unidade só dá"} ${fmtKW1(load.heating.unitHeatKW)} kW. ${load.heating.suggest ? `Sugerimos ${load.units > 1 ? `${load.units} × ` : ""}${fmtInt(load.heating.suggest.btu)} BTU (${fmtKW1(load.heating.suggestHeatKW)} kW num dia frio).` : "Fale connosco para uma solução à medida."}`)
     : "";
   return `
@@ -326,11 +341,11 @@ function renderRoomResult(load) {
       <details class="why">
         <summary>Como chegámos a este valor</summary>
         <div class="breakdown">
-          <span>Paredes, ar exterior e inércia (${fmtDec(load.volume)} m³)</span><b>${fmtInt(load.parts.envelope)} W</b>
-          <span>Sol pelas janelas (${fmtDec(load.room.windows)} m², ${esc(load.labels.orientation)}, ${esc(load.labels.shading).toLowerCase()})</span><b>${fmtInt(load.parts.solar)} W</b>
-          <span>Pessoas (${load.room.people == null ? 2 : load.room.people}) e equipamentos</span><b>${fmtInt(load.parts.internal)} W</b>
-          ${load.parts.roof ? `<span>Telhado (último andar)</span><b>${fmtInt(load.parts.roof)} W</b>` : ""}
-          <span>Clima (zona ${esc(load.zone)} ×${fmtFactor(load.factors.climate)} sobre o que vem de fora), margem ×${fmtFactor(load.factors.margin)} e arredondamento</span><b>${fmtInt(load.loadW - load.parts.sum)} W</b>
+          <span>Paredes, ar exterior e inércia (${fmtDec(load.volume)} m³)</span><b>${fmtInt(rows.envelope)} W</b>
+          <span>Sol pelas janelas (${fmtDec(load.room.windows)} m², ${esc(load.labels.orientation)}, ${esc(load.labels.shading).toLowerCase()})</span><b>${fmtInt(rows.solar)} W</b>
+          <span>Pessoas (${load.room.people == null ? 2 : load.room.people}) e equipamentos</span><b>${fmtInt(rows.internal)} W</b>
+          ${load.parts.roof ? `<span>Telhado (último andar)</span><b>${fmtInt(rows.roof)} W</b>` : ""}
+          <span>Clima (zona ${esc(load.zone)} ×${fmtFactor(load.factors.climate)} sobre o que vem de fora), margem ×${fmtFactor(load.factors.margin)} e arredondamento</span><b>${fmtInt(rows.rest)} W</b>
           <span class="tot">Carga total</span><b class="tot">${fmtInt(load.loadW)} W</b>
         </div>
       </details>
@@ -342,13 +357,13 @@ function renderRoomResult(load) {
 function renderPostal() {
   const info = postalInfo(state.postal);
   return `
-    <p class="lead">Introduza o seu <em>código postal</em></p>
+    <h2 class="lead" tabindex="-1">Introduza o seu <em>código postal</em></h2>
     <p class="sub">O código postal ajuda-nos a ajustar o cálculo ao clima da sua zona e a confirmar se estamos na sua área de intervenção.</p>
     <div class="card">
       <div class="field" style="margin-bottom:0">
-        <label class="label" for="f-postal"><b>Código postal <span class="req" aria-hidden="true">*</span></b><span class="hint">formato 1990-426</span></label>
-        <div class="control"><input id="f-postal" type="text" inputmode="numeric" autocomplete="postal-code" required data-field="postal" value="${esc(state.postal)}" placeholder="1990-426" maxlength="8" aria-invalid="${state.postal && !info.valid ? "true" : "false"}" aria-describedby="e-postal" /></div>
-        <div class="error" id="e-postal" data-err="postal">${state.postal && !info.valid ? "Indique um código postal português com 7 dígitos (ex. 1990-426)." : ""}</div>
+        <label class="label" for="f-postal"><b>Código postal <span class="req" aria-hidden="true">*</span></b><span class="hint">só os 7 dígitos, ex. 1990426</span></label>
+        <div class="control"><input id="f-postal" type="text" inputmode="numeric" autocomplete="postal-code" required data-field="postal" value="${esc(formatPostal(state.postal))}" placeholder="1990-426" maxlength="8" aria-invalid="${postalErr(state.postal) ? "true" : "false"}" aria-describedby="e-postal" /></div>
+        <div class="error" id="e-postal" data-err="postal">${postalErr(state.postal)}</div>
       </div>
       <div data-role="zone">${renderZone(info)}</div>
     </div>
@@ -364,7 +379,7 @@ function renderZone(info) {
       <div><b>${esc(z.label)}</b><small>${esc(info.district)}. ${esc(z.hint)}</small></div>
     </div>
     ${info.inAML
-      ? notice("ok", `<b>Estamos na sua zona.</b> A MDM Assist intervém em toda a Área Metropolitana de Lisboa, normalmente em 24 a 48 horas.`)
+      ? notice("ok", `<b>Estamos na sua zona.</b> A MDM Assist intervém em toda a Área Metropolitana de Lisboa, normalmente em 24 a 48 horas. Respondemos em menos de 24 horas úteis.`)
       : notice("info", `Fora da Área Metropolitana de Lisboa. Pode usar o cálculo na mesma; para instalação fora de Lisboa fale connosco para confirmar disponibilidade.`)}
   `;
 }
@@ -389,7 +404,7 @@ function renderResult() {
         <tbody>
           ${p.rooms.map((l, i) => `<tr>
             <td>${esc(roomLabel(state.rooms[i], i))}<small>${fmtDec(l.room.area)} m² · ${esc(l.labels.orientation)} · ${fmtInt(l.loadBTU)} BTU/h de carga</small></td>
-            <td class="num"><span class="nw">${unitLabel(l)}</span><small>${fmtKW1(l.unit.coolKW * l.units)} kW frio · ${fmtKW1(l.unit.heatKW * l.units)} kW calor</small></td>
+            <td class="num"><span class="nw">${unitLabel(l)}</span><small><span class="nw">${fmtKW1(l.unit.coolKW * l.units)} kW frio</span><br /><span class="nw">${fmtKW1(l.unit.heatKW * l.units)} kW calor</span></small></td>
           </tr>`).join("")}
         </tbody>
       </table>
@@ -406,7 +421,7 @@ function renderResult() {
           <ul>${o.lines.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>
           ${o.price != null ? `<div class="price">desde ${fmtEUR(o.price)} <small>equipamento e instalação standard, IVA incluído</small></div>` : ""}
         </div>`).join("")}
-      ${PRICES && PRICES.note ? `<p class="fine">${esc(PRICES.note)}</p>` : `<p class="fine">Preços só após visita técnica gratuita: dependem da marca, da distância entre unidades e do trabalho de instalação. Pedimos o orçamento com um clique abaixo.</p>`}
+      ${PRICES && PRICES.note ? `<p class="fine">${esc(PRICES.note)}</p>` : `<p class="fine">Preços só após visita técnica gratuita: dependem da marca, da distância entre unidades e do trabalho de instalação. Peça o orçamento com um clique abaixo.</p>`}
     </div>
 
     <div class="card no-print">
@@ -442,6 +457,7 @@ function mailHref(project) {
 }
 
 // ------------------------------------------------------------- sticky
+let lastStickyHtml = "";
 function refreshSticky() {
   const st = STEPS[state.step];
   const el = $("#sticky");
@@ -461,10 +477,11 @@ function refreshSticky() {
   } else if (st.key === "rooms") {
     const p = sizeProject(state.rooms, ctx());
     total.classList.remove("hidden");
-    $("#sticky-k").textContent = "Potência total estimada";
-    $("#sticky-v").innerHTML = p.allValid
-      ? `${fmtInt(p.totalUnitBTU)} BTU/h<small>${fmtKW1(p.totalUnitKW)} kW</small>`
+    $("#sticky-k").textContent = "Potência total";
+    const html = p.allValid
+      ? `${fmtInt(p.totalUnitBTU)} BTU/h <small>${fmtKW1(p.totalUnitKW)} kW de frio</small>`
       : `<span style="color:var(--slate-lt)">…</span>`;
+    if (html !== lastStickyHtml) { lastStickyHtml = html; $("#sticky-v").innerHTML = html; }
     btn.disabled = !p.allValid;
     if (!p.allValid) {
       note.textContent = "Complete todas as divisões antes de continuar";
@@ -482,20 +499,35 @@ function refreshSticky() {
 }
 
 // ------------------------------------------------------------- render
-function render() {
+function render(opts = {}) {
   const key = STEPS[state.step].key;
   const app = $("#app");
   app.innerHTML = key === "intro" ? renderIntro() : key === "select" ? renderSelect() : key === "rooms" ? renderRooms() : key === "postal" ? renderPostal() : renderResult();
   renderStepbar();
   refreshSticky();
   saveState();
-  window.scrollTo({ top: 0 });
+  syncStickyHeight();
+  if (opts.newStep) {
+    window.scrollTo({ top: 0 });
+    // Leitores de ecrã e teclado: o foco vai para o título do passo.
+    const lead = $(".lead", app);
+    if (lead) lead.focus({ preventScroll: true });
+  }
 }
 
-function go(step) {
+function go(step, { fromHistory = false } = {}) {
   state.step = Math.max(0, Math.min(STEPS.length - 1, step));
-  render();
+  if (!fromHistory && typeof history !== "undefined" && history.pushState) {
+    try { history.pushState({ step: state.step }, ""); } catch { /* ignore */ }
+  }
+  render({ newStep: true });
 }
+
+// O gesto "voltar" do telemóvel volta ao passo anterior em vez de sair da página.
+window.addEventListener("popstate", (ev) => {
+  const step = ev.state && Number.isInteger(ev.state.step) ? ev.state.step : 0;
+  go(Math.min(step, state.step === 4 ? 3 : step), { fromHistory: true });
+});
 
 function next() {
   const key = STEPS[state.step].key;
@@ -508,7 +540,7 @@ function next() {
     if (!sizeProject(state.rooms, ctx()).allValid) return;
     go(3);
   } else if (key === "postal") {
-    if (!postalInfo(state.postal).valid) return;
+    if (!postalInfo(state.postal).valid || !sizeProject(state.rooms, ctx()).allValid) return;
     go(4);
   } else if (key === "result") {
     openContact();
@@ -533,8 +565,9 @@ function refreshRoom(id) {
   for (const f of ["area", "height", "windows", "people"]) {
     const inp = $(`input[data-field="${f}"]`, sec);
     const err = $(`[data-err="${f}"]`, sec);
-    if (inp) inp.setAttribute("aria-invalid", load.errors[f] ? "true" : "false");
-    if (err) err.textContent = load.errors[f] || "";
+    const msg = fieldErr(room, load, f);
+    if (inp) inp.setAttribute("aria-invalid", msg ? "true" : "false");
+    if (err) err.textContent = msg;
   }
   for (const chip of sec.querySelectorAll('[data-action="preset"]')) {
     chip.classList.toggle("on", chip.dataset.name === room.name);
@@ -591,8 +624,15 @@ document.addEventListener("click", (ev) => {
     state.mode = t.dataset.mode;
     if (state.mode === "multi" && state.rooms.length < 2) setRoomCount(2);
     render();
-  } else if (a === "rooms-inc") { setRoomCount(state.rooms.length + 1); render(); }
-  else if (a === "rooms-dec") { setRoomCount(state.rooms.length - 1); render(); }
+    $(`[data-action="mode"][data-mode="${state.mode}"]`)?.focus({ preventScroll: true });
+  } else if (a === "rooms-inc" || a === "rooms-dec") {
+    // Atualiza no sítio: sem re-render, o botão mantém a posição e o foco.
+    setRoomCount(state.rooms.length + (a === "rooms-inc" ? 1 : -1));
+    $(".stepper output").textContent = state.rooms.length;
+    $('[data-action="rooms-dec"]').disabled = state.rooms.length <= 2;
+    $('[data-action="rooms-inc"]').disabled = state.rooms.length >= LIMITS.rooms.max;
+    saveState();
+  }
   else if (a === "toggle-room") {
     state.openRoom = state.openRoom === t.dataset.id ? null : t.dataset.id;
     for (const sec of document.querySelectorAll(".room")) {
@@ -612,10 +652,16 @@ document.addEventListener("click", (ev) => {
     if (sec) { sec.scrollIntoView({ behavior: "smooth", block: "start" }); $('input[data-field="name"]', sec)?.focus(); }
   } else if (a === "remove-room") {
     if (state.rooms.length <= 1) return;
+    const idx = state.rooms.findIndex((r) => String(r.id) === t.dataset.id);
     state.rooms = state.rooms.filter((r) => String(r.id) !== t.dataset.id);
     if (state.rooms.length === 1) state.mode = "single";
-    state.openRoom = state.rooms[0].id;
+    const neighbour = state.rooms[Math.max(0, idx - 1)];
+    state.openRoom = neighbour.id;
+    const y = window.scrollY;
     render();
+    window.scrollTo({ top: y });
+    const sec = $(`.room[data-room="${neighbour.id}"]`);
+    if (sec) { sec.scrollIntoView({ block: "start" }); $(".room-head", sec)?.focus({ preventScroll: true }); }
   } else if (a === "preset") {
     const room = roomById(t.dataset.id);
     room.name = t.dataset.name;
@@ -639,10 +685,16 @@ document.addEventListener("input", (ev) => {
   const f = el.dataset.field;
   if (!f) return;
   if (f === "postal") {
-    state.postal = el.value;
+    const formatted = formatPostal(el.value);
+    if (el.value !== formatted) {
+      const atEnd = el.selectionStart === el.value.length;
+      el.value = formatted;
+      if (!atEnd) el.setSelectionRange(formatted.length, formatted.length);
+    }
+    state.postal = formatted;
     const info = postalInfo(state.postal);
-    el.setAttribute("aria-invalid", state.postal && !info.valid ? "true" : "false");
-    $('[data-err="postal"]').textContent = state.postal.replace(/\D/g, "").length >= 7 && !info.valid ? "Indique um código postal português com 7 dígitos (ex. 1990-426)." : "";
+    el.setAttribute("aria-invalid", postalErr(state.postal) ? "true" : "false");
+    $('[data-err="postal"]').textContent = postalErr(state.postal);
     $('[data-role="zone"]').innerHTML = renderZone(info);
     refreshSticky();
     saveState();
@@ -675,12 +727,17 @@ document.addEventListener("change", (ev) => {
   refreshRoom(room.id);
 });
 
-// A barra de passos cola-se por baixo do cabeçalho, seja qual for a altura dele.
+// A barra de passos cola-se por baixo do cabeçalho, seja qual for a altura dele,
+// e o conteúdo nunca fica escondido atrás da barra fixa de baixo.
 const headerEl = $(".site-header");
+const stickyEl = $("#sticky");
 const syncHeaderHeight = () => document.documentElement.style.setProperty("--header-h", `${headerEl.offsetHeight}px`);
+function syncStickyHeight() {
+  document.documentElement.style.setProperty("--sticky-h", `${stickyEl.classList.contains("hidden") ? 0 : stickyEl.offsetHeight}px`);
+}
 syncHeaderHeight();
-if (typeof ResizeObserver !== "undefined") new ResizeObserver(syncHeaderHeight).observe(headerEl);
-window.addEventListener("resize", syncHeaderHeight);
+if (typeof ResizeObserver !== "undefined") { new ResizeObserver(syncHeaderHeight).observe(headerEl); new ResizeObserver(syncStickyHeight).observe(stickyEl); }
+window.addEventListener("resize", () => { syncHeaderHeight(); syncStickyHeight(); });
 
 $("#back-btn").addEventListener("click", () => go(state.step - 1));
 $("#next-btn").addEventListener("click", next);
@@ -689,4 +746,13 @@ $("#contact-close").addEventListener("click", closeContact);
 $("#contact-overlay").addEventListener("click", (ev) => { if (ev.target.id === "contact-overlay") closeContact(); });
 document.addEventListener("keydown", (ev) => { if (ev.key === "Escape") closeContact(); });
 
-render();
+try {
+  if (typeof history !== "undefined" && history.replaceState) history.replaceState({ step: state.step }, "");
+  render({ newStep: true });
+} catch (err) {
+  // Estado guardado irrecuperável: começa de novo em vez de ficar em branco.
+  console.error(err);
+  try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+  Object.assign(state, { step: 0, mode: null, rooms: [defaultRoom(0)], heating: false, building: "unknown", postal: "", openRoom: null });
+  render({ newStep: true });
+}

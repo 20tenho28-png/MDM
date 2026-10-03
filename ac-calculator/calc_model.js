@@ -125,8 +125,8 @@ export const METHOD_PT =
   "Para cada divisão somamos o calor que entra pelas paredes, teto e ar exterior (proporcional ao volume e à idade do edifício), " +
   "o calor do sol que entra pelas janelas (depende da área de vidro, da orientação e do sombreamento), o calor das pessoas e dos equipamentos " +
   "e, em último andar, o calor do telhado. Ajustamos o que vem de fora à zona climática de verão do seu código postal e acrescentamos 5 % de margem. " +
-  "Convertemos o resultado de watts para BTU/h (1 kW são 3 412 BTU/h) e escolhemos a unidade comercial mais pequena que cobre essa carga: " +
-  "9 000, 12 000, 18 000 ou 24 000 BTU/h; acima disso dividimos a carga por duas ou mais unidades. Se pediu aquecimento, estimamos as perdas de calor num dia frio da sua zona de inverno (paredes, ar e vidro) e confirmamos que a potência de calor da unidade, já reduzida pelo frio, chega. A zona climática é a da sua região ao nível de referência, sem correção de altitude.";
+  "Convertemos o resultado de watts para BTU/h (1 kW são 3 412 BTU/h) e escolhemos a unidade comercial mais pequena cuja potência nominal de frio cobre essa carga: " +
+  "9 000 BTU (2,5 kW), 12 000 BTU (3,5 kW), 18 000 BTU (5,0 kW) ou 24 000 BTU (7,0 kW); acima de 7 kW dividimos a carga por duas ou mais unidades. Se pediu aquecimento, estimamos as perdas de calor num dia frio da sua zona de inverno (paredes, ar e vidro) e confirmamos que a potência de calor da unidade, já reduzida pelo frio, chega. A zona climática é a da sua região ao nível de referência, sem correção de altitude.";
 
 // ------------------------------------------------------------ utilidades
 let roomCounter = 0;
@@ -428,7 +428,7 @@ export function sizeProject(rooms, ctx = {}) {
 
 /** Resumo em texto simples para WhatsApp ou email. */
 export function summaryText(project, rooms, ctx = {}) {
-  const lines = ["Olá MDM Assist, fiz a calculadora de ar condicionado e gostaria de um orçamento gratuito.", ""];
+  const lines = ["Olá MDM Assist, usei a calculadora de ar condicionado e gostaria de um orçamento gratuito.", ""];
   project.rooms.forEach((l, i) => {
     const name = rooms[i] && rooms[i].name && rooms[i].name.trim() ? rooms[i].name.trim() : `Divisão ${i + 1}`;
     const unit = l.units > 1 ? `${l.units} × ${fmt(l.unit.btu)} BTU (${fmt(l.unit.coolKW * l.units, 1)} kW)` : `${fmt(l.unit.btu)} BTU (${fmt(l.unit.coolKW, 1)} kW)`;
