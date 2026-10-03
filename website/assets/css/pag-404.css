@@ -1,5 +1,5 @@
 /* Página 404. Complementa site.css. */
-.p404-cab .h1 { max-width: 12ch; }
+.p404-cab .h1 { max-width: 12ch; font-size: clamp(36px, 5vw, 64px); }
 .p404-cod { text-transform: uppercase; font-family: var(--sans); font-size: 13px; font-weight: 700; letter-spacing: .14em; color: var(--carmim); }
 .p404-links strong { display: flex; align-items: center; gap: 8px; }
 .p404-links a { display: block; color: var(--tinta); text-decoration: none; }

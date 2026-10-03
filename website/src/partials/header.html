@@ -5,7 +5,7 @@
       <span class="marca-txt"><span class="marca-nome">MDM</span><span class="marca-sub">Assistência técnica · 1991</span></span>
     </a>
     <nav class="nav" aria-label="Principal">
-      <a class="nav-a" data-nav-item="servicos" href="{{ root }}index.html#especialidades">Especialidades</a>
+      <a class="nav-a" data-nav-item="servicos" href="{{ root }}index.html#especialidades">Serviços</a>
       <a class="nav-a" data-nav-item="obras" href="{{ root }}obras.html">Obras</a>
       <a class="nav-a" data-nav-item="metodo" href="{{ root }}index.html#metodo">Como trabalhamos</a>
       <a class="nav-a" data-nav-item="contacto" href="{{ root }}index.html#contacto">Contacto</a>
@@ -28,7 +28,14 @@
     </button>
   </div>
   <nav class="gaveta-nav" aria-label="Menu">
-    <a data-nav-item="servicos" href="{{ root }}index.html#especialidades">Especialidades</a>
+    <!-- os cinco serviços não têm data-nav-item: site.js marca aria-current="page" na ligação com o caminho da página atual -->
+    <p class="gaveta-grupo">Serviços</p>
+    <a href="{{ root }}servicos/ar-condicionado.html">Ar condicionado</a>
+    <a href="{{ root }}servicos/bombas-de-calor.html">Bombas de calor</a>
+    <a href="{{ root }}servicos/manutencao.html">Manutenção e avarias</a>
+    <a href="{{ root }}servicos/eletricidade.html">Eletricidade</a>
+    <a href="{{ root }}servicos/ventilacao.html">Ventilação</a>
+    <p class="gaveta-grupo">MDM</p>
     <a data-nav-item="obras" href="{{ root }}obras.html">Obras</a>
     <a data-nav-item="metodo" href="{{ root }}index.html#metodo">Como trabalhamos</a>
     <a data-nav-item="contacto" href="{{ root }}index.html#contacto">Contacto</a>

@@ -1,4 +1,4 @@
-<article class="obra-card" data-cat="{{ obra.cat }}">
+<article class="obra-card" data-cat="{{ obra.serv }}">
   <a class="obra-link" href="{{ root }}obras/{{ obra.slug }}.html" aria-labelledby="obra-t-{{ obra.n }}" aria-describedby="obra-meta-{{ obra.n }}">
     <span class="obra-quadro">{{foto {{ obra.n }} sizes="{{ cartaoSizes }}" loading="{{ loading }}" prioridade="{{ prioridade }}"}}</span>
     <span class="obra-cab"><span class="obra-t" id="obra-t-{{ obra.n }}">{{ obra.title }}</span><span class="obra-code">{{ obra.code }}</span></span>

@@ -31,14 +31,14 @@
     "maxDivisoes": 8
   },
   "wa": {
-    "geral": "Olá MDM. Gostava de pedir informação sobre um serviço. [P5 · Geral]",
-    "avaria": "Olá MDM. Tenho uma avaria e envio já uma fotografia. [P4 · Avaria]",
-    "montagem": "Olá MDM. Quero orçamento para instalar ar condicionado. Envio já fotografias do local. [P1 · Montagem AC]",
-    "bombaCalor": "Olá MDM. Quero orçamento para uma bomba de calor. Envio já fotografias do local e do quadro elétrico. [P1 · Bomba de calor]",
-    "manutencao": "Olá MDM. Quero proposta de manutenção preventiva (contrato anual). [P2 · Manutenção preventiva]",
-    "eletricidade": "Olá MDM. Preciso de um eletricista certificado para quadros ou alimentações AVAC. [P3 · Eletricista certificado]",
-    "ventilacao": "Olá MDM. Preciso de ajuda com ventilação e envio já uma fotografia. [P4 · Ventilação]",
-    "obra": "Olá MDM. Vi uma obra no site e quero um orçamento parecido. [P5 · Obra vista no site]",
-    "pedido": "Olá MDM. Acabei de enviar um pedido de orçamento pelo site e quero juntar fotografias. [P5 · Pedido do site]"
+    "geral": "Olá MDM. Vim do vosso site e gostava de falar sobre um serviço.",
+    "avaria": "Olá MDM. Tenho uma avaria e envio já uma fotografia.",
+    "montagem": "Olá MDM. Quero orçamento para instalar ar condicionado. Envio já fotografias do local.",
+    "bombaCalor": "Olá MDM. Quero orçamento para uma bomba de calor. Envio já fotografias do local e do quadro elétrico.",
+    "manutencao": "Olá MDM. Quero proposta de manutenção preventiva (contrato anual).",
+    "eletricidade": "Olá MDM. Preciso de um eletricista certificado para quadros ou alimentações AVAC.",
+    "ventilacao": "Olá MDM. Preciso de ajuda com ventilação e envio já uma fotografia.",
+    "obra": "Olá MDM. Vi uma obra no site e quero um orçamento parecido.",
+    "pedido": "Olá MDM. Acabei de enviar um pedido de orçamento pelo site e quero juntar fotografias."
   }
 }

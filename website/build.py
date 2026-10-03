@@ -10,7 +10,9 @@ Sintaxe dos modelos (src/):
     <!--meta {...json...} -->            no topo de cada página: title, description, file, nav, jsonld, css
                                           (jsonld: faq, breadcrumb, servico; este lê "servico": {nome, tipo, ofertas};
                                           a empresa, HVACBusiness, vai sempre em todas as páginas)
-    {{ caminho.ponto }}                   valor de site.*, page.*, obra.*, root (prefixo relativo à raiz)
+    {{ caminho.ponto }}                   valor de site.*, page.*, obra.*, root (prefixo relativo à raiz), serv_n.* (obras por serviço)
+                                          (obra.*: os campos de obras.json e os calculados por campos_obra(): serv, servLabel,
+                                          servicoUrl, orcamentoHref, waHref, ctaTitulo, relTitulo, relLigacao, relHref, fotoSizes)
     {{> nome }}                           inclui src/partials/nome.html com o mesmo contexto
     {{foto NN sizes="..." class="..." loading="eager" alt="..."}}   <picture> avif + webp + jpg da obra NN
                                           (FOTO_LADOS; tamanhos feitos por gerar_fotos.py)
@@ -29,6 +31,7 @@ No lançamento passa a false: ver README.md, "Lançamento".
 Dados por preencher: data/dados-mdm.json. Um valor vazio esconde a frase, a linha ou a secção que o usa;
 nunca se mostra um [PLACEHOLDER] e --check falha se algum chegar a public/.
 """
+import hashlib
 import html
 import json
 import re
@@ -47,6 +50,49 @@ SITE = json.loads((DATA / "site.json").read_text(encoding="utf-8"))
 OBRAS_DATA = json.loads((DATA / "obras.json").read_text(encoding="utf-8"))
 OBRAS = OBRAS_DATA["obras"]
 OBRA_BY_N = {o["n"]: o for o in OBRAS}
+# serviço de cada obra (filtros de obras.html, ligação da ficha, obras relacionadas), a partir da «especialidade»;
+# o que não é um dos cinco serviços (Climatização, Águas quentes) fica em «outros», sem página de serviço
+SERV = {"Ar condicionado": "ar-condicionado", "Ar condicionado e ventilação": "ar-condicionado", "Ventilação": "ventilacao",
+        "Manutenção": "manutencao", "Eletricidade": "eletricidade", "Bombas de calor": "bombas-de-calor"}
+SERV_LABEL = {"ar-condicionado": "Ar condicionado", "ventilacao": "Ventilação", "manutencao": "Manutenção e avarias",
+              "eletricidade": "Eletricidade", "bombas-de-calor": "Bombas de calor"}
+# trabalhos de avaria: a faixa da página da obra convida a enviar a fotografia da avaria, não a pedir uma obra igual
+TRABALHO_AVARIA = {"Reparação", "Diagnóstico"}
+# sizes da fotografia grande da página da obra: cabe em 78% da altura do ecrã, nunca mais larga do que o ecrã
+FOTO_OBRA_SIZES = {"landscape": "(min-width: 1280px) min(1280px, calc(78vh * 4 / 3)), min(100vw, calc(78vh * 4 / 3))",
+                   "portrait": "min(100vw, calc(78vh * 3 / 4))"}
+
+
+def campos_obra(o):
+    """Campos calculados de cada obra (modelo obra.html e cartões). As páginas das obras vivem em obras/: root «../»."""
+    serv = SERV.get(o["especialidade"], "outros")
+    label = SERV_LABEL.get(serv, "")
+    o["serv"], o["servLabel"] = serv, label
+    o["servicoUrl"] = f"servicos/{serv}.html" if label else ""
+    o["orcamentoHref"] = f"../{o['servicoUrl']}#orcamento" if label else "../index.html#orcamento"
+    avaria = o["trabalho"] in TRABALHO_AVARIA
+    o["ctaTitulo"] = "Tem uma avaria parecida?" if avaria else "Quer uma obra assim?"
+    msg = (f"Olá MDM. Vi a obra {o['code']} no site ({o['title']}) e tenho uma avaria parecida. Envio já uma fotografia."
+           if avaria else f"Olá MDM. Vi a obra {o['code']} no site ({o['title']}) e quero um orçamento parecido.")
+    o["waHref"] = SITE["whatsappBase"] + quote(msg)
+    o["relTitulo"] = f"Outras obras de {label.lower()}" if label else "Outras obras"
+    o["relLigacao"] = f"Todas as obras de {label.lower()}" if label else "Todas as obras"
+    o["relHref"] = f"obras.html#{serv}" if label else "obras.html"
+    o["fotoSizes"] = FOTO_OBRA_SIZES[o["orient"]]
+
+
+for _o in OBRAS:
+    campos_obra(_o)
+# obras por serviço (contagens dos filtros de obras.html; «todas» é o total)
+SERV_N = {**{s: sum(1 for o in OBRAS if o["serv"] == s) for s in SERV_LABEL}, "todas": len(OBRAS)}
+
+
+def relacionadas(o, n=3):
+    """Sempre n obras: primeiro as do mesmo serviço (pela ordem do ficheiro, sem a própria), depois o mesmo local, depois as outras."""
+    out = []
+    for chave in (lambda x: x["serv"] == o["serv"], lambda x: x["cat"] == o["cat"], lambda x: True):
+        out += [x for x in OBRAS if x is not o and x not in out and chave(x)]
+    return out[:n]
 # prévias de 16 px das fotografias (gerar_fotos.py): ficam por trás da fotografia enquanto descarrega; sem o ficheiro, nada
 LQIP = json.loads((DATA / "lqip.json").read_text(encoding="utf-8")) if (DATA / "lqip.json").exists() else {}
 DADOS_DOC = json.loads((DATA / "dados-mdm.json").read_text(encoding="utf-8"))
@@ -331,7 +377,7 @@ def page_ctx(meta, file):
     # a 404 é servida em qualquer profundidade (/obras/xyz.html): precisa de caminhos absolutos
     root = "/" if file == "404.html" else "../" * depth
     return {"site": SITE, "page": meta, "root": root, "_file": file, "dados": DADOS,
-            "categorias": OBRAS_DATA["categorias"], "year": "2026"}
+            "categorias": OBRAS_DATA["categorias"], "serv_n": SERV_N, "year": "2026"}
 
 
 def build_page(meta, body_tpl, extra_ctx=None):
@@ -366,11 +412,28 @@ def build_page(meta, body_tpl, extra_ctx=None):
                 "content": body, "jsonld": ld_html, "page_css": css,
                 "canonical": SITE["baseUrl"] + "/" + ("" if file == "index.html" else file)})
     layout = (SRC / "templates" / "layout.html").read_text(encoding="utf-8")
-    out = render(layout, ctx)
+    out = versiona(render(layout, ctx))
     dest = OUT / file
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(out, encoding="utf-8")
     return file
+
+
+# Cache: CSS e JS levam ?v=<8 hex do sha1 do ficheiro> (site.css do layout, o CSS de cada página e site.js); com o nome
+# igual e o conteúdo novo, o browser e o Netlify (netlify.toml: um ano, immutable) vão buscar a versão nova.
+# --check ignora o ?… ao resolver a referência (REF_RE para em ? e #).
+VERSAO_RE = re.compile(r'((?:href|src)="(?:[^"?]*/)?assets/(?:css|js)/)([^"?]+)"')
+_VERSOES = {}
+
+
+def versao(nome):
+    if nome not in _VERSOES:
+        _VERSOES[nome] = hashlib.sha1((ASSETS / nome).read_bytes()).hexdigest()[:8]
+    return _VERSOES[nome]
+
+
+def versiona(texto):
+    return VERSAO_RE.sub(lambda m: f'{m.group(1)}{m.group(2)}?v={versao(m.group(1).split("assets/", 1)[1] + m.group(2))}"', texto)
 
 
 def build():
@@ -396,13 +459,12 @@ def build():
             file = f"obras/{o['slug']}.html"
             meta = {"file": file, "nav": "obras", "css": ["pag-obras.css"],
                     "title": f"{o['title']}: {o['especialidade'].lower()} · Obras MDM Lisboa",
-                    "description": f"{o['title']}. {o['especialidade']}, {o['trabalho'].lower()}: {o['equipamento']}. "
+                    "description": f"{o['title']}: {o['especialidade'].lower()}, {o['trabalho'].lower()}, {o['equipamento']}. "
                                    f"Obra da MDM na grande Lisboa, fotografada no local pelos técnicos.",
                     "og": f"foto-{o['n']}-1600.jpg",
                     "jsonld": ["breadcrumb"],
                     "breadcrumb": [["Início", ""], ["Obras", "obras.html"], [o["title"], file]]}
-            files.append(build_page(meta, tpl, {"obra": o, "prev": prev_o, "next": next_o,
-                                                "related": [x for x in OBRAS if x["cat"] == o["cat"] and x is not o][:3]}))
+            files.append(build_page(meta, tpl, {"obra": o, "prev": prev_o, "next": next_o, "related": relacionadas(o)}))
     urls = "".join(f"<url><loc>{SITE['baseUrl']}/{'' if f == 'index.html' else f}</loc></url>\n"
                    for f in files if f not in fora_do_mapa)
     (OUT / "sitemap.xml").write_text(
@@ -420,7 +482,7 @@ def build():
 
 
 # o que sobra de um dado por preencher: [MAIÚSCULAS…], [[CHAVE]], "por preencher", "lorem ipsum" (comentários HTML à parte).
-# Não contam as etiquetas de triagem ([P1 · Montagem AC]).
+# Não contam as etiquetas de triagem ([P1 · Montagem AC], só no campo escondido e no assunto do email, postas por site.js).
 PLACEHOLDER_RE = re.compile(r"\[(?!P\d ·)[^\[\]<>\"']*?[A-ZÀ-Ý]{3}[^\[\]<>\"']*\]|\[\[[^\]]*\]\]"
                             r"|(?i:\b(?:por preencher|lorem ipsum)\b)")
 # Decisões do dono (AUDIT.md da v3, 27/09/2026): nada disto volta ao site, nem em meta, JSON-LD ou mensagens de WhatsApp.

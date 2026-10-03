@@ -7,7 +7,8 @@
   command = "python3 build.py --check"
   publish = "public"
 
-# Imagens e letras não mudam de nome nem de conteúdo; CSS e JS mudam sem mudar de nome, por isso cache curta.
+# Imagens e letras não mudam de nome nem de conteúdo. CSS e JS levam ?v=<versão> no HTML (build.py, pelo conteúdo do
+# ficheiro): uma versão nova é um endereço novo, por isso também podem ficar um ano em cache.
 [[headers]]
   for = "/assets/img/*"
   [headers.values]
@@ -21,12 +22,12 @@
 [[headers]]
   for = "/assets/css/*"
   [headers.values]
-    Cache-Control = "public, max-age=3600"
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/assets/js/*"
   [headers.values]
-    Cache-Control = "public, max-age=3600"
+    Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
   for = "/*"

@@ -5,8 +5,15 @@
 .filtros-rot { margin-right: 6px; }
 /* Sem JavaScript os filtros não fazem nada: escondem-se e aparecem as 24 obras */
 html:not(.js) .filtros-wrap { display: none; }
-/* No telemóvel os seis filtros ocupam três linhas: não ficam colados ao topo */
-@media (max-width: 699px) { .filtros-wrap { position: static; } }
+/* No telemóvel os seis filtros ficam numa só linha que desliza para o lado, de borda a borda do ecrã, sem o rótulo
+   nem a contagem (os botões já dizem o número); não ficam colados ao topo */
+@media (max-width: 699px) {
+  .filtros-wrap { position: static; }
+  .filtros-rot, .filtros-conta { display: none; }
+  .filtros { flex-wrap: nowrap; margin: 0 calc(-1 * var(--margem)); padding: 16px var(--margem); overflow-x: auto; scroll-padding-inline: var(--margem); scrollbar-width: none; }
+  .filtros::-webkit-scrollbar { display: none; }
+  .chip { flex-shrink: 0; }
+}
 
 /* Obra: título */
 .obra-pag-t { font-size: clamp(34px, 4.6vw, 64px); line-height: 1; letter-spacing: -.03em; max-width: 16ch; }
@@ -22,10 +29,11 @@ html:not(.js) .filtros-wrap { display: none; }
   .obra-corpo:not(:has(.obra-resumo:not(:empty), li)) .ficha { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .obra-corpo:not(:has(.obra-resumo:not(:empty), li)) .ficha > div:last-child { grid-column: auto; }
 }
-.obra-ficha-t { margin-bottom: 12px; }
+.obra-ficha-t { margin-bottom: 12px; font-size: 13px; }
 
 /* Obra: relacionadas e navegação anterior/seguinte */
 .obra-rel { border-bottom: 0; }
+.obra-rel .h2 { font-size: clamp(26px, 3vw, 38px); }   /* abaixo do título da obra */
 .obra-nav-sec { padding-top: 0; }
 .obra-nav { border-bottom: 1px solid var(--linha); }
 .obra-nav-todas { margin-top: 28px; }

@@ -1,5 +1,5 @@
 /* Página de agradecimento do formulário (obrigado.html). Complementa site.css. */
-.obg-cab .h1 { max-width: 12ch; }
+.obg-cab .h1 { max-width: 12ch; font-size: clamp(36px, 5vw, 64px); }
 .obg-rot { text-transform: uppercase; font-family: var(--sans); font-size: 13px; font-weight: 700; letter-spacing: .14em; color: var(--carmim); }
 .obg-contacto { display: flex; flex-direction: column; gap: 18px; }
 .obg-acoes { display: flex; flex-direction: column; gap: 12px; }
