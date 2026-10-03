@@ -288,6 +288,125 @@
     });
   })();
 
+  /* ═══ Topo «A chegada» (página inicial) ═══
+     No computador a secção fica presa 300vh (site.css, .chegada-on): o progresso 0..1 pelo scroll move a fotografia
+     (--pan) e troca as três legendas (opacidade por banda, --k para as palavras subirem). O valor mostrado persegue o
+     alvo com uma interpolação normalizada pelo tempo; o ciclo repousa quando converge e quando o topo sai do ecrã.
+     Cinco condições desligam a chegada e deixam o topo fixo: ecrã estreito, ao alto, baixo, toque ao alto, movimento
+     reduzido. São decididas ao vivo (rodar o tablet, redimensionar, mudar a preferência) e são a única fonte: o CSS
+     reage à classe. Escritas no DOM só quando o valor muda. */
+  (function () {
+    var sec = document.querySelector('[data-chegada]');
+    if (!sec || !window.matchMedia) return;
+    var bandas = qsa('.hero-banda', sec).map(function (el) {
+      var r = (el.getAttribute('data-banda') || '0 1').split(/\s+/).map(Number);
+      return { el: el, a: r[0], b: r[1], op: -1, k: -1, ativa: false };
+    });
+    var foto = sec.querySelector('.hero-foto picture');
+    var GATES = ['(max-width: 899px)', '(orientation: portrait) and (max-aspect-ratio: 2/3)', '(pointer: coarse) and (orientation: portrait)',
+                 '(max-height: 520px)', '(prefers-reduced-motion: reduce)'];
+    var MQLS = GATES.map(function (q) { return matchMedia(q); });
+    var ligada = false, alvo = 0, mostrado = 0, raf = null, ultimo = 0, pan = -1, pShown = -1, aVista = true, inicio = 0;
+    var suave = function (p, e0, e1) { var t = Math.min(1, Math.max(0, (p - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
+    function progresso() {
+      var r = sec.getBoundingClientRect(), topo = sec.querySelector('.hero-palco').offsetHeight;
+      var curso = r.height - topo;
+      return curso > 0 ? Math.min(1, Math.max(0, -r.top / curso)) : 0;
+    }
+    function escreve(p, agora) {
+      bandas.forEach(function (bd, i) {
+        var f = Math.min(0.02, (bd.b - bd.a) / 3);
+        var op = (i === 0 ? 1 : suave(p, bd.a, bd.a + f)) * (i === bandas.length - 1 ? 1 : 1 - suave(p, bd.b - f, bd.b));
+        if (p < bd.a - f && i > 0) op = 0;
+        if (p > bd.b + f && i < bandas.length - 1) op = 0;
+        var k = Math.min(1, Math.max(0, (p - bd.a) / Math.min(0.025, (bd.b - bd.a) * 0.35)));
+        /* a primeira banda abre sozinha ao carregar (rampa de 400 ms), depois é só o scroll que manda */
+        if (i === 0 && inicio) k = Math.max(k, Math.min(1, (agora - inicio) / 400));
+        if (Math.abs(op - bd.op) > 0.005) { bd.op = op; bd.el.style.opacity = op.toFixed(3); }
+        if (Math.abs(k - bd.k) > 0.008) { bd.k = k; bd.el.style.setProperty('--k', k.toFixed(3)); }
+        var at = op > 0.5;
+        if (at !== bd.ativa) { bd.ativa = at; bd.el.classList.toggle('ativa', at); }
+      });
+      /* a fotografia: dos técnicos (0) à cabine (1), com o mesmo suavizar; a seta de scroll some no primeiro terço */
+      var np = Math.round(p * 500) / 500;
+      if (np !== pan) { pan = np; foto.style.setProperty('--pan', np); sec.style.setProperty('--p', np); }
+    }
+    function passo(agora) {
+      var dt = Math.min(100, agora - (ultimo || agora)); ultimo = agora;
+      mostrado += (alvo - mostrado) * (1 - Math.pow(1 - 0.16, dt / 16.667));
+      var fim = Math.abs(alvo - mostrado) < 0.0005 && (!inicio || agora - inicio > 450);
+      if (fim) { mostrado = alvo; raf = null; ultimo = 0; }
+      else raf = requestAnimationFrame(passo);
+      escreve(mostrado, agora);
+    }
+    function aoScroll() {
+      alvo = progresso();
+      if (raf === null && aVista) raf = requestAnimationFrame(passo);
+    }
+    var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) {
+      aVista = es[0].isIntersecting;
+      if (aVista) aoScroll();
+    }) : null;
+    function liga() {
+      if (ligada) return; ligada = true;
+      sec.classList.add('chegada-on');
+      bandas.forEach(function (bd) { bd.op = -1; bd.k = -1; bd.ativa = false; bd.el.classList.remove('ativa'); });
+      pan = -1; mostrado = alvo = progresso(); inicio = performance.now();
+      addEventListener('scroll', aoScroll, { passive: true });
+      addEventListener('resize', aoScroll);
+      if (io) io.observe(sec);
+      raf = requestAnimationFrame(passo);
+    }
+    function desliga() {
+      if (!ligada) return; ligada = false;
+      removeEventListener('scroll', aoScroll); removeEventListener('resize', aoScroll);
+      if (io) io.unobserve(sec);
+      if (raf !== null) { cancelAnimationFrame(raf); raf = null; }
+      sec.classList.remove('chegada-on');
+      bandas.forEach(function (bd) { bd.el.style.opacity = ''; bd.el.style.removeProperty('--k'); bd.el.classList.remove('ativa'); });
+      foto.style.removeProperty('--pan'); sec.style.removeProperty('--p');
+    }
+    function decide() {
+      if (MQLS.some(function (m) { return m.matches; })) desliga(); else liga();
+    }
+    MQLS.forEach(function (m) { if (m.addEventListener) m.addEventListener('change', decide); else m.addListener(decide); });
+    decide();
+  })();
+
+  /* ═══ A linha a prumo (página inicial): desenha-se de #ouvimos ao formulário, com uma marca em cada secção ═══
+     scaleY em transform, escrito só quando muda; com movimento reduzido fica desenhada (site.css). */
+  (function () {
+    var prumo = document.querySelector('[data-prumo]');
+    if (!prumo) return;
+    var linha = prumo.querySelector('.prumo-linha');
+    var secs = ['#ouvimos', '#especialidades', '#obras', '#metodo', '#contacto'].map(function (s) { return document.querySelector(s); }).filter(Boolean);
+    if (secs.length < 2) return;
+    var marcas = secs.map(function (el) { var m = document.createElement('span'); m.className = 'prumo-marca'; prumo.appendChild(m); return { el: el, m: m, on: false }; });
+    var topo = 0, altura = 1, ultimo = -1, raf = null;
+    function mede() {
+      var main = prumo.offsetParent || document.body, mr = main.getBoundingClientRect();
+      var y0 = secs[0].getBoundingClientRect().top - mr.top, y1 = secs[secs.length - 1].getBoundingClientRect().top - mr.top;
+      topo = y0; altura = Math.max(1, y1 - y0);
+      prumo.style.top = y0 + 'px'; prumo.style.height = altura + 'px';
+      marcas.forEach(function (mk) { mk.y = mk.el.getBoundingClientRect().top - mr.top - y0; mk.m.style.top = mk.y + 'px'; });
+      desenha();
+    }
+    function desenha() {
+      /* a ponta da linha acompanha o terço de cima do ecrã */
+      var r = prumo.getBoundingClientRect(), ponta = innerHeight * 0.36 - r.top;
+      var v = Math.min(1, Math.max(0, ponta / altura));
+      var q = Math.round(v * 400) / 400;
+      if (q !== ultimo) { ultimo = q; linha.style.setProperty('--prumo', q); }
+      marcas.forEach(function (mk) { var on = ponta >= mk.y; if (on !== mk.on) { mk.on = on; mk.m.classList.toggle('passada', on); } });
+      raf = null;
+    }
+    function pede() { if (raf === null) raf = requestAnimationFrame(desenha); }
+    addEventListener('scroll', pede, { passive: true });
+    addEventListener('resize', mede);
+    addEventListener('load', mede);
+    mede();
+  })();
+
   /* ═══ Revelação ao percorrer: uma vez, 16 px, 70 ms entre irmãos ═══ */
   (function () {
     var els = qsa('[data-r]');

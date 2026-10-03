@@ -33,6 +33,7 @@
 
   --sans: 'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;   /* códigos, legendas de ficha, horas */
 
   --margem: clamp(20px, 5.5vw, 80px);
   --max: 1440px;
@@ -61,6 +62,7 @@ a:hover { color: var(--carmim-esc); }
 p { margin: 0; }
 h1, h2, h3 { margin: 0; font-family: var(--sans); color: var(--tinta); line-height: 1.15; text-wrap: balance; }
 button, input, select, textarea { font: inherit; color: inherit; }
+main { position: relative; }   /* a linha a prumo (página inicial) posiciona-se dentro do main */
 main:focus { outline: none; }
 .ico { width: 20px; height: 20px; fill: currentColor; flex-shrink: 0; }
 
@@ -78,7 +80,7 @@ main:focus { outline: none; }
 .texto-aco { color: var(--aco); }
 .registo { font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--aco); line-height: 1.5; }
 .sec-escura .registo { color: var(--aco-claro); }
-.obra-code { flex-shrink: 0; font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--aco); }
+.obra-code { flex-shrink: 0; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--aco); }
 .sec-escura .obra-code { color: var(--aco-claro); }
 
 /* ── Estrutura ── */
@@ -231,7 +233,7 @@ body.menu-aberto { overflow: hidden; }
 @media (min-width: 560px) { .hero-acoes { flex-direction: row; flex-wrap: wrap; } }
 .hero-acoes .btn { min-height: 54px; padding: 16px 28px; font-size: 16px; }
 /* legenda da obra, como uma etiqueta de ficha no canto de cima da fotografia (em baixo taparia as rodas) */
-.hero-leg { position: absolute; z-index: 1; right: var(--margem); top: 18px; max-width: 360px; margin: 0; padding: 6px 10px; background: rgba(244, 242, 237, .9); font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--tinta); line-height: 1.5; display: none; }
+.hero-leg { position: absolute; z-index: 1; right: var(--margem); top: 18px; max-width: 360px; margin: 0; padding: 6px 10px; background: rgba(244, 242, 237, .9); font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: .02em; color: var(--tinta); line-height: 1.5; display: none; }
 /* a fotografia do camião (página inicial): prévia minúscula enquanto descarrega */
 /* ao alto (telemóvel, tablet): o corte segue os técnicos no cesto da plataforma (19–35% da altura da fotografia), a carrinha vem depois */
 .hero-retrato { --foto-ar: .75; --foto-pos-m: 50% 30%; --foto-pos-d: 33% 50%; }
@@ -290,6 +292,63 @@ body.menu-aberto { overflow: hidden; }
      longe dos técnicos, que estão mais à direita, e das rodas e do para-choques, que a 1440 px ocupam o canto de baixo */
   .hero-retrato .hero-leg { top: 18px; right: auto; left: calc(var(--texto-x) + var(--texto-max) + 24px); }
 }
+
+/* ── Topo «A chegada» (página inicial) ──
+   site.js põe .chegada-on no computador quando o ecrã serve (largura, orientação, altura, ponteiro, movimento). Com a classe,
+   a secção mede 300vh e o palco fica preso à altura do ecrã: a fotografia desce dos técnicos no cesto até ao logótipo da cabine
+   (--pan 0..1, em transform) e as três legendas trocam na faixa de gesso, cada uma com o seu plateau. Sem a classe (telemóvel,
+   tablet ao alto, movimento reduzido, sem JavaScript) é o topo fixo de sempre: fotografia, título, uma linha e os botões.
+   O palco é display: contents quando não há chegada, para a disposição antiga não mudar. */
+.hero-palco { display: contents; }
+.hero-banda .so-palco, .hero-banda.so-palco { display: none; }
+.hero-bandas { display: flex; flex-direction: column; gap: 20px; }
+.hero-banda { display: flex; flex-direction: column; gap: 20px; }
+.hero-t2 { font-family: var(--sans); font-weight: 800; letter-spacing: -.03em; line-height: 1; color: var(--tinta); }
+.hero-chegada.chegada-on { display: block; height: 300vh; height: 300svh; min-height: 0; }
+.hero-chegada.chegada-on .hero-palco { position: sticky; top: var(--topo-h); display: flex; align-items: center; height: var(--hero-h); overflow: hidden; }
+.hero-chegada.chegada-on .hero-banda .so-palco { display: block; }
+.hero-chegada.chegada-on .hero-banda.so-palco { display: flex; }
+.hero-chegada.chegada-on .hero-banda .so-fixo { display: none; }
+.hero-chegada.chegada-on .hero-bandas { display: grid; }
+.hero-chegada.chegada-on .hero-banda { grid-area: 1 / 1; opacity: 0; pointer-events: none; }
+.hero-chegada.chegada-on .hero-banda.ativa { pointer-events: auto; }
+/* as palavras sobem em ordem conforme --k (0..1, escrito por site.js): só transform e opacity, reversível ao subir */
+.hero-chegada.chegada-on .pal { display: inline-block; --kc: clamp(0, calc((var(--k, 0) - var(--th, 0)) * 3), 1); opacity: var(--kc); transform: translateY(calc((1 - var(--kc)) * .35em)); }
+.hero-chegada.chegada-on .hero-banda > .hero-lead { --kc: clamp(0, calc((var(--k, 0) - .45) * 3), 1); opacity: var(--kc); transform: translateY(calc((1 - var(--kc)) * 10px)); }
+.hero-chegada.chegada-on .hero-acoes { --kc: clamp(0, calc((var(--k, 0) - .6) * 3), 1); opacity: var(--kc); transform: translateY(calc((1 - var(--kc)) * 10px)); }
+/* a fotografia: mais alta do que o palco, desce com --pan (0 = técnicos, 1 = cabine); a prévia e o painel de gesso ficam como estão */
+.hero-chegada.chegada-on .hero-foto picture.foto { height: 140%; will-change: transform; transform: translate3d(0, calc(var(--pan, 0) * -28.5%), 0); }
+.hero-chegada.chegada-on .hero-foto picture.foto img { object-position: 100% 50%; }
+/* seta de scroll, discreta, no canto de baixo do palco; some quando a chegada acaba */
+.hero-chegada .hero-seta { display: none; }
+.hero-chegada.chegada-on .hero-seta { display: flex; position: absolute; left: var(--margem); bottom: 22px; z-index: 2; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--aco); opacity: calc(1 - var(--p, 0) * 3); pointer-events: none; }
+.hero-chegada.chegada-on .hero-seta .ico { width: 16px; height: 16px; animation: mdm-desce 2.4s var(--mover) -1.2s infinite; }
+@keyframes mdm-desce { 0%, 100% { transform: translateY(-3px); } 50% { transform: translateY(3px); } }
+
+/* ── O que ouvimos ── */
+.ouvimos-grelha { display: grid; gap: var(--gap); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 800px) { .ouvimos-grelha { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.ouvimos-par { display: flex; flex-direction: column; gap: 12px; padding: 22px 0 0; border-top: 2px solid var(--tinta); }
+.ouvimos-q { font-family: var(--sans); font-size: clamp(20px, 1.9vw, 24px); font-weight: 700; letter-spacing: -.015em; line-height: 1.2; color: var(--aco); }
+.ouvimos-r { font-size: 17px; line-height: 1.55; color: var(--tinta); }
+.ouvimos-r::before { content: ''; display: block; width: 28px; height: 3px; margin-bottom: 12px; background: var(--carmim); }
+
+/* ── A linha a prumo (assinatura da página inicial) ──
+   Um filete vermelho vertical na margem esquerda da coluna de conteúdo, de «O que ouvimos» ao formulário, que se desenha
+   com o scroll (scaleY em transform, escrito por site.js) e deixa uma marca de esquadria à altura de cada secção.
+   Só onde há margem para ela (≥ 1100 px); com movimento reduzido fica desenhada. */
+.prumo { display: none; }
+@media (min-width: 1100px) {
+  .prumo { display: block; position: absolute; left: calc(max(0px, (100% - var(--max)) / 2) + var(--margem) - 28px); top: 0; width: 2px; pointer-events: none; z-index: 2; }
+  .prumo-linha { position: absolute; left: 0; top: 0; width: 2px; height: 100%; background: var(--carmim); transform-origin: 50% 0; transform: scaleY(var(--prumo, 0)); }
+  .prumo-marca { position: absolute; left: -5px; width: 12px; height: 12px; border: 2px solid var(--carmim); border-right: 0; border-bottom: 0; transform: translateY(-1px); opacity: 0; transition: opacity 300ms var(--mover); }
+  .prumo-marca.passada { opacity: 1; }
+  .sec-escura ~ .prumo-marca { border-color: var(--gesso); }
+}
+
+/* ── Um só lugar: grão quase invisível fixo sobre toda a página ── */
+body::before { content: ''; position: fixed; inset: 0; z-index: 70; pointer-events: none; opacity: .035; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E"); }
 
 /* ── Faixa de dados ── */
 .faixa { background: var(--tinta); color: var(--gesso); }
@@ -370,7 +429,7 @@ body.menu-aberto { overflow: hidden; }
 /* ── Carrossel de obras ── */
 .carrossel-cab { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px 40px; margin-bottom: 36px; }
 .carrossel-ctrl { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.carrossel-cont { min-width: 88px; text-align: right; font-family: var(--sans); font-size: 14px; font-weight: 700; letter-spacing: .08em; color: #fff; }
+.carrossel-cont { min-width: 88px; text-align: right; font-family: var(--mono); font-size: 14px; font-weight: 600; letter-spacing: .04em; color: #fff; }
 .carrossel-seta { width: 52px; height: 52px; border: 1px solid rgba(244, 242, 237, .32); background: transparent; color: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 150ms, border-color 150ms, opacity 200ms; }
 .carrossel-seta:hover:not([aria-disabled="true"]) { background: rgba(244, 242, 237, .1); border-color: rgba(244, 242, 237, .7); }
 .carrossel-seta[aria-disabled="true"] { opacity: .35; cursor: default; }
@@ -805,6 +864,10 @@ html.visor-aberto { overflow: hidden; }
 @keyframes mdm-rede { to { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
+  .prumo-linha { transform: scaleY(1) !important; }
+  .prumo-marca { opacity: 1 !important; transition: none; }
+  .hero-chegada .hero-seta .ico { animation: none; }
+
   html:focus-within { scroll-behavior: auto; }
   .btn-accent { background-image: none; }
   .faq-item::details-content { transition: none; }   /* a regra geral (*, ::before, ::after) não apanha este pseudo-elemento */
