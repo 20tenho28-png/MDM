@@ -31,6 +31,23 @@ O estado fica em `localStorage` para o cliente poder voltar.
 - **Sozinha:** `python -m http.server 8080` nesta pasta e abrir
   `http://localhost:8080/` (módulos ES não funcionam por `file://`).
 
+## Versão de ficheiro único (para o site)
+
+`dist/calculadora-ar-condicionado.html` é a calculadora inteira num só
+ficheiro, sem módulos ES, sem servidor e sem dependências: abre por `file://`
+e pode ser copiado tal e qual para qualquer versão do site (alojamento
+estático). As únicas referências externas são as fontes do Google que o site
+já usa; sem rede, caem nas fontes do sistema.
+
+Depois de alterar qualquer ficheiro fonte, regenerar com:
+
+```bash
+node ac-calculator/tools/build_single.js
+```
+
+O `pytest` confirma que o ficheiro gerado não tem imports nem scripts
+externos.
+
 ## Ficheiros
 
 | Ficheiro | Para que serve |
@@ -40,6 +57,8 @@ O estado fica em `localStorage` para o cliente poder voltar.
 | `calc_model.js` | Modelo de cálculo, **sem DOM**, com todas as constantes no topo |
 | `prices.js` | Tabela de preços "desde" (opcional, `null` por omissão) |
 | `test/calc.test.mjs` | Testes do modelo (`node ac-calculator/test/calc.test.mjs`) |
+| `tools/build_single.js` | Gera a versão de ficheiro único em `dist/` |
+| `dist/calculadora-ar-condicionado.html` | Ficheiro único pronto a copiar para o site |
 
 ## O modelo em duas linhas
 

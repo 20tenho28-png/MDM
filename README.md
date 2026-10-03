@@ -71,7 +71,10 @@ sizing (area, height, glass, shading, orientation, people, top floor, kitchen)
 → postal code (REH climate zone + Lisbon service area) → result with the
 recommended unit per room, mono vs multi-split comparison and a one-tap quote
 request (WhatsApp / phone / email). The sizing model (`calc_model.js`) is
-DOM-free and Node-tested; prices are off until `prices.js` is filled. See
+DOM-free and Node-tested; prices are off until `prices.js` is filled.
+`node ac-calculator/tools/build_single.js` bundles everything into
+`ac-calculator/dist/calculadora-ar-condicionado.html`, a dependency-free
+single file to drop into the public website. See
 [`ac-calculator/README.md`](ac-calculator/README.md).
 
 ## Circuit Planner

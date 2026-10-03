@@ -52,6 +52,26 @@ async def test_calculator_assets_served(sessionmaker):
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
+def test_single_file_build(tmp_path):
+    """The dist bundle must be self-contained: no ES modules, no external JS."""
+    proc = subprocess.run(
+        ["node", str(CALC_DIR / "tools" / "build_single.js")],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        cwd=str(REPO_ROOT),
+    )
+    assert proc.returncode == 0, proc.stderr or proc.stdout
+    html = (CALC_DIR / "dist" / "calculadora-ar-condicionado.html").read_text()
+    assert 'type="module"' not in html
+    assert "./app.js" not in html and "./calc_model.js" not in html
+    assert "<script>" in html and "roomLoad" in html and "sizeProject" in html
+    assert "—" not in html
+    # The committed bundle must be the one the sources produce.
+    assert "escrito" in proc.stdout
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node not installed")
 def test_node_suite():
     proc = subprocess.run(
         ["node", str(CALC_DIR / "test" / "calc.test.mjs")],
