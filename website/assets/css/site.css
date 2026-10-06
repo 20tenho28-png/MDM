@@ -202,13 +202,13 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 .gaveta-tel span { font-size: 13px; font-weight: 500; letter-spacing: .02em; color: var(--aco); }
 body.menu-aberto { overflow: hidden; }
 
-/* ── Hero ──
+/* ── Topo das páginas de serviço (.pag-hero) ──
    A fotografia da obra inteira e clara, sem véu escuro e sem zoom. --foto-ar é a proporção da fotografia
    (1.3333 deitada, .75 ao alto). No telemóvel e no tablet ao alto fica em cima, a toda a largura, com altura
    limitada para o título caber no primeiro ecrã, e desvanece-se onde o texto começa. No computador fica à direita,
    à altura do topo, e funde-se no fundo cor de gesso onde está o texto; o texto entra no máximo 10% na fotografia,
-   sempre sobre o degradê. */
-.hero, .pag-hero { --foto-ar: 1.3333; position: relative; display: block; background: var(--gesso); color: var(--tinta); border-bottom: 1px solid var(--linha); }
+   sempre sobre o degradê. (A página inicial tem o seu topo, «Central», mais abaixo.) */
+.pag-hero { --foto-ar: 1.3333; position: relative; display: block; background: var(--gesso); color: var(--tinta); border-bottom: 1px solid var(--linha); }
 .hero-foto { position: relative; overflow: hidden; background: var(--areia) center / cover no-repeat;
   height: min(calc(100vw / var(--foto-ar)), max(46vh, calc(100vw / var(--foto-ar) * .56), calc(100vh - var(--topo-h) - 540px)));
   height: min(calc(100vw / var(--foto-ar)), max(46svh, calc(100vw / var(--foto-ar) * .56), calc(100svh - var(--topo-h) - 540px))); }
@@ -216,55 +216,40 @@ body.menu-aberto { overflow: hidden; }
 .hero-foto picture.foto img { object-position: var(--foto-pos-m, 50% 50%); }
 .hero-foto::after { content: ''; position: absolute; inset: -1px; pointer-events: none;
   background: linear-gradient(0deg, var(--gesso) 0, rgba(244, 242, 237, .92) 24px, rgba(244, 242, 237, 0) 56px); }
-.hero-in, .pag-hero-in { position: relative; z-index: 1; max-width: var(--max); margin: -24px auto 0; box-sizing: border-box; padding: 0 var(--margem) clamp(40px, 6vw, 64px); display: flex; flex-direction: column; gap: 20px; }
+.pag-hero-in { position: relative; z-index: 1; max-width: var(--max); margin: -24px auto 0; box-sizing: border-box; padding: 0 var(--margem) clamp(40px, 6vw, 64px); display: flex; flex-direction: column; gap: 20px; }
 .hero-rot { display: flex; align-items: center; gap: 14px; }
 .hero-risco { display: block; width: 44px; height: 3px; background: var(--carmim); flex-shrink: 0; }
 .hero-rot .rotulo { min-width: 0; color: var(--aco-2); letter-spacing: .18em; }
-/* lista do rótulo: quando parte, o "·" nunca fica pendurado no fim nem no início de uma linha */
-.rotulo-lista { overflow: hidden; }
-.rotulo-lista > span { display: block; margin-left: -1.6em; text-wrap: balance; }
-.rotulo-lista > span > span { display: inline-block; white-space: nowrap; }
-.rotulo-lista > span > span::before { content: '·'; display: inline-block; width: 1.6em; text-align: center; }
-.rotulo-lista > span > span:first-child::before { content: '·' / ''; }
-.hero .h1, .pag-hero .h1 { color: var(--tinta); max-width: 14ch; font-size: clamp(40px, 9vw, 64px); text-wrap: balance; overflow-wrap: break-word; hyphens: auto; }
-.pag-hero .h1 { max-width: 20ch; }
+.pag-hero .h1 { color: var(--tinta); max-width: 20ch; font-size: clamp(40px, 9vw, 64px); text-wrap: balance; overflow-wrap: break-word; hyphens: auto; }
 .hero-lead { max-width: 560px; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.55; color: var(--aco-2); text-wrap: pretty; }
 .hero-acoes { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
 @media (min-width: 560px) { .hero-acoes { flex-direction: row; flex-wrap: wrap; } }
 .hero-acoes .btn { min-height: 54px; padding: 16px 28px; font-size: 16px; }
 /* legenda da obra, como uma etiqueta de ficha no canto de cima da fotografia (em baixo taparia as rodas) */
 .hero-leg { position: absolute; z-index: 1; right: var(--margem); top: 18px; max-width: 360px; margin: 0; padding: 6px 10px; background: rgba(244, 242, 237, .9); font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: .02em; color: var(--tinta); line-height: 1.5; display: none; }
-/* a fotografia do camião (página inicial): prévia minúscula enquanto descarrega */
-/* ao alto (telemóvel, tablet): o corte segue os técnicos no cesto da plataforma (19–35% da altura da fotografia), a carrinha vem depois */
-.hero-retrato { --foto-ar: .75; --foto-pos-m: 50% 30%; --foto-pos-d: 33% 50%; }
-@media (max-width: 559px) { .pag-hero .h1 { font-size: clamp(32px, 9vw, 40px); } .hero .hero-rot { display: none; } }
+@media (max-width: 559px) { .pag-hero .h1 { font-size: clamp(32px, 9vw, 40px); } }
 @media (max-aspect-ratio: 2/3) and (max-height: 600px) { .pag-hero .hero-foto { max-height: 36svh; } }
-.hero-retrato .hero-foto { background-image: url(data:image/webp;base64,UklGRugAAABXRUJQVlA4INwAAADQBQCdASoSABgAPu1srFEppaQiqAqpMB2JZQDIYagcYFUEndotEzGajNSQv2ho+9kphOP9+ICAAP6Pt4HCINxpqj6AKE8PbMbGj7Azf4JR2SWejPJ092qLo2TLjbdep0XFKErAlRKCEJ7+eEwD3K4ctjdk/JGf3hvJep2gnnt3nn7Z1sv3ClteYSd9a0YSk9XyJqdiEHPmJ1+Oq61szHFFFM6NMkRZ7nhwXjiEMikpyGF+MIumXy7sKfjtTNhrnyC2o10+nYugAxB3/9wB0ggNGqmm08MegLmLlAAA); }
 
 /* Computador (e telemóvel deitado): fotografia à direita, texto à esquerda sobre o gesso */
 @media (min-width: 900px) and (min-aspect-ratio: 2/3), (min-width: 700px) and (min-aspect-ratio: 6/5), (max-height: 520px) and (min-aspect-ratio: 3/2) {
-  .hero, .pag-hero {
+  .pag-hero {
     display: flex; align-items: center; min-height: var(--hero-h);
     --foto-a: calc(var(--hero-h) * var(--foto-ar));                              /* largura natural à altura do topo */
     --texto-x: calc(max(0px, (100vw - var(--max)) / 2) + var(--margem));         /* onde o texto começa */
     --foto-w: min(var(--foto-a), max(calc(var(--foto-a) * .7), calc(100vw - var(--texto-x) - 360px)));
     --texto-max: calc(100vw - var(--texto-x) - var(--foto-w) * .9);               /* o texto entra no máximo 10% na foto */
   }
-  .hero { --hero-h: calc(100svh - var(--topo-h)); }
   .pag-hero { --hero-h: min(76svh, 680px); }
   .hero-foto { position: absolute; top: 0; right: 0; bottom: 0; width: var(--foto-w); height: auto; }
   .hero-foto { background-position: var(--foto-pos-d, 50% 50%); }
   .hero-foto picture.foto img { object-position: var(--foto-pos-d, 50% 50%); }
-  /* o texto entra até 10% na foto: aí o véu tem de chegar a .92 para o parágrafo manter 4,5:1 */
-  .hero-foto::after { background: linear-gradient(90deg, var(--gesso) 0%, rgba(244, 242, 237, .92) 10%, rgba(244, 242, 237, 0) 32%); }
   /* páginas de serviço: a 1280 px o parágrafo chega à máquina esbatida; o véu fica quase opaco (.96) até aos 12% */
   .pag-hero .hero-foto::after { background: linear-gradient(90deg, var(--gesso) 0%, rgba(244, 242, 237, .96) 12%, rgba(244, 242, 237, 0) 34%); }
   .hero-leg { display: block; max-width: min(360px, calc(var(--foto-w) - var(--margem) - 16px)); }
-  .hero-in, .pag-hero-in { width: 100%; margin: 0 auto; padding: clamp(40px, 6vw, 96px) var(--margem); }
-  .hero-in > :not(.hero-acoes), .pag-hero-in > :not(.hero-acoes) { max-width: min(620px, 46vw, var(--texto-max)); }
+  .pag-hero-in { width: 100%; margin: 0 auto; padding: clamp(40px, 6vw, 96px) var(--margem); }
+  .pag-hero-in > :not(.hero-acoes) { max-width: min(620px, 46vw, var(--texto-max)); }
   /* os botões são opacos: podem entrar na fotografia, mas partem para a linha de baixo antes de a tapar */
-  .hero-acoes { max-width: max(var(--texto-max), 290px); }
-  .hero .h1 { font-size: clamp(40px, min(5.2vw, calc(var(--texto-max) * .16)), 80px); max-width: min(14ch, var(--texto-max)); }
+  .pag-hero .hero-acoes { max-width: max(var(--texto-max), 290px); }
   .pag-hero .h1 { font-size: clamp(38px, 4vw, 60px); max-width: min(20ch, var(--texto-max)); }
 }
 /* telemóvel deitado: a foto fica à altura do ecrã (não estica com o texto) e sem legenda */
@@ -272,58 +257,113 @@ body.menu-aberto { overflow: hidden; }
   .hero-foto { bottom: auto; height: var(--hero-h); }
   .hero-leg { display: none; }
 }
-/* ecrã largo com a fotografia ao alto: o texto nem chega à fotografia, o degradê só esbate a borda */
-@media (min-width: 1200px) and (min-aspect-ratio: 3/2) {
-  .hero-retrato .hero-foto::after { background: linear-gradient(90deg, var(--gesso) 0%, rgba(244, 242, 237, .6) 4%, rgba(244, 242, 237, 0) 12%); }
-}
-/* Página inicial em ecrã deitado: a fotografia ocupa o ecrã todo, sem zoom.
-   A foto do camião é ao alto, por isso usa-se uma versão larga (mdm-plataforma-largo-*): a foto inteira à direita
-   e, à esquerda, a parede da própria foto esticada e desfocada, onde assenta o texto sobre um véu de gesso.
-   O media tem de ser igual ao das <source> largas em index.html. */
-@media (min-width: 700px) and (min-aspect-ratio: 4/3), (max-height: 520px) and (min-aspect-ratio: 3/2) {
-  .hero-retrato { --texto-max: min(620px, 46vw); }
-  .hero-retrato .hero-foto { left: 0; width: auto; background-image: url(data:image/webp;base64,UklGRrwAAABXRUJQVlA4ILAAAADwBACdASobABIAPuVcpk2pJSOiMAwBIByJZQDLpCLQGQaa+5dIffZY9bIB2bLotgAA4iAzJ1o5b9A251YEaBUo8tnc8CqTCMrwcq+ckrcerQlmY6NgRxN3io+GgTGJ1Ql3ucbDLdBVFCxBUTVJo13BRWW0Lt9X3QZdTjVUGRoMPIA9WP4WC+46hzwQ9/fwghrepeAQG5KIDY+CwKkdse5qOPLGMYFwHi/8gVjZyVXAAA==); }
-  .hero-retrato .hero-foto { background-position: 100% 62%; }
-  .hero-retrato .hero-foto picture.foto img { object-position: 100% 62%; }
-  /* painel de gesso opaco sob a coluna de texto (a parede desfocada não se vê por trás das letras); esbate-se em 220 px, antes do camião */
-  .hero-retrato .hero-foto::after { background: linear-gradient(90deg, var(--gesso) 0%, var(--gesso) calc(var(--texto-x) + var(--texto-max)), rgba(244, 242, 237, 0) calc(var(--texto-x) + var(--texto-max) + 220px)); }
-  .hero-retrato .hero-acoes { max-width: none; }
-  /* a legenda fica no canto de cima da fotografia, logo a seguir ao painel de texto (sobre a parede e a janela):
-     longe dos técnicos, que estão mais à direita, e das rodas e do para-choques, que a 1440 px ocupam o canto de baixo */
-  .hero-retrato .hero-leg { top: 18px; right: auto; left: calc(var(--texto-x) + var(--texto-max) + 24px); }
-}
 
-/* ── Topo «A chegada» (página inicial) ──
-   site.js põe .chegada-on no computador quando o ecrã serve (largura, orientação, altura, ponteiro, movimento). Com a classe,
-   a secção mede 300vh e o palco fica preso à altura do ecrã: a fotografia desce dos técnicos no cesto até ao logótipo da cabine
-   (--pan 0..1, em transform) e as três legendas trocam na faixa de gesso, cada uma com o seu plateau. Sem a classe (telemóvel,
-   tablet ao alto, movimento reduzido, sem JavaScript) é o topo fixo de sempre: fotografia, título, uma linha e os botões.
-   O palco é display: contents quando não há chegada, para a disposição antiga não mudar. */
-.hero-palco { display: contents; }
-.hero-banda .so-palco, .hero-banda.so-palco { display: none; }
-.hero-bandas { display: flex; flex-direction: column; gap: 20px; }
-.hero-banda { display: flex; flex-direction: column; gap: 20px; }
-.hero-t2 { font-family: var(--sans); font-weight: 800; letter-spacing: -.03em; line-height: 1; color: var(--tinta); }
-.hero-chegada.chegada-on { display: block; height: 300vh; height: 300svh; min-height: 0; }
-.hero-chegada.chegada-on .hero-palco { position: sticky; top: var(--topo-h); display: flex; align-items: center; height: var(--hero-h); overflow: hidden; }
-.hero-chegada.chegada-on .hero-banda .so-palco { display: block; }
-.hero-chegada.chegada-on .hero-banda.so-palco { display: flex; }
-.hero-chegada.chegada-on .hero-banda .so-fixo { display: none; }
-.hero-chegada.chegada-on .hero-bandas { display: grid; }
-.hero-chegada.chegada-on .hero-banda { grid-area: 1 / 1; opacity: 0; pointer-events: none; }
-.hero-chegada.chegada-on .hero-banda.ativa { pointer-events: auto; }
-/* as palavras sobem em ordem conforme --k (0..1, escrito por site.js): só transform e opacity, reversível ao subir */
-.hero-chegada.chegada-on .pal { display: inline-block; --kc: clamp(0, calc((var(--k, 0) - var(--th, 0)) * 3), 1); opacity: var(--kc); transform: translateY(calc((1 - var(--kc)) * .35em)); }
-.hero-chegada.chegada-on .hero-banda > .hero-lead { --kc: clamp(0, calc((var(--k, 0) - .45) * 3), 1); opacity: var(--kc); transform: translateY(calc((1 - var(--kc)) * 10px)); }
-.hero-chegada.chegada-on .hero-acoes { --kc: clamp(0, calc((var(--k, 0) - .6) * 3), 1); opacity: var(--kc); transform: translateY(calc((1 - var(--kc)) * 10px)); }
-/* a fotografia: mais alta do que o palco, desce com --pan (0 = técnicos, 1 = cabine); a prévia e o painel de gesso ficam como estão */
-.hero-chegada.chegada-on .hero-foto picture.foto { height: 140%; will-change: transform; transform: translate3d(0, calc(var(--pan, 0) * -28.5%), 0); }
-.hero-chegada.chegada-on .hero-foto picture.foto img { object-position: 100% 50%; }
-/* seta de scroll, discreta, no canto de baixo do palco; some quando a chegada acaba */
-.hero-chegada .hero-seta { display: none; }
-.hero-chegada.chegada-on .hero-seta { display: flex; position: absolute; left: var(--margem); bottom: 22px; z-index: 2; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; color: var(--aco); opacity: calc(1 - var(--p, 0) * 3); pointer-events: none; }
-.hero-chegada.chegada-on .hero-seta .ico { width: 16px; height: 16px; animation: mdm-desce 2.4s var(--mover) -1.2s infinite; }
-@keyframes mdm-desce { 0%, 100% { transform: translateY(-3px); } 50% { transform: translateY(3px); } }
+/* ── Topo «Central» (página inicial) ──
+   A obra F03, uma central técnica em cave com sete unidades exteriores, a toda a largura e com o texto por cima.
+   O véu é azul-noite: forte à esquerda, onde está o texto, e leve à direita, onde as máquinas se leem; mais um degradê
+   em cima (horário e telefone) e outro em baixo (a linha de dados). Os textos são brancos ou quase brancos e passam
+   4,5:1 contra o pixel mais claro por baixo de cada um (medido nos tamanhos de ecrã do README).
+   No telemóvel e com o ecrã ao alto o véu é vertical e o texto fica em baixo: título, parágrafo e os dois botões
+   cabem no primeiro ecrã, por cima da barra fixa (64 px). Ao abrir, o texto sobe (mdm-sobe, 250 ms) e a fotografia
+   assenta de 1,04 a 1 (1,2 s). Nada em ciclo, sem prender o scroll; com movimento reduzido, nada se mexe. */
+.central { --noite: #0B1628; --noite-rgb: 11, 22, 40; --claro: #F4F2ED; --claro-2: #C8D0DB;
+  --cantos: clamp(10px, 1.6vw, 22px);
+  position: relative; isolation: isolate; overflow: hidden; background: var(--noite); color: var(--claro); }
+/* no telemóvel a fotografia tem a altura do primeiro ecrã (quanto mais baixa, menos ampliada: vêem-se as quatro unidades
+   sobrepostas); a linha de dados, por baixo, fica sobre o azul-noite */
+.central-foto { position: absolute; inset: 0 0 auto; height: calc(100vh - var(--topo-h) - 64px); height: calc(100svh - var(--topo-h) - 64px); z-index: -1; }
+.central-foto picture.foto { animation: mdm-assenta 1.2s var(--mover) both; }
+.central-foto picture.foto img { object-position: 22% 50%; filter: saturate(.7); }
+/* véu do telemóvel: leve em cima (as máquinas), escuro em cima de tudo (o horário) e a fundir-se no azul-noite em baixo;
+   o escuro por trás do texto vem do próprio bloco de texto (.central-texto::before), que o segue onde ele ficar */
+.central-foto::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(var(--noite-rgb), .62) 0, rgba(var(--noite-rgb), 0) 96px),
+    linear-gradient(180deg, rgba(var(--noite-rgb), .18) 0%, rgba(var(--noite-rgb), .3) 60%, rgba(var(--noite-rgb), 1) 100%),
+    linear-gradient(rgba(30, 64, 120, .14), rgba(30, 64, 120, .14)); }
+/* os quatro cantos, em esquadria: um só elemento, oito traços */
+.central-cantos { position: absolute; z-index: 1; inset: var(--cantos); pointer-events: none; --c: rgba(244, 242, 237, .7); --l: 18px; --e: 1.5px;
+  background:
+    linear-gradient(var(--c), var(--c)) 0 0 / var(--l) var(--e), linear-gradient(var(--c), var(--c)) 0 0 / var(--e) var(--l),
+    linear-gradient(var(--c), var(--c)) 100% 0 / var(--l) var(--e), linear-gradient(var(--c), var(--c)) 100% 0 / var(--e) var(--l),
+    linear-gradient(var(--c), var(--c)) 0 100% / var(--l) var(--e), linear-gradient(var(--c), var(--c)) 0 100% / var(--e) var(--l),
+    linear-gradient(var(--c), var(--c)) 100% 100% / var(--l) var(--e), linear-gradient(var(--c), var(--c)) 100% 100% / var(--e) var(--l);
+  background-repeat: no-repeat; }
+.central-in { position: relative; max-width: var(--max); margin: 0 auto; padding: 0 var(--margem); display: flex; flex-direction: column; }
+/* primeiro ecrã do telemóvel: topo e texto até à barra fixa de baixo; a linha de dados vem a seguir */
+.central-palco { display: flex; flex-direction: column; min-height: calc(100vh - var(--topo-h) - 64px); min-height: calc(100svh - var(--topo-h) - 64px); padding: calc(var(--cantos) + 10px) 0 28px; }
+.central-mono { font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; line-height: 1.5; color: var(--claro-2); }
+/* z-index: em ecrãs baixos o escuro do texto (.central-texto::before) sobe até aqui e não pode ficar por cima do telefone */
+.central-topo { position: relative; z-index: 1; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 24px; }
+.central-lugar { display: none; }
+.central-horas { color: var(--claro); text-transform: none; letter-spacing: .04em; }
+/* o telefone: 44 px de altura para o dedo, sem alargar a linha */
+.central-tel { display: inline-flex; align-items: center; min-height: 44px; margin: -12px 0; color: #fff; font-weight: 600; text-decoration: none; }
+.central-tel:hover { color: #fff; text-decoration: underline; }
+.central-texto { position: relative; margin-top: auto; padding-top: 32px; display: flex; flex-direction: column; gap: 18px; }
+.central-texto::before { content: ''; position: absolute; z-index: -1; inset: -150px calc(-1 * var(--margem)) -28px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(var(--noite-rgb), 0) 0, rgba(var(--noite-rgb), .84) 180px, rgba(var(--noite-rgb), .92) 100%); }
+.central .h1 { color: #fff; font-family: var(--sans); font-weight: 800; font-size: clamp(36px, 10vw, 52px); line-height: 1; letter-spacing: -.03em; max-width: 12em; text-wrap: balance; }
+/* a linha pequena por cima do título faz parte do h1 (a palavra-chave do Google), com a letra das etiquetas */
+.hero-sobre { display: block; margin-bottom: 16px; font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: .14em; line-height: 1.5; text-transform: uppercase; color: var(--claro-2); text-wrap: pretty; }
+.central-lead { max-width: 34em; font-size: clamp(17px, 1.45vw, 20px); line-height: 1.5; color: var(--claro); text-wrap: pretty; }
+.central-acoes { margin-top: 6px; }
+.central .btn-contorno-claro { background: rgba(var(--noite-rgb), .35); }
+.central .btn-contorno-claro:hover { background: rgba(244, 242, 237, .12); }
+/* a linha de baixo: um filete, três (ou quatro) pares etiqueta/valor e «Ver serviços» */
+.central-base { position: relative; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 32px; border-top: 1px solid rgba(244, 242, 237, .28); padding: 22px 0 calc(var(--cantos) + 22px); }
+.central-dados { margin: 0; flex: 1 1 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; }
+.central-dados dt { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; line-height: 1.5; color: var(--claro-2); }
+.central-dados dd { margin: 2px 0 0; font-family: var(--sans); font-size: 15px; font-weight: 600; line-height: 1.35; color: #fff; }
+.central-dados a { display: inline-flex; align-items: center; min-height: 44px; margin: -12px 0; color: #fff; text-decoration: underline; text-decoration-color: rgba(244, 242, 237, .5); }
+.central-dados a:hover { color: #fff; text-decoration-color: #fff; }
+/* legenda da fotografia (com ligação à obra) e «Ver serviços»: juntos à direita; sem lugar ao lado dos dados, passam para baixo */
+.central-fim { display: flex; align-items: center; gap: 12px 32px; margin-left: auto; }
+.central-leg { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; line-height: 1.5; }
+.central-leg a { display: inline-flex; align-items: center; min-height: 44px; margin: -12px 0; color: var(--claro-2); text-decoration: none; white-space: nowrap; }
+.central-leg a:hover { color: #fff; text-decoration: underline; }
+.central-desce { display: none; }
+/* foco do teclado sobre o escuro: anel branco */
+.central a:focus-visible, .central .btn:focus-visible { box-shadow: 0 0 0 2px var(--noite), 0 0 0 4px #fff; }
+@media (max-width: 399px) { .hero-sobre { font-size: 11px; letter-spacing: .08em; } }
+/* telemóveis baixos ao alto (320×568): menos ar no bloco de texto, para o segundo botão caber por cima da barra fixa */
+@media (max-width: 899px) and (max-height: 600px) and (orientation: portrait) { .central-texto { gap: 14px; padding-top: 20px; } .hero-sobre { margin-bottom: 10px; } }
+@media (max-width: 639px) { .central-dados > div:last-child:nth-child(odd) { grid-column: 1 / -1; } }   /* o último par, sozinho, ocupa a linha */
+@media (min-width: 480px) { .central-lugar { display: block; } }
+@media (min-width: 640px) { .central-dados { flex: 1 1 auto; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: max-content; gap: 16px 40px; } }
+
+/* Computador (ecrã deitado e largo) e telemóvel deitado: véu da esquerda para a direita, texto à esquerda */
+@media (min-width: 900px) and (orientation: landscape), (max-height: 520px) and (min-width: 600px) and (orientation: landscape) {
+  /* um ecrã: a altura do ecrã menos o cabeçalho (--topo-h e o filete de 1 px de baixo) */
+  .central-in { min-height: calc(100vh - var(--topo-h) - 1px); min-height: calc(100svh - var(--topo-h) - 1px); }
+  .central-foto { bottom: 0; height: auto; }
+  .central-palco { flex: 1 1 auto; min-height: 0; padding-bottom: 36px; }
+  .central-texto { margin: auto 0; padding-top: 36px; max-width: min(820px, 64vw); }
+  .central-texto::before { content: none; }
+  .central .h1 { font-size: clamp(44px, 5.6vw, 88px); }
+  .hero-sobre { margin-bottom: 22px; font-size: 13px; }
+  .central-lead { max-width: min(34em, 46vw); }   /* o parágrafo para antes de o véu aclarar */
+  .central-foto picture.foto img { object-position: 50% 45%; }
+  .central-foto::after { background:
+    linear-gradient(180deg, rgba(var(--noite-rgb), .55) 0, rgba(var(--noite-rgb), 0) 120px),
+    linear-gradient(0deg, rgba(var(--noite-rgb), .78) 0, rgba(var(--noite-rgb), .5) 110px, rgba(var(--noite-rgb), 0) 220px),
+    linear-gradient(90deg, rgba(var(--noite-rgb), .92) 0%, rgba(var(--noite-rgb), .8) 38%, rgba(var(--noite-rgb), .35) 72%, rgba(var(--noite-rgb), .25) 100%),
+    linear-gradient(rgba(30, 64, 120, .14), rgba(30, 64, 120, .14)); }
+  .central-base { align-items: center; }
+  .central-dados { flex: 0 1 auto; }
+  .central-desce { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; flex-shrink: 0; font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: #fff; text-decoration: none; }
+  .central-desce:hover { color: #fff; text-decoration: underline; }
+}
+/* primeira visita, com a barra das estatísticas fixa em baixo (66 px, medida por site.js em --consent-h): o topo acaba onde
+   ela começa, para não tapar a linha de dados. Depois da escolha a barra sai e o topo volta a ter o ecrã todo.
+   (min-height: 521px: nos ecrãs baixos vale a regra de baixo, sem altura mínima) */
+@media (min-width: 900px) and (orientation: landscape) and (min-height: 521px) {
+  html.com-consent .central-in { min-height: calc(100vh - var(--topo-h) - 1px - var(--consent-h, 66px)); min-height: calc(100svh - var(--topo-h) - 1px - var(--consent-h, 66px)); }
+}
+/* ecrãs baixos (telemóvel deitado, zoom): sem altura mínima, o topo mede o que o texto mede e desliza-se normalmente */
+@media (max-height: 520px) {
+  .central-in, .central-palco { min-height: 0; }
+}
 
 /* ── O que ouvimos ── */
 .ouvimos-grelha { display: grid; gap: var(--gap); grid-template-columns: minmax(0, 1fr); }
@@ -359,15 +399,39 @@ body::before { content: ''; position: fixed; inset: 0; z-index: 70; pointer-even
 .faixa-item strong { font-family: var(--sans); font-size: clamp(21px, 2vw, 27px); font-weight: 700; letter-spacing: -.01em; color: #fff; line-height: 1.2; }
 .faixa-item > span { font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--aco-claro); }
 .faixa-item:hover { color: inherit; }
+.faixa-item > .faixa-nota { margin-top: 2px; font-size: 13px; line-height: 1.45; color: var(--gesso); }   /* concelhos, se a MDM os der */
 @media (max-width: 699px) { .faixa-item:last-child:nth-child(odd) { grid-column: 1 / -1; border-right: 0; } }
-/* a partir do tablet os três dados ficam numa só linha */
+/* a partir do tablet os dados ficam em linhas de três; com os dados opcionais (Google, unidades, contratos) há uma segunda linha */
 @media (min-width: 700px) {
   .faixa-in { grid-template-columns: repeat(3, minmax(0, 1fr)); min-height: 104px; }
-  .faixa-item { border-bottom: 0; border-right: 1px solid var(--linha-esc); padding: 28px 24px 24px; justify-content: center; }
-  .faixa-item:first-child { padding-left: 0; }
-  .faixa-item:last-child { border-right: 0; }
+  .faixa-item { border-bottom: 0; border-right: 1px solid var(--linha-esc); padding: 28px 24px 24px; }
   .faixa-item:nth-child(even) { padding-left: 24px; }
+  .faixa-item:nth-child(3n+1) { padding-left: 0; }
+  .faixa-item:nth-child(3n), .faixa-item:last-child { border-right: 0; }
+  .faixa-item:nth-child(n+4) { border-top: 1px solid var(--linha-esc); }
 }
+/* computador: até quatro dados numa só linha; com cinco ou seis ficam as linhas de três (numa linha, «Grande Lisboa» partia) */
+@media (min-width: 1100px) {
+  .faixa-in:not(:has(> :nth-child(5))) { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+  .faixa-in:not(:has(> :nth-child(5))) > .faixa-item { padding-left: 24px; border-top: 0; border-right: 1px solid var(--linha-esc); }
+  .faixa-in:not(:has(> :nth-child(5))) > .faixa-item:first-child { padding-left: 0; }
+  .faixa-in:not(:has(> :nth-child(5))) > .faixa-item:last-child { border-right: 0; }
+}
+
+/* ── Portas: três entradas para o formulário (página inicial) ──
+   Cada uma leva ao formulário com o serviço já escolhido (data-preselect, site.js); sem JavaScript, só ao formulário. */
+.portas { padding: clamp(28px, 4vw, 48px) var(--margem); border-bottom: 1px solid var(--linha); }
+.portas-in { max-width: calc(var(--max) - 160px); margin: 0 auto; display: grid; gap: 12px var(--gap); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 800px) { .portas-in { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.porta { display: flex; flex-direction: column; gap: 6px; min-height: 44px; padding: 18px 20px 20px; background: var(--branco); border: 1px solid var(--linha); border-top: 4px solid var(--carmim); color: var(--tinta); text-decoration: none; outline: 1px solid transparent; outline-offset: -1px; transition: outline-color 180ms var(--resposta); }
+.porta-instalar { border-top-color: var(--tinta); }
+.porta-manter { border-top-color: var(--aco); }
+.porta:hover { color: var(--tinta); outline-color: var(--tinta); }
+.porta-t { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-family: var(--sans); font-size: clamp(19px, 1.7vw, 22px); font-weight: 700; letter-spacing: -.015em; line-height: 1.2; }
+.porta-t .seta { color: var(--carmim); }
+.porta:hover .seta, .porta:focus-visible .seta { transform: translateX(4px); }
+.porta-d { font-size: 16px; line-height: 1.5; color: var(--aco-2); }
+@media (max-width: 639px) { .porta { padding: 14px 16px 16px; } .porta-d { font-size: 15px; } }
 
 /* ── Especialidades ── */
 .esp-grelha { display: grid; gap: var(--gap); grid-template-columns: minmax(0, 1fr); }
@@ -390,6 +454,10 @@ body::before { content: ''; position: fixed; inset: 0; z-index: 70; pointer-even
 .esp-cab .seta { color: var(--carmim); }
 .esp-card:hover .seta, .esp-card:focus-visible .seta { transform: translateX(4px); }
 .esp-corpo p { font-size: 16px; color: var(--aco-2); flex-grow: 1; }
+.esp-txt { display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
+/* «Preço indicativo», só com os preços que a MDM quiser publicar (data/dados-mdm.json) */
+.esp-corpo .esp-preco { flex-grow: 0; display: flex; flex-wrap: wrap; gap: 2px 16px; font-family: var(--sans); font-size: 15px; font-weight: 600; line-height: 1.4; color: var(--tinta); }
+.esp-preco-t { flex-basis: 100%; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--carmim); }
 /* Subgrid: nos cartões lado a lado, fotografia, título, texto e marcas alinham entre cartões
    (no tablet o último cartão é largo e fica como está; no computador os cinco são iguais e alinham todos) */
 @supports (grid-template-rows: subgrid) {
@@ -445,6 +513,7 @@ body::before { content: ''; position: fixed; inset: 0; z-index: 70; pointer-even
 .slide-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
 .slide-t { font-family: var(--sans); font-size: 20px; font-weight: 700; color: #fff; text-decoration: none; }
 .slide-t:hover { color: #fff; text-decoration: underline; }
+.slide-res { font-size: 16px; line-height: 1.5; color: var(--gesso); }   /* resultado da obra, se preenchido em obras.json */
 .carrossel-pe { margin-top: 32px; display: flex; align-items: center; gap: 24px; }
 .carrossel-barra { flex-grow: 1; height: 2px; background: var(--linha-esc); }
 .carrossel-barra span { display: block; height: 2px; width: 22%; background: var(--carmim); transition: width 650ms var(--mover); }
@@ -468,6 +537,15 @@ html:not(.js) .topo-in > .menu-btn { display: none; }
 .passo-n { flex-shrink: 0; width: 40px; font-family: var(--sans); font-size: 13px; font-weight: 700; letter-spacing: .1em; color: var(--carmim); padding-top: 5px; }
 .passo strong { display: block; font-family: var(--sans); font-size: 20px; font-weight: 700; margin-bottom: 6px; }
 .passo span { color: var(--aco-2); }
+/* a fotografia do camião: 4:3 nos ecrãs de uma coluna (os técnicos no cesto, 19–35% da altura), ao alto na coluna do computador */
+.metodo-foto { margin: 28px 0 0; max-width: 640px; display: flex; flex-direction: column; gap: 10px; }
+.metodo-foto picture.foto { height: auto; aspect-ratio: 4 / 3; background: url(data:image/webp;base64,UklGRugAAABXRUJQVlA4INwAAADQBQCdASoSABgAPu1srFEppaQiqAqpMB2JZQDIYagcYFUEndotEzGajNSQv2ho+9kphOP9+ICAAP6Pt4HCINxpqj6AKE8PbMbGj7Azf4JR2SWejPJ092qLo2TLjbdep0XFKErAlRKCEJ7+eEwD3K4ctjdk/JGf3hvJep2gnnt3nn7Z1sv3ClteYSd9a0YSk9XyJqdiEHPmJ1+Oq61szHFFFM6NMkRZ7nhwXjiEMikpyGF+MIumXy7sKfjtTNhrnyC2o10+nYugAxB3/9wB0ggNGqmm08MegLmLlAAA)) 50% 43% / cover no-repeat; }
+.metodo-foto picture.foto img { object-position: 50% 43%; }   /* a 4:3 vêem-se o cesto com os dois técnicos e o logótipo da MDM */
+.metodo-leg { font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: .02em; line-height: 1.5; color: var(--aco); }
+/* a legenda liga à ficha da obra F17, como a do topo liga à F03; 44 px de altura para o dedo, sem alargar a linha */
+.metodo-leg a { display: inline-flex; align-items: center; min-height: 44px; margin: -12px 0; color: var(--aco); }
+.metodo-leg a:hover { color: var(--tinta); }
+@media (min-width: 1100px) { .metodo-foto { margin-top: 36px; } .metodo-foto picture.foto { aspect-ratio: 4 / 5; } }
 
 /* ── Certificações e marcas ── */
 .cert { background: var(--areia); border-bottom: 1px solid var(--linha); padding: 36px var(--margem); }
@@ -482,6 +560,11 @@ html:not(.js) .topo-in > .menu-btn { display: none; }
 .selo-txt { font-size: 15px; line-height: 1.45; color: var(--aco-2); }
 @media (min-width: 1100px) { .cert-selos { gap: 32px; } .selo { gap: 18px; grid-template-columns: auto minmax(0, 1fr); } .selo-sigla { font-size: 19px; } }
 .selo-num { font-family: var(--sans); font-size: 11px; font-weight: 600; letter-spacing: .08em; color: var(--tinta); }
+/* garantia da instalação e seguro de responsabilidade civil, só quando a MDM os der (data/dados-mdm.json) */
+.cert-garantias { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .cert-garantias { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .cert-garantias { gap: 32px; } }
+.selo-garantia { margin: 0; border-left-color: var(--aco); }
 .marcas { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 22px; }
 .marcas li { font-family: var(--sans); font-size: 16px; font-weight: 600; letter-spacing: -.01em; color: #3C4450; }
 
@@ -822,6 +905,8 @@ html.visor-aberto { overflow: hidden; }
 .ficha > div { display: flex; flex-direction: column; gap: 4px; padding: 14px 0; border-bottom: 1px solid var(--linha); }
 .ficha dt { font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--aco); }
 .ficha dd { margin: 0; font-family: var(--sans); font-size: 16px; font-weight: 600; }
+.ficha > .ficha-largo { grid-column: 1 / -1; }   /* o resultado da obra é uma frase: ocupa as duas colunas */
+.ficha-largo dd { font-family: var(--serif); font-size: 17px; font-weight: 400; line-height: 1.5; }
 .prosa { max-width: 680px; display: flex; flex-direction: column; gap: 18px; font-size: 18px; line-height: 1.65; }
 .prosa h2 { font-size: clamp(24px, 2.4vw, 30px); letter-spacing: -.02em; margin-top: 12px; }
 .nowrap { white-space: nowrap; }
@@ -853,12 +938,14 @@ html.visor-aberto { overflow: hidden; }
 /* o destino de uma âncora (#orcamento, #contacto…) aparece logo, sem esperar pela revelação */
 .js [data-r]:target, .js [data-r]:has(:target) { opacity: 1; transform: none; animation: none; transition: none; }
 
-/* ── Entrada do hero: curta e toda ao mesmo tempo (sem escalonar), a fotografia aparece sem animação ── */
+/* ── Entrada do topo: curta e toda ao mesmo tempo (sem escalonar). Nas páginas de serviço a fotografia aparece sem animação;
+   na página inicial assenta de 1,04 a 1 (mdm-assenta, 1,2 s) ── */
 .entra-1, .entra-2, .entra-3, .entra-4, .entra-5 { animation: mdm-sobe 250ms var(--mover) both; }
 .hero-leg { animation: mdm-sobe 250ms var(--mover) both; }
 .hero-risco { transform-origin: left center; animation: mdm-risco 400ms var(--mover) both; }
 
 @keyframes mdm-sobe { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes mdm-assenta { from { transform: scale(1.04); } to { transform: none; } }
 @keyframes mdm-risco { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes mdm-cai { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 @keyframes mdm-rede { to { opacity: 1; transform: none; } }
@@ -866,7 +953,7 @@ html.visor-aberto { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .prumo-linha { transform: scaleY(1) !important; }
   .prumo-marca { opacity: 1 !important; transition: none; }
-  .hero-chegada .hero-seta .ico { animation: none; }
+  .central-foto picture.foto, .central .entra-1, .central .entra-3, .central .entra-5 { animation: none; }
 
   html:focus-within { scroll-behavior: auto; }
   .btn-accent { background-image: none; }
@@ -874,7 +961,7 @@ html.visor-aberto { overflow: hidden; }
   .carrossel-trilho { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 1ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; transition-delay: 0ms !important; }
   .js [data-r] { opacity: 1; transform: none; }
-  .btn:active, .chip:active, .btn:hover .seta, .esp-card:hover .seta,
+  .btn:active, .chip:active, .btn:hover .seta, .esp-card:hover .seta, .porta:hover .seta, .porta:focus-visible .seta,
   .esp-card:hover .quadro img, .obra-link:hover .obra-quadro img { transform: none !important; }
 }
 

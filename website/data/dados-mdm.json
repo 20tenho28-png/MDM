@@ -25,6 +25,11 @@
     "pedido": "O que fazer fora do horário e ao fim de semana: uma ou duas frases, sem prazos de resposta (bloco «Fora de horas» no contacto e pergunta na página inicial)",
     "valor": "Deixe mensagem por WhatsApp ou no formulário; respondemos no dia útil seguinte."
   },
+  "concelhos": {
+    "grupo": "Contactos",
+    "pedido": "Concelhos onde a MDM trabalha, numa frase ou numa lista separada por vírgulas, só os confirmados (aparece no contacto, por baixo da morada, e na faixa de dados da página inicial, por baixo de «Grande Lisboa»)",
+    "valor": ""
+  },
   "testemunhos": {
     "grupo": "Prova",
     "pedido": "Testemunhos reais de clientes, com autorização por escrito. Lista de {\"texto\": \"…\", \"nome\": \"nome ou cargo\", \"tipo\": \"tipo de cliente · local\"}; o «tipo» é opcional e pode ficar de fora. Sem testemunhos, a secção não aparece",
@@ -35,9 +40,59 @@
     "pedido": "Setores ou clientes que podem ser nomeados, com autorização por escrito: uma frase (aparece por baixo dos testemunhos)",
     "valor": ""
   },
+  "googleNota": {
+    "grupo": "Prova",
+    "pedido": "Nota média do Perfil da Empresa no Google, tal como o Google a mostra: só o número, com uma casa decimal e vírgula, sem estrelas. Só aparece com o número de avaliações (topo e faixa de dados da página inicial, com ligação ao Perfil)",
+    "valor": ""
+  },
+  "googleAvaliacoes": {
+    "grupo": "Prova",
+    "pedido": "Número de avaliações do Perfil da Empresa no Google, só o número (duas ou mais). Só aparece com a nota (topo e faixa de dados da página inicial)",
+    "valor": ""
+  },
+  "unidadesAno": {
+    "grupo": "Prova",
+    "pedido": "Número aproximado de unidades instaladas por ano que a MDM aceite publicar: só o número; se for aproximado, com «Cerca de» ou «Mais de» à frente, com maiúscula (faixa de dados da página inicial)",
+    "valor": ""
+  },
+  "contratosAtivos": {
+    "grupo": "Prova",
+    "pedido": "Número de contratos de manutenção ativos, só o número (faixa de dados da página inicial)",
+    "valor": ""
+  },
+  "garantiaInstalacao": {
+    "grupo": "Prova",
+    "pedido": "Garantia da instalação: o que cobre e durante quanto tempo, numa frase completa e só se estiver confirmada (aparece nas certificações; junto ao botão do formulário diz-se só que a instalação tem garantia)",
+    "valor": ""
+  },
+  "seguroRC": {
+    "grupo": "Prova",
+    "pedido": "Seguro de responsabilidade civil da MDM: que seguro é e o que cobre, numa frase completa e só se a MDM quiser publicar (aparece nas certificações; junto ao botão do formulário diz-se só que há seguro)",
+    "valor": ""
+  },
   "precoAC": {
     "grupo": "Serviços",
-    "pedido": "Preço indicativo ou gama de preços da montagem de ar condicionado, numa frase completa, só se a MDM quiser publicar (pergunta «Quanto custa instalar ar condicionado?»)",
+    "pedido": "Preço indicativo ou gama de preços da montagem de ar condicionado, com IVA incluído, numa frase completa, só se a MDM quiser publicar (pergunta «Quanto custa instalar ar condicionado?»)",
+    "valor": ""
+  },
+  "precoSplit": {
+    "grupo": "Serviços",
+    "pedido": "Preço indicativo da montagem de um split, com IVA incluído, curto, no formato «desde … €», só se a MDM quiser publicar (linha «Preço indicativo» no cartão Ar condicionado da página inicial)",
+    "valor": ""
+  },
+  "precoMultisplit": {
+    "grupo": "Serviços",
+    "pedido": "Preço indicativo da montagem de um multi-split, com IVA incluído, curto, no formato «desde … €», só se a MDM quiser publicar (linha «Preço indicativo» no cartão Ar condicionado da página inicial)",
+    "valor": ""
+  },
+  "precoContrato": {
+    "grupo": "Serviços",
+    "pedido": "Preço indicativo do contrato anual de manutenção, com IVA incluído, curto, no formato «desde … €» (o cartão já diz «Contrato anual»), só se a MDM quiser publicar (linha «Preço indicativo» no cartão Manutenção da página inicial)",
+    "valor": ""
+  },
+  "precoDiagnostico": {
+    "grupo": "Serviços",
+    "pedido": "Preço indicativo da deslocação e do diagnóstico de uma avaria, com IVA incluído, curto, no formato «desde … €», só se a MDM quiser publicar (linha «Preço indicativo» no cartão Manutenção da página inicial)",
     "valor": ""
   },
   "duracaoMontagem": {
@@ -98,7 +153,7 @@
   "_tarefas": [
     "Política de privacidade (escrita a 01/10/2026, sem revisão jurídica): revisão por um jurista antes do lançamento. Confirmar os prazos de conservação que vêm da versão anterior do site (pedidos e contactos sem trabalho: no máximo 3 anos; estatísticas: 12 meses, a acertar nas definições do projeto PostHog) e apagar no Netlify os pedidos mais antigos do que isso. Dizer qual é o serviço de email que recebe os pedidos, se quiser que fique nomeado.",
     "Fotografias de quadros elétricos AVAC montados pela MDM, para a página de Eletricidade.",
-    "Confirmar a frase «peças originais» e se há alguma garantia a anunciar (a «garantia de fabricante» foi retirada por não estar confirmada).",
+    "Confirmar a frase «peças originais» e se há alguma garantia a anunciar (a «garantia de fabricante» foi retirada por não estar confirmada); se houver, escrever em «garantiaInstalacao».",
     "Bombas de calor: confirmar se a obra F29 (unidade de dois ventiladores e depósito numa varanda) é uma bomba de calor para águas quentes, como dizia a versão anterior do site, ou um chiller, como diz hoje a ficha. Enviar fotografias de outras bombas de calor montadas pela MDM: hoje a página mostra só F04 e F29.",
     "Estimativa de potência do formulário: os técnicos confirmam os números de «btu» em data/site.json (400 BTU/h por m²; fatores por tipo de divisão, sol e último andar; tamanhos de aparelho). Mudam-se aí, sem mexer no código.",
     "Netlify (formulário de orçamento): depois da primeira publicação, ligar a deteção de formulários (Forms → Enable form detection) e voltar a publicar; em Forms → Form notifications, escolher o email que recebe os pedidos. Dizer qual é esse email."

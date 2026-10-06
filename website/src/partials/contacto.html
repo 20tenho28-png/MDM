@@ -9,7 +9,8 @@
         <div><dt>Telefone</dt><dd><a class="canal-v" data-lead="tel" href="{{ site.phoneHref }}">{{ site.phone }}</a><span>Para falar já connosco · <span class="nowrap">{{ site.hours }}</span></span></dd></div>
         <div><dt>WhatsApp</dt><dd><a class="canal-v" data-lead="{{ page.wa }}" href="{{wa {{ page.wa }}}}" target="_blank" rel="noopener">{{ site.whatsapp }}</a><span>Para enviar fotografias da avaria ou do local</span></dd></div>
         <div><dt>Email</dt><dd><a class="canal-v canal-mail" data-lead="email" href="mailto:{{ site.email }}">{{ site.email }}</a><span>Para propostas e documentos</span></dd></div>
-        <div><dt>Morada</dt><dd><span class="canal-morada">{{ site.address1 }}<br>{{ site.address2 }}</span></dd></div>
+        <div><dt>Morada</dt><dd><span class="canal-morada">{{ site.address1 }}<br>{{ site.address2 }}</span></dd></div>{{#se dados.concelhos}}
+        <div><dt>Zona</dt><dd><span class="canal-morada">{{ dados.concelhos }}</span></dd></div>{{/se}}
       </dl>
       {{#se dados.foraDeHoras}}<div class="fora-horas">
         <p class="rotulo">Fora de horas e fins de semana</p>
@@ -69,7 +70,7 @@
               <option value="Eletricidade: quadros e alimentações AVAC">Quadros e ligações elétricas do ar condicionado</option>
             </optgroup>
             <optgroup label="Manutenção">
-              <option value="Manutenção preventiva: contrato anual">Contrato anual de manutenção</option>
+              <option value="Manutenção preventiva: contrato anual">Manutenção: revisão ou contrato anual</option>
             </optgroup>
             <option value="Outro / vários serviços">Outro ou vários serviços</option>
           </select>
@@ -163,7 +164,7 @@
             Enviar por WhatsApp
           </button>
         </div>
-        <p class="form-garantia">Orçamento gratuito e sem compromisso. Fatura com dados fiscais.</p>
+        <p class="form-garantia">Orçamento gratuito e sem compromisso. Fatura com dados fiscais.{{#se dados.garantiaInstalacao}} Instalação com garantia.{{/se}}{{#se dados.seguroRC}} Com seguro de responsabilidade civil.{{/se}}</p>
       </form>
       <!-- Confirmação depois de enviar (site.js esconde o formulário e mostra isto; sem este bloco, volta ao aviso no formulário).
            site.js escreve a frase em data-feito-txt e põe o nome do visitante na mensagem de WhatsApp. -->

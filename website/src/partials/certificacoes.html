@@ -14,7 +14,11 @@
         <span class="selo-sigla">F-gas</span>
         <span class="selo-txt">Certificação para gases fluorados, usados no ar condicionado e nas bombas de calor{{#se dados.gasesFluorados}}<br><span class="selo-num">{{ dados.gasesFluorados }}</span>{{/se}}</span>
       </div>
-    </div>
+    </div>{{#se dados.garantias}}
+    <div class="cert-garantias">
+      {{#se dados.garantiaInstalacao}}<p class="selo selo-garantia"><span class="selo-sigla">Garantia</span> <span class="selo-txt">{{ dados.garantiaInstalacao }}</span></p>{{/se}}
+      {{#se dados.seguroRC}}<p class="selo selo-garantia"><span class="selo-sigla">Seguro</span> <span class="selo-txt">{{ dados.seguroRC }}</span></p>{{/se}}
+    </div>{{/se}}
     <div class="cert-marcas">
       <p class="rotulo">Multimarca, peças originais</p>
       <ul class="marcas">

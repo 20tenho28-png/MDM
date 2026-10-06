@@ -5,5 +5,6 @@
   <div class="slide-leg">
     <span class="slide-cab"><a class="slide-t" href="{{ root }}obras/{{ obra.slug }}.html">{{ obra.title }}</a><span class="obra-code">{{ obra.code }}</span></span>
     <span class="registo">{{ obra.especialidade }} · {{ obra.trabalho }} · {{ obra.equipamento }}</span>
+    {{#se obra.factos.resultado}}<span class="slide-res">{{ obra.factos.resultado }}</span>{{/se}}
   </div>
 </div>

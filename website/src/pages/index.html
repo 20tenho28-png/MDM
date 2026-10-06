@@ -1,48 +1,74 @@
-<!--meta {"file": "index.html", "title": "Ar condicionado, ventilação e eletricidade em Lisboa | MDM", "description": "Ar condicionado, bombas de calor, ventilação, eletricidade e manutenção na grande Lisboa desde 1991. Técnicos certificados e orçamento gratuito.", "nav": "", "jsonld": [], "css": []} -->
-<!-- Topo «A chegada»: no computador a secção fica presa durante 300vh e a fotografia desce dos técnicos no cesto até ao
-     logótipo da cabine, com três legendas (site.js põe .chegada-on quando o ecrã serve; sem isso, e no telemóvel, fica fixo). -->
-<section class="hero hero-retrato hero-chegada" aria-labelledby="heroT" data-chegada>
-  <div class="hero-palco">
-  <div class="hero-foto"><picture class="foto"><source media="(min-width: 700px) and (min-aspect-ratio: 4/3), (max-height: 520px) and (min-aspect-ratio: 3/2)" type="image/avif" srcset="{{ root }}assets/img/hero/mdm-plataforma-largo-1200.avif 1200w, {{ root }}assets/img/hero/mdm-plataforma-largo-1600.avif 1600w, {{ root }}assets/img/hero/mdm-plataforma-largo-2000.avif 2000w, {{ root }}assets/img/hero/mdm-plataforma-largo-2400.avif 2400w" sizes="100vw"><source media="(min-width: 700px) and (min-aspect-ratio: 4/3), (max-height: 520px) and (min-aspect-ratio: 3/2)" type="image/webp" srcset="{{ root }}assets/img/hero/mdm-plataforma-largo-1200.webp 1200w, {{ root }}assets/img/hero/mdm-plataforma-largo-1600.webp 1600w, {{ root }}assets/img/hero/mdm-plataforma-largo-2000.webp 2000w, {{ root }}assets/img/hero/mdm-plataforma-largo-2400.webp 2400w" sizes="100vw"><source media="(min-width: 700px) and (min-aspect-ratio: 4/3), (max-height: 520px) and (min-aspect-ratio: 3/2)" srcset="{{ root }}assets/img/hero/mdm-plataforma-largo-1600.jpg 1600w, {{ root }}assets/img/hero/mdm-plataforma-largo-2400.jpg 2400w" sizes="100vw"><source type="image/avif" srcset="{{ root }}assets/img/hero/mdm-plataforma-600.avif 600w, {{ root }}assets/img/hero/mdm-plataforma-800.avif 800w, {{ root }}assets/img/hero/mdm-plataforma-1000.avif 1000w, {{ root }}assets/img/hero/mdm-plataforma-1200.avif 1200w" sizes="(max-width: 599px) and (min-resolution: 2.5dppx) 67vw, (min-width: 900px) and (min-aspect-ratio: 2/3) calc((100vh - 76px) * .75), (min-width: 700px) and (min-aspect-ratio: 6/5) calc((100vh - 64px) * .75), (max-height: 520px) and (min-aspect-ratio: 3/2) calc((100vh - 64px) * .75), 100vw"><source type="image/webp" srcset="{{ root }}assets/img/hero/mdm-plataforma-600.webp 600w, {{ root }}assets/img/hero/mdm-plataforma-800.webp 800w, {{ root }}assets/img/hero/mdm-plataforma-1000.webp 1000w, {{ root }}assets/img/hero/mdm-plataforma-1200.webp 1200w" sizes="(max-width: 599px) and (min-resolution: 2.5dppx) 67vw, (min-width: 900px) and (min-aspect-ratio: 2/3) calc((100vh - 76px) * .75), (min-width: 700px) and (min-aspect-ratio: 6/5) calc((100vh - 64px) * .75), (max-height: 520px) and (min-aspect-ratio: 3/2) calc((100vh - 64px) * .75), 100vw"><img src="{{ root }}assets/img/hero/mdm-plataforma-1200.jpg" srcset="{{ root }}assets/img/hero/mdm-plataforma-600.jpg 600w, {{ root }}assets/img/hero/mdm-plataforma-1200.jpg 1200w" sizes="(max-width: 599px) and (min-resolution: 2.5dppx) 67vw, (min-width: 900px) and (min-aspect-ratio: 2/3) calc((100vh - 76px) * .75), (min-width: 700px) and (min-aspect-ratio: 6/5) calc((100vh - 64px) * .75), (max-height: 520px) and (min-aspect-ratio: 3/2) calc((100vh - 64px) * .75), 100vw" alt="Camião da MDM com plataforma elevatória à porta de um pavilhão; no cesto, dois técnicos montam unidades exteriores de ar condicionado na fachada." width="1200" height="1600" loading="eager" decoding="async" fetchpriority="high"></picture></div>
-  <div class="hero-in">
-    <div class="hero-rot">
-      <span class="hero-risco"></span>
-      <p class="rotulo rotulo-lista"><span><span>Ar condicionado</span><span>Bombas de calor</span><span>Ventilação</span><span>Eletricidade</span><span>Manutenção</span></span></p>
-    </div>
-    <div class="hero-bandas">
-      <div class="hero-banda" data-banda="0 .35">
-        <h1 class="h1" id="heroT"><span class="pal">Ar</span> <span class="pal">condicionado</span> <span class="pal">em</span> <span class="pal">Lisboa.</span><br> <span class="pal">Desde</span> <span class="pal">1991.</span></h1>
-        <p class="hero-lead so-palco">Instalamos, reparamos e mantemos ar condicionado, bombas de calor, ventilação e a parte elétrica. Coberturas, fachadas, centrais técnicas e casas.</p>
-        <p class="hero-lead so-fixo">Vemos o local antes de dar preço. Tubagem a prumo, calha em esquadria, casa tapada.</p>
+<!--meta {"file": "index.html", "title": "Ar condicionado, ventilação e eletricidade em Lisboa | MDM", "description": "Ar condicionado, bombas de calor, ventilação, eletricidade e manutenção na Grande Lisboa desde 1991. Técnicos certificados e orçamento gratuito.", "nav": "", "jsonld": [], "css": []} -->
+<!-- Topo «Central»: a obra F03 (sete unidades exteriores numa central técnica em cave) a toda a largura, com o texto por cima,
+     num véu azul-noite (site.css, «Topo Central»). Sem prender o scroll e sem nada em ciclo.
+     sizes: à largura do ecrã deitado; ao alto a fotografia fica cortada à altura do primeiro ecrã (cerca de 82vh)
+     e mostra-se a 4/3 dessa altura, por isso pede-se 110vh. -->
+<section class="central" aria-labelledby="heroT">
+  <div class="central-foto">{{foto 03 loading="eager" sizes="(orientation: landscape) 100vw, 110vh"}}</div>
+  <span class="central-cantos" aria-hidden="true"></span>
+  <div class="central-in">
+    <div class="central-palco">
+      <div class="central-topo entra-1">
+        <p class="central-mono central-lugar">Lisboa · 38,7° N</p>
+        <p class="central-mono central-horas">{{ site.hours }} · <a class="central-tel" data-lead="tel" href="{{ site.phoneHref }}">{{ site.phone }}</a></p>
       </div>
-      <div class="hero-banda so-palco" data-banda=".37 .70">
-        <p class="h1 hero-t2"><span class="pal">Vemos</span> <span class="pal">o</span> <span class="pal">local</span> <span class="pal">antes</span> <span class="pal">de</span> <span class="pal">dar</span> <span class="pal">preço.</span></p>
-        <p class="hero-lead">Onde fica a máquina, por onde passa a tubagem, de onde vem a corrente. Só depois o orçamento, gratuito e sem compromisso.</p>
-      </div>
-      <div class="hero-banda" data-banda=".72 1">
-        <p class="h1 hero-t2 so-palco"><span class="pal">Tubagem</span> <span class="pal">a</span> <span class="pal">prumo.</span><br> <span class="pal">Calha</span> <span class="pal">em</span> <span class="pal">esquadria.</span><br> <span class="pal">Casa</span> <span class="pal">tapada.</span></p>
-        <p class="hero-lead so-palco">É assim que se vê um trabalho nosso dez anos depois.</p>
-        <div class="hero-acoes">
+      <div class="central-texto entra-3">
+        <h1 class="h1" id="heroT"><span class="hero-sobre">Ar condicionado em Lisboa <span class="nowrap">· desde 1991</span><span class="so-leitor">.</span></span> Vemos o local antes de dar preço.</h1>
+        <p class="central-lead">Ar condicionado, bombas de calor, ventilação, eletricidade e manutenção na Grande Lisboa. Tubagem a prumo, calha em esquadria, casa tapada.</p>
+        <div class="hero-acoes central-acoes">
           <a class="btn btn-accent" data-lead="orcamento" href="#orcamento">Pedir orçamento ou assistência <svg class="seta" viewBox="0 0 256 256" aria-hidden="true"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg></a>
-          <a class="btn btn-contorno" data-lead="avaria" href="{{wa avaria}}" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 256 256" aria-hidden="true"><path d="M187.58,144.84l-32-16a8,8,0,0,0-8,.5l-14.69,9.8a40.55,40.55,0,0,1-16-16l9.8-14.69a8,8,0,0,0,.5-8l-16-32A8,8,0,0,0,104,64a40,40,0,0,0-40,40,88.1,88.1,0,0,0,88,88,40,40,0,0,0,40-40A8,8,0,0,0,187.58,144.84ZM152,176a72.08,72.08,0,0,1-72-72A24,24,0,0,1,99.29,80.46l11.48,23L101,118a8,8,0,0,0-.73,7.51,56.47,56.47,0,0,0,30.15,30.15A8,8,0,0,0,138,155l14.61-9.74,23,11.48A24,24,0,0,1,152,176ZM128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm0,192a87.87,87.87,0,0,1-44.06-11.81,8,8,0,0,0-6.54-.67L40,216,52.47,178.6a8,8,0,0,0-.66-6.54A88,88,0,1,1,128,216Z"/></svg> Avaria? Envie a foto</a>
+          <a class="btn btn-contorno-claro" data-lead="avaria" href="{{wa avaria}}" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 256 256" aria-hidden="true"><path d="M187.58,144.84l-32-16a8,8,0,0,0-8,.5l-14.69,9.8a40.55,40.55,0,0,1-16-16l9.8-14.69a8,8,0,0,0,.5-8l-16-32A8,8,0,0,0,104,64a40,40,0,0,0-40,40,88.1,88.1,0,0,0,88,88,40,40,0,0,0,40-40A8,8,0,0,0,187.58,144.84ZM152,176a72.08,72.08,0,0,1-72-72A24,24,0,0,1,99.29,80.46l11.48,23L101,118a8,8,0,0,0-.73,7.51,56.47,56.47,0,0,0,30.15,30.15A8,8,0,0,0,138,155l14.61-9.74,23,11.48A24,24,0,0,1,152,176ZM128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm0,192a87.87,87.87,0,0,1-44.06-11.81,8,8,0,0,0-6.54-.67L40,216,52.47,178.6a8,8,0,0,0-.66-6.54A88,88,0,1,1,128,216Z"/></svg> Avaria? Envie a foto</a>
         </div>
       </div>
     </div>
-  </div>
-  <p class="hero-leg">F17 · Montagem em fachada, com plataforma elevatória</p>
-  <p class="hero-seta" aria-hidden="true"><svg class="ico" viewBox="0 0 256 256"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></svg>Desça</p>
+    <div class="central-base entra-5">
+      <dl class="central-dados">
+        <div><dt>Cinco ofícios</dt><dd>Uma equipa</dd></div>
+        <div><dt>Orçamento</dt><dd>Gratuito, depois da visita</dd></div>
+        <div><dt>Certificação</dt><dd>F-gás · APIRAC · IMPIC</dd></div>
+        {{#se dados.googleNota}}{{#se dados.googleAvaliacoes}}<div><dt>Google</dt><dd><a href="{{ site.googleMaps }}" target="_blank" rel="noopener"><span><span aria-hidden="true">★ </span>{{ dados.googleNota }}<span class="so-leitor"> em 5</span> · {{ dados.googleAvaliacoes }} avaliações<span class="so-leitor"> no Google (abre noutro separador)</span></span></a></dd></div>{{/se}}{{/se}}
+      </dl>
+      <div class="central-fim">
+        <p class="central-leg"><a href="{{ root }}obras/central-de-sete-unidades.html">F03 · Central técnica em cave</a></p>
+        <a class="central-desce" href="#especialidades">Ver serviços <span aria-hidden="true">↓</span></a>
+      </div>
+    </div>
   </div>
 </section>
 <!-- a linha a prumo: site.js mede de #ouvimos a #contacto e desenha-a com o scroll (site.css, .prumo) -->
 <div class="prumo" data-prumo aria-hidden="true"><span class="prumo-linha"></span></div>
 
+<!-- faixa de dados: os de data/dados-mdm.json (Google, unidades por ano, contratos, concelhos) só aparecem preenchidos -->
 <div class="faixa">
   <div class="faixa-in">
     <div class="faixa-item"><strong>1991</strong><span>Fundação</span></div>
-    <div class="faixa-item"><strong>Grande Lisboa</strong><span>Zona de intervenção</span></div>
+    <div class="faixa-item"><strong>Grande Lisboa</strong><span>Zona de intervenção</span>{{#se dados.concelhos}}<span class="faixa-nota">{{ dados.concelhos }}</span>{{/se}}</div>
+    {{#se dados.googleNota}}{{#se dados.googleAvaliacoes}}<a class="faixa-item foco-dentro" href="{{ site.googleMaps }}" target="_blank" rel="noopener"><strong><span aria-hidden="true">★ </span>{{ dados.googleNota }}<span class="so-leitor"> em 5</span></strong><span>{{ dados.googleAvaliacoes }} avaliações no Google<span class="so-leitor"> (abre noutro separador)</span></span></a>{{/se}}{{/se}}
+    {{#se dados.unidadesAno}}<div class="faixa-item"><strong>{{ dados.unidadesAno }}</strong><span>Unidades instaladas por ano</span></div>{{/se}}
+    {{#se dados.contratosAtivos}}<div class="faixa-item"><strong>{{ dados.contratosAtivos }}</strong><span>Contratos de manutenção ativos</span></div>{{/se}}
     <a class="faixa-item foco-dentro" data-lead="tel" href="{{ site.phoneHref }}"><strong>{{ site.phone }}</strong><span>{{ site.hours }}</span></a>
   </div>
 </div>
+
+<!-- três portas para o formulário: data-preselect escolhe o serviço (site.js, «serviço pré-escolhido»); sem JavaScript vão só a #orcamento -->
+<nav class="portas" aria-label="O que precisa">
+  <div class="portas-in">
+    <a class="porta porta-avaria" href="#orcamento" data-preselect="Ar condicionado: avaria / reparação">
+      <span class="porta-t">Tenho uma avaria <svg class="seta" viewBox="0 0 256 256" aria-hidden="true"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg></span>
+      <span class="porta-d">Qualquer marca. Envie a foto e o técnico sabe o que levar.</span>
+    </a>
+    <a class="porta porta-instalar" href="#orcamento" data-preselect="Ar condicionado: montagem / instalação">
+      <span class="porta-t">Quero instalar <svg class="seta" viewBox="0 0 256 256" aria-hidden="true"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg></span>
+      <span class="porta-d">Ar condicionado ou bomba de calor. Visita e orçamento gratuitos.</span>
+    </a>
+    <a class="porta porta-manter" href="#orcamento" data-preselect="Manutenção preventiva: contrato anual">
+      <span class="porta-t">Manutenção <svg class="seta" viewBox="0 0 256 256" aria-hidden="true"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg></span>
+      <span class="porta-d">Revisões ou contrato anual, com relatório escrito.</span>
+    </a>
+  </div>
+</nav>
+
+{{> testemunhos }}
 
 <section class="sec ouvimos" id="ouvimos" aria-labelledby="ouvimosT">
   <div class="sec-cab" data-r>
@@ -68,11 +94,14 @@
     <p class="texto-aco">Técnicos certificados em AVAC (aquecimento, ventilação e ar condicionado) e em eletricidade: instalação, ligação elétrica, condutas e manutenção, com a mesma empresa a responder por tudo.</p>
   </div>
   <div class="esp-grelha" data-r>
-    <a class="esp-card" href="{{ root }}servicos/ar-condicionado.html" aria-labelledby="esp-ac-t" aria-describedby="esp-ac-d">
+    <a class="esp-card" href="{{ root }}servicos/ar-condicionado.html" aria-labelledby="esp-ac-t" aria-describedby="esp-ac-d{{#se dados.precosAC}} esp-ac-p{{/se}}">
       <div class="quadro">{{foto 01 sizes="(min-width: 1100px) min(calc(33.4vw - 16px), 411px), (min-width: 640px) calc(44.5vw - 12px), 230px"}}</div>
       <div class="esp-corpo">
         <div class="esp-cab"><h3 class="h3" id="esp-ac-t">Ar condicionado</h3><svg class="seta" viewBox="0 0 256 256" aria-hidden="true"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg></div>
-        <p id="esp-ac-d">Split para uma divisão, multi-split para várias com uma só máquina lá fora, VRF para edifícios com muitas zonas.</p>
+        <div class="esp-txt">
+          <p id="esp-ac-d">Split para uma divisão, multi-split para várias com uma só máquina lá fora, VRF para edifícios com muitas zonas.</p>
+          {{#se dados.precosAC}}<p class="esp-preco" id="esp-ac-p"><span class="esp-preco-t">Preço indicativo</span>{{#se dados.precoSplit}}<span>Split: {{ dados.precoSplit }}</span>{{/se}}{{#se dados.precoMultisplit}}<span>Multi-split: {{ dados.precoMultisplit }}</span>{{/se}}</p>{{/se}}
+        </div>
         <span class="esp-marcas">Midea · Mitsubishi Electric · Daikin</span>
       </div>
     </a>
@@ -84,11 +113,14 @@
         <span class="esp-marcas"><span class="nowrap">Ar-água</span> · Águas quentes · Aquecimento</span>
       </div>
     </a>
-    <a class="esp-card" href="{{ root }}servicos/manutencao.html" aria-labelledby="esp-man-t" aria-describedby="esp-man-d">
+    <a class="esp-card" href="{{ root }}servicos/manutencao.html" aria-labelledby="esp-man-t" aria-describedby="esp-man-d{{#se dados.precosManutencao}} esp-man-p{{/se}}">
       <div class="quadro">{{foto 06 sizes="(min-width: 1100px) min(calc(33.4vw - 16px), 411px), (min-width: 640px) calc(44.5vw - 12px), 230px"}}</div>
       <div class="esp-corpo">
         <div class="esp-cab"><h3 class="h3" id="esp-man-t">Manutenção</h3><svg class="seta" viewBox="0 0 256 256" aria-hidden="true"><path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z"/></svg></div>
-        <p id="esp-man-d">Contratos anuais com visitas programadas e relatório escrito. E, quando avaria, o diagnóstico faz-se no local, com a máquina aberta.</p>
+        <div class="esp-txt">
+          <p id="esp-man-d">Contratos anuais com visitas programadas e relatório escrito. E, quando avaria, o diagnóstico faz-se no local, com a máquina aberta.</p>
+          {{#se dados.precosManutencao}}<p class="esp-preco" id="esp-man-p"><span class="esp-preco-t">Preço indicativo</span>{{#se dados.precoContrato}}<span>Contrato anual: {{ dados.precoContrato }}</span>{{/se}}{{#se dados.precoDiagnostico}}<span>Deslocação e diagnóstico: {{ dados.precoDiagnostico }}</span>{{/se}}</p>{{/se}}
+        </div>
         <span class="esp-marcas">Preventiva · Corretiva · Multimarca</span>
       </div>
     </a>
@@ -143,6 +175,11 @@
       <p class="rotulo rotulo-accent">Como trabalhamos</p>
       <h2 class="h2" id="metodoT">Quatro passos<br> e uma fatura.</h2>
       <p class="texto-aco">Do pedido à manutenção, responde sempre a mesma empresa.</p>
+      <!-- a fotografia do camião (antes no topo da página): ao alto na coluna do computador, cortada a 4:3 nos ecrãs de uma coluna -->
+      <figure class="metodo-foto">
+        <picture class="foto"><source type="image/avif" srcset="{{ root }}assets/img/hero/mdm-plataforma-600.avif 600w, {{ root }}assets/img/hero/mdm-plataforma-800.avif 800w, {{ root }}assets/img/hero/mdm-plataforma-1000.avif 1000w, {{ root }}assets/img/hero/mdm-plataforma-1200.avif 1200w" sizes="(max-width: 599px) and (min-resolution: 2.5dppx) calc(min(calc(100vw - 40px), 640px) * 2 / 3), (min-width: 1100px) min(28vw, 412px), min(calc(100vw - 40px), 640px)"><source type="image/webp" srcset="{{ root }}assets/img/hero/mdm-plataforma-600.webp 600w, {{ root }}assets/img/hero/mdm-plataforma-800.webp 800w, {{ root }}assets/img/hero/mdm-plataforma-1000.webp 1000w, {{ root }}assets/img/hero/mdm-plataforma-1200.webp 1200w" sizes="(max-width: 599px) and (min-resolution: 2.5dppx) calc(min(calc(100vw - 40px), 640px) * 2 / 3), (min-width: 1100px) min(28vw, 412px), min(calc(100vw - 40px), 640px)"><img src="{{ root }}assets/img/hero/mdm-plataforma-1200.jpg" srcset="{{ root }}assets/img/hero/mdm-plataforma-600.jpg 600w, {{ root }}assets/img/hero/mdm-plataforma-1200.jpg 1200w" sizes="(max-width: 599px) and (min-resolution: 2.5dppx) calc(min(calc(100vw - 40px), 640px) * 2 / 3), (min-width: 1100px) min(28vw, 412px), min(calc(100vw - 40px), 640px)" alt="Camião da MDM com plataforma elevatória à porta de um pavilhão; no cesto, dois técnicos montam unidades exteriores de ar condicionado na fachada." width="1200" height="1600" loading="lazy" decoding="async"></picture>
+        <figcaption class="metodo-leg"><a href="{{ root }}obras/parque-de-unidades-em-pavilhao.html">F17 · Montagem em fachada, com plataforma elevatória</a></figcaption>
+      </figure>
     </div>
     <ol class="passos" data-r>
       <li class="passo">
@@ -178,7 +215,5 @@
 </section>
 
 {{> certificacoes }}
-
-{{> testemunhos }}
 
 {{> contacto }}

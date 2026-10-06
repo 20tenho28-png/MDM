@@ -20,7 +20,9 @@ Sintaxe dos modelos (src/):
     {{li obra.detalhes}}                  um <li> por texto de uma lista
     {{each parcial NN,NN,...}} / {{each parcial all}} / {{each parcial cat=vent}} / {{each parcial ctx:related}}   repete um parcial por obra
                                           (… eagerN no fim: as N primeiras imagens sem lazy, ex.: eager1)
-    {{#se caminho}}…{{/se}}               só aparece se o valor existir e não estiver vazio (dados.*, obra.factos.*)
+    {{#se caminho}}…{{/se}}               só aparece se o valor existir e não estiver vazio (dados.*, obra.factos.*);
+                                          blocos dentro de blocos: {{#se dados.a}}{{#se dados.b}}…{{/se}}{{/se}} = «a e b»;
+                                          para «a ou b» há chaves calculadas em DADOS_OU (ex.: {{#se dados.precosAC}})
     {{#sem caminho}}…{{/sem}}             só aparece se o valor estiver vazio
     {{#cada caminho}}…{{/cada}}           repete o bloco por cada elemento da lista, com o elemento em {{ item }}
 
@@ -102,10 +104,17 @@ for _t in DADOS.get("testemunhos") or []:
     if isinstance(_t, dict):
         for _c in ("texto", "nome", "tipo"):
             _t.setdefault(_c, "")
+# números e preços não partem ao fim da linha («1 200», «desde 300 €»): o espaço entre grupos de algarismos e o espaço antes
+# de «€» passam a espaço inseparável (U+00A0) no que se mostra; dados-mdm.json fica como a MDM o escreveu
+NBSP_RE = re.compile(r"(?<=\d) (?=\d{3}(?!\d)|€)")
+for _k, _v in DADOS.items():
+    if isinstance(_v, str):
+        DADOS[_k] = NBSP_RE.sub("\u00a0", _v)
 DADOS_USO = {}   # chave de dados-mdm.json → páginas onde entra (para --faltam)
 # campos de "factos" de cada obra em obras.json: vazios, a linha não aparece na ficha
 FACTOS_OBRA = {"data": "Data da obra", "localExato": "Local exato (bairro ou concelho, sem nome do cliente)",
-               "cliente": "Tipo de cliente", "duracao": "Duração"}
+               "cliente": "Tipo de cliente", "duracao": "Duração",
+               "resultado": "Resultado da obra numa frase (ficha da obra e diapositivo da página inicial)"}
 
 META_RE = re.compile(r"\A\s*<!--meta\s+(\{.*?\})\s*-->\s*", re.S)
 # etiqueta mais interior primeiro: {{foto {{ obra.n }} ...}} resolve {{ obra.n }} e depois {{foto 25 ...}}
@@ -215,6 +224,18 @@ ABRE_RE = re.compile(r"\{\{#(se|sem|cada)\s+([\w.]+)\s*\}\}")
 
 def tem(v):
     return bool(v.strip()) if isinstance(v, str) else bool(v)
+
+
+# Chaves calculadas «a ou b»: uma linha ou um bloco que junta vários dados opcionais aparece se pelo menos um estiver
+# preenchido; lá dentro, cada dado continua com o seu {{#se}}. Não se preenchem (não estão em dados-mdm.json) e não entram
+# em --faltam: o que entra são os dados de que dependem. «a e b» não precisa de chave: blocos {{#se}} um dentro do outro.
+DADOS_OU = {"precosAC": ("precoSplit", "precoMultisplit"),              # «Preço indicativo» no cartão Ar condicionado
+            "precosManutencao": ("precoContrato", "precoDiagnostico"),  # «Preço indicativo» no cartão Manutenção
+            "garantias": ("garantiaInstalacao", "seguroRC")}           # garantia e seguro nas certificações
+for _k, _ks in DADOS_OU.items():
+    if _k in DADOS or not all(x in DADOS for x in _ks):
+        raise SystemExit(f"build.py, DADOS_OU «{_k}»: o nome já existe em data/dados-mdm.json ou falta lá um de {_ks}")
+    DADOS[_k] = any(tem(DADOS[x]) for x in _ks)
 
 
 def valor(ctx, caminho):
@@ -545,6 +566,37 @@ def check_testemunhos():
             if not isinstance(t, dict) or not tem(t.get("texto", "")) or not tem(t.get("nome", ""))]
 
 
+# Formato dos dados que entram na página inicial como número, nota ou preço: um engano (um número JSON em vez de texto, um
+# ponto em vez da vírgula, um preço sem «€», uma frase sem ponto final) aparecia tal e qual no site, sem aviso.
+NUM = r"\d{1,3}(?:[ \u00a0\u202f]?\d{3})*"   # 1200, 1 200 (espaço normal, inseparável ou fino)
+FORMATOS = {
+    "googleNota": (r"(?:[1-4],\d|5,0)", "um algarismo, vírgula e uma casa decimal, de 1,0 a 5,0, sem estrelas"),
+    "googleAvaliacoes": (NUM, "só o número, sem pontos"),
+    "contratosAtivos": (NUM, "só o número, sem pontos"),
+    "unidadesAno": (rf"(?:(?:Cerca|Mais) de )?{NUM}", "só o número, ou «Cerca de …» / «Mais de …», com maiúscula"),
+    **{k: (r".*\d.*€.*", "com o número e «€», no formato «desde … €»")
+       for k in ("precoSplit", "precoMultisplit", "precoContrato", "precoDiagnostico")},
+    **{k: (r".*[.!?]", "uma frase completa, com ponto final") for k in ("garantiaInstalacao", "seguroRC")},
+    "concelhos": (r".+", "uma frase ou uma lista separada por vírgulas"),
+}
+
+
+def check_formatos():
+    out = []
+    for k, (rx, como) in FORMATOS.items():
+        v = DADOS_DOC.get(k, {}).get("valor", "")
+        if not isinstance(v, str):
+            out.append(f"dados-mdm.json «{k}»: tem de ser texto, entre aspas ({como}) → {json.dumps(v, ensure_ascii=False)}")
+        elif tem(v) and not re.fullmatch(rx, v.strip(), re.S):
+            out.append(f"dados-mdm.json «{k}»: {como} → «{v}»")
+    nota, aval = (DADOS_DOC.get(k, {}).get("valor", "") for k in ("googleNota", "googleAvaliacoes"))
+    if isinstance(aval, str) and re.fullmatch(NUM, aval.strip()) and int(re.sub(r"\D", "", aval)) < 2:
+        out.append(f"dados-mdm.json «googleAvaliacoes»: com uma só avaliação a página diria «1 avaliações»; publicar a partir de 2 → «{aval}»")
+    if tem(nota) != tem(aval):
+        out.append("dados-mdm.json «googleNota» preenchida sem «googleAvaliacoes» (ou vice-versa): a nota do Google só aparece no site com as duas")
+    return out
+
+
 def check(files):
     problems = []
     for f in files:
@@ -565,7 +617,7 @@ def check(files):
                 if not target.exists():
                     problems.append(f"{f}: referência partida → {r}")
     problems += check_preview()
-    problems += check_duracoes() + check_testemunhos() + check_btu()
+    problems += check_duracoes() + check_testemunhos() + check_formatos() + check_btu()
     for css in (OUT / "assets" / "css").glob("*.css"):
         for c in re.findall(r"url\(([^)]+)\)", css.read_text(encoding="utf-8")):
             c = c.strip("'\"")
