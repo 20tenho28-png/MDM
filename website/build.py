@@ -32,6 +32,9 @@ No lançamento passa a false: ver README.md, "Lançamento".
 
 Dados por preencher: data/dados-mdm.json. Um valor vazio esconde a frase, a linha ou a secção que o usa;
 nunca se mostra um [PLACEHOLDER] e --check falha se algum chegar a public/.
+
+Preço provável do formulário: data/precos.json (começa vazio; copiado à mão da folha da MDM), posto em data-precos no
+bloco do formulário, como data-btu. --check valida a estrutura e os pares [mínimo, máximo]; --faltam diz se está vazio.
 """
 import hashlib
 import html
@@ -111,6 +114,31 @@ for _k, _v in DADOS.items():
     if isinstance(_v, str):
         DADOS[_k] = NBSP_RE.sub("\u00a0", _v)
 DADOS_USO = {}   # chave de dados-mdm.json → páginas onde entra (para --faltam)
+
+# Preço provável do formulário (data/precos.json): valores copiados à mão da folha «MDM, tabela de preços para o site».
+# Cada preço é null ou [mínimo, máximo] em euros inteiros com IVA; vazio = não aparece. O site.js lê-os em data-precos
+# (como data-btu) e só mostra um produto com a sua linha e a sua frase de «inclui» preenchidas. check_precos() valida.
+PRECOS_FOLHA = "«MDM, tabela de preços para o site»"
+PRECOS_GAMAS = ("eco", "sup")
+PRECOS_EXTRAS = ("metrosIncluidos", "metroExtra", "preInstalacaoDesconto", "furoBetao", "alturaEscada", "alturaAndaime",
+                 "alturaPlataforma", "ligacaoEletrica", "retirarAntiga")
+PRECOS_INCLUI = ("split", "multisplit", "aguasQuentes")
+if not (DATA / "precos.json").exists():
+    raise SystemExit("build.py: falta data/precos.json (preço provável do formulário; ver README.md, «Preço provável»)")
+PRECOS_DOC = json.loads((DATA / "precos.json").read_text(encoding="utf-8"))
+
+
+def precos_linhas():
+    """Linhas de cada tabela de preços: os tamanhos do split são os de btu.tamanhos (site.json), em texto («12000»)."""
+    tam = (SITE.get("btu") or {}).get("tamanhos") or []
+    return {"split": [str(int(t)) if isinstance(t, (int, float)) and t == int(t) else str(t) for t in tam],
+            "multisplit": ["2", "3", "4", "acrescimoGrande"], "aguasQuentes": ["200", "300"]}
+
+
+# o que vai para a página (sem as chaves «_»); «}}» passa a «} }» (o mesmo JSON), para não parecer sintaxe de modelo
+PRECOS_ATTR = re.sub(r"\}(?=\})", "} ", json.dumps(
+    {k: v for k, v in PRECOS_DOC.items() if not k.startswith("_")} if isinstance(PRECOS_DOC, dict) else {},
+    ensure_ascii=False))
 # campos de "factos" de cada obra em obras.json: vazios, a linha não aparece na ficha
 FACTOS_OBRA = {"data": "Data da obra", "localExato": "Local exato (bairro ou concelho, sem nome do cliente)",
                "cliente": "Tipo de cliente", "duracao": "Duração",
@@ -397,7 +425,7 @@ def page_ctx(meta, file):
     depth = file.count("/")
     # a 404 é servida em qualquer profundidade (/obras/xyz.html): precisa de caminhos absolutos
     root = "/" if file == "404.html" else "../" * depth
-    return {"site": SITE, "page": meta, "root": root, "_file": file, "dados": DADOS,
+    return {"site": SITE, "page": meta, "root": root, "_file": file, "dados": DADOS, "precos": PRECOS_ATTR,
             "categorias": OBRAS_DATA["categorias"], "serv_n": SERV_N, "year": "2026"}
 
 
@@ -523,7 +551,7 @@ REF_RE = re.compile(r'(?:href|src|action)="([^"#?]+)|srcset="([^"]+)"|url\(([^)]
 FORM_RE = re.compile(r'<form\b[^>]*\bid="quoteForm"[^>]*>.*?</form>', re.S)
 FORM_EXIGE = [' name="orcamento"', ' method="POST"', ' data-netlify="true"', ' netlify-honeypot="bot-field"',
               ' enctype="multipart/form-data"', ' action="/obrigado.html"']
-FORM_CAMPOS = {"form-name", "subject", "pagina", "triagem", "potencia", "nome", "email", "telefone", "servico",
+FORM_CAMPOS = {"form-name", "subject", "pagina", "triagem", "potencia", "estimativa", "nome", "email", "telefone", "servico",
                "mensagem", "fotografia", "bot-field"}
 
 
@@ -617,7 +645,7 @@ def check(files):
                 if not target.exists():
                     problems.append(f"{f}: referência partida → {r}")
     problems += check_preview()
-    problems += check_duracoes() + check_testemunhos() + check_formatos() + check_btu()
+    problems += check_duracoes() + check_testemunhos() + check_formatos() + check_btu() + check_precos()
     for css in (OUT / "assets" / "css").glob("*.css"):
         for c in re.findall(r"url\(([^)]+)\)", css.read_text(encoding="utf-8")):
             c = c.strip("'\"")
@@ -690,7 +718,90 @@ def check_formulario(f, text):
         out.append(f"{f}: falta o campo escondido potencia (vazio; site.js põe lá a estimativa de potência)")
     if "data-btu=" not in form:
         out.append(f"{f}: falta a estimativa de potência (data-btu) no formulário")
+    if not re.search(r'<input type="hidden" name="estimativa" value=""', form):
+        out.append(f"{f}: falta o campo escondido estimativa (vazio; site.js põe lá o preço provável mostrado)")
+    if "data-precos=" not in form:
+        out.append(f"{f}: falta o preço provável (data-precos) no formulário")
     return out
+
+
+def check_precos():
+    """data/precos.json: a estrutura de sempre, preços null ou [mínimo, máximo] inteiros, e os tamanhos de btu.tamanhos."""
+    p, out, nome = PRECOS_DOC, [], "precos.json"
+    if not isinstance(p, dict):
+        return [f"{nome}: tem de ser um objeto JSON, como o modelo do README"]
+    esperado = {"split", "multisplit", "extras", "aguasQuentes", "inclui"}
+    chaves = {k for k in p if not k.startswith("_")}
+    if chaves != esperado:
+        out.append(f"{nome}: chaves diferentes do esperado → a mais {sorted(chaves - esperado)}, em falta {sorted(esperado - chaves)}")
+
+    def par(v, onde):
+        if v is None:
+            return
+        if not (isinstance(v, list) and len(v) == 2 and all(isinstance(x, int) and not isinstance(x, bool) and x >= 0 for x in v)):
+            out.append(f"{nome} «{onde}»: null ou [mínimo, máximo] em euros inteiros, sem aspas → {json.dumps(v, ensure_ascii=False)}")
+        elif v[0] > v[1]:
+            out.append(f"{nome} «{onde}»: o mínimo é maior do que o máximo → {json.dumps(v)}")
+
+    for sec, linhas in precos_linhas().items():
+        s = p.get(sec)
+        if not isinstance(s, dict):
+            out.append(f"{nome} «{sec}»: falta, ou não é um objeto com as linhas {linhas}")
+            continue
+        if set(s) != set(linhas):
+            porque = " (as linhas do split são os tamanhos de «btu.tamanhos» em site.json)" if sec == "split" else ""
+            out.append(f"{nome} «{sec}»: linhas diferentes do esperado{porque} → a mais {sorted(set(s) - set(linhas))}, "
+                       f"em falta {sorted(set(linhas) - set(s))}")
+        for k in linhas:
+            if k not in s:
+                continue
+            l = s[k]
+            if not (isinstance(l, dict) and set(l) == set(PRECOS_GAMAS)):
+                out.append(f'{nome} «{sec}.{k}»: tem de ser {{"eco": …, "sup": …}} → {json.dumps(l, ensure_ascii=False)}')
+                continue
+            for g in PRECOS_GAMAS:
+                par(l[g], f"{sec}.{k}.{g}")
+    ex = p.get("extras")
+    if not isinstance(ex, dict):
+        out.append(f"{nome} «extras»: falta, ou não é um objeto com {list(PRECOS_EXTRAS)}")
+    else:
+        if set(ex) != set(PRECOS_EXTRAS):
+            out.append(f"{nome} «extras»: chaves diferentes do esperado → a mais {sorted(set(ex) - set(PRECOS_EXTRAS))}, "
+                       f"em falta {sorted(set(PRECOS_EXTRAS) - set(ex))}")
+        m = ex.get("metrosIncluidos")
+        if m is not None and not (isinstance(m, int) and not isinstance(m, bool) and m >= 0):
+            out.append(f"{nome} «extras.metrosIncluidos»: null ou um número inteiro de metros, sem aspas → {json.dumps(m, ensure_ascii=False)}")
+        for k in PRECOS_EXTRAS[1:]:
+            if k in ex:
+                par(ex[k], f"extras.{k}")
+    inc = p.get("inclui")
+    if not (isinstance(inc, dict) and set(inc) == set(PRECOS_INCLUI)):
+        out.append(f"{nome} «inclui»: tem de ter as frases {list(PRECOS_INCLUI)} (texto; vazio = o produto não aparece)")
+    else:
+        for k, v in inc.items():
+            if not isinstance(v, str):
+                out.append(f"{nome} «inclui.{k}»: tem de ser texto, entre aspas → {json.dumps(v, ensure_ascii=False)}")
+            elif re.search(r"[{}<>]", v):
+                out.append(f"{nome} «inclui.{k}»: sem chavetas nem < > → «{v}»")
+    return out
+
+
+def precos_contagem():
+    """(preenchidos, total) de data/precos.json, para --faltam: cada gama de cada linha, cada extra e cada frase."""
+    p = PRECOS_DOC if isinstance(PRECOS_DOC, dict) else {}
+    cheios = total = 0
+    for sec, linhas in precos_linhas().items():
+        s = p.get(sec) if isinstance(p.get(sec), dict) else {}
+        for k in linhas:
+            l = s.get(k) if isinstance(s.get(k), dict) else {}
+            for g in PRECOS_GAMAS:
+                total += 1
+                cheios += l.get(g) is not None
+    ex = p.get("extras") if isinstance(p.get("extras"), dict) else {}
+    inc = p.get("inclui") if isinstance(p.get("inclui"), dict) else {}
+    total += len(PRECOS_EXTRAS) + len(PRECOS_INCLUI)
+    cheios += sum(ex.get(k) is not None for k in PRECOS_EXTRAS) + sum(tem(inc.get(k) or "") for k in PRECOS_INCLUI)
+    return cheios, total
 
 
 def check_btu():
@@ -747,6 +858,12 @@ def em_falta():
         if sem:
             yield ("Obras (data/obras.json, «factos» de cada obra; a linha só aparece na ficha quando existe)",
                    f"{nome}: falta em {len(sem)} de {len(OBRAS)} obras" + ("" if len(sem) == len(OBRAS) else f" ({', '.join(sem)})"))
+    cheios, total = precos_contagem()
+    if cheios < total:
+        estado = ("Tabela de preços vazia: o formulário não mostra nenhum preço" if not cheios else
+                  f"Tabela de preços preenchida em parte ({cheios} de {total} valores): o que falta não aparece")
+        yield ("Preço provável no formulário (data/precos.json; ver README.md, «Preço provável»)",
+               f"{estado}. Copiar os valores da folha {PRECOS_FOLHA} quando a MDM a preencher.")
 
 
 def faltam():

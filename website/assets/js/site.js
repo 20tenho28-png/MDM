@@ -631,6 +631,7 @@
   function quoteData() {
     return { empresa: $('qNome').value.trim(), email: $('qEmail').value.trim(), tel: $('qTel').value.trim(),
              servico: $('qServico').value, msg: $('qMsg').value.trim(), potencia: pot.resumo(), potCurta: pot.curto(),
+             estimativa: preco.resumo(),
              foto: !SEM_ENVIO && foto && foto.files && foto.files[0] || null };
   }
   /* a mensagem de WhatsApp, como quem fala; as partes vazias saem:
@@ -639,6 +640,7 @@
     var l = ['Olá MDM, sou ' + d.empresa + '.', FRASE[d.servico] || (d.servico ? 'Preciso de vários serviços.' : 'Preciso de ajuda com um equipamento.')];
     if (d.msg) l.push(d.msg);
     if (d.potCurta) l.push('Estimativa de potência: ' + d.potCurta + '.');
+    if (d.estimativa) l.push(d.estimativa + '.');
     var contacto = [d.email, d.tel].filter(Boolean).join(' / ');
     if (contacto) l.push('Contacto: ' + contacto);
     l.push('(Pedido feito pelo site.)');
@@ -649,6 +651,7 @@
     var l = ['Pedido de orçamento MDM', '', 'Nome/Empresa: ' + (d.empresa || '-'), 'Email: ' + (d.email || '-'),
              'Telefone: ' + (d.tel || '-'), 'Serviço: ' + (d.servico || '-'), 'Triagem: ' + etiqueta(d.servico)];
     if (d.potencia) l.push('Potência estimada: ' + d.potencia);
+    if (d.estimativa) l.push(d.estimativa);
     return l.concat(['', d.msg || '']).join('\n');
   }
   function assunto(d) { return etiqueta(d.servico) + ' Pedido de orçamento, ' + (d.servico || 'serviços MDM'); }
@@ -750,7 +753,10 @@
       curto: function () { return campo ? campo.value : ''; },
       numeros: function (p) { return p; },
       visibilidade: function () {},
-      juntaAutomatico: function () { return false; }
+      juntaAutomatico: function () { return false; },
+      ativo: false,
+      estado: function () { return null; },
+      ouve: function () {}
     };
     var cfg = null;
     try { cfg = JSON.parse(raiz.getAttribute('data-btu')); } catch (e) {}
@@ -771,6 +777,8 @@
     var anuncio = raiz.querySelector('[data-pot-anuncio]');
     var sel = $('qServico');
     var linhas = [], seq = 0, junto = false, atual = null;
+    /* quem precisa do resultado (o preço provável, mais abaixo) ouve cada mudança */
+    var ouvintes = [];
 
     /* a estimativa é de ar condicionado: só aparece sem serviço escolhido ou com a montagem de AC
        (e fica, enquanto estiver junta ao pedido, mesmo que o serviço mude) */
@@ -872,6 +880,7 @@
       linhas.forEach(mostraLinha);
       mostraTotal(atual);
       sincroniza();
+      ouvintes.forEach(function (fn) { fn(atual); });
       return atual;
     }
     /* «ultimo» evita repetir o que acabou de se ouvir (a estimativa dita ao parar de escrever não se repete ao sair do
@@ -1086,6 +1095,10 @@
         return p;
       },
       visibilidade: visibilidade,
+      ativo: true,
+      /* o resultado de agora (divisões com área, cada uma com o tamanho de aparelho «tam»; 0 = acima do maior) */
+      estado: function () { return atual; },
+      ouve: function (fn) { ouvintes.push(fn); },
       /* ao enviar: uma estimativa à vista com pelo menos uma divisão preenchida, mas não junta, junta-se sozinha */
       juntaAutomatico: function () {
         if (junto || raiz.hidden) return false;
@@ -1094,6 +1107,284 @@
         junta(r, false);
         return true;
       }
+    };
+  })();
+
+  /* ═══ Preço provável (montagem de ar condicionado e bomba de calor para águas quentes), a seguir à estimativa de potência ═══
+     Os valores vêm de data/precos.json (copiados da folha «MDM, tabela de preços para o site»): o build.py põe-nos em
+     data-precos, como data-btu. Cada preço é null ou [mínimo, máximo], em euros com IVA; as linhas têm duas gamas (eco, sup).
+     Aparece só com o serviço «Ar condicionado: montagem / instalação» ou «Bomba de calor: instalação / manutenção», e um
+     produto só com a sua linha e a sua frase de «inclui» preenchidas; uma gama vazia não aparece; uma pergunta extra só com o
+     seu preço. Com a tabela vazia (hoje) nada disto aparece e o campo "estimativa" fica vazio.
+     Ar condicionado: parte das divisões da estimativa de potência. 1 divisão: o split do seu tamanho. 2 a 4: o multi-split
+     dessas divisões, mais o acréscimo por cada divisão acima de 12 000 BTU/h, e, com as linhas do split todas preenchidas,
+     «Com uma máquina para cada divisão». Uma divisão acima do maior tamanho, ou mais de 4: o preço dá-se depois da visita.
+     Extras (só com o preço preenchido): pré-instalação (desconto por divisão), distância (metros a mais por divisão),
+     furo em betão ou pedra (um por divisão), trabalho em altura (por obra), ligação elétrica nova (um circuito), máquinas
+     antigas (por máquina). «Não sei» soma 0 ao mínimo e o preço todo ao máximo. Os extras valem igual para as duas gamas.
+     As perguntas não pertencem ao formulário (atributo form para um id que não existe): não seguem com o pedido e o reset
+     não as limpa (limpam-se aqui). Segue só o resumo, no campo escondido "estimativa", posto a cada mudança e ao enviar. */
+  var preco = (function () {
+    var raiz = form.querySelector('[data-preco]'), campo = form.querySelector('[data-estimativa-campo]');
+    var sem = { resumo: function () { return campo ? campo.value : ''; }, junta: function () {}, visibilidade: function () {} };
+    if (!raiz || !campo) return sem;
+    var P = null;
+    try { P = JSON.parse(raiz.getAttribute('data-precos')); } catch (e) {}
+    if (!P || typeof P !== 'object') return sem;
+    var AC = 'Ar condicionado: montagem / instalação', BC = 'Bomba de calor: instalação / manutenção';
+    var GAMAS = [{ k: 'eco', nome: 'Gama económica', ex: 'ex.: Midea' },
+                 { k: 'sup', nome: 'Gama superior', ex: 'ex.: Mitsubishi Electric, Daikin' }];
+    var NB = '\u00a0', GRANDE = 12000, MAX_MULTI = 4;
+    function obj(o, k) { var v = o && o[k]; return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; }
+    function inteiro(x) { return typeof x === 'number' && x >= 0 && Math.floor(x) === x; }
+    function par(v) { return Array.isArray(v) && v.length === 2 && inteiro(v[0]) && inteiro(v[1]) && v[0] <= v[1] ? v : null; }
+    /* uma linha da tabela com pelo menos uma gama preenchida: { eco: [mín, máx] ou null, sup: … }; sem nenhuma, null */
+    function linha(o, k) {
+      var l = obj(o, k), r = {}, alguma = false;
+      GAMAS.forEach(function (g) { r[g.k] = par(l[g.k]); if (r[g.k]) alguma = true; });
+      return alguma ? r : null;
+    }
+    var split = obj(P, 'split'), multi = obj(P, 'multisplit'), aq = obj(P, 'aguasQuentes'), ex = obj(P, 'extras'), inc = obj(P, 'inclui');
+    function frase(k) { return typeof inc[k] === 'string' ? inc[k].trim() : ''; }
+    function algumaLinha(o) { return Object.keys(o).some(function (k) { return k !== 'acrescimoGrande' && !!linha(o, k); }); }
+    var temAC = !!(pot.ativo && ((frase('split') && algumaLinha(split)) || (frase('multisplit') && algumaLinha(multi))));
+    var temBC = !!(frase('aguasQuentes') && algumaLinha(aq));
+    if (!temAC && !temBC) return sem;
+
+    var X = {};
+    ['metroExtra', 'preInstalacaoDesconto', 'furoBetao', 'alturaEscada', 'alturaAndaime', 'alturaPlataforma', 'ligacaoEletrica',
+     'retirarAntiga'].forEach(function (k) { X[k] = par(ex[k]); });
+    var METROS = inteiro(ex.metrosIncluidos) ? ex.metrosIncluidos : null;
+    /* fachada mais alta: andaime ou plataforma, do menor dos mínimos ao maior dos máximos */
+    var ALTA = X.alturaAndaime && X.alturaPlataforma
+      ? [Math.min(X.alturaAndaime[0], X.alturaPlataforma[0]), Math.max(X.alturaAndaime[1], X.alturaPlataforma[1])]
+      : X.alturaAndaime || X.alturaPlataforma;
+
+    /* números à portuguesa, com espaço inseparável: 1 050 €, 12 000 BTU/h */
+    function milhares(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, NB); }
+    function euros(n) { return milhares(n) + NB + '€'; }
+    function btuh(n) { return milhares(n) + NB + 'BTU/h'; }
+    function faixa(p) { return p[0] === p[1] ? 'cerca de ' + euros(p[0]) : 'entre ' + euros(p[0]) + ' e ' + euros(p[1]); }
+    function curta(p) { return p[0] === p[1] ? euros(p[0]) : milhares(p[0]) + '–' + euros(p[1]); }
+    function lista(xs) { return xs.length < 2 ? xs.join('') : xs.slice(0, -1).join(', ') + ' e ' + xs[xs.length - 1]; }
+    function soma(a, b, k) { return [a[0] + b[0] * k, a[1] + b[1] * k]; }
+
+    /* as perguntas: [valor, texto do botão, texto no resumo (se for outro)] */
+    var SIM_NAO = [ ['sim', 'Sim'], ['nao', 'Não'] ], SIM_NAO_NS = SIM_NAO.concat([ ['nsei', 'Não sei'] ]);
+    var PERGUNTAS = [];
+    if (temAC) {
+      if (X.preInstalacaoDesconto) PERGUNTAS.push({ k: 'pre', ac: true, t: 'Já tem pré-instalação (tubos na parede)?', r: 'pré-instalação', op: SIM_NAO });
+      if (X.metroExtra && METROS !== null) PERGUNTAS.push({ k: 'dist', ac: true, t: 'Distância entre a máquina de dentro e a de fora', r: 'distância', op: [
+        ['0', 'Até ' + METROS + NB + 'm'], ['5', 'Cerca de ' + (METROS + 5) + NB + 'm'], ['10', 'Cerca de ' + (METROS + 10) + NB + 'm'],
+        ['mais', 'Mais do que isso', 'mais de ' + (METROS + 10) + ' m, a confirmar na visita'] ] });
+      if (X.furoBetao) PERGUNTAS.push({ k: 'furo', ac: true, t: 'A parede é de betão ou pedra?', r: 'parede de betão ou pedra', op: SIM_NAO_NS });
+      if (X.alturaEscada || ALTA) PERGUNTAS.push({ k: 'fora', ac: true, t: 'Onde fica a máquina de fora?', r: 'máquina de fora', op: [ ['chao', 'No chão ou varanda'] ]
+        .concat(X.alturaEscada ? [ ['escada', 'Fachada, até ao 1.º andar (escada grande)', 'fachada até ao 1.º andar, escada grande'] ] : [])
+        .concat(ALTA ? [ ['alta', 'Fachada mais alta (andaime ou plataforma elevatória)', 'fachada mais alta, andaime ou plataforma'] ] : []) });
+      if (X.ligacaoEletrica) PERGUNTAS.push({ k: 'luz', ac: true, t: 'Precisa de ligação elétrica nova a partir do quadro?', r: 'ligação elétrica nova', op: SIM_NAO_NS });
+      if (X.retirarAntiga) PERGUNTAS.push({ k: 'antigas', ac: true, t: 'Há máquinas antigas para retirar?', r: 'máquinas antigas a retirar',
+        op: [ ['0', '0'], ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'] ] });
+    }
+    if (temBC) {
+      var aq200 = linha(aq, '200'), aq300 = linha(aq, '300');
+      PERGUNTAS.push({ k: 'deposito', ac: false, t: 'Tamanho do depósito', r: 'depósito', op: (aq200 ? [ ['200', '200 L'] ] : [])
+        .concat(aq300 ? [ ['300', '300 L'] ] : []).concat(aq200 && aq300 ? [ ['nsei', 'Não sei'] ] : []) });
+    }
+
+    var caixaQ = raiz.querySelector('[data-preco-perguntas]'), res = raiz.querySelector('[data-preco-res]');
+    var pede = raiz.querySelector('[data-preco-pede]'), anuncio = raiz.querySelector('[data-preco-anuncio]');
+    var sel = $('qServico');
+    function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt) e.textContent = txt; return e; }
+    PERGUNTAS.forEach(function (q) {
+      var fs = el('fieldset', 'preco-q');
+      fs.appendChild(el('legend', 'preco-q-t', q.t));
+      /* com várias divisões, a distância é a de cada uma */
+      if (q.k === 'dist') { q.ajuda = el('p', 'preco-q-ajuda', 'Em cada divisão, em média.'); q.ajuda.hidden = true; fs.appendChild(q.ajuda); }
+      var ops = el('div', 'preco-ops' + (q.k === 'antigas' ? ' preco-ops-n' : ''));
+      q.inputs = q.op.map(function (o) {
+        var lb = el('label', 'preco-op'), i = el('input');
+        i.type = 'radio'; i.name = 'preco-' + q.k; i.value = o[0];
+        i.setAttribute('form', 'preco-fora-do-pedido');   /* não existe: as respostas não seguem no pedido, só o resumo */
+        lb.appendChild(i); lb.appendChild(el('span', '', o[1]));
+        ops.appendChild(lb);
+        return i;
+      });
+      fs.appendChild(ops);
+      caixaQ.appendChild(fs);
+      q.el = fs;
+    });
+    function resposta(k) {
+      for (var i = 0; i < PERGUNTAS.length; i++) {
+        if (PERGUNTAS[i].k !== k) continue;
+        for (var j = 0; j < PERGUNTAS[i].inputs.length; j++) if (PERGUNTAS[i].inputs[j].checked) return PERGUNTAS[i].inputs[j].value;
+      }
+      return '';
+    }
+    /* o que o visitante respondeu, para o resumo: «pré-instalação: não», «distância: até 3 m» */
+    function respostas(ac) {
+      var out = [];
+      PERGUNTAS.forEach(function (q) {
+        if (q.ac !== ac) return;
+        var v = resposta(q.k);
+        q.op.forEach(function (o) { if (o[0] === v) out.push(q.r + ': ' + (o[2] || o[1].charAt(0).toLowerCase() + o[1].slice(1))); });
+      });
+      return out;
+    }
+
+    function calculaAC() {
+      var e = pot.estado(), n = e ? e.n : 0, visita = { ac: true, modo: 'visita', n: n };
+      if (!n) return { ac: true, modo: 'pede', n: 0 };
+      if (e.acima || n > MAX_MULTI) return visita;
+      var tams = e.divs.map(function (d) { return d.tam; });
+      var base = {}, sep = null, titulo, det, inclui;
+      if (n === 1) {
+        base = frase('split') && linha(split, String(tams[0]));
+        if (!base) return visita;
+        inclui = frase('split');
+        titulo = 'Split para 1 divisão, ' + btuh(tams[0]);
+        det = 'split ' + btuh(tams[0]);
+      } else {
+        var m = frase('multisplit') && linha(multi, String(n));
+        if (!m) return visita;
+        var grandes = tams.filter(function (t) { return t > GRANDE; }).length, acr = linha(multi, 'acrescimoGrande');
+        GAMAS.forEach(function (g) {
+          var b = m[g.k];
+          if (b && grandes) b = acr && acr[g.k] ? soma(b, acr[g.k], grandes) : null;
+          base[g.k] = b;
+        });
+        if (!base.eco && !base.sup) return visita;
+        inclui = frase('multisplit');
+        titulo = 'Multi-split para ' + n + ' divisões: ' + lista(tams.map(milhares)) + NB + 'BTU/h';
+        det = 'multi-split ' + n + ' divisões: ' + tams.map(milhares).join(' + ') + ' BTU/h';
+        /* com uma máquina para cada divisão: a soma das linhas do split, se estiverem todas */
+        sep = {};
+        GAMAS.forEach(function (g) {
+          var t = [0, 0];
+          tams.forEach(function (tam) { var ls = linha(split, String(tam)); t = t && ls && ls[g.k] ? soma(t, ls[g.k], 1) : null; });
+          sep[g.k] = t;
+        });
+      }
+      var d = [0, 0], confirmar = false;
+      var pre = resposta('pre'), dist = resposta('dist'), furo = resposta('furo'), fora = resposta('fora'), luz = resposta('luz'), antigas = resposta('antigas');
+      if (pre === 'sim') d = [d[0] - X.preInstalacaoDesconto[1] * n, d[1] - X.preInstalacaoDesconto[0] * n];
+      if (dist) { d = soma(d, X.metroExtra, (dist === 'mais' ? 10 : +dist) * n); confirmar = dist === 'mais'; }
+      if (furo === 'sim') d = soma(d, X.furoBetao, n); else if (furo === 'nsei') d[1] += X.furoBetao[1] * n;
+      if (fora === 'escada') d = soma(d, X.alturaEscada, 1); else if (fora === 'alta') d = soma(d, ALTA, 1);
+      if (luz === 'sim') d = soma(d, X.ligacaoEletrica, 1); else if (luz === 'nsei') d[1] += X.ligacaoEletrica[1];
+      if (antigas) d = soma(d, X.retirarAntiga, +antigas);
+      function aplica(b) {
+        var r = {};
+        GAMAS.forEach(function (g) { r[g.k] = b && b[g.k] ? [Math.max(0, b[g.k][0] + d[0]), Math.max(0, b[g.k][1] + d[1])] : null; });
+        return r;
+      }
+      return { ac: true, modo: 'preco', n: n, inclui: inclui, confirmar: confirmar, dets: [det].concat(respostas(true)),
+               blocos: [{ titulo: titulo, gamas: aplica(base), sep: sep && aplica(sep) }] };
+    }
+    function calculaBC() {
+      var dep = resposta('deposito');
+      var blocos = (dep === 'nsei' ? ['200', '300'] : dep ? [dep] : []).map(function (t) {
+        return { titulo: 'Bomba de calor para águas quentes, depósito de ' + t + NB + 'L', curto: 'depósito de ' + t + ' L', gamas: linha(aq, t) };
+      }).filter(function (b) { return b.gamas; });
+      if (!blocos.length) return { ac: false, modo: 'escolhe', n: 0 };
+      return { ac: false, modo: 'preco', n: 0, inclui: frase('aguasQuentes'), confirmar: false, blocos: blocos,
+               dets: ['bomba de calor para águas quentes'].concat(respostas(false)) };
+    }
+
+    function desenha(c) {
+      pede.hidden = !(c && c.modo === 'pede');
+      PERGUNTAS.forEach(function (q) {
+        q.el.hidden = !(c && c.ac === q.ac && (!q.ac || c.modo === 'preco'));
+        if (q.ajuda) q.ajuda.hidden = !(c && c.n > 1);
+      });
+      res.textContent = '';
+      res.hidden = !(c && (c.modo === 'preco' || c.modo === 'visita'));
+      if (res.hidden) return;
+      if (c.modo === 'visita') { res.appendChild(el('p', 'preco-visita', 'Para este caso o preço dá-se depois da visita, que é gratuita.')); return; }
+      c.blocos.forEach(function (b) {
+        res.appendChild(el('p', 'preco-prod', b.titulo));
+        var ul = el('ul', 'preco-gamas');
+        GAMAS.forEach(function (g) {
+          var v = b.gamas[g.k];
+          if (!v) return;
+          var li = el('li', 'preco-gama'), s = b.sep && b.sep[g.k];
+          li.appendChild(el('span', 'preco-gama-n', g.nome + ' (' + g.ex + '): '));
+          li.appendChild(el('strong', 'preco-v', faixa(v) + (c.confirmar ? ', a confirmar na visita' : '')));
+          if (s) li.appendChild(el('span', 'preco-sep', 'Com uma máquina para cada divisão: ' +
+            (s[0] === s[1] ? euros(s[0]) : milhares(s[0]) + ' a ' + euros(s[1]))));
+          ul.appendChild(li);
+        });
+        res.appendChild(ul);
+      });
+      var inc = el('p', 'preco-inclui');
+      inc.appendChild(el('span', 'preco-inclui-t', 'Inclui: '));
+      inc.appendChild(document.createTextNode(c.inclui));
+      res.appendChild(inc);
+      res.appendChild(el('p', 'preco-nota', 'Preço com IVA. O preço final fica fechado depois da visita, que é gratuita.'));
+      res.appendChild(el('p', 'preco-segue', 'Este preço provável segue com o seu pedido.'));
+    }
+    /* no pedido (campo, email e WhatsApp), numa linha e com espaços normais:
+       "Preço provável mostrado: Gama económica 1 050–1 400 €; Gama superior 1 300–1 750 € (split 12 000 BTU/h, pré-instalação: não, …)" */
+    function resumoDe(c) {
+      if (!c || c.modo !== 'preco') return '';
+      var varios = c.blocos.length > 1;
+      function gamas(b, k) {
+        return GAMAS.filter(function (g) { return b.gamas[g.k] && b[k] && b[k][g.k]; })
+          .map(function (g) { return g.nome + ' ' + curta(b[k][g.k]); }).join('; ');
+      }
+      var txt = 'Preço provável mostrado: ' + c.blocos.map(function (b) { return (varios ? b.curto + ': ' : '') + gamas(b, 'gamas'); }).join('; ') +
+        ' (' + c.dets.join(', ') + ')';
+      var sep = c.blocos[0].sep && gamas(c.blocos[0], 'sep');
+      if (sep) txt += '; com uma máquina para cada divisão: ' + sep;
+      return txt.replace(/\u00a0/g, ' ');
+    }
+    /* o leitor de ecrã ouve o preço quando para de mudar (não a cada tecla da área) */
+    var ultimo = '', tAnuncio = 0;
+    function anuncia(c) {
+      var txt = '';
+      if (c && c.modo === 'preco') txt = 'Preço provável: ' + c.blocos.map(function (b) {
+        return (c.blocos.length > 1 ? b.curto + ', ' : '') + GAMAS.filter(function (g) { return b.gamas[g.k]; })
+          .map(function (g) { return g.nome + ', ' + faixa(b.gamas[g.k]); }).join('; ');
+      }).join('. ') + '.';
+      else if (c && c.modo === 'visita') txt = 'Para este caso o preço dá-se depois da visita, que é gratuita.';
+      clearTimeout(tAnuncio);
+      tAnuncio = setTimeout(function () {
+        if (txt === ultimo) return;
+        ultimo = txt;
+        anuncio.textContent = txt;
+      }, 500);
+    }
+    var mostrado = {};
+    function atualiza() {
+      raiz.hidden = !((sel.value === AC && temAC) || (sel.value === BC && temBC));
+      var c = raiz.hidden ? null : sel.value === AC ? calculaAC() : calculaBC();
+      desenha(c);
+      anuncia(c);
+      campo.value = resumoDe(c);
+      /* na medição, uma vez por produto: o serviço, o número de divisões e as gamas mostradas */
+      var tipo = c && c.ac ? 'ac' : 'bc';
+      if (c && c.modo === 'preco' && !mostrado[tipo]) {
+        mostrado[tipo] = true;
+        track('preco_mostrado', { servico: sel.value, divisoes: c.n, gamas: GAMAS.filter(function (g) {
+          return c.blocos.some(function (b) { return b.gamas[g.k]; });
+        }).map(function (g) { return g.k; }).join(',') });
+      }
+    }
+    caixaQ.addEventListener('change', atualiza);
+    pot.ouve(atualiza);
+    sel.addEventListener('change', atualiza);
+    /* depois de um envio: as respostas voltam ao início (o reset do formulário não as vê) */
+    form.addEventListener('reset', function () {
+      setTimeout(function () {
+        PERGUNTAS.forEach(function (q) { q.inputs.forEach(function (i) { i.checked = false; }); });
+        atualiza();
+      }, 0);
+    });
+    atualiza();
+    return {
+      resumo: function () { return campo.value; },
+      /* ao enviar: o preço à vista vai para o campo "estimativa" (já lá está; isto confirma-o com o estado de agora) */
+      junta: atualiza,
+      visibilidade: atualiza
     };
   })();
 
@@ -1158,8 +1449,8 @@
     if (btn.getAttribute('aria-busy') === 'true' || bloqueado()) return;
     var d = quoteData(); if (!quoteValidate(d)) return;
     if (d.foto && !confereFoto()) { foto.focus(); return; }
-    /* uma estimativa preenchida mas não junta segue também (sem mexer no foco) */
-    if (pot.juntaAutomatico()) d = quoteData();
+    /* uma estimativa preenchida mas não junta segue também (sem mexer no foco), e o preço provável à vista */
+    pot.juntaAutomatico(); preco.junta(); d = quoteData();
     preparaCampos(d);
     track('quote_form_submit', pot.numeros({ via: SEM_ENVIO ? 'mailto' : 'netlify', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg }));
     if (SEM_ENVIO) { quoteMailto(d); return; }
@@ -1190,7 +1481,7 @@
   $('sendWhats').addEventListener('click', function () {
     if (bloqueado()) return;
     var d = quoteData(); if (!quoteValidate(d, true)) return;
-    if (pot.juntaAutomatico()) d = quoteData();
+    pot.juntaAutomatico(); preco.junta(); d = quoteData();
     track('quote_form_submit', pot.numeros({ via: 'whatsapp', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg }));
     window.open(WA_BASE + encodeURIComponent(mensagemWhats(d)), '_blank', 'noopener');
     quoteAlert('Abrimos o WhatsApp com o pedido preenchido, falta só carregar em enviar.' + (d.foto ? ' Junte lá a fotografia.' : ''), true);
@@ -1207,7 +1498,7 @@
   function escolheServico(v) {
     var sel = $('qServico');
     if (!v) return;
-    for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === v || sel.options[i].text === v) { sel.selectedIndex = i; pot.visibilidade(); return true; }
+    for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === v || sel.options[i].text === v) { sel.selectedIndex = i; pot.visibilidade(); if (preco) preco.visibilidade(); return true; }
   }
   escolheServico(form.getAttribute('data-preselect'));
   document.addEventListener('click', function (e) {

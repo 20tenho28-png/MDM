@@ -739,6 +739,42 @@ html:not(.js) #sendWhats { display: none; }
 .pot-junta-txt:focus-visible { box-shadow: 0 0 0 2px var(--ok-bg), 0 0 0 4px var(--tinta); }
 .pot-junta-nota { margin-top: 4px; color: var(--aco-2); }
 
+/* ── Preço provável (dentro do formulário, a seguir à estimativa de potência; site.js, data/precos.json) ──
+   Escondido enquanto a tabela de preços estiver vazia. Perguntas curtas com escolhas de 44 px, depois o resultado:
+   uma linha por gama, a frase do que inclui e a nota fixa da visita. */
+.preco { display: flex; flex-direction: column; gap: 14px; padding: 16px; border: 1px solid var(--linha-2); border-top: 3px solid var(--carmim); background: var(--gesso); }
+@media (max-width: 399px) { .preco { padding-left: 12px; padding-right: 12px; } }
+.preco-cab { display: flex; flex-direction: column; gap: 2px; }
+.preco-t { font-family: var(--sans); font-size: 16px; font-weight: 700; line-height: 1.3; letter-spacing: -.01em; color: var(--tinta); }
+.preco-s { font-family: var(--sans); font-size: 13px; font-weight: 500; line-height: 1.4; color: var(--aco); }
+.preco-pede { font-size: 15px; line-height: 1.5; color: var(--aco-2); }
+.preco-pede a { font-weight: 600; }
+.preco-perguntas { display: flex; flex-direction: column; }
+.preco-perguntas:empty { display: none; }
+/* a legenda flutua (como nas divisões da estimativa): é uma linha normal e não corta o filete de cima */
+.preco-q { min-width: 0; margin: 0; padding: 12px 0 14px; border: 0; border-top: 1px solid var(--linha-2); }
+.preco-q-t { float: left; width: 100%; margin: 0 0 10px; padding: 0; font-family: var(--sans); font-size: 15px; font-weight: 600; line-height: 1.35; color: var(--tinta); }
+.preco-q-ajuda { clear: both; margin: -4px 0 10px; font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--aco); }
+.preco-ops { clear: both; display: flex; flex-wrap: wrap; gap: 8px; }
+.preco-op { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 14px 8px 12px; background: var(--branco); border: 1px solid var(--linha-2); font-family: var(--sans); font-size: 15px; font-weight: 500; line-height: 1.3; color: var(--tinta); cursor: pointer; transition: border-color 150ms var(--resposta), box-shadow 150ms var(--resposta); }
+.preco-op:hover { border-color: #A9A397; }
+.preco-op input { flex-shrink: 0; width: 20px; height: 20px; margin: 0; accent-color: var(--carmim); cursor: pointer; }
+.preco-op input:focus-visible { outline: 2px solid var(--tinta); outline-offset: 3px; }
+.preco-op:has(input:checked) { border-color: var(--tinta); box-shadow: inset 0 -3px 0 var(--carmim); }
+.preco-ops-n .preco-op { min-width: 64px; }
+.preco-res { border-top: 2px solid var(--tinta); padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+.preco-prod { font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--carmim); }
+.preco-prod:not(:first-child) { margin-top: 6px; }
+.preco-gamas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.preco-gama { font-family: var(--sans); font-size: 15px; font-weight: 500; line-height: 1.4; color: var(--aco-2); }
+.preco-v { display: block; font-size: clamp(20px, 2vw, 22px); font-weight: 800; line-height: 1.25; letter-spacing: -.015em; color: var(--tinta); }
+.preco-sep { display: block; margin-top: 2px; font-size: 14px; font-weight: 500; color: var(--aco-2); }
+.preco-inclui { font-size: 15px; line-height: 1.5; color: var(--aco-2); }
+.preco-inclui-t { font-family: var(--sans); font-size: 13px; font-weight: 700; color: var(--tinta); }
+.preco-nota { font-size: 15px; line-height: 1.5; color: var(--tinta); }
+.preco-segue { font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--aco); }
+.preco-visita { font-size: 16px; line-height: 1.5; color: var(--tinta); }
+
 /* ── Rodapé ── */
 .rodape { background: var(--tinta); color: var(--aco-claro); padding: 56px var(--margem) 28px; font-size: 15px; }
 .rodape-in { max-width: calc(var(--max) - 160px); margin: 0 auto; display: grid; gap: 36px; grid-template-columns: minmax(0, 1fr); }
