@@ -550,7 +550,7 @@ html:not(.js) .topo-in > .menu-btn { display: none; }
 /* ── Certificações e marcas ── */
 .cert { background: var(--areia); border-bottom: 1px solid var(--linha); padding: 36px var(--margem); }
 .cert-in { max-width: calc(var(--max) - 160px); margin: 0 auto; display: grid; gap: 32px; }
-@media (min-width: 1100px) { .cert-in { gap: 28px; } .cert-marcas { display: flex; align-items: baseline; gap: 28px; border-top: 1px solid var(--linha-2); padding-top: 20px; } .cert-marcas .marcas { margin: 0; } }
+@media (min-width: 1100px) { .cert-in { gap: 28px; } }
 .cert-selos { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
 /* Três selos (APIRAC, IMPIC, F-gas): um por linha até haver largura para os três lado a lado */
 @media (min-width: 900px) { .cert-selos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -565,8 +565,57 @@ html:not(.js) .topo-in > .menu-btn { display: none; }
 @media (min-width: 900px) { .cert-garantias { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1100px) { .cert-garantias { gap: 32px; } }
 .selo-garantia { margin: 0; border-left-color: var(--aco); }
-.marcas { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 22px; }
-.marcas li { font-family: var(--sans); font-size: 16px; font-weight: 600; letter-spacing: -.01em; color: #3C4450; }
+
+/* ── Marcas: os logótipos reais, numa faixa que desliza (data/site.json «marcas», partials/certificacoes.html) ──
+   Os logótipos vão com as cores e a proporção do ficheiro: aqui só se escolhe a altura (--marca-h; «escala» em site.json
+   acerta uma marca larga ou compacta, por exemplo 0.85). Uma marca sem ficheiro mostra o nome em Archivo, sem imitar o
+   logótipo (.marcas-nome); só com «simbolo», o símbolo e o nome (.marcas-simbolo). Os nomes das classes começam
+   todos por «marcas-»: .marca, .marca-logo e .marca-nome são do logótipo MDM no topo.
+   Sem JavaScript, ou com «reduzir movimento», é uma linha fixa que quebra. Com JavaScript (.js) reserva-se logo a linha
+   do rótulo e do botão; o próprio código da faixa no site.js liga .marcas-pronta (a lista numa só linha, pontas
+   esbatidas), junta-lhe cópias escondidas dos leitores de ecrã, põe a duração (--marcas-dur, cerca de 34 px por
+   segundo) e liga .marcas-anda. Se o site.js não correr, a lista continua a quebrar e vê-se toda. Para com o botão
+   «Pausa» / «Continuar», com o rato ou o foco em cima da faixa e quando a faixa sai do ecrã. Só se anima o transform. */
+.cert-marcas { --marca-h: 28px; --marcas-gap: 48px; display: grid; gap: 14px; align-items: center; }
+@media (min-width: 768px) { .cert-marcas { --marca-h: 34px; --marcas-gap: 64px; } }
+@media (min-width: 1100px) {
+  .cert-marcas { grid-template-columns: auto minmax(0, 1fr); column-gap: 40px; border-top: 1px solid var(--linha-2); padding-top: 20px; }
+}
+.marcas { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 16px var(--marcas-gap); }
+.marcas-item { flex: none; display: flex; align-items: center; gap: calc(var(--marca-h) * .3); min-height: calc(var(--marca-h) * 1.25); }
+.marcas-item img { width: auto; max-width: none; }
+.marcas-logo { height: calc(var(--marca-h) * var(--escala, 1)); }
+.marcas-simbolo { height: calc(var(--marca-h) * .82 * var(--escala, 1)); }
+.marcas-nome { font-family: var(--sans); font-size: calc(var(--marca-h) * .52 * var(--escala, 1)); font-weight: 700; line-height: 1; letter-spacing: -.01em; color: #3C4450; white-space: nowrap; }
+.marcas-pausa { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 44px; min-height: 44px; padding: 0 14px; border: 1px solid var(--linha-2); background: transparent; color: var(--aco-2); font-family: var(--sans); font-size: 13px; font-weight: 600; cursor: pointer; transition: border-color 150ms var(--resposta), color 150ms var(--resposta); }
+.marcas-pausa:hover { border-color: var(--aco); color: var(--tinta); }
+.marcas-pausa .ico { width: 12px; height: 12px; }
+.marcas-pausa .ico-continuar, .marcas-parada .marcas-pausa .ico-pausa { display: none; }
+.marcas-parada .marcas-pausa .ico-continuar { display: block; }
+/* telemóvel estreito: o botão mais leve (o alvo continua com 44 px), para o rótulo caber numa linha */
+@media (max-width: 399px) {
+  .marcas-pausa { padding: 0 10px; gap: 6px; font-size: 12px; border-color: transparent; }
+  .marcas-pausa:focus-visible { border-color: var(--aco); }
+  .cert-marcas .rotulo { letter-spacing: .12em; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .js .cert-marcas { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "rotulo pausa" "faixa faixa"; grid-template-rows: minmax(44px, auto) auto; row-gap: 8px; }
+  .js .cert-marcas .rotulo { grid-area: rotulo; }
+  .js .marcas-pausa { grid-area: pausa; }
+  .js .marcas-faixa { grid-area: faixa; min-width: 0; }
+  .marcas-pronta .marcas-faixa { overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 36px, #000 calc(100% - 36px), transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 36px, #000 calc(100% - 36px), transparent); }
+  .marcas-pronta .marcas-pista { display: flex; width: max-content; }
+  .marcas-pronta .marcas { flex-wrap: nowrap; padding-right: var(--marcas-gap); }   /* o mesmo espaço entre a última marca e a cópia */
+  .marcas-anda .marcas-pista { animation: mdm-marcas var(--marcas-dur, 30s) linear infinite; will-change: transform; }
+  .marcas-anda .marcas-faixa:hover .marcas-pista, .marcas-anda .marcas-faixa:focus-within .marcas-pista,
+  .marcas-parada .marcas-pista, .marcas-fora .marcas-pista { animation-play-state: paused; }
+}
+@media (prefers-reduced-motion: no-preference) and (min-width: 1100px) {
+  .js .cert-marcas { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "rotulo faixa pausa"; grid-template-rows: minmax(44px, auto); }
+}
+@keyframes mdm-marcas { to { transform: translateX(-50%); } }
 
 /* ── Testemunhos ── */
 .test-grelha { display: grid; gap: var(--gap); grid-template-columns: minmax(0, 1fr); }
@@ -1003,6 +1052,8 @@ html.visor-aberto { overflow: hidden; }
 
 @media print {
   .topo, .barra-movel, .consent, .gaveta, .veu, .carrossel-ctrl, .form-caixa { display: none !important; }
+  .marcas-pausa, .marcas-copia { display: none !important; }
+  .marcas-pista { animation: none !important; }
   .js [data-r] { opacity: 1; transform: none; }
   body { background: #fff; padding: 0; }
 }

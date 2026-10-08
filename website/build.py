@@ -52,6 +52,10 @@ SRC, DATA, ASSETS = ROOT / "src", ROOT / "data", ROOT / "assets"
 OUT = Path(os.environ["MDM_OUT"]).resolve() if os.environ.get("MDM_OUT") else ROOT / "public"
 
 SITE = json.loads((DATA / "site.json").read_text(encoding="utf-8"))
+# marcas da faixa das certificações (site.json «marcas»): os campos que faltam ficam vazios, para o modelo poder
+# perguntar {{#se item.logo}} / {{#se item.simbolo}}. Quando chegar o ficheiro de uma marca, basta juntar logo, w e h.
+MARCA_CAMPOS = {"logo": "", "w": "", "h": "", "simbolo": "", "escala": 1}
+SITE["marcas"] = [dict(MARCA_CAMPOS, **m) for m in SITE.get("marcas", [])]
 OBRAS_DATA = json.loads((DATA / "obras.json").read_text(encoding="utf-8"))
 OBRAS = OBRAS_DATA["obras"]
 OBRA_BY_N = {o["n"]: o for o in OBRAS}
@@ -538,12 +542,16 @@ PLACEHOLDER_RE = re.compile(r"\[(?!P\d ·)[^\[\]<>\"']*?[A-ZÀ-Ý]{3}[^\[\]<>\"'
 PRAZO = (re.compile(r"\b\d+\s*(?:h|horas)\s+úteis|\b(?:24|48)\s*(?:h|horas)\b|\b\d+\s*(?:a|–|-)\s*\d+\s*(?:h|horas)\b"
                     r"|mesmo dia|\b\d+\s*minutos\b", re.I),
          "promessa de prazo de resposta (retiradas pelo dono)")
+# a assinatura da France Air: o dono pediu para a tirar (o nome e, quando chegar, o logótipo sem ela)
+ARQUITECTOS_RE = re.compile(r"Arquitec?tos\s+do\s+Ar", re.I)
 PROIBIDO = [
     PRAZO,
     (re.compile(r"\b[34]\d\s+anos\b"), "idade da empresa: só «1991», nunca «N anos»"),
     (re.compile(r"\b(?:LG|Hitachi|Vulcano|Panasonic|Climaveneta)\b"),
      "marca fora da lista do dono (Midea, Mitsubishi Electric, Daikin, France Air)"),
     (re.compile(r"Domingues|M\.D\.M\.\s*[—–]"), "nome legal: «M.D.M. - Manuel Domingos Melancia, Lda»"),
+    (ARQUITECTOS_RE,
+     "assinatura da France Air («Os Arquitectos do Ar»): o dono não a quer no site, só o nome ou o logótipo"),
 ]
 REF_RE = re.compile(r'(?:href|src|action)="([^"#?]+)|srcset="([^"]+)"|url\(([^)]+)\)')
 # Netlify Forms: o formulário de orçamento tem de chegar ao HTML gerado com o nome, os campos escondidos,
@@ -645,7 +653,7 @@ def check(files):
                 if not target.exists():
                     problems.append(f"{f}: referência partida → {r}")
     problems += check_preview()
-    problems += check_duracoes() + check_testemunhos() + check_formatos() + check_btu() + check_precos()
+    problems += check_duracoes() + check_testemunhos() + check_formatos() + check_btu() + check_precos() + check_marcas()
     for css in (OUT / "assets" / "css").glob("*.css"):
         for c in re.findall(r"url\(([^)]+)\)", css.read_text(encoding="utf-8")):
             c = c.strip("'\"")
@@ -827,6 +835,50 @@ def check_btu():
         out.append("site.json «btu.folga»: margem entre 0 e 0,49 (0,1 = 10%)")
     if not out and b["areaMin"] >= b["areaMax"]:
         out.append("site.json «btu»: areaMin tem de ser menor do que areaMax")
+    return out
+
+
+VIEWBOX_RE = re.compile(r'<svg\b[^>]*\bviewBox="\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)\s*"')
+
+
+def check_marcas():
+    """Faixa das marcas (site.json «marcas»): nome, ficheiros que existem, largura e altura do logótipo certas, escala."""
+    out, marcas = [], SITE["marcas"]
+    if not marcas:
+        return ["site.json: falta «marcas» (faixa das certificações)"]
+    inteiro = lambda v: isinstance(v, int) and not isinstance(v, bool) and v > 0
+    for m in marcas:
+        nome = m.get("nome")
+        if not (isinstance(nome, str) and nome.strip()):
+            out.append("site.json «marcas»: cada marca tem de ter «nome»")
+            continue
+        e = m["escala"]
+        if not (isinstance(e, (int, float)) and not isinstance(e, bool) and 0.5 <= e <= 2):
+            out.append(f"site.json «marcas» {nome}: «escala» é um número entre 0,5 e 2 (1 = altura normal)")
+        for campo in ("logo", "simbolo"):
+            if m[campo] and not (ROOT / m[campo]).is_file():
+                out.append(f"site.json «marcas» {nome}: «{campo}» não existe → {m[campo]}")
+        if not m["logo"]:
+            continue
+        if not (inteiro(m["w"]) and inteiro(m["h"])):
+            out.append(f"site.json «marcas» {nome}: com «logo», «w» e «h» são a largura e a altura do ficheiro (inteiros)")
+            continue
+        f = ROOT / m["logo"]
+        if f.suffix.lower() == ".png" and f.is_file():
+            cab = f.read_bytes()[:24]
+            if cab[:8] == b"\x89PNG\r\n\x1a\n" and (int.from_bytes(cab[16:20], "big"), int.from_bytes(cab[20:24], "big")) != (m["w"], m["h"]):
+                out.append(f"site.json «marcas» {nome}: «w»/«h» ({m['w']}×{m['h']}) não são o tamanho do PNG "
+                           f"({int.from_bytes(cab[16:20], 'big')}×{int.from_bytes(cab[20:24], 'big')})")
+        if f.suffix.lower() == ".svg" and f.is_file():
+            svg = f.read_text(encoding="utf-8", errors="replace")
+            vb = VIEWBOX_RE.search(svg)
+            if not vb:
+                out.append(f"{m['logo']}: SVG sem viewBox (o logótipo não escala)")
+            elif abs(float(vb[1]) / float(vb[2]) - m["w"] / m["h"]) > 0.02 * m["w"] / m["h"]:
+                out.append(f"site.json «marcas» {nome}: «w»/«h» ({m['w']}×{m['h']}) não têm a proporção do viewBox "
+                           f"({vb[1]}×{vb[2]}): o logótipo ficaria esticado")
+            if ARQUITECTOS_RE.search(svg):
+                out.append(f"{m['logo']}: traz a assinatura «Os Arquitectos do Ar», que o dono não quer no site")
     return out
 
 

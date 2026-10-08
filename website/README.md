@@ -57,7 +57,7 @@ Todas as páginas levam a empresa em JSON-LD (`HVACBusiness` e `Electrician`): n
 | `src/pages/` | Página inicial (ver «Página inicial»), obras, 5 serviços (ar condicionado, bombas de calor, manutenção, eletricidade, ventilação), privacidade, 404, `obrigado.html` (depois de enviar o formulário sem JavaScript). Cada serviço descreve-se no `<!--meta-->` em `servico` (nome, tipo e ofertas) para os dados estruturados `Service` |
 | `src/templates/obra.html` | Modelo das 24 páginas de obra (`obras/<slug>.html`) |
 | `assets/css/site.css` | Sistema visual completo e movimento |
-| `assets/js/site.js` | Estatísticas (PostHog UE, sem cookies, só depois de «Aceitar»), formulário (envio para o Netlify, estimativa de potência), gaveta, carrossel, filtros, revelação |
+| `assets/js/site.js` | Estatísticas (PostHog UE, sem cookies, só depois de «Aceitar»), formulário (envio para o Netlify, estimativa de potência), gaveta, carrossel, faixa das marcas, filtros, revelação |
 | `assets/fonts/` | Archivo e Newsreader alojadas no site (licença OFL incluída): nenhum pedido ao Google |
 | `assets/img/obras/` | Fotografias com correção de cor ligeira: o original `foto-NN-1600.jpg` e os tamanhos 400 a 1600 em AVIF e WebP (ver «Fotografias das obras») |
 | `gerar_fotos.py` | Faz os tamanhos AVIF e WebP das fotografias a partir do JPEG de 1600 |
@@ -75,6 +75,28 @@ Todas as páginas levam a empresa em JSON-LD (`HVACBusiness` e `Electrician`): n
 A linha a prumo (`[data-prumo]`) desenha-se de «O que ouvimos» ao formulário.
 
 **Dados opcionais juntos numa linha.** Um bloco `{{#se}}` dentro de outro é «um e outro» (a nota do Google só aparece com o número de avaliações). Para «um ou outro» (a linha «Preço indicativo» aparece com qualquer dos dois preços do cartão; o bloco da garantia e do seguro nas certificações, com qualquer dos dois) o `build.py` calcula chaves em `DADOS_OU`: `precosAC`, `precosManutencao` e `garantias`. Não se preenchem e não aparecem em `--faltam`; o que aparece são os dados de que dependem.
+
+## Marcas (logótipos)
+
+Na faixa das certificações (`src/partials/certificacoes.html`: página inicial e as cinco páginas de serviço), por baixo dos selos APIRAC, IMPIC e F-gas, «Multimarca, peças originais» e os logótipos reais das quatro marcas, pela ordem de `marcas` em `data/site.json`: Midea, Mitsubishi Electric, Daikin, France Air. Só estas quatro podem aparecer no site (`--check` falha com outra marca).
+
+```json
+"marcas": [
+  {"nome": "Midea", "logo": "assets/img/marcas/midea.svg", "w": 487, "h": 193, "escala": 1.2},
+  {"nome": "Mitsubishi Electric", "logo": "assets/img/marcas/mitsubishi-electric.svg", "w": 357, "h": 109, "escala": 1.05},
+  {"nome": "Daikin", "logo": "assets/img/marcas/daikin.svg", "w": 1899, "h": 378, "escala": 0.72},
+  {"nome": "France Air", "logo": "assets/img/marcas/france-air.png", "w": 900, "h": 141, "escala": 0.7}
+]
+```
+
+- **`logo`** (com `w` e `h`, a largura e a altura do ficheiro; num SVG, os dois últimos números do `viewBox`): mostra o logótipo, com o nome da marca como texto alternativo. Os ficheiros estão em `assets/img/marcas/`, com as cores originais: nunca se pintam, esticam, cortam ou enfeitam.
+- **`simbolo`**, sem `logo`: o símbolo e, ao lado, o nome em texto (Archivo).
+- **Só `nome`**: o nome em texto, sem imitar o logótipo da marca.
+- **`escala`** (opcional, 1 por omissão, entre 0,5 e 2): acerta a altura de uma marca para as quatro parecerem do mesmo tamanho (um logótipo largo e cheio, como o da Daikin ou o da France Air, fica mais baixo; um com letras pequenas, como o da Midea ou o da Mitsubishi Electric, mais alto). A altura de base é 28 px no telemóvel e 34 px a partir de 768 px (`--marca-h` em `site.css`).
+
+**Ficheiros.** Os quatro são os logótipos reais, com as cores originais: Daikin vetorizado de um original de 1920 px, Midea tirado de um ficheiro vetorial, Mitsubishi Electric (símbolo oficial dos três diamantes e o nome redesenhado da imagem do dono) e France Air (a imagem do dono, PNG transparente de 900 px). O da France Air vai **sem a assinatura «Os Arquitectos do Ar»**: o dono não a quer no site, e `--check` falha se ela aparecer numa página ou dentro de um SVG. `mitsubishi-electric-simbolo.svg` (só o símbolo) ficou da fase em que faltava o logótipo completo e não é usado. Para trocar ou juntar uma marca: pôr o ficheiro em `assets/img/marcas/` e mudar `logo`, `w` e `h` (e `escala`, se precisar); mais nada muda. Um logótipo novo leva sempre um nome de ficheiro novo (por exemplo `france-air-2.png`), nunca o mesmo nome: o `netlify.toml` guarda `assets/img/` um ano em cache, e quem já visitou o site continuaria a ver o antigo. `--check` falha também se um ficheiro não existir, se faltar `w` ou `h` ou se não baterem com o ficheiro (num SVG, a proporção do `viewBox`; num PNG, o tamanho em píxeis): o logótipo ficaria esticado.
+
+**A faixa.** Com JavaScript, os logótipos deslizam devagar (cerca de 34 px por segundo), com as pontas esbatidas. O `site.js` junta cópias da lista para a volta não ter buracos; as cópias ficam escondidas dos leitores de ecrã e do teclado (`aria-hidden`, `inert`, imagens sem texto alternativo), que leem cada marca uma vez. A faixa para com o botão «Pausa» / «Continuar» (WCAG 2.2.2; o texto diz o que o botão faz), com o rato ou o foco em cima dela e quando sai do ecrã (para não gastar processador). Sem JavaScript (ou se o `site.js` falhar), ou com «reduzir movimento» no sistema, é uma linha fixa (que quebra no telemóvel), sem cópias nem botão. Estilos em `site.css`, «Marcas»: as classes da faixa começam todas por `marcas-` (`.marcas-item`, `.marcas-logo`, `.marcas-simbolo`, `.marcas-nome`), porque `.marca`, `.marca-logo` e `.marca-nome` são do logótipo MDM no topo.
 
 ## Obras por serviço
 

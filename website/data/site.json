@@ -17,7 +17,12 @@
   "address2": "1990-426 Lisboa · Parque das Nações",
   "hours": "2ª a 6ª, 8h–17h",
   "certifications": "APIRAC · IMPIC · Gases fluorados",
-  "brands": ["Midea", "Mitsubishi Electric", "Daikin", "France Air"],
+  "marcas": [
+    {"nome": "Midea", "logo": "assets/img/marcas/midea.svg", "w": 487, "h": 193, "escala": 1.2},
+    {"nome": "Mitsubishi Electric", "logo": "assets/img/marcas/mitsubishi-electric.svg", "w": 357, "h": 109, "escala": 1.05},
+    {"nome": "Daikin", "logo": "assets/img/marcas/daikin.svg", "w": 1899, "h": 378, "escala": 0.72},
+    {"nome": "France Air", "logo": "assets/img/marcas/france-air.png", "w": 900, "h": 141, "escala": 0.7}
+  ],
   "btu": {
     "porM2": 400,
     "tipos": {"Quarto": 1.0, "Sala": 1.1, "Cozinha": 1.25, "Escritório": 1.15, "Outra divisão": 1.0},

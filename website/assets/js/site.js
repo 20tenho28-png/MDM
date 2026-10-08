@@ -580,6 +580,84 @@
     window.addEventListener('hashchange', function () { aplica((location.hash || '').slice(1) || 'todas', 'hash'); });
   })();
 
+  /* ═══ Marcas: a faixa dos logótipos desliza devagar (partials/certificacoes.html, data/site.json «marcas») ═══
+     Sem JavaScript, ou com «reduzir movimento», a lista fica fixa e o botão escondido. Aqui juntam-se cópias da lista
+     até a faixa nunca ficar vazia: um ciclo anda metade da pista, por isso as listas vão aos pares (a original e uma
+     cópia, ou mais num ecrã largo). As cópias ficam fora do alcance dos leitores de ecrã e do teclado (aria-hidden,
+     inert, imagens com alt vazio): cada marca lê-se uma vez. Cerca de 34 px por segundo.
+     Para com o botão «Pausa» (WCAG 2.2.2), com o rato ou o foco em cima da faixa (no CSS) e quando a faixa sai do
+     ecrã (IntersectionObserver), para não gastar processador. */
+  (function () {
+    var root = document.querySelector('[data-marcas]');
+    if (!root) return;
+    var faixa = root.querySelector('.marcas-faixa'), pista = root.querySelector('.marcas-pista');
+    var lista = pista && pista.querySelector('.marcas'), botao = root.querySelector('.marcas-pausa');
+    var txt = botao && botao.querySelector('.marcas-pausa-txt');
+    if (!faixa || !lista || !botao || !txt) return;
+    var VELOCIDADE = 34;   /* px por segundo */
+    var mm = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : null;
+    var ligada = false, medida = '', io = null, espera = null;
+
+    function tiraCopias() { qsa('.marcas-copia', pista).forEach(function (c) { pista.removeChild(c); }); }
+    function copia() {
+      var c = lista.cloneNode(true);
+      c.className += ' marcas-copia';
+      c.removeAttribute('aria-labelledby');
+      c.setAttribute('aria-hidden', 'true');
+      c.setAttribute('inert', '');
+      qsa('img', c).forEach(function (i) { i.alt = ''; });
+      qsa('[id]', c).forEach(function (e) { e.removeAttribute('id'); });
+      return c;
+    }
+    /* quantas listas cabem na faixa; refaz-se só quando a lista ou a faixa mudam de largura (letras, rodar o ecrã) */
+    function monta() {
+      var a = lista.getBoundingClientRect().width, f = faixa.clientWidth;
+      if (!a || !f) return;
+      var m = Math.max(1, Math.ceil(f / a)), chave = m + '|' + Math.round(a);
+      if (chave === medida) return;
+      medida = chave;
+      tiraCopias();
+      for (var k = 1; k < 2 * m; k++) pista.appendChild(copia());
+      pista.style.setProperty('--marcas-dur', (m * a / VELOCIDADE).toFixed(1) + 's');
+    }
+    /* o texto diz o que o botão faz (Pausa / Continuar); sem aria-pressed, que com o nome a mudar se contradizia */
+    function pausa(parada) {
+      txt.textContent = parada ? 'Continuar' : 'Pausa';
+      root.classList.toggle('marcas-parada', parada);
+    }
+    function liga() {
+      if (ligada) return;
+      ligada = true;
+      root.classList.add('marcas-pronta');   /* uma só linha: antes de medir */
+      monta();
+      root.classList.add('marcas-anda');
+      botao.hidden = false;
+      if ('IntersectionObserver' in window) {
+        io = new IntersectionObserver(function (en) { root.classList.toggle('marcas-fora', !en[en.length - 1].isIntersecting); });
+        io.observe(faixa);
+      }
+    }
+    function desliga() {
+      if (!ligada) return;
+      ligada = false; medida = '';
+      if (io) { io.disconnect(); io = null; }
+      root.classList.remove('marcas-anda', 'marcas-fora', 'marcas-pronta');
+      pausa(false);
+      botao.hidden = true;
+      tiraCopias();
+    }
+    function decide() { if (mm && mm.matches) desliga(); else liga(); }
+
+    botao.addEventListener('click', function () { pausa(!root.classList.contains('marcas-parada')); });
+    window.addEventListener('resize', function () {
+      if (!ligada) return;
+      clearTimeout(espera); espera = setTimeout(monta, 150);
+    });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (ligada) monta(); });
+    decide();
+    if (mm) { if (mm.addEventListener) mm.addEventListener('change', decide); else if (mm.addListener) mm.addListener(decide); }
+  })();
+
   /* ═══ Perguntas: registo de aberturas ═══ */
   qsa('details.faq-item').forEach(function (d) {
     d.addEventListener('toggle', function () { if (d.open) track('faq_aberta', { pergunta: d.querySelector('summary').textContent.trim() }); });
