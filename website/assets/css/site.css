@@ -84,10 +84,16 @@ main:focus { outline: none; }
 .sec-escura .obra-code { color: var(--aco-claro); }
 
 /* ── Estrutura ── */
-.sec { padding: clamp(56px, 7vw, 88px) var(--margem); border-bottom: 1px solid var(--linha); }
+.sec { padding: clamp(56px, 7vw, 88px) var(--margem); }
 .sec > * { max-width: calc(var(--max) - 2 * 80px); margin-left: auto; margin-right: auto; }
 .sec-areia { background: var(--areia); }
-.sec-escura { background: var(--tinta); color: var(--gesso); border-bottom: 0; }
+.sec-escura { background: var(--tinta); color: var(--gesso); }
+/* Costuras suaves: sem filetes entre secções. Quando o fundo muda de gesso para areia (ou ao contrário), a cor funde-se
+   no espaço de cima da secção, antes do conteúdo, para a página correr sem cortes. Entre fundos iguais não há costura. */
+:root { --funde: clamp(56px, 7vw, 88px); }
+:is(.sec:not(.sec-areia):not(.sec-escura), .portas, .pag-hero) + :is(.sec-areia, .cert) { background: linear-gradient(var(--gesso), var(--areia) var(--funde)); }
+:is(.sec-areia, .cert) + .sec:not(.sec-areia):not(.sec-escura) { background: linear-gradient(var(--areia), var(--gesso) var(--funde)); }
+.cert { --funde: 36px; }
 .sec-escura .h2, .sec-escura h3 { color: #fff; }
 .sec-cab { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 60px; margin-bottom: clamp(28px, 3.4vw, 44px); }
 .sec-cab > div { max-width: 760px; }
@@ -142,10 +148,10 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 .foco-dentro:focus-visible { box-shadow: inset 0 0 0 2px var(--gesso), inset 0 0 0 4px var(--tinta); }
 
 /* ── Topo ── */
-.topo { position: sticky; top: 0; z-index: 40; background: var(--gesso); border-bottom: 1px solid var(--linha); transition: box-shadow 200ms var(--resposta), background-color 200ms var(--resposta); }
+.topo { position: sticky; top: 0; z-index: 40; background: var(--gesso); border-bottom: 1px solid transparent; transition: box-shadow 200ms var(--resposta), background-color 200ms var(--resposta); }
 .topo-in { max-width: var(--max); margin: 0 auto; height: var(--topo-h); padding: 0 var(--margem); display: flex; align-items: center; gap: 28px; transition: height 200ms var(--mover); }
 .topo.compacto .topo-in { height: 60px; }
-.topo.compacto { box-shadow: 0 1px 0 var(--tinta); }
+.topo.compacto { box-shadow: 0 10px 28px -22px rgba(17, 22, 29, .55); }
 /* Topo em vidro depois de descer: gesso translúcido e desfocado. Onde o browser não desfoca, fica opaco como antes.
    86% de gesso mantém 4,5:1 mesmo com preto por baixo: o texto mais claro (marca-sub) passa a aço escuro, o resto é tinta e carmim. */
 @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
@@ -208,7 +214,7 @@ body.menu-aberto { overflow: hidden; }
    limitada para o título caber no primeiro ecrã, e desvanece-se onde o texto começa. No computador fica à direita,
    à altura do topo, e funde-se no fundo cor de gesso onde está o texto; o texto entra no máximo 10% na fotografia,
    sempre sobre o degradê. (A página inicial tem o seu topo, «Central», mais abaixo.) */
-.pag-hero { --foto-ar: 1.3333; position: relative; display: block; background: var(--gesso); color: var(--tinta); border-bottom: 1px solid var(--linha); }
+.pag-hero { --foto-ar: 1.3333; position: relative; display: block; background: var(--gesso); color: var(--tinta); }
 .hero-foto { position: relative; overflow: hidden; background: var(--areia) center / cover no-repeat;
   height: min(calc(100vw / var(--foto-ar)), max(46vh, calc(100vw / var(--foto-ar) * .56), calc(100vh - var(--topo-h) - 540px)));
   height: min(calc(100vw / var(--foto-ar)), max(46svh, calc(100vw / var(--foto-ar) * .56), calc(100svh - var(--topo-h) - 540px))); }
@@ -420,13 +426,13 @@ body::before { content: ''; position: fixed; inset: 0; z-index: 70; pointer-even
 
 /* ── Portas: três entradas para o formulário (página inicial) ──
    Cada uma leva ao formulário com o serviço já escolhido (data-preselect, site.js); sem JavaScript, só ao formulário. */
-.portas { padding: clamp(28px, 4vw, 48px) var(--margem); border-bottom: 1px solid var(--linha); }
+.portas { padding: clamp(28px, 4vw, 48px) var(--margem); }
 .portas-in { max-width: calc(var(--max) - 160px); margin: 0 auto; display: grid; gap: 12px var(--gap); grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 800px) { .portas-in { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.porta { display: flex; flex-direction: column; gap: 6px; min-height: 44px; padding: 18px 20px 20px; background: var(--branco); border: 1px solid var(--linha); border-top: 4px solid var(--carmim); color: var(--tinta); text-decoration: none; outline: 1px solid transparent; outline-offset: -1px; transition: outline-color 180ms var(--resposta); }
+.porta { display: flex; flex-direction: column; gap: 6px; min-height: 44px; padding: 18px 20px 20px; background: var(--branco); border: 0; border-top: 4px solid var(--carmim); color: var(--tinta); text-decoration: none; outline: 1px solid transparent; outline-offset: -1px; transition: transform 300ms var(--mover), box-shadow 300ms var(--mover); }
 .porta-instalar { border-top-color: var(--tinta); }
 .porta-manter { border-top-color: var(--aco); }
-.porta:hover { color: var(--tinta); outline-color: var(--tinta); }
+.porta:hover, .esp-card:hover { color: var(--tinta); transform: translateY(-2px); box-shadow: 0 18px 36px -24px rgba(17, 22, 29, .45); }
 .porta-t { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-family: var(--sans); font-size: clamp(19px, 1.7vw, 22px); font-weight: 700; letter-spacing: -.015em; line-height: 1.2; }
 .porta-t .seta { color: var(--carmim); }
 .porta:hover .seta, .porta:focus-visible .seta { transform: translateX(4px); }
@@ -443,8 +449,7 @@ body::before { content: ''; position: fixed; inset: 0; z-index: 70; pointer-even
   .esp-card:nth-child(4) { grid-column: 2 / span 2; }
   .esp-card:nth-child(5) { grid-column: 4 / span 2; }
 }
-.esp-card { display: flex; flex-direction: column; background: var(--branco); border: 1px solid var(--linha); color: var(--tinta); text-decoration: none; outline: 1px solid transparent; outline-offset: -1px; transition: outline-color 180ms var(--resposta); }
-.esp-card:hover { color: var(--tinta); outline-color: var(--tinta); }
+.esp-card { display: flex; flex-direction: column; background: var(--branco); color: var(--tinta); text-decoration: none; outline: 1px solid transparent; outline-offset: -1px; transition: transform 300ms var(--mover), box-shadow 300ms var(--mover); }
 .quadro { display: block; overflow: hidden; }
 .quadro picture.foto img { transition: transform 600ms var(--mover); }
 .esp-card .quadro { aspect-ratio: 4 / 3; }
@@ -548,7 +553,7 @@ html:not(.js) .topo-in > .menu-btn { display: none; }
 @media (min-width: 1100px) { .metodo-foto { margin-top: 36px; } .metodo-foto picture.foto { aspect-ratio: 4 / 5; } }
 
 /* ── Certificações e marcas ── */
-.cert { background: var(--areia); border-bottom: 1px solid var(--linha); padding: 36px var(--margem); }
+.cert { background: var(--areia); padding: 36px var(--margem); }
 .cert-in { max-width: calc(var(--max) - 160px); margin: 0 auto; display: grid; gap: 32px; }
 @media (min-width: 1100px) { .cert-in { gap: 28px; } }
 .cert-selos { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
@@ -660,7 +665,7 @@ html:not(.js) .topo-in > .menu-btn { display: none; }
 .canal-morada { color: var(--tinta) !important; font-size: 16px !important; }
 .fora-horas { border-left: 3px solid var(--carmim); padding: 4px 0 4px 16px; display: flex; flex-direction: column; gap: 6px; }
 .fora-horas p:last-child { font-size: 15px; color: var(--aco-2); }
-.form-caixa { background: var(--branco); border: 1px solid var(--linha); padding: clamp(24px, 3.2vw, 40px); scroll-margin-top: calc(var(--topo-h) + 16px); }
+.form-caixa { background: var(--branco); padding: clamp(24px, 3.2vw, 40px); scroll-margin-top: calc(var(--topo-h) + 16px); }
 .form-t { font-size: clamp(24px, 2.4vw, 30px); font-weight: 700; letter-spacing: -.022em; margin-bottom: 22px; }
 #quoteForm { display: flex; flex-direction: column; gap: 18px; }
 .campo { display: flex; flex-direction: column; gap: 8px; }
@@ -1046,6 +1051,7 @@ html.visor-aberto { overflow: hidden; }
   .carrossel-trilho { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 1ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; transition-delay: 0ms !important; }
   .js [data-r] { opacity: 1; transform: none; }
+  .porta:hover, .esp-card:hover,
   .btn:active, .chip:active, .btn:hover .seta, .esp-card:hover .seta, .porta:hover .seta, .porta:focus-visible .seta,
   .esp-card:hover .quadro img, .obra-link:hover .obra-quadro img { transform: none !important; }
 }
