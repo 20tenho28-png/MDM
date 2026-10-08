@@ -48,6 +48,8 @@ from urllib.parse import quote, unquote
 ROOT = Path(__file__).resolve().parent
 import os
 SRC, DATA, ASSETS = ROOT / "src", ROOT / "data", ROOT / "assets"
+# assistente de propostas da equipa (uso interno, fora do site): copiado tal como está para public/equipa/
+EQUIPA = ROOT / "equipa"
 # MDM_OUT permite gerar para outra pasta (por exemplo, várias verificações em paralelo)
 OUT = Path(os.environ["MDM_OUT"]).resolve() if os.environ.get("MDM_OUT") else ROOT / "public"
 
@@ -494,6 +496,8 @@ def build():
         shutil.rmtree(OUT)
     OUT.mkdir()
     shutil.copytree(ASSETS, OUT / "assets")
+    if EQUIPA.exists():
+        shutil.copytree(EQUIPA, OUT / "equipa")
     files, fora_do_mapa = [], set()
     for p in sorted((SRC / "pages").rglob("*.html")):
         text = p.read_text(encoding="utf-8")
@@ -530,7 +534,8 @@ def build():
         (OUT / "_headers").write_text("# Pré-visualização: gerado por build.py a partir de \"preview\" em data/site.json\n"
                                       "/*\n  X-Robots-Tag: noindex\n", encoding="utf-8")
     else:
-        (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE['baseUrl']}/sitemap.xml\n", encoding="utf-8")
+        (OUT / "robots.txt").write_text(f"User-agent: *\nDisallow: /equipa/\nAllow: /\nSitemap: {SITE['baseUrl']}/sitemap.xml\n",
+                                        encoding="utf-8")
     return files
 
 
@@ -653,7 +658,7 @@ def check(files):
                 if not target.exists():
                     problems.append(f"{f}: referência partida → {r}")
     problems += check_preview()
-    problems += check_duracoes() + check_testemunhos() + check_formatos() + check_btu() + check_precos() + check_marcas()
+    problems += check_duracoes() + check_testemunhos() + check_formatos() + check_btu() + check_precos() + check_marcas() + check_equipa()
     for css in (OUT / "assets" / "css").glob("*.css"):
         for c in re.findall(r"url\(([^)]+)\)", css.read_text(encoding="utf-8")):
             c = c.strip("'\"")
@@ -733,9 +738,10 @@ def check_formulario(f, text):
     return out
 
 
-def check_precos():
-    """data/precos.json: a estrutura de sempre, preços null ou [mínimo, máximo] inteiros, e os tamanhos de btu.tamanhos."""
-    p, out, nome = PRECOS_DOC, [], "precos.json"
+def check_precos(p=None, nome="precos.json"):
+    """data/precos.json (e a tabela de teste do assistente, precos-teste.json): a estrutura de sempre, preços null ou
+    [mínimo, máximo] inteiros, e os tamanhos de btu.tamanhos."""
+    p, out = (PRECOS_DOC if p is None else p), []
     if not isinstance(p, dict):
         return [f"{nome}: tem de ser um objeto JSON, como o modelo do README"]
     esperado = {"split", "multisplit", "extras", "aguasQuentes", "inclui"}
@@ -791,6 +797,37 @@ def check_precos():
                 out.append(f"{nome} «inclui.{k}»: tem de ser texto, entre aspas → {json.dumps(v, ensure_ascii=False)}")
             elif re.search(r"[{}<>]", v):
                 out.append(f"{nome} «inclui.{k}»: sem chavetas nem < > → «{v}»")
+    return out
+
+
+def check_equipa():
+    """Assistente de propostas (equipa/, uso interno): a tabela de teste com a estrutura de precos.json, as regras de
+    texto do dono nas páginas e nos scripts, as ligações, e o noindex."""
+    out = []
+    teste = DATA / "precos-teste.json"
+    if teste.exists():
+        try:
+            out += check_precos(json.loads(teste.read_text(encoding="utf-8")), "precos-teste.json")
+        except json.JSONDecodeError as e:
+            out.append(f"precos-teste.json: JSON inválido → {e}")
+    for f in sorted((OUT / "equipa").glob("*")) if (OUT / "equipa").exists() else []:
+        nome = str(f.relative_to(OUT))
+        text = f.read_text(encoding="utf-8")
+        out += texto_proibido(nome, text)
+        if f.suffix == ".html":
+            if 'name="robots" content="noindex' not in text:
+                out.append(f"{nome}: falta <meta name=\"robots\" content=\"noindex, nofollow\"> (página interna)")
+            for a, b, c in REF_RE.findall(text):
+                r = a or c.strip("'\"")
+                if r and not re.match(r"^(https?:|mailto:|tel:|data:|//|/api/)", r):
+                    alvo = (OUT / r.lstrip("/")) if r.startswith("/") else (f.parent / r).resolve()
+                    if not alvo.exists():
+                        out.append(f"{nome}: referência partida → {r}")
+        if f.suffix == ".css":
+            for c in re.findall(r"url\(([^)]+)\)", text):
+                c = c.strip("'\"")
+                if not c.startswith("data:") and not (f.parent / c).resolve().exists():
+                    out.append(f"{nome}: url partido → {c}")
     return out
 
 

@@ -21,3 +21,6 @@ htmlcov/
 # Site gerado (python3 website/build.py)
 website/public/
 
+
+# Dependências da função do assistente de propostas (website/package.json)
+node_modules/

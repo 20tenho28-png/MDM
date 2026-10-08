@@ -40,3 +40,11 @@
   from = "/*"
   to = "/404.html"
   status = 404
+
+# Assistente de propostas da equipa (equipa/, uso interno): fora dos motores de busca e sem cache (o CSS e o JS de
+# equipa/ não levam ?v=, por isso o browser tem de confirmar sempre se mudaram).
+[[headers]]
+  for = "/equipa/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-cache"

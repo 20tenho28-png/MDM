@@ -1,0 +1,87 @@
+<!doctype html>
+<!-- Assistente de propostas da equipa MDM (uso interno, com senha). Fora do site: sem menu, sem estatísticas, sem
+     indexação (meta robots, X-Robots-Tag no netlify.toml e Disallow no robots.txt). Fala com a função
+     netlify/functions/proposta.mts em /api/proposta. README.md, «Assistente de propostas». -->
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Assistente de propostas · MDM</title>
+<link rel="icon" href="../assets/img/logo-mdm.svg" type="image/svg+xml">
+<link rel="stylesheet" href="proposta.css">
+</head>
+<body>
+<header class="eq-topo">
+  <div class="eq-marca">
+    <img src="../assets/img/logo-mdm.svg" alt="" width="36" height="36">
+    <div>
+      <p class="eq-nome">Assistente de propostas</p>
+      <p class="eq-sub">MDM · uso interno da equipa</p>
+    </div>
+  </div>
+  <div class="eq-acoes" data-so-dentro hidden>
+    <button type="button" class="eq-btn eq-btn-linha" data-nova>Nova conversa</button>
+    <button type="button" class="eq-btn eq-btn-texto" data-sair>Sair</button>
+  </div>
+</header>
+
+<main id="conteudo">
+  <section class="eq-entrar" data-entrar aria-labelledby="entrarT">
+    <h1 class="eq-h1" id="entrarT">Entrar</h1>
+    <p class="eq-texto">Escreva a senha da equipa. Fica guardada só neste separador, até o fechar.</p>
+    <form data-entrar-form>
+      <label class="eq-rot" for="senha">Senha</label>
+      <input class="eq-campo" id="senha" name="senha" type="password" autocomplete="current-password" required>
+      <p class="eq-erro" data-entrar-erro role="alert"></p>
+      <button class="eq-btn eq-btn-accent" type="submit">Entrar</button>
+    </form>
+  </section>
+
+  <div class="eq-mesa" data-mesa hidden>
+    <section class="eq-chat" aria-labelledby="chatT">
+      <h1 class="eq-h1 eq-vis-oculto" id="chatT">Conversa</h1>
+      <div class="eq-teste" data-teste hidden>Tabela de <strong>teste</strong>: os preços são falsos. Não enviar ao cliente.</div>
+      <div class="eq-msgs" data-msgs role="log" aria-label="Conversa" tabindex="0">
+        <div class="eq-vazio" data-vazio>
+          <p class="eq-texto">Escreva o que o cliente pediu, como contaria a um colega. O assistente pergunta o que falta, faz as contas com a tabela da MDM e prepara a proposta modelo.</p>
+          <p class="eq-rot">Exemplos</p>
+          <ul class="eq-exemplos">
+            <li><button type="button" class="eq-chip" data-exemplo>Sala de 25 m² num último andar, com muito sol. Quanto custa um ar condicionado?</button></li>
+            <li><button type="button" class="eq-chip" data-exemplo>T3 em Moscavide: sala de 30 m² e dois quartos de 12 e 14 m². Quanto fica um multi-split?</button></li>
+            <li><button type="button" class="eq-chip" data-exemplo>Moradia com 4 pessoas quer bomba de calor para águas quentes. Que preço damos?</button></li>
+          </ul>
+        </div>
+      </div>
+      <p class="eq-estado" data-estado role="status" aria-live="polite"></p>
+      <form class="eq-escrever" data-form>
+        <label class="eq-vis-oculto" for="msg">Mensagem para o assistente</label>
+        <textarea class="eq-campo eq-msg" id="msg" rows="3" placeholder="O que pediu o cliente?" data-msg></textarea>
+        <div class="eq-escrever-pe">
+          <span class="eq-dica">Enter envia · Shift + Enter muda de linha</span>
+          <button class="eq-btn eq-btn-accent" type="submit" data-enviar>Enviar</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="eq-lado" aria-labelledby="propT">
+      <div class="eq-lado-cab">
+        <h2 class="eq-h2" id="propT">Proposta modelo</h2>
+        <label class="eq-vis-oculto" for="qual">Escolher proposta</label>
+        <select class="eq-campo eq-qual" id="qual" data-qual hidden></select>
+      </div>
+      <p class="eq-texto eq-sem-prop" data-sem-prop>Quando pedir «prepara a proposta», ela aparece aqui, pronta a copiar ou a guardar em PDF.</p>
+      <div data-prop-zona hidden>
+        <div class="eq-prop-acoes">
+          <button type="button" class="eq-btn eq-btn-tinta" data-copiar>Copiar texto</button>
+          <button type="button" class="eq-btn eq-btn-linha" data-pdf>Guardar PDF</button>
+          <span class="eq-copiado" data-copiado role="status" aria-live="polite"></span>
+        </div>
+        <article class="doc" data-doc aria-label="Proposta modelo"></article>
+      </div>
+    </section>
+  </div>
+</main>
+<script src="proposta.js"></script>
+</body>
+</html>

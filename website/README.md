@@ -61,6 +61,7 @@ Todas as páginas levam a empresa em JSON-LD (`HVACBusiness` e `Electrician`): n
 | `assets/fonts/` | Archivo e Newsreader alojadas no site (licença OFL incluída): nenhum pedido ao Google |
 | `assets/img/obras/` | Fotografias com correção de cor ligeira: o original `foto-NN-1600.jpg` e os tamanhos 400 a 1600 em AVIF e WebP (ver «Fotografias das obras») |
 | `gerar_fotos.py` | Faz os tamanhos AVIF e WebP das fotografias a partir do JPEG de 1600 |
+| `equipa/`, `netlify/`, `data/precos-teste.json`, `package.json`, `tests/` | Assistente de propostas da equipa (uso interno, fora do site): ver «Assistente de propostas» |
 
 ## Página inicial
 
@@ -172,6 +173,28 @@ Cada linha tem duas gamas: `eco` («Gama económica (ex.: Midea)») e `sup` («G
 3. Enviar um pedido de teste com fotografia e confirmar que chega ao email e aparece em **Forms**. Apagar depois o pedido de teste.
 
 O filtro de spam do Netlify está ligado por omissão; os pedidos marcados como spam ficam em **Forms → Spam**, convém espreitar de vez em quando.
+
+## Assistente de propostas (uso interno da equipa)
+
+Uma página com senha, `/equipa/proposta.html`, onde a equipa escreve o pedido do cliente como o contaria a um colega («sala de 25 m² num último andar, quanto custa?»). O assistente (Claude, pela API da Anthropic) pergunta o que falta, responde ao «quanto custa?» e prepara uma **proposta modelo** com texto para copiar (email, WhatsApp) e PDF em A4 («Guardar PDF» abre a impressão do browser: escolher «Guardar como PDF»). Não aparece no site: sem ligações, sem estatísticas, `noindex` na página e no cabeçalho (`netlify.toml`) e `Disallow: /equipa/` no `robots.txt`.
+
+**A IA não faz contas.** Os números saem de `netlify/lib/calculo.mjs`, com as mesmas regras e os mesmos dados do formulário do site (`btu` em `data/site.json` e `data/precos.json`, ver «Preço provável»): o modelo chama as ferramentas `calcular_potencia`, `calcular_preco` e `preparar_proposta` e repete o que elas devolvem. A proposta é montada pela função a partir desses números, não pelo texto do modelo. As notas que o modelo escreve passam pelas regras do dono (sem prazos de resposta, sem «N anos», só as quatro marcas, sem travessões): uma nota que falhe fica de fora.
+
+**As regras do preço estão em dois sítios** (`assets/js/site.js` para o formulário, `netlify/lib/calculo.mjs` para o assistente). Quem mudar uma tem de mudar a outra; `tests/paridade.mjs` compara os dois em 67 casos com a tabela de teste e falha se derem resumos diferentes.
+
+**Como funciona.** A página fala com a função `netlify/functions/proposta.mts` em `/api/proposta`. Cada pedido HTTP faz uma só chamada ao modelo (`claude-opus-5-5`, esforço `medium`, com `fallbacks: "default"` para o caso de o modelo recusar um pedido); quando o modelo pede contas, a função faz-as e a página volta a chamar até ao fim da resposta, para nenhum pedido se aproximar do limite de 60 s das funções. A conversa vive no separador (`sessionStorage`) e vai inteira em cada pedido; fechar o separador apaga-a. Limite: 40 pedidos por minuto por IP.
+
+**Ligar no Netlify** (Site configuration → Environment variables, âmbito **Functions**), e depois voltar a publicar:
+
+| Variável | O quê |
+|---|---|
+| `ANTHROPIC_API_KEY` | Chave da API da Anthropic (console.anthropic.com). Paga por utilização |
+| `MDM_EQUIPA_SENHA` | A senha que a equipa escreve na página. Sem ela, a função responde que não está configurada |
+| `MDM_PRECOS` | `teste` para experimentar com `data/precos-teste.json` (números falsos e redondos; cada proposta sai com «VALORES DE TESTE · NÃO ENVIAR AO CLIENTE»). Apagar a variável quando a tabela real estiver preenchida |
+
+Com `precos.json` vazio (hoje) e sem `MDM_PRECOS=teste`, o assistente calcula potências mas diz que ainda não há preços. O `package.json` só existe para a função (o site continua a ser gerado só com Python); o Netlify instala as dependências sozinho.
+
+**Testes** (a partir de `website/`): `npm install && node tests/funcao.mjs` (a função contra uma API falsa, sem chave nem rede: senha, pedido à API, contas, proposta, notas recusadas); `tests/paridade.mjs` precisa do Playwright (ver o cabeçalho do ficheiro). `build.py --check` valida também `precos-teste.json` e as páginas de `equipa/`.
 
 ## Estatísticas e consentimento
 
