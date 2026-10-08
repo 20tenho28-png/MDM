@@ -88,12 +88,28 @@ main:focus { outline: none; }
 .sec > * { max-width: calc(var(--max) - 2 * 80px); margin-left: auto; margin-right: auto; }
 .sec-areia { background: var(--areia); }
 .sec-escura { background: var(--tinta); color: var(--gesso); }
-/* Costuras suaves: sem filetes entre secções. Quando o fundo muda de gesso para areia (ou ao contrário), a cor funde-se
-   no espaço de cima da secção, antes do conteúdo, para a página correr sem cortes. Entre fundos iguais não há costura. */
+/* Costuras suaves: sem filetes entre secções. Quando o fundo muda (gesso, areia ou tinta), a cor de cima funde-se na de baixo
+   dentro do espaço de cima da secção, antes do conteúdo; o texto fica sempre sobre a cor final. A passagem segue uma curva
+   suave (em oklab), para o claro e o escuro não se misturarem num cinzento sujo. Entre fundos iguais não há costura.
+   --de: cor da secção de cima; --para: cor desta secção; --funde: altura da passagem (= espaço de cima da secção). */
 :root { --funde: clamp(56px, 7vw, 88px); }
-:is(.sec:not(.sec-areia):not(.sec-escura), .portas, .pag-hero) + :is(.sec-areia, .cert) { background: linear-gradient(var(--gesso), var(--areia) var(--funde)); }
-:is(.sec-areia, .cert) + .sec:not(.sec-areia):not(.sec-escura) { background: linear-gradient(var(--areia), var(--gesso) var(--funde)); }
 .cert { --funde: 36px; }
+.portas { --funde: clamp(28px, 4vw, 48px); }
+.cta-faixa { --funde: clamp(40px, 5vw, 56px); }
+.rodape { --funde: 56px; }
+/* claro para claro */
+:is(.sec:not(.sec-areia):not(.sec-escura), .portas, .pag-hero) + :is(.sec-areia, .cert) { --de: var(--gesso); --para: var(--areia); }
+:is(.sec-areia, .cert) + .sec:not(.sec-areia):not(.sec-escura) { --de: var(--areia); --para: var(--gesso); }
+/* claro para escuro */
+:is(.sec:not(.sec-areia):not(.sec-escura), .portas, .obras-wrap) + :is(.sec-escura, .cta-faixa) { --de: var(--gesso); --para: var(--tinta); }
+:is(.sec-areia, .cert) + :is(.sec-escura, .cta-faixa) { --de: var(--areia); --para: var(--tinta); }
+main:not(:has(> :is(.cta-faixa, .sec-escura):last-of-type)) + .rodape { --de: var(--gesso); --para: var(--tinta); }
+main:has(> .sec-areia:last-of-type) + .rodape { --de: var(--areia); }
+/* escuro para claro */
+:is(.sec-escura, .cta-faixa, .faixa) + :is(.sec:not(.sec-areia):not(.sec-escura), .portas) { --de: var(--tinta); --para: var(--gesso); }
+:is(.sec-escura, .cta-faixa, .faixa) + .sec-areia { --de: var(--tinta); --para: var(--areia); }
+/* a passagem: sem --de definido (ou sem color-mix) a declaração não vale e fica a cor lisa da secção */
+html :is(.sec, .portas, .cert, .cta-faixa, .rodape) { background-image: linear-gradient(var(--de), color-mix(in oklab, var(--para) 6.1%, var(--de)) calc(var(--funde) * 0.15), color-mix(in oklab, var(--para) 21.6%, var(--de)) calc(var(--funde) * 0.3), color-mix(in oklab, var(--para) 42.5%, var(--de)) calc(var(--funde) * 0.45), color-mix(in oklab, var(--para) 64.8%, var(--de)) calc(var(--funde) * 0.6), color-mix(in oklab, var(--para) 84.4%, var(--de)) calc(var(--funde) * 0.75), color-mix(in oklab, var(--para) 97.2%, var(--de)) calc(var(--funde) * 0.9), var(--para) var(--funde)); }
 .sec-escura .h2, .sec-escura h3 { color: #fff; }
 .sec-cab { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 60px; margin-bottom: clamp(28px, 3.4vw, 44px); }
 .sec-cab > div { max-width: 760px; }
