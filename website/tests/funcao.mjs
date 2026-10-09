@@ -16,7 +16,7 @@ const saida = path.join(tmp, 'proposta.mjs');
 await build({ entryPoints: [path.join(W, 'netlify/functions/proposta.mts')], bundle: true, platform: 'node', format: 'esm',
   outfile: saida, external: ['@anthropic-ai/sdk'], logLevel: 'error' });
 fs.symlinkSync(path.join(W, 'node_modules'), path.join(tmp, 'node_modules'));
-const { atende } = await import(saida);
+const { atende, redige } = await import(saida);
 
 let falhas = 0, oks = 0;
 const ok = (c, msg, extra) => { if (c) oks++; else { falhas++; console.log('FALHA ' + msg + (extra !== undefined ? ' → ' + JSON.stringify(extra).slice(0, 600) : '')); } };
@@ -235,6 +235,28 @@ fila.push(usa('preparar_proposta', { servico: 'ac', divisoes: [{ tipo: 'Sala', a
   cliente: { nome: 'Rui', contacto: '[telefone]', local: '' }, pedido: 'Sala', observacoes: [] }));
 r = await chama([{ role: 'user', content: 'x' }]);
 ok(r.corpo.propostas[0].cliente.contacto === '', 'contacto «[telefone]» não vai para a proposta', r.corpo.propostas[0].cliente);
+
+// 15. corte: formatos portugueses cortados, medidas e BTU intactos
+const cortar = ['+351912345678', '00351912345678', '351912345678', '91 234 56 78', '912.345.678', '218 935 050', '21 893 50 50', 'NIF 123 456 789', '123 456 789',
+  'contribuinte: 501234567', '1990-426, Lisboa', '1990 426, Lisboa', 'cp 1990 426', 'CP: 1990-426', 'Rua X, 2700-123.', 'a@b.pt'];
+const manter = ['Sala de 25 m2 e quarto de 12,5 m2', 'Máquinas de 9000 12000 e 18000 BTU', 'BTU 7000 9000 12000', 'Visita 2026-10-09 14:30', 'Desde 1991, prédio de 1990',
+  'entre 1000-500 €', 'orçamento 1000-1500 euros', 'Sala 3x4 metros, 2.º andar, 9 m de tubo', 'Preço 1 050 € a 1 400 €', '24000 BTU/h e 18000 BTU/h'];
+ok(cortar.every((x) => !/\d{3}|@/.test(redige(x))), 'corte: todos os formatos de dados pessoais', cortar.map(redige));
+ok(manter.every((x) => redige(x) === x), 'corte: medidas, BTU, datas e preços ficam', manter.filter((x) => redige(x) !== x).map(redige));
+
+// 16. marcadores nunca chegam à proposta (local, pedido, notas, contacto)
+fila.push(usa('preparar_proposta', { servico: 'ac', divisoes: [{ tipo: 'Sala', area: 20, sol: false, ultimo_andar: false }], respostas: VAZIAS,
+  cliente: { nome: 'Rui', contacto: 'Telefone: [telefone]', local: 'Rua das Flores 12, [código postal] Lisboa' }, pedido: 'Sala, contacto [telefone]',
+  observacoes: ['Ligar antes para [telefone].', 'Máquina na varanda.'] }));
+r = await chama([{ role: 'user', content: 'x' }]);
+const pm16 = r.corpo.propostas[0];
+ok(pm16.cliente.contacto === '' && pm16.cliente.local === 'Rua das Flores 12, Lisboa' && pm16.pedido === 'Sala, contacto' && pm16.observacoes.join('|') === 'Máquina na varanda.' && !/\[/.test(pm16.texto),
+  'marcadores fora da proposta', { c: pm16.cliente, p: pm16.pedido, o: pm16.observacoes });
+
+// 17. a leitura devolve o motivo da IA à parte dos calculados
+fila.push({ content: [{ type: 'text', text: JSON.stringify({ servico: 'ac', divisoes: quartos(5), respostas: VAZIAS, local: '', pedido: '', notas: [], duvidas: [], complexo: true, motivo_complexo: 'Prédio antigo com fachada protegida.' }) }], stop_reason: 'end_turn' });
+t = await acao({ acao: 'ler', texto: 'cinco quartos' });
+ok(t.corpo.complexoIA.length === 1 && t.corpo.complexoIA[0] === 'Prédio antigo com fachada protegida.' && t.corpo.complexo.some((m) => /5 divisões/.test(m)), 'motivo da IA à parte', t.corpo);
 
 srv.close();
 fs.rmSync(tmp, { recursive: true, force: true });

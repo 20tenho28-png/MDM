@@ -28,11 +28,20 @@
   var VAZIO_FORM = { servico: 'ac', divisoes: [{ tipo: 'Sala', area: '', sol: false, topo: false }], respostas: {},
     nome: '', contacto: '', local: '', pedido: '', notas: '', texto: '', duvidas: [], complexoIA: [] };
   function novoForm() { return JSON.parse(JSON.stringify(VAZIO_FORM)); }
-  var S = { mensagens: [], propostas: [], teste: false, atual: -1, aba: 'form', form: novoForm() };
+  var S = { mensagens: [], propostas: [], teste: false, atual: -1, aba: 'form', form: novoForm(), rascunho: '' };
   try {
     var g = JSON.parse(le(CHAVE) || 'null');
     if (g && Array.isArray(g.mensagens)) { S = g; S.form = Object.assign(novoForm(), S.form || {}); if (!Array.isArray(S.propostas)) S.propostas = []; }
   } catch (e) {}
+  /* a página foi recarregada a meio de uma resposta: o turno sem fim sai do histórico e o texto volta à caixa (rascunho) */
+  (function () {
+    var m = S.mensagens, i = m.length - 1;
+    if (!m.length || m[i].role === 'assistant') return;
+    while (i > 0 && !(m[i].role === 'user' && typeof m[i].content === 'string')) i--;
+    var t = typeof m[i].content === 'string' ? m[i].content : '';
+    m.splice(i);
+    S.rascunho = [t, S.rascunho || ''].filter(Boolean).join('\n\n');
+  })();
   var senha = le(CHAVE_SENHA) || '', ocupado = false, T = null;
   /* «Nova proposta» e «Sair» mudam a geração: uma resposta que chegue depois, de um pedido feito antes, é ignorada */
   var GEN = 0;
@@ -52,6 +61,7 @@
     $('[data-entrar-erro]').textContent = erro || '';
     if (!dentroDaMesa) { $('#senha').focus(); return; }
     desenhaTudo();
+    texto.value = S.form.texto || '';
     if (!T) carregaTabela(); else calcula();   /* depois de voltar a entrar, a conta que ficou a meio refaz-se */
     var aba = $('[data-aba][aria-selected="true"]'); if (aba) aba.focus();
   }
@@ -62,10 +72,11 @@
     $('#senha').value = '';
     mostra(true);
   });
-  $('[data-sair]').addEventListener('click', function () { senha = ''; apaga(CHAVE_SENHA); GEN++; T = null; limpaEstados(); mostra(false); });
+  /* «Sair» não muda a geração: o caso continua o mesmo, e uma resposta já paga ainda entra */
+  $('[data-sair]').addEventListener('click', function () { senha = ''; apaga(CHAVE_SENHA); mostra(false); });
   function temDados() {
     var f = S.form;
-    return S.mensagens.length || S.propostas.length || f.texto.trim() || f.nome || f.contacto || f.local || f.pedido || f.notas.trim() ||
+    return S.mensagens.length || S.propostas.length || caixa.value.trim() || f.texto.trim() || f.nome || f.contacto || f.local || f.pedido || f.notas.trim() ||
       f.divisoes.some(function (d) { return String(d.area).trim(); });
   }
   /* estados que pertencem a pedidos em curso: ao mudar de geração, nada fica preso */
@@ -79,7 +90,8 @@
     GEN++;
     S = { mensagens: [], propostas: [], teste: S.teste, atual: -1, aba: 'form', form: novoForm() };
     caixa.value = '';
-    limpaEstados(); grava(); desenhaTudo(); poeForm(); poeComplexo([]); calcula();
+    limpaEstados(); grava(); desenhaTudo(); poeForm(); poeComplexo([]);
+    if (!T) carregaTabela(); else calcula();   /* a tabela não depende do caso: se ainda não chegou, volta a pedir-se */
   });
 
   /* ── abas ── */
@@ -104,21 +116,29 @@
 
   /* ── formulário ── */
   var recarrega = $('[data-recarrega]'), lerBtn = $('[data-ler]');
+  var aCarregar = false, focoDepois = false;
   function carregaTabela() {
-    var g = GEN;
+    if (aCarregar) return;
+    aCarregar = true;
     calcEstado.textContent = 'A carregar a tabela…'; recarrega.hidden = true;
     api({ acao: 'tabela' }).then(function (x) {
-      if (g !== GEN) return;
+      aCarregar = false;
       if (!x.ok) { calcEstado.textContent = x.c.erro || 'Não foi possível carregar a tabela.'; recarrega.hidden = false; return; }
       T = x.c; S.teste = !!T.teste; testeAviso.hidden = !S.teste;
       fp.inert = false; lerBtn.disabled = false; calcEstado.textContent = '';
       poeForm(); calcula();
+      if (focoDepois) { focoDepois = false; var c = fp.querySelector('input[name="servico"]:checked'); if (c) c.focus(); }
     }).catch(function (e) {
+      aCarregar = false;
       if (e.message === 'senha') return;
       calcEstado.textContent = 'Sem ligação. Verifique a internet.'; recarrega.hidden = false;
     });
   }
-  recarrega.addEventListener('click', carregaTabela);
+  recarrega.addEventListener('click', function () {
+    /* o botão esconde-se enquanto tenta: o foco passa para a linha de estado e, quando a tabela chega, para o formulário */
+    focoDepois = true; calcEstado.tabIndex = -1; calcEstado.focus();
+    carregaTabela();
+  });
   function leArea(t) {
     t = String(t == null ? '' : t).trim().replace(/\s*m(²|2)$/i, '').replace(',', '.');
     if (!t) return null;
@@ -215,7 +235,7 @@
       else if (a > T.areaMax) { msg = 'Mais de ' + T.areaMax + ' m²: dimensiona-se na visita.'; acimaDaArea++; }
       e.textContent = msg;
       li.querySelector('[data-d="area"]').setAttribute('aria-invalid', msg && a !== null ? 'true' : 'false');
-      if (msg) { if (a !== null) erros.push(i); return; }
+      if (msg) { if (a !== null && !(a > T.areaMax)) erros.push(i); return; }   /* acima do máximo é caso complexo, não erro */
       divisoes.push({ tipo: f.divisoes[i].tipo, area: a, sol: f.divisoes[i].sol, ultimo_andar: f.divisoes[i].topo });
     });
     var respostas = {};
@@ -231,7 +251,7 @@
       if (!x.ok) { tiraForm(); calcEstado.textContent = x.c.erro || 'Não foi possível calcular.'; return; }
       var c = x.c, avisos = [];
       if (c.proposta) { c.proposta.origem = 'form'; poeProposta(c.proposta); } else tiraForm();
-      if (ac && !divisoes.length) avisos.push('Escreva a área de pelo menos uma divisão.');
+      if (ac && !divisoes.length) avisos.push(acimaDaArea ? 'Divisão com mais de ' + T.areaMax + ' m²: dimensiona-se na visita, ou passe o caso ao assistente completo.' : 'Escreva a área de pelo menos uma divisão.');
       else if (c.modo === 'erro' && c.resultado && c.resultado.erro) avisos.push(c.resultado.erro);
       if (c.modo === 'escolhe') avisos.push('Escolha o tamanho do depósito.');
       if (c.notasRecusadas && c.notasRecusadas.length) avisos.push('Notas que não entram na proposta (regras da MDM): ' + c.notasRecusadas.join('; '));
@@ -302,7 +322,7 @@
         f.notas = ja.join('\n');
       }
       f.duvidas = c.duvidas || [];
-      f.complexoIA = x.c.complexo || [];
+      f.complexoIA = x.c.complexoIA || [];   /* só o motivo da IA; os calculados vêm de cada conta */
       grava(); poeForm(); calculaJa();
       lerEstado.textContent = 'Formulário preenchido. Confirme os campos' + (f.duvidas.length ? ' e veja o que falta perguntar.' : '.');
     }).catch(function (e) {
@@ -344,17 +364,19 @@
     if (tudo || nDesenhadas > S.mensagens.length || !S.mensagens.length) { msgs.textContent = ''; nDesenhadas = 0; }
     if (!S.mensagens.length) { msgs.appendChild(vazio); return; }
     if (vazio.parentNode) msgs.removeChild(vazio);
-    S.mensagens.slice(nDesenhadas).forEach(function (m) {
+    S.mensagens.slice(nDesenhadas).forEach(function (m, k) {
+      var i = nDesenhadas + k;
+      function poe(n) { n.setAttribute('data-i', i); msgs.appendChild(n); }
       if (m.role === 'user') {
-        if (typeof m.content === 'string') msgs.appendChild(el('div', 'msg msg-eu', m.content));
+        if (typeof m.content === 'string') poe(el('div', 'msg msg-eu', m.content));
         return;   /* resultados das ferramentas: não se mostram */
       }
       var txt = [];
       (m.content || []).forEach(function (b) {
         if (b.type === 'text' && b.text) txt.push(b.text);
-        if (b.type === 'tool_use') msgs.appendChild(el('p', 'msg-passo', '↳ ' + (PASSOS[b.name] || b.name)));
+        if (b.type === 'tool_use') poe(el('p', 'msg-passo', '↳ ' + (PASSOS[b.name] || b.name)));
       });
-      if (txt.length) msgs.appendChild(el('div', 'msg msg-ia', txt.join('\n\n').trim()));
+      if (txt.length) poe(el('div', 'msg msg-ia', txt.join('\n\n').trim()));
     });
     nDesenhadas = S.mensagens.length;
     msgs.scrollTop = msgs.scrollHeight;
@@ -362,8 +384,14 @@
   /* a mensagem que a equipa acabou de escrever não chegou a ter resposta: sai do histórico e volta à caixa */
   function devolve(textoDevolvido, quantas) {
     S.mensagens.splice(S.mensagens.length - quantas, quantas);
-    if (!caixa.value.trim()) caixa.value = textoDevolvido;
-    grava(); desenhaConversa(true);
+    /* se a equipa já começou a escrever a seguinte, as duas ficam juntas na caixa */
+    caixa.value = [textoDevolvido, caixa.value.trim()].filter(Boolean).join('\n\n');
+    S.rascunho = caixa.value;
+    grava();
+    /* tira só os nós dessas mensagens: o resto da conversa não volta a ser lido */
+    $$('[data-i]', msgs).forEach(function (n) { if (+n.getAttribute('data-i') >= S.mensagens.length) n.parentNode.removeChild(n); });
+    nDesenhadas = S.mensagens.length;
+    if (!S.mensagens.length) desenhaConversa(true);
   }
   function erroNaConversa(t) { msgs.appendChild(el('div', 'msg msg-erro', t)); msgs.scrollTop = msgs.scrollHeight; }
   function ocupa(sim, txt) {
@@ -405,11 +433,12 @@
     t = String(t || '').trim();
     if (!t || ocupado) return;
     S.mensagens.push({ role: 'user', content: t });
+    caixa.value = ''; S.rascunho = '';
     grava(); desenhaConversa();
-    caixa.value = '';
     pede(0);
   }
   formChat.addEventListener('submit', function (e) { e.preventDefault(); envia(caixa.value); });
+  caixa.addEventListener('input', function () { S.rascunho = caixa.value; grava(); });
   caixa.addEventListener('keydown', function (e) {
     if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); envia(caixa.value); }
   });
@@ -466,7 +495,9 @@
         tr.appendChild(el('td', 'num', inseparavel(d.texto || '')));
         tb.appendChild(tr);
       });
-      t.appendChild(tb); doc.appendChild(t);
+      t.appendChild(tb);
+      var cx = el('div', 'doc-pot-caixa'); cx.appendChild(t); doc.appendChild(cx);   /* num ecrã estreito, só a tabela desliza */
+      cx.tabIndex = 0; cx.setAttribute('role', 'region'); cx.setAttribute('aria-label', 'Potência estimada por divisão');
     }
     doc.appendChild(el('p', 'doc-sec', 'Preço provável, com IVA'));
     if (p.modo === 'visita') doc.appendChild(el('p', 'doc-visita', 'Para este caso o preço dá-se depois da visita, que é gratuita.'));
@@ -511,6 +542,9 @@
     document.title = antes;
   });
 
-  function desenhaTudo() { testeAviso.hidden = !S.teste; abre(S.aba || 'form'); desenhaConversa(true); desenhaProposta(); }
+  function desenhaTudo() {
+    testeAviso.hidden = !S.teste; abre(S.aba || 'form'); desenhaConversa(true); desenhaProposta();
+    if (!caixa.value && S.rascunho) caixa.value = S.rascunho;
+  }
   mostra(!!senha);
 })();

@@ -152,7 +152,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .doc-dados dt { font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--aco); padding-top: 3px; }
 .doc-dados dd { margin: 0; overflow-wrap: anywhere; }
 .doc-sec { margin: 0 0 8px; font-family: var(--sans); font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--carmim); }
-.doc-pot { width: 100%; border-collapse: collapse; margin: 0 0 22px; font-size: 14px; }
+.doc-pot-caixa { overflow-x: auto; margin: 0 0 22px; }
+.doc-pot { width: 100%; border-collapse: collapse; font-size: 14px; }
 .doc-pot th, .doc-pot td { padding: 7px 8px 7px 0; border-bottom: 1px solid var(--linha); text-align: left; vertical-align: top; }
 .doc-pot th { font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .06em; color: var(--aco); }
 .doc-pot td.num, .doc-pot th.num { text-align: right; }
@@ -185,7 +186,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .doc-teste { margin-bottom: 12px; padding: 6px 10px; }
   .doc-cab { padding-bottom: 12px; }
   .doc-tit { margin-top: 14px; font-size: 21pt; }
-  .doc-servico, .doc-dados, .doc-pot, .doc-bloco, .doc-notas { margin-bottom: 12px; }
+  .doc-servico, .doc-dados, .doc-pot-caixa, .doc-bloco, .doc-notas { margin-bottom: 12px; }
+  .doc-pot-caixa { overflow: visible; }
   .doc-dados { gap: 2px 16px; }
   .doc-pot th, .doc-pot td { padding: 4px 8px 4px 0; }
   .doc-gama { padding: 10px 14px; }

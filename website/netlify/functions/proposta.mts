@@ -145,20 +145,23 @@ function prepararProposta(input: any, tab: Tabela) {
   const r: any = preco(tab.T, opcoesDe(input))
   if (r.modo === "erro" || r.modo === "sem_tabela" || r.modo === "escolhe") return { erro: paraModelo(r, tab.teste) }
   const recusadas: string[] = []
+  /* uma nota com um dado escondido pelo corte ([telefone], [NIF]…) não vai para o cliente: o modelo só viu o marcador */
   const observacoes = (Array.isArray(input?.observacoes) ? input.observacoes : []).slice(0, 6)
     .map((o: unknown) => limpa(o, 240)).filter((o: string) => {
-      const porque = o && proibido(o)
+      const porque = o && (proibido(o) || (MARCA_RE.test(o) ? "tem um dado pessoal escondido (não vai para a proposta)" : null))
       if (porque) recusadas.push(`«${o}»: ${porque}`)
       return o && !porque
     })
-  const pedido = limpa(input?.pedido, 400)
+  const pedido = semMarcas(limpa(input?.pedido, 400))
   const porque = proibido(pedido)
   if (porque) recusadas.push(`pedido: ${porque}`)
+  const contacto = semMarcas(limpa(input?.cliente?.contacto, 120))
   const { ref, data } = agoraLisboa()
   const proposta = {
     ref, data, teste: tab.teste, modo: r.modo,
     servico: SERVICOS[servico] || servico,
-    cliente: { nome: limpa(input?.cliente?.nome, 120), contacto: semMarcas(limpa(input?.cliente?.contacto, 120)), local: limpa(input?.cliente?.local, 160) },
+    cliente: { nome: semMarcas(limpa(input?.cliente?.nome, 120)), contacto: /[\d@]/.test(contacto) ? contacto : "",
+      local: semMarcas(limpa(input?.cliente?.local, 160)) },
     pedido: porque ? "" : pedido,
     potencia: r.potencia ? r.potencia.resumo : "",
     divisoes: r.potencia ? r.potencia.divs : [],
@@ -178,7 +181,7 @@ function prepararProposta(input: any, tab: Tabela) {
     proposta: { ...proposta, texto },
     paraModelo: {
       ok: true, ref, modo: r.modo, valores_de_teste: tab.teste || undefined,
-      perguntas_por_responder: r.porResponder?.length ? r.porResponder : undefined,
+      perguntas_por_responder: r.modo === "preco" && r.porResponder?.length ? r.porResponder : undefined,
       notas_recusadas: recusadas.length ? recusadas : undefined,
       mostrada: "A proposta já aparece à equipa, com texto para copiar e PDF. Não a repita por inteiro: diga só o essencial.",
     },
@@ -268,7 +271,8 @@ Como trabalhas:
 - Depois, as perguntas que mudam o preço (faz só as que faltam, no máximo três de cada vez, numa mensagem curta):
 ${perguntas}
 - Se faltar alguma resposta, podes dar já o preço com o que há e dizer o que ainda pode mudar. Uma resposta «não sei» é válida.
-- Quando a equipa pedir a proposta, chama preparar_proposta com os mesmos dados. As observações são notas curtas e factuais da conversa, sem preços nem promessas.${tab.teste ? `
+- Quando a equipa pedir a proposta, chama preparar_proposta com os mesmos dados. As observações são notas curtas e factuais da conversa, sem preços nem promessas.
+- [telefone], [email], [NIF], [código postal] e [número] marcam dados pessoais que foram escondidos de ti. Nunca os copies para a proposta: deixa esses campos vazios e diz à equipa que os junte ela.${tab.teste ? `
 - ATENÇÃO: a tabela em uso é de TESTE, com números falsos. Lembra a equipa disso sempre que deres um preço ou uma proposta.` : ""}
 
 Como escreves:
@@ -363,12 +367,16 @@ export function redige(t: string): string {
   return String(t)
     .replace(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g, "[email]")
     .replace(/\b(?:NIF|NIPC|contribuinte|n\.?º?\s*fiscal)\D{0,6}(?:\d[\s.]?){8}\d\b/gi, "[NIF]")
-    .replace(/(?:(?:\+|00)351[\s.-]?)?(?<!\d)[29](?:[\s.-]?\d){8}(?!\d)/g, "[telefone]")
-    .replace(/(?<!\d)[1235689]\d{8}(?!\d)/g, "[número]")
-    .replace(/(?<!\d)\d{4}-\d{3}(?!\d)|(?<!\d)\d{4}\s\d{3}(?=\s+[A-ZÀ-Ý])/g, "[código postal]")
+    /* só os agrupamentos de telefone (9 seguidos, 3-3-3, 2-3-2-2, 3-2-2-2), para não apanhar pares como «9000 12000» */
+    .replace(/(?<![\d+])(?:(?:\+|00)?351[\s.-]?)?(?:[29]\d{8}|[29]\d{2}[\s.-]\d{3}[\s.-]\d{3}|[29]\d[\s.-]\d{3}[\s.-]\d{2}[\s.-]\d{2}|[29]\d{2}[\s.-]\d{2}[\s.-]\d{2}[\s.-]\d{2})(?!\d)/g, "[telefone]")
+    .replace(/(?<!\d)[1235689]\d{2}[\s.]?\d{3}[\s.]?\d{3}(?!\d)/g, "[número]")
+    .replace(/\b(?:cp|c\.p\.|código postal)\s*:?\s*\d{4}[\s-]?\d{3}(?!\d)/gi, "[código postal]")
+    .replace(/(?<!\d)\d{4}-\d{3}(?!\d|[.,]\d|\s*(?:€|eur))|(?<!\d)\d{4}\s\d{3}(?=[\s,]+[A-ZÀ-Ý])/g, "[código postal]")
 }
+const MARCA_RE = /\[(?:email|NIF|telefone|número|código postal)\]/
 function semMarcas(t: string): string {
-  return t.replace(/\[(?:email|NIF|telefone|número|código postal)\]/g, "").replace(/\s{2,}/g, " ").replace(/^[\s,;.-]+|[\s,;-]+$/g, "")
+  return t.replace(new RegExp(MARCA_RE.source, "g"), "").replace(/\s+([,;.:])/g, "$1").replace(/([,;:])(?=[,;:.])/g, "")
+    .replace(/\s{2,}/g, " ").replace(/^[\s,;:.\/-]+|[\s,;:\/-]+$/g, "").trim()
 }
 
 /* Como a IA chega à Anthropic:
@@ -412,7 +420,7 @@ async function ler(texto: string, tab: Tabela, client: Anthropic) {
     output_config: { effort: "low", format: { type: "json_schema", schema: esquemaLeitura(tab) } },
     system: SISTEMA_LEITURA,
     messages: [{ role: "user", content: `Pedido do cliente:\n\n${redige(texto)}` }],
-  }, { timeout: 25_000, maxRetries: 1 })
+  }, { timeout: 25_000, maxRetries: 0 })
   if (resposta.stop_reason === "refusal") return { erro: "A IA não leu este pedido. Preencha o formulário à mão." }
   if (resposta.stop_reason === "max_tokens") return { erro: "O pedido é demasiado longo para ler de uma vez. Preencha o formulário à mão ou use o assistente completo." }
   const txt = (resposta.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("")
@@ -428,8 +436,10 @@ async function ler(texto: string, tab: Tabela, client: Anthropic) {
   const limpo = { ...campos, divisoes, notas, pedido: proibido(pedido) ? "" : pedido, local: limpa(campos.local, 160), duvidas,
     motivo_complexo: limpa(campos.motivo_complexo, 240) }
   const r: any = limpo.servico === "ac" || limpo.servico === "aguasQuentes" ? preco(tab.T, opcoesDe(limpo)) : null
-  const complexo = complexidade(limpo, r, limpo.complexo && limpo.motivo_complexo ? [limpo.motivo_complexo] : limpo.complexo ? ["A IA marcou este pedido como fora do normal."] : [])
-  return { campos: limpo, complexo }
+  /* o motivo da IA fica à parte: os motivos calculados mudam quando a equipa corrigir o formulário, o da IA não */
+  const complexoIA = limpo.complexo ? [limpo.motivo_complexo || "A IA marcou este pedido como fora do normal."] : []
+  const complexo = complexidade(limpo, r, complexoIA)
+  return { campos: limpo, complexo, complexoIA }
 }
 
 /* ── Pedido HTTP ── */
