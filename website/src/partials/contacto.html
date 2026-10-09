@@ -24,7 +24,10 @@
            O mesmo nome e os mesmos campos em todas as páginas (este parcial); os campos escondidos dizem a página,
            a triagem ([P1 · Montagem AC], posta por site.js), a estimativa de potência e o preço provável mostrado. Sem JavaScript, o envio é normal
            e o Netlify mostra obrigado.html; com JavaScript, site.js valida e envia sem sair da página.
-           O browser só valida sozinho sem JavaScript: site.js desliga essa validação e usa a sua. -->
+           O browser só valida sozinho sem JavaScript: site.js desliga essa validação e usa a sua.
+           Os pedidos de instalação e manutenção seguem como «orcamento-comercial», com o seu email de aviso: site.js troca
+           o form-name e build.py gera esse formulário em formularios.html, com os mesmos campos. Quem mudar os campos daqui
+           muda também FORM_CAMPOS e FORM_ESQUELETO no build.py (README.md, «Encaminhamento dos pedidos»). -->
       <form id="quoteForm" name="orcamento" method="POST" action="/obrigado.html" enctype="multipart/form-data"
             data-netlify="true" netlify-honeypot="bot-field" data-preselect="{{ page.preselect }}" aria-labelledby="quoteTitle">
         <input type="hidden" name="form-name" value="orcamento">

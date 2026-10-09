@@ -83,8 +83,9 @@ def campos_obra(o):
     o["orcamentoHref"] = f"../{o['servicoUrl']}#orcamento" if label else "../index.html#orcamento"
     avaria = o["trabalho"] in TRABALHO_AVARIA
     o["ctaTitulo"] = "Tem uma avaria parecida?" if avaria else "Quer uma obra assim?"
+    # o orçamento pede-se no formulário (por email, ao comercial); o WhatsApp fica para avarias, fotografias e dúvidas
     msg = (f"Olá MDM. Vi a obra {o['code']} no site ({o['title']}) e tenho uma avaria parecida. Envio já uma fotografia."
-           if avaria else f"Olá MDM. Vi a obra {o['code']} no site ({o['title']}) e quero um orçamento parecido.")
+           if avaria else f"Olá MDM. Vi a obra {o['code']} no site ({o['title']}) e envio já fotografias do local.")
     o["waHref"] = SITE["whatsappBase"] + quote(msg)
     o["relTitulo"] = f"Outras obras de {label.lower()}" if label else "Outras obras"
     o["relLigacao"] = f"Todas as obras de {label.lower()}" if label else "Todas as obras"
@@ -522,6 +523,8 @@ def build():
                     "jsonld": ["breadcrumb"],
                     "breadcrumb": [["Início", ""], ["Obras", "obras.html"], [o["title"], file]]}
             files.append(build_page(meta, tpl, {"obra": o, "prev": prev_o, "next": next_o, "related": relacionadas(o)}))
+    # o formulário do comercial, só para o Netlify (não é uma página: fica fora de files e do mapa do site)
+    (OUT / FORMULARIOS).write_text(formularios_html(), encoding="utf-8")
     urls = "".join(f"<url><loc>{SITE['baseUrl']}/{'' if f == 'index.html' else f}</loc></url>\n"
                    for f in files if f not in fora_do_mapa)
     (OUT / "sitemap.xml").write_text(
@@ -566,6 +569,33 @@ FORM_EXIGE = [' name="orcamento"', ' method="POST"', ' data-netlify="true"', ' n
               ' enctype="multipart/form-data"', ' action="/obrigado.html"']
 FORM_CAMPOS = {"form-name", "subject", "pagina", "triagem", "potencia", "estimativa", "nome", "email", "telefone", "servico",
                "mensagem", "fotografia", "bot-field"}
+# Encaminhamento (README.md, «Encaminhamento dos pedidos»): os pedidos de instalação e manutenção vão para um segundo
+# formulário Netlify, «orcamento-comercial», com o seu próprio email de aviso (o comercial). site.js troca o form-name ao
+# enviar. O Netlify só aceita um formulário que encontrou no HTML publicado, por isso build.py gera-o em formularios.html,
+# escondido e com os mesmos campos (pela ordem do formulário visível: o Netlify resume cada pedido pelo primeiro campo de
+# texto e pela primeira caixa de texto). Nenhuma página liga para lá; fica fora do mapa do site e com noindex.
+FORM_COMERCIAL = "orcamento-comercial"
+FORMULARIOS = "formularios.html"
+FORM_ESQUELETO = [("subject", "hidden"), ("pagina", "hidden"), ("triagem", "hidden"), ("potencia", "hidden"),
+                  ("estimativa", "hidden"), ("nome", "text"), ("email", "email"), ("telefone", "tel"), ("servico", "text"),
+                  ("mensagem", "textarea"), ("fotografia", "file"), ("bot-field", "text")]
+
+
+def formularios_html():
+    campos = [f'<input type="hidden" name="form-name" value="{FORM_COMERCIAL}">']
+    for nome, tipo in FORM_ESQUELETO:
+        if tipo == "textarea":
+            campos.append(f'<textarea name="{nome}"></textarea>')
+        elif tipo == "file":
+            campos.append(f'<input name="{nome}" type="file" accept="image/*">')
+        else:
+            campos.append(f'<input type="{tipo}" name="{nome}">')
+    return ('<!doctype html>\n<html lang="pt-PT">\n<head>\n<meta charset="utf-8">\n'
+            '<meta name="robots" content="noindex, nofollow">\n<title>Formulários · MDM</title>\n</head>\n<body>\n'
+            '<!-- Gerado por build.py (FORM_ESQUELETO): só para o Netlify registar o formulário do comercial. '
+            'README.md, «Encaminhamento dos pedidos». -->\n'
+            f'<form name="{FORM_COMERCIAL}" method="POST" action="/obrigado.html" enctype="multipart/form-data" '
+            'data-netlify="true" netlify-honeypot="bot-field" hidden>\n' + "\n".join(campos) + "\n</form>\n</body>\n</html>\n")
 
 
 # Durações dadas pela MDM (quanto tempo leva o trabalho, de quanto em quanto tempo se faz a visita): são factos,
@@ -659,6 +689,7 @@ def check(files):
                     problems.append(f"{f}: referência partida → {r}")
     problems += check_preview()
     problems += check_duracoes() + check_testemunhos() + check_formatos() + check_btu() + check_precos() + check_marcas() + check_equipa()
+    problems += check_encaminhamento()
     for css in (OUT / "assets" / "css").glob("*.css"):
         for c in re.findall(r"url\(([^)]+)\)", css.read_text(encoding="utf-8")):
             c = c.strip("'\"")
@@ -735,6 +766,35 @@ def check_formulario(f, text):
         out.append(f"{f}: falta o campo escondido estimativa (vazio; site.js põe lá o preço provável mostrado)")
     if "data-precos=" not in form:
         out.append(f"{f}: falta o preço provável (data-precos) no formulário")
+    return out
+
+
+def check_encaminhamento():
+    """O formulário do comercial (formularios.html) é o formulário de orçamento com outro nome: os mesmos campos e os
+    mesmos atributos. site.js tem de usar o mesmo nome para lá enviar os pedidos de instalação e manutenção."""
+    f = OUT / FORMULARIOS
+    if not f.exists():
+        return [f"{FORMULARIOS}: não foi gerado (formulário do comercial)"]
+    text = f.read_text(encoding="utf-8")
+    m = re.search(r'<form\b[^>]*\bname="%s"[^>]*>.*?</form>' % re.escape(FORM_COMERCIAL), text, re.S)
+    if not m:
+        return [f"{FORMULARIOS}: falta o formulário {FORM_COMERCIAL}"]
+    form = m.group(0)
+    abre = form[:form.index(">") + 1]
+    out = [f"{FORMULARIOS}: formulário sem{x}" for x in FORM_EXIGE if x != ' name="orcamento"' and x not in abre]
+    campos = set(re.findall(r'<(?:input|select|textarea)\b[^>]*\bname="([^"]+)"', form))
+    if campos != FORM_CAMPOS:
+        out.append(f"{FORMULARIOS}: campos diferentes do formulário de orçamento → a mais {sorted(campos - FORM_CAMPOS)}, "
+                   f"em falta {sorted(FORM_CAMPOS - campos)}")
+    if f'<input type="hidden" name="form-name" value="{FORM_COMERCIAL}">' not in form:
+        out.append(f"{FORMULARIOS}: falta o campo escondido form-name={FORM_COMERCIAL}")
+    if not re.search(r'<input[^>]*name="fotografia"[^>]*type="file"', form):
+        out.append(f"{FORMULARIOS}: falta o campo da fotografia (type=file)")
+    if 'name="robots" content="noindex' not in text:
+        out.append(f"{FORMULARIOS}: falta o noindex")
+    js = OUT / "assets" / "js" / "site.js"
+    if js.exists() and f"'{FORM_COMERCIAL}'" not in js.read_text(encoding="utf-8"):
+        out.append(f"site.js: não envia para o formulário {FORM_COMERCIAL} (o nome tem de ser o mesmo de build.py)")
     return out
 
 

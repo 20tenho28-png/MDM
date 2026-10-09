@@ -676,22 +676,28 @@
   var SEM_ENVIO = location.protocol === 'file:' || form.hasAttribute('data-sem-envio');
   var FOTO_MAX = 8 * 1000 * 1000;   /* o Netlify aceita até 8 MB por pedido */
   var TEL = '218 935 050', TEL_HREF = 'tel:+351218935050', EMAIL = 'mdmassist@mdmassist.com';
+  var ligueTel = [TEL_HREF, 'ligue ' + TEL];   /* a ligação «ligue 218 935 050» dos avisos */
   var WA_BASE = 'https://wa.me/351910307579?text=';
+  /* c: pedido do comercial (instalação e manutenção). Segue só por email: vai para o formulário Netlify
+     «orcamento-comercial», que tem o seu próprio email de aviso, e o formulário não o oferece por WhatsApp. O resto
+     (avarias, «outro», sem serviço) fica no formulário geral «orcamento». README.md, «Encaminhamento dos pedidos». */
+  var FORM_COMERCIAL = 'orcamento-comercial';
   var TRIAGEM = {
-    'Ar condicionado: montagem / instalação':   { p: 'P1', seg: 'Montagem AC' },
-    'Bomba de calor: instalação / manutenção':  { p: 'P1', seg: 'Bomba de calor' },
-    'Manutenção preventiva: contrato anual':    { p: 'P2', seg: 'Manutenção preventiva' },
-    'Eletricidade: quadros e alimentações AVAC': { p: 'P3', seg: 'Eletricista certificado' },
+    'Ar condicionado: montagem / instalação':   { p: 'P1', seg: 'Montagem AC', c: true },
+    'Bomba de calor: instalação / manutenção':  { p: 'P1', seg: 'Bomba de calor', c: true },
+    'Manutenção preventiva: contrato anual':    { p: 'P2', seg: 'Manutenção preventiva', c: true },
+    'Eletricidade: quadros e alimentações AVAC': { p: 'P3', seg: 'Eletricista certificado', c: true },
     'Ar condicionado: avaria / reparação':      { p: 'P4', seg: 'Avaria AC' },
     'Bomba de calor: avaria / reparação':       { p: 'P4', seg: 'Avaria bomba de calor' },
     'Eletricidade: avaria / reparação':         { p: 'P4', seg: 'Avaria elétrica' },
-    'Ventilação: instalação / revisão':         { p: 'P4', seg: 'Ventilação' },
+    'Ventilação: instalação / revisão':         { p: 'P4', seg: 'Ventilação', c: true },
     'Ventilação: avaria / reparação':           { p: 'P4', seg: 'Avaria ventilação' }
   };
   /* a etiqueta de triagem é só para a MDM: vai no campo escondido "triagem" e no assunto/corpo do email, nunca no que o
      cliente lê ou envia (WhatsApp, avisos) */
   function triagem(s) { return TRIAGEM[s] || { p: 'P5', seg: s ? 'Outro' : 'Por classificar' }; }
   function etiqueta(s) { var t = triagem(s); return '[' + t.p + ' · ' + t.seg + ']'; }
+  function comercial(s) { return !!(TRIAGEM[s] && TRIAGEM[s].c); }
   /* o que o cliente diz no WhatsApp por cada serviço, em linguagem corrente */
   var FRASE = {
     'Ar condicionado: avaria / reparação':      'Tenho um ar condicionado avariado.',
@@ -1475,7 +1481,10 @@
     var ctl = window.AbortController ? new AbortController() : null;
     /* uma fotografia grande demora a subir numa rede móvel fraca */
     var timer = ctl && setTimeout(function () { ctl.abort(); }, d.foto ? 120000 : 20000);
-    return fetch('/', { method: 'POST', body: new FormData(form), signal: ctl ? ctl.signal : undefined })
+    /* os pedidos do comercial vão para o outro formulário Netlify (os mesmos campos; build.py gera-o em formularios.html) */
+    var dados = new FormData(form);
+    if (comercial(d.servico)) dados.set('form-name', FORM_COMERCIAL);
+    return fetch('/', { method: 'POST', body: dados, signal: ctl ? ctl.signal : undefined })
       .then(function (r) { return r.ok; }, function () { return false; })
       .then(function (ok) { clearTimeout(timer); return ok; });
   }
@@ -1494,12 +1503,13 @@
     return WA_BASE + encodeURIComponent('Olá MDM, sou ' + d.empresa + '. Acabei de enviar um pedido pelo site e quero juntar fotografias.' +
       (d.potCurta ? ' Estimativa de potência: ' + d.potCurta + '.' : ''));
   }
-  /* o formulário volta ao início (serviço da página escolhido de novo) */
+  /* o formulário volta ao início (serviço da página escolhido de novo; sem ele, o botão do WhatsApp volta) */
   function limpaForm() {
-    form.reset(); erroCampo('qFoto'); escolheServico(form.getAttribute('data-preselect'));
+    form.reset(); erroCampo('qFoto'); escolheServico(form.getAttribute('data-preselect')); canal();
   }
   /* painel «Pedido enviado» (data-form-feito, a seguir ao formulário): diz para onde vamos responder e dá o WhatsApp para
-     juntar fotografias; «Enviar outro pedido» repõe o formulário. Sem o painel no HTML, fica o aviso de antes. */
+     juntar fotografias, menos nos pedidos do comercial, que seguem só por email; «Enviar outro pedido» repõe o
+     formulário. Sem o painel no HTML, fica o aviso de antes. */
   var feito = document.querySelector('[data-form-feito]');
   function mostraFeito(d) {
     var txt = feito.querySelector('[data-feito-txt]'), wa = feito.querySelector('[data-feito-wa]');
@@ -1508,7 +1518,7 @@
     var tel = d.tel ? d.tel.replace(/\D/g, '').replace(/^351(?=\d{9}$)/, '').replace(/(\d{3})(?=\d)/g, '$1\u00a0') : '';
     var para = [d.email, tel].filter(Boolean).join(' e ');
     if (txt) txt.textContent = para ? 'Vamos responder para ' + para + '.' : 'Vamos responder em breve.';
-    if (wa) wa.href = whatsDepois(d);
+    if (wa) { wa.href = whatsDepois(d); wa.hidden = comercial(d.servico); }
     form.hidden = true;
     feito.hidden = false;
     /* sem o formulário a página encolhe e, no computador, o painel ficava acima do ecrã, atrás do cabeçalho; o foco
@@ -1551,24 +1561,27 @@
         if (feito) mostraFeito(d);
         else {
           quoteAlert('Pedido recebido, obrigado. Vamos analisar o seu pedido e responder pelo email ou telefone que indicou. Se for urgente,', true,
-            [[TEL_HREF, 'ligue ' + TEL], [whatsDepois(d), 'fale connosco por WhatsApp']]);
+            comercial(d.servico) ? [ligueTel] : [ligueTel, [whatsDepois(d), 'fale connosco por WhatsApp']]);
           limpaForm();
         }
         setTimeout(function () { if (lbl.textContent === 'Pedido enviado') lbl.textContent = 'Enviar pedido'; }, 6000);
         return;
       }
-      /* falhou (rede, tempo ou serviço): nada se apaga; o mesmo pedido pode seguir por telefone ou WhatsApp */
+      /* falhou (rede, tempo ou serviço): nada se apaga; o mesmo pedido pode seguir por telefone ou, fora dos pedidos do
+         comercial (só por email), por WhatsApp */
       track('quote_form_erro', { servico: d.servico });
       lbl.textContent = 'Tentar novamente';
-      quoteAlert('Não conseguimos enviar o pedido agora. O que escreveu continua no formulário: tente de novo,', false,
-        [[TEL_HREF, 'ligue ' + TEL], [WA_BASE + encodeURIComponent(mensagemWhats(d)), 'envie-o por WhatsApp']]);
+      if (comercial(d.servico)) quoteAlert('Não conseguimos enviar o pedido agora. O que escreveu continua no formulário: tente de novo ou', false, [ligueTel]);
+      else quoteAlert('Não conseguimos enviar o pedido agora. O que escreveu continua no formulário: tente de novo,', false,
+        [ligueTel, [WA_BASE + encodeURIComponent(mensagemWhats(d)), 'envie-o por WhatsApp']]);
     });
   });
   /* segunda via: o pedido entregue por WhatsApp, como uma mensagem normal (a fotografia junta-se lá).
-     Basta o nome: o contacto é o próprio WhatsApp. Abre dentro do clique: depois de uma espera o browser bloqueia a janela. */
+     Basta o nome: o contacto é o próprio WhatsApp. Abre dentro do clique: depois de uma espera o browser bloqueia a janela.
+     Nos pedidos do comercial não existe: canal() esconde o botão, que só segue por email. */
   $('sendWhats').addEventListener('click', function () {
     if (bloqueado()) return;
-    var d = quoteData(); if (!quoteValidate(d, true)) return;
+    var d = quoteData(); if (comercial(d.servico) || !quoteValidate(d, true)) return;
     pot.juntaAutomatico(); preco.junta(); d = quoteData();
     track('quote_form_submit', pot.numeros({ via: 'whatsapp', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg }));
     window.open(WA_BASE + encodeURIComponent(mensagemWhats(d)), '_blank', 'noopener');
@@ -1582,13 +1595,17 @@
       arrancou = true; track('quote_form_start', { campo: e.target.id });
     });
   })();
+  /* o botão «Enviar por WhatsApp» só existe fora dos pedidos do comercial, que seguem só por email */
+  function canal() { $('sendWhats').hidden = comercial($('qServico').value); }
+  $('qServico').addEventListener('change', canal);
   /* serviço pré-escolhido: pela página (data-preselect) ou por uma ligação com data-preselect */
   function escolheServico(v) {
     var sel = $('qServico');
     if (!v) return;
-    for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === v || sel.options[i].text === v) { sel.selectedIndex = i; pot.visibilidade(); if (preco) preco.visibilidade(); return true; }
+    for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === v || sel.options[i].text === v) { sel.selectedIndex = i; pot.visibilidade(); if (preco) preco.visibilidade(); canal(); return true; }
   }
   escolheServico(form.getAttribute('data-preselect'));
+  canal();   /* também quando o browser repõe o serviço escolhido antes (voltar atrás) */
   document.addEventListener('click', function (e) {
     var a = e.target.closest && e.target.closest('a[data-preselect]');
     if (!a) return;

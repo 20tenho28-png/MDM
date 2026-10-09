@@ -38,12 +38,12 @@
   "wa": {
     "geral": "Olá MDM. Vim do vosso site e gostava de falar sobre um serviço.",
     "avaria": "Olá MDM. Tenho uma avaria e envio já uma fotografia.",
-    "montagem": "Olá MDM. Quero orçamento para instalar ar condicionado. Envio já fotografias do local.",
-    "bombaCalor": "Olá MDM. Quero orçamento para uma bomba de calor. Envio já fotografias do local e do quadro elétrico.",
-    "manutencao": "Olá MDM. Quero proposta de manutenção preventiva (contrato anual).",
-    "eletricidade": "Olá MDM. Preciso de um eletricista certificado para quadros ou alimentações AVAC.",
-    "ventilacao": "Olá MDM. Preciso de ajuda com ventilação e envio já uma fotografia.",
-    "obra": "Olá MDM. Vi uma obra no site e quero um orçamento parecido.",
+    "montagem": "Olá MDM. Tenho uma dúvida sobre ar condicionado.",
+    "bombaCalor": "Olá MDM. Tenho uma dúvida sobre bombas de calor.",
+    "manutencao": "Olá MDM. Tenho uma dúvida sobre manutenção.",
+    "eletricidade": "Olá MDM. Tenho uma dúvida sobre quadros e alimentações AVAC.",
+    "ventilacao": "Olá MDM. Tenho uma dúvida sobre ventilação.",
+    "obra": "Olá MDM. Vi uma obra no site e envio já fotografias do local.",
     "pedido": "Olá MDM. Acabei de enviar um pedido de orçamento pelo site e quero juntar fotografias."
   }
 }
