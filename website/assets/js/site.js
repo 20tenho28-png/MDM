@@ -1503,14 +1503,24 @@
   var feito = document.querySelector('[data-form-feito]');
   function mostraFeito(d) {
     var txt = feito.querySelector('[data-feito-txt]'), wa = feito.querySelector('[data-feito-wa]');
-    /* o telefone volta com espaços (912 345 678), tal como se diz */
-    var tel = d.tel ? d.tel.replace(/\D/g, '').replace(/^351(?=\d{9}$)/, '').replace(/(\d{3})(?=\d)/g, '$1 ') : '';
+    /* o telefone volta com espaços (912 345 678), tal como se diz; espaços que não partem a linha (o número não se divide
+       num telemóvel estreito) */
+    var tel = d.tel ? d.tel.replace(/\D/g, '').replace(/^351(?=\d{9}$)/, '').replace(/(\d{3})(?=\d)/g, '$1\u00a0') : '';
     var para = [d.email, tel].filter(Boolean).join(' e ');
     if (txt) txt.textContent = para ? 'Vamos responder para ' + para + '.' : 'Vamos responder em breve.';
     if (wa) wa.href = whatsDepois(d);
     form.hidden = true;
     feito.hidden = false;
-    feito.focus();
+    /* sem o formulário a página encolhe e, no computador, o painel ficava acima do ecrã, atrás do cabeçalho; o foco
+       sozinho não o trazia (conta como visível). A caixa volta ao sítio onde fica quando se chega por «Pedir orçamento»
+       (scroll-padding-top + scroll-margin-top), com o título à vista. Num ecrã baixo, onde o painel não caberia assim
+       acima das barras de baixo (scroll-padding-bottom), sobe o próprio painel até por baixo do cabeçalho. */
+    var caixa = feito.parentNode, cs = getComputedStyle(document.documentElement);
+    var cima = parseFloat(cs.scrollPaddingTop) + parseFloat(getComputedStyle(caixa).scrollMarginTop);
+    var fundo = innerHeight - (parseFloat(cs.scrollPaddingBottom) || 0) - 16;
+    var alvo = cima + feito.getBoundingClientRect().bottom - caixa.getBoundingClientRect().top <= fundo ? caixa : feito;
+    feito.focus({ preventScroll: true });
+    alvo.scrollIntoView({ block: 'start', behavior: reduceMotion ? 'auto' : 'smooth' });
   }
   if (feito) qsa('[data-feito-novo]', feito).forEach(function (b) {
     b.addEventListener('click', function () {

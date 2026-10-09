@@ -120,7 +120,9 @@ html :is(.sec, .portas, .cert, .cta-faixa, .rodape) { background-image: linear-g
   .metodo-intro, .faq-intro { grid-column: span 4; }
   .passos, .faq-lista { grid-column: span 8; }
   .contacto-canais { grid-column: span 5; }
-  .form-caixa { grid-column: span 7; }
+  /* align-self: depois de enviar, a caixa encolhe até ao painel «Pedido enviado» em vez de esticar vazia até à altura
+     da coluna dos contactos (antes de enviar a caixa é a mais alta, por isso não muda nada) */
+  .form-caixa { grid-column: span 7; align-self: start; }
 }
 
 /* ── Botões ── */
@@ -732,7 +734,7 @@ html:not(.js) #sendWhats { display: none; }
 .form-feito-t { font-family: var(--sans); font-size: 20px; font-weight: 700; letter-spacing: -.015em; line-height: 1.25; color: var(--tinta); }
 .form-feito-txt, .form-feito-urg { font-size: 16px; line-height: 1.5; color: var(--aco-2); }
 .form-feito-txt:empty { display: none; }
-.form-feito-urg a { font-weight: 700; }
+.form-feito-urg a { font-weight: 700; white-space: nowrap; }
 .form-feito-acoes { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 4px; }
 /* só para leitores de ecrã (o nome completo de um campo: «Área da divisão 2, em m²») */
 .so-leitor { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
