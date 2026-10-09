@@ -1,12 +1,13 @@
 # MDM
 
-Team workspace with three apps, one folder each:
+Team workspace with four apps, one folder each:
 
 | App | Folder | What it is |
 | --- | --- | --- |
 | **Email ticket wall** | `src/mdm/` | IMAP-driven ticket tracking with a TV wall display (FastAPI + PostgreSQL) |
 | **Electric simulator** | `electric-simulator/` | Interactive DC circuit simulator (canvas editor + live MNA solver) |
 | **Circuit Planner — EU Edition** | `circuit-planner/` | Single-file EU electrical/HVAC training app (the trainer) |
+| **MDM website** | `website/` | Bilingual public HVAC site, AC sizing calculator and quote requests; deployed through Sites |
 
 ```
 MDM/
@@ -69,6 +70,10 @@ rules and workflow before editing.
 cd circuit-planner
 npm test          # full headless test suite, no dependencies needed
 ```
+
+## MDM website
+
+The `website/` folder contains the source and public assets for [MDM · Climatização à sua medida](https://mdm-climatizacao-a-medida.jocund-bud-7221.chatgpt.site/). It includes the PT/EN calculator with **Price on request**, plus the existing quote request backend. Runtime secrets and customer data are excluded. See [website/README.md](website/README.md) for local build instructions and the pending Resend configuration. GitHub updates do not automatically publish the live site.
 
 ## Contributing
 

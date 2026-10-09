@@ -1,0 +1,111 @@
+/* Full-width photographic opening. Only the homepage opts into this layout. */
+.hero-immersive{
+ --hero-gutter:max(48px,calc((100% - 1320px)/2));
+ position:relative;isolation:isolate;display:flex;align-items:center;
+ width:100%;min-height:780px;min-height:max(780px,calc(100svh - 90px));
+ margin:0;padding:64px var(--hero-gutter) 70px;overflow:hidden;
+ color:#fff;background:#101b25;
+}
+.hero-immersive .hero-copy{position:relative;z-index:2;width:47%;max-width:590px;margin-left:auto;padding:0}
+.hero-immersive h1{font-size:clamp(3.4rem,5.4vw,5.1rem);margin:24px 0;letter-spacing:-.055em}
+.hero-immersive h1 em{color:#fff}
+.hero-immersive .hero-copy>.eyebrow{color:#f1f3f5;font-size:.8125rem;letter-spacing:.12em}
+.hero-immersive .eyebrow>span{background:#ec4250;width:30px;flex:none}
+.hero-immersive .hero-intro{max-width:470px;color:#edf0f2;font-size:1.0625rem;line-height:1.65}
+.hero-immersive .audience{background:#0b152499;border:1px solid #ffffff40;padding:4px;margin-top:24px}
+.hero-immersive .audience button{color:#fff;min-height:40px;padding:8px 18px}
+.hero-immersive .audience button[aria-pressed=true]{background:#fff;color:#17232e}
+.hero-immersive .audience-note{color:#e0e6eb;max-width:470px;margin:12px 0 24px}
+.hero-immersive .hero-actions{gap:22px}
+.hero-immersive .hero-actions .primary{background:#b61124;box-shadow:0 8px 28px #080e1840}
+.hero-immersive .hero-actions .primary:hover{background:#970c1c}
+.hero-immersive .text-link{color:#fff;text-decoration-color:#ffffff88}
+.hero-immersive .text-link:hover{color:#fff;text-decoration-color:#fff}
+.hero-immersive .hero-proof{border-color:#ffffff33;color:#d6dfe6;gap:38px;margin-top:28px;padding-top:20px}
+.hero-immersive .hero-proof b{color:#fff;font-size:1rem}
+.hero-immersive :is(button,a):focus-visible{outline-color:#fff;outline-offset:5px}
+.hero-immersive .hero-visual{position:absolute;inset:0;z-index:0;min-height:0;aspect-ratio:auto;border-radius:0;background:#101b25}
+.hero-immersive .hero-image-frame{position:absolute;inset:0;overflow:hidden}
+.hero-immersive .hero-image-frame>img{position:absolute;width:100%;height:100%;object-fit:cover;object-position:center;max-width:none}
+/* Frame the licensed architectural and rooftop photographs. */
+.hero-immersive .hero-image-frame>img[src$="hero-terrace-pexels-30606279.jpg"]{object-position:50% 61%}
+.hero-immersive .hero-image-frame>img[src$="hero-hvac-pexels-30210086.jpg"]{object-position:50% 56%}
+.hero-immersive .hero-visual:after{
+ inset:0;z-index:1;
+ background:linear-gradient(90deg,#0b16241a 0%,#0b162429 32%,#0b1624b8 51%,#0b1624ed 76%,#0b1624f5 100%),linear-gradient(0deg,#0b1624ba,transparent 30%);
+}
+.hero-immersive .photo-tag{z-index:2;left:var(--hero-gutter);bottom:104px;right:auto;max-width:340px;text-shadow:0 2px 12px #000}
+.hero-immersive .photo-tag span{font-size:.75rem;letter-spacing:.14em}
+.hero-immersive .photo-tag b{font-size:1.3rem;margin-top:10px;max-width:320px}
+.hero-immersive .photo-controls{z-index:3;left:var(--hero-gutter);right:auto;bottom:40px;gap:10px}
+.hero-immersive .photo-controls button{width:44px;height:44px;min-width:44px;background:#0b16247a;border-color:#ffffff8c}
+.hero-immersive .photo-controls button[aria-pressed=true]{background:#fff;color:#17232e}
+.hero-immersive .photo-controls>span{margin-left:12px;font-size:.75rem;letter-spacing:.08em;max-width:160px;line-height:1.5}
+.hero-immersive+.mdm-assistant,.brand-strip+.mdm-assistant{border-top:0;padding-top:80px}
+@media(max-width:1100px) and (min-width:901px){
+ .hero-immersive{--hero-gutter:36px;padding-top:52px;padding-bottom:52px;min-height:800px}
+ .hero-immersive .hero-copy{width:49%}
+ .hero-immersive h1{font-size:3.6rem}
+ .hero-immersive .hero-actions{gap:18px}
+ .hero-immersive .hero-actions .btn{width:100%}
+ .hero-immersive .photo-controls>span{display:none}
+ .hero-immersive .photo-tag{max-width:280px}
+}
+@media(max-width:900px){
+ .hero-immersive{--hero-gutter:28px;--hero-mobile-photo-height:clamp(460px,70vw,600px);display:block;min-height:0;padding:360px var(--hero-gutter) 165px}
+ .hero-immersive .hero-copy{width:100%;max-width:620px;margin:0;padding:0}
+ .hero-immersive .hero-visual:after{background:linear-gradient(180deg,#0b162400 0px,#0b162429 160px,#0b1624d9 345px,#101b25 calc(var(--hero-mobile-photo-height) - 5px))}
+ .hero-immersive .hero-image-frame{inset:0 0 auto;height:var(--hero-mobile-photo-height)}
+ .hero-immersive .hero-image-frame>img[src$="hero-terrace-pexels-30606279.jpg"]{object-position:56% center}
+ .hero-immersive .hero-image-frame>img[src$="hero-hvac-pexels-30210086.jpg"]{object-position:24% center}
+ .hero-immersive h1{font-size:clamp(3.25rem,8.5vw,4.6rem)}
+ .hero-immersive .hero-intro,.hero-immersive .audience-note{max-width:520px}
+ .hero-immersive .hero-actions{justify-content:flex-start}
+ .hero-immersive .hero-actions .text-link{margin:0}
+ .hero-immersive .hero-proof{justify-content:flex-start;gap:40px}
+ .hero-immersive .photo-tag{bottom:100px;max-width:calc(100% - 56px)}
+ .hero-immersive .photo-tag b{font-size:1.125rem;max-width:none;margin-top:6px}
+ .hero-immersive .photo-tag span{font-size:.75rem}
+ .hero-immersive .photo-controls{bottom:32px}
+ .hero-immersive .photo-controls>span{max-width:none}
+ .hero-immersive+.mdm-assistant,.brand-strip+.mdm-assistant{padding-top:45px}
+}
+@media(max-width:480px){
+ .hero-immersive{--hero-gutter:22px;padding-top:310px}
+ .hero-immersive .hero-copy>.eyebrow{font-size:.75rem;letter-spacing:.08em;gap:10px}
+ .hero-immersive h1{font-size:clamp(3rem,12.6vw,3.8rem);line-height:1.02;margin:22px 0}
+ .hero-immersive .hero-intro{font-size:1rem}
+ .hero-immersive .hero-actions .btn{width:100%}
+ .hero-immersive .hero-actions .text-link{margin:0 auto}
+ .hero-immersive .hero-proof{gap:24px;justify-content:space-between;font-size:.8125rem}
+ .hero-immersive .hero-proof b{font-size:.9375rem}
+ .hero-immersive .photo-controls>span{max-width:145px;margin-left:5px;font-size:.75rem}
+ .hero-immersive .audience{max-width:100%}
+ .hero-immersive .audience button{padding-inline:15px;font-size:.875rem}
+}
+@media(max-width:360px){
+ .hero-immersive{--hero-gutter:18px}
+ .hero-immersive .photo-controls>span{max-width:125px;font-size:.75rem}
+ .hero-immersive .hero-proof{gap:14px}
+}
+
+@media(max-width:900px){.hero-immersive{padding-bottom:48px}}
+
+/* Preserve the complete original residential and commercial photographs. */
+.hero-immersive .hero-image-frame>img[src$="foto-04-1600.webp"],.hero-immersive .hero-image-frame>img[src$="foto-28-1600.webp"]{object-fit:contain;object-position:right center}
+@media(min-width:901px){
+ .hero-mdm-terrace .hero-copy{margin-left:0;margin-right:auto}
+ .hero-mdm-terrace .hero-visual:after{background:linear-gradient(90deg,#0b1624ed 0%,#0b1624d9 26%,#0b16248c 42%,#0b16241a 59%,#0b162429 100%),linear-gradient(0deg,#0b1624cf,transparent 32%)}
+ .hero-mdm-terrace .photo-tag,.hero-mdm-terrace .photo-controls{left:auto;right:var(--hero-gutter)}
+}
+@media(max-width:900px){
+ .hero-immersive .hero-image-frame>img[src$="foto-04-1600.webp"],.hero-immersive .hero-image-frame>img[src$="foto-28-1600.webp"]{object-position:center top}
+}
+
+/* Each original aspect ratio receives its own space above the mobile text. */
+@media(max-width:900px){
+ .hero-heat-pump{--hero-mobile-photo-height:clamp(400px,120vw,600px)}
+ .hero-solar-rooftop{--hero-mobile-photo-height:clamp(240px,75vw,600px)}
+ .hero-heat-pump,.hero-solar-rooftop{padding-top:calc(var(--hero-mobile-photo-height) - 5px)}
+ .hero-heat-pump .hero-visual:after,.hero-solar-rooftop .hero-visual:after{background:linear-gradient(180deg,transparent 0px,transparent calc(var(--hero-mobile-photo-height) - 72px),#101b25 calc(var(--hero-mobile-photo-height) - 1px))}
+}

@@ -1,0 +1,12 @@
+Avisos de novos pedidos	New request notifications
+Quando o envio automático está configurado, o serviço Resend transmite à MDM uma notificação com os dados do pedido. O pedido fica também guardado na área de gestão. Não são enviados emails de publicidade por este formulário.	When automatic email is configured, Resend sends MDM a notification containing the request details. The request is also saved in the management area. This form does not send advertising emails.
+Atualizar pedidos	Refresh requests
+Terminar sessão	Sign out
+Carregar mais pedidos	Load more requests
+Aviso aceite pelo serviço de email.	Notification accepted by the email service.
+Aviso por email pendente.	Email notification pending.
+Reenviar aviso por email	Retry email notification
+Não foi possível enviar o aviso. O pedido continua guardado.	The notification could not be sent. The request is still saved.
+Notificações por email configuradas. A aceitação pelo serviço não confirma a entrega na caixa de entrada.	Email notifications are configured. Acceptance by the service does not confirm delivery to the inbox.
+Envio automático de email por configurar. Consulte os pedidos nesta página.	Automatic email delivery is not configured yet. View requests on this page.
+A MDM irá contactá-lo para avaliar o pedido e combinar uma visita, se necessária.	MDM will contact you to assess the request and arrange a visit if needed.
