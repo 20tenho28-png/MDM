@@ -176,25 +176,33 @@ O filtro de spam do Netlify está ligado por omissão; os pedidos marcados como 
 
 ## Assistente de propostas (uso interno da equipa)
 
-Uma página com senha, `/equipa/proposta.html`, onde a equipa escreve o pedido do cliente como o contaria a um colega («sala de 25 m² num último andar, quanto custa?»). O assistente (Claude, pela API da Anthropic) pergunta o que falta, responde ao «quanto custa?» e prepara uma **proposta modelo** com texto para copiar (email, WhatsApp) e PDF em A4 («Guardar PDF» abre a impressão do browser: escolher «Guardar como PDF»). Não aparece no site: sem ligações, sem estatísticas, `noindex` na página e no cabeçalho (`netlify.toml`) e `Disallow: /equipa/` no `robots.txt`.
+Uma página com senha, `/equipa/proposta.html`, para responder ao «quanto custa?» e preparar a **proposta modelo** do cliente, com texto para copiar (email, WhatsApp) e PDF em A4 («Guardar PDF» abre a impressão do browser: escolher «Guardar como PDF»). Não aparece no site: sem ligações, sem estatísticas, `noindex` na página e no cabeçalho (`netlify.toml`) e `Disallow: /equipa/` no `robots.txt`.
 
-**A IA não faz contas.** Os números saem de `netlify/lib/calculo.mjs`, com as mesmas regras e os mesmos dados do formulário do site (`btu` em `data/site.json` e `data/precos.json`, ver «Preço provável»): o modelo chama as ferramentas `calcular_potencia`, `calcular_preco` e `preparar_proposta` e repete o que elas devolvem. A proposta é montada pela função a partir desses números, não pelo texto do modelo. As notas que o modelo escreve passam pelas regras do dono (sem prazos de resposta, sem «N anos», só as quatro marcas, sem travessões): uma nota que falhe fica de fora.
+**Três caminhos, do mais barato ao mais caro:**
 
-**As regras do preço estão em dois sítios** (`assets/js/site.js` para o formulário, `netlify/lib/calculo.mjs` para o assistente). Quem mudar uma tem de mudar a outra; `tests/paridade.mjs` compara os dois em 67 casos com a tabela de teste e falha se derem resumos diferentes.
+1. **Formulário (custo zero, sem IA).** Serviço, divisões (tipo, área, sol, último andar), as perguntas que mudam o preço (vêm da tabela) e os dados do cliente. A proposta atualiza-se sozinha a cada mudança. Funciona mesmo sem a chave da API.
+2. **«Preencher com IA» (cêntimos por mês).** Cola-se a mensagem do cliente e o Claude Haiku passa-a para os campos do formulário, com a lista do que falta perguntar ao cliente. A equipa confirma antes de enviar. Telefones, emails, NIF e códigos postais são cortados antes de o texto sair. Se a leitura falhar (sem chave, sem rede, texto confuso), aparece o aviso e preenche-se à mão: nada se perde.
+3. **Assistente completo (o recurso para casos complexos).** Quando o caso sai do que a tabela cobre (mais de 4 divisões, uma divisão acima do maior aparelho, outro tipo de trabalho, produto ainda sem preços, ou um pedido que a IA marcou como fora do normal), o formulário mostra porquê e oferece «Passar para o assistente completo», que abre a conversa (Claude Opus) já com os dados. É o caminho mais caro (alguns cêntimos por conversa), por isso só se usa quando é preciso.
 
-**Como funciona.** A página fala com a função `netlify/functions/proposta.mts` em `/api/proposta`. Cada pedido HTTP faz uma só chamada ao modelo (`claude-opus-5-5`, esforço `medium`, com `fallbacks: "default"` para o caso de o modelo recusar um pedido); quando o modelo pede contas, a função faz-as e a página volta a chamar até ao fim da resposta, para nenhum pedido se aproximar do limite de 60 s das funções. A conversa vive no separador (`sessionStorage`) e vai inteira em cada pedido; fechar o separador apaga-a. Limite: 40 pedidos por minuto por IP.
+**A IA nunca faz contas.** Os números saem de `netlify/lib/calculo.mjs`, com as mesmas regras e os mesmos dados do formulário do site (`btu` em `data/site.json` e `data/precos.json`, ver «Preço provável»). No assistente completo, o modelo chama as ferramentas `calcular_potencia`, `calcular_preco` e `preparar_proposta` e repete o que elas devolvem. A proposta é sempre montada pela função a partir desses números. As notas passam pelas regras do dono (sem prazos de resposta, sem «N anos», só as quatro marcas, sem travessões): uma nota que falhe fica de fora.
+
+**As regras do preço estão em dois sítios** (`assets/js/site.js` para o formulário do site, `netlify/lib/calculo.mjs` para o assistente). Quem mudar uma tem de mudar a outra; `tests/paridade.mjs` compara os dois em 67 casos com a tabela de teste e falha se derem resumos diferentes.
+
+**Como funciona.** A página fala com a função `netlify/functions/proposta.mts` em `/api/proposta`, com o campo `acao`: `tabela` e `calcular` (formulário, sem IA), `ler` (Haiku, `claude-haiku-5-5`, esforço `low`, saída em JSON com esquema fixo) e, sem `acao`, a conversa (`claude-opus-5-5`, esforço `medium`, com `fallbacks: "default"` para o caso de o modelo recusar um pedido). Na conversa, cada pedido HTTP faz uma só chamada ao modelo; quando o modelo pede contas, a função faz-as e a página volta a chamar até ao fim da resposta, para nenhum pedido se aproximar do limite de 60 s das funções. O formulário, a conversa e as propostas vivem no separador (`sessionStorage`); fechar o separador apaga-os. Limite: 120 pedidos por minuto por IP.
+
+**Custos (estimativa, a confirmar com o uso real):** formulário 0 €; «Preencher com IA» cerca de 0,0004 € por pedido (menos de 0,20 € por mês com 300 propostas); assistente completo cerca de 0,10 a 0,30 € por conversa. A API da Anthropic não tem plano gratuito: carregamento mínimo de 5 $ na consola.
 
 **Ligar no Netlify** (Site configuration → Environment variables, âmbito **Functions**), e depois voltar a publicar:
 
 | Variável | O quê |
 |---|---|
-| `ANTHROPIC_API_KEY` | Chave da API da Anthropic (console.anthropic.com). Paga por utilização |
-| `MDM_EQUIPA_SENHA` | A senha que a equipa escreve na página. Sem ela, a função responde que não está configurada |
+| `MDM_EQUIPA_SENHA` | A senha que a equipa escreve na página. Obrigatória |
+| `ANTHROPIC_API_KEY` | Chave da API da Anthropic (console.anthropic.com), para «Preencher com IA» e o assistente completo. Sem ela, o formulário funciona e os botões de IA avisam que não está ligada |
 | `MDM_PRECOS` | `teste` para experimentar com `data/precos-teste.json` (números falsos e redondos; cada proposta sai com «VALORES DE TESTE · NÃO ENVIAR AO CLIENTE»). Apagar a variável quando a tabela real estiver preenchida |
 
-Com `precos.json` vazio (hoje) e sem `MDM_PRECOS=teste`, o assistente calcula potências mas diz que ainda não há preços. O `package.json` só existe para a função (o site continua a ser gerado só com Python); o Netlify instala as dependências sozinho.
+Com `precos.json` vazio (hoje) e sem `MDM_PRECOS=teste`, o formulário calcula potências mas avisa que ainda não há preços. O `package.json` só existe para a função (o site continua a ser gerado só com Python); o Netlify instala as dependências sozinho.
 
-**Testes** (a partir de `website/`): `npm install && node tests/funcao.mjs` (a função contra uma API falsa, sem chave nem rede: senha, pedido à API, contas, proposta, notas recusadas); `tests/paridade.mjs` precisa do Playwright (ver o cabeçalho do ficheiro). `build.py --check` valida também `precos-teste.json` e as páginas de `equipa/`.
+**Testes** (a partir de `website/`): `npm install && node tests/funcao.mjs` (a função contra uma API falsa, sem chave nem rede: senha, formulário sem chave, leitura com o Haiku e o corte de telefones e emails, leituras falhadas, casos complexos, conversa, proposta, notas recusadas); `tests/paridade.mjs` precisa do Playwright (ver o cabeçalho do ficheiro). `build.py --check` valida também `precos-teste.json` e as páginas de `equipa/`.
 
 ## Estatísticas e consentimento
 

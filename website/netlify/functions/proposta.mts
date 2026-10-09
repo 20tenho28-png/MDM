@@ -8,8 +8,15 @@
    resposta traz «continuar: true» e a página volta a chamar com o histórico novo: assim nenhum pedido se aproxima do
    limite de 60 s das funções. O histórico vive na página e volta inteiro a cada pedido, sempre só acrescentado.
 
-   Variáveis no Netlify (âmbito Functions): ANTHROPIC_API_KEY, MDM_EQUIPA_SENHA e, para experimentar com a tabela de
-   teste (data/precos-teste.json, números falsos), MDM_PRECOS=teste. README.md, «Assistente de propostas». */
+   Três caminhos, do mais barato ao mais caro (campo «acao» do pedido):
+   - «tabela» e «calcular»: o formulário passo a passo. Sem IA, custo zero: as perguntas da tabela e a proposta.
+   - «ler»: o Claude Haiku lê o texto do pedido do cliente (WhatsApp, email) e devolve os campos do formulário, que a
+     equipa confirma. Uma chamada barata por pedido. Se falhar, o formulário continua a funcionar à mão.
+   - sem «acao» (com «mensagens»): o assistente completo, em conversa (Opus), para os casos complexos.
+
+   Variáveis no Netlify (âmbito Functions): MDM_EQUIPA_SENHA (sempre), ANTHROPIC_API_KEY (para «ler» e para a conversa;
+   sem ela o formulário funciona na mesma) e, para experimentar com a tabela de teste (data/precos-teste.json, números
+   falsos), MDM_PRECOS=teste. README.md, «Assistente de propostas». */
 import Anthropic from "@anthropic-ai/sdk"
 import type { Config, Context } from "@netlify/functions"
 import { createHash, timingSafeEqual } from "node:crypto"
@@ -19,6 +26,7 @@ import precosTeste from "../../data/precos-teste.json" with { type: "json" }
 import { configPotencia, configPreco, potencia, preco } from "../lib/calculo.mjs"
 
 const MODELO = "claude-opus-5-5"
+const MODELO_LEITURA = "claude-haiku-5-5"
 const MAX_MENSAGENS = 120
 const MAX_BYTES = 400_000
 
@@ -176,9 +184,9 @@ function prepararProposta(input: any, tab: Tabela) {
 
 /* ── Ferramentas ── */
 
-function ferramentas(tab: Tabela): Anthropic.Tool[] {
+function esquemaDivisoes() {
   const tipos = Object.keys(site.btu.tipos)
-  const divisoes = {
+  return {
     type: "array", description: "As divisões a climatizar (só para ar condicionado; vazio para águas quentes).",
     items: {
       type: "object", additionalProperties: false, required: ["tipo", "area", "sol", "ultimo_andar"],
@@ -190,6 +198,8 @@ function ferramentas(tab: Tabela): Anthropic.Tool[] {
       },
     },
   }
+}
+function esquemaRespostas(tab: Tabela) {
   const respostaProps: Record<string, any> = {}
   for (const k of ["pre", "dist", "furo", "fora", "luz", "antigas", "deposito"]) {
     const q = tab.T.perguntas.find((p: any) => p.k === k)
@@ -199,7 +209,11 @@ function ferramentas(tab: Tabela): Anthropic.Tool[] {
         : "A tabela não tem esta pergunta: deixe «».",
     }
   }
-  const respostas = { type: "object", additionalProperties: false, required: Object.keys(respostaProps), properties: respostaProps }
+  return { type: "object", additionalProperties: false, required: Object.keys(respostaProps), properties: respostaProps }
+}
+
+function ferramentas(tab: Tabela): Anthropic.Tool[] {
+  const divisoes = esquemaDivisoes(), respostas = esquemaRespostas(tab)
   const servico = { type: "string", enum: ["ac", "aguasQuentes"], description: "«ac» = montagem de ar condicionado; «aguasQuentes» = bomba de calor para águas quentes." }
   return [
     {
@@ -263,6 +277,112 @@ Como escreves:
 - Sem travessões.`
 }
 
+/* ── Formulário (sem IA) ── */
+
+/* o que o formulário precisa de saber da tabela: tipos de divisão, limites e as perguntas que mudam o preço */
+function infoTabela(tab: Tabela) {
+  const b = site.btu
+  return {
+    teste: tab.teste, temAC: tab.T.temAC, temBC: tab.T.temBC, tipos: Object.keys(b.tipos),
+    areaMin: b.areaMin, areaMax: b.areaMax, maxDivisoes: b.maxDivisoes,
+    perguntas: tab.T.perguntas.map((q: any) => ({ k: q.k, ac: q.ac, t: q.t, op: q.op.map((o: string[]) => [o[0], o[1].replace(/ /g, " ")]) })),
+  }
+}
+
+/* quando é melhor passar o caso ao assistente completo (ou à visita): o que a tabela não cobre */
+function complexidade(input: any, r: any, extra: string[] = []): string[] {
+  const m = [...extra]
+  const servico = input?.servico
+  if (servico !== "ac" && servico !== "aguasQuentes")
+    m.push("Trabalho sem tabela de preços (reparação, manutenção, ventilação, eletricidade ou outro): o preço dá-se depois da visita.")
+  else if (r?.modo === "sem_tabela") m.push("Ainda não há preços na tabela da MDM para este produto.")
+  if (servico === "ac" && r?.potencia) {
+    if (r.potencia.n > 4) m.push(`São ${r.potencia.n} divisões: a tabela vai até 4 (multi-split); acima disso, dimensiona-se na visita.`)
+    if (r.potencia.acima) m.push("Há uma divisão acima do maior aparelho da tabela: pode precisar de mais do que uma máquina ou de condutas.")
+  }
+  return [...new Set(m)]
+}
+
+function calcular(input: any, tab: Tabela) {
+  const servico = input?.servico
+  if (servico !== "ac" && servico !== "aguasQuentes") return { modo: "outro", complexo: complexidade(input, null) }
+  const r: any = preco(tab.T, opcoesDe(input))
+  const out: any = { modo: r.modo, resultado: paraModelo(r, tab.teste), complexo: complexidade(input, r) }
+  if (r.modo === "preco" || r.modo === "visita") {
+    const p: any = prepararProposta(input, tab)
+    if (p.proposta) { out.proposta = p.proposta; out.notasRecusadas = p.paraModelo.notas_recusadas || [] }
+  }
+  return out
+}
+
+/* ── Leitura do pedido em texto livre (Claude Haiku): só preenche campos; a equipa confirma antes de calcular ── */
+
+function esquemaLeitura(tab: Tabela) {
+  return {
+    type: "object", additionalProperties: false,
+    required: ["servico", "divisoes", "respostas", "local", "pedido", "notas", "duvidas", "complexo", "motivo_complexo"],
+    properties: {
+      servico: { type: "string", enum: ["ac", "aguasQuentes", "outro"],
+        description: "«ac» = montar ar condicionado; «aguasQuentes» = bomba de calor para águas quentes; «outro» = qualquer outro trabalho (reparação, manutenção, ventilação, eletricidade, condutas, VRV, comercial)." },
+      divisoes: { ...esquemaDivisoes(), description: "As divisões a climatizar, só com ar condicionado. Área 0 quando o texto não a diz." },
+      respostas: esquemaRespostas(tab),
+      local: { type: "string", description: "Localidade ou zona da obra, se o texto a diz (sem morada completa); senão «»." },
+      pedido: { type: "string", description: "Uma frase simples com o que o cliente pede, sem nomes, telefones nem moradas." },
+      notas: { type: "array", items: { type: "string" }, description: "Até 3 notas factuais úteis para a obra que não cabem nos campos. Sem preços nem prazos." },
+      duvidas: { type: "array", items: { type: "string" }, description: "O que falta ou é ambíguo e muda o preço, como pergunta curta a fazer ao cliente." },
+      complexo: { type: "boolean", description: "true se o caso sai do normal: mais de 4 divisões, espaço comercial, condutas ou VRV, vários serviços juntos, pedido confuso ou contraditório." },
+      motivo_complexo: { type: "string", description: "Porquê, numa frase, se complexo; senão «»." },
+    },
+  }
+}
+
+const SISTEMA_LEITURA = `Lês pedidos de clientes de uma empresa de ar condicionado em Lisboa (mensagens de WhatsApp, emails, notas de telefone, em português) e passas o que lá está para os campos de um formulário. Não respondes ao cliente nem dás preços.
+
+Regras:
+- Só preenches o que o texto diz. Nunca adivinhes: o que não está escrito fica vazio («» ou área 0) e, se mudar o preço, vai para «duvidas».
+- Áreas: «uns 30», «30 metros», «30 m2» = 30. Sem número, área 0 e uma dúvida.
+- Tipo de divisão: sala, quarto, cozinha e escritório pelo nome; o resto é «Outra divisão». «Suite» é quarto.
+- «sol» só se o texto falar em muito sol, sol direto, virado a sul ou a poente.
+- «ultimo_andar» só se for o último andar ou por baixo do telhado; um andar com número não chega.
+- Respostas que mudam o preço: escolhe a opção que corresponde ao que o texto diz, pelo texto da opção; se o texto não diz, «».
+- «pedido» e «notas» sem nomes, telefones, emails, NIF nem moradas.
+- Escreve em português de Portugal, sem travessões.`
+
+function redige(t: string): string {
+  return t
+    .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, "[email]")
+    .replace(/(?:\+?351[\s.-]?)?\b[29]\d{2}[\s.-]?\d{3}[\s.-]?\d{3}\b/g, "[telefone]")
+    .replace(/\bNIF:?\s*\d{9}\b/gi, "[NIF]")
+    .replace(/\b\d{4}-\d{3}\b/g, "[código postal]")
+}
+
+async function ler(texto: string, tab: Tabela, client: Anthropic) {
+  const resposta: any = await client.messages.create({
+    model: MODELO_LEITURA,
+    max_tokens: 4000,
+    output_config: { effort: "low", format: { type: "json_schema", schema: esquemaLeitura(tab) } },
+    system: SISTEMA_LEITURA,
+    messages: [{ role: "user", content: `Pedido do cliente:\n\n${redige(texto)}` }],
+  } as any)
+  if (resposta.stop_reason === "refusal") return { erro: "A IA não leu este pedido. Preencha o formulário à mão." }
+  if (resposta.stop_reason === "max_tokens") return { erro: "O pedido é demasiado longo para ler de uma vez. Preencha o formulário à mão ou use o assistente completo." }
+  const txt = (resposta.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("")
+  let campos: any
+  try { campos = JSON.parse(txt) } catch { return { erro: "A leitura veio incompleta. Preencha o formulário à mão." } }
+  /* limpeza: nada de travessões nem de regras do dono quebradas nos textos livres */
+  const notas = (campos.notas || []).map((n: unknown) => limpa(n, 240)).filter((n: string) => n && !proibido(n)).slice(0, 3)
+  const pedido = limpa(campos.pedido, 400)
+  const divisoes = (campos.divisoes || []).slice(0, 12)
+  const semArea = divisoes.filter((d: any) => !(d.area > 0)).length
+  const duvidas = (campos.duvidas || []).map((n: unknown) => limpa(n, 200)).filter(Boolean).slice(0, 6)
+  if (semArea && !duvidas.some((d: string) => /área|m²|m2|metros/i.test(d))) duvidas.unshift(`Falta a área de ${semArea === 1 ? "uma divisão" : semArea + " divisões"}.`)
+  const limpo = { ...campos, divisoes, notas, pedido: proibido(pedido) ? "" : pedido, local: limpa(campos.local, 160), duvidas,
+    motivo_complexo: limpa(campos.motivo_complexo, 240) }
+  const r: any = limpo.servico === "ac" || limpo.servico === "aguasQuentes" ? preco(tab.T, opcoesDe(limpo)) : null
+  const complexo = complexidade(limpo, r, limpo.complexo && limpo.motivo_complexo ? [limpo.motivo_complexo] : limpo.complexo ? ["A IA marcou este pedido como fora do normal."] : [])
+  return { campos: limpo, complexo }
+}
+
 /* ── Pedido HTTP ── */
 
 function iguais(a: string, b: string) {
@@ -275,18 +395,37 @@ export async function atende(req: Request, env: Env, cliente?: Anthropic): Promi
   if (req.method !== "POST") return json({ erro: "Use POST." }, 405)
   const senha = env.get("MDM_EQUIPA_SENHA")
   const chave = env.get("ANTHROPIC_API_KEY")
-  if (!senha || !(chave || cliente)) return json({ erro: "O assistente ainda não está configurado no Netlify (MDM_EQUIPA_SENHA e ANTHROPIC_API_KEY)." }, 503)
+  if (!senha) return json({ erro: "O assistente ainda não está configurado no Netlify (falta MDM_EQUIPA_SENHA)." }, 503)
   if (!iguais(req.headers.get("x-mdm-senha") || "", senha)) return json({ erro: "Senha errada." }, 401)
 
   const bruto = await req.text()
   if (bruto.length > MAX_BYTES) return json({ erro: "A conversa ficou demasiado longa. Comece uma nova." }, 413)
   let corpo: any
   try { corpo = JSON.parse(bruto) } catch { return json({ erro: "Pedido inválido." }, 400) }
+  const tab = tabela(env)
+  const semIA = () => json({ erro: "A IA ainda não está ligada (falta ANTHROPIC_API_KEY no Netlify). O formulário funciona na mesma." }, 503)
+
+  /* formulário: sem IA, sem custo */
+  if (corpo?.acao === "tabela") return json(infoTabela(tab))
+  if (corpo?.acao === "calcular") {
+    try { return json(calcular(corpo.dados, tab)) } catch (e) { console.error(e); return json({ erro: "Não foi possível calcular com estes dados." }, 400) }
+  }
+  /* leitura do texto livre (Haiku) */
+  if (corpo?.acao === "ler") {
+    const texto = String(corpo.texto || "").trim()
+    if (!texto) return json({ erro: "Cole primeiro o pedido do cliente." }, 400)
+    if (texto.length > 6000) return json({ erro: "O texto é demasiado longo: cole só o pedido do cliente." }, 413)
+    if (!(chave || cliente)) return semIA()
+    try { return json(await ler(texto, tab, cliente || new Anthropic({ apiKey: chave }))) }
+    catch (e) { console.error("leitura falhou", e); return json({ erro: "A leitura falhou. Preencha o formulário à mão ou tente outra vez." }, 502) }
+  }
+
+  /* assistente completo (conversa) */
+  if (!(chave || cliente)) return semIA()
   const mensagens = corpo?.mensagens
   if (!Array.isArray(mensagens) || !mensagens.length || mensagens.length > MAX_MENSAGENS || mensagens[0]?.role !== "user")
     return json({ erro: mensagens?.length > MAX_MENSAGENS ? "A conversa ficou demasiado longa. Comece uma nova." : "Pedido inválido." }, 400)
 
-  const tab = tabela(env)
   const client = cliente || new Anthropic({ apiKey: chave })
   let resposta: any
   try {
@@ -349,5 +488,5 @@ export default async (req: Request, _context: Context) => atende(req, Netlify.en
 export const config: Config = {
   path: "/api/proposta",
   method: "POST",
-  rateLimit: { windowLimit: 40, windowSize: 60, aggregateBy: ["ip", "domain"] },
+  rateLimit: { windowLimit: 120, windowSize: 60, aggregateBy: ["ip", "domain"] },
 }

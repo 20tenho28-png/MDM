@@ -1,31 +1,53 @@
-/* Assistente de propostas (uso interno). A conversa e as propostas ficam neste separador (sessionStorage) e vão
-   inteiras à função /api/proposta a cada pedido, sempre só acrescentadas (a API exige o histórico tal como o deu).
-   Quando a função responde «continuar», o modelo pediu contas às ferramentas: volta-se a chamar até ao fim do turno.
-   Texto da IA e dos clientes entra sempre como texto (textContent), nunca como HTML. */
+/* Assistente de propostas (uso interno). Três caminhos, do mais barato ao mais caro:
+   1. O formulário: as perguntas vêm da tabela de preços e a proposta é calculada pela função sem IA (acao «calcular»),
+      a cada mudança. Funciona mesmo sem a chave da API.
+   2. «Preencher com IA»: o Claude Haiku lê a mensagem do cliente e preenche o formulário (acao «ler»); a equipa confirma.
+      Se a leitura falhar, preenche-se à mão.
+   3. O assistente completo (conversa), para o que a tabela não cobre: o formulário avisa e passa-lhe o caso.
+   A conversa, o formulário e as propostas ficam neste separador (sessionStorage). A conversa vai inteira à função a cada
+   pedido, sempre só acrescentada (a API exige o histórico tal como o deu); com «continuar», o modelo pediu contas às
+   ferramentas e volta-se a chamar até ao fim do turno. Texto da IA e dos clientes entra sempre como texto, nunca como HTML. */
 (function () {
   'use strict';
   var API = '/api/proposta', CHAVE = 'mdm-equipa-conversa', CHAVE_SENHA = 'mdm-equipa-senha', MAX_VOLTAS = 8;
   function $(s) { return document.querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
   function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
   function guarda(k, v) { try { sessionStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v)); } catch (e) {} }
   function le(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } }
   function apaga(k) { try { sessionStorage.removeItem(k); } catch (e) {} }
 
-  var entrar = $('[data-entrar]'), mesa = $('[data-mesa]'), dentro = $('[data-so-dentro]');
-  var msgs = $('[data-msgs]'), vazio = $('[data-vazio]'), estado = $('[data-estado]'), form = $('[data-form]'), caixa = $('[data-msg]');
-  var enviar = $('[data-enviar]'), testeAviso = $('[data-teste]');
+  var entrar = $('[data-entrar]'), mesa = $('[data-mesa]'), dentro = $('[data-so-dentro]'), testeAviso = $('[data-teste]');
+  var msgs = $('[data-msgs]'), vazio = $('[data-vazio]'), estado = $('[data-estado]'), formChat = $('[data-form]'), caixa = $('[data-msg]');
+  var enviar = $('[data-enviar]');
   var qual = $('[data-qual]'), doc = $('[data-doc]'), zona = $('[data-prop-zona]'), semProp = $('[data-sem-prop]'), copiado = $('[data-copiado]');
+  var fp = $('[data-form-prop]'), divsEl = $('[data-divs]'), modeloDiv = $('[data-div-modelo]'), pergEl = $('[data-perguntas]');
+  var calcEstado = $('[data-calc-estado]'), lerEstado = $('[data-ler-estado]'), texto = $('[data-texto]');
+  var complexoEl = $('[data-complexo]'), duvidasEl = $('[data-duvidas]');
 
-  var S = { mensagens: [], propostas: [], teste: false, atual: -1 };
-  try { var g = JSON.parse(le(CHAVE) || 'null'); if (g && Array.isArray(g.mensagens)) S = g; } catch (e) {}
-  var senha = le(CHAVE_SENHA) || '', ocupado = false;
+  var VAZIO_FORM = { servico: 'ac', divisoes: [{ tipo: 'Sala', area: '', sol: false, topo: false }], respostas: {},
+    nome: '', contacto: '', local: '', pedido: '', notas: '', texto: '', duvidas: [], complexoIA: [] };
+  function novoForm() { return JSON.parse(JSON.stringify(VAZIO_FORM)); }
+  var S = { mensagens: [], propostas: [], teste: false, atual: -1, aba: 'form', form: novoForm() };
+  try { var g = JSON.parse(le(CHAVE) || 'null'); if (g && Array.isArray(g.mensagens)) { S = g; if (!S.form) S.form = novoForm(); } } catch (e) {}
+  var senha = le(CHAVE_SENHA) || '', ocupado = false, T = null;
   function grava() { guarda(CHAVE, S); }
+
+  function api(corpo) {
+    return fetch(API, { method: 'POST', headers: { 'content-type': 'application/json', 'x-mdm-senha': senha }, body: JSON.stringify(corpo) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (c) {
+        if (r.status === 401) { senha = ''; apaga(CHAVE_SENHA); mostra(false, 'Senha errada. Escreva-a outra vez; o trabalho fica guardado.'); throw new Error('senha'); }
+        return { ok: r.ok, status: r.status, c: c };
+      }); });
+  }
 
   /* ── entrar e sair ── */
   function mostra(dentroDaMesa, erro) {
     entrar.hidden = dentroDaMesa; mesa.hidden = !dentroDaMesa; dentro.hidden = !dentroDaMesa;
     $('[data-entrar-erro]').textContent = erro || '';
-    if (dentroDaMesa) { desenhaTudo(); caixa.focus(); } else { $('#senha').focus(); }
+    if (!dentroDaMesa) { $('#senha').focus(); return; }
+    desenhaTudo();
+    if (!T) carregaTabela();
   }
   $('[data-entrar-form]').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -34,14 +56,228 @@
     $('#senha').value = '';
     mostra(true);
   });
-  $('[data-sair]').addEventListener('click', function () { senha = ''; apaga(CHAVE_SENHA); mostra(false); });
+  $('[data-sair]').addEventListener('click', function () { senha = ''; apaga(CHAVE_SENHA); T = null; mostra(false); });
   $('[data-nova]').addEventListener('click', function () {
-    if (S.mensagens.length && !confirm('Começar uma conversa nova? A conversa e as propostas deste separador desaparecem.')) return;
-    S = { mensagens: [], propostas: [], teste: S.teste, atual: -1 };
-    grava(); desenhaTudo(); caixa.focus();
+    if ((S.mensagens.length || S.propostas.length) && !confirm('Começar uma proposta nova? O formulário, a conversa e as propostas deste separador desaparecem.')) return;
+    S = { mensagens: [], propostas: [], teste: S.teste, atual: -1, aba: 'form', form: novoForm() };
+    grava(); desenhaTudo(); poeForm(); calcula();
   });
 
-  /* ── conversa ── */
+  /* ── abas ── */
+  var abas = $$('[data-aba]');
+  function abre(qualAba, foco) {
+    S.aba = qualAba; grava();
+    abas.forEach(function (b) {
+      var sim = b.getAttribute('data-aba') === qualAba;
+      b.setAttribute('aria-selected', sim ? 'true' : 'false'); b.tabIndex = sim ? 0 : -1;
+      if (sim && foco) b.focus();
+    });
+    $$('[data-painel]').forEach(function (p) { p.hidden = p.getAttribute('data-painel') !== qualAba; });
+    if (qualAba === 'chat') desenhaConversa();
+  }
+  abas.forEach(function (b, i) {
+    b.addEventListener('click', function () { abre(b.getAttribute('data-aba')); });
+    b.addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      e.preventDefault(); abre(abas[(i + (e.key === 'ArrowRight' ? 1 : abas.length - 1)) % abas.length].getAttribute('data-aba'), true);
+    });
+  });
+
+  /* ── formulário ── */
+  function carregaTabela() {
+    calcEstado.textContent = 'A carregar a tabela…';
+    api({ acao: 'tabela' }).then(function (x) {
+      if (!x.ok) { calcEstado.textContent = x.c.erro || 'Não foi possível carregar a tabela.'; return; }
+      T = x.c; S.teste = !!T.teste; testeAviso.hidden = !S.teste;
+      poeForm(); calcula();
+    }).catch(function (e) { if (e.message !== 'senha') calcEstado.textContent = 'Sem ligação. Verifique a internet.'; });
+  }
+  function leArea(t) {
+    t = String(t == null ? '' : t).trim().replace(/\s*m(²|2)$/i, '').replace(',', '.');
+    if (!t) return null;
+    return /^(\d+(\.\d*)?|\.\d+)$/.test(t) ? Math.round(parseFloat(t) * 100) / 100 : NaN;
+  }
+  function linhaDiv(d, i) {
+    var li = modeloDiv.content.firstElementChild.cloneNode(true);
+    li.querySelector('.eq-div-n').textContent = 'Divisão ' + (i + 1);
+    var tipo = li.querySelector('[data-d="tipo"]');
+    T.tipos.forEach(function (t) { var o = el('option', '', t); o.value = t; tipo.appendChild(o); });
+    tipo.value = T.tipos.indexOf(d.tipo) >= 0 ? d.tipo : T.tipos[0];
+    var area = li.querySelector('[data-d="area"]');
+    area.value = d.area === '' || d.area == null || d.area === 0 ? '' : String(d.area).replace('.', ',');
+    li.querySelector('[data-d="sol"]').checked = !!d.sol;
+    li.querySelector('[data-d="topo"]').checked = !!d.topo;
+    /* etiquetas ligadas aos campos (ids únicos por linha) */
+    $$('.eq-rot', li).forEach(function (l, j) { var c = j === 0 ? tipo : area; c.id = 'd' + i + (j === 0 ? 't' : 'a'); l.htmlFor = c.id; });
+    li.querySelector('[data-d="tira"]').hidden = S.form.divisoes.length < 2;
+    li.querySelector('[data-d="tira"]').setAttribute('aria-label', 'Tirar a divisão ' + (i + 1));
+    return li;
+  }
+  function poeForm() {
+    if (!T) return;
+    var f = S.form;
+    texto.value = f.texto || '';
+    $$('input[name="servico"]', fp).forEach(function (r) { r.checked = r.value === f.servico; });
+    divsEl.textContent = '';
+    f.divisoes.forEach(function (d, i) { divsEl.appendChild(linhaDiv(d, i)); });
+    $('[data-junta-div]').hidden = f.divisoes.length >= (T.maxDivisoes || 8);
+    pergEl.textContent = '';
+    var mostradas = 0;
+    T.perguntas.forEach(function (q) {
+      var visivel = f.servico === 'ac' ? q.ac : f.servico === 'aguasQuentes' ? !q.ac : false;
+      if (!visivel) return;
+      mostradas++;
+      var fs = el('fieldset', 'eq-q'), ops = el('div', 'eq-ops');
+      fs.appendChild(el('legend', 'eq-q-t', q.t));
+      [naoPerguntei].concat(q.op).forEach(function (o) {
+        var lb = el('label', 'eq-op' + (o[0] === '' ? ' eq-op-vazio' : '')), r = el('input');
+        r.type = 'radio'; r.name = 'q-' + q.k; r.value = o[0]; r.checked = (f.respostas[q.k] || '') === o[0];
+        lb.appendChild(r); lb.appendChild(el('span', '', o[1])); ops.appendChild(lb);
+      });
+      fs.appendChild(ops); pergEl.appendChild(fs);
+    });
+    $('[data-sec-divs]').hidden = f.servico !== 'ac';
+    $('[data-sec-perg]').hidden = f.servico === 'outro';
+    $('[data-sem-perg]').hidden = mostradas > 0;
+    $('[data-num-perg]').textContent = f.servico === 'ac' ? '4' : '3';
+    $('[data-num-cli]').textContent = f.servico === 'ac' ? '5' : f.servico === 'outro' ? '3' : '4';
+    fp.nome.value = f.nome; fp.contacto.value = f.contacto; fp.local.value = f.local; fp.pedido.value = f.pedido; fp.notas.value = f.notas;
+    desenhaDuvidas();
+  }
+  /* o que está no ecrã para S.form */
+  function leForm() {
+    var f = S.form;
+    f.texto = texto.value;
+    var s = fp.querySelector('input[name="servico"]:checked'); f.servico = s ? s.value : 'ac';
+    f.divisoes = $$('.eq-div', divsEl).map(function (li) {
+      return { tipo: li.querySelector('[data-d="tipo"]').value, area: li.querySelector('[data-d="area"]').value,
+        sol: li.querySelector('[data-d="sol"]').checked, topo: li.querySelector('[data-d="topo"]').checked };
+    });
+    $$('.eq-q input:checked', pergEl).forEach(function (r) { f.respostas[r.name.slice(2)] = r.value; });
+    ['nome', 'contacto', 'local', 'pedido', 'notas'].forEach(function (k) { f[k] = fp[k].value; });
+    grava();
+  }
+  var naoPerguntei = ['', 'Ainda não perguntei'];
+  var tCalc = 0, nCalc = 0;
+  function calcula() {
+    if (!T) return;
+    clearTimeout(tCalc);
+    tCalc = setTimeout(calculaJa, 350);
+  }
+  function calculaJa() {
+    var f = S.form, erros = [];
+    var divisoes = [];
+    $$('.eq-div', divsEl).forEach(function (li, i) {
+      var a = leArea(li.querySelector('[data-d="area"]').value), e = li.querySelector('[data-d="erro"]'), msg = '';
+      if (a === null) msg = f.servico === 'ac' ? 'Falta a área.' : '';
+      else if (isNaN(a)) msg = 'Escreva a área só com números, por exemplo 12 ou 12,5.';
+      else if (a < T.areaMin || a > T.areaMax) msg = 'Entre ' + T.areaMin + ' e ' + T.areaMax + ' m². Maior do que isso, dimensiona-se na visita.';
+      e.textContent = msg;
+      li.querySelector('[data-d="area"]').setAttribute('aria-invalid', msg && a !== null ? 'true' : 'false');
+      if (msg) { if (a !== null) erros.push(i); return; }
+      divisoes.push({ tipo: f.divisoes[i].tipo, area: a, sol: f.divisoes[i].sol, ultimo_andar: f.divisoes[i].topo });
+    });
+    if (f.servico === 'ac' && !divisoes.length) { calcEstado.textContent = 'Escreva a área de pelo menos uma divisão.'; poeComplexo([]); return; }
+    var respostas = {};
+    ['pre', 'dist', 'furo', 'fora', 'luz', 'antigas', 'deposito'].forEach(function (k) { respostas[k] = f.respostas[k] || ''; });
+    var dados = { servico: f.servico, divisoes: f.servico === 'ac' ? divisoes : [], respostas: respostas,
+      cliente: { nome: f.nome, contacto: f.contacto, local: f.local }, pedido: f.pedido,
+      observacoes: f.notas.split('\n').map(function (n) { return n.trim(); }).filter(Boolean).slice(0, 6) };
+    var este = ++nCalc;
+    calcEstado.textContent = 'A calcular…';
+    api({ acao: 'calcular', dados: dados }).then(function (x) {
+      if (este !== nCalc) return;   /* chegou uma resposta mais recente */
+      if (!x.ok) { calcEstado.textContent = x.c.erro || 'Não foi possível calcular.'; return; }
+      var c = x.c, avisos = [];
+      if (c.proposta) { c.proposta.origem = 'form'; poeProposta(c.proposta); }
+      if (c.modo === 'escolhe') avisos.push('Escolha o tamanho do depósito.');
+      if (c.modo === 'erro' && c.resultado && c.resultado.erro) avisos.push(c.resultado.erro);
+      if (c.notasRecusadas && c.notasRecusadas.length) avisos.push('Notas que não entram na proposta (regras da MDM): ' + c.notasRecusadas.join('; '));
+      if (erros.length) avisos.push('Há divisões com a área por corrigir; não entram na conta.');
+      var falta = c.resultado && c.resultado.perguntas_por_responder ? c.resultado.perguntas_por_responder.length : 0;
+      calcEstado.textContent = avisos.join(' ') || (c.proposta ? 'Proposta atualizada.' + (falta ? ' Ainda há ' + falta + (falta === 1 ? ' pergunta' : ' perguntas') + ' por fazer ao cliente.' : '') : '');
+      poeComplexo(c.complexo || []);
+    }).catch(function (e) { if (e.message !== 'senha') calcEstado.textContent = 'Sem ligação. Verifique a internet.'; });
+  }
+  fp.addEventListener('input', function () { leForm(); calcula(); });
+  fp.addEventListener('change', function (e) {
+    leForm();
+    if (e.target.name === 'servico') { S.form.complexoIA = []; poeForm(); poeComplexo([]); }
+    calcula();
+  });
+  divsEl.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-d="tira"]'); if (!b) return;
+    var i = $$('.eq-div', divsEl).indexOf(b.closest('.eq-div'));
+    leForm(); S.form.divisoes.splice(i, 1); grava(); poeForm(); calcula();
+    var primeiro = divsEl.querySelector('[data-d="area"]'); if (primeiro) primeiro.focus();
+  });
+  $('[data-junta-div]').addEventListener('click', function () {
+    leForm(); S.form.divisoes.push({ tipo: 'Quarto', area: '', sol: false, topo: false }); grava(); poeForm();
+    var areas = $$('[data-d="area"]', divsEl); areas[areas.length - 1].focus();
+  });
+  texto.addEventListener('input', function () { S.form.texto = texto.value; grava(); });
+
+  /* ── avisos: dúvidas da leitura e casos complexos ── */
+  function desenhaDuvidas() {
+    var l = $('[data-duvidas-lista]'); l.textContent = '';
+    (S.form.duvidas || []).forEach(function (d) { l.appendChild(el('li', '', d)); });
+    duvidasEl.hidden = !(S.form.duvidas && S.form.duvidas.length);
+  }
+  var motivosAtuais = [];
+  function poeComplexo(doCalculo) {
+    var todos = (S.form.complexoIA || []).concat(doCalculo).filter(function (m, i, a) { return a.indexOf(m) === i; });
+    motivosAtuais = todos;
+    var l = $('[data-complexo-lista]'); l.textContent = '';
+    todos.forEach(function (m) { l.appendChild(el('li', '', m)); });
+    complexoEl.hidden = !todos.length;
+  }
+
+  /* ── preencher com IA (Haiku) ── */
+  $('[data-ler]').addEventListener('click', function () {
+    var t = texto.value.trim();
+    if (!t) { lerEstado.textContent = 'Cole primeiro a mensagem do cliente.'; texto.focus(); return; }
+    var b = this; b.disabled = true; lerEstado.textContent = 'A ler o pedido…';
+    api({ acao: 'ler', texto: t }).then(function (x) {
+      b.disabled = false;
+      if (!x.ok || x.c.erro) { lerEstado.textContent = (x.c.erro || 'A leitura falhou.') + ' O formulário continua disponível.'; return; }
+      var c = x.c.campos, f = S.form;
+      f.servico = c.servico;
+      if (c.divisoes && c.divisoes.length) f.divisoes = c.divisoes.map(function (d) { return { tipo: d.tipo, area: d.area > 0 ? d.area : '', sol: !!d.sol, topo: !!d.ultimo_andar }; });
+      Object.keys(c.respostas || {}).forEach(function (k) { if (c.respostas[k]) f.respostas[k] = c.respostas[k]; });
+      if (c.local) f.local = c.local;
+      if (c.pedido) f.pedido = c.pedido;
+      if (c.notas && c.notas.length) f.notas = (f.notas ? f.notas.trim() + '\n' : '') + c.notas.join('\n');
+      f.duvidas = c.duvidas || [];
+      f.complexoIA = x.c.complexo || [];
+      grava(); poeForm(); calculaJa();
+      lerEstado.textContent = 'Formulário preenchido. Confirme os campos' + (f.duvidas.length ? ' e veja o que falta perguntar.' : '.');
+    }).catch(function (e) { b.disabled = false; if (e.message !== 'senha') lerEstado.textContent = 'Sem ligação. Preencha o formulário à mão.'; });
+  });
+
+  /* ── passar o caso ao assistente completo ── */
+  $('[data-passar]').addEventListener('click', function () {
+    leForm();
+    var f = S.form, l = ['Caso passado do formulário, para preparar a proposta.'];
+    if (f.texto.trim()) l.push('', 'Mensagem do cliente:', f.texto.trim());
+    l.push('', 'Serviço: ' + ({ ac: 'montagem de ar condicionado', aguasQuentes: 'bomba de calor para águas quentes', outro: 'outro trabalho' })[f.servico]);
+    if (f.servico === 'ac') f.divisoes.forEach(function (d, i) {
+      var c = []; if (d.sol) c.push('muito sol'); if (d.topo) c.push('último andar');
+      l.push('Divisão ' + (i + 1) + ': ' + d.tipo + ', ' + (d.area ? String(d.area).replace('.', ',') + ' m²' : 'área por saber') + (c.length ? ' (' + c.join(', ') + ')' : ''));
+    });
+    T.perguntas.forEach(function (q) {
+      var v = f.respostas[q.k]; if (!v) return;
+      q.op.forEach(function (o) { if (o[0] === v) l.push(q.t + ' ' + o[1]); });
+    });
+    if (f.local) l.push('Local: ' + f.local);
+    if (f.pedido) l.push('Pedido: ' + f.pedido);
+    if (f.notas.trim()) l.push('Notas: ' + f.notas.trim().replace(/\n/g, '; '));
+    if (motivosAtuais.length) l.push('', 'Porque passou para aqui: ' + motivosAtuais.join(' '));
+    abre('chat');
+    caixa.value = l.join('\n');
+    caixa.focus();
+  });
+
+  /* ── assistente completo (conversa) ── */
   var PASSOS = { calcular_potencia: 'Calculou a potência', calcular_preco: 'Calculou o preço com a tabela', preparar_proposta: 'Preparou a proposta' };
   function desenhaConversa() {
     msgs.textContent = '';
@@ -51,12 +287,12 @@
         if (typeof m.content === 'string') msgs.appendChild(el('div', 'msg msg-eu', m.content));
         return;   /* resultados das ferramentas: não se mostram */
       }
-      var texto = [];
+      var txt = [];
       (m.content || []).forEach(function (b) {
-        if (b.type === 'text' && b.text) texto.push(b.text);
+        if (b.type === 'text' && b.text) txt.push(b.text);
         if (b.type === 'tool_use') msgs.appendChild(el('p', 'msg-passo', '↳ ' + (PASSOS[b.name] || b.name)));
       });
-      if (texto.length) msgs.appendChild(el('div', 'msg msg-ia', texto.join('\n\n').trim()));
+      if (txt.length) msgs.appendChild(el('div', 'msg msg-ia', txt.join('\n\n').trim()));
     });
     msgs.scrollTop = msgs.scrollHeight;
   }
@@ -65,27 +301,21 @@
     ocupado = sim; enviar.disabled = sim;
     estado.textContent = txt || ''; estado.classList.toggle('a-pensar', sim);
   }
-
   function pede(volta) {
     ocupa(true, volta ? 'A fazer as contas…' : 'A pensar…');
-    fetch(API, { method: 'POST', headers: { 'content-type': 'application/json', 'x-mdm-senha': senha },
-      body: JSON.stringify({ mensagens: S.mensagens }) })
-      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (c) { return { r: r, c: c }; }); })
-      .then(function (x) {
-        if (x.r.status === 401) { ocupa(false); senha = ''; apaga(CHAVE_SENHA); mostra(false, 'Senha errada. Escreva-a outra vez; a conversa fica guardada.'); return; }
-        if (!x.r.ok) { ocupa(false); erroNaConversa(x.c.erro || 'Algo falhou (' + x.r.status + '). Tente outra vez.'); return; }
-        var c = x.c;
-        if (Array.isArray(c.novas)) S.mensagens = S.mensagens.concat(c.novas);
-        if (Array.isArray(c.propostas) && c.propostas.length) { S.propostas = S.propostas.concat(c.propostas); S.atual = S.propostas.length - 1; }
-        S.teste = !!c.teste;
-        grava(); desenhaTudo();
-        if (c.erro) erroNaConversa(c.erro);
-        if (c.cortada) erroNaConversa('A resposta ficou cortada. Peça para continuar.');
-        if (c.continuar && volta < MAX_VOLTAS) { pede(volta + 1); return; }
-        ocupa(false);
-        if (c.continuar) erroNaConversa('O assistente parou a meio. Escreva «continua».');
-      })
-      .catch(function () { ocupa(false); erroNaConversa('Sem ligação ao assistente. Verifique a internet e tente outra vez.'); });
+    api({ mensagens: S.mensagens }).then(function (x) {
+      if (!x.ok) { ocupa(false); erroNaConversa(x.c.erro || 'Algo falhou (' + x.status + '). Tente outra vez.'); return; }
+      var c = x.c;
+      if (Array.isArray(c.novas)) S.mensagens = S.mensagens.concat(c.novas);
+      (c.propostas || []).forEach(function (p) { p.origem = 'chat'; poeProposta(p); });
+      S.teste = !!c.teste;
+      grava(); testeAviso.hidden = !S.teste; desenhaConversa();
+      if (c.erro) erroNaConversa(c.erro);
+      if (c.cortada) erroNaConversa('A resposta ficou cortada. Peça para continuar.');
+      if (c.continuar && volta < MAX_VOLTAS) { pede(volta + 1); return; }
+      ocupa(false);
+      if (c.continuar) erroNaConversa('O assistente parou a meio. Escreva «continua».');
+    }).catch(function (e) { ocupa(false); if (e.message !== 'senha') erroNaConversa('Sem ligação ao assistente. Verifique a internet e tente outra vez.'); });
   }
   function envia(t) {
     t = String(t || '').trim();
@@ -95,13 +325,17 @@
     caixa.value = '';
     pede(0);
   }
-  form.addEventListener('submit', function (e) { e.preventDefault(); envia(caixa.value); });
+  formChat.addEventListener('submit', function (e) { e.preventDefault(); envia(caixa.value); });
   caixa.addEventListener('keydown', function (e) {
     if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); envia(caixa.value); }
   });
-  Array.prototype.forEach.call(document.querySelectorAll('[data-exemplo]'), function (b) {
-    b.addEventListener('click', function () { caixa.value = b.textContent; caixa.focus(); });
-  });
+
+  /* a proposta do formulário é uma só e vai sendo atualizada; as do assistente juntam-se à lista */
+  function poeProposta(p) {
+    var i = p.origem === 'form' ? S.propostas.map(function (x) { return x.origem; }).indexOf('form') : -1;
+    if (i >= 0) S.propostas[i] = p; else { S.propostas.push(p); i = S.propostas.length - 1; }
+    S.atual = i; grava(); desenhaProposta();
+  }
 
   /* ── proposta ── */
   /* no ecrã e no PDF os números não partem a meio: 4 480 €, 12 000 BTU/h */
@@ -111,7 +345,7 @@
     var tem = S.propostas.length > 0;
     zona.hidden = !tem; semProp.hidden = tem; qual.hidden = S.propostas.length < 2;
     qual.textContent = '';
-    S.propostas.forEach(function (p, i) { var o = el('option', '', p.ref + (p.cliente && p.cliente.nome ? ' · ' + p.cliente.nome : '')); o.value = i; qual.appendChild(o); });
+    S.propostas.forEach(function (p, i) { var o = el('option', '', (p.origem === 'form' ? 'Formulário · ' : 'Assistente · ') + p.ref + (p.cliente && p.cliente.nome ? ' · ' + p.cliente.nome : '')); o.value = i; qual.appendChild(o); });
     if (!tem) return;
     if (S.atual < 0 || S.atual >= S.propostas.length) S.atual = S.propostas.length - 1;
     qual.value = String(S.atual);
@@ -190,6 +424,6 @@
     document.title = antes;
   });
 
-  function desenhaTudo() { testeAviso.hidden = !S.teste; desenhaConversa(); desenhaProposta(); }
+  function desenhaTudo() { testeAviso.hidden = !S.teste; abre(S.aba || 'form'); desenhaConversa(); desenhaProposta(); }
   mostra(!!senha);
 })();

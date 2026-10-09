@@ -1,7 +1,9 @@
 <!doctype html>
 <!-- Assistente de propostas da equipa MDM (uso interno, com senha). Fora do site: sem menu, sem estatísticas, sem
      indexação (meta robots, X-Robots-Tag no netlify.toml e Disallow no robots.txt). Fala com a função
-     netlify/functions/proposta.mts em /api/proposta. README.md, «Assistente de propostas». -->
+     netlify/functions/proposta.mts em /api/proposta. README.md, «Assistente de propostas».
+     Caminho principal: o formulário (sem IA, custo zero), que a IA barata pode preencher a partir do texto do cliente.
+     Recurso: o assistente completo, em conversa, para os casos que o formulário não cobre. -->
 <html lang="pt-PT">
 <head>
 <meta charset="utf-8">
@@ -21,7 +23,7 @@
     </div>
   </div>
   <div class="eq-acoes" data-so-dentro hidden>
-    <button type="button" class="eq-btn eq-btn-linha" data-nova>Nova conversa</button>
+    <button type="button" class="eq-btn eq-btn-linha" data-nova>Nova proposta</button>
     <button type="button" class="eq-btn eq-btn-texto" data-sair>Sair</button>
   </div>
 </header>
@@ -39,29 +41,107 @@
   </section>
 
   <div class="eq-mesa" data-mesa hidden>
-    <section class="eq-chat" aria-labelledby="chatT">
-      <h1 class="eq-h1 eq-vis-oculto" id="chatT">Conversa</h1>
+    <section class="eq-esq" aria-labelledby="esqT">
+      <h1 class="eq-vis-oculto" id="esqT">Preparar a proposta</h1>
       <div class="eq-teste" data-teste hidden>Tabela de <strong>teste</strong>: os preços são falsos. Não enviar ao cliente.</div>
-      <div class="eq-msgs" data-msgs role="log" aria-label="Conversa" tabindex="0">
-        <div class="eq-vazio" data-vazio>
-          <p class="eq-texto">Escreva o que o cliente pediu, como contaria a um colega. O assistente pergunta o que falta, faz as contas com a tabela da MDM e prepara a proposta modelo.</p>
-          <p class="eq-rot">Exemplos</p>
-          <ul class="eq-exemplos">
-            <li><button type="button" class="eq-chip" data-exemplo>Sala de 25 m² num último andar, com muito sol. Quanto custa um ar condicionado?</button></li>
-            <li><button type="button" class="eq-chip" data-exemplo>T3 em Moscavide: sala de 30 m² e dois quartos de 12 e 14 m². Quanto fica um multi-split?</button></li>
-            <li><button type="button" class="eq-chip" data-exemplo>Moradia com 4 pessoas quer bomba de calor para águas quentes. Que preço damos?</button></li>
-          </ul>
-        </div>
+
+      <div class="eq-abas" role="tablist" aria-label="Como preparar">
+        <button type="button" class="eq-aba" role="tab" id="abaForm" aria-controls="painelForm" aria-selected="true" data-aba="form">Formulário</button>
+        <button type="button" class="eq-aba" role="tab" id="abaChat" aria-controls="painelChat" aria-selected="false" tabindex="-1" data-aba="chat">Assistente completo</button>
       </div>
-      <p class="eq-estado" data-estado role="status" aria-live="polite"></p>
-      <form class="eq-escrever" data-form>
-        <label class="eq-vis-oculto" for="msg">Mensagem para o assistente</label>
-        <textarea class="eq-campo eq-msg" id="msg" rows="3" placeholder="O que pediu o cliente?" data-msg></textarea>
-        <div class="eq-escrever-pe">
-          <span class="eq-dica">Enter envia · Shift + Enter muda de linha</span>
-          <button class="eq-btn eq-btn-accent" type="submit" data-enviar>Enviar</button>
+
+      <!-- ── Formulário: o caminho de todos os dias ── -->
+      <div class="eq-painel" role="tabpanel" id="painelForm" aria-labelledby="abaForm" data-painel="form">
+        <section class="eq-bloco" aria-labelledby="lerT">
+          <h2 class="eq-h3" id="lerT"><span class="eq-num">1</span> Pedido do cliente <span class="eq-opc">opcional</span></h2>
+          <p class="eq-ajuda">Cole a mensagem do cliente (WhatsApp, email, notas do telefone) e a IA preenche o formulário. Confirme os campos antes de enviar a proposta. Telefones, emails, NIF e códigos postais são cortados antes de o texto sair.</p>
+          <label class="eq-vis-oculto" for="pedidoTexto">Mensagem do cliente</label>
+          <textarea class="eq-campo" id="pedidoTexto" rows="4" placeholder="Boa tarde, tenho um T2 em Moscavide, sala com uns 30 m²…" data-texto></textarea>
+          <div class="eq-linha">
+            <button type="button" class="eq-btn eq-btn-tinta" data-ler>Preencher com IA</button>
+            <span class="eq-estado" data-ler-estado role="status" aria-live="polite"></span>
+          </div>
+          <div class="eq-duvidas" data-duvidas hidden>
+            <p class="eq-rot">A perguntar ao cliente</p>
+            <ul data-duvidas-lista></ul>
+          </div>
+        </section>
+
+        <div class="eq-complexo" data-complexo hidden>
+          <p class="eq-complexo-t">Este caso sai do que a tabela cobre</p>
+          <ul data-complexo-lista></ul>
+          <p class="eq-ajuda">Pode passá-lo ao assistente completo, que conversa e prepara a proposta com o que houver, ou marcar a visita gratuita.</p>
+          <button type="button" class="eq-btn eq-btn-linha" data-passar>Passar para o assistente completo</button>
         </div>
-      </form>
+
+        <form class="eq-form" data-form-prop novalidate>
+          <fieldset class="eq-bloco">
+            <legend class="eq-h3"><span class="eq-num">2</span> Serviço</legend>
+            <div class="eq-ops">
+              <label class="eq-op"><input type="radio" name="servico" value="ac" checked><span>Ar condicionado (montagem)</span></label>
+              <label class="eq-op"><input type="radio" name="servico" value="aguasQuentes"><span>Bomba de calor para águas quentes</span></label>
+              <label class="eq-op"><input type="radio" name="servico" value="outro"><span>Outro trabalho</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="eq-bloco" data-sec-divs>
+            <legend class="eq-h3"><span class="eq-num">3</span> Divisões</legend>
+            <ol class="eq-divs" data-divs></ol>
+            <button type="button" class="eq-btn eq-btn-linha" data-junta-div>Juntar divisão</button>
+          </fieldset>
+
+          <fieldset class="eq-bloco" data-sec-perg>
+            <legend class="eq-h3"><span class="eq-num" data-num-perg>4</span> O que muda o preço</legend>
+            <div data-perguntas></div>
+            <p class="eq-ajuda" data-sem-perg hidden>A tabela de preços ainda não tem perguntas para este serviço.</p>
+          </fieldset>
+
+          <fieldset class="eq-bloco">
+            <legend class="eq-h3"><span class="eq-num" data-num-cli>5</span> Cliente e notas</legend>
+            <div class="eq-grelha">
+              <div><label class="eq-rot" for="cNome">Nome</label><input class="eq-campo" id="cNome" name="nome" autocomplete="off"></div>
+              <div><label class="eq-rot" for="cContacto">Contacto</label><input class="eq-campo" id="cContacto" name="contacto" autocomplete="off"></div>
+              <div class="eq-largo"><label class="eq-rot" for="cLocal">Local da obra</label><input class="eq-campo" id="cLocal" name="local" autocomplete="off"></div>
+              <div class="eq-largo"><label class="eq-rot" for="cPedido">O que o cliente pediu, numa frase</label><input class="eq-campo" id="cPedido" name="pedido" autocomplete="off"></div>
+              <div class="eq-largo"><label class="eq-rot" for="cNotas">Notas para a proposta (uma por linha)</label><textarea class="eq-campo" id="cNotas" name="notas" rows="3"></textarea></div>
+            </div>
+          </fieldset>
+        </form>
+        <p class="eq-estado" data-calc-estado role="status" aria-live="polite"></p>
+
+        <template data-div-modelo>
+          <li class="eq-div">
+            <p class="eq-div-n"></p>
+            <div class="eq-div-campos">
+              <div><label class="eq-rot">Tipo</label><select class="eq-campo" data-d="tipo"></select></div>
+              <div><label class="eq-rot">Área (m²)</label><input class="eq-campo" data-d="area" inputmode="decimal" autocomplete="off"></div>
+              <label class="eq-check"><input type="checkbox" data-d="sol"><span>Muito sol</span></label>
+              <label class="eq-check"><input type="checkbox" data-d="topo"><span>Último andar</span></label>
+              <button type="button" class="eq-btn eq-btn-texto eq-div-tira" data-d="tira">Tirar</button>
+            </div>
+            <p class="eq-erro eq-div-erro" data-d="erro"></p>
+          </li>
+        </template>
+      </div>
+
+      <!-- ── Assistente completo: o recurso para os casos complexos ── -->
+      <div class="eq-painel eq-chat" role="tabpanel" id="painelChat" aria-labelledby="abaChat" data-painel="chat" hidden>
+        <p class="eq-ajuda">Para casos que o formulário não cobre: conversa, pergunta o que falta e prepara a proposta. Usa uma IA mais forte e custa mais por conversa do que o formulário.</p>
+        <div class="eq-msgs" data-msgs role="log" aria-label="Conversa" tabindex="0">
+          <div class="eq-vazio" data-vazio>
+            <p class="eq-texto">Escreva o caso como o contaria a um colega, ou passe-o do formulário.</p>
+          </div>
+        </div>
+        <p class="eq-estado" data-estado role="status" aria-live="polite"></p>
+        <form class="eq-escrever" data-form>
+          <label class="eq-vis-oculto" for="msg">Mensagem para o assistente</label>
+          <textarea class="eq-campo eq-msg" id="msg" rows="3" placeholder="O que pediu o cliente?" data-msg></textarea>
+          <div class="eq-escrever-pe">
+            <span class="eq-dica">Enter envia · Shift + Enter muda de linha</span>
+            <button class="eq-btn eq-btn-accent" type="submit" data-enviar>Enviar</button>
+          </div>
+        </form>
+      </div>
     </section>
 
     <section class="eq-lado" aria-labelledby="propT">
@@ -70,7 +150,7 @@
         <label class="eq-vis-oculto" for="qual">Escolher proposta</label>
         <select class="eq-campo eq-qual" id="qual" data-qual hidden></select>
       </div>
-      <p class="eq-texto eq-sem-prop" data-sem-prop>Quando pedir «prepara a proposta», ela aparece aqui, pronta a copiar ou a guardar em PDF.</p>
+      <p class="eq-texto eq-sem-prop" data-sem-prop>Preencha o formulário (ou peça ao assistente completo) e a proposta aparece aqui, pronta a copiar ou a guardar em PDF.</p>
       <div data-prop-zona hidden>
         <div class="eq-prop-acoes">
           <button type="button" class="eq-btn eq-btn-tinta" data-copiar>Copiar texto</button>

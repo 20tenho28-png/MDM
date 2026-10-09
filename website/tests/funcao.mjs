@@ -117,6 +117,53 @@ fila.push({ content: [], stop_reason: 'refusal', stop_details: { type: 'refusal'
 r = await chama([{ role: 'user', content: 'x' }]);
 ok(r.corpo.novas.length === 0 && /Reformule/.test(r.corpo.erro), 'recusa não entra no histórico');
 
+// 7. formulário: tabela e calcular, sem IA (funcionam mesmo sem chave da API)
+async function acao(corpo, { e = env(), cli = cliente } = {}) {
+  const req = new Request('http://x/api/proposta', { method: 'POST', headers: { 'x-mdm-senha': 'segredo', 'content-type': 'application/json' }, body: JSON.stringify(corpo) });
+  const r = await atende(req, e, cli);
+  return { status: r.status, corpo: await r.json() };
+}
+const semChave = env({}); // sem ANTHROPIC_API_KEY e sem cliente
+const nPedidos = pedidos.length;
+let t = await acao({ acao: 'tabela' }, { e: semChave, cli: null });
+ok(t.status === 200 && t.corpo.teste === true && t.corpo.perguntas.length === 7 && t.corpo.tipos.includes('Sala'), 'tabela para o formulário, sem chave', t.corpo);
+const sala = { servico: 'ac', divisoes: [{ tipo: 'Sala', area: 25, sol: true, ultimo_andar: true }], respostas: { ...VAZIAS, pre: 'nao' },
+  cliente: { nome: 'Rui', contacto: '', local: 'Olivais' }, pedido: 'Ar condicionado na sala', observacoes: [] };
+t = await acao({ acao: 'calcular', dados: sala }, { e: semChave, cli: null });
+ok(t.corpo.modo === 'preco' && t.corpo.proposta?.blocos[0].gamas[0].texto === 'entre 1 500 € e 1 900 €' && t.corpo.complexo.length === 0, 'calcular dá a proposta sem IA', t.corpo);
+t = await acao({ acao: 'calcular', dados: { ...sala, divisoes: Array.from({ length: 5 }, () => ({ tipo: 'Quarto', area: 10, sol: false, ultimo_andar: false })) } }, { e: semChave, cli: null });
+ok(t.corpo.modo === 'visita' && t.corpo.complexo.some((m) => /5 divisões/.test(m)), '5 divisões: complexo, preço depois da visita', t.corpo.complexo);
+t = await acao({ acao: 'calcular', dados: { ...sala, divisoes: [{ tipo: 'Sala', area: 90, sol: true, ultimo_andar: true }] } }, { e: semChave, cli: null });
+ok(t.corpo.complexo.some((m) => /maior aparelho/.test(m)), 'divisão acima do maior aparelho: complexo', t.corpo.complexo);
+t = await acao({ acao: 'calcular', dados: { ...sala, servico: 'outro' } }, { e: semChave, cli: null });
+ok(t.corpo.modo === 'outro' && !t.corpo.proposta && /sem tabela/.test(t.corpo.complexo[0]), 'outro trabalho: sem proposta, vai para o assistente ou visita', t.corpo);
+t = await acao({ acao: 'ler', texto: 'olá' }, { e: semChave, cli: null });
+ok(t.status === 503 && /formulário funciona/.test(t.corpo.erro), 'ler sem chave: avisa e o formulário continua', t.corpo);
+ok(pedidos.length === nPedidos, 'tabela e calcular não chamam a API');
+
+// 8. ler: o Haiku devolve os campos em JSON; telefone e email não saem
+const lido = { servico: 'ac', divisoes: [{ tipo: 'Sala', area: 30, sol: true, ultimo_andar: false }, { tipo: 'Quarto', area: 0, sol: false, ultimo_andar: false }],
+  respostas: { ...VAZIAS, pre: 'sim' }, local: 'Moscavide', pedido: 'Ar condicionado na sala e num quarto — já tem tubos', notas: ['Prédio com elevador.'],
+  duvidas: [], complexo: false, motivo_complexo: '' };
+fila.push({ content: [{ type: 'thinking', thinking: '', signature: 's' }, { type: 'text', text: JSON.stringify(lido) }], stop_reason: 'end_turn' });
+t = await acao({ acao: 'ler', texto: 'Boa tarde, sou a Marta (912 345 678, marta@mail.pt). T2 em Moscavide, sala de 30 m2 com muito sol e um quarto, já tenho os tubos na parede.' });
+const pl = pedidos.at(-1);
+ok(pl.body.model === 'claude-haiku-5-5' && pl.body.output_config?.format?.type === 'json_schema' && pl.body.output_config.effort === 'low' && !pl.body.fallbacks && !pl.body.tools,
+  'ler usa o Haiku com saída estruturada, esforço baixo e sem fallbacks', { m: pl.body.model, oc: pl.body.output_config && Object.keys(pl.body.output_config) });
+const enviado = pl.body.messages[0].content;
+ok(!/912 345 678|marta@mail\.pt/.test(enviado) && /\[telefone\]/.test(enviado) && /\[email\]/.test(enviado), 'telefone e email cortados antes de enviar', enviado);
+ok(t.corpo.campos.divisoes.length === 2 && t.corpo.campos.respostas.pre === 'sim' && t.corpo.campos.pedido === 'Ar condicionado na sala e num quarto, já tem tubos', 'campos lidos e limpos', t.corpo.campos);
+ok(/área de uma divisão/.test(t.corpo.campos.duvidas[0]) && t.corpo.complexo.length === 0, 'área em falta vira dúvida', t.corpo.campos.duvidas);
+fila.push({ content: [{ type: 'text', text: JSON.stringify({ ...lido, servico: 'outro', divisoes: [], complexo: true, motivo_complexo: 'Escritório com condutas no teto falso.' }) }], stop_reason: 'end_turn' });
+t = await acao({ acao: 'ler', texto: 'escritório com condutas' });
+ok(t.corpo.complexo.includes('Escritório com condutas no teto falso.') && t.corpo.complexo.length === 2, 'caso marcado como complexo, com o motivo', t.corpo.complexo);
+fila.push({ content: [{ type: 'text', text: '{"servico": "ac", "divi' }], stop_reason: 'end_turn' });
+t = await acao({ acao: 'ler', texto: 'x' });
+ok(/à mão/.test(t.corpo.erro), 'leitura estragada: manda preencher à mão', t.corpo);
+fila.push({ content: [], stop_reason: 'refusal', stop_details: { type: 'refusal', category: null, explanation: null } });
+t = await acao({ acao: 'ler', texto: 'x' });
+ok(/à mão/.test(t.corpo.erro), 'recusa na leitura: manda preencher à mão', t.corpo);
+
 srv.close();
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log(`${oks} ok, ${falhas} falhas`);
