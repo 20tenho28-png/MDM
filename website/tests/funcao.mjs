@@ -27,6 +27,10 @@ const srv = http.createServer((req, res) => {
   let b = ''; req.on('data', (c) => (b += c)); req.on('end', () => {
     pedidos.push({ headers: req.headers, body: JSON.parse(b) });
     const r = fila.shift() || { content: [{ type: 'text', text: 'ok' }], stop_reason: 'end_turn' };
+    if (r.__status) {
+      res.writeHead(r.__status, { 'content-type': 'application/json' });
+      return res.end(JSON.stringify({ type: 'error', error: { type: r.__tipo || 'not_found_error', message: r.__msg || 'x' } }));
+    }
     res.writeHead(200, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ id: 'msg_' + pedidos.length, type: 'message', role: 'assistant', model: 'claude-opus-5-5',
       stop_sequence: null, usage: { input_tokens: 10, output_tokens: 10 }, ...r }));
@@ -84,7 +88,7 @@ fila.push(usa('preparar_proposta', { servico: 'ac', divisoes: [{ tipo: 'Sala', a
   observacoes: ['A máquina de fora fica na fachada do 2.º andar.', 'Respondemos em 24 horas.', 'Experiência de 35 anos.'] }));
 r = await chama(h);
 const prop = r.corpo.propostas[0];
-ok(prop && prop.teste === true && /^MDM-P-\d{6}-\d{4}$/.test(prop.ref), 'proposta com referência e marca de teste', prop && prop.ref);
+ok(prop && prop.teste === true && /^MDM-P-\d{6}-\d{4}-[0-9A-F]{4}$/.test(prop.ref), 'proposta com referência única e marca de teste', prop && prop.ref);
 // 18 000 eco [1500,1900] − pré [150,100] + furo [40,60] + andaime/plataforma [250,500] + antiga [50,80] = [1690, 2440]
 ok(prop.blocos[0].gamas[0].texto === 'entre 1 690 € e 2 440 €', 'extras aplicados como no formulário', prop.blocos[0].gamas[0]);
 ok(prop.observacoes.length === 1 && prop.observacoes[0].startsWith('A máquina'), 'notas com prazo ou «N anos» ficam de fora', prop.observacoes);
@@ -115,7 +119,7 @@ ok(!/TESTE/.test(pedidos.at(-1).body.system[0].text) && /ainda vazia/.test(pedid
 // 6. recusa do modelo
 fila.push({ content: [], stop_reason: 'refusal', stop_details: { type: 'refusal', category: null, explanation: null } });
 r = await chama([{ role: 'user', content: 'x' }]);
-ok(r.corpo.novas.length === 0 && /Reformule/.test(r.corpo.erro), 'recusa não entra no histórico');
+ok(r.corpo.novas.length === 0 && r.corpo.retirar === 1 && r.corpo.textoRetirado === 'x' && /voltou para a caixa/.test(r.corpo.erro), 'recusa não entra no histórico e a mensagem volta à caixa', r.corpo);
 
 // 7. formulário: tabela e calcular, sem IA (funcionam mesmo sem chave da API)
 async function acao(corpo, { e = env(), cli = cliente } = {}) {
@@ -163,6 +167,74 @@ ok(/à mão/.test(t.corpo.erro), 'leitura estragada: manda preencher à mão', t
 fila.push({ content: [], stop_reason: 'refusal', stop_details: { type: 'refusal', category: null, explanation: null } });
 t = await acao({ acao: 'ler', texto: 'x' });
 ok(/à mão/.test(t.corpo.erro), 'recusa na leitura: manda preencher à mão', t.corpo);
+
+
+// 9. respostas que a API não aceitaria de volta nunca entram no histórico
+const pergunta = [{ role: 'user', content: 'Sala 20 m2' }];
+fila.push({ content: [{ type: 'thinking', thinking: '', signature: 's' }, { type: 'tool_use', id: 'tu_cortado', name: 'calcular_preco', input: {} }], stop_reason: 'max_tokens' });
+r = await chama(pergunta);
+ok(r.corpo.novas.length === 0 && r.corpo.retirar === 1 && /cortada a meio/.test(r.corpo.erro), 'max_tokens com ferramenta cortada: nada entra, mensagem volta', r.corpo);
+fila.push({ content: [], stop_reason: 'end_turn' });
+r = await chama(pergunta);
+ok(r.corpo.novas.length === 0 && /não respondeu/.test(r.corpo.erro), 'resposta vazia: nada entra', r.corpo);
+fila.push({ content: [{ type: 'thinking', thinking: '', signature: 's' }], stop_reason: 'end_turn' });
+r = await chama(pergunta);
+ok(r.corpo.novas.length === 0, 'só pensamento, sem texto: nada entra', r.corpo);
+fila.push({ content: [{ type: 'text', text: 'Resposta comprida…' }], stop_reason: 'max_tokens' });
+r = await chama(pergunta);
+ok(r.corpo.novas.length === 1 && r.corpo.cortada === true, 'texto cortado sem ferramenta: entra e avisa');
+const aMeio = [{ role: 'user', content: 'Prepara a proposta' }, { role: 'assistant', content: [{ type: 'tool_use', id: 'tu1', name: 'calcular_preco', input: {} }] },
+  { role: 'user', content: [{ type: 'tool_result', tool_use_id: 'tu1', content: '{}' }] }];
+fila.push({ content: [], stop_reason: 'refusal', stop_details: { type: 'refusal', category: null, explanation: null } });
+r = await chama([{ role: 'user', content: 'olá' }, { role: 'assistant', content: [{ type: 'text', text: 'olá' }] }, ...aMeio]);
+ok(r.corpo.retirar === 3 && r.corpo.textoRetirado === 'Prepara a proposta', 'recusa a meio das contas: recua o turno inteiro', r.corpo);
+
+// 10. AI Gateway do Netlify: sem chave própria, a conversa vai sem cabeçalho beta nem fallbacks
+fila.push({ content: [{ type: 'text', text: 'via gateway' }], stop_reason: 'end_turn' });
+r = await chama(pergunta, { e: env({ ANTHROPIC_API_KEY: 'nf-gw', NETLIFY_AI_GATEWAY_KEY: 'nf-gw', ANTHROPIC_BASE_URL: 'http://gw', NETLIFY_AI_GATEWAY_URL: 'http://gw' }) });
+const pg = pedidos.at(-1);
+ok(r.status === 200 && !pg.body.fallbacks && !pg.body.betas && !/server-side-fallback/.test(pg.headers['anthropic-beta'] || ''), 'gateway: sem fallbacks nem beta', { b: pg.headers['anthropic-beta'], f: pg.body.fallbacks });
+fila.push({ content: [{ type: 'text', text: 'direto' }], stop_reason: 'end_turn' });
+r = await chama(pergunta, { e: env({ ANTHROPIC_API_KEY: 'sk-da-mdm', NETLIFY_AI_GATEWAY_KEY: 'nf-gw' }) });
+ok(pedidos.at(-1).body.fallbacks === 'default', 'chave própria: com fallbacks');
+fila.push({ __status: 404, __tipo: 'not_found_error', __msg: 'model: claude-opus-5-5' });
+r = await chama(pergunta);
+ok(r.status === 502 && /modelo claude-opus-5-5 não está disponível/.test(r.corpo.erro), 'modelo indisponível: mensagem clara', r.corpo);
+fila.push({ __status: 401, __tipo: 'authentication_error', __msg: 'bad key' });
+r = await acao({ acao: 'ler', texto: 'sala' }, { e: env({ ANTHROPIC_API_KEY: 'nf-gw', NETLIFY_AI_GATEWAY_KEY: 'nf-gw' }) });
+ok(r.status === 502 && /AI Gateway do Netlify recusou/.test(r.corpo.erro) && /à mão/.test(r.corpo.erro), 'gateway recusa na leitura: mensagem clara', r.corpo);
+
+// 11. dados pessoais cortados em vários formatos, também na conversa
+const pessoais = 'Ligue 91 234 56 78 ou +351 912345678 ou 218.935.050, email marta.silva@mail.com.pt, NIF 123 456 789, contribuinte: 501234567, 1990 426 Lisboa, 2700-123. Sala de 25 m2.';
+fila.push({ content: [{ type: 'text', text: JSON.stringify({ servico: 'ac', divisoes: [], respostas: VAZIAS, local: '', pedido: '', notas: [], duvidas: [], complexo: false, motivo_complexo: '' }) }], stop_reason: 'end_turn' });
+await acao({ acao: 'ler', texto: pessoais });
+const saiu = pedidos.at(-1).body.messages[0].content;
+ok(!/\d{3}[\s.]?\d{3}|@|1990|2700/.test(saiu.replace('25 m2', '')) && /Sala de 25 m2/.test(saiu), 'telefones, email, NIF e códigos postais cortados', saiu);
+fila.push({ content: [{ type: 'text', text: 'ok' }], stop_reason: 'end_turn' });
+await chama([{ role: 'user', content: 'Cliente 912 345 678, sala de 20 m2' }]);
+ok(pedidos.at(-1).body.messages[0].content === 'Cliente [telefone], sala de 20 m2', 'conversa também corta o telefone', pedidos.at(-1).body.messages[0].content);
+
+// 12. senha com caracteres fora do ISO-8859-1 (codificada pela página)
+const reqS = (s) => new Request('http://x/api/proposta', { method: 'POST', headers: { 'x-mdm-senha': s }, body: '{"acao":"tabela"}' });
+ok((await atende(reqS(encodeURIComponent('prumo€“2026”')), env({ MDM_EQUIPA_SENHA: 'prumo€“2026”' }), cliente)).status === 200, 'senha com € e aspas curvas entra');
+ok((await atende(reqS('%E0%A4%A'), env(), cliente)).status === 401, 'senha mal codificada: 401, sem rebentar');
+
+// 13. complexidade a partir do pedido (mais de 8 divisões, áreas acima de 200 m², divisões ainda sem área)
+const quartos = (n, area = 10) => Array.from({ length: n }, () => ({ tipo: 'Quarto', area, sol: false, ultimo_andar: false }));
+t = await acao({ acao: 'calcular', dados: { ...sala, divisoes: quartos(9) } });
+ok(t.corpo.complexo.some((m) => /São 9 divisões/.test(m)), '9 divisões (o cálculo pára): continua complexo', t.corpo);
+t = await acao({ acao: 'calcular', dados: { ...sala, divisoes: [{ tipo: 'Sala', area: 250, sol: false, ultimo_andar: false }] } });
+ok(t.corpo.complexo.some((m) => /mais de 200 m²/.test(m)), 'área acima de 200 m²: complexo', t.corpo);
+t = await acao({ acao: 'calcular', dados: { ...sala, divisoes: quartos(2), contagem: { divisoes: 6, acimaDaArea: 1 } } });
+ok(t.corpo.complexo.some((m) => /São 6 divisões/.test(m)) && t.corpo.complexo.some((m) => /mais de 200 m²/.test(m)), 'contagem da página entra na complexidade', t.corpo.complexo);
+t = await acao({ acao: 'calcular', dados: { ...sala, divisoes: quartos(5) } });
+ok(!t.corpo.resultado.perguntas_por_responder, 'caso visita: não manda fazer perguntas', t.corpo.resultado);
+
+// 14. contacto com o marcador do corte fica vazio na proposta do assistente
+fila.push(usa('preparar_proposta', { servico: 'ac', divisoes: [{ tipo: 'Sala', area: 20, sol: false, ultimo_andar: false }], respostas: VAZIAS,
+  cliente: { nome: 'Rui', contacto: '[telefone]', local: '' }, pedido: 'Sala', observacoes: [] }));
+r = await chama([{ role: 'user', content: 'x' }]);
+ok(r.corpo.propostas[0].cliente.contacto === '', 'contacto «[telefone]» não vai para a proposta', r.corpo.propostas[0].cliente);
 
 srv.close();
 fs.rmSync(tmp, { recursive: true, force: true });

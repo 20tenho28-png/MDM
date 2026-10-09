@@ -534,8 +534,8 @@ def build():
         (OUT / "_headers").write_text("# Pré-visualização: gerado por build.py a partir de \"preview\" em data/site.json\n"
                                       "/*\n  X-Robots-Tag: noindex\n", encoding="utf-8")
     else:
-        (OUT / "robots.txt").write_text(f"User-agent: *\nDisallow: /equipa/\nAllow: /\nSitemap: {SITE['baseUrl']}/sitemap.xml\n",
-                                        encoding="utf-8")
+        # a página interna equipa/ não leva Disallow: o Google tem de a poder ler para ver o noindex (meta e X-Robots-Tag)
+        (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE['baseUrl']}/sitemap.xml\n", encoding="utf-8")
     return files
 
 
@@ -810,7 +810,8 @@ def check_equipa():
             out += check_precos(json.loads(teste.read_text(encoding="utf-8")), "precos-teste.json")
         except json.JSONDecodeError as e:
             out.append(f"precos-teste.json: JSON inválido → {e}")
-    for f in sorted((OUT / "equipa").glob("*")) if (OUT / "equipa").exists() else []:
+    textos = {".html", ".css", ".js"}   # imagens ou outros ficheiros em equipa/ são só copiados
+    for f in sorted(p for p in (OUT / "equipa").rglob("*") if p.is_file() and p.suffix in textos) if (OUT / "equipa").exists() else []:
         nome = str(f.relative_to(OUT))
         text = f.read_text(encoding="utf-8")
         out += texto_proibido(nome, text)

@@ -29,12 +29,17 @@
     nome: '', contacto: '', local: '', pedido: '', notas: '', texto: '', duvidas: [], complexoIA: [] };
   function novoForm() { return JSON.parse(JSON.stringify(VAZIO_FORM)); }
   var S = { mensagens: [], propostas: [], teste: false, atual: -1, aba: 'form', form: novoForm() };
-  try { var g = JSON.parse(le(CHAVE) || 'null'); if (g && Array.isArray(g.mensagens)) { S = g; if (!S.form) S.form = novoForm(); } } catch (e) {}
+  try {
+    var g = JSON.parse(le(CHAVE) || 'null');
+    if (g && Array.isArray(g.mensagens)) { S = g; S.form = Object.assign(novoForm(), S.form || {}); if (!Array.isArray(S.propostas)) S.propostas = []; }
+  } catch (e) {}
   var senha = le(CHAVE_SENHA) || '', ocupado = false, T = null;
+  /* «Nova proposta» e «Sair» mudam a geração: uma resposta que chegue depois, de um pedido feito antes, é ignorada */
+  var GEN = 0;
   function grava() { guarda(CHAVE, S); }
 
   function api(corpo) {
-    return fetch(API, { method: 'POST', headers: { 'content-type': 'application/json', 'x-mdm-senha': senha }, body: JSON.stringify(corpo) })
+    return fetch(API, { method: 'POST', headers: { 'content-type': 'application/json', 'x-mdm-senha': encodeURIComponent(senha) }, body: JSON.stringify(corpo) })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (c) {
         if (r.status === 401) { senha = ''; apaga(CHAVE_SENHA); mostra(false, 'Senha errada. Escreva-a outra vez; o trabalho fica guardado.'); throw new Error('senha'); }
         return { ok: r.ok, status: r.status, c: c };
@@ -47,7 +52,8 @@
     $('[data-entrar-erro]').textContent = erro || '';
     if (!dentroDaMesa) { $('#senha').focus(); return; }
     desenhaTudo();
-    if (!T) carregaTabela();
+    if (!T) carregaTabela(); else calcula();   /* depois de voltar a entrar, a conta que ficou a meio refaz-se */
+    var aba = $('[data-aba][aria-selected="true"]'); if (aba) aba.focus();
   }
   $('[data-entrar-form]').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -56,11 +62,24 @@
     $('#senha').value = '';
     mostra(true);
   });
-  $('[data-sair]').addEventListener('click', function () { senha = ''; apaga(CHAVE_SENHA); T = null; mostra(false); });
+  $('[data-sair]').addEventListener('click', function () { senha = ''; apaga(CHAVE_SENHA); GEN++; T = null; limpaEstados(); mostra(false); });
+  function temDados() {
+    var f = S.form;
+    return S.mensagens.length || S.propostas.length || f.texto.trim() || f.nome || f.contacto || f.local || f.pedido || f.notas.trim() ||
+      f.divisoes.some(function (d) { return String(d.area).trim(); });
+  }
+  /* estados que pertencem a pedidos em curso: ao mudar de geração, nada fica preso */
+  function limpaEstados() {
+    nCalc++; clearTimeout(tCalc);
+    ocupa(false); calcEstado.textContent = ''; lerEstado.textContent = ''; copiado.textContent = '';
+    lerBtn.disabled = !T; fp.inert = !T;
+  }
   $('[data-nova]').addEventListener('click', function () {
-    if ((S.mensagens.length || S.propostas.length) && !confirm('Começar uma proposta nova? O formulário, a conversa e as propostas deste separador desaparecem.')) return;
+    if (temDados() && !confirm('Começar uma proposta nova? O formulário, a conversa e as propostas deste separador desaparecem.')) return;
+    GEN++;
     S = { mensagens: [], propostas: [], teste: S.teste, atual: -1, aba: 'form', form: novoForm() };
-    grava(); desenhaTudo(); poeForm(); calcula();
+    caixa.value = '';
+    limpaEstados(); grava(); desenhaTudo(); poeForm(); poeComplexo([]); calcula();
   });
 
   /* ── abas ── */
@@ -73,7 +92,7 @@
       if (sim && foco) b.focus();
     });
     $$('[data-painel]').forEach(function (p) { p.hidden = p.getAttribute('data-painel') !== qualAba; });
-    if (qualAba === 'chat') desenhaConversa();
+    if (qualAba === 'chat') desenhaConversa(true);
   }
   abas.forEach(function (b, i) {
     b.addEventListener('click', function () { abre(b.getAttribute('data-aba')); });
@@ -84,14 +103,22 @@
   });
 
   /* ── formulário ── */
+  var recarrega = $('[data-recarrega]'), lerBtn = $('[data-ler]');
   function carregaTabela() {
-    calcEstado.textContent = 'A carregar a tabela…';
+    var g = GEN;
+    calcEstado.textContent = 'A carregar a tabela…'; recarrega.hidden = true;
     api({ acao: 'tabela' }).then(function (x) {
-      if (!x.ok) { calcEstado.textContent = x.c.erro || 'Não foi possível carregar a tabela.'; return; }
+      if (g !== GEN) return;
+      if (!x.ok) { calcEstado.textContent = x.c.erro || 'Não foi possível carregar a tabela.'; recarrega.hidden = false; return; }
       T = x.c; S.teste = !!T.teste; testeAviso.hidden = !S.teste;
+      fp.inert = false; lerBtn.disabled = false; calcEstado.textContent = '';
       poeForm(); calcula();
-    }).catch(function (e) { if (e.message !== 'senha') calcEstado.textContent = 'Sem ligação. Verifique a internet.'; });
+    }).catch(function (e) {
+      if (e.message === 'senha') return;
+      calcEstado.textContent = 'Sem ligação. Verifique a internet.'; recarrega.hidden = false;
+    });
   }
+  recarrega.addEventListener('click', carregaTabela);
   function leArea(t) {
     t = String(t == null ? '' : t).trim().replace(/\s*m(²|2)$/i, '').replace(',', '.');
     if (!t) return null;
@@ -109,6 +136,7 @@
     li.querySelector('[data-d="topo"]').checked = !!d.topo;
     /* etiquetas ligadas aos campos (ids únicos por linha) */
     $$('.eq-rot', li).forEach(function (l, j) { var c = j === 0 ? tipo : area; c.id = 'd' + i + (j === 0 ? 't' : 'a'); l.htmlFor = c.id; });
+    var erro = li.querySelector('[data-d="erro"]'); erro.id = 'd' + i + 'e'; area.setAttribute('aria-describedby', erro.id);
     li.querySelector('[data-d="tira"]').hidden = S.form.divisoes.length < 2;
     li.querySelector('[data-d="tira"]').setAttribute('aria-label', 'Tirar a divisão ' + (i + 1));
     return li;
@@ -146,6 +174,7 @@
   }
   /* o que está no ecrã para S.form */
   function leForm() {
+    if (!T) return;   /* antes de a tabela chegar, o formulário no ecrã ainda não é o guardado */
     var f = S.form;
     f.texto = texto.value;
     var s = fp.querySelector('input[name="servico"]:checked'); f.servico = s ? s.value : 'ac';
@@ -164,40 +193,56 @@
     clearTimeout(tCalc);
     tCalc = setTimeout(calculaJa, 350);
   }
+  /* a proposta do formulário só fica à vista enquanto corresponde ao que está no formulário */
+  function tiraForm() {
+    var i = S.propostas.map(function (x) { return x.origem; }).indexOf('form');
+    if (i < 0) return;
+    S.propostas.splice(i, 1);
+    if (S.atual >= S.propostas.length || S.atual === i) S.atual = S.propostas.length - 1;
+    else if (S.atual > i) S.atual--;
+    grava(); desenhaProposta();
+  }
   function calculaJa() {
-    var f = S.form, erros = [];
+    if (!T) return;
+    var f = S.form, erros = [], acimaDaArea = 0, ac = f.servico === 'ac';
     var divisoes = [];
     $$('.eq-div', divsEl).forEach(function (li, i) {
       var a = leArea(li.querySelector('[data-d="area"]').value), e = li.querySelector('[data-d="erro"]'), msg = '';
-      if (a === null) msg = f.servico === 'ac' ? 'Falta a área.' : '';
+      if (!ac) { e.textContent = ''; li.querySelector('[data-d="area"]').removeAttribute('aria-invalid'); return; }   /* divisões escondidas */
+      if (a === null) msg = 'Falta a área.';
       else if (isNaN(a)) msg = 'Escreva a área só com números, por exemplo 12 ou 12,5.';
-      else if (a < T.areaMin || a > T.areaMax) msg = 'Entre ' + T.areaMin + ' e ' + T.areaMax + ' m². Maior do que isso, dimensiona-se na visita.';
+      else if (a < T.areaMin) msg = 'A área tem de ter pelo menos ' + T.areaMin + ' m².';
+      else if (a > T.areaMax) { msg = 'Mais de ' + T.areaMax + ' m²: dimensiona-se na visita.'; acimaDaArea++; }
       e.textContent = msg;
       li.querySelector('[data-d="area"]').setAttribute('aria-invalid', msg && a !== null ? 'true' : 'false');
       if (msg) { if (a !== null) erros.push(i); return; }
       divisoes.push({ tipo: f.divisoes[i].tipo, area: a, sol: f.divisoes[i].sol, ultimo_andar: f.divisoes[i].topo });
     });
-    if (f.servico === 'ac' && !divisoes.length) { calcEstado.textContent = 'Escreva a área de pelo menos uma divisão.'; poeComplexo([]); return; }
     var respostas = {};
     ['pre', 'dist', 'furo', 'fora', 'luz', 'antigas', 'deposito'].forEach(function (k) { respostas[k] = f.respostas[k] || ''; });
-    var dados = { servico: f.servico, divisoes: f.servico === 'ac' ? divisoes : [], respostas: respostas,
+    var dados = { servico: f.servico, divisoes: ac ? divisoes : [], respostas: respostas,
+      contagem: { divisoes: ac ? f.divisoes.length : 0, acimaDaArea: acimaDaArea },
       cliente: { nome: f.nome, contacto: f.contacto, local: f.local }, pedido: f.pedido,
       observacoes: f.notas.split('\n').map(function (n) { return n.trim(); }).filter(Boolean).slice(0, 6) };
-    var este = ++nCalc;
+    var este = ++nCalc, g = GEN;
     calcEstado.textContent = 'A calcular…';
     api({ acao: 'calcular', dados: dados }).then(function (x) {
-      if (este !== nCalc) return;   /* chegou uma resposta mais recente */
-      if (!x.ok) { calcEstado.textContent = x.c.erro || 'Não foi possível calcular.'; return; }
+      if (este !== nCalc || g !== GEN) return;   /* chegou uma resposta mais recente, ou começou outra proposta */
+      if (!x.ok) { tiraForm(); calcEstado.textContent = x.c.erro || 'Não foi possível calcular.'; return; }
       var c = x.c, avisos = [];
-      if (c.proposta) { c.proposta.origem = 'form'; poeProposta(c.proposta); }
+      if (c.proposta) { c.proposta.origem = 'form'; poeProposta(c.proposta); } else tiraForm();
+      if (ac && !divisoes.length) avisos.push('Escreva a área de pelo menos uma divisão.');
+      else if (c.modo === 'erro' && c.resultado && c.resultado.erro) avisos.push(c.resultado.erro);
       if (c.modo === 'escolhe') avisos.push('Escolha o tamanho do depósito.');
-      if (c.modo === 'erro' && c.resultado && c.resultado.erro) avisos.push(c.resultado.erro);
       if (c.notasRecusadas && c.notasRecusadas.length) avisos.push('Notas que não entram na proposta (regras da MDM): ' + c.notasRecusadas.join('; '));
       if (erros.length) avisos.push('Há divisões com a área por corrigir; não entram na conta.');
       var falta = c.resultado && c.resultado.perguntas_por_responder ? c.resultado.perguntas_por_responder.length : 0;
       calcEstado.textContent = avisos.join(' ') || (c.proposta ? 'Proposta atualizada.' + (falta ? ' Ainda há ' + falta + (falta === 1 ? ' pergunta' : ' perguntas') + ' por fazer ao cliente.' : '') : '');
       poeComplexo(c.complexo || []);
-    }).catch(function (e) { if (e.message !== 'senha') calcEstado.textContent = 'Sem ligação. Verifique a internet.'; });
+    }).catch(function (e) {
+      if (este !== nCalc || g !== GEN) return;
+      calcEstado.textContent = e.message === 'senha' ? '' : 'Sem ligação. Verifique a internet.';
+    });
   }
   fp.addEventListener('input', function () { leForm(); calcula(); });
   fp.addEventListener('change', function (e) {
@@ -212,7 +257,7 @@
     var primeiro = divsEl.querySelector('[data-d="area"]'); if (primeiro) primeiro.focus();
   });
   $('[data-junta-div]').addEventListener('click', function () {
-    leForm(); S.form.divisoes.push({ tipo: 'Quarto', area: '', sol: false, topo: false }); grava(); poeForm();
+    leForm(); S.form.divisoes.push({ tipo: 'Quarto', area: '', sol: false, topo: false }); grava(); poeForm(); calcula();
     var areas = $$('[data-d="area"]', divsEl); areas[areas.length - 1].focus();
   });
   texto.addEventListener('input', function () { S.form.texto = texto.value; grava(); });
@@ -236,9 +281,14 @@
   $('[data-ler]').addEventListener('click', function () {
     var t = texto.value.trim();
     if (!t) { lerEstado.textContent = 'Cole primeiro a mensagem do cliente.'; texto.focus(); return; }
-    var b = this; b.disabled = true; lerEstado.textContent = 'A ler o pedido…';
+    var b = this, g = GEN;
+    leForm();
+    /* durante a leitura o formulário fica parado, para a resposta não desfazer o que a equipa escrever entretanto */
+    b.disabled = true; fp.inert = true; lerEstado.textContent = 'A ler o pedido…';
+    function fim() { if (g === GEN) { b.disabled = false; fp.inert = false; } }
     api({ acao: 'ler', texto: t }).then(function (x) {
-      b.disabled = false;
+      if (g !== GEN) return;
+      fim();
       if (!x.ok || x.c.erro) { lerEstado.textContent = (x.c.erro || 'A leitura falhou.') + ' O formulário continua disponível.'; return; }
       var c = x.c.campos, f = S.form;
       f.servico = c.servico;
@@ -246,12 +296,20 @@
       Object.keys(c.respostas || {}).forEach(function (k) { if (c.respostas[k]) f.respostas[k] = c.respostas[k]; });
       if (c.local) f.local = c.local;
       if (c.pedido) f.pedido = c.pedido;
-      if (c.notas && c.notas.length) f.notas = (f.notas ? f.notas.trim() + '\n' : '') + c.notas.join('\n');
+      if (c.notas && c.notas.length) {
+        var ja = f.notas.split('\n').map(function (n) { return n.trim(); }).filter(Boolean);
+        c.notas.forEach(function (n) { if (ja.indexOf(n) < 0) ja.push(n); });
+        f.notas = ja.join('\n');
+      }
       f.duvidas = c.duvidas || [];
       f.complexoIA = x.c.complexo || [];
       grava(); poeForm(); calculaJa();
       lerEstado.textContent = 'Formulário preenchido. Confirme os campos' + (f.duvidas.length ? ' e veja o que falta perguntar.' : '.');
-    }).catch(function (e) { b.disabled = false; if (e.message !== 'senha') lerEstado.textContent = 'Sem ligação. Preencha o formulário à mão.'; });
+    }).catch(function (e) {
+      if (g !== GEN) return;
+      fim();
+      lerEstado.textContent = e.message === 'senha' ? 'Não foi lido: entre outra vez e carregue em «Preencher com IA».' : 'Sem ligação. Preencha o formulário à mão.';
+    });
   });
 
   /* ── passar o caso ao assistente completo ── */
@@ -265,7 +323,8 @@
       l.push('Divisão ' + (i + 1) + ': ' + d.tipo + ', ' + (d.area ? String(d.area).replace('.', ',') + ' m²' : 'área por saber') + (c.length ? ' (' + c.join(', ') + ')' : ''));
     });
     T.perguntas.forEach(function (q) {
-      var v = f.respostas[q.k]; if (!v) return;
+      var visivel = f.servico === 'ac' ? q.ac : f.servico === 'aguasQuentes' ? !q.ac : false;
+      var v = f.respostas[q.k]; if (!v || !visivel) return;
       q.op.forEach(function (o) { if (o[0] === v) l.push(q.t + ' ' + o[1]); });
     });
     if (f.local) l.push('Local: ' + f.local);
@@ -279,10 +338,13 @@
 
   /* ── assistente completo (conversa) ── */
   var PASSOS = { calcular_potencia: 'Calculou a potência', calcular_preco: 'Calculou o preço com a tabela', preparar_proposta: 'Preparou a proposta' };
-  function desenhaConversa() {
-    msgs.textContent = '';
+  /* a região é role=log: só se juntam as mensagens novas, para o leitor de ecrã ler só o que chegou */
+  var nDesenhadas = 0;
+  function desenhaConversa(tudo) {
+    if (tudo || nDesenhadas > S.mensagens.length || !S.mensagens.length) { msgs.textContent = ''; nDesenhadas = 0; }
     if (!S.mensagens.length) { msgs.appendChild(vazio); return; }
-    S.mensagens.forEach(function (m) {
+    if (vazio.parentNode) msgs.removeChild(vazio);
+    S.mensagens.slice(nDesenhadas).forEach(function (m) {
       if (m.role === 'user') {
         if (typeof m.content === 'string') msgs.appendChild(el('div', 'msg msg-eu', m.content));
         return;   /* resultados das ferramentas: não se mostram */
@@ -294,7 +356,14 @@
       });
       if (txt.length) msgs.appendChild(el('div', 'msg msg-ia', txt.join('\n\n').trim()));
     });
+    nDesenhadas = S.mensagens.length;
     msgs.scrollTop = msgs.scrollHeight;
+  }
+  /* a mensagem que a equipa acabou de escrever não chegou a ter resposta: sai do histórico e volta à caixa */
+  function devolve(textoDevolvido, quantas) {
+    S.mensagens.splice(S.mensagens.length - quantas, quantas);
+    if (!caixa.value.trim()) caixa.value = textoDevolvido;
+    grava(); desenhaConversa(true);
   }
   function erroNaConversa(t) { msgs.appendChild(el('div', 'msg msg-erro', t)); msgs.scrollTop = msgs.scrollHeight; }
   function ocupa(sim, txt) {
@@ -302,10 +371,22 @@
     estado.textContent = txt || ''; estado.classList.toggle('a-pensar', sim);
   }
   function pede(volta) {
+    var g = GEN, ultima = S.mensagens[S.mensagens.length - 1];
+    /* na primeira volta, a última mensagem é o texto da equipa; se o pedido falhar, volta para a caixa */
+    function falhou(msg) {
+      ocupa(false);
+      if (!volta && S.mensagens[S.mensagens.length - 1] === ultima && typeof ultima.content === 'string') {
+        devolve(ultima.content, 1);
+        msg += ' A mensagem voltou para a caixa.';
+      }
+      erroNaConversa(msg);
+    }
     ocupa(true, volta ? 'A fazer as contas…' : 'A pensar…');
     api({ mensagens: S.mensagens }).then(function (x) {
-      if (!x.ok) { ocupa(false); erroNaConversa(x.c.erro || 'Algo falhou (' + x.status + '). Tente outra vez.'); return; }
+      if (g !== GEN) return;
+      if (!x.ok) { falhou(x.c.erro || 'Algo falhou (' + x.status + '). Tente outra vez.'); return; }
       var c = x.c;
+      if (c.retirar) { ocupa(false); devolve(c.textoRetirado || '', Math.min(c.retirar, S.mensagens.length)); erroNaConversa(c.erro); return; }
       if (Array.isArray(c.novas)) S.mensagens = S.mensagens.concat(c.novas);
       (c.propostas || []).forEach(function (p) { p.origem = 'chat'; poeProposta(p); });
       S.teste = !!c.teste;
@@ -315,7 +396,10 @@
       if (c.continuar && volta < MAX_VOLTAS) { pede(volta + 1); return; }
       ocupa(false);
       if (c.continuar) erroNaConversa('O assistente parou a meio. Escreva «continua».');
-    }).catch(function (e) { ocupa(false); if (e.message !== 'senha') erroNaConversa('Sem ligação ao assistente. Verifique a internet e tente outra vez.'); });
+    }).catch(function (e) {
+      if (g !== GEN) return;
+      falhou(e.message === 'senha' ? 'Não foi enviada: entre outra vez.' : 'Sem ligação ao assistente. Verifique a internet e tente outra vez.');
+    });
   }
   function envia(t) {
     t = String(t || '').trim();
@@ -345,7 +429,10 @@
     var tem = S.propostas.length > 0;
     zona.hidden = !tem; semProp.hidden = tem; qual.hidden = S.propostas.length < 2;
     qual.textContent = '';
-    S.propostas.forEach(function (p, i) { var o = el('option', '', (p.origem === 'form' ? 'Formulário · ' : 'Assistente · ') + p.ref + (p.cliente && p.cliente.nome ? ' · ' + p.cliente.nome : '')); o.value = i; qual.appendChild(o); });
+    S.propostas.forEach(function (p, i) {
+      var o = el('option', '', (i + 1) + '. ' + (p.origem === 'form' ? 'Formulário · ' : 'Assistente · ') + p.ref + (p.cliente && p.cliente.nome ? ' · ' + p.cliente.nome : ''));
+      o.value = i; qual.appendChild(o);
+    });
     if (!tem) return;
     if (S.atual < 0 || S.atual >= S.propostas.length) S.atual = S.propostas.length - 1;
     qual.value = String(S.atual);
@@ -374,7 +461,7 @@
         var tr = el('tr'), cond = [];
         if (d.sol) cond.push('muito sol'); if (d.topo) cond.push('último andar');
         tr.appendChild(el('td', '', d.tipo));
-        tr.appendChild(el('td', '', String(d.area).replace('.', ',') + ' m²'));
+        tr.appendChild(el('td', '', inseparavel(String(d.area).replace('.', ',') + ' m²')));
         tr.appendChild(el('td', '', cond.join(', ')));
         tr.appendChild(el('td', 'num', inseparavel(d.texto || '')));
         tb.appendChild(tr);
@@ -385,7 +472,7 @@
     if (p.modo === 'visita') doc.appendChild(el('p', 'doc-visita', 'Para este caso o preço dá-se depois da visita, que é gratuita.'));
     (p.blocos || []).forEach(function (b) {
       var s = el('section', 'doc-bloco');
-      s.appendChild(el('h4', 'doc-bloco-t', b.titulo));
+      s.appendChild(el('h4', 'doc-bloco-t', inseparavel(b.titulo)));
       var ul = el('ul', 'doc-gamas');
       b.gamas.forEach(function (g) {
         var li = el('li', 'doc-gama');
@@ -424,6 +511,6 @@
     document.title = antes;
   });
 
-  function desenhaTudo() { testeAviso.hidden = !S.teste; abre(S.aba || 'form'); desenhaConversa(); desenhaProposta(); }
+  function desenhaTudo() { testeAviso.hidden = !S.teste; abre(S.aba || 'form'); desenhaConversa(true); desenhaProposta(); }
   mostra(!!senha);
 })();

@@ -14,12 +14,13 @@
      equipa confirma. Uma chamada barata por pedido. Se falhar, o formulário continua a funcionar à mão.
    - sem «acao» (com «mensagens»): o assistente completo, em conversa (Opus), para os casos complexos.
 
-   Variáveis no Netlify (âmbito Functions): MDM_EQUIPA_SENHA (sempre), ANTHROPIC_API_KEY (para «ler» e para a conversa;
-   sem ela o formulário funciona na mesma) e, para experimentar com a tabela de teste (data/precos-teste.json, números
-   falsos), MDM_PRECOS=teste. README.md, «Assistente de propostas». */
+   Variáveis no Netlify: MDM_EQUIPA_SENHA (sempre) e, para experimentar com a tabela de teste (data/precos-teste.json,
+   números falsos), MDM_PRECOS=teste. A IA chega à Anthropic de uma de duas maneiras (ver ligacaoIA): com a chave da
+   própria MDM (ANTHROPIC_API_KEY definida pela equipa) ou, sem ela, pelo AI Gateway do Netlify, pago em créditos do
+   Netlify. Sem nenhuma das duas, a IA fica desligada e o formulário funciona na mesma. README.md, «Assistente de propostas». */
 import Anthropic from "@anthropic-ai/sdk"
 import type { Config, Context } from "@netlify/functions"
-import { createHash, timingSafeEqual } from "node:crypto"
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto"
 import site from "../../data/site.json" with { type: "json" }
 import precosReais from "../../data/precos.json" with { type: "json" }
 import precosTeste from "../../data/precos-teste.json" with { type: "json" }
@@ -74,7 +75,8 @@ function agoraLisboa() {
     timeZone: "Europe/Lisbon", year: "2-digit", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
   }).formatToParts(d).map((x) => [x.type, x.value]))
   return {
-    ref: `MDM-P-${p.year}${p.month}${p.day}-${p.hour}${p.minute}`,
+    /* o sufixo distingue duas propostas feitas no mesmo minuto */
+    ref: `MDM-P-${p.year}${p.month}${p.day}-${p.hour}${p.minute}-${randomBytes(2).toString("hex").toUpperCase()}`,
     data: new Intl.DateTimeFormat("pt-PT", { timeZone: "Europe/Lisbon", day: "numeric", month: "long", year: "numeric" }).format(d),
   }
 }
@@ -102,7 +104,8 @@ function paraModelo(r: any, teste: boolean) {
   if (r.modo === "visita") base.nota = "Para este caso o preço dá-se depois da visita, que é gratuita."
   if (r.modo === "sem_tabela") base.nota = "Ainda não há preços para este produto na tabela da MDM. Não dê nenhum valor."
   if (r.modo === "escolhe") base.nota = "Falta o tamanho do depósito."
-  if (r.porResponder?.length) base.perguntas_por_responder = r.porResponder
+  /* num caso «visita» ou com erro as perguntas não mudam nada: não se mandam fazer */
+  if ((r.modo === "preco" || r.modo === "escolhe") && r.porResponder?.length) base.perguntas_por_responder = r.porResponder
   if (r.ignoradas?.length) base.respostas_ignoradas = r.ignoradas
   return base
 }
@@ -155,7 +158,7 @@ function prepararProposta(input: any, tab: Tabela) {
   const proposta = {
     ref, data, teste: tab.teste, modo: r.modo,
     servico: SERVICOS[servico] || servico,
-    cliente: { nome: limpa(input?.cliente?.nome, 120), contacto: limpa(input?.cliente?.contacto, 120), local: limpa(input?.cliente?.local, 160) },
+    cliente: { nome: limpa(input?.cliente?.nome, 120), contacto: semMarcas(limpa(input?.cliente?.contacto, 120)), local: limpa(input?.cliente?.local, 160) },
     pedido: porque ? "" : pedido,
     potencia: r.potencia ? r.potencia.resumo : "",
     divisoes: r.potencia ? r.potencia.divs : [],
@@ -296,9 +299,15 @@ function complexidade(input: any, r: any, extra: string[] = []): string[] {
   if (servico !== "ac" && servico !== "aguasQuentes")
     m.push("Trabalho sem tabela de preços (reparação, manutenção, ventilação, eletricidade ou outro): o preço dá-se depois da visita.")
   else if (r?.modo === "sem_tabela") m.push("Ainda não há preços na tabela da MDM para este produto.")
-  if (servico === "ac" && r?.potencia) {
-    if (r.potencia.n > 4) m.push(`São ${r.potencia.n} divisões: a tabela vai até 4 (multi-split); acima disso, dimensiona-se na visita.`)
-    if (r.potencia.acima) m.push("Há uma divisão acima do maior aparelho da tabela: pode precisar de mais do que uma máquina ou de condutas.")
+  if (servico === "ac") {
+    /* conta-se a partir do que foi pedido (o cálculo pára com erro acima de 8 divisões ou de 200 m²); a página junta em
+       «contagem» as divisões que não mandou por ainda não terem área válida */
+    const divs = Array.isArray(input?.divisoes) ? input.divisoes : []
+    const n = Math.max(divs.length, Number(input?.contagem?.divisoes) || 0)
+    const grandes = divs.filter((d: any) => Number(d?.area) > site.btu.areaMax).length + (Number(input?.contagem?.acimaDaArea) || 0)
+    if (n > 4) m.push(`São ${n} divisões: a tabela vai até 4 (multi-split); acima disso, dimensiona-se na visita.`)
+    if (grandes) m.push(`${grandes === 1 ? "Há uma divisão" : `Há ${grandes} divisões`} com mais de ${site.btu.areaMax} m²: dimensiona-se na visita.`)
+    if (r?.potencia?.acima) m.push("Há uma divisão acima do maior aparelho da tabela: pode precisar de mais do que uma máquina ou de condutas.")
   }
   return [...new Set(m)]
 }
@@ -348,22 +357,62 @@ Regras:
 - «pedido» e «notas» sem nomes, telefones, emails, NIF nem moradas.
 - Escreve em português de Portugal, sem travessões.`
 
-function redige(t: string): string {
-  return t
-    .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, "[email]")
-    .replace(/(?:\+?351[\s.-]?)?\b[29]\d{2}[\s.-]?\d{3}[\s.-]?\d{3}\b/g, "[telefone]")
-    .replace(/\bNIF:?\s*\d{9}\b/gi, "[NIF]")
-    .replace(/\b\d{4}-\d{3}\b/g, "[código postal]")
+/* dados pessoais que não precisam de sair para a IA (também na conversa): emails, telefones portugueses em qualquer
+   agrupamento («912 345 678», «91 234 56 78», «+351 912345678»), NIF/NIPC (com ou sem a palavra) e códigos postais */
+export function redige(t: string): string {
+  return String(t)
+    .replace(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g, "[email]")
+    .replace(/\b(?:NIF|NIPC|contribuinte|n\.?º?\s*fiscal)\D{0,6}(?:\d[\s.]?){8}\d\b/gi, "[NIF]")
+    .replace(/(?:(?:\+|00)351[\s.-]?)?(?<!\d)[29](?:[\s.-]?\d){8}(?!\d)/g, "[telefone]")
+    .replace(/(?<!\d)[1235689]\d{8}(?!\d)/g, "[número]")
+    .replace(/(?<!\d)\d{4}-\d{3}(?!\d)|(?<!\d)\d{4}\s\d{3}(?=\s+[A-ZÀ-Ý])/g, "[código postal]")
+}
+function semMarcas(t: string): string {
+  return t.replace(/\[(?:email|NIF|telefone|número|código postal)\]/g, "").replace(/\s{2,}/g, " ").replace(/^[\s,;.-]+|[\s,;-]+$/g, "")
+}
+
+/* Como a IA chega à Anthropic:
+   - chave da MDM (ANTHROPIC_API_KEY definida pela equipa no Netlify): direto à Anthropic, com «fallbacks» na conversa;
+   - sem ela, num plano do Netlify por créditos (Free, Personal, Pro), depois da primeira publicação em produção: o AI
+     Gateway do Netlify injeta ANTHROPIC_API_KEY e ANTHROPIC_BASE_URL (os mesmos valores de NETLIFY_AI_GATEWAY_KEY/URL) e
+     cobra em créditos do Netlify. O gateway não deixa passar cabeçalhos beta: aí a conversa vai sem «fallbacks»;
+   - nenhuma das duas: null, e os caminhos com IA respondem que ela não está ligada.
+   Sem novas tentativas: o Netlify corta a função aos 60 s. */
+function ligacaoIA(env: Env, cliente?: Anthropic | null) {
+  const chave = env.get("ANTHROPIC_API_KEY"), base = env.get("ANTHROPIC_BASE_URL")
+  const gwChave = env.get("NETLIFY_AI_GATEWAY_KEY"), gwUrl = env.get("NETLIFY_AI_GATEWAY_URL")
+  const gateway = !!(gwChave && chave === gwChave) || !!(gwUrl && base && base === gwUrl)
+  if (cliente) return { client: cliente, gateway }
+  if (!chave) return null
+  return { client: new Anthropic({ apiKey: chave, baseURL: base || undefined, timeout: 50_000, maxRetries: 0 }), gateway }
+}
+
+/* erros da API em português, para a equipa saber o que fazer */
+function erroIA(e: unknown, modelo: string, gateway: boolean, onde: "ler" | "conversa") {
+  const resto = onde === "ler" ? " Preencha o formulário à mão." : ""
+  if (e instanceof Anthropic.APIConnectionTimeoutError) return json({ erro: "A IA demorou demasiado a responder. Tente outra vez." + resto }, 504)
+  if (e instanceof Anthropic.RateLimitError) return json({ erro: "Muitos pedidos à IA ao mesmo tempo. Tente outra vez daqui a um minuto." + resto }, 429)
+  if (e instanceof Anthropic.AuthenticationError || e instanceof Anthropic.PermissionDeniedError)
+    return json({ erro: (gateway ? "O AI Gateway do Netlify recusou o acesso (veja os créditos e as AI Features da equipa)." : "A chave ANTHROPIC_API_KEY no Netlify não é válida.") + resto }, 502)
+  if (e instanceof Anthropic.NotFoundError)
+    return json({ erro: `O modelo ${modelo} não está disponível ${gateway ? "no AI Gateway do Netlify" : "nesta conta da Anthropic"}.` + resto }, 502)
+  if (e instanceof Anthropic.BadRequestError) {
+    console.error("pedido recusado pela API", (e as any).message)
+    return json({ erro: (onde === "ler" ? "A IA recusou o pedido." : "A API recusou a conversa. Comece uma nova.") + resto }, 502)
+  }
+  if (e instanceof Anthropic.APIError) { console.error("erro da API", (e as any).status, (e as any).message); return json({ erro: "O serviço de IA falhou. Tente outra vez." + resto }, 502) }
+  console.error(e)
+  return json({ erro: "Não foi possível falar com o serviço de IA. Tente outra vez." + resto }, 502)
 }
 
 async function ler(texto: string, tab: Tabela, client: Anthropic) {
-  const resposta: any = await client.messages.create({
+  const resposta: any = await (client.messages.create as any)({
     model: MODELO_LEITURA,
     max_tokens: 4000,
     output_config: { effort: "low", format: { type: "json_schema", schema: esquemaLeitura(tab) } },
     system: SISTEMA_LEITURA,
     messages: [{ role: "user", content: `Pedido do cliente:\n\n${redige(texto)}` }],
-  } as any)
+  }, { timeout: 25_000, maxRetries: 1 })
   if (resposta.stop_reason === "refusal") return { erro: "A IA não leu este pedido. Preencha o formulário à mão." }
   if (resposta.stop_reason === "max_tokens") return { erro: "O pedido é demasiado longo para ler de uma vez. Preencha o formulário à mão ou use o assistente completo." }
   const txt = (resposta.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("")
@@ -394,16 +443,19 @@ const json = (corpo: unknown, status = 200) => Response.json(corpo, { status, he
 export async function atende(req: Request, env: Env, cliente?: Anthropic): Promise<Response> {
   if (req.method !== "POST") return json({ erro: "Use POST." }, 405)
   const senha = env.get("MDM_EQUIPA_SENHA")
-  const chave = env.get("ANTHROPIC_API_KEY")
   if (!senha) return json({ erro: "O assistente ainda não está configurado no Netlify (falta MDM_EQUIPA_SENHA)." }, 503)
-  if (!iguais(req.headers.get("x-mdm-senha") || "", senha)) return json({ erro: "Senha errada." }, 401)
+  /* a página manda a senha com encodeURIComponent: um cabeçalho HTTP só leva ISO-8859-1 */
+  let dada = ""
+  try { dada = decodeURIComponent(req.headers.get("x-mdm-senha") || "") } catch { dada = "" }
+  if (!iguais(dada, senha)) return json({ erro: "Senha errada." }, 401)
 
   const bruto = await req.text()
   if (bruto.length > MAX_BYTES) return json({ erro: "A conversa ficou demasiado longa. Comece uma nova." }, 413)
   let corpo: any
   try { corpo = JSON.parse(bruto) } catch { return json({ erro: "Pedido inválido." }, 400) }
   const tab = tabela(env)
-  const semIA = () => json({ erro: "A IA ainda não está ligada (falta ANTHROPIC_API_KEY no Netlify). O formulário funciona na mesma." }, 503)
+  const ia = ligacaoIA(env, cliente)
+  const semIA = () => json({ erro: "A IA ainda não está ligada: ponha ANTHROPIC_API_KEY no Netlify, ou publique uma vez em produção para ligar o AI Gateway do Netlify. O formulário funciona na mesma." }, 503)
 
   /* formulário: sem IA, sem custo */
   if (corpo?.acao === "tabela") return json(infoTabela(tab))
@@ -415,46 +467,57 @@ export async function atende(req: Request, env: Env, cliente?: Anthropic): Promi
     const texto = String(corpo.texto || "").trim()
     if (!texto) return json({ erro: "Cole primeiro o pedido do cliente." }, 400)
     if (texto.length > 6000) return json({ erro: "O texto é demasiado longo: cole só o pedido do cliente." }, 413)
-    if (!(chave || cliente)) return semIA()
-    try { return json(await ler(texto, tab, cliente || new Anthropic({ apiKey: chave }))) }
-    catch (e) { console.error("leitura falhou", e); return json({ erro: "A leitura falhou. Preencha o formulário à mão ou tente outra vez." }, 502) }
+    if (!ia) return semIA()
+    try { return json(await ler(texto, tab, ia.client)) }
+    catch (e) { return erroIA(e, MODELO_LEITURA, ia.gateway, "ler") }
   }
 
   /* assistente completo (conversa) */
-  if (!(chave || cliente)) return semIA()
+  if (!ia) return semIA()
   const mensagens = corpo?.mensagens
   if (!Array.isArray(mensagens) || !mensagens.length || mensagens.length > MAX_MENSAGENS || mensagens[0]?.role !== "user")
     return json({ erro: mensagens?.length > MAX_MENSAGENS ? "A conversa ficou demasiado longa. Comece uma nova." : "Pedido inválido." }, 400)
 
-  const client = cliente || new Anthropic({ apiKey: chave })
+  /* os textos da equipa também passam pelo corte dos dados pessoais; é sempre o mesmo corte, por isso o histórico que a
+     API recebe continua igual de pedido para pedido */
+  const historico = mensagens.map((m: any) => (m?.role === "user" && typeof m.content === "string" ? { ...m, content: redige(m.content) } : m))
+  const pedido: any = {
+    model: MODELO,
+    max_tokens: 16000,
+    output_config: { effort: "medium" },
+    system: [{ type: "text", text: sistema(tab), cache_control: { type: "ephemeral" } }],
+    tools: ferramentas(tab),
+    messages: historico,
+  }
   let resposta: any
   try {
-    resposta = await (client.beta.messages.create as any)({
-      model: MODELO,
-      max_tokens: 16000,
-      betas: ["server-side-fallback-2026-07-01"],
-      fallbacks: "default",
-      output_config: { effort: "medium" },
-      system: [{ type: "text", text: sistema(tab), cache_control: { type: "ephemeral" } }],
-      tools: ferramentas(tab),
-      messages: mensagens,
-    })
+    resposta = ia.gateway
+      ? await (ia.client.messages.create as any)(pedido)
+      : await (ia.client.beta.messages.create as any)({ ...pedido, betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" })
   } catch (e) {
-    if (e instanceof Anthropic.RateLimitError) return json({ erro: "Muitos pedidos ao mesmo tempo. Tente outra vez daqui a um minuto." }, 429)
-    if (e instanceof Anthropic.AuthenticationError) return json({ erro: "A chave da API no Netlify não é válida." }, 502)
-    if (e instanceof Anthropic.BadRequestError) { console.error("pedido recusado pela API", e.message); return json({ erro: "A API recusou a conversa. Comece uma nova." }, 502) }
-    if (e instanceof Anthropic.APIError) { console.error("erro da API", e.status, e.message); return json({ erro: "O serviço de IA falhou. Tente outra vez." }, 502) }
-    console.error(e)
-    return json({ erro: "Não foi possível falar com o serviço de IA. Tente outra vez." }, 502)
+    return erroIA(e, MODELO, ia.gateway, "conversa")
   }
 
-  if (resposta.stop_reason === "refusal")
-    return json({ novas: [], continuar: false, propostas: [], erro: "O modelo não respondeu a este pedido. Reformule a mensagem." })
+  /* o que a API não aceitaria de volta nunca entra no histórico: uma recusa, uma chamada de ferramenta cortada pelo limite
+     de tokens (ficaria sem resultado) ou uma resposta sem texto nem ferramentas. Nesses casos a página tira do histórico
+     este turno inteiro, desde a última mensagem escrita pela equipa, e devolve essa mensagem à caixa de texto. */
+  const conteudo: any[] = Array.isArray(resposta.content) ? resposta.content : []
+  const temTexto = conteudo.some((b) => b.type === "text" && String(b.text || "").trim())
+  const temFerramenta = conteudo.some((b) => b.type === "tool_use")
+  const recua = (erro: string) => {
+    let i = mensagens.length - 1
+    while (i > 0 && !(mensagens[i]?.role === "user" && typeof mensagens[i].content === "string")) i--
+    const texto = typeof mensagens[i]?.content === "string" ? mensagens[i].content : ""
+    return json({ novas: [], continuar: false, propostas: [], teste: tab.teste, retirar: mensagens.length - i, textoRetirado: texto, erro })
+  }
+  if (resposta.stop_reason === "refusal") return recua("O modelo não respondeu a este pedido. A mensagem voltou para a caixa: reformule-a.")
+  if (resposta.stop_reason === "max_tokens" && temFerramenta) return recua("A resposta ficou cortada a meio de uma conta. A mensagem voltou para a caixa: envie outra vez ou peça uma resposta mais curta.")
+  if (!temTexto && !temFerramenta) return recua("O assistente não respondeu. A mensagem voltou para a caixa: envie outra vez.")
 
-  const novas: any[] = [{ role: "assistant", content: resposta.content }]
+  const novas: any[] = [{ role: "assistant", content: conteudo }]
   const propostas: any[] = []
   if (resposta.stop_reason === "tool_use") {
-    const resultados = resposta.content.filter((b: any) => b.type === "tool_use").map((b: any) => {
+    const resultados = conteudo.filter((b: any) => b.type === "tool_use").map((b: any) => {
       let conteudo: any, erro = false
       try {
         if (b.name === "calcular_potencia") {

@@ -30,6 +30,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .eq-acoes { display: flex; gap: 8px; }
 @media (max-width: 560px) {
   .eq-sub { display: none; }
+  .eq-topo { flex-wrap: wrap; row-gap: 8px; }
   .eq-nome { font-size: 15px; }
   .eq-acoes .eq-btn { padding: 0 12px; font-size: 14px; }
 }
@@ -149,12 +150,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .doc-servico { margin: 0 0 18px; font-family: var(--sans); font-weight: 600; color: var(--carmim); letter-spacing: .02em; }
 .doc-dados { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 6px 16px; margin: 0 0 22px; }
 .doc-dados dt { font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--aco); padding-top: 3px; }
-.doc-dados dd { margin: 0; }
+.doc-dados dd { margin: 0; overflow-wrap: anywhere; }
 .doc-sec { margin: 0 0 8px; font-family: var(--sans); font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--carmim); }
 .doc-pot { width: 100%; border-collapse: collapse; margin: 0 0 22px; font-size: 14px; }
 .doc-pot th, .doc-pot td { padding: 7px 8px 7px 0; border-bottom: 1px solid var(--linha); text-align: left; vertical-align: top; }
 .doc-pot th { font-family: var(--sans); font-size: 12px; font-weight: 600; letter-spacing: .06em; color: var(--aco); }
-.doc-pot td.num, .doc-pot th.num { text-align: right; white-space: nowrap; }
+.doc-pot td.num, .doc-pot th.num { text-align: right; }
+.doc-pot th.num { white-space: nowrap; }   /* nas células os números já levam espaços inseparáveis; o texto pode quebrar */
 .doc-bloco { margin: 0 0 18px; }
 .doc-bloco-t { margin: 0 0 10px; font-family: var(--sans); font-weight: 700; font-size: 17px; }
 .doc-gamas { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
@@ -190,7 +192,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .doc-gama-v { font-size: 15pt; }
   .doc-cond { margin-top: 12px; padding-top: 10px; }
   .doc-pe { margin-top: 12px; padding-top: 10px; }
-  .eq-topo, .eq-chat, .eq-lado-cab, .eq-prop-acoes, .eq-sem-prop, .eq-entrar { display: none !important; }
+  /* só a folha da proposta: a coluna do formulário e da conversa fica toda de fora */
+  .eq-topo, .eq-esq, .eq-lado-cab, .eq-prop-acoes, .eq-sem-prop, .eq-entrar { display: none !important; }
+  .eq-lado { position: static; max-height: none; overflow: visible; }
   .eq-mesa { display: block; padding: 0; max-width: none; }
   .doc { padding: 0; }
   .doc-gamas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
