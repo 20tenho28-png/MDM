@@ -40,11 +40,13 @@ const casos = [
   { servico: 'ac', divisoes: [{ tipo: 'Sala', area: 30, sol: false, ultimoAndar: false }, { tipo: 'Quarto', area: 12, sol: false, ultimoAndar: false },
     { tipo: 'Quarto', area: 14, sol: true, ultimoAndar: false }], respostas: { dist: '5', fora: 'escada' } },
   { servico: 'ac', divisoes: [{ tipo: 'Sala', area: 90, sol: true, ultimoAndar: true }], respostas: {} },
+  /* uma divisão acima de areaMax (200 m²) conta, a dimensionar na visita: o preço não sai só das outras */
+  { servico: 'ac', divisoes: [{ tipo: 'Sala', area: 250, sol: false, ultimoAndar: false }, { tipo: 'Quarto', area: 12, sol: false, ultimoAndar: false }], respostas: {} },
   { servico: 'aguasQuentes', respostas: { deposito: '200' } },
   { servico: 'aguasQuentes', respostas: { deposito: '300' } },
   { servico: 'aguasQuentes', respostas: { deposito: 'nsei' } },
 ];
-while (casos.length < N + 7) casos.push(casoAC());
+while (casos.length < N + 8) casos.push(casoAC());
 
 const original = fs.readFileSync(REAL);
 let servidor = null, falhas = 0;

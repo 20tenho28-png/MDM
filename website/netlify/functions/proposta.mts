@@ -304,8 +304,9 @@ function complexidade(input: any, r: any, extra: string[] = []): string[] {
     m.push("Trabalho sem tabela de preços (reparação, manutenção, ventilação, eletricidade ou outro): o preço dá-se depois da visita.")
   else if (r?.modo === "sem_tabela") m.push("Ainda não há preços na tabela da MDM para este produto.")
   if (servico === "ac") {
-    /* conta-se a partir do que foi pedido (o cálculo pára com erro acima de 8 divisões ou de 200 m²); a página junta em
-       «contagem» as divisões que não mandou por ainda não terem área válida */
+    /* conta-se a partir do que foi pedido (o cálculo pára com erro acima de 8 divisões; acima de 200 m² a divisão conta,
+       a dimensionar na visita); a página junta em «contagem» o número de divisões, mesmo as que ainda não têm área
+       válida. contagem.acimaDaArea fica para quem chame a função sem mandar essas divisões */
     const divs = Array.isArray(input?.divisoes) ? input.divisoes : []
     const n = Math.max(divs.length, Number(input?.contagem?.divisoes) || 0)
     const grandes = divs.filter((d: any) => Number(d?.area) > site.btu.areaMax).length + (Number(input?.contagem?.acimaDaArea) || 0)

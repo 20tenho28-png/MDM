@@ -133,13 +133,13 @@
   })();
 
   /* ligações para uma secção da página inicial (index.html#orcamento, #contacto, #metodo) numa página que também tem essa
-     secção (serviços): ficam nesta página; no caso do orçamento, com o serviço já escolhido */
-  if (!/(^|\/)(index\.html)?$/.test(location.pathname)) {
-    qsa('a[href]').forEach(function (a) {
-      var m = /^(\.\.\/)*index\.html#([\w-]+)$/.exec(a.getAttribute('href'));
-      if (m && document.getElementById(m[2])) a.setAttribute('href', '#' + m[2]);
-    });
-  }
+     secção (serviços e a própria página inicial): ficam nesta página, sem a recarregar; no caso do orçamento, com o
+     serviço já escolhido. A página inicial também conta: aberta em «/», «index.html#orcamento» seria outra página, e o
+     que o visitante já escreveu no formulário perdia-se */
+  qsa('a[href]').forEach(function (a) {
+    var m = /^(\.\.\/)*index\.html#([\w-]+)$/.exec(a.getAttribute('href'));
+    if (m && document.getElementById(m[2])) a.setAttribute('href', '#' + m[2]);
+  });
 
   /* cliques nos caminhos de contacto: um evento com o nome do caminho */
   document.addEventListener('click', function (e) {
@@ -882,7 +882,9 @@
       if (!/^(\d+(\.\d*)?|\.\d+)$/.test(t)) return { erro: 'Escreva a área só com números, por exemplo 12 ou 12,5.' };
       var a = Math.round(parseFloat(t) * 100) / 100;
       if (a < AREA_MIN) return { erro: 'A área tem de ter pelo menos ' + decimal(AREA_MIN) + ' m².' };
-      if (a > AREA_MAX) return { erro: 'Até ' + decimal(AREA_MAX) + ' m² por divisão. Para um espaço maior, a MDM dimensiona a instalação na visita.' };
+      /* acima de AREA_MAX não é erro: a divisão conta, a dimensionar na visita, como acima do maior aparelho (se ficasse
+         de fora, o preço sairia só das outras, mais baixo). netlify/lib/calculo.mjs faz igual. */
+      if (a > AREA_MAX) return { area: a, grande: true };
       return { area: a };
     }
     function calcula(tipo, area, sol, topo) {
@@ -899,6 +901,7 @@
         if (l.leitura.area == null) return;
         var d = { i: i, tipo: l.tipo.value, area: l.leitura.area, sol: l.sol.checked, topo: l.topo.checked };
         l.calc = calcula(d.tipo, d.area, d.sol, d.topo);
+        if (l.leitura.grande) l.calc.tam = 0;
         d.tam = l.calc.tam;
         r.divs.push(d);
         r.total += d.tam || MAIOR;
@@ -1503,9 +1506,9 @@
     return WA_BASE + encodeURIComponent('Olá MDM, sou ' + d.empresa + '. Acabei de enviar um pedido pelo site e quero juntar fotografias.' +
       (d.potCurta ? ' Estimativa de potência: ' + d.potCurta + '.' : ''));
   }
-  /* o formulário volta ao início (serviço da página escolhido de novo; sem ele, o botão do WhatsApp volta) */
+  /* o formulário volta ao início (serviço do endereço ou da página escolhido de novo; sem ele, o botão do WhatsApp volta) */
   function limpaForm() {
-    form.reset(); erroCampo('qFoto'); escolheServico(form.getAttribute('data-preselect')); canal();
+    form.reset(); erroCampo('qFoto'); preEscolhe(); canal();
   }
   /* painel «Pedido enviado» (data-form-feito, a seguir ao formulário): diz para onde vamos responder e dá o WhatsApp para
      juntar fotografias, menos nos pedidos do comercial, que seguem só por email; «Enviar outro pedido» repõe o
@@ -1583,6 +1586,13 @@
     if (bloqueado()) return;
     var d = quoteData(); if (comercial(d.servico) || !quoteValidate(d, true)) return;
     pot.juntaAutomatico(); preco.junta(); d = quoteData();
+    /* sem serviço escolhido, a estimativa de potência junta sozinha escolhe a instalação de ar condicionado: aí o pedido
+       passou a ser do comercial e segue só por email (o botão do WhatsApp já saiu; o foco vai para «Enviar pedido») */
+    if (comercial(d.servico)) {
+      quoteAlert('Com a estimativa de potência, o pedido é de instalação de ar condicionado e segue por email: carregue em «Enviar pedido».');
+      $('sendEmail').focus();
+      return;
+    }
     track('quote_form_submit', pot.numeros({ via: 'whatsapp', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg }));
     window.open(WA_BASE + encodeURIComponent(mensagemWhats(d)), '_blank', 'noopener');
     quoteAlert('Abrimos o WhatsApp com o pedido preenchido, falta só carregar em enviar.' + (d.foto ? ' Junte lá a fotografia.' : ''), true);
@@ -1598,14 +1608,22 @@
   /* o botão «Enviar por WhatsApp» só existe fora dos pedidos do comercial, que seguem só por email */
   function canal() { $('sendWhats').hidden = comercial($('qServico').value); }
   $('qServico').addEventListener('change', canal);
-  /* serviço pré-escolhido: pela página (data-preselect) ou por uma ligação com data-preselect */
+  /* serviço pré-escolhido: pelo endereço (?servico=…, das obras de avaria), pela página (data-preselect) ou por uma
+     ligação com data-preselect. pot e preco podem ainda não existir: ao abrir em #potencia, a estimativa chama isto
+     enquanto se monta */
   function escolheServico(v) {
     var sel = $('qServico');
     if (!v) return;
-    for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === v || sel.options[i].text === v) { sel.selectedIndex = i; pot.visibilidade(); if (preco) preco.visibilidade(); canal(); return true; }
+    for (var i = 0; i < sel.options.length; i++) if (sel.options[i].value === v || sel.options[i].text === v) { sel.selectedIndex = i; if (pot) pot.visibilidade(); if (preco) preco.visibilidade(); canal(); return true; }
   }
-  escolheServico(form.getAttribute('data-preselect'));
-  canal();   /* também quando o browser repõe o serviço escolhido antes (voltar atrás) */
+  var PEDIDO_ENDERECO = '';
+  try { PEDIDO_ENDERECO = new URLSearchParams(location.search).get('servico') || ''; } catch (e) {}
+  function preEscolhe() { return escolheServico(PEDIDO_ENDERECO) || escolheServico(form.getAttribute('data-preselect')); }
+  preEscolhe();
+  canal();
+  /* ao voltar atrás sem a cópia da página em memória, o browser repõe o serviço escolhido depois de este script correr e
+     sem evento change: quando a página aparece, o botão do WhatsApp, a estimativa e o preço acertam-se com o serviço */
+  window.addEventListener('pageshow', function () { canal(); pot.visibilidade(); preco.visibilidade(); });
   document.addEventListener('click', function (e) {
     var a = e.target.closest && e.target.closest('a[data-preselect]');
     if (!a) return;

@@ -1,8 +1,9 @@
 /* Encaminhamento dos pedidos do formulário do site (README.md, «Encaminhamento dos pedidos»): instalação e manutenção
    vão para o formulário Netlify «orcamento-comercial» (o email do comercial) e só por email; avarias, «outro» e sem
-   serviço ficam em «orcamento», com o WhatsApp. Gera o site numa pasta temporária (MDM_OUT) e serve-o num servidor local
-   que guarda cada envio, como o Netlify Forms o receberia, e que pode falhar de propósito. Precisa do Playwright, fora
-   das dependências. Uso, a partir de website/:
+   serviço ficam em «orcamento», com o WhatsApp. Também os caminhos que contornavam isto (estimativa junta sozinha no
+   WhatsApp, obras de avaria, serviço reposto ao voltar atrás), a página inicial aberta em «/» e uma divisão acima de
+   200 m². Gera o site numa pasta temporária (MDM_OUT) e serve-o num servidor local que guarda cada envio, como o Netlify
+   Forms o receberia, e que pode falhar de propósito. Precisa do Playwright, fora das dependências. Uso, a partir de website/:
      NODE_PATH=/caminho/para/node_modules node tests/encaminhamento.mjs */
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
@@ -153,6 +154,101 @@ for (const f of fs.readdirSync(PUB, { recursive: true }).filter((f) => f.endsWit
   }
 }
 ok(pedemOrcamento.length === 0, 'G: o WhatsApp das páginas e das obras não pede orçamento', pedemOrcamento.slice(0, 5));
+
+// H. página inicial aberta em «/»: «Pedir orçamento» do cabeçalho fica na página, sem a recarregar (o que se escreveu fica)
+page = await nova('/');
+await page.fill('#qNome', 'Escrito antes');
+await page.evaluate(() => { window.__mesmaPagina = true; window.scrollTo(0, 0); });
+const porReescrever = await page.$$eval('a[href*="index.html#"]', (as) => as.map((a) => a.getAttribute('href')).filter((h) => document.getElementById(h.split('#')[1])));
+await page.click('.topo-cta');
+await page.waitForTimeout(600);
+const h = await page.evaluate(() => ({ mesma: window.__mesmaPagina === true, nome: document.getElementById('qNome').value, caminho: location.pathname, hash: location.hash }));
+ok(!porReescrever.length && h.mesma && h.nome === 'Escrito antes' && h.caminho === '/' && h.hash === '#orcamento', 'H: em «/», «Pedir orçamento» não recarrega a página', { porReescrever, h });
+await page.context().close();
+
+// I. sem serviço e com a potência calculada (não junta), «Enviar por WhatsApp» não abre o WhatsApp: a estimativa escolhe
+//    a instalação de ar condicionado, que segue só por email
+page = await nova('/');
+await page.evaluate(() => { window.__wa = null; window.open = (u) => { window.__wa = u; return null; }; });
+await page.click('#potencia summary');
+await page.locator('[data-pot-divs] [data-pot-linha]').first().locator('[data-pot="area"]').fill('20');
+await page.fill('#qNome', 'Cliente de teste');
+await page.click('#sendWhats');
+const wi = await page.evaluate(() => ({ wa: window.__wa, servico: document.getElementById('qServico').value, escondido: document.getElementById('sendWhats').hidden,
+  aviso: document.getElementById('quoteAlert').textContent, foco: document.activeElement && document.activeElement.id }));
+ok(!wi.wa && wi.servico === 'Ar condicionado: montagem / instalação' && wi.escondido && /segue por email/.test(wi.aviso) && wi.foco === 'sendEmail',
+  'I: potência junta sozinha no WhatsApp: não abre o WhatsApp e manda para «Enviar pedido»', wi);
+await page.context().close();
+
+// J. obras de avaria: «Pedir orçamento» abre o formulário com a avaria do serviço (?servico=…) ou, sem ela, o da página
+//    inicial sem serviço; nunca uma página com um serviço do comercial já escolhido
+const AVARIAS = CASOS.filter((c) => c[1] === 'orcamento' && / avaria /.test(c[0])).map((c) => c[0]);
+const obrasAvaria = fs.readdirSync(path.join(PUB, 'obras')).filter((f) => f.endsWith('.html')).map((f) => {
+  const t = fs.readFileSync(path.join(PUB, 'obras', f), 'utf8');
+  const m = /id="obraCtaT">Tem uma avaria parecida\?<[\s\S]*?data-lead="orcamento" href="([^"]*)"/.exec(t);
+  return m && { f, href: m[1].replace(/&amp;/g, '&') };
+}).filter(Boolean);
+const malAvaria = obrasAvaria.filter((o) => {
+  const sv = new URL(o.href, 'http://x/obras/').searchParams.get('servico');
+  return sv ? !AVARIAS.includes(sv) : o.href !== '../index.html#orcamento';
+});
+ok(obrasAvaria.length > 0 && !malAvaria.length, `J: ${obrasAvaria.length} obras de avaria levam a avaria ou o formulário sem serviço`, malAvaria);
+const comServico = obrasAvaria.find((o) => o.href.includes('?servico='));
+if (comServico) {
+  page = await nova('/obras/' + comServico.f);
+  await page.click('section[aria-labelledby="obraCtaT"] a[data-lead="orcamento"]');
+  await page.waitForURL(/\?servico=/);
+  const sv = await page.inputValue('#qServico');
+  ok(AVARIAS.includes(sv) && !(await whatsEscondido(page)), `J: ${comServico.f} → formulário com «${sv}» e com WhatsApp`);
+  const ej = await envia(page, null);
+  ok(ej && ej['form-name'] === 'orcamento', 'J: a avaria da obra vai para o formulário geral', ej && ej['form-name']);
+  await page.context().close();
+}
+
+// K. o browser repõe o serviço depois do script, sem evento change (voltar atrás sem a cópia em memória): ao aparecer a
+//    página o botão acerta-se; e ao recarregar, o botão bate com o serviço que ficou
+page = await nova('/');
+await page.evaluate(() => {
+  document.getElementById('qServico').value = 'Manutenção preventiva: contrato anual';
+  window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: false }));
+});
+ok(await whatsEscondido(page), 'K: serviço do comercial reposto sem change: o botão do WhatsApp sai quando a página aparece');
+await page.selectOption('#qServico', 'Ar condicionado: montagem / instalação');
+await page.reload();
+const kr = { valor: await page.inputValue('#qServico'), escondido: await whatsEscondido(page) };
+ok(kr.escondido === CASOS.some((c) => c[0] === kr.valor && c[1] === 'orcamento-comercial'), 'K: depois de recarregar, o botão bate com o serviço', kr);
+await page.context().close();
+
+// L. uma divisão com mais de 200 m² conta, a dimensionar na visita: não desaparece do pedido nem fica como erro
+page = await nova('/servicos/ar-condicionado.html');
+if (!(await page.$eval('#potencia', (d) => d.open))) await page.click('#potencia summary');
+let linha = page.locator('[data-pot-divs] [data-pot-linha]').nth(0);
+await linha.locator('[data-pot="tipo"]').selectOption('Sala'); await linha.locator('[data-pot="area"]').fill('250');
+await page.click('[data-pot-adiciona]');
+linha = page.locator('[data-pot-divs] [data-pot-linha]').nth(1);
+await linha.locator('[data-pot="tipo"]').selectOption('Quarto'); await linha.locator('[data-pot="area"]').fill('12');
+await page.click('[data-pot-juntar]');
+const pl = await page.evaluate(() => ({ campo: document.querySelector('[data-potencia-campo]').value,
+  invalida: document.querySelector('[data-pot-divs] [data-pot="area"]').getAttribute('aria-invalid') }));
+ok(/Sala 250 m²: mais de [\d ]+ BTU\/h, a dimensionar na visita/.test(pl.campo) && /Quarto 12 m²/.test(pl.campo) && /Total mais de/.test(pl.campo) && pl.invalida !== 'true',
+  'L: 250 m² entra no pedido, a dimensionar na visita', pl);
+await page.context().close();
+
+// M. aberta em #potencia com outro serviço já escolhido antes do script (o Firefox e o Safari repõem-no ao recarregar ou
+//    ao voltar atrás): a estimativa abre-se sem rebentar, e o resto do formulário continua a funcionar
+const ctxM = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+await ctxM.route(/posthog/, (r) => r.abort());
+await ctxM.route(/ar-condicionado\.html/, async (r) => {
+  const res = await r.fetch();
+  const html = (await res.text()).replace(/(<option value="Ar condicionado: avaria \/ reparação")/, '$1 selected');
+  await r.fulfill({ response: res, body: html });
+});
+page = await ctxM.newPage();
+const errosM = []; page.on('pageerror', (e) => errosM.push(e.message));
+await page.goto(B + '/servicos/ar-condicionado.html#potencia');
+const mm = { erros: errosM, aberta: await page.$eval('#potencia', (d) => d.open), servico: await page.inputValue('#qServico'), whats: await whatsEscondido(page) };
+ok(!mm.erros.length && mm.aberta && mm.servico === 'Ar condicionado: montagem / instalação' && mm.whats, 'M: #potencia com outro serviço reposto: abre sem erro', mm);
+await ctxM.close();
 
 await browser.close(); servidor.close();
 fs.rmSync(tmp, { recursive: true, force: true });

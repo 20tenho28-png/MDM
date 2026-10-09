@@ -47,10 +47,10 @@ export function potencia(C, divisoes) {
     if (!tipo) { erros.push(`Divisão ${i + 1}: tipo «${d.tipo}» desconhecido (${C.tipos.join(', ')}).`); return; }
     if (!(a > 0)) { erros.push(`Divisão ${i + 1}: falta a área em m².`); return; }
     if (a < C.AREA_MIN) { erros.push(`Divisão ${i + 1}: a área tem de ter pelo menos ${decimal(C.AREA_MIN)} m².`); return; }
-    if (a > C.AREA_MAX) { erros.push(`Divisão ${i + 1}: até ${decimal(C.AREA_MAX)} m² por divisão; maior do que isso, a MDM dimensiona na visita.`); return; }
     const cfg = C.cfg, sol = !!d.sol, topo = !!d.ultimoAndar;
     const est = Math.round(a * cfg.porM2 * (cfg.tipos[tipo] || 1) * (sol ? cfg.sol || 1 : 1) * (topo ? cfg.ultimoAndar || 1 : 1));
-    const tam = C.tamanhos.find((t) => t >= est * (1 - C.FOLGA)) || 0;
+    /* acima de AREA_MAX m² a divisão conta, a dimensionar na visita (tam 0), como acima do maior aparelho; como no site.js */
+    const tam = a > C.AREA_MAX ? 0 : C.tamanhos.find((t) => t >= est * (1 - C.FOLGA)) || 0;
     divs.push({ tipo, area: a, sol, topo, est, tam });
   });
   let total = 0, acima = false;

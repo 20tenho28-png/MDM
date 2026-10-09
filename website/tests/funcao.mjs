@@ -225,6 +225,8 @@ t = await acao({ acao: 'calcular', dados: { ...sala, divisoes: quartos(9) } });
 ok(t.corpo.complexo.some((m) => /São 9 divisões/.test(m)), '9 divisões (o cálculo pára): continua complexo', t.corpo);
 t = await acao({ acao: 'calcular', dados: { ...sala, divisoes: [{ tipo: 'Sala', area: 250, sol: false, ultimo_andar: false }] } });
 ok(t.corpo.complexo.some((m) => /mais de 200 m²/.test(m)), 'área acima de 200 m²: complexo', t.corpo);
+t = await acao({ acao: 'calcular', dados: { ...sala, divisoes: [{ tipo: 'Sala', area: 250, sol: false, ultimo_andar: false }, ...quartos(1, 12)] } });
+ok(t.corpo.modo === 'visita' && t.corpo.complexo.some((m) => /Há uma divisão com mais de 200 m²/.test(m)), 'divisão acima de 200 m² com outra: preço depois da visita, não o da outra sozinha', t.corpo);
 t = await acao({ acao: 'calcular', dados: { ...sala, divisoes: quartos(2), contagem: { divisoes: 6, acimaDaArea: 1 } } });
 ok(t.corpo.complexo.some((m) => /São 6 divisões/.test(m)) && t.corpo.complexo.some((m) => /mais de 200 m²/.test(m)), 'contagem da página entra na complexidade', t.corpo.complexo);
 t = await acao({ acao: 'calcular', dados: { ...sala, divisoes: quartos(5) } });

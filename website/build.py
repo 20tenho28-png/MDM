@@ -69,6 +69,11 @@ SERV_LABEL = {"ar-condicionado": "Ar condicionado", "ventilacao": "Ventilação"
               "eletricidade": "Eletricidade", "bombas-de-calor": "Bombas de calor"}
 # trabalhos de avaria: a faixa da página da obra convida a enviar a fotografia da avaria, não a pedir uma obra igual
 TRABALHO_AVARIA = {"Reparação", "Diagnóstico"}
+# a avaria de cada serviço, como no formulário (o value): numa obra de avaria, «Pedir orçamento» abre o formulário já com
+# ela (?servico=…), e o pedido vai para o email geral; a página do serviço sozinha escolheria a instalação ou a manutenção,
+# que são do comercial (README.md, «Encaminhamento dos pedidos»). Manutenção não diz de que equipamento é: fica de fora.
+SERV_AVARIA = {"ar-condicionado": "Ar condicionado: avaria / reparação", "bombas-de-calor": "Bomba de calor: avaria / reparação",
+               "eletricidade": "Eletricidade: avaria / reparação", "ventilacao": "Ventilação: avaria / reparação"}
 # sizes da fotografia grande da página da obra: cabe em 78% da altura do ecrã, nunca mais larga do que o ecrã
 FOTO_OBRA_SIZES = {"landscape": "(min-width: 1280px) min(1280px, calc(78vh * 4 / 3)), min(100vw, calc(78vh * 4 / 3))",
                    "portrait": "min(100vw, calc(78vh * 3 / 4))"}
@@ -80,8 +85,13 @@ def campos_obra(o):
     label = SERV_LABEL.get(serv, "")
     o["serv"], o["servLabel"] = serv, label
     o["servicoUrl"] = f"servicos/{serv}.html" if label else ""
-    o["orcamentoHref"] = f"../{o['servicoUrl']}#orcamento" if label else "../index.html#orcamento"
     avaria = o["trabalho"] in TRABALHO_AVARIA
+    if avaria:
+        # a avaria do serviço já escolhida; sem ela, o formulário da página inicial, sem serviço, para o cliente escolher
+        v = SERV_AVARIA.get(serv)
+        o["orcamentoHref"] = f"../{o['servicoUrl']}?servico={quote(v)}#orcamento" if v and label else "../index.html#orcamento"
+    else:
+        o["orcamentoHref"] = f"../{o['servicoUrl']}#orcamento" if label else "../index.html#orcamento"
     o["ctaTitulo"] = "Tem uma avaria parecida?" if avaria else "Quer uma obra assim?"
     # o orçamento pede-se no formulário (por email, ao comercial); o WhatsApp fica para avarias, fotografias e dúvidas
     msg = (f"Olá MDM. Vi a obra {o['code']} no site ({o['title']}) e tenho uma avaria parecida. Envio já uma fotografia."
@@ -795,6 +805,11 @@ def check_encaminhamento():
     js = OUT / "assets" / "js" / "site.js"
     if js.exists() and f"'{FORM_COMERCIAL}'" not in js.read_text(encoding="utf-8"):
         out.append(f"site.js: não envia para o formulário {FORM_COMERCIAL} (o nome tem de ser o mesmo de build.py)")
+    # as avarias que as obras pedem no endereço (?servico=…) têm de existir no formulário, senão o serviço não se escolhe
+    inicio = OUT / "index.html"
+    if inicio.exists():
+        valores = set(re.findall(r'<option value="([^"]*)"', inicio.read_text(encoding="utf-8")))
+        out += [f"build.py: SERV_AVARIA tem «{v}», que não é um serviço do formulário" for v in SERV_AVARIA.values() if v not in valores]
     return out
 
 

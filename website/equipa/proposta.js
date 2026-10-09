@@ -224,24 +224,27 @@
   }
   function calculaJa() {
     if (!T) return;
-    var f = S.form, erros = [], acimaDaArea = 0, ac = f.servico === 'ac';
+    var f = S.form, erros = [], ac = f.servico === 'ac';
     var divisoes = [];
     $$('.eq-div', divsEl).forEach(function (li, i) {
       var a = leArea(li.querySelector('[data-d="area"]').value), e = li.querySelector('[data-d="erro"]'), msg = '';
       if (!ac) { e.textContent = ''; li.querySelector('[data-d="area"]').removeAttribute('aria-invalid'); return; }   /* divisões escondidas */
+      /* acima do máximo não é erro: a divisão segue para o cálculo, a dimensionar na visita (e é caso complexo). Se ficasse
+         de fora, a proposta sairia só com as outras divisões, com um preço mais baixo */
+      var grande = a !== null && a > T.areaMax;
       if (a === null) msg = 'Falta a área.';
       else if (isNaN(a)) msg = 'Escreva a área só com números, por exemplo 12 ou 12,5.';
       else if (a < T.areaMin) msg = 'A área tem de ter pelo menos ' + T.areaMin + ' m².';
-      else if (a > T.areaMax) { msg = 'Mais de ' + T.areaMax + ' m²: dimensiona-se na visita.'; acimaDaArea++; }
+      else if (grande) msg = 'Mais de ' + T.areaMax + ' m²: dimensiona-se na visita.';
       e.textContent = msg;
-      li.querySelector('[data-d="area"]').setAttribute('aria-invalid', msg && a !== null ? 'true' : 'false');
-      if (msg) { if (a !== null && !(a > T.areaMax)) erros.push(i); return; }   /* acima do máximo é caso complexo, não erro */
+      li.querySelector('[data-d="area"]').setAttribute('aria-invalid', msg && a !== null && !grande ? 'true' : 'false');
+      if (msg && !grande) { if (a !== null) erros.push(i); return; }
       divisoes.push({ tipo: f.divisoes[i].tipo, area: a, sol: f.divisoes[i].sol, ultimo_andar: f.divisoes[i].topo });
     });
     var respostas = {};
     ['pre', 'dist', 'furo', 'fora', 'luz', 'antigas', 'deposito'].forEach(function (k) { respostas[k] = f.respostas[k] || ''; });
     var dados = { servico: f.servico, divisoes: ac ? divisoes : [], respostas: respostas,
-      contagem: { divisoes: ac ? f.divisoes.length : 0, acimaDaArea: acimaDaArea },
+      contagem: { divisoes: ac ? f.divisoes.length : 0 },
       cliente: { nome: f.nome, contacto: f.contacto, local: f.local }, pedido: f.pedido,
       observacoes: f.notas.split('\n').map(function (n) { return n.trim(); }).filter(Boolean).slice(0, 6) };
     var este = ++nCalc, g = GEN;
@@ -251,7 +254,7 @@
       if (!x.ok) { tiraForm(); calcEstado.textContent = x.c.erro || 'Não foi possível calcular.'; return; }
       var c = x.c, avisos = [];
       if (c.proposta) { c.proposta.origem = 'form'; poeProposta(c.proposta); } else tiraForm();
-      if (ac && !divisoes.length) avisos.push(acimaDaArea ? 'Divisão com mais de ' + T.areaMax + ' m²: dimensiona-se na visita, ou passe o caso ao assistente completo.' : 'Escreva a área de pelo menos uma divisão.');
+      if (ac && !divisoes.length) avisos.push('Escreva a área de pelo menos uma divisão.');
       else if (c.modo === 'erro' && c.resultado && c.resultado.erro) avisos.push(c.resultado.erro);
       if (c.modo === 'escolhe') avisos.push('Escolha o tamanho do depósito.');
       if (c.notasRecusadas && c.notasRecusadas.length) avisos.push('Notas que não entram na proposta (regras da MDM): ' + c.notasRecusadas.join('; '));

@@ -219,10 +219,14 @@ await page.click('#abaForm');
 ok(await page.inputValue('[data-texto]') === 'mensagem do cliente guardada', 'M: mensagem do cliente visível enquanto a tabela carrega');
 await pronto(page); delete atraso.tabela;
 
-// O. área acima de 200 m²: aviso certo, sem «por corrigir»
+// O. área acima de 200 m²: a divisão entra no cálculo, a dimensionar na visita (proposta sem preço firme), com o aviso na
+//    divisão e sem «por corrigir»
 await page.fill('.eq-div [data-d="area"]', '260');
-await page.waitForFunction(() => /dimensiona-se na visita/.test(document.querySelector('[data-calc-estado]').textContent), null, { timeout: 15000 });
-ok(!/por corrigir|Escreva a área/.test(await page.textContent('[data-calc-estado]')), 'O: área acima de 200 m²: aviso de visita, não de erro');
+await page.waitForFunction(() => /dimensiona-se na visita/.test(document.querySelector('.eq-div [data-d="erro"]').textContent)
+  && /Proposta atualizada/.test(document.querySelector('[data-calc-estado]').textContent), null, { timeout: 15000 });
+const docO = await page.textContent('.doc');
+ok(!/por corrigir|Escreva a área/.test(await page.textContent('[data-calc-estado]')) && await page.getAttribute('.eq-div [data-d="area"]', 'aria-invalid') === 'false'
+  && /visita/.test(docO) && !/\d\s?€/.test(docO), 'O: área acima de 200 m²: proposta de visita, sem preço e sem erro', docO.slice(0, 300));
 
 // S. motivo da IA fica; os calculados acompanham o formulário
 fila.push({ content: [{ type: 'text', text: JSON.stringify({ servico: 'ac', divisoes: Array.from({ length: 5 }, () => ({ tipo: 'Quarto', area: 10, sol: false, ultimo_andar: false })), respostas: V, local: '', pedido: '', notas: [], duvidas: [], complexo: true, motivo_complexo: 'Fachada protegida.' }) }], stop_reason: 'end_turn' });
