@@ -60,6 +60,7 @@ Todas as páginas levam a empresa em JSON-LD (`HVACBusiness` e `Electrician`): n
 | `assets/js/site.js` | Estatísticas (PostHog UE, sem cookies, só depois de «Aceitar»), formulário (envio para o Netlify, estimativa de potência), gaveta, carrossel, faixa das marcas, filtros, revelação |
 | `assets/fonts/` | Archivo e Newsreader alojadas no site (licença OFL incluída): nenhum pedido ao Google |
 | `assets/img/obras/` | Fotografias com correção de cor ligeira: o original `foto-NN-1600.jpg` e os tamanhos 400 a 1600 em AVIF e WebP (ver «Fotografias das obras») |
+| `assets/img/ilustracoes/` | Imagens de banco **licenciadas** (Magnific), não obras da MDM: entram como ilustração, sem número de obra (hoje, o quadro elétrico na página de Eletricidade). A MDM guarda o comprovativo da licença |
 | `gerar_fotos.py` | Faz os tamanhos AVIF e WebP das fotografias a partir do JPEG de 1600 |
 | `equipa/`, `netlify/`, `data/precos-teste.json`, `package.json`, `tests/` | Assistente de propostas da equipa (uso interno, fora do site): ver «Assistente de propostas» |
 
