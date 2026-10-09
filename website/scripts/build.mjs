@@ -1,0 +1,20 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {execFileSync} from 'node:child_process';
+const root=process.cwd(),out=path.resolve(root,'dist');
+if(path.dirname(out)!==root||path.basename(out)!=='dist')throw Error('Invalid build output');
+execFileSync('python',['scripts/localize.py'],{stdio:'inherit'});
+execFileSync('python',['scripts/metadata.py'],{stdio:'inherit'});
+fs.rmSync(out,{recursive:true,force:true});
+fs.mkdirSync(path.join(out,'server'),{recursive:true});
+fs.cpSync('public',path.join(out,'client'),{recursive:true});
+// Keep the admin HTML out of the public asset layer; authentication runs first.
+const adminPages={pt:fs.readFileSync('public/gestao.html','utf8'),en:fs.readFileSync('public/en/gestao.html','utf8')};
+const errorPages={pt:fs.readFileSync('public/404.html','utf8'),en:fs.readFileSync('public/en/404.html','utf8')};
+const worker=fs.readFileSync('src/worker.mjs','utf8').replace('/* EMBED_ADMIN_PAGES */{}',JSON.stringify(adminPages)).replace('/* EMBED_ERROR_PAGES */{}',JSON.stringify(errorPages));
+fs.writeFileSync(path.join(out,'server/index.js'),worker);
+for(const file of ['gestao.html','en/gestao.html'])fs.unlinkSync(path.join(out,'client',file));
+fs.mkdirSync(path.join(out,'.openai'),{recursive:true});
+fs.copyFileSync('.openai/hosting.json',path.join(out,'.openai/hosting.json'));
+fs.writeFileSync(path.join(out,'server/wrangler.json'),JSON.stringify({name:'mdm-site',main:'index.js',compatibility_date:'2026-09-01',assets:{directory:'../client',binding:'ASSETS',run_worker_first:true},d1_databases:[{binding:'DB',database_name:'mdm-local',database_id:'local-only'}]},null,2));
+console.log('Built bilingual MDM site, protected management and request server.');
