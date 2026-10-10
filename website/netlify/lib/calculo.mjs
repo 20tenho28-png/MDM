@@ -128,7 +128,7 @@ export function configPreco(P, C) {
 /* opts: { servico: 'ac' | 'aguasQuentes', divisoes (como em potencia(), só para ac), respostas: { pre, dist, furo, fora, luz,
    antigas, deposito } }. Uma resposta a uma pergunta que a tabela não tem, ou com um valor fora das opções, não conta
    (vai em «ignoradas»). Devolve modo 'preco' (com blocos e o resumo igual ao do formulário), 'visita' (o preço dá-se
-   depois da visita), 'sem_tabela' (esse produto ainda não tem preços) ou 'erro'. */
+   depois da visita), 'sem_tabela' (esse produto ainda não tem preços; no ar condicionado, com a potência) ou 'erro'. */
 export function preco(T, opts) {
   const servico = opts && opts.servico;
   const r = (opts && opts.respostas) || {};
@@ -165,9 +165,9 @@ export function preco(T, opts) {
       dets: ['bomba de calor para águas quentes'].concat(respostas(false)) }, extra);
   }
   if (servico !== 'ac') return { modo: 'erro', erro: 'servico tem de ser «ac» ou «aguasQuentes».', ...extra };
-  if (!T.temAC) return { modo: 'sem_tabela', ...extra };
-
   const e = potencia(T.C, opts.divisoes);
+  /* sem preços, a potência conta-se na mesma (a equipa vê-a e o modelo recebe-a), mas nenhum preço sai daqui */
+  if (!T.temAC) return { modo: 'sem_tabela', ...(e.erro || e.erros.length ? {} : { n: e.n, potencia: e }), ...extra };
   if (e.erro) return { modo: 'erro', erro: e.erro, ...extra };
   if (e.erros.length) return { modo: 'erro', erro: e.erros.join(' '), ...extra };
   const n = e.n, visita = { modo: 'visita', n, potencia: e, ...extra };

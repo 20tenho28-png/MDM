@@ -24,6 +24,7 @@ import { createHash, randomBytes, timingSafeEqual } from "node:crypto"
 import site from "../../data/site.json" with { type: "json" }
 import precosReais from "../../data/precos.json" with { type: "json" }
 import precosTeste from "../../data/precos-teste.json" with { type: "json" }
+import regrasMarcas from "../../data/regras-marcas.json" with { type: "json" }
 import { configPotencia, configPreco, potencia, preco } from "../lib/calculo.mjs"
 
 const MODELO = "claude-opus-5-5"
@@ -43,19 +44,37 @@ function tabela(env: Env) {
 }
 type Tabela = ReturnType<typeof tabela>
 
+/* as marcas que o dono não quer (data/regras-marcas.json, «proibidas», a mesma lista do build.py): sem distinguir
+   maiúsculas e só como palavra inteira, por isso um nome de duas palavras não apanha «Mitsubishi Electric» e um nome
+   curto não apanha uma palavra maior que comece por ele. Entre as palavras de um nome pode haver espaços, qualquer traço
+   (hífen, U+2010 a U+2015, sinal menos, os traços pequenos e largos) ou nada: com hífen ou tudo junto, o nome fica de
+   fora na mesma. É a mesma junção do build.py */
+const JUNTA_MARCA = "[\\s\\-\\u2010-\\u2015\\u2212\\ufe58\\ufe63\\uff0d]*"
+const MARCAS_RE = new RegExp(`(?<![\\p{L}\\p{N}])(?:${(regrasMarcas.proibidas as string[])
+  .map((m) => m.trim().split(/\s+/).map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join(JUNTA_MARCA)).join("|")})(?![\\p{L}\\p{N}])`, "iu")
 /* o que o dono não quer em nada escrito pela MDM (as mesmas regras do build.py, PROIBIDO) */
+/* prazos de resposta: a mesma regra do build.py (PRAZO): espaços, um traço qualquer ou nada entre o número e a unidade
+   («24-horas», «24‑h»), e intervalos com traço, «a» ou «e» («2–4 horas», «2 e 4 horas») */
+const TRACOS = "\\-\u2010-\u2015\u2212\u2043\u2e3a\u2e3b\ufe58\ufe63\uff0d"
+const JUNTA_UNIDADE = `[\\s${TRACOS}]*`
+const PRAZO_RE = new RegExp(
+  `\\b\\d+${JUNTA_UNIDADE}(?:h|horas)\\s+úteis|\\b(?:24|48)${JUNTA_UNIDADE}(?:h|horas)\\b`
+  + `|\\b\\d+(?:${JUNTA_UNIDADE}(?:h|horas))?(?:\\s*(?:a|[${TRACOS}])\\s*|\\s+e\\s+)\\d+${JUNTA_UNIDADE}(?:h|horas)\\b`
+  + `|\\bmesmo\\s+dia\\b|\\b\\d+${JUNTA_UNIDADE}minutos\\b`, "i")
 const PROIBIDO: [RegExp, string][] = [
-  [/\b\d+\s*(?:h|horas)\s+úteis|\b(?:24|48)\s*(?:h|horas)\b|\b\d+\s*(?:a|–|-)\s*\d+\s*(?:h|horas)\b|mesmo dia|\b\d+\s*minutos\b/i,
-    "promessa de prazo de resposta"],
+  [PRAZO_RE, "promessa de prazo de resposta"],
   [/\b[34]\d\s+anos\b/, "idade da empresa (só «desde 1991»)"],
-  [/\b(?:LG|Hitachi|Vulcano|Panasonic|Climaveneta|Samsung|Toshiba|Fujitsu|Gree|Haier|Bosch|Ariston)\b/i,
-    "marca fora da lista (só Midea, Mitsubishi Electric, Daikin, France Air)"],
+  [MARCAS_RE, `marca fora da lista (só ${regrasMarcas.permitidas.join(", ")})`],
+  [/Domingues|M\.D\.M\.\s*[—–]/, "nome legal: «M.D.M. - Manuel Domingos Melancia, Lda»"],
+  [/Arquitec?tos\s+do\s+Ar/i, "assinatura da France Air («Os Arquitectos do Ar»): o dono não a quer"],
 ]
 function limpa(t: unknown, max = 300): string {
   return String(t ?? "").replace(/\s*[—–]\s*/g, ", ").replace(/\s+/g, " ").trim().slice(0, max)
 }
-function proibido(t: string): string | null {
-  for (const [re, porque] of PROIBIDO) if (re.test(t)) return porque
+/* vê o texto limpo e o original: limpa() troca os travessões por vírgulas, e as regras do nome legal e dos prazos
+   («2–4 horas») olham para eles */
+function proibido(...textos: unknown[]): string | null {
+  for (const [re, porque] of PROIBIDO) if (textos.some((t) => re.test(String(t ?? "")))) return porque
   return null
 }
 
@@ -147,13 +166,13 @@ function prepararProposta(input: any, tab: Tabela) {
   const recusadas: string[] = []
   /* uma nota com um dado escondido pelo corte ([telefone], [NIF]…) não vai para o cliente: o modelo só viu o marcador */
   const observacoes = (Array.isArray(input?.observacoes) ? input.observacoes : []).slice(0, 6)
-    .map((o: unknown) => limpa(o, 240)).filter((o: string) => {
-      const porque = o && (proibido(o) || (MARCA_RE.test(o) ? "tem um dado pessoal escondido (não vai para a proposta)" : null))
+    .map((bruto: unknown) => [limpa(bruto, 240), bruto] as const).filter(([o, bruto]: readonly [string, unknown]) => {
+      const porque = o && (proibido(o, bruto) || (MARCA_RE.test(o) ? "tem um dado pessoal escondido (não vai para a proposta)" : null))
       if (porque) recusadas.push(`«${o}»: ${porque}`)
       return o && !porque
-    })
+    }).map(([o]: readonly [string, unknown]) => o)
   const pedido = semMarcas(limpa(input?.pedido, 400))
-  const porque = proibido(pedido)
+  const porque = proibido(pedido, input?.pedido)
   if (porque) recusadas.push(`pedido: ${porque}`)
   const contacto = semMarcas(limpa(input?.cliente?.contacto, 120))
   const { ref, data } = agoraLisboa()
@@ -362,17 +381,57 @@ Regras:
 - «pedido» e «notas» sem nomes, telefones, emails, NIF nem moradas.
 - Escreve em português de Portugal, sem travessões.`
 
-/* dados pessoais que não precisam de sair para a IA (também na conversa): emails, telefones portugueses em qualquer
-   agrupamento («912 345 678», «91 234 56 78», «+351 912345678»), NIF/NIPC (com ou sem a palavra) e códigos postais */
+/* dados pessoais que não precisam de sair para a IA (também na conversa): emails (também com acentos,
+   «joão.silva@gmail.com»), telefones portugueses nos agrupamentos habituais («912 345 678», «91 234 56 78», «91 234 5678»,
+   «91 2345678», «21 893 5050», «+351 21 893 5050»), NIF/NIPC (com ou sem a palavra, também com hífenes) e códigos
+   postais nas formas que o README diz («2700-123»; «CP 2700 123»; «2700 123 Amadora»; «2700 123 amadora» numa morada) */
 export function redige(t: string): string {
   return String(t)
-    .replace(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/g, "[email]")
-    .replace(/\b(?:NIF|NIPC|contribuinte|n\.?º?\s*fiscal)\D{0,6}(?:\d[\s.]?){8}\d\b/gi, "[NIF]")
-    /* só os agrupamentos de telefone (9 seguidos, 3-3-3, 2-3-2-2, 3-2-2-2), para não apanhar pares como «9000 12000» */
-    .replace(/(?<![\d+])(?:(?:\+|00)?351[\s.-]?)?(?:[29]\d{8}|[29]\d{2}[\s.-]\d{3}[\s.-]\d{3}|[29]\d[\s.-]\d{3}[\s.-]\d{2}[\s.-]\d{2}|[29]\d{2}[\s.-]\d{2}[\s.-]\d{2}[\s.-]\d{2})(?!\d)/g, "[telefone]")
-    .replace(/(?<!\d)[1235689]\d{2}[\s.]?\d{3}[\s.]?\d{3}(?!\d)/g, "[número]")
+    .replace(/[\p{L}\p{N}_.+-]+@[\p{L}\p{N}_-]+(?:\.[\p{L}\p{N}_-]+)+/gu, "[email]")
+    .replace(/\b(?:NIF|NIPC|contribuinte|n\.?º?\s*fiscal)\D{0,6}(?:\d[\s.-]?){8}\d\b/gi, "[NIF]")
+    /* telefone com +351/00351: em qualquer agrupamento e seja o que for que venha depois */
+    .replace(/(?<![\d+])(?:\+|00)351[\s.-]?[29](?:[\s.-]?\d){8}(?!\d)/g, "[telefone]")
+    /* sem o +: telemóvel (91, 92, 93, 96) em qualquer agrupamento (os tamanhos em BTU começam por 70, 90, 12, 18 ou 24);
+       fixo (2…) com a primeira parte de 2 ou 3 algarismos, ou os 9 seguidos, para não apanhar pares como «24000 9000»
+       nem «2026-10-09 9:30». A última parte tem sempre dois algarismos ou mais: uma data com a hora («21-10-2026 9:30»)
+       não é telefone. Seguido de € ou de uma unidade (eur, euros, BTU, kW, kWh, m2, m²) também não, mas só se a
+       unidade acabar ali: «91 234 56 78 Eurico» é um telefone */
+    .replace(/(?<![\d+])(?:351[\s.-]?)?(?:9[1236](?:[\s.-]?\d){6}\d|2(?:\d[\s.-]\d(?:[\s.-]?\d){5}\d|\d{2}[\s.-]\d(?:[\s.-]?\d){4}\d|\d{8}))(?!\d|[ \t]*(?:€|(?:eur|euros|btu|kwh?|m2|m²)(?![\p{L}\p{N}])))/giu, "[telefone]")
+    .replace(/(?<!\d)[1235689]\d{2}[\s.-]?\d{3}[\s.-]?\d{3}(?!\d)/g, "[número]")
     .replace(/\b(?:cp|c\.p\.|código postal)\s*:?\s*\d{4}[\s-]?\d{3}(?!\d)/gi, "[código postal]")
-    .replace(/(?<!\d)\d{4}-\d{3}(?!\d|[.,]\d|\s*(?:€|eur))|(?<!\d)\d{4}\s\d{3}(?=[\s,]+[A-ZÀ-Ý])/g, "[código postal]")
+    /* «2700-123» em qualquer sítio, a não ser antes de uma casa decimal ou de € («1000-500 €»), «eur» ou «euros» (só a
+       palavra inteira: «2700-123 Eurico» é cortado) */
+    .replace(/(?<!\d)\d{4}-\d{3}(?!\d|[.,]\d|[ \t]*(?:€|(?:eur|euros)(?![\p{L}\p{N}])))/giu, "[código postal]")
+    /* «1990 426 Lisboa», «2700 123 amadora», «2690 123 S. João da Talha»: com espaço, só quando segue o nome de uma
+       localidade (três letras ou mais, ou uma abreviatura com ponto: «S.», «Sto.»), não uma unidade nem uma palavra de
+       contagem (CONTAGEM: «1000 500 euros», «2000 300 com IVA», «2026 100 visitas»). Com a localidade em minúsculas, só
+       numa morada (emMorada), para não apanhar contas como «em 2019 500 casas» */
+    .replace(CP_COM_ESPACO, (cp, letra, i, s) => (letra !== letra.toLowerCase() || emMorada(s, i) ? "[código postal]" : cp))
+}
+/* palavras que vêm depois de um número e não são uma localidade: unidades, contagens e palavras curtas */
+const CONTAGEM = "eur|euros?|btu|kwh|watts?|metros?|litros?|graus|mil|milhões|anos|horas|minutos|dias|semanas|meses|vezes"
+  + "|unidades?|casas?|clientes?|visitas?|instalaç(?:ão|ões)|obras?|máquinas?|aparelhos?|equipamentos?|pessoas?|divisões|quartos?"
+  + "|apartamentos?|prédios?|com|sem|por|para|mais|cada"
+/* a localidade: três letras ou mais, ou uma ou duas letras com ponto e logo outra palavra («S. João», «S.João») */
+const CP_COM_ESPACO = new RegExp(String.raw`(?<!\d)[1-9]\d{3}\s\d{3}(?=[\s,]+(?!(?:${CONTAGEM})(?![\p{L}\p{N}]))`
+  + String.raw`(\p{L})(?:\p{L}{2}|\p{L}?\.[^\S\n]*\p{L}))`, "giu")
+/* onde está uma morada com a localidade em minúsculas (o README, «Assistente de propostas», diz o mesmo: quem mudar
+   uma lista muda a outra):
+   - no início do texto ou de uma linha, só com espaços antes ou um marcador de lista («-», «*», «•», «·», um traço);
+   - logo a seguir a outro dado já cortado, com só espaços, «,», «;», «:», parênteses, «/» ou traços pelo meio
+     («[telefone], 2700 123 amadora», «([telefone]) 2700 123 amadora», «[email] - 2700 123 amadora»);
+   - com uma palavra de morada antes, na mesma linha e a menos de 100 caracteres: rua, r., avenida, av., travessa,
+     trav., tv., largo, lg., praça, pç., praceta, estrada, calçada, alameda, beco, bairro, urbanização, urb., lote,
+     quinta, rotunda, azinhaga, morada, moro, mora, vivo, resido, residência, código, cp, c.p., local, localidade, zona,
+     ou o andar e a porta: esq., esquerdo, dto., direito, r/c, n.º, e um número ordinal («2.º», «3ºB», «1ª»). As
+     abreviaturas contam com ou sem ponto, menos r. e c.p. Só olha para trás a partir de i, sem percorrer o texto todo */
+const SITIO_DE_MORADA = new RegExp(String.raw`(?<=(?:^|\n)[^\S\n]*(?:[-*\u2022\u00b7\u2010-\u2015][^\S\n]*)?|\][\s,;:()\/\-\u2010-\u2015]*`
+  + String.raw`|(?:(?:^|[^\p{L}\p{N}])(?:rua|r\.|avenida|av\.?|travessa|trav\.?|tv\.?|largo|lg\.?|praça|pç\.?|praceta|estrada|calçada|alameda`
+  + String.raw`|beco|bairro|urbanização|urb\.?|lote|quinta|rotunda|azinhaga|morada|moro|mora|vivo|resido|residência|código|cp|c\.p\.`
+  + String.raw`|local|localidade|zona|esq\.?|esquerdo|dto\.?|direito)(?![\p{L}\p{N}-])|(?:^|[^\p{L}\p{N}])(?:r\/c|n\.?\s?º)|\d\.?\s?[ºª])[^\n]{0,100})`, "iuy")
+function emMorada(s: string, i: number): boolean {
+  SITIO_DE_MORADA.lastIndex = i
+  return SITIO_DE_MORADA.test(s)
 }
 const MARCA_RE = /\[(?:email|NIF|telefone|número|código postal)\]/
 function semMarcas(t: string): string {
@@ -427,20 +486,29 @@ async function ler(texto: string, tab: Tabela, client: Anthropic) {
   const txt = (resposta.content || []).filter((b: any) => b.type === "text").map((b: any) => b.text).join("")
   let campos: any
   try { campos = JSON.parse(txt) } catch { return { erro: "A leitura veio incompleta. Preencha o formulário à mão." } }
-  /* limpeza: nada de travessões nem de regras do dono quebradas nos textos livres */
-  const notas = (campos.notas || []).map((n: unknown) => limpa(n, 240)).filter((n: string) => n && !proibido(n)).slice(0, 3)
+  /* limpeza: nada de travessões nem de regras do dono quebradas nos textos livres. O que fica de fora vai em
+     «recusadas», para a equipa ver porquê (como as notas recusadas da proposta) */
+  const recusadas: string[] = []
+  const notas = (campos.notas || []).map((bruto: unknown) => [limpa(bruto, 240), bruto] as const)
+    .filter(([n, bruto]: readonly [string, unknown]) => {
+      const porque = n && proibido(n, bruto)
+      if (porque) recusadas.push(`«${n}»: ${porque}`)
+      return n && !porque
+    }).map(([n]: readonly [string, unknown]) => n).slice(0, 3)
   const pedido = limpa(campos.pedido, 400)
+  const porquePedido = proibido(pedido, campos.pedido)
+  if (porquePedido) recusadas.push(`pedido: ${porquePedido}`)
   const divisoes = (campos.divisoes || []).slice(0, 12)
   const semArea = divisoes.filter((d: any) => !(d.area > 0)).length
   const duvidas = (campos.duvidas || []).map((n: unknown) => limpa(n, 200)).filter(Boolean).slice(0, 6)
   if (semArea && !duvidas.some((d: string) => /área|m²|m2|metros/i.test(d))) duvidas.unshift(`Falta a área de ${semArea === 1 ? "uma divisão" : semArea + " divisões"}.`)
-  const limpo = { ...campos, divisoes, notas, pedido: proibido(pedido) ? "" : pedido, local: limpa(campos.local, 160), duvidas,
+  const limpo = { ...campos, divisoes, notas, pedido: porquePedido ? "" : pedido, local: limpa(campos.local, 160), duvidas,
     motivo_complexo: limpa(campos.motivo_complexo, 240) }
   const r: any = limpo.servico === "ac" || limpo.servico === "aguasQuentes" ? preco(tab.T, opcoesDe(limpo)) : null
   /* o motivo da IA fica à parte: os motivos calculados mudam quando a equipa corrigir o formulário, o da IA não */
   const complexoIA = limpo.complexo ? [limpo.motivo_complexo || "A IA marcou este pedido como fora do normal."] : []
   const complexo = complexidade(limpo, r, complexoIA)
-  return { campos: limpo, complexo, complexoIA }
+  return { campos: limpo, complexo, complexoIA, recusadas }
 }
 
 /* ── Pedido HTTP ── */

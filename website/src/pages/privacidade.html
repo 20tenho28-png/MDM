@@ -12,7 +12,7 @@
     </div>
     <div class="priv-cab-lado">
       <p class="lead">Que dados recolhemos, para quê, durante quanto tempo, quem os trata por nossa conta e como pode exercer os seus direitos.</p>
-      <p class="registo">Última atualização: <time datetime="2026-10-02">2 de outubro de 2026</time></p>
+      <p class="registo">Última atualização: <time datetime="2026-10-09">9 de outubro de 2026</time></p>
     </div>
   </div>
 </section>
@@ -52,12 +52,12 @@
 
       <h3 class="priv-h3">Pedido de orçamento pelo formulário</h3>
       <dl class="priv-ficha">
-        <div><dt>Dados</dt><dd>O seu nome (ou o da empresa ou condomínio), um email ou um telefone, o serviço que procura e, se quiser, uma mensagem, uma fotografia e a estimativa de potência, se a juntar (o tipo e a área de cada divisão, se tem muito sol ou fica no último andar, e o resultado). Com o pedido seguem a página de onde o enviou, e uma etiqueta com o tipo de serviço (por exemplo, «Montagem AC»). O Netlify regista também a data, o endereço IP e o browser, que usa para filtrar mensagens automáticas (spam).</dd></div>
+        <div><dt>Dados</dt><dd>O seu nome (ou o da empresa ou condomínio), um email ou um telefone, o serviço que procura e, se quiser, uma mensagem, uma fotografia e a estimativa de potência, se a calcular (o tipo e a área de cada divisão, se tem muito sol ou fica no último andar, e o resultado). Se o site lhe mostrar um preço provável, segue também o resumo desse preço, com as respostas que deu sobre a casa. Com o pedido seguem a página de onde o enviou, e uma etiqueta com o tipo de serviço (por exemplo, «Montagem AC»). O Netlify regista também a data, o endereço IP e o browser, que usa para filtrar mensagens automáticas (spam).</dd></div>
         <div><dt>Para quê</dt><dd>Responder ao pedido, preparar o orçamento e, se o aceitar, marcar e fazer o trabalho.</dd></div>
         <div><dt>Fundamento</dt><dd>Diligências pré-contratuais a seu pedido (alínea b).</dd></div>
         <div><dt>Conservação</dt><dd>Enquanto for preciso para responder e acompanhar o pedido. Se não der origem a um trabalho, no máximo 3 anos depois do último contacto.</dd></div>
       </dl>
-      <p>Ao carregar em «Enviar pedido», o pedido fica guardado no serviço de formulários do Netlify, a empresa que aloja o site, e é-nos enviado por email. Enquanto escreve, o site não guarda nem envia nada. A estimativa de potência é calculada no seu browser e só segue com o pedido se carregar em «Juntar ao pedido». A fotografia é opcional e serve só para preparar o orçamento ou a visita: evite fotografias em que apareçam pessoas ou documentos.</p>
+      <p>Ao carregar em «Enviar pedido», o pedido fica guardado no serviço de formulários do Netlify, a empresa que aloja o site, e é-nos enviado por email. Enquanto escreve, o site não guarda nem envia o que escreve. A estimativa de potência e o preço provável são calculados no seu browser. Se calcular a estimativa, ela segue com o pedido quando o enviar, a não ser que a tire com «Retirar». O preço provável que estiver à vista também segue com o pedido. A fotografia é opcional e serve só para preparar o orçamento ou a visita: evite fotografias em que apareçam pessoas ou documentos.</p>
       <p>Se carregar em «Enviar por WhatsApp», o site não envia nada: abre o WhatsApp com o pedido já escrito, e o pedido só nos chega quando o enviar por lá.</p>
 
       <h3 class="priv-h3">Contacto por telefone, WhatsApp ou email</h3>
@@ -99,7 +99,7 @@
       <ul>
         <li><strong>Sem cookies.</strong> O identificador da visita vive só na memória do browser e desaparece quando muda de página ou fecha o separador. Não conseguimos ligar duas visitas suas.</li>
         <li><strong>Sem perfis de pessoas.</strong> Nunca associamos as estatísticas a um nome, email ou telefone.</li>
-        <li><strong>O que se regista:</strong> as páginas vistas e o site de onde chegou; os toques nos contactos (telefone, WhatsApp, email, orçamento); o uso do menu, do carrossel, do visor de fotografias, dos filtros de obras e das perguntas frequentes; o início e o envio do formulário, com o serviço escolhido; quando junta a estimativa de potência ao pedido, só o número de divisões e o total em BTU/h; onde se clica em cada página (mapa de cliques); e o tipo de equipamento e de browser. Se aceitar, conta também o que fez nessa página antes de escolher.</li>
+        <li><strong>O que se regista:</strong> as páginas vistas e o site de onde chegou; os toques nos contactos (telefone, WhatsApp, email, orçamento); o uso do menu, do carrossel, do visor de fotografias, dos filtros de obras e das perguntas frequentes; o início e o envio do formulário, com o serviço escolhido; quando a estimativa de potência se junta ao pedido (com «Juntar ao pedido» ou sozinha, ao enviar), só o número de divisões e o total em BTU/h; quando aparece um preço provável, o serviço, o número de divisões e as gamas mostradas (económica ou superior), sem os preços; onde se clica em cada página (mapa de cliques); e o tipo de equipamento e de browser. Se aceitar, conta também o que fez nessa página antes de escolher.</li>
         <li><strong>O que nunca se regista:</strong> o que escreve no formulário (nome, email, telefone, mensagem) nem a fotografia.</li>
       </ul>
       <p>Como em qualquer ligação à internet, o PostHog recebe o endereço IP do seu equipamento.{{#se dados.posthogIP}} {{ dados.posthogIP }}{{/se}}{{#sem dados.posthogIP}} O PostHog pode guardar esse endereço e usá-lo para estimar a localização aproximada (país e cidade).{{/sem}}</p>
@@ -112,7 +112,7 @@
           <button class="btn btn-contorno" type="button" data-est="sim" aria-pressed="false">Aceitar</button>
           <button class="btn btn-contorno" type="button" data-est="nao" aria-pressed="false">Recusar</button>
         </div>
-        <p class="priv-nota">Se recusar depois de ter aceitado, o PostHog deixa de enviar dados logo nesta página. Se limpar os dados deste site no browser, a escolha perde-se e a pergunta volta a aparecer.</p>
+        <p class="priv-nota">Se recusar depois de ter aceitado, o PostHog deixa de enviar dados logo nesta página e nos outros separadores do site que tiver abertos. Se limpar os dados deste site no browser, a escolha perde-se e a pergunta volta a aparecer.</p>
       </div>
 
       <h2 id="equipamento">O que fica no seu equipamento</h2>

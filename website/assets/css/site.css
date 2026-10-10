@@ -887,6 +887,9 @@ html:not(.js) #sendWhats { display: none; }
 .barra-orc { background: var(--carmim); }
 @media (max-width: 699px) { html { scroll-padding-bottom: calc(58px + 16px + env(safe-area-inset-bottom)); } }
 @media (min-width: 700px) { .barra-movel { display: none; } }
+/* sem JavaScript (ou com site.js a falhar) a barra não sai do caminho: o fundo do rodapé guarda-lhe o lugar
+   (58 px e o filete), para as ligações legais não ficarem por baixo dela. site.js põe .barra-pronta quando a barra sai sozinha */
+@media (max-width: 699px) { html:not(.barra-pronta) .rodape { padding-bottom: calc(24px + 59px + env(safe-area-inset-bottom)); } }
 
 /* ── Barra das estatísticas: pequena, em baixo, por cima da barra móvel; some depois da escolha ──
    Os dois botões têm o mesmo peso. site.js mede a altura (--consent-h) para o foco nunca ficar por baixo dela

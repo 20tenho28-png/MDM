@@ -114,6 +114,7 @@ fila.push(usa('calcular_preco', { servico: 'ac', divisoes: [{ tipo: 'Quarto', ar
 r = await chama([{ role: 'user', content: 'x' }], { e: env({ MDM_PRECOS: '' }) });
 const real = JSON.parse(r.corpo.novas[1].content[0].content);
 ok(real.modo === 'sem_tabela' && !real.valores_de_teste && r.corpo.teste === false, 'tabela real vazia: sem preço', real);
+ok(/^Quarto 12 m²: 7 000 BTU\/h · Total 7 000 BTU\/h/.test(real.potencia || '') && !/€/.test(JSON.stringify(real)), 'tabela real vazia: a potência vai na mesma, sem preço', real);
 ok(!/TESTE/.test(pedidos.at(-1).body.system[0].text) && /ainda vazia/.test(pedidos.at(-1).body.system[0].text), 'sistema sem aviso de teste e com a tabela vazia');
 
 // 6. recusa do modelo
@@ -240,11 +241,42 @@ ok(r.corpo.propostas[0].cliente.contacto === '', 'contacto «[telefone]» não v
 
 // 15. corte: formatos portugueses cortados, medidas e BTU intactos
 const cortar = ['+351912345678', '00351912345678', '351912345678', '91 234 56 78', '912.345.678', '218 935 050', '21 893 50 50', 'NIF 123 456 789', '123 456 789',
-  'contribuinte: 501234567', '1990-426, Lisboa', '1990 426, Lisboa', 'cp 1990 426', 'CP: 1990-426', 'Rua X, 2700-123.', 'a@b.pt'];
+  'contribuinte: 501234567', '1990-426, Lisboa', '1990 426, Lisboa', 'cp 1990 426', 'CP: 1990-426', 'Rua X, 2700-123.', 'a@b.pt',
+  // outros agrupamentos e formatos que passavam
+  '91 234 5678', '21 893 5050', '+351 21 893 5050', '91 2345678', 'NIF 123-456-789', '2700 123 amadora', 'joão.silva@gmail.com',
+  '912 34 56 78', '91-234-56-78', '+351 2189 35050', '00351 91 234 5678', 'tel. 21 8935050', '123-456-789', '1990 426 Lisboa',
+  'Rua das Flores 12 2700 123 amadora', 'Morada: 2700 123 amadora',
+  // a localidade em minúsculas numa morada: com o andar ou a porta antes, a meio da frase, numa linha só sua, depois de outro dado
+  'Rua X 12 2º esq 2700 123 amadora', 'Rua X 12 r/c 2700 123 amadora', 'Rua X 12 1ºdto 2700 123 amadora', 'Av X 3 3ºB 2700 123 amadora',
+  'Rua X 12 - 2700 123 amadora', 'moro em 2700 123 amadora', 'nº 5 2700 123 amadora', 'Rua X 12\n2700 123 amadora', 'Marta, 912 345 678, 2700 123 amadora',
+  // telefone seguido de uma palavra que só começa como uma unidade («Eurico»), e com +351 antes de € ou de uma unidade
+  'Ligue para 91 234 56 78 Eurico', 'Contacto: 21 893 50 50 Eurídice', '00351912345678 Eurico', '+351 21 893 5050 Eurico', '93 123 4567 eurico',
+  '91 2345678 Eurico', 'Tel 21 893 5050 Euro Clima', '+351 912 345 678 Eurico Silva', '+351 912 345 678 €', '00351912345678 eur', '+351 289 123 456 BTU',
+  // a localidade abreviada, com maiúscula ou numa morada; depois de outro dado entre parênteses ou traços; com um marcador de lista
+  'Morada: Rua Y 5, 2690 123 S. João da Talha', 'Rua X 12, 2775 123 S. Domingos de Rana', '2765 123 S. João do Estoril', '2765 123 S.João do Estoril',
+  'Rua X 1, 2690 123 s. joão da talha', 'Marta (912 345 678) 2700 123 amadora', 'Marta - 912 345 678 - 2700 123 amadora', 'joao@x.pt / 2700 123 amadora',
+  'Dados:\n- 2700 123 amadora', '• 2700 123 amadora', 'Vivo em 2700 123 amadora', 'Urb. X lote 3 2700 123 amadora', 'Tv. do Sol 3, 1200 123 lisboa',
+  '2700-123 Eurico Silva'];
 const manter = ['Sala de 25 m2 e quarto de 12,5 m2', 'Máquinas de 9000 12000 e 18000 BTU', 'BTU 7000 9000 12000', 'Visita 2026-10-09 14:30', 'Desde 1991, prédio de 1990',
-  'entre 1000-500 €', 'orçamento 1000-1500 euros', 'Sala 3x4 metros, 2.º andar, 9 m de tubo', 'Preço 1 050 € a 1 400 €', '24000 BTU/h e 18000 BTU/h'];
+  'entre 1000-500 €', 'orçamento 1000-1500 euros', 'Sala 3x4 metros, 2.º andar, 9 m de tubo', 'Preço 1 050 € a 1 400 €', '24000 BTU/h e 18000 BTU/h',
+  // pares de números que um corte mais largo apanharia
+  'Máquinas de 24000 9000 e 7000 BTU', 'Visita 2026-10-09 9:30', 'Duas de 9 000 12 000 BTU', 'orçamento 2500-12000 €', 'entre 1000 500 euros',
+  '12000 9000 7000', '9 000 12 000 18 000', 'entre 2000 300 com IVA', 'Total mais de 36 000 BTU/h (10,6 kW)', '22 000 BTU',
+  // datas com a hora (dia 20 a 29) e contas no meio de uma frase
+  'Visita 21-10-2026 9:30', 'Visita 21.10.2026 9h', 'dia 22-10-2026 9:00', '23 10 2026 9h', 'em 2019 500 casas', 'há 2000 123 clientes', 'faturou 1000 200 mil',
+  // contas fora de uma morada, também depois de dois pontos, de um parêntese ou no início do texto
+  'Ano: 2024 300 instalações', '(2019 500 casas)', 'Sala 25 m², 1000 500 watts', '2026 100 visitas', 'Total: 2024 300 unidades', '2019 500 casas feitas',
+  'Contas:\n1000 200 mil',
+  // milhares com espaço antes de uma unidade (o telefone sem +351 não se corta antes de €, eur, euros, BTU, kW, kWh, m2, m²)
+  'Máquinas de 24 000 9 000 BTU', 'Duas de 24 000 9 000 BTU/h', 'Total 21 000 9 000 kW', 'Total 24 000 9 000 euros',
+  // uma abreviatura em minúsculas fora de uma morada não é localidade
+  'Foram 2019 500 m. de tubo'];
 ok(cortar.every((x) => !/\d{3}|@/.test(redige(x))), 'corte: todos os formatos de dados pessoais', cortar.map(redige));
 ok(manter.every((x) => redige(x) === x), 'corte: medidas, BTU, datas e preços ficam', manter.filter((x) => redige(x) !== x).map(redige));
+ok(redige('Ligue para 91 234 56 78 Eurico') === 'Ligue para [telefone] Eurico' && redige('+351 912 345 678 Eurico Silva') === '[telefone] Eurico Silva'
+  && redige('Morada: Rua Y 5, 2690 123 S. João da Talha') === 'Morada: Rua Y 5, [código postal] S. João da Talha',
+  'corte: telefone antes de «Eurico» e código postal antes de «S. João» saem inteiros', ['Ligue para 91 234 56 78 Eurico', '+351 912 345 678 Eurico Silva'].map(redige));
+ok(redige('joão.silva@gmail.com') === '[email]' && redige('Email: joão.silva@gmail.com.') === 'Email: [email].', 'corte: email com acentos sai inteiro', redige('joão.silva@gmail.com'));
 
 // 16. marcadores nunca chegam à proposta (local, pedido, notas, contacto)
 fila.push(usa('preparar_proposta', { servico: 'ac', divisoes: [{ tipo: 'Sala', area: 20, sol: false, ultimo_andar: false }], respostas: VAZIAS,
@@ -259,6 +291,42 @@ ok(pm16.cliente.contacto === '' && pm16.cliente.local === 'Rua das Flores 12, Li
 fila.push({ content: [{ type: 'text', text: JSON.stringify({ servico: 'ac', divisoes: quartos(5), respostas: VAZIAS, local: '', pedido: '', notas: [], duvidas: [], complexo: true, motivo_complexo: 'Prédio antigo com fachada protegida.' }) }], stop_reason: 'end_turn' });
 t = await acao({ acao: 'ler', texto: 'cinco quartos' });
 ok(t.corpo.complexoIA.length === 1 && t.corpo.complexoIA[0] === 'Prédio antigo com fachada protegida.' && t.corpo.complexo.some((m) => /5 divisões/.test(m)), 'motivo da IA à parte', t.corpo);
+
+// 18. formulário com a tabela real vazia: a potência de cada divisão e o total, os motivos, e nenhum preço nem proposta
+t = await acao({ acao: 'calcular', dados: { ...sala, divisoes: [{ tipo: 'Sala', area: 25, sol: false, ultimo_andar: false }, { tipo: 'Sala', area: 90, sol: false, ultimo_andar: false }] } },
+  { e: env({ MDM_PRECOS: '' }), cli: null });
+ok(t.corpo.modo === 'sem_tabela' && /^Sala 25 m²: 12 000 BTU\/h · Sala 90 m²: mais de 24 000 BTU\/h, a dimensionar na visita · Total mais de 36 000 BTU\/h/.test(t.corpo.resultado.potencia || ''),
+  'tabela vazia: potência de cada divisão e o total', t.corpo.resultado);
+ok(t.corpo.complexo.some((m) => /Ainda não há preços/.test(m)) && t.corpo.complexo.some((m) => /maior aparelho/.test(m)), 'tabela vazia: sem preços e acima do maior aparelho', t.corpo.complexo);
+ok(!t.corpo.proposta && !/€/.test(JSON.stringify(t.corpo)), 'tabela vazia: nenhum preço inventado, nenhuma proposta', t.corpo);
+
+// 19. marcas e assinaturas fora das propostas (data/regras-marcas.json e as regras do build.py), sem distinguir maiúsculas
+t = await acao({ acao: 'calcular', dados: { ...sala, pedido: 'Ar condicionado Carrier na sala', observacoes: ['Máquina Carrier antiga.', 'Prefere hisense.',
+  'Grelhas France Air, os Arquitectos do Ar.', 'Fatura a M.D.M. — Manuel Domingos Melancia.', 'Mitsubishi Heavy na varanda.', 'Máquina Mitsubishi Electric na sala.'] } });
+const rec = t.corpo.notasRecusadas || [];
+ok(t.corpo.proposta?.observacoes.join('|') === 'Máquina Mitsubishi Electric na sala.', 'só a nota com uma marca permitida entra', t.corpo.proposta?.observacoes);
+ok(['Carrier antiga', 'hisense', 'Arquitectos do Ar', 'M.D.M.', 'Mitsubishi Heavy'].every((m) => rec.some((x) => x.includes(m) && /marca|assinatura|nome legal/.test(x))),
+  'Carrier, hisense, «os Arquitectos do Ar», o nome legal com travessão e Mitsubishi Heavy recusados', rec);
+ok(t.corpo.proposta?.pedido === '' && rec.some((x) => /^pedido: marca/.test(x)), 'pedido com uma marca proibida fica de fora', { p: t.corpo.proposta?.pedido, rec });
+fila.push({ content: [{ type: 'text', text: JSON.stringify({ servico: 'ac', divisoes: [], respostas: VAZIAS, local: '', pedido: 'Trocar a máquina HISENSE da sala',
+  notas: ['Máquina Carrier antiga.', 'Grelhas com os Arquitectos do Ar.', 'Prédio com elevador.'], duvidas: [], complexo: false, motivo_complexo: '' }) }], stop_reason: 'end_turn' });
+t = await acao({ acao: 'ler', texto: 'sala' });
+ok(t.corpo.campos.notas.join('|') === 'Prédio com elevador.' && t.corpo.campos.pedido === '', 'leitura: notas e pedido com marcas ou a assinatura ficam de fora', t.corpo.campos);
+const recL = t.corpo.recusadas || [];
+ok(recL.length === 3 && /^«Máquina Carrier antiga\.»: marca/.test(recL[0]) && /^«Grelhas com os Arquitectos do Ar\.»: assinatura/.test(recL[1]) && /^pedido: marca/.test(recL[2]),
+  'leitura: o que fica de fora vem com o motivo', recL);
+
+// 20. as palavras de uma marca proibida juntas por um traço qualquer, por outro espaço ou por nada também ficam de fora (a
+//     mesma junção do build.py); as permitidas e as palavras parecidas entram
+const entraNota = async (n) => ((await acao({ acao: 'calcular', dados: { ...sala, observacoes: [n] } })).corpo.proposta?.observacoes || []).length === 1;
+const marcasJuntas = ['Saunier-Duval antiga', 'SaunierDuval', 'Soler&Palau', 'Olimpia-Splendid', 'Mitsubishi-Heavy', 'mitsubishiheavy', 'SOLER-&-PALAU',
+  'Saunier\u2010Duval', 'Saunier\u2011Duval', 'Saunier\u2012Duval', 'Saunier\u2013Duval', 'Saunier \u2014 Duval', 'Saunier\u2015Duval', 'Saunier\u2212Duval', 'Saunier\ufe58Duval',
+  'Saunier\ufe63Duval', 'Saunier\uff0dDuval', 'Saunier\u00a0Duval', 'Saunier\nDuval'];
+const entraram = []; for (const n of marcasJuntas) if (await entraNota(n)) entraram.push(n);
+ok(!entraram.length, 'marcas com traços, outros espaços ou sem espaço entre as palavras: recusadas', entraram);
+const permitidas = ['Máquina Mitsubishi Electric na sala.', 'Mitsubishi-Electric', 'Daikin e Midea', 'France Air', 'Sharpe', 'Algarve', 'Green', 'algés'];
+const recusadas = []; for (const n of permitidas) if (!(await entraNota(n))) recusadas.push(n);
+ok(!recusadas.length, 'marcas permitidas e palavras parecidas entram', recusadas);
 
 srv.close();
 fs.rmSync(tmp, { recursive: true, force: true });

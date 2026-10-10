@@ -1,9 +1,12 @@
 /* Encaminhamento dos pedidos do formulário do site (README.md, «Encaminhamento dos pedidos»): instalação e manutenção
    vão para o formulário Netlify «orcamento-comercial» (o email do comercial) e só por email; avarias, «outro» e sem
    serviço ficam em «orcamento», com o WhatsApp. Também os caminhos que contornavam isto (estimativa junta sozinha no
-   WhatsApp, obras de avaria, serviço reposto ao voltar atrás), a página inicial aberta em «/» e uma divisão acima de
-   200 m². Gera o site numa pasta temporária (MDM_OUT) e serve-o num servidor local que guarda cada envio, como o Netlify
-   Forms o receberia, e que pode falhar de propósito. Precisa do Playwright, fora das dependências. Uso, a partir de website/:
+   WhatsApp, obras de avaria, serviço reposto ao voltar atrás), a página inicial aberta em «/», uma divisão acima de
+   200 m², a estimativa tirada com «Retirar» (não volta sozinha ao enviar) e o telefone com +351. Gera o site numa pasta temporária (MDM_OUT) e serve-o num servidor local que guarda cada envio, como o Netlify
+   Forms o receberia, e que pode falhar de propósito. No fim, as estatísticas: depois de «Recusar», nada chega ao PostHog,
+   nem o reenvio de um envio que tinha falhado, e «Aceitar» outra vez não envia o clique em «Recusar» como clique sem
+   efeito (só com o posthog-js instalado; sem ele, esse caso é saltado).
+   Precisa do Playwright, fora das dependências. Uso, a partir de website/:
      NODE_PATH=/caminho/para/node_modules node tests/encaminhamento.mjs */
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
@@ -11,6 +14,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 
 const W = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -62,9 +66,9 @@ async function nova(url = '/') {
   return page;
 }
 const whatsEscondido = (page) => page.$eval('#sendWhats', (b) => b.hidden);
-async function envia(page, servico) {
+async function envia(page, servico, tel = '912 345 678') {
   if (servico !== null) await page.selectOption('#qServico', servico);
-  await page.fill('#qNome', 'Cliente de teste'); await page.fill('#qTel', '912 345 678');
+  await page.fill('#qNome', 'Cliente de teste'); await page.fill('#qTel', tel);
   const antes = envios.length;
   await page.click('#sendEmail');
   await page.waitForFunction(() => !document.querySelector('[data-form-feito]').hidden || /enviar/i.test(document.getElementById('quoteAlert').textContent));
@@ -249,6 +253,123 @@ await page.goto(B + '/servicos/ar-condicionado.html#potencia');
 const mm = { erros: errosM, aberta: await page.$eval('#potencia', (d) => d.open), servico: await page.inputValue('#qServico'), whats: await whatsEscondido(page) };
 ok(!mm.erros.length && mm.aberta && mm.servico === 'Ar condicionado: montagem / instalação' && mm.whats, 'M: #potencia com outro serviço reposto: abre sem erro', mm);
 await ctxM.close();
+
+// N. «Retirar» fica: juntar, retirar e voltar a «sem serviço»; ao enviar (WhatsApp ou email), a estimativa não volta sozinha
+//    nem escolhe a instalação de ar condicionado. Volta só num pedido novo, depois de o formulário se limpar
+page = await nova('/');
+await page.evaluate(() => { window.__wa = null; window.open = (u) => { window.__wa = u; return null; }; });
+await page.click('#potencia summary');
+await page.locator('[data-pot-divs] [data-pot-linha]').first().locator('[data-pot="area"]').fill('20');
+await page.click('[data-pot-juntar]');
+await page.click('[data-pot-retirar]');
+await page.selectOption('#qServico', '');
+await page.fill('#qNome', 'Cliente de teste');
+await page.click('#sendWhats');
+const nw = await page.evaluate(() => ({ wa: window.__wa ? decodeURIComponent(window.__wa) : null, servico: document.getElementById('qServico').value }));
+ok(nw.wa && !/BTU/.test(nw.wa) && nw.servico === '', 'N: depois de «Retirar», o WhatsApp abre sem a estimativa e sem mudar o serviço', nw);
+const en = await envia(page, null);
+ok(en && en['form-name'] === 'orcamento' && en.servico === '' && en.potencia === '' && en.triagem === '[P5 · Por classificar]',
+  'N: depois de «Retirar», o envio não junta a estimativa', en && [en['form-name'], en.servico, en.potencia, en.triagem]);
+await page.click('[data-feito-novo]');
+await page.locator('[data-pot-divs] [data-pot-linha]').first().locator('[data-pot="area"]').fill('20');
+const en2 = await envia(page, null);
+ok(en2 && en2['form-name'] === 'orcamento-comercial' && /Total 9 000 BTU\/h/.test(en2.potencia), 'N: num pedido novo, a estimativa volta a juntar-se sozinha', en2 && [en2['form-name'], en2.potencia]);
+await page.context().close();
+
+// O. telefone: escrito com +351 ou 00351, contam os 9 algarismos depois do indicativo; os outros números ficam com a regra
+//    simples (pelo menos 9 algarismos). A mensagem de erro é a mesma
+for (const [tel, valido] of [['+351 123456', false], ['00351 1234', false], ['+351 912 345 678', true], ['00351912345678', true], ['+44 20 7946 0958', true]]) {
+  page = await nova('/');
+  const eo = await envia(page, 'Ar condicionado: avaria / reparação', tel);
+  const erro = await page.$eval('#eTel', (e) => e.textContent);
+  if (valido) ok(eo && eo.telefone === tel && !erro, `O: «${tel}» segue`, { eo: eo && eo.telefone, erro });
+  else ok(!eo && erro === 'Verifique o telefone: precisa de pelo menos 9 algarismos.', `O: «${tel}» não segue e pede para verificar o telefone`, { eo: eo && eo.telefone, erro });
+  await page.context().close();
+}
+
+// P. estatísticas (README.md, «Estatísticas e consentimento»): com «sim» guardado, o primeiro envio ao PostHog falha
+//    (503) e o visitante recusa na política logo a seguir. O PostHog guarda esse envio para o repetir uns segundos depois,
+//    por um caminho que não passa pela recusa; nada pode chegar a um endereço do PostHog depois de «Recusar», o browser
+//    fica só com 'mdm-estatisticas' e «Aceitar» outra vez na mesma página volta a enviar. Usa o posthog-js instalado
+//    (npm install posthog-js, ao lado do Playwright), servido no lugar do CDN; sem ele, este caso é saltado
+let phDist = null;
+try { phDist = path.dirname(require.resolve('posthog-js/dist/array.js')); } catch (e) {}
+if (!phDist) console.log('saltado P: sem o posthog-js em node_modules (npm install posthog-js, ao lado do Playwright)');
+else {
+  /* o PostHog não envia nada se o browser disser que é automático (navigator.webdriver ou «HeadlessChrome») */
+  const browserP = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+    args: ['--disable-blink-features=AutomationControlled'] });
+  const ctxP = await browserP.newContext({ viewport: { width: 1440, height: 900 },
+    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36' });
+  const pedidosP = []; let falhou = false;
+  const eventosP = (q) => {
+    const b = q.postDataBuffer(); if (!b) return '';
+    let s; try { s = zlib.gunzipSync(b).toString(); } catch (e) { s = b.toString(); }
+    if (/^data=/.test(s)) { try { s = Buffer.from(decodeURIComponent(s.slice(5)), 'base64').toString(); } catch (e) {} }
+    let j; try { j = JSON.parse(s); } catch (e) { return [...s.matchAll(/"event":"([^"]+)"/g)].map((m) => m[1]).join(','); }
+    const evs = Array.isArray(j) ? j : j && Array.isArray(j.batch) ? j.batch : [j];
+    /* o clique sem efeito com o texto do elemento; no mapa de cliques, cada ponto (tipo@x,y, na página) */
+    return evs.map((e) => {
+      const p = (e && e.properties) || {};
+      if (e.event === '$dead_click') return `$dead_click(${p.$el_text || ''})`;
+      if (e.event === '$$heatmap') return '$$heatmap ' + Object.values(p.$heatmap_data || {}).flat().map((h) => `${h.type}@${Math.round(h.x)},${Math.round(h.y)}`).join(' ');
+      return e.event;
+    }).join(',');
+  };
+  await ctxP.route(/posthog\.com/, (r) => {
+    const q = r.request(), u = new URL(q.url());
+    pedidosP.push({ t: Date.now(), txt: `${q.method()} ${u.host}${u.pathname}${u.search} [${eventosP(q)}]` });
+    const js = /^\/static\/(?:[\d.]+\/)?([\w.-]+\.js)$/.exec(u.pathname);
+    if (js && fs.existsSync(path.join(phDist, js[1]))) return r.fulfill({ contentType: 'text/javascript', body: fs.readFileSync(path.join(phDist, js[1])) });
+    if (/^\/e\/?$/.test(u.pathname) && !falhou) { falhou = true; return r.fulfill({ status: 503, body: '' }); }
+    return r.fulfill({ contentType: 'application/json', body: '{"status":1}' });
+  });
+  page = await ctxP.newPage();
+  page.on('pageerror', (e) => { falhas++; console.log('erro JS', e.message); });
+  await page.goto(B + '/privacidade.html');
+  await page.evaluate(() => localStorage.setItem('mdm-estatisticas', 'sim'));
+  await page.reload();
+  await page.waitForFunction(() => window.posthog && window.posthog.__loaded, null, { timeout: 10000 }).catch(() => {});
+  for (let i = 0; i < 50 && !falhou; i++) await page.waitForTimeout(100);
+  await page.waitForTimeout(600);
+  const antesP = pedidosP.map((p) => p.txt);
+  ok(falhou, 'P: com «sim», o PostHog carrega e o primeiro envio falha (503)', antesP);
+  /* cliques num parágrafo sem ligações: o mapa de cliques guarda-os para os enviar de 5 em 5 s */
+  const clica = async () => { for (let i = 0; i < 3; i++) await page.click('.priv-nota', { position: { x: 20 + i * 60, y: 6 } }); };
+  await clica();
+  const tRecusa = Date.now();
+  await page.click('[data-est="nao"]');
+  await page.evaluate(() => window.mdmTrack('depois_de_recusar'));
+  await clica();
+  await page.waitForTimeout(9000);
+  const depoisP = pedidosP.filter((p) => p.t >= tRecusa).map((p) => p.txt);
+  ok(falhou && !depoisP.length, 'P: depois de «Recusar», nenhum pedido ao PostHog em 9 s (nem o reenvio do que falhou)', { antesP, depoisP });
+  const guardadoP = await page.evaluate(() => ({ local: Object.keys(localStorage), sessao: Object.keys(sessionStorage), cookies: document.cookie }));
+  ok(guardadoP.local.join() === 'mdm-estatisticas' && !guardadoP.sessao.length && !guardadoP.cookies,
+    'P: no browser fica só a escolha (sem cookies nem outras entradas)', guardadoP);
+  const tAceita = Date.now();
+  await page.click('[data-est="sim"]');
+  await page.evaluate(() => window.mdmTrack('aceite_outra_vez'));
+  for (let i = 0; i < 50 && !pedidosP.some((p) => p.t >= tAceita && /aceite_outra_vez/.test(p.txt)); i++) await page.waitForTimeout(100);
+  ok(pedidosP.some((p) => p.t >= tAceita && /aceite_outra_vez/.test(p.txt)), 'P: «Aceitar» outra vez na mesma página volta a enviar',
+    pedidosP.filter((p) => p.t >= tAceita).map((p) => p.txt));
+  /* o PostHog regista o clique em «Recusar» antes de o botão reagir. Não o pode contar como clique sem efeito
+     ($dead_click, ou deadclick no mapa de cliques) e enviá-lo depois de «Aceitar»: nem o da recusa de cima nem o de
+     «Recusar» e «Aceitar» 200 ms depois. Os cliques no parágrafo depois de aceitar mostram que o mapa de cliques voltou
+     (esses podem seguir como cliques sem efeito: o parágrafo não reage) */
+  const tVaivem = Date.now();
+  await page.click('[data-est="nao"]'); await page.waitForTimeout(200); await page.click('[data-est="sim"]');
+  await clica();
+  const mapaDepois = () => pedidosP.some((p) => p.t >= tVaivem && /\$\$heatmap .*\bclick@/.test(p.txt));
+  for (let i = 0; i < 80 && !(mapaDepois() && Date.now() - tVaivem > 4500); i++) await page.waitForTimeout(100);
+  const caixa = await page.$eval('[data-est="nao"]', (b) => { const r = b.getBoundingClientRect(); return { x0: r.left + scrollX - 30, x1: r.right + scrollX + 30, y0: r.top + scrollY - 30, y1: r.bottom + scrollY + 30 }; });
+  const noRecusar = (t) => /\$dead_click\(Recusar\)/.test(t) ||
+    [...t.matchAll(/deadclick@(-?\d+),(-?\d+)/g)].some(([, x, y]) => +x >= caixa.x0 && +x <= caixa.x1 && +y >= caixa.y0 && +y <= caixa.y1);
+  const depoisAceitar = pedidosP.filter((p) => p.t >= tAceita).map((p) => p.txt);
+  ok(mapaDepois() && !depoisAceitar.some(noRecusar),
+    'P: depois de «Aceitar» outra vez, o mapa de cliques volta e o clique em «Recusar» não segue como clique sem efeito', { caixa, depoisAceitar });
+  await browserP.close();
+}
 
 await browser.close(); servidor.close();
 fs.rmSync(tmp, { recursive: true, force: true });

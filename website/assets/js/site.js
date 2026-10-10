@@ -13,13 +13,17 @@
      (partials/consentimento.html); a política de privacidade tem o controlo para mudar de ideias.
      Com o sinal «não seguir» do browser (Global Privacy Control ou Do Not Track) a barra não aparece e nada se mede,
      a não ser que o visitante aceite na política. No ficheiro único (file:) não há estatísticas nem barra.
-     Antes da escolha, os eventos ficam só na memória desta página: seguem se aceitar aqui, perdem-se se não. */
+     Antes da escolha, os eventos ficam só na memória desta página: seguem se aceitar aqui, perdem-se se não.
+     A escolha lê-se outra vez quando muda noutro separador ('storage') e quando a página volta da memória do browser
+     («Voltar», 'pageshow'): uma recusa feita noutro separador também para o envio nesta página. */
   var CHAVE_EST = 'mdm-estatisticas';
   var SEM_REDE = location.protocol === 'file:';
   var NAO_SEGUIR = navigator.globalPrivacyControl === true || navigator.doNotTrack === '1' || window.doNotTrack === '1';
-  var escolha = (function () {
-    try { var v = localStorage.getItem(CHAVE_EST); return v === 'sim' || v === 'nao' ? v : ''; } catch (e) { return ''; }
-  })();
+  /* 'sim', 'nao' ou '' (sem escolha); null se o browser não deixar ler o localStorage */
+  function leEscolha() {
+    try { var v = localStorage.getItem(CHAVE_EST); return v === 'sim' || v === 'nao' ? v : ''; } catch (e) { return null; }
+  }
+  var escolha = leEscolha() || '';
   var _trackQueue = [];
   var phPronto = false, phCapture = null;
   function track(event, props) {
@@ -31,8 +35,9 @@
     } catch (e) {}
   }
   window.mdmTrack = track;
+  /* só com «sim» de agora: o 'load' adiado (mais abaixo) pode chegar depois de uma recusa */
   function carregaPostHog() {
-    if (SEM_REDE || carregaPostHog.feito) return;
+    if (SEM_REDE || escolha !== 'sim' || carregaPostHog.feito) return;
     carregaPostHog.feito = true;
     var el = document.createElement('script');
     el.src = 'https://eu-assets.i.posthog.com/static/array.js';
@@ -44,6 +49,12 @@
         window.posthog.init('phc_veB6kR2as8m8HuRMEVuTUWubWQxLkPW5D8Uf6wsJcy8A', {
           api_host: 'https://eu.i.posthog.com', persistence: 'memory', person_profiles: 'identified_only',
           autocapture: false, enable_heatmaps: true, capture_dead_clicks: true,
+          /* cada evento sai logo, sem a fila de 3 s, que podia sair depois de «Recusar». Um envio que falhe fica na fila
+             de reenvio do PostHog, que a recusa também para (paraPostHog) */
+          request_batching: false,
+          /* sem feature flags, conversas nem tours, que o site não usa. Sem flags, o PostHog também não lê a configuração
+             da conta, que podia chegar já depois de «Recusar» e pedir mais (as flags, por exemplo): mede só o que está aqui */
+          advanced_disable_flags: true, disable_conversations: true, disable_product_tours: true,
           /* só o que a política de privacidade descreve, mesmo que se ligue mais alguma coisa na conta PostHog */
           disable_session_recording: true, disable_surveys: true, capture_exceptions: false, capture_performance: false
         });
@@ -53,24 +64,66 @@
     };
     document.head.appendChild(el);
   }
-  /* «Recusar» depois de aceitar: o PostHog já carregado deixa de enviar a partir de agora
-     (sem opt_out_capturing, que gravaria outra entrada no localStorage) */
+  /* «Recusar» depois de aceitar: o PostHog já carregado deixa de enviar a partir de agora, sem gravar nada no browser
+     (o opt_out_capturing gravaria outra entrada no localStorage e não para os reenvios). O PostHog vem sempre na versão
+     mais recente, por isso são três travões, cada um no seu try:
+     - capture() deixa de fazer alguma coisa: os eventos do site, o mapa de cliques e a saída da página;
+     - __loaded = false: um envio que falhou pouco antes (erro do servidor ou da rede) fica na fila de reenvio do PostHog,
+       que não passa por capture() nem pela recusa. Sem __loaded, o PostHog não faz nenhum pedido. Não é API pública:
+       tests/encaminhamento.mjs confirma-o com o posthog-js instalado;
+     - set_config, da API pública: recusa por omissão (opt_out_capturing_by_default, que não grava nada), sem mapa de
+       cliques nem cliques sem efeito (deixa de os ouvir e deita fora os cliques que o mapa ainda não tinha enviado).
+       Corre logo a seguir (setTimeout), quando a página já mostrou a recusa: o PostHog regista o clique em «Recusar»
+       antes de o botão reagir e, se deixasse de ver a página nesse momento, contava-o como clique sem efeito e
+       enviava-o se o visitante aceitasse outra vez. Entretanto, os outros dois travões já não deixam sair nada.
+     «Aceitar» outra vez na mesma página volta a pôr tudo como no posthog.init. */
+  var PH_RECUSA = { opt_out_capturing_by_default: true, enable_heatmaps: false, capture_dead_clicks: false };
+  var PH_ACEITA = { opt_out_capturing_by_default: false, enable_heatmaps: true, capture_dead_clicks: true };
+  var phParado = false, phDesliga = 0;
   function paraPostHog() {
     _trackQueue.length = 0;
-    try { if (phPronto) window.posthog.capture = function () {}; } catch (e) {}
+    if (!phPronto) return;
+    var ph = window.posthog;
+    try { ph.capture = function () {}; } catch (e) {}
+    try { if (ph.__loaded === true) { ph.__loaded = false; phParado = true; } } catch (e) {}
+    clearTimeout(phDesliga);
+    phDesliga = setTimeout(function () { try { ph.set_config(PH_RECUSA); } catch (e) {} }, 0);
+  }
+  function retomaPostHog() {
+    if (!phPronto) return;
+    clearTimeout(phDesliga);
+    var ph = window.posthog;
+    try { if (phParado) { ph.__loaded = true; phParado = false; } } catch (e) {}
+    try { ph.set_config(PH_ACEITA); } catch (e) {}
+    try { ph.capture = phCapture; } catch (e) {}
+  }
+  function aplicaEscolha(v) {
+    escolha = v;
+    if (v) fechaConsent();
+    if (v === 'sim') {
+      retomaPostHog();
+      carregaPostHog();
+    } else paraPostHog();
   }
   function defineEscolha(v) {
     if (v !== 'sim' && v !== 'nao') return false;
-    escolha = v;
     var guardada = true;
     try { localStorage.setItem(CHAVE_EST, v); } catch (e) { guardada = false; }
-    fechaConsent();
-    if (v === 'sim') {
-      if (phPronto && phCapture) { try { window.posthog.capture = phCapture; } catch (e) {} }
-      carregaPostHog();
-    } else paraPostHog();
+    aplicaEscolha(v);
     return guardada;
   }
+  /* escolha mudada noutro separador ou enquanto a página estava na memória do browser. Os eventos desta página de antes
+     da escolha não seguem: só contam os da página onde se carregou em «Aceitar». A política de privacidade atualiza a
+     sua caixa (privacidade.js) */
+  function releEscolha() {
+    var v = leEscolha();
+    if (v === null || v === escolha) return;
+    _trackQueue.length = 0;
+    aplicaEscolha(v);
+    try { document.dispatchEvent(new CustomEvent('mdm-estatisticas', { detail: { guardada: true } })); } catch (e) {}
+  }
+  window.addEventListener('storage', function (e) { if (e.key === CHAVE_EST || e.key === null) releEscolha(); });
+  window.addEventListener('pageshow', function (e) { if (e.persisted) releEscolha(); });
   /* para a política de privacidade (assets/js/privacidade.js) */
   window.mdmEstatisticas = {
     escolha: function () { return escolha; }, define: defineEscolha, naoSeguir: NAO_SEGUIR, semRede: SEM_REDE
@@ -258,6 +311,8 @@
       consentRecolhe();
     }, { threshold: [0.05, 0.6] });
     alvos.forEach(function (a) { io.observe(a); });
+    /* a barra já sai sozinha do rodapé: o rodapé deixa de lhe guardar lugar (site.css) */
+    document.documentElement.classList.add('barra-pronta');
   })();
 
   /* ═══ Foco do teclado nunca por baixo das barras fixas de baixo (estatísticas e barra do telemóvel) ═══
@@ -758,8 +813,13 @@
     if (e) e.textContent = msg || '';
   }
   function emailValido(e) { return /^\S+@\S+\.\S+$/.test(e); }
-  /* um telefone tem pelo menos 9 algarismos (espaços, +351 e pontos não contam) */
-  function telValido(t) { return t.replace(/\D/g, '').length >= 9; }
+  /* um telefone tem pelo menos 9 algarismos (espaços e pontos não contam). Escrito com +351 ou 00351, o indicativo também
+     não conta: são precisos os 9 algarismos do número português. Os outros números internacionais ficam com a regra simples */
+  function telValido(t) {
+    var n = t.replace(/\D/g, '');
+    if (/^\D*(\+|00)\s*351/.test(t)) n = n.replace(/^(00)?351/, '');
+    return n.length >= 9;
+  }
   /* soNome: pelo WhatsApp basta o nome (e um email bem escrito, se o houver); o contacto é o próprio WhatsApp */
   function quoteValidate(d, soNome) {
     erroCampo('qNome'); erroCampo('qEmail'); erroCampo('qTel');
@@ -828,7 +888,8 @@
      o primeiro que chega à conta com uma folga de "folga" (10%: 12 100 BTU/h fica num aparelho de 12 000, não salta para 18 000).
      Os campos das divisões não têm name e não seguem com o pedido. Só segue o resumo, no campo escondido "potencia",
      depois de «Juntar ao pedido» (ou ao enviar, se houver uma divisão preenchida); a partir daí acompanha cada mudança até
-     «Retirar». Só aparece sem serviço escolhido ou com a montagem de AC. Sem JavaScript o bloco fica escondido.
+     «Retirar». Depois de «Retirar» o envio já não a junta sozinho: volta só com «Juntar ao pedido» ou num pedido novo,
+     depois de o formulário se limpar. Só aparece sem serviço escolhido ou com a montagem de AC. Sem JavaScript o bloco fica escondido.
      Na medição vão só números (quantas divisões e o total em BTU/h). */
   var pot = (function () {
     var raiz = form.querySelector('[data-potencia]'), campo = form.querySelector('[data-potencia-campo]');
@@ -860,7 +921,8 @@
     var notaServico = raiz.querySelector('[data-pot-servico]'), retirar = raiz.querySelector('[data-pot-retirar]');
     var anuncio = raiz.querySelector('[data-pot-anuncio]');
     var sel = $('qServico');
-    var linhas = [], seq = 0, junto = false, atual = null;
+    /* retirada: o visitante tirou a estimativa com «Retirar»; mudar as divisões não a traz de volta */
+    var linhas = [], seq = 0, junto = false, retirada = false, atual = null;
     /* quem precisa do resultado (o preço provável, mais abaixo) ouve cada mudança */
     var ouvintes = [];
 
@@ -1101,7 +1163,7 @@
     /* junta a estimativa ao pedido (caixa verde e campo escondido). Pelo botão, o foco vai para a caixa;
        no envio automático fica onde está */
     function junta(r, viaBotao) {
-      junto = true;
+      junto = true; retirada = false;
       /* sem serviço escolhido, a estimativa é de ar condicionado: escolhe a montagem (e a triagem [P1 · Montagem AC]) */
       var antes = sel.value;
       if (!antes) escolheServico(POT_AC);
@@ -1125,7 +1187,7 @@
       junta(r, true);
     });
     retirar.addEventListener('click', function () {
-      junto = false;
+      junto = false; retirada = true;
       sincroniza();
       visibilidade();
       ultimo = '';
@@ -1140,7 +1202,7 @@
         linhas.slice(1).forEach(function (l) { l.el.remove(); });
         linhas.length = Math.min(linhas.length, 1);
         linhas.forEach(function (l) { poeErro(l, ''); });
-        junto = false; ultimo = '';
+        junto = false; retirada = false; ultimo = '';
         numera();
         atualiza();
         visibilidade();
@@ -1186,9 +1248,10 @@
       /* o resultado de agora (divisões com área, cada uma com o tamanho de aparelho «tam»; 0 = acima do maior) */
       estado: function () { return atual; },
       ouve: function (fn) { ouvintes.push(fn); },
-      /* ao enviar: uma estimativa à vista com pelo menos uma divisão preenchida, mas não junta, junta-se sozinha */
+      /* ao enviar: uma estimativa à vista com pelo menos uma divisão preenchida, mas não junta, junta-se sozinha
+         (menos depois de «Retirar»: aí fica de fora) */
       juntaAutomatico: function () {
-        if (junto || raiz.hidden) return false;
+        if (junto || retirada || raiz.hidden) return false;
         var r = atualiza();
         if (!r.n) return false;
         junta(r, false);
@@ -1550,7 +1613,7 @@
     if (btn.getAttribute('aria-busy') === 'true' || bloqueado()) return;
     var d = quoteData(); if (!quoteValidate(d)) return;
     if (d.foto && !confereFoto()) { foto.focus(); return; }
-    /* uma estimativa preenchida mas não junta segue também (sem mexer no foco), e o preço provável à vista */
+    /* uma estimativa preenchida mas não junta segue também (sem mexer no foco; não depois de «Retirar»), e o preço provável à vista */
     pot.juntaAutomatico(); preco.junta(); d = quoteData();
     preparaCampos(d);
     track('quote_form_submit', pot.numeros({ via: SEM_ENVIO ? 'mailto' : 'netlify', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg }));

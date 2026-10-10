@@ -32,9 +32,10 @@
   <section class="eq-entrar" data-entrar aria-labelledby="entrarT">
     <h1 class="eq-h1" id="entrarT">Entrar</h1>
     <p class="eq-texto">Escreva a senha da equipa. Fica guardada só neste separador, até o fechar.</p>
-    <form data-entrar-form>
+    <!-- a senha nunca vai no endereço: POST e o campo sem «name» (o script lê-o pelo id), mesmo que o script não chegue -->
+    <form data-entrar-form method="post">
       <label class="eq-rot" for="senha">Senha</label>
-      <input class="eq-campo" id="senha" name="senha" type="password" autocomplete="current-password" required>
+      <input class="eq-campo" id="senha" type="password" autocomplete="current-password" required>
       <p class="eq-erro" data-entrar-erro role="alert"></p>
       <button class="eq-btn eq-btn-accent" type="submit">Entrar</button>
     </form>

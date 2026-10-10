@@ -47,10 +47,25 @@
   var GEN = 0;
   function grava() { guarda(CHAVE, S); }
 
+  /* cada «Entrar» e cada «Sair» abrem uma entrada nova: um 401 de uma entrada que já acabou não diz nada da senha atual.
+     «Senha errada» só aparece em resposta à senha que a equipa acabou de escrever (até à primeira resposta aceite) */
+  var entrada = 0, acabadaDeEscrever = false;
+  function sai() { entrada++; senha = ''; apaga(CHAVE_SENHA); }
   function api(corpo) {
+    var e = entrada;
+    if (!senha) return Promise.reject(new Error('senha'));   /* depois de «Sair», nada sai sem senha */
     return fetch(API, { method: 'POST', headers: { 'content-type': 'application/json', 'x-mdm-senha': encodeURIComponent(senha) }, body: JSON.stringify(corpo) })
       .then(function (r) { return r.json().catch(function () { return {}; }).then(function (c) {
-        if (r.status === 401) { senha = ''; apaga(CHAVE_SENHA); mostra(false, 'Senha errada. Escreva-a outra vez; o trabalho fica guardado.'); throw new Error('senha'); }
+        if (r.status === 401) {
+          if (e === entrada) {
+            var escrita = acabadaDeEscrever;
+            sai();
+            mostra(false, escrita ? 'Senha errada. Escreva-a outra vez; o trabalho fica guardado.'
+              : 'A senha guardada neste separador deixou de ser aceite. Escreva-a outra vez; o trabalho fica guardado.');
+          }
+          throw new Error('senha');
+        }
+        if (e === entrada) acabadaDeEscrever = false;
         return { ok: r.ok, status: r.status, c: c };
       }); });
   }
@@ -67,13 +82,14 @@
   }
   $('[data-entrar-form]').addEventListener('submit', function (e) {
     e.preventDefault();
+    entrada++; acabadaDeEscrever = true;
     senha = $('#senha').value;
     guarda(CHAVE_SENHA, senha);
     $('#senha').value = '';
     mostra(true);
   });
   /* «Sair» não muda a geração: o caso continua o mesmo, e uma resposta já paga ainda entra */
-  $('[data-sair]').addEventListener('click', function () { senha = ''; apaga(CHAVE_SENHA); mostra(false); });
+  $('[data-sair]').addEventListener('click', function () { sai(); mostra(false); });
   function temDados() {
     var f = S.form;
     return S.mensagens.length || S.propostas.length || caixa.value.trim() || f.texto.trim() || f.nome || f.contacto || f.local || f.pedido || f.notas.trim() ||
@@ -116,21 +132,26 @@
 
   /* ── formulário ── */
   var recarrega = $('[data-recarrega]'), lerBtn = $('[data-ler]');
-  var aCarregar = false, focoDepois = false;
+  /* o pedido da tabela pertence à entrada que o fez: cada entrada pede a sua, mesmo com o de uma entrada anterior ainda a
+     caminho, e a resposta de uma entrada que já acabou (um 401 da senha antiga, por exemplo) não mexe no ecrã. Assim a
+     entrada atual acaba sempre com a tabela ou com o erro e «Tentar outra vez» */
+  var aCarregar = null, focoDepois = false;
   function carregaTabela() {
-    if (aCarregar) return;
-    aCarregar = true;
+    if (aCarregar === entrada) return;   /* esta entrada já tem um pedido a caminho */
+    var e = aCarregar = entrada;
     calcEstado.textContent = 'A carregar a tabela…'; recarrega.hidden = true;
     api({ acao: 'tabela' }).then(function (x) {
-      aCarregar = false;
+      if (e !== entrada) return;
+      aCarregar = null;
       if (!x.ok) { calcEstado.textContent = x.c.erro || 'Não foi possível carregar a tabela.'; recarrega.hidden = false; return; }
       T = x.c; S.teste = !!T.teste; testeAviso.hidden = !S.teste;
       fp.inert = false; lerBtn.disabled = false; calcEstado.textContent = '';
       poeForm(); calcula();
       if (focoDepois) { focoDepois = false; var c = fp.querySelector('input[name="servico"]:checked'); if (c) c.focus(); }
-    }).catch(function (e) {
-      aCarregar = false;
-      if (e.message === 'senha') return;
+    }).catch(function (erro) {
+      if (e !== entrada) return;
+      aCarregar = null;
+      if (erro.message === 'senha') return;
       calcEstado.textContent = 'Sem ligação. Verifique a internet.'; recarrega.hidden = false;
     });
   }
@@ -213,12 +234,13 @@
     clearTimeout(tCalc);
     tCalc = setTimeout(calculaJa, 350);
   }
-  /* a proposta do formulário só fica à vista enquanto corresponde ao que está no formulário */
+  /* a proposta do formulário só fica à vista enquanto corresponde ao que está no formulário. Se era a escolhida, fica
+     nenhuma escolhida (o ecrã mostra a última), para a próxima conta do formulário voltar a aparecer */
   function tiraForm() {
     var i = S.propostas.map(function (x) { return x.origem; }).indexOf('form');
     if (i < 0) return;
     S.propostas.splice(i, 1);
-    if (S.atual >= S.propostas.length || S.atual === i) S.atual = S.propostas.length - 1;
+    if (S.atual === i) S.atual = -1;
     else if (S.atual > i) S.atual--;
     grava(); desenhaProposta();
   }
@@ -256,6 +278,9 @@
       if (c.proposta) { c.proposta.origem = 'form'; poeProposta(c.proposta); } else tiraForm();
       if (ac && !divisoes.length) avisos.push('Escreva a área de pelo menos uma divisão.');
       else if (c.modo === 'erro' && c.resultado && c.resultado.erro) avisos.push(c.resultado.erro);
+      /* sem preços na tabela, a potência mostra-se na mesma (cada divisão e o total), sem proposta */
+      if (c.modo === 'sem_tabela' && c.resultado && c.resultado.potencia)
+        avisos.push('Potência estimada: ' + inseparavel(c.resultado.potencia) + '. A tabela da MDM ainda não tem preços para este produto, por isso não há proposta.');
       if (c.modo === 'escolhe') avisos.push('Escolha o tamanho do depósito.');
       if (c.notasRecusadas && c.notasRecusadas.length) avisos.push('Notas que não entram na proposta (regras da MDM): ' + c.notasRecusadas.join('; '));
       if (erros.length) avisos.push('Há divisões com a área por corrigir; não entram na conta.');
@@ -264,6 +289,9 @@
       poeComplexo(c.complexo || []);
     }).catch(function (e) {
       if (este !== nCalc || g !== GEN) return;
+      /* sem ligação, a proposta à vista já não corresponde ao formulário: sai, como num erro da função. Sem senha fica:
+         o ecrã de entrar esconde-a e, ao voltar a entrar, a conta refaz-se */
+      if (e.message !== 'senha') tiraForm();
       calcEstado.textContent = e.message === 'senha' ? '' : 'Sem ligação. Verifique a internet.';
     });
   }
@@ -327,7 +355,9 @@
       f.duvidas = c.duvidas || [];
       f.complexoIA = x.c.complexoIA || [];   /* só o motivo da IA; os calculados vêm de cada conta */
       grava(); poeForm(); calculaJa();
-      lerEstado.textContent = 'Formulário preenchido. Confirme os campos' + (f.duvidas.length ? ' e veja o que falta perguntar.' : '.');
+      var fora = x.c.recusadas || [];
+      lerEstado.textContent = 'Formulário preenchido. Confirme os campos' + (f.duvidas.length ? ' e veja o que falta perguntar.' : '.')
+        + (fora.length ? ' Não passou para o formulário (regras da MDM): ' + fora.join('; ') : '');
     }).catch(function (e) {
       if (g !== GEN) return;
       fim();
@@ -446,17 +476,34 @@
     if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); envia(caixa.value); }
   });
 
-  /* a proposta do formulário é uma só e vai sendo atualizada; as do assistente juntam-se à lista */
+  /* a mesma proposta com outra referência: a função dá uma referência e uma data novas a cada conta (o texto leva-as) */
+  function mesma(a, b) {
+    function sem(p) { var c = Object.assign({}, p); delete c.ref; delete c.data; delete c.texto; return JSON.stringify(c); }
+    return sem(a) === sem(b);
+  }
+  /* a proposta do formulário é uma só e vai sendo atualizada; as do assistente juntam-se à lista e ficam escolhidas.
+     A mesma conta (recarregar, sair e entrar, um campo que não mudou) deixa tudo como estava: a referência, a data e a
+     escolha. Uma conta nova do formulário só muda a escolha se ela era a do formulário, ou se não havia nenhuma */
   function poeProposta(p) {
     var i = p.origem === 'form' ? S.propostas.map(function (x) { return x.origem; }).indexOf('form') : -1;
-    if (i >= 0) S.propostas[i] = p; else { S.propostas.push(p); i = S.propostas.length - 1; }
-    S.atual = i; grava(); desenhaProposta();
+    var nenhuma = !(S.atual >= 0 && S.atual < S.propostas.length);
+    if (i >= 0) {
+      if (mesma(S.propostas[i], p)) return;
+      S.propostas[i] = p;
+      if (nenhuma) S.atual = i;
+    } else {
+      S.propostas.push(p);
+      if (p.origem !== 'form' || nenhuma) S.atual = S.propostas.length - 1;
+    }
+    grava(); desenhaProposta();
   }
 
   /* ── proposta ── */
   /* no ecrã e no PDF os números não partem a meio: 4 480 €, 12 000 BTU/h */
   function inseparavel(t) { return String(t).replace(/(\d) (?=\d{3}\b)/g, '$1\u00a0').replace(/ (€|BTU\/h|m²)/g, '\u00a0$1'); }
   function linhaDados(dl, rot, val) { if (!val) return; dl.appendChild(el('dt', '', rot)); dl.appendChild(el('dd', '', val)); }
+  /* a proposta à vista: a escolhida ou, sem nenhuma escolhida, a última */
+  function aVista() { return S.atual >= 0 && S.atual < S.propostas.length ? S.atual : S.propostas.length - 1; }
   function desenhaProposta() {
     var tem = S.propostas.length > 0;
     zona.hidden = !tem; semProp.hidden = tem; qual.hidden = S.propostas.length < 2;
@@ -466,9 +513,8 @@
       o.value = i; qual.appendChild(o);
     });
     if (!tem) return;
-    if (S.atual < 0 || S.atual >= S.propostas.length) S.atual = S.propostas.length - 1;
-    qual.value = String(S.atual);
-    var p = S.propostas[S.atual], e = p.empresa || {};
+    qual.value = String(aVista());
+    var p = S.propostas[aVista()], e = p.empresa || {};
     doc.textContent = '';
     if (p.teste) doc.appendChild(el('p', 'doc-teste', 'Valores de teste · não enviar ao cliente'));
     var cab = el('header', 'doc-cab'), marca = el('div', 'doc-marca'), img = el('img');
@@ -532,13 +578,13 @@
   }
   qual.addEventListener('change', function () { S.atual = +qual.value; grava(); desenhaProposta(); });
   $('[data-copiar]').addEventListener('click', function () {
-    var p = S.propostas[S.atual]; if (!p) return;
+    var p = S.propostas[aVista()]; if (!p) return;
     function feito(ok) { copiado.textContent = ok ? 'Texto copiado.' : 'Não deu para copiar: selecione o texto da proposta.'; setTimeout(function () { copiado.textContent = ''; }, 4000); }
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(p.texto).then(function () { feito(true); }, function () { feito(false); });
     else feito(false);
   });
   $('[data-pdf]').addEventListener('click', function () {
-    var p = S.propostas[S.atual]; if (!p) return;
+    var p = S.propostas[aVista()]; if (!p) return;
     var antes = document.title;
     document.title = 'Proposta ' + p.ref + (p.cliente && p.cliente.nome ? ' ' + p.cliente.nome : '');   /* nome do ficheiro PDF */
     window.print();

@@ -1,11 +1,14 @@
 /* Paridade: o cálculo do assistente de propostas (netlify/lib/calculo.mjs) tem de dar exatamente o mesmo resumo que o
-   formulário do site (assets/js/site.js) para os mesmos dados. Usa a tabela de teste: põe data/precos-teste.json no lugar
-   de data/precos.json, gera o site, compara caso a caso no browser e repõe o ficheiro original no fim (mesmo com erro).
+   formulário do site (assets/js/site.js) para os mesmos dados. Usa a tabela de teste sem tocar em data/precos.json: gera o
+   site numa pasta temporária (MDM_OUT) com MDM_PRECOS_FICHEIRO=data/precos-teste.json, serve-o numa porta livre, compara
+   caso a caso no browser e apaga a pasta no fim (mesmo com erro ou Ctrl+C).
    Precisa do Playwright (fora das dependências do site). Uso, a partir de website/:
      NODE_PATH=/caminho/para/node_modules node tests/paridade.mjs [número de casos aleatórios, 60 por omissão] */
 import { createRequire } from 'node:module';
 import { execFileSync, spawn } from 'node:child_process';
 import fs from 'node:fs';
+import net from 'node:net';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { configPotencia, configPreco, potencia, preco } from '../netlify/lib/calculo.mjs';
@@ -14,7 +17,7 @@ const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
 const W = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REAL = path.join(W, 'data/precos.json'), TESTE = path.join(W, 'data/precos-teste.json');
-const N = +process.argv[2] || 60, PORTA = 8799;
+const N = +process.argv[2] || 60;
 const AC = 'Ar condicionado: montagem / instalação', BC = 'Bomba de calor: instalação / manutenção';
 
 const site = JSON.parse(fs.readFileSync(path.join(W, 'data/site.json'), 'utf8'));
@@ -49,11 +52,14 @@ const casos = [
 while (casos.length < N + 8) casos.push(casoAC());
 
 const original = fs.readFileSync(REAL);
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mdm-paridade-')), PUB = path.join(tmp, 'public');
 let servidor = null, falhas = 0;
+const limpa = () => { if (servidor) servidor.kill(); fs.rmSync(tmp, { recursive: true, force: true }); };
+for (const [sinal, rc] of [['SIGINT', 130], ['SIGTERM', 143]]) process.on(sinal, () => { limpa(); process.exit(rc); });
 try {
-  fs.copyFileSync(TESTE, REAL);
-  execFileSync('python3', ['build.py'], { cwd: W, stdio: 'ignore' });
-  servidor = spawn('python3', ['-m', 'http.server', String(PORTA), '-d', 'public', '--bind', '127.0.0.1'], { cwd: W, stdio: 'ignore' });
+  execFileSync('python3', ['build.py'], { cwd: W, stdio: 'ignore', env: { ...process.env, MDM_OUT: PUB, MDM_PRECOS_FICHEIRO: TESTE } });
+  const PORTA = await new Promise((r) => { const s = net.createServer().listen(0, '127.0.0.1', () => { const p = s.address().port; s.close(() => r(p)); }); });
+  servidor = spawn('python3', ['-m', 'http.server', String(PORTA), '-d', PUB, '--bind', '127.0.0.1'], { stdio: 'ignore' });
   await new Promise((r) => setTimeout(r, 800));
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
   const ctx = await browser.newContext();
@@ -61,6 +67,11 @@ try {
   await ctx.route('**/*posthog*/**', (r) => r.abort());
   const page = await ctx.newPage();
   page.on('pageerror', (e) => { falhas++; console.log('erro JS: ' + e.message); });
+  /* o site gerado tem a tabela de teste (sem as notas «_»): sem isto, todos os casos falhariam sem dizer porquê */
+  await page.goto(`http://127.0.0.1:${PORTA}/servicos/ar-condicionado.html`, { waitUntil: 'load' });
+  const noForm = JSON.parse(await page.$eval('[data-precos]', (x) => x.dataset.precos));
+  const semNotas = Object.fromEntries(Object.entries(tabela).filter(([k]) => !k.startsWith('_')));
+  if (JSON.stringify(noForm) !== JSON.stringify(semNotas)) { falhas++; console.log('FALHA o site gerado não tem a tabela de teste (MDM_PRECOS_FICHEIRO)'); }
   for (const [i, c] of casos.entries()) {
     await page.goto(`http://127.0.0.1:${PORTA}/servicos/ar-condicionado.html`, { waitUntil: 'load' });
     await page.selectOption('#qServico', c.servico === 'ac' ? AC : BC);
@@ -88,10 +99,10 @@ try {
     if (!bate) { falhas++; console.log(`FALHA caso ${i}: ${JSON.stringify(c)}\n  site:   «${noSite}» visita=${visitaSite}\n  cálculo: «${aqui}» modo=${r.modo}`); }
   }
   await browser.close();
+  /* a tabela verdadeira nunca se toca */
+  if (!fs.readFileSync(REAL).equals(original)) { falhas++; console.log('FALHA data/precos.json mudou durante o teste'); }
   console.log(`${casos.length} casos, ${falhas} falhas`);
 } finally {
-  if (servidor) servidor.kill();
-  fs.writeFileSync(REAL, original);
-  execFileSync('python3', ['build.py'], { cwd: W, stdio: 'ignore' });
+  limpa();
 }
 process.exit(falhas ? 1 : 0);

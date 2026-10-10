@@ -4,7 +4,9 @@
 O original de cada obra é assets/img/obras/foto-NN-1600.jpg, já com a correção de cor e o corte finais
 (é também o JPEG de reserva e a imagem de partilha da obra). Este script faz, para cada um, os tamanhos
 que o build.py põe no srcset (FOTO_LADOS, medidos pelo lado maior): foto-NN-400.avif … foto-NN-1600.avif
-e o mesmo em WebP. Só faz os que faltam; --todas refaz tudo.
+e o mesmo em WebP. Só faz os que faltam (um ficheiro vazio conta como em falta); --todas refaz tudo.
+Cada ficheiro é escrito primeiro num temporário na mesma pasta (.foto-NN-400.avif.tmp) e só no fim fica com o nome
+final: interromper o script nunca deixa uma imagem vazia ou a meio, que a corrida seguinte saltaria.
 Escreve também data/lqip.json: uma prévia de 16 px de cada fotografia (WebP em base64, ~300 bytes), que o
 build.py põe por trás da fotografia enquanto ela descarrega.
 
@@ -19,6 +21,7 @@ correr o script e depois python3 website/build.py --check, que falha se faltar a
 import base64
 import io
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -32,6 +35,17 @@ LQIP = Path(__file__).resolve().parent / "data" / "lqip.json"
 # qualidade escolhida por comparação com os WebP anteriores (SSIM e recortes a 2x): equivalente à vista,
 # AVIF cerca de um quarto mais leve que o WebP com a mesma qualidade
 FORMATOS = {"avif": dict(quality=60, speed=4), "webp": dict(quality=80, method=6)}
+
+
+def grava(destino, escreve):
+    """Chama escreve(temporário) e só depois lhe dá o nome final (os.replace). O temporário nunca fica, salvo com um
+    kill -9, e aí o build.py --check apanha-o."""
+    tmp = destino.with_name(f".{destino.name}.tmp")
+    try:
+        escreve(tmp)
+        os.replace(tmp, destino)
+    finally:
+        tmp.unlink(missing_ok=True)
 
 
 def gera(jpg, todas=False):
@@ -51,9 +65,9 @@ def gera(jpg, todas=False):
         r = im if escala == 1 else im.resize((round(im.width * escala), round(im.height * escala)), Image.LANCZOS)
         for ext, opcoes in FORMATOS.items():
             f = PASTA / f"foto-{n}-{lado}.{ext}"
-            if f.exists() and not todas:
+            if f.exists() and f.stat().st_size > 0 and not todas:
                 continue
-            r.save(f, ext.upper(), **opcoes)
+            grava(f, lambda tmp: r.save(tmp, ext.upper(), **opcoes))
             feitos.append(f.name)
     return feitos
 
@@ -85,7 +99,7 @@ def main():
     print(f"{total} ficheiros novos em {PASTA}")
     # as prévias de todas as obras (rápido; sempre todas, para nunca ficar uma desatualizada)
     previas = {j.name[5:-9]: previa(j) for j in sorted(PASTA.glob("foto-*-1600.jpg"))}
-    LQIP.write_text(json.dumps(previas, indent=1) + "\n", encoding="utf-8")
+    grava(LQIP, lambda tmp: tmp.write_text(json.dumps(previas, indent=1) + "\n", encoding="utf-8"))
     print(f"{len(previas)} prévias em {LQIP}")
 
 

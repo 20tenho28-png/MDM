@@ -1,7 +1,9 @@
 /* Testes da página interna (equipa/proposta.html) no browser, contra a função real (empacotada com esbuild) e uma API do
    Claude falsa: o caminho do formulário, a leitura com IA, a conversa e as falhas corrigidas na revisão (senha com
    acentos, escrever durante o carregamento, PDF só com a proposta, proposta desatualizada, «Nova proposta» a meio,
-   notas repetidas, recusas e respostas cortadas, perguntas de outro serviço, telemóvel a 320 px).
+   notas repetidas, recusas e respostas cortadas, perguntas de outro serviço, telemóvel a 320 px, a senha fora do
+   endereço, a referência que não muda sem razão, sem ligação, «Sair» sem «Senha errada», a tabela que carrega depois de
+   uma senha que não valia, a tabela vazia com a potência).
    Gera o site numa pasta temporária (MDM_OUT) e serve-o numa porta livre. Precisa do Playwright, fora das dependências.
    Uso, a partir de website/:
      npm install && NODE_PATH=/caminho/para/node_modules node tests/pagina.mjs */
@@ -38,18 +40,24 @@ const api = http.createServer((req, res) => { let b = ''; req.on('data', c => b 
 await new Promise(r => api.listen(0, '127.0.0.1', r));
 const cliente = new Anthropic({ apiKey: 'x', baseURL: `http://127.0.0.1:${api.address().port}`, maxRetries: 0 });
 const SENHA = 'grelha€“prumo”';
-const env = { get: k => ({ MDM_EQUIPA_SENHA: SENHA, MDM_PRECOS: 'teste' })[k] };
+const vars = { MDM_EQUIPA_SENHA: SENHA, MDM_PRECOS: 'teste' };   // MDM_PRECOS = '' para a tabela real (vazia)
+const env = { get: k => vars[k] };
 const V = { pre: '', dist: '', furo: '', fora: '', luz: '', antigas: '', deposito: '' };
 const atraso = {};   // acao -> ms
 const falhaUma = {};  // acao -> true: a próxima resposta dessa ação é um 500
+const corta = {};     // acao -> true: o pedido dessa ação falha sem ligação, até se apagar
+let semSenha = 0;     // pedidos que chegaram sem senha
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
-async function nova(w = 1440) {
+async function nova(w = 1440, { semScript = false } = {}) {
   const ctx = await browser.newContext({ viewport: { width: w, height: 900 } });
   const page = await ctx.newPage();
   page.on('pageerror', e => { falhas++; console.log('erro JS', e.message); });
   page.on('dialog', d => d.accept());
+  if (semScript) await page.route('**/equipa/proposta.js', route => route.abort());
   await page.route('**/api/proposta', async route => {
     const rq = route.request(), corpo = JSON.parse(rq.postData() || '{}');
+    if (!rq.headers()['x-mdm-senha']) semSenha++;
+    if (corta[corpo.acao || 'conversa']) return route.abort('internetdisconnected').catch(() => {});
     const ms = atraso[corpo.acao || 'conversa']; if (ms) await new Promise(r => setTimeout(r, ms));
     if (falhaUma[corpo.acao || 'conversa']) { delete falhaUma[corpo.acao || 'conversa']; return route.fulfill({ status: 500, contentType: 'application/json', body: '{"erro":"falha simulada"}' }).catch(() => {}); }
     const r = await atende(new Request('http://x/api/proposta', { method: 'POST', headers: rq.headers(), body: rq.postData() }), env, cliente);
@@ -118,6 +126,15 @@ for (let i = 0; i < 2; i++) {
   await page.evaluate(() => { document.querySelector('[data-ler-estado]').textContent = ''; });
 }
 ok((await page.inputValue('#cNotas')).split('\n').length === 1, 'E: a mesma nota não se repete', await page.inputValue('#cNotas'));
+// o que a leitura deixa de fora pelas regras da MDM (uma marca proibida) aparece com o motivo
+fila.push({ content: [{ type: 'text', text: JSON.stringify({ servico: 'ac', divisoes: [{ tipo: 'Sala', area: 20, sol: false, ultimo_andar: false }], respostas: V, local: '', pedido: 'Trocar a Carrier da sala', notas: ['Máquina Carrier antiga.', 'Prédio com elevador.'], duvidas: [], complexo: false, motivo_complexo: '' }) }], stop_reason: 'end_turn' });
+await page.fill('[data-texto]', 'trocar a carrier da sala');
+await page.click('[data-ler]');
+await page.waitForFunction(() => /preenchido/.test(document.querySelector('[data-ler-estado]').textContent));
+const estE = await page.textContent('[data-ler-estado]'), notasE = await page.inputValue('#cNotas');
+ok(/Não passou para o formulário/.test(estE) && /Carrier antiga\.»: marca fora da lista/.test(estE) && /pedido: marca fora da lista/.test(estE)
+  && !/Carrier/.test(notasE + await page.inputValue('#cPedido')), 'E: a leitura diz porquê uma nota e o pedido ficaram de fora', { estE, notasE });
+await page.evaluate(() => { document.querySelector('[data-ler-estado]').textContent = ''; });
 
 // F. recusa e resposta cortada com ferramenta: a mensagem volta à caixa e o histórico fica limpo
 await page.click('#abaChat');
@@ -243,11 +260,13 @@ page = await nova();
 falhaUma.tabela = true;
 await entra(page);
 await page.waitForSelector('[data-recarrega]:not([hidden])', { timeout: 15000 });
+/* a ordem do foco regista-se: a tabela chega uns 20 ms depois e leva o foco ao formulário, e lê-lo depois do clique chegava tarde */
+await page.evaluate(() => { window.__focos = []; document.addEventListener('focusin', (e) => window.__focos.push(e.target.matches('[data-calc-estado]') ? 'estado' : e.target.name || e.target.tagName), true); });
 await page.click('[data-recarrega]');
-const focoAoTentar = await page.evaluate(() => document.activeElement && document.activeElement.matches('[data-calc-estado]'));
 await pronto(page);
 await page.waitForFunction(() => document.activeElement && document.activeElement.matches('input[name="servico"]'), null, { timeout: 15000 });
-ok(focoAoTentar, 'Q: «Tentar outra vez»: foco na linha de estado e depois no formulário');
+const focos = await page.evaluate(() => window.__focos);
+ok(focos.includes('estado') && focos.indexOf('estado') < focos.indexOf('servico'), 'Q: «Tentar outra vez»: foco na linha de estado e depois no formulário', focos);
 await page.context().close();
 
 // N. 320 px com «Escritório», décimas e duas divisões: sem deslize da página
@@ -259,6 +278,123 @@ await entra(page); await pronto(page);
 await docTem(page, /Multi-split/);
 const larg2 = await page.evaluate(() => [document.documentElement.scrollWidth, window.innerWidth]);
 ok(larg2[0] <= larg2[1], 'N: 320 px com tabela larga sem deslize da página', larg2);
+await page.context().close();
+
+// T. sem o script (lento, bloqueado ou desligado), Enter no campo da senha não a põe no endereço nem no pedido
+page = await nova(1440, { semScript: true });
+const navs = []; page.on('request', rq => { if (rq.isNavigationRequest()) navs.push({ metodo: rq.method(), url: rq.url(), corpo: rq.postData() || '' }); });
+await page.fill('#senha', SENHA);
+await Promise.all([page.waitForEvent('framenavigated', { timeout: 15000 }), page.press('#senha', 'Enter')]);
+const ida = navs.at(-1) || {};
+ok(new URL(page.url()).search === '' && !/senha/i.test(page.url()) && ida.metodo === 'POST' && !/senha|prumo|grelha/i.test(decodeURIComponent(ida.url + ida.corpo)),
+  'T: sem o script, a senha não vai no endereço nem no pedido', { url: page.url(), ida });
+await page.context().close();
+
+// U. a mesma proposta do formulário guarda a referência, a data e a escolha; uma conta nova só muda a escolha se ela era a do
+//    formulário (ou se não havia nenhuma)
+const guardado = (page) => page.evaluate(() => { const s = JSON.parse(sessionStorage.getItem('mdm-equipa-conversa'));
+  return { atual: s.atual, form: (s.propostas.find(p => p.origem === 'form') || {}).ref || '', data: (s.propostas.find(p => p.origem === 'form') || {}).data || '',
+    origens: s.propostas.map(p => p.origem) }; });
+const calculou = async (page, accao) => {
+  await page.evaluate(() => { document.querySelector('[data-calc-estado]').textContent = ''; });
+  await accao();
+  await page.waitForFunction(() => /Proposta atualizada|Sem ligação|pelo menos uma divisão/.test(document.querySelector('[data-calc-estado]').textContent), null, { timeout: 15000 });
+};
+page = await nova();
+await page.evaluate(() => sessionStorage.setItem('mdm-equipa-conversa', JSON.stringify({ mensagens: [], propostas: [], teste: true, atual: -1, aba: 'form',
+  form: { servico: 'ac', divisoes: [{ tipo: 'Sala', area: 25, sol: false, topo: false }], respostas: {}, nome: 'Ana', contacto: '', local: '', pedido: '', notas: '', texto: '', duvidas: [], complexoIA: [] } })));
+await page.reload();
+await calculou(page, async () => { await entra(page); await pronto(page); });
+fila.push({ content: [{ type: 'tool_use', id: 'tu', name: 'preparar_proposta', input: { servico: 'ac', divisoes: [{ tipo: 'Quarto', area: 12, sol: false, ultimo_andar: false }], respostas: V,
+  cliente: { nome: 'Do assistente', contacto: '', local: '' }, pedido: 'Quarto', observacoes: [] } }], stop_reason: 'tool_use' });
+fila.push({ content: [{ type: 'text', text: 'Proposta pronta.' }], stop_reason: 'end_turn' });
+await page.click('#abaChat');
+await page.fill('[data-msg]', 'proposta do quarto'); await page.click('[data-enviar]');
+await page.waitForFunction(() => /Proposta pronta/.test(document.querySelector('[data-msgs]').textContent), null, { timeout: 15000 });
+const u0 = await guardado(page);
+ok(u0.origens.join() === 'form,chat' && u0.atual === 1 && /Do assistente/.test(await page.textContent('.doc')), 'U: a proposta do assistente fica escolhida', u0);
+await page.click('#abaForm');
+await calculou(page, () => page.reload());
+let u = await guardado(page);
+ok(u.form === u0.form && u.data === u0.data && u.atual === 1, 'U: recarregar não muda a referência, a data nem a escolha', { u0, u });
+await page.click('[data-sair]');
+await calculou(page, () => entra(page));
+u = await guardado(page);
+ok(u.form === u0.form && u.atual === 1, 'U: sair e entrar não muda a referência nem a escolha', { u0, u });
+await calculou(page, async () => { await page.fill('#cNome', 'Ana'); await page.press('#cNome', 'Tab'); });
+u = await guardado(page);
+ok(u.form === u0.form && u.atual === 1, 'U: um campo que não mudou não muda nada', { u0, u });
+await calculou(page, () => page.fill('.eq-div [data-d="area"]', '30'));
+u = await guardado(page);
+ok(u.form !== u0.form && u.atual === 1 && /Do assistente/.test(await page.textContent('.doc')), 'U: conta nova com a do assistente escolhida: a escolha fica', { u0, u });
+await page.selectOption('[data-qual]', '0');
+await calculou(page, () => page.fill('.eq-div [data-d="area"]', '35'));
+u = await guardado(page);
+ok(u.atual === 0 && /35\sm²/.test(await page.textContent('.doc')), 'U: conta nova com a do formulário escolhida: continua à vista', u);
+await calculou(page, () => page.fill('.eq-div [data-d="area"]', ''));
+await calculou(page, () => page.fill('.eq-div [data-d="area"]', '28'));
+u = await guardado(page);
+ok(u.origens[u.atual] === 'form' && /28\sm²/.test(await page.textContent('.doc')), 'U: sem área a do formulário sai; com área volta e fica à vista', u);
+
+// V. sem ligação: a proposta do formulário, já desatualizada, sai (como num erro da função)
+corta.calcular = true;
+await calculou(page, () => page.fill('.eq-div [data-d="area"]', '40'));
+delete corta.calcular;
+u = await guardado(page);
+ok(/Sem ligação/.test(await page.textContent('[data-calc-estado]')) && !u.origens.includes('form') && !/28\sm²|40\sm²/.test(await page.textContent('.doc')),
+  'V: sem ligação, a proposta antiga do formulário sai', u);
+await calculou(page, () => page.fill('.eq-div [data-d="area"]', '41'));
+u = await guardado(page);
+ok(u.origens[u.atual] === 'form' && /41\sm²/.test(await page.textContent('.doc')), 'V: com ligação, a proposta volta', u);
+await page.context().close();
+
+// W. «Sair» logo depois de escrever: nenhum pedido sem senha e nenhum «Senha errada»; uma senha errada a sério continua a avisar
+page = await nova();
+await entra(page); await pronto(page);
+const semSenhaAntes = semSenha;
+await page.fill('.eq-div [data-d="area"]', '22');
+await page.click('[data-sair]');
+await page.waitForTimeout(1000);
+ok(await page.textContent('[data-entrar-erro]') === '' && semSenha === semSenhaAntes, 'W: «Sair» sem «Senha errada» e sem pedidos sem senha', { erro: await page.textContent('[data-entrar-erro]'), semSenha: semSenha - semSenhaAntes });
+await page.fill('#senha', 'errada'); await page.click('[data-entrar-form] button');
+await page.waitForFunction(() => /Senha errada/.test(document.querySelector('[data-entrar-erro]').textContent), null, { timeout: 15000 });
+ok(true, 'W: uma senha errada continua a dar «Senha errada»');
+await page.context().close();
+
+// Y. a tabela ainda a caminho com uma senha que não vale (escrita errada, ou a guardada que deixou de valer), «Sair» e a senha
+//    certa: a entrada nova carrega a tabela, o 401 antigo não a deixa presa em «A carregar» nem traz «Senha errada»
+const carregou = (page) => page.waitForSelector('.eq-div [data-d="tipo"] option', { state: 'attached', timeout: 8000 }).then(() => true, () => false);
+const estadoY = async (page) => ({ erro: await page.textContent('[data-entrar-erro]'), dentro: await page.isVisible('[data-sair]'),
+  inerte: await page.$eval('[data-form-prop]', f => f.inert), ler: await page.$eval('[data-ler]', b => b.disabled), estado: await page.textContent('[data-calc-estado]') });
+for (const guardada of [false, true]) {
+  page = await nova();
+  atraso.tabela = 1500;
+  if (guardada) { await page.evaluate(() => sessionStorage.setItem('mdm-equipa-senha', 'antiga')); await page.reload(); }
+  else { await page.fill('#senha', 'errada'); await page.click('[data-entrar-form] button'); }
+  await page.waitForTimeout(300);
+  await page.click('[data-sair]');
+  await entra(page);
+  await page.waitForTimeout(300); delete atraso.tabela;
+  const tem = await carregou(page);
+  await page.waitForTimeout(1500);   // o 401 da entrada anterior já chegou
+  const y = await estadoY(page);
+  ok(tem && y.erro === '' && y.dentro && !y.inerte && !y.ler && !/A carregar/.test(y.estado),
+    'Y: ' + (guardada ? 'senha guardada que deixou de valer' : 'senha errada') + ', «Sair» e a certa com a tabela a caminho: a tabela carrega', { tem, ...y });
+  await page.context().close();
+}
+
+// X. tabela real vazia: a potência de cada divisão e o total, os motivos, e nenhum preço
+vars.MDM_PRECOS = '';
+page = await nova();
+await page.evaluate(() => sessionStorage.setItem('mdm-equipa-conversa', JSON.stringify({ mensagens: [], propostas: [], teste: false, atual: -1, aba: 'form',
+  form: { servico: 'ac', divisoes: [{ tipo: 'Sala', area: 25, sol: false, topo: false }, { tipo: 'Sala', area: 90, sol: false, topo: false }], respostas: {}, nome: '', contacto: '', local: '', pedido: '', notas: '', texto: '', duvidas: [], complexoIA: [] } })));
+await page.reload();
+await entra(page); await pronto(page);
+await page.waitForFunction(() => /Potência estimada/.test(document.querySelector('[data-calc-estado]').textContent), null, { timeout: 15000 });
+const estX = await page.textContent('[data-calc-estado]'), cxX = await page.textContent('[data-complexo]');
+ok(/Sala 25\sm²: 12\s000\sBTU\/h/.test(estX) && /Total mais de 36\s000\sBTU\/h/.test(estX) && /ainda não tem preços/.test(estX) && !/€/.test(estX)
+  && /Ainda não há preços/.test(cxX) && /maior aparelho/.test(cxX) && await page.isHidden('[data-prop-zona]'), 'X: tabela vazia: potência, motivos e nenhum preço', { estX, cxX });
+vars.MDM_PRECOS = 'teste';
 await page.context().close();
 
 await browser.close(); api.close(); servidor.kill();

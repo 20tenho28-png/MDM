@@ -5,6 +5,8 @@ Só biblioteca padrão. Uso:
     python3 website/build.py            # gera public/
     python3 website/build.py --check    # gera e valida ligações, recursos, placeholders e decisões do dono
     python3 website/build.py --faltam   # lista os dados que só a MDM pode dar (data/dados-mdm.json, factos das obras)
+    MDM_OUT=/tmp/x python3 website/build.py --check   # gera noutra pasta (só apaga uma que o build.py gerou: limpa_saida)
+    MDM_PRECOS_FICHEIRO=…                # outra tabela de preços em vez de data/precos.json, só para testes
 
 Sintaxe dos modelos (src/):
     <!--meta {...json...} -->            no topo de cada página: title, description, file, nav, jsonld, css
@@ -44,6 +46,10 @@ import shutil
 import sys
 from pathlib import Path
 from urllib.parse import quote, unquote
+try:
+    import tomllib   # Python 3.11+ (README.md); só o lançamento o usa, para ler o netlify.toml (check_preview)
+except ModuleNotFoundError:
+    tomllib = None
 
 ROOT = Path(__file__).resolve().parent
 import os
@@ -52,6 +58,8 @@ SRC, DATA, ASSETS = ROOT / "src", ROOT / "data", ROOT / "assets"
 EQUIPA = ROOT / "equipa"
 # MDM_OUT permite gerar para outra pasta (por exemplo, várias verificações em paralelo)
 OUT = Path(os.environ["MDM_OUT"]).resolve() if os.environ.get("MDM_OUT") else ROOT / "public"
+# ficheiro que build() deixa em cada pasta que gera: ao gerar de novo, só se apaga uma pasta com ele (limpa_saida)
+MARCA_SAIDA = ".gerado-por-build"
 
 SITE = json.loads((DATA / "site.json").read_text(encoding="utf-8"))
 # marcas da faixa das certificações (site.json «marcas»): os campos que faltam ficam vazios, para o modelo poder
@@ -140,9 +148,17 @@ PRECOS_GAMAS = ("eco", "sup")
 PRECOS_EXTRAS = ("metrosIncluidos", "metroExtra", "preInstalacaoDesconto", "furoBetao", "alturaEscada", "alturaAndaime",
                  "alturaPlataforma", "ligacaoEletrica", "retirarAntiga")
 PRECOS_INCLUI = ("split", "multisplit", "aguasQuentes")
-if not (DATA / "precos.json").exists():
-    raise SystemExit("build.py: falta data/precos.json (preço provável do formulário; ver README.md, «Preço provável»)")
-PRECOS_DOC = json.loads((DATA / "precos.json").read_text(encoding="utf-8"))
+# MDM_PRECOS_FICHEIRO: outra tabela no lugar de data/precos.json, só para testes (tests/paridade.mjs gera com a tabela de
+# teste sem tocar no ficheiro verdadeiro). No Netlify é recusada: o site publicado lê sempre data/precos.json.
+PRECOS_OUTRO = os.environ.get("MDM_PRECOS_FICHEIRO", "")
+if PRECOS_OUTRO and os.environ.get("NETLIFY") == "true":
+    raise SystemExit("build.py: MDM_PRECOS_FICHEIRO é só para testes; no Netlify o site lê sempre data/precos.json")
+PRECOS_FICHEIRO = Path(PRECOS_OUTRO).resolve() if PRECOS_OUTRO else DATA / "precos.json"
+PRECOS_NOME = PRECOS_FICHEIRO.name if PRECOS_OUTRO else "precos.json"   # nos avisos de check_precos()
+if not PRECOS_FICHEIRO.exists():
+    raise SystemExit(f"build.py: falta {PRECOS_FICHEIRO if PRECOS_OUTRO else 'data/precos.json'} "
+                     "(preço provável do formulário; ver README.md, «Preço provável»)")
+PRECOS_DOC = json.loads(PRECOS_FICHEIRO.read_text(encoding="utf-8"))
 
 
 def precos_linhas():
@@ -363,6 +379,22 @@ def render(text, ctx, depth=0):
 # os concelhos à volta de Lisboa ainda não foram confirmados pelo dono: fica "Grande Lisboa"
 AREA_LD = [{"@type": "City", "name": "Lisboa"}, {"@type": "AdministrativeArea", "name": "Grande Lisboa"}]
 PREVIEW = bool(SITE.get("preview"))
+# páginas sempre fora do Google, também depois do lançamento (README.md, «Lançamento»); --check confirma
+NOINDEX_SEMPRE = {"404.html", "obrigado.html"}
+# fora do Google: «noindex» ou «none» (o mesmo que «noindex, nofollow»), com qualquer grafia, em qualquer sítio da lista
+# (vírgulas ou espaços) e com ou sem o nome do robô à frente («googlebot: none», no X-Robots-Tag). Antes de procurar
+# tiram-se as diretivas «max-…: valor», porque «none» também é valor delas («max-image-preview:none» só tira a imagem
+# grande e a página continua no Google). O mesmo teste no meta robots das páginas (page_ctx, mapa do site, check_cabeca)
+# e nos cabeçalhos X-Robots-Tag (check_preview)
+class _NoIndex:
+    _fora = re.compile(r"\b(?:noindex|none)\b", re.I)
+    _max = re.compile(r"\bmax-[\w-]+\s*:\s*[\w-]+", re.I)
+
+    def search(self, texto):
+        return self._fora.search(self._max.sub(" ", texto or ""))
+
+
+NOINDEX_RE = _NoIndex()
 # imagem de partilha (og-mdm.jpg): logótipo, frase, telefone e o camião com a matrícula desfocada
 OG_IMG = {"src": "og-mdm.jpg", "w": 1200, "h": 630,
           "alt": f"MDM Assistência Técnica. Clima, ar e corrente. Desde {SITE['founded']}. Telefone {SITE['phone']}."}
@@ -437,7 +469,7 @@ def breadcrumb_ld(trail):
 def page_ctx(meta, file):
     # wa: mensagem de WhatsApp da barra do telemóvel, do rodapé e do contacto (site.wa.*); cada serviço usa a sua
     meta = {"preselect": "", "nav": "", "robots": "index,follow", "og": "", "wa": "geral", **meta}
-    if PREVIEW and "noindex" not in meta["robots"]:
+    if PREVIEW and not NOINDEX_RE.search(meta["robots"]):
         meta["robots"] = "noindex"   # pré-visualização: nenhuma página entra no Google antes do lançamento
     depth = file.count("/")
     # a 404 é servida em qualquer profundidade (/obras/xyz.html): precisa de caminhos absolutos
@@ -502,10 +534,47 @@ def versiona(texto):
     return VERSAO_RE.sub(lambda m: f'{m.group(1)}{m.group(2)}?v={versao(m.group(1).split("assets/", 1)[1] + m.group(2))}"', texto)
 
 
+def saida_antiga(p):
+    """public/ gerado antes de haver MARCA_SAIDA (num clone antigo): só com nomes que o build.py escreve, e com as páginas."""
+    if p != ROOT / "public":
+        return False
+    nomes = {x.name for x in (SRC / "pages").iterdir()} | {"assets", "equipa", "obras", FORMULARIOS, "sitemap.xml",
+                                                           "robots.txt", "_headers"}
+    tem = {x.name for x in p.iterdir()}
+    return tem <= nomes and {"index.html", "sitemap.xml", "assets"} <= tem
+
+
+def limpa_saida():
+    """Apaga a saída anterior, só se for uma pasta que o build.py gerou (com MARCA_SAIDA), vazia ou o public/ antigo.
+    MDM_OUT aceita qualquer caminho, e um engano (MDM_OUT=., MDM_OUT=~) apagaria o site ou a pasta pessoal: pára antes."""
+    p, casa = OUT, Path.home().resolve()
+    porque = ""
+    if p == Path(p.anchor) or p == casa or p in casa.parents:
+        porque = "é a raiz do disco ou a pasta pessoal"
+    elif p == ROOT or p in ROOT.parents:
+        porque = "é a pasta do site ou uma pasta acima dela"
+    elif ".git" in p.parts:
+        porque = "fica dentro de uma pasta .git"
+    elif any(p == d or d in p.parents for d in (SRC, DATA, ASSETS, EQUIPA)):
+        porque = "fica dentro das fontes do site (src/, data/, assets/ ou equipa/)"
+    elif p.exists() and not p.is_dir():
+        porque = "não é uma pasta"
+    elif p.exists() and any((p / x).exists() for x in ("build.py", "data", ".git")):
+        porque = "tem build.py, data/ ou .git: parece código, não um site gerado"
+    elif p.exists() and any(p.iterdir()) and not (p / MARCA_SAIDA).is_file() and not saida_antiga(p):
+        porque = f"não está vazia e não tem o ficheiro {MARCA_SAIDA}, que o build.py deixa nas pastas que gera"
+    if porque:
+        raise SystemExit(f"build.py: não apago {p}: {porque}. MDM_OUT tem de ser uma pasta nova, vazia ou já gerada pelo "
+                         "build.py. Escolha outra pasta, ou apague esta à mão se tiver a certeza.")
+    if p.exists() and any(p.iterdir()):
+        shutil.rmtree(p)
+
+
 def build():
-    if OUT.exists():
-        shutil.rmtree(OUT)
-    OUT.mkdir()
+    limpa_saida()
+    OUT.mkdir(exist_ok=True)
+    (OUT / MARCA_SAIDA).write_text("Pasta gerada pelo build.py do site da MDM. Ao gerar de novo, o build.py só apaga uma "
+                                   "pasta com este ficheiro.\n", encoding="utf-8")
     shutil.copytree(ASSETS, OUT / "assets")
     if EQUIPA.exists():
         shutil.copytree(EQUIPA, OUT / "equipa")
@@ -517,7 +586,7 @@ def build():
             raise SystemExit(f"{p}: falta o bloco <!--meta {{...}} -->")
         meta = json.loads(m.group(1))
         files.append(build_page(meta, text[m.end():]))
-        if "noindex" in meta.get("robots", ""):
+        if NOINDEX_RE.search(meta.get("robots", "")):
             fora_do_mapa.add(meta["file"])   # 404 e página de agradecimento
     obra_tpl_path = SRC / "templates" / "obra.html"
     if obra_tpl_path.exists():
@@ -557,16 +626,37 @@ def build():
 PLACEHOLDER_RE = re.compile(r"\[(?!P\d ·)[^\[\]<>\"']*?[A-ZÀ-Ý]{3}[^\[\]<>\"']*\]|\[\[[^\]]*\]\]"
                             r"|(?i:\b(?:por preencher|lorem ipsum)\b)")
 # Decisões do dono (AUDIT.md da v3, 27/09/2026): nada disto volta ao site, nem em meta, JSON-LD ou mensagens de WhatsApp.
-PRAZO = (re.compile(r"\b\d+\s*(?:h|horas)\s+úteis|\b(?:24|48)\s*(?:h|horas)\b|\b\d+\s*(?:a|–|-)\s*\d+\s*(?:h|horas)\b"
-                    r"|mesmo dia|\b\d+\s*minutos\b", re.I),
+# Intervalos («2–4 h», «2h-4h», «2 a 4 horas», «entre 2 e 4 horas») com qualquer traço: hífen, travessões, sinal menos.
+TRACOS = "\\-\u2010-\u2015\u2212\u2043\u2e3a\u2e3b\ufe58\ufe63\uff0d"
+# entre o número e a unidade, espaços, um traço ou nada: «24h», «24 horas», «24-horas», «2–4-horas»
+JUNTA_UNIDADE = rf"[\s{TRACOS}]*"
+PRAZO = (re.compile(rf"\b\d+{JUNTA_UNIDADE}(?:h|horas)\s+úteis|\b(?:24|48){JUNTA_UNIDADE}(?:h|horas)\b"
+                    rf"|\b\d+(?:{JUNTA_UNIDADE}(?:h|horas))?(?:\s*(?:a|[{TRACOS}])\s*|\s+e\s+)\d+{JUNTA_UNIDADE}(?:h|horas)\b"
+                    rf"|\bmesmo\s+dia\b|\b\d+{JUNTA_UNIDADE}minutos\b", re.I),
          "promessa de prazo de resposta (retiradas pelo dono)")
 # a assinatura da France Air: o dono pediu para a tirar (o nome e, quando chegar, o logótipo sem ela)
 ARQUITECTOS_RE = re.compile(r"Arquitec?tos\s+do\s+Ar", re.I)
+# Marcas (data/regras-marcas.json, a mesma lista da função do assistente): no site só as «permitidas»; as «proibidas»
+# apanham-se sem distinguir maiúsculas e como palavra inteira («Mitsubishi Heavy» sim, «Mitsubishi Electric» não)
+if not (DATA / "regras-marcas.json").exists():
+    raise SystemExit("build.py: falta data/regras-marcas.json (marcas permitidas e proibidas; ver README.md, «Marcas»)")
+REGRAS_MARCAS = json.loads((DATA / "regras-marcas.json").read_text(encoding="utf-8"))
+for _k in ("permitidas", "proibidas"):
+    if not (isinstance(REGRAS_MARCAS.get(_k), list) and REGRAS_MARCAS[_k]
+            and all(isinstance(x, str) and x.strip() for x in REGRAS_MARCAS[_k])):
+        raise SystemExit(f"build.py: data/regras-marcas.json «{_k}» tem de ser uma lista de nomes de marcas")
+MARCAS_PERMITIDAS = REGRAS_MARCAS["permitidas"]
+# as palavras de cada nome separadas por espaços, por qualquer traço (hífen, U+2010 a U+2015, sinal menos, os traços
+# pequenos e largos) ou por nada: «Saunier-Duval», «Saunier–Duval», «SaunierDuval». É a mesma junção da função do
+# assistente (JUNTA_MARCA em netlify/functions/proposta.mts). Os nomes mais compridos primeiro
+JUNTA_MARCA = r"[\s\-\u2010-\u2015\u2212\ufe58\ufe63\uff0d]*"
+MARCAS_RE = re.compile(r"(?<!\w)(?:%s)(?!\w)" % "|".join(
+    JUNTA_MARCA.join(map(re.escape, n.split())) for n in sorted(REGRAS_MARCAS["proibidas"], key=len, reverse=True)),
+    re.I)
 PROIBIDO = [
     PRAZO,
     (re.compile(r"\b[34]\d\s+anos\b"), "idade da empresa: só «1991», nunca «N anos»"),
-    (re.compile(r"\b(?:LG|Hitachi|Vulcano|Panasonic|Climaveneta)\b"),
-     "marca fora da lista do dono (Midea, Mitsubishi Electric, Daikin, France Air)"),
+    (MARCAS_RE, f"marca fora da lista do dono ({', '.join(MARCAS_PERMITIDAS)})"),
     (re.compile(r"Domingues|M\.D\.M\.\s*[—–]"), "nome legal: «M.D.M. - Manuel Domingos Melancia, Lda»"),
     (ARQUITECTOS_RE,
      "assinatura da France Air («Os Arquitectos do Ar»): o dono não a quer no site, só o nome ou o logótipo"),
@@ -615,10 +705,46 @@ DURACOES = {**{f"dados-mdm.json «{k}»": DADOS.get(k, "")
             **{f"obras.json «factos.duracao» da obra {o['n']}": o.get("factos", {}).get("duracao", "") for o in OBRAS}}
 # uma duração que fala em responder, chegar ou atender é um prazo de resposta disfarçado
 RESPOSTA_RE = re.compile(r"\b(?:respo\w*|cheg\w*|atend\w*|desloc\w*|urgênc\w*)", re.I)
+# O horário (site.json «hours», «2ª a 6ª, 8h–17h»): as horas de abrir e fechar têm a forma de «2h–4h», mas são um facto.
+# Só esse intervalo, com «h» nas duas horas e logo a seguir aos dias, sai da regra dos prazos; o resto do horário
+# («24h», «mesmo dia») é visto em todas as páginas, como o outro texto. O horário deixa de ser só um horário, e nenhum
+# intervalo sai da regra, se falar em responder, chegar, deslocação ou urgências (RESPOSTA_RE, à parte «atend…»:
+# «Atendimento: 2ª a 6ª, 8h–17h» é um horário) ou se tiver um intervalo sem os dias logo antes («Atendemos em 1h–2h»,
+# «Avarias: 1h–3h», «2ª a 6ª, em 1h–2h»: prazos, seja qual for a palavra). check_duracoes() diz porquê.
+HORA = rf"\b\d{{1,2}}h(?:\d\d)?(?:\s*(?:a|[{TRACOS}])\s*|\s+e\s+)\d{{1,2}}h(?:\d\d)?\b"
+HORAS_RE = re.compile(HORA, re.I)
+# os dias logo antes das horas: «2ª a 6ª, 8h–17h», «2.ª a 6.ª: 8h–12h e 14h–18h», «sábado 9h–13h», «sáb. 9h–13h»,
+# «segunda a sexta-feira, das 8h–17h», «dias úteis, 8h–17h», «todos os dias 8h–20h»
+DIA = (r"(?:\d\.?ª|(?:segunda|terça|quarta|quinta|sexta)(?:-feira)?s?|sábados?|domingos?|feriados?|úteis"
+       r"|todos\s+os\s+dias|(?:seg|ter|qua|qui|sex|sáb|sab|dom)\.?)")
+ABERTURA_RE = re.compile(rf"(?<!\w){DIA}[\s,:]*(?:(?:das|de|entre)\s+)?{HORA}(?:\s*(?:,|e|/)\s*{HORA})*", re.I)
+
+
+def horario_promete(hours):
+    """Porque é que o horário não é só um horário (vazio: é só um horário). As palavras de RESPOSTA_RE, à parte «atend…»,
+    e os intervalos que não vêm logo a seguir aos dias."""
+    if not isinstance(hours, str):
+        return []
+    palavras = dict.fromkeys(p for p in RESPOSTA_RE.findall(hours) if not p.lower().startswith("atend"))
+    abertura = [m.span() for m in ABERTURA_RE.finditer(hours)]
+    soltas = dict.fromkeys(m.group(0) for m in HORAS_RE.finditer(hours)
+                           if not any(a <= m.start() and m.end() <= b for a, b in abertura))
+    return ([f"fala em {', '.join(f'«{p}»' for p in palavras)}"] if palavras else []) + \
+           ([f"tem {', '.join(f'«{h}»' for h in soltas)} sem os dias logo antes (como em «2ª a 6ª, 8h–17h»)"] if soltas else [])
+
+
+def horario_isento(hours):
+    """Os intervalos do horário que não contam como prazo: as horas de abrir e fechar, se o horário não prometer nada."""
+    if not isinstance(hours, str) or horario_promete(hours):
+        return []
+    return sorted(set(HORAS_RE.findall(hours)))
+
+
+HORARIO = horario_isento(SITE.get("hours"))
 
 
 def sem_duracoes(t):
-    for v in DURACOES.values():
+    for v in [*DURACOES.values(), *HORARIO]:
         if not isinstance(v, str) or not v.strip():
             continue
         for forma in {v, re.sub(r"\s+", " ", v).strip(), json.dumps(v, ensure_ascii=False)[1:-1]}:
@@ -627,18 +753,67 @@ def sem_duracoes(t):
 
 
 def check_duracoes():
-    return [f"{onde}: {PRAZO[1]} → «{v}»" for onde, v in DURACOES.items()
-            if isinstance(v, str) and PRAZO[0].search(v) and RESPOSTA_RE.search(v)]
+    out = [f"{onde}: {PRAZO[1]} → «{v}»" for onde, v in DURACOES.items()
+           if isinstance(v, str) and PRAZO[0].search(v) and RESPOSTA_RE.search(v)]
+    hours, porque = SITE.get("hours"), horario_promete(SITE.get("hours"))
+    if porque and HORAS_RE.search(hours):
+        out.append(f"site.json «hours»: {' e '.join(porque)}, por isso todas as horas do horário "
+                   f"({', '.join(f'«{h}»' for h in dict.fromkeys(HORAS_RE.findall(hours)))}) contam como prazo de resposta "
+                   f"em todas as páginas → «{hours}»")
+    return out
+
+
+# etiquetas de texto (as que não partem a linha): «<strong>mesmo</strong> dia» lê-se «mesmo dia»; <br> é um espaço
+TAG_TEXTO_RE = re.compile(r"</?(?:a|abbr|b|bdi|bdo|br|cite|code|data|dfn|em|i|kbd|mark|q|s|samp|small|span|strong|sub|sup"
+                          r"|time|u|var|wbr)\b[^<>]*>", re.I)
 
 
 def texto_proibido(nome, text):
-    """Placeholders e frases retiradas pelo dono, também dentro de ligações (WhatsApp), meta e JSON-LD."""
-    t = unquote(html.unescape(re.sub(r"<!--.*?-->", "", text, flags=re.S)))
-    out = [f"{nome}: placeholder visível → {m}" for m in sorted(set(PLACEHOLDER_RE.findall(t)))]
+    """Placeholders e frases retiradas pelo dono, também dentro de ligações (WhatsApp), meta e JSON-LD. Lê o texto como
+    aparece: sem as imagens em base64 (letras ao acaso, «LG» ou «24h» por sorte), com os \\uXXXX e \\xXX dos scripts já
+    descodificados e sem os caracteres invisíveis (espaço de largura zero e outros) no meio de uma frase. E lê-o duas
+    vezes: tal como está (os atributos contam) e sem as etiquetas de texto, que não podem esconder uma frase."""
+    t = re.sub(r"data:[^,\s\"']*;base64,[A-Za-z0-9+/=]+", "data:", re.sub(r"<!--.*?-->", "", text, flags=re.S))
+    t = re.sub(r"\\(?:u\{?([0-9a-fA-F]{4})\}?|x([0-9a-fA-F]{2}))", lambda m: chr(int(m.group(1) or m.group(2), 16)), t)
+    t = re.sub("[\u00ad\u200b-\u200d\u2060\ufeff]", "", unquote(html.unescape(t)))
+    vistas = {t, TAG_TEXTO_RE.sub(lambda m: " " if re.match(r"</?br\b", m.group(0), re.I) else "", t)}
+    achados = lambda rx, prazo=False: sorted({m for v in vistas for m in rx.findall(sem_duracoes(v) if prazo else v)})
+    out = [f"{nome}: placeholder visível → {m}" for m in achados(PLACEHOLDER_RE)]
     for rx, porque in PROIBIDO:
-        alvo = sem_duracoes(t) if (rx, porque) == PRAZO else t
-        out += [f"{nome}: {porque} → «{m}»" for m in sorted(set(rx.findall(alvo)))]
+        out += [f"{nome}: {porque} → «{m}»" for m in achados(rx, (rx, porque) == PRAZO)]
     return out
+
+
+def check_regras():
+    """Exemplos das regras acima, vistos em cada --check: se uma mudança a uma expressão deixar passar uma frase que tem
+    de falhar, ou apanhar uma que tem de passar, --check diz qual. As marcas vêm de data/regras-marcas.json, como a regra."""
+    juntas = ["\u2011", "\u2013", "", "\u00a0", " - "]
+    regras = [
+        ("prazos", PRAZO[0].search,
+         ["24h", "24 horas", "Assistência 24-horas", "serviço 24\u2011h", "24\u2013horas", "48 h", "2\u20134-horas", "2h-4h",
+          "2 a 4 horas", "entre 2 e 4 horas", "2 \u2212 4 h", "4 horas úteis", "no mesmo dia", "em 30 minutos"],
+         ["desde 1991", "1991\u20132026", "12 000 BTU/h", "9 000 \u2013 12 000 BTU/h", "2,5\u20133,5 kW", "3 a 4 divisões",
+          "12 a 25 m²", "Instalação num dia"]),
+        ("horário", lambda h: not horario_isento(h),   # «apanha»: nenhum intervalo do horário fica de fora da regra
+         ["2ª a 6ª, 8h–17h. Urgências: 1h–3h", "8h–17h, chegamos em 1h–2h", "2ª a 6ª, 8h–17h. Atendemos em 1h–2h",
+          "2ª a 6ª, 8h–17h. Atendimento de avarias em 1h–3h", "2ª a 6ª, 8h–17h. Avarias: 1h–3h",
+          "2ª a 6ª, 8h–17h. Emergências: 1h–3h", "2ª a 6ª, 8h–17h. Visita técnica em 2h–4h", "2ª a 6ª, em 1h–2h",
+          "Sábado: até 1h–2h"],
+         ["2ª a 6ª, 8h–17h", "Atendimento: 2ª a 6ª, 8h–17h", "Atendemos de 2ª a 6ª, 8h–17h",
+          "2ª a 6ª, 8h–17h; sábado 9h–13h", "2.ª a 6.ª: 8h–12h e 14h–18h", "Segunda a sexta-feira, das 8h–17h",
+          "Seg. a sex., 8h00–17h00", "Dias úteis, 8h–17h"]),
+        ("robots", NOINDEX_RE.search,
+         ["noindex", "noindex, nofollow", "NOINDEX,follow", "noindex nofollow", "none", "NONE", "index, None",
+          "googlebot: none", "googlebot:noindex"],
+         ["index,follow", "index, nofollow", "all", "index, follow, max-image-preview:none", "max-image-preview: none",
+          "googlebot: max-image-preview:none, max-snippet:-1", "nosnippet", "noimageindex"]),
+        ("marcas", MARCAS_RE.search,
+         [j.join(n.split()) for n in REGRAS_MARCAS["proibidas"] if len(n.split()) > 1 for j in juntas],
+         [j.join(n.split()) for n in MARCAS_PERMITIDAS for j in juntas]),
+    ]
+    return [f"build.py, regra «{nome}»: {'deixa passar' if falha else 'apanha'} o exemplo «{t}»"
+            for nome, apanha, falham, passam in regras for falha, frases in ((True, falham), (False, passam))
+            for t in frases if bool(apanha(t)) != falha]
 
 
 def check_testemunhos():
@@ -698,8 +873,15 @@ def check(files):
                 if not target.exists():
                     problems.append(f"{f}: referência partida → {r}")
     problems += check_preview()
-    problems += check_duracoes() + check_testemunhos() + check_formatos() + check_btu() + check_precos() + check_marcas() + check_equipa()
-    problems += check_encaminhamento()
+    problems += check_regras() + check_duracoes() + check_testemunhos() + check_formatos() + check_btu() + check_precos()
+    problems += check_marcas() + check_equipa()
+    problems += check_encaminhamento() + check_precos_teste()
+    # uma imagem com 0 bytes (gravação interrompida) existe para REF_RE mas não aparece; .tmp é uma gravação a meio
+    for img in sorted(p for p in (OUT / "assets" / "img").rglob("*") if p.is_file()):
+        if img.stat().st_size == 0:
+            problems.append(f"{img.relative_to(OUT)}: imagem vazia (0 bytes): fazer de novo (as das obras: python3 website/gerar_fotos.py)")
+        elif img.suffix == ".tmp":
+            problems.append(f"{img.relative_to(OUT)}: sobra de uma gravação interrompida do gerar_fotos.py: apagar")
     for css in (OUT / "assets" / "css").glob("*.css"):
         for c in re.findall(r"url\(([^)]+)\)", css.read_text(encoding="utf-8")):
             c = c.strip("'\"")
@@ -711,6 +893,8 @@ def check(files):
     for extra in sorted((OUT / "assets" / "js").glob("*.js")):
         problems += texto_proibido(str(extra.relative_to(OUT)), extra.read_text(encoding="utf-8"))
     print(f"{len(files)} páginas geradas em {OUT}")
+    if PRECOS_OUTRO:
+        print(f"Preços de MDM_PRECOS_FICHEIRO ({PRECOS_FICHEIRO}), só para testes: não publicar esta pasta.")
     if PREVIEW:
         print("Pré-visualização: noindex em todas as páginas. No lançamento: \"preview\": false em data/site.json (README.md).")
     n = sum(1 for _ in em_falta())
@@ -740,8 +924,12 @@ def check_cabeca(f, text):
     if ["HVACBusiness", "Electrician"] not in tipos:
         out.append(f"{f}: falta o JSON-LD da empresa")
     robots = re.search(r'<meta name="robots" content="([^"]*)"', text)
-    if PREVIEW and not (robots and "noindex" in robots.group(1)):
+    noindex = bool(robots and NOINDEX_RE.search(robots.group(1)))
+    if PREVIEW and not noindex:
         out.append(f"{f}: pré-visualização sem <meta name=\"robots\" content=\"noindex\">")
+    elif not PREVIEW and noindex != (f in NOINDEX_SEMPRE):
+        out.append(f"{f}: lançamento com noindex (robots «{robots.group(1)}»: fica fora do Google)" if noindex else
+                   f"{f}: sem <meta name=\"robots\" content=\"noindex\"> (fica sempre fora do Google, NOINDEX_SEMPRE)")
     base = SITE["baseUrl"] + "/"
     for prop in ("og:image", "og:url"):
         m = re.search(r'<meta property="%s" content="([^"]*)"' % prop, text)
@@ -813,7 +1001,7 @@ def check_encaminhamento():
     return out
 
 
-def check_precos(p=None, nome="precos.json"):
+def check_precos(p=None, nome=PRECOS_NOME):
     """data/precos.json (e a tabela de teste do assistente, precos-teste.json): a estrutura de sempre, preços null ou
     [mínimo, máximo] inteiros, e os tamanhos de btu.tamanhos."""
     p, out = (PRECOS_DOC if p is None else p), []
@@ -873,6 +1061,21 @@ def check_precos(p=None, nome="precos.json"):
             elif re.search(r"[{}<>]", v):
                 out.append(f"{nome} «inclui.{k}»: sem chavetas nem < > → «{v}»")
     return out
+
+
+def check_precos_teste():
+    """data/precos.json nunca leva os números falsos de precos-teste.json: os testes geram com MDM_PRECOS_FICHEIRO e não o
+    tocam. Igual à tabela de teste (sem contar as chaves «_») é erro, salvo com MDM_PRECOS_FICHEIRO, que é para isso."""
+    teste = DATA / "precos-teste.json"
+    if PRECOS_OUTRO or not teste.exists():
+        return []
+    sem_notas = lambda p: {k: v for k, v in p.items() if not k.startswith("_")} if isinstance(p, dict) else p
+    try:
+        igual = sem_notas(json.loads(teste.read_text(encoding="utf-8"))) == sem_notas(PRECOS_DOC)
+    except json.JSONDecodeError:
+        return []   # check_equipa() já diz que precos-teste.json é inválido
+    return ["data/precos.json: tem os números falsos de precos-teste.json; repor a tabela verdadeira antes de publicar "
+            "(git diff website/data/precos.json)"] if igual else []
 
 
 def check_equipa():
@@ -955,16 +1158,23 @@ VIEWBOX_RE = re.compile(r'<svg\b[^>]*\bviewBox="\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\
 
 
 def check_marcas():
-    """Faixa das marcas (site.json «marcas»): nome, ficheiros que existem, largura e altura do logótipo certas, escala."""
+    """Faixa das marcas (site.json «marcas»): nome entre as permitidas, ficheiros que existem, largura e altura do
+    logótipo certas, escala. E as duas listas de data/regras-marcas.json não se apanham uma à outra."""
     out, marcas = [], SITE["marcas"]
+    # uma proibida que apanhe uma permitida («Mitsubishi» sozinha apanharia «Mitsubishi Electric») faria falhar o site
+    out += [f"data/regras-marcas.json: a marca permitida «{n}» é apanhada pelas «proibidas» → «{MARCAS_RE.search(n).group(0)}»"
+            for n in MARCAS_PERMITIDAS if MARCAS_RE.search(n)]
     if not marcas:
-        return ["site.json: falta «marcas» (faixa das certificações)"]
+        return out + ["site.json: falta «marcas» (faixa das certificações)"]
     inteiro = lambda v: isinstance(v, int) and not isinstance(v, bool) and v > 0
     for m in marcas:
         nome = m.get("nome")
         if not (isinstance(nome, str) and nome.strip()):
             out.append("site.json «marcas»: cada marca tem de ter «nome»")
             continue
+        if nome not in MARCAS_PERMITIDAS:
+            out.append(f"site.json «marcas» {nome}: não é uma das «permitidas» de data/regras-marcas.json "
+                       f"({', '.join(MARCAS_PERMITIDAS)})")
         e = m["escala"]
         if not (isinstance(e, (int, float)) and not isinstance(e, bool) and 0.5 <= e <= 2):
             out.append(f"site.json «marcas» {nome}: «escala» é um número entre 0,5 e 2 (1 = altura normal)")
@@ -996,15 +1206,44 @@ def check_marcas():
 
 
 def check_preview():
-    """O modo de pré-visualização e o lançamento nunca ficam a meio caminho."""
-    robots = (OUT / "robots.txt").read_text(encoding="utf-8")
-    cab = OUT / "_headers"
-    tem_noindex = cab.exists() and "X-Robots-Tag: noindex" in cab.read_text(encoding="utf-8")
+    """O modo de pré-visualização e o lançamento nunca ficam a meio caminho. O meta robots de cada página vê-o
+    check_cabeca(); aqui, robots.txt, _headers e o netlify.toml, que é escrito à mão e o build.py não muda."""
+    out, robots_f, cab = [], OUT / "robots.txt", OUT / "_headers"
+    robots = robots_f.read_text(encoding="utf-8") if robots_f.exists() else ""
+    disallow = re.search(r"^\s*Disallow:\s*/\s*$", robots, re.I | re.M)
+    # um bloco «/*» do _headers com X-Robots-Tag noindex
+    cab_noindex = cab.exists() and re.search(r"^/\*[ \t]*\n(?:[ \t]+\S.*\n)*?[ \t]+X-Robots-Tag:[^\n]*noindex",
+                                             cab.read_text(encoding="utf-8"), re.I | re.M)
     if PREVIEW:
-        return [] if ("Disallow: /\n" in robots and tem_noindex) else ["pré-visualização: falta Disallow em robots.txt ou X-Robots-Tag em _headers"]
-    out = []
-    if "Disallow: /\n" in robots or tem_noindex:
-        out.append("lançamento: robots.txt ou _headers ainda pedem para não indexar")
+        if not disallow:
+            out.append("pré-visualização: robots.txt sem «Disallow: /»")
+        if not cab_noindex:
+            out.append("pré-visualização: _headers sem «X-Robots-Tag: noindex» em /*")
+        return out
+    if disallow:
+        out.append("lançamento: robots.txt ainda tem «Disallow: /»")
+    sitemap = f"{SITE['baseUrl']}/sitemap.xml"
+    if not re.search(r"^Sitemap:\s*%s\s*$" % re.escape(sitemap), robots, re.M):
+        out.append(f"lançamento: robots.txt sem a linha «Sitemap: {sitemap}»")
+    if cab.exists() and any(map(NOINDEX_RE.search, re.findall(r"X-Robots-Tag:(.*)", cab.read_text(encoding="utf-8"), re.I))):
+        out.append("lançamento: _headers ainda pede noindex")
+    # o netlify.toml só pode tirar do Google a página interna (/equipa/*); cada [[headers]] tem o seu «for». Lido com
+    # tomllib, que entende todas as grafias do TOML (aspas simples, «values = { … }» numa linha, chaves com pontos)
+    toml = ROOT / "netlify.toml"
+    conf = {}
+    if toml.exists() and tomllib is None:
+        out.append("lançamento: o --check precisa de Python 3.11+ para ler o netlify.toml (README.md, «Gerar»)")
+    elif toml.exists():
+        try:
+            conf = tomllib.loads(toml.read_text(encoding="utf-8"))
+        except tomllib.TOMLDecodeError as e:
+            out.append(f"lançamento: netlify.toml inválido → {e}")
+    for h in conf.get("headers", []):
+        para = h.get("for", "?")
+        # entre vírgulas: «X-Robots-Tag» e «x-robots-tag» no mesmo bloco são duas listas de diretivas
+        robots = ", ".join(str(v) for k, v in h.get("values", {}).items() if k.lower() == "x-robots-tag")
+        if NOINDEX_RE.search(robots) and not para.startswith("/equipa/"):
+            out.append(f"lançamento: netlify.toml pede noindex em {para} (só /equipa/* fica fora do Google)")
     if not SITE["baseUrl"].startswith("https://") or "manus.space" in SITE["baseUrl"]:
         out.append(f"lançamento: baseUrl não é o domínio final → {SITE['baseUrl']}")
     return out
