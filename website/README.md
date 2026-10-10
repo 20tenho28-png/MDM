@@ -41,6 +41,18 @@ double-clicking `index.html`.
 English pages are separate static files: a text change on a PT page must be
 made on the matching `en/` page too.
 
+## Visitor statistics (off by default)
+
+`assets/analytics.js` loads Google Analytics 4 and Microsoft Clarity, but only
+after the IDs at the top of the file are filled in. Until then it does nothing.
+
+With IDs set, a consent banner appears and nothing loads until the visitor
+accepts. Before switching it on, add a paragraph about statistics cookies to
+`privacidade.html` and `en/privacidade.html`.
+
+Events sent: `call_click`, `whatsapp_click`, `email_click`, `quote_open`,
+`quote_sent`, `quote_whatsapp`, `quote_email`, `calculator_open`.
+
 ## What does not work outside the original host
 
 The original host also runs a small server. These parts call it and will not

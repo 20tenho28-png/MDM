@@ -10,7 +10,7 @@ function changeScene(key){
  q('.hero-immersive').classList.toggle('hero-heat-pump',scene.frame==='heat-pump');
  q('.hero-immersive').classList.toggle('hero-solar-rooftop',scene.frame==='solar-rooftop');
 }
-qa('[data-audience]').forEach(b=>b.addEventListener('click',()=>{qa('[data-audience]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));q('#audience-note').textContent=t(b.dataset.audience==='casa'?'Sistemas residenciais selecionados em função da carga térmica, das divisões e das condições de instalação.':'Climatização de espaços comerciais e edifícios, considerando ocupação, zonamento e condições de utilização.');changeScene(b.dataset.audience);spaceChosen=false;}));
+qa('[data-audience]').forEach(b=>b.addEventListener('click',()=>{qa('[data-audience]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));q('#audience-note').textContent=t(b.dataset.audience==='casa'?'Conforto em cada divisão, com uma solução à medida da sua casa.':'Climatização de espaços comerciais e edifícios, considerando ocupação, zonamento e condições de utilização.');changeScene(b.dataset.audience);spaceChosen=false;}));
 function setMenu(open,restoreFocus=false){const menu=q('.nav nav'),toggle=q('.menu-toggle');if(!menu||!toggle)return;menu.classList.toggle('open',open);toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',t(open?'Fechar menu':'Abrir menu'));if(restoreFocus)toggle.focus();}
 q('.menu-toggle')?.addEventListener('click',()=>setMenu(!q('.nav nav').classList.contains('open')));
 qa('.nav nav a').forEach(a=>a.addEventListener('click',()=>setMenu(false)));
