@@ -5,12 +5,16 @@
    200 m², a estimativa tirada com «Retirar» (não volta sozinha ao enviar) e o telefone com +351. Gera o site numa pasta temporária (MDM_OUT) e serve-o num servidor local que guarda cada envio, como o Netlify
    Forms o receberia, e que pode falhar de propósito. No fim, as estatísticas: depois de «Recusar», nada chega ao PostHog,
    nem o reenvio de um envio que tinha falhado, e «Aceitar» outra vez não envia o clique em «Recusar» como clique sem
-   efeito (só com o posthog-js instalado; sem ele, esse caso é saltado).
+   efeito (só com o posthog-js instalado; sem ele, esse caso é saltado). Por último (caso Q), os pedidos pelo Google: o
+   site gerado outra vez com MDM_PEDIDOS_URL (no lugar de «pedidosUrl» de data/site.json) a apontar para um servidor
+   local que faz de Apps Script, e cada pedido que o site enviou passa depois pelo Apps Script verdadeiro (google/pedidos.gs,
+   com as imitações da Google de tests/apps-script.mjs); os outros casos correm sem ele, com o Netlify.
    Precisa do Playwright, fora das dependências. Uso, a partir de website/:
      NODE_PATH=/caminho/para/node_modules node tests/encaminhamento.mjs */
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
 import http from 'node:http';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -36,33 +40,35 @@ function campos(corpo, tipo) {
   }
   return out;
 }
-/* o servidor: os ficheiros gerados e, como o Netlify Forms, os POST para "/" */
+/* o servidor: os ficheiros gerados (raiz) e, como o Netlify Forms, os POST para "/" (guardados em lista) */
 const envios = []; let falhar = false;
 const TIPOS = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml',
   '.woff2': 'font/woff2', '.webp': 'image/webp', '.avif': 'image/avif', '.jpg': 'image/jpeg', '.png': 'image/png', '.json': 'application/json' };
-const servidor = http.createServer((req, res) => {
+const estatico = (raiz, lista) => http.createServer((req, res) => {
   if (req.method === 'POST') {
     const partes = []; req.on('data', (c) => partes.push(c));
-    req.on('end', () => { envios.push(campos(Buffer.concat(partes), req.headers['content-type'] || '')); res.writeHead(falhar ? 500 : 200); res.end(); });
+    req.on('end', () => { lista.push(campos(Buffer.concat(partes), req.headers['content-type'] || '')); res.writeHead(falhar ? 500 : 200); res.end(); });
     return;
   }
-  let f = path.join(PUB, decodeURIComponent(new URL(req.url, 'http://x').pathname));
+  let f = path.join(raiz, decodeURIComponent(new URL(req.url, 'http://x').pathname));
   if (fs.existsSync(f) && fs.statSync(f).isDirectory()) f = path.join(f, 'index.html');
-  if (!f.startsWith(PUB) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
+  if (!f.startsWith(raiz) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
   res.writeHead(200, { 'content-type': TIPOS[path.extname(f)] || 'application/octet-stream' });
   fs.createReadStream(f).pipe(res);
 });
-await new Promise((r) => servidor.listen(0, '127.0.0.1', r));
+const ouve = (s) => new Promise((r) => s.listen(0, '127.0.0.1', r));
+const servidor = estatico(PUB, envios);
+await ouve(servidor);
 const B = `http://127.0.0.1:${servidor.address().port}`;
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
-async function nova(url = '/') {
+async function nova(url = '/', base = B) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   await ctx.route(/posthog/, (r) => r.abort());
   await ctx.addInitScript(() => { try { localStorage.setItem('mdm-estatisticas', 'nao'); } catch (e) {} });
   const page = await ctx.newPage();
   page.on('pageerror', (e) => { falhas++; console.log('erro JS', e.message); });
-  await page.goto(B + url);
+  await page.goto(base + url);
   return page;
 }
 const whatsEscondido = (page) => page.$eval('#sendWhats', (b) => b.hidden);
@@ -370,6 +376,152 @@ else {
     'P: depois de «Aceitar» outra vez, o mapa de cliques volta e o clique em «Recusar» não segue como clique sem efeito', { caixa, depoisAceitar });
   await browserP.close();
 }
+
+// Q. pedidos pelo Google (data/site.json «pedidosUrl», README.md «Encaminhamento dos pedidos»): o site gerado outra vez,
+//    com MDM_PEDIDOS_URL a apontar para um servidor local que faz de Apps Script. Como o Google, este responde ao POST com
+//    um 302 para outra origem (lá, script.googleusercontent.com), que dá o JSON. Cada pedido é um só POST text/plain com o
+//    JSON combinado com o Apps Script (sem pedido prévio de CORS) e nenhum POST ao Netlify; o painel aparece só com
+//    {ok: true}; com {ok: false} ou sem rede, o aviso de falha e o que se escreveu fica. O site dos casos de cima, sem
+//    «pedidosUrl», não leva data-pedidos e envia para o Netlify, como sempre. A política de privacidade acompanha
+//    «pedidosUrl» (com a data de «pedidosDesde», aqui MDM_PEDIDOS_DESDE), e a mensagem não passa o maxlength (o Apps
+//    Script recusa campos com mais de 20 000 caracteres)
+ok(!/data-pedidos=/.test(fs.readFileSync(path.join(PUB, 'index.html'), 'utf8')), 'Q: sem «pedidosUrl», o formulário não leva data-pedidos (casos A a P: Netlify)');
+const pedidosQ = [], enviosQ = []; let respostaQ = 'ok', previosQ = 0;
+const conteudoQ = http.createServer((req, res) => {
+  const corpo = respostaQ === 'ok' ? { ok: true, ref: '20261010-teste' } : { ok: false, erro: 'Pedido recusado no teste.' };
+  res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': '*' });
+  res.end(JSON.stringify(corpo));
+});
+await ouve(conteudoQ);
+const appsScript = http.createServer((req, res) => {
+  if (req.method === 'OPTIONS') { previosQ++; res.writeHead(204); return res.end(); }
+  const partes = []; req.on('data', (c) => partes.push(c));
+  req.on('end', () => {
+    pedidosQ.push({ metodo: req.method, caminho: req.url, tipo: req.headers['content-type'] || '', corpo: Buffer.concat(partes).toString('utf8') });
+    if (respostaQ === 'rede') { req.socket.destroy(); return; }
+    res.writeHead(302, { location: `http://127.0.0.1:${conteudoQ.address().port}/macros/echo?user_content_key=teste`, 'access-control-allow-origin': '*' });
+    res.end();
+  });
+});
+await ouve(appsScript);
+const PUBQ = path.join(tmp, 'public-google');
+execFileSync('python3', ['build.py'], { cwd: W, stdio: 'ignore',
+  env: { ...process.env, MDM_OUT: PUBQ, MDM_PEDIDOS_URL: `http://127.0.0.1:${appsScript.address().port}/macros/s/teste/exec`, MDM_PEDIDOS_DESDE: '2026-11-03' } });
+const sitioQ = estatico(PUBQ, enviosQ);
+await ouve(sitioQ);
+const BQ = `http://127.0.0.1:${sitioQ.address().port}`;
+/* a política de privacidade acompanha «pedidosUrl»: sem ele, tudo pelo Netlify, que nos envia cada pedido por email; com
+   ele, o Apps Script na conta Google da MDM (email para a MDM e folha do Google) e o Netlify só sem JavaScript, sem
+   prometer os avisos por email do Netlify (opcionais). Em nenhum dos dois diz que caixa de correio recebe os emails
+   («Gmail»). A Google não entra na lista dos subcontratantes (depende do tipo de conta Google: README.md, «Privacidade»),
+   mas a política diz que recebe o endereço IP de quem envia. A data no topo é a de «pedidosDesde» quando o texto passa a
+   falar do Google. As notas internas ficam no README: o conteúdo da página publicada (<main>) não leva comentários */
+const htmlPriv = (raiz) => fs.readFileSync(path.join(raiz, 'privacidade.html'), 'utf8');
+const textoPriv = (raiz) => htmlPriv(raiz).replace(/<!--[\s\S]*?-->/g, '');
+const corpoPriv = (raiz) => htmlPriv(raiz).split(/<main\b/)[1] || '';
+const subcontratantes = (t) => (/\(subcontratantes\)[^<]*<\/p>\s*<ul>([\s\S]*?)<\/ul>/.exec(t) || [])[1] || '';
+const privN = textoPriv(PUB), privQ = textoPriv(PUBQ);
+ok(!/Apps Script|Google Sheets|conta Google/.test(privN) && /é-nos enviado por email/.test(privN) && /o Netlify envia-nos cada um por email/.test(privN),
+  'Q: sem «pedidosUrl», a política diz que os pedidos vão todos para o Netlify, que no-los envia por email');
+ok(/pequeno programa \(Apps Script\) na conta Google da MDM, que no-lo envia por email/.test(privQ) && /Google Sheets/.test(privQ) && !/sua conta Google/.test(privQ) &&
+   !/é-nos enviado por email|envia-nos cada um por email/.test(privQ) && /desligado no seu browser/.test(privQ),
+  'Q: com «pedidosUrl», a política fala da conta Google da MDM, do Netlify só sem JavaScript, e não promete o email do Netlify');
+ok(!/Gmail/i.test(privN + privQ), 'Q: a política não diz que os pedidos chegam ao Gmail (não se sabe que caixa de correio os recebe)');
+const dataPriv = (t) => (/Última atualização: <time datetime="([\d-]+)">([^<]+)<\/time>/.exec(t) || []).slice(1).join(' ');
+ok(dataPriv(privN) === '2026-10-10 10 de outubro de 2026' && dataPriv(privQ) === '2026-11-03 3 de novembro de 2026',
+  'Q: a data no topo da política: 10 de outubro de 2026 sem «pedidosUrl», a de «pedidosDesde» com ele', [dataPriv(privN), dataPriv(privQ)]);
+ok(/passa pela Google, que recebe também o endereço IP/.test(privQ) && /a Google recebe também o endereço IP/.test(privQ) && !/endereço IP[^.]*Google|Google[^.]*endereço IP/.test(privN),
+  'Q: com «pedidosUrl», a política diz que a Google recebe o endereço IP de quem envia (sem ele, a Google não aparece)');
+ok(!/<!--/.test(corpoPriv(PUB) + corpoPriv(PUBQ)) && !/jurista/.test(htmlPriv(PUB) + htmlPriv(PUBQ)),
+  'Q: a política publicada não leva comentários internos (as notas para o jurista ficam no README)');
+ok(/Netlify/.test(subcontratantes(privN)) && /Netlify/.test(subcontratantes(privQ)) && !/Google/.test(subcontratantes(privN) + subcontratantes(privQ)),
+  'Q: a Google não aparece entre os subcontratantes', subcontratantes(privQ));
+const NOMES_Q = ['subject', 'pagina', 'triagem', 'potencia', 'estimativa', 'nome', 'email', 'telefone', 'servico', 'mensagem', 'bot-field'];
+const MSG_Q = 'Sala com 25 m², 3.º andar.';
+async function enviaQ(servico, foto, msg = MSG_Q) {
+  page = await nova('/', BQ);
+  await page.selectOption('#qServico', servico);
+  await page.fill('#qNome', 'Cliente de teste «Q»'); await page.fill('#qEmail', 'cliente@exemplo.pt'); await page.fill('#qTel', '912 345 678');
+  await page.fill('#qMsg', msg);
+  if (foto) await page.setInputFiles('#qFoto', foto);
+  const antes = pedidosQ.length;
+  await page.click('#sendEmail');
+  await page.waitForFunction(() => !document.querySelector('[data-form-feito]').hidden || /enviar/i.test(document.getElementById('quoteAlert').textContent));
+  const novos = pedidosQ.slice(antes);
+  let j = null; try { j = JSON.parse(novos[0].corpo); } catch (e) {}
+  const ecra = await page.evaluate(() => ({ feito: !document.querySelector('[data-form-feito]').hidden, formEscondido: document.getElementById('quoteForm').hidden,
+    painelSemWa: document.querySelector('[data-feito-wa]').hidden, aviso: document.getElementById('quoteAlert').textContent,
+    wa: !!document.querySelector('#quoteAlert a[href*="wa.me"]'), tel: !!document.querySelector('#quoteAlert a[href^="tel:"]'),
+    nome: document.getElementById('qNome').value }));
+  await page.context().close();
+  return { novos, j, ecra };
+}
+/* o Apps Script verdadeiro (google/pedidos.gs, com as imitações da Google de tests/apps-script.mjs) recebe cada corpo que
+   o site enviou: tem de o aceitar, mandar o email ao destino certo, com a fotografia em anexo, e escrever a linha. Assim
+   os dois lados do formato não se afastam sem um teste falhar. As fotografias têm os primeiros bytes de uma imagem
+   verdadeira (fotoAmostra), porque o Apps Script só junta em anexo o que reconhece como fotografia */
+let AS = null;
+try { AS = await import('./apps-script.mjs'); } catch (e) { ok(false, 'Q: tests/apps-script.mjs carrega (o Apps Script com as imitações da Google)', String(e)); }
+const EMAILS_Q = { comercial: 'mdmassist@mdmassist.com', geral: 'geral@exemplo.pt' };
+function appsScriptQ(corpo) {
+  const s = AS.carregaScript({ props: { EMAIL_COMERCIAL: EMAILS_Q.comercial, EMAIL_GERAL: EMAILS_Q.geral } });
+  const r = s.envia(corpo);
+  return { r, emails: s.enviados, linhas: s.linhas };
+}
+const FOTO_Q = AS ? AS.fotoAmostra('jpeg', 300 * 1000) : crypto.randomBytes(300 * 1000);
+const HEIC_Q = AS ? AS.fotoAmostra('heic', 5000) : FOTO_Q.subarray(0, 5000);
+for (const [servico, destino, formulario, etiqueta, foto, tipo] of [
+  ['Ar condicionado: montagem / instalação', 'comercial', 'orcamento-comercial', '[P1 · Montagem AC]', null],
+  ['Ar condicionado: avaria / reparação', 'geral', 'orcamento', '[P4 · Avaria AC]', { name: 'avaria.jpg', mimeType: 'image/jpeg', buffer: FOTO_Q }, 'image/jpeg'],
+  /* sem tipo no browser (o HEIC, em alguns sistemas): o tipo sai da extensão */
+  ['Outro / vários serviços', 'geral', 'orcamento', '[P5 · Outro]', { name: 'IMG_0001.HEIC', mimeType: '', buffer: HEIC_Q }, 'image/heic'],
+]) {
+  const { novos, j, ecra } = await enviaQ(servico, foto);
+  const rot = `Q: ${servico}`;
+  ok(novos.length === 1 && novos[0].metodo === 'POST' && novos[0].tipo === 'text/plain;charset=utf-8' && novos[0].caminho === '/macros/s/teste/exec' && !previosQ,
+    `${rot}: um só POST text/plain ao Apps Script, sem pedido prévio de CORS`, { novos: novos.map((n) => [n.metodo, n.tipo, n.caminho]), previosQ });
+  ok(j && j.versao === 1 && j.destino === destino && j.formulario === formulario, `${rot}: versao 1, destino «${destino}», formulario «${formulario}»`, j && [j.versao, j.destino, j.formulario]);
+  const c = (j && j.campos) || {};
+  ok(Object.keys(c).sort().join() === [...NOMES_Q].sort().join() && Object.values(c).every((v) => typeof v === 'string'), `${rot}: os campos do formulário Netlify, todos em texto`, Object.keys(c));
+  ok(c.triagem === etiqueta && c.subject === `${etiqueta} Pedido de orçamento, ${servico}` && c.servico === servico && c.nome === 'Cliente de teste «Q»' &&
+     c.email === 'cliente@exemplo.pt' && c.telefone === '912 345 678' && c.mensagem === MSG_Q && c.pagina === 'index.html' && c['bot-field'] === '',
+    `${rot}: assunto, triagem e o que o cliente escreveu`, c);
+  if (foto) {
+    const f = (j && j.fotografia) || {};
+    ok(f.nome === foto.name && f.tipo === tipo && typeof f.base64 === 'string' && !/^data:/.test(f.base64) && Buffer.from(f.base64, 'base64').equals(foto.buffer),
+      `${rot}: a fotografia segue em base64 («${tipo}») e é a que se escolheu`, { nome: f.nome, tipo: f.tipo, tamanho: (f.base64 || '').length });
+  } else ok(j && j.fotografia === null, `${rot}: sem fotografia, «fotografia» vai null`, j && j.fotografia);
+  ok(ecra.feito && ecra.formEscondido && ecra.painelSemWa === (destino === 'comercial'), `${rot}: com {ok: true}, o painel «Pedido enviado»`, ecra);
+  if (AS && novos.length) {
+    const { r, emails, linhas } = appsScriptQ(novos[0].corpo);
+    const m = emails[0] || {}, anexos = m.anexos || [];
+    ok(r.ok === true && emails.length === 1 && m.to === EMAILS_Q[destino] && m.subject.startsWith(c.subject) && linhas.length === 2 &&
+       (foto ? anexos.length === 1 && anexos[0].bytes.equals(foto.buffer) && anexos[0].tipo === tipo : !anexos.length),
+      `${rot}: o Apps Script (google/pedidos.gs) aceita o pedido do site, manda o email a ${EMAILS_Q[destino]}${foto ? ', com a fotografia em anexo,' : ''} e escreve a linha`,
+      { r, to: m.to, subject: m.subject, anexos: anexos.map((a) => [a.nome, a.tipo, a.bytes.length]), linhas: linhas.length });
+  }
+}
+for (const modo of ['erro', 'rede']) {
+  respostaQ = modo;
+  const { novos, ecra } = await enviaQ('Bomba de calor: avaria / reparação', null);
+  ok(novos.length === 1 && !ecra.feito && !ecra.formEscondido && /tente de novo/.test(ecra.aviso) && ecra.tel && ecra.wa && ecra.nome === 'Cliente de teste «Q»',
+    `Q: ${modo === 'erro' ? 'com {ok: false}' : 'sem rede'}, o aviso de falha (telefone e WhatsApp) e o que se escreveu fica`, { novos: novos.length, ecra });
+}
+respostaQ = 'ok';
+{
+  /* colar 30 000 caracteres na mensagem: o maxlength (5 000) corta, e o pedido cabe no limite do Apps Script */
+  const longa = 'Pinga água na sala. '.repeat(1500);
+  const { novos, j, ecra } = await enviaQ('Ar condicionado: avaria / reparação', null, longa);
+  const m = ((j && j.campos) || {}).mensagem || '';
+  ok(novos.length === 1 && m.length === 5000 && longa.startsWith(m) && ecra.feito,
+    'Q: uma mensagem de 30 000 caracteres segue com os 5 000 do maxlength (abaixo dos 20 000 do Apps Script)', { n: m.length, feito: ecra.feito });
+  if (AS && novos.length) {
+    const { r } = appsScriptQ(novos[0].corpo);
+    ok(r.ok === true, 'Q: o Apps Script aceita essa mensagem cortada pelo maxlength', r);
+  }
+}
+ok(!enviosQ.length, 'Q: com «pedidosUrl», nenhum POST ao Netlify («/»)', enviosQ);
+appsScript.close(); conteudoQ.close(); sitioQ.close();
 
 await browser.close(); servidor.close();
 fs.rmSync(tmp, { recursive: true, force: true });

@@ -719,9 +719,11 @@
   });
 
   /* ═══ Pedido de orçamento ═══
-     No site: Netlify Forms (formulário "orcamento" em src/partials/contacto.html). Com JavaScript, valida aqui,
-     envia com fetch para "/" sem sair da página e, se falhar, deixa o que foi escrito e oferece telefone e WhatsApp.
-     Sem JavaScript, o envio é normal e o Netlify mostra obrigado.html.
+     No site: o formulário "orcamento" em src/partials/contacto.html. Com JavaScript, valida aqui, envia com fetch sem
+     sair da página e, se falhar, deixa o que foi escrito e oferece telefone e WhatsApp. O envio vai para o Apps Script
+     da MDM quando o formulário tem data-pedidos (data/site.json «pedidosUrl»: o pedido segue por email e fica numa folha
+     do Google; enviaPedidos) ou, sem ele, para o Netlify Forms, com um POST para "/" (enviaNetlify).
+     Sem JavaScript, o envio é normal, vai sempre para o Netlify Forms e o Netlify mostra obrigado.html.
      No ficheiro único (MDM-index.html, aberto de file://) não há servidor: o botão abre o email do visitante com o
      pedido preparado e o campo da fotografia não aparece (a fotografia segue por WhatsApp). */
   var form = $('quoteForm');
@@ -729,14 +731,17 @@
   form.noValidate = true;   /* a validação do browser só serve sem JavaScript; daqui em diante é a de baixo */
 
   var SEM_ENVIO = location.protocol === 'file:' || form.hasAttribute('data-sem-envio');
-  var FOTO_MAX = 8 * 1000 * 1000;   /* o Netlify aceita até 8 MB por pedido */
+  var FOTO_MAX = 8 * 1000 * 1000;   /* o Netlify aceita até 8 MB por pedido; o Apps Script da MDM, a fotografia até 8 MB */
   var TEL = '218 935 050', TEL_HREF = 'tel:+351218935050', EMAIL = 'mdmassist@mdmassist.com';
   var ligueTel = [TEL_HREF, 'ligue ' + TEL];   /* a ligação «ligue 218 935 050» dos avisos */
   var WA_BASE = 'https://wa.me/351910307579?text=';
+  /* o endereço /exec do Apps Script da MDM (data-pedidos, de «pedidosUrl» em data/site.json); vazio: Netlify Forms */
+  var PEDIDOS = form.getAttribute('data-pedidos') || '';
   /* c: pedido do comercial (instalação e manutenção). Segue só por email: vai para o formulário Netlify
-     «orcamento-comercial», que tem o seu próprio email de aviso, e o formulário não o oferece por WhatsApp. O resto
-     (avarias, «outro», sem serviço) fica no formulário geral «orcamento». README.md, «Encaminhamento dos pedidos». */
-  var FORM_COMERCIAL = 'orcamento-comercial';
+     «orcamento-comercial», que tem o seu próprio email de aviso (com data-pedidos, para o Apps Script com o destino
+     «comercial»), e o formulário não o oferece por WhatsApp. O resto (avarias, «outro», sem serviço) fica no formulário
+     geral «orcamento» (destino «geral»). README.md, «Encaminhamento dos pedidos». */
+  var FORM_COMERCIAL = 'orcamento-comercial', FORM_GERAL = 'orcamento';
   var TRIAGEM = {
     'Ar condicionado: montagem / instalação':   { p: 'P1', seg: 'Montagem AC', c: true },
     'Bomba de calor: instalação / manutenção':  { p: 'P1', seg: 'Bomba de calor', c: true },
@@ -854,11 +859,20 @@
     });
   });
 
+  /* o tipo da fotografia para o Apps Script, que só aceita imagens: o que o browser diz ou, quando não diz nada (o HEIC,
+     em alguns sistemas), o da extensão do nome; vazio se não parecer uma imagem */
+  var EXT_FOTO = { jpg: 'jpeg', jpeg: 'jpeg', jpe: 'jpeg', png: 'png', gif: 'gif', webp: 'webp', heic: 'heic', heif: 'heif',
+                   avif: 'avif', bmp: 'bmp', tif: 'tiff', tiff: 'tiff' };
+  function tipoFoto(f) {
+    if (/^image\//.test(f.type || '')) return f.type;
+    var m = /\.(\w+)$/.exec(f.name || ''), e = m && EXT_FOTO[m[1].toLowerCase()];
+    return !f.type && e ? 'image/' + e : '';
+  }
   /* fotografia (opcional): uma imagem até 8 MB. Se não servir, sai do pedido e o erro diz porquê */
   function fotoErro(f) {
     if (!f) return '';
     if (f.size > FOTO_MAX) return 'A fotografia tem mais de 8 MB e não segue com o pedido. Escolha uma mais pequena ou envie-a depois por WhatsApp.';
-    if (f.type && !/^image\//.test(f.type)) return 'Este ficheiro não é uma fotografia e não segue com o pedido. Escolha uma imagem (JPG, PNG ou HEIC).';
+    if ((f.type && !/^image\//.test(f.type)) || (PEDIDOS && !tipoFoto(f))) return 'Este ficheiro não é uma fotografia e não segue com o pedido. Escolha uma imagem (JPG, PNG ou HEIC).';
     return '';
   }
   function confereFoto() {
@@ -1538,7 +1552,7 @@
     };
   })();
 
-  /* campos escondidos que o Netlify guarda com o pedido: triagem e o assunto do email de aviso */
+  /* campos escondidos que seguem com o pedido (Netlify ou Apps Script): triagem e o assunto do email de aviso */
   function preparaCampos(d) {
     form.querySelector('[data-triagem]').value = etiqueta(d.servico);
     form.querySelector('[data-assunto]').value = assunto(d);
@@ -1553,6 +1567,41 @@
     return fetch('/', { method: 'POST', body: dados, signal: ctl ? ctl.signal : undefined })
       .then(function (r) { return r.ok; }, function () { return false; })
       .then(function (ok) { clearTimeout(timer); return ok; });
+  }
+  /* Com data-pedidos: o pedido vai em JSON para o Apps Script da MDM (google/LEIA-ME.md), que o manda por email ao
+     comercial ou ao geral (destino) e o regista numa folha do Google. Os campos são os do formulário Netlify, com os
+     mesmos nomes (build.py --check confere CAMPOS_PEDIDO com os do formulário); a fotografia segue à parte, em base64.
+     Em text/plain, o browser envia-o sem pedir licença antes ao Google (sem pedido prévio de CORS). O Apps Script não
+     escolhe o código HTTP da resposta: só conta como enviado um JSON com ok: true; o resto (ok: false, outra resposta,
+     rede, tempo) é uma falha. */
+  var CAMPOS_PEDIDO = ['subject', 'pagina', 'triagem', 'potencia', 'estimativa', 'nome', 'email', 'telefone', 'servico',
+                       'mensagem', 'bot-field'];
+  function leFoto(f) {
+    return new Promise(function (feito, falha) {
+      if (!f) { feito(null); return; }
+      var r = new FileReader();
+      r.onload = function () {
+        var s = String(r.result || ''), i = s.indexOf(',');
+        feito({ nome: f.name || 'fotografia', tipo: tipoFoto(f), base64: i >= 0 ? s.slice(i + 1) : '' });
+      };
+      r.onerror = r.onabort = function () { falha(r.error); };
+      r.readAsDataURL(f);
+    });
+  }
+  function enviaPedidos(d) {
+    var c = comercial(d.servico), dados = new FormData(form), campos = {};
+    CAMPOS_PEDIDO.forEach(function (n) { var v = dados.get(n); campos[n] = typeof v === 'string' ? v : ''; });
+    return leFoto(d.foto).then(function (fotografia) {
+      var ctl = window.AbortController ? new AbortController() : null;
+      var timer = ctl && setTimeout(function () { ctl.abort(); }, d.foto ? 120000 : 20000);
+      var corpo = JSON.stringify({ versao: 1, destino: c ? 'comercial' : 'geral', formulario: c ? FORM_COMERCIAL : FORM_GERAL,
+                                   campos: campos, fotografia: fotografia });
+      return fetch(PEDIDOS, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: corpo,
+                              signal: ctl ? ctl.signal : undefined })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) { return !!(j && j.ok === true); }, function () { return false; })
+        .then(function (ok) { clearTimeout(timer); return ok; });
+    }, function () { return false; });
   }
   function quoteMailto(d) {
     location.href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent(assunto(d)) + '&body=' + encodeURIComponent(quoteBody(d));
@@ -1616,10 +1665,10 @@
     /* uma estimativa preenchida mas não junta segue também (sem mexer no foco; não depois de «Retirar»), e o preço provável à vista */
     pot.juntaAutomatico(); preco.junta(); d = quoteData();
     preparaCampos(d);
-    track('quote_form_submit', pot.numeros({ via: SEM_ENVIO ? 'mailto' : 'netlify', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg }));
+    track('quote_form_submit', pot.numeros({ via: SEM_ENVIO ? 'mailto' : PEDIDOS ? 'google' : 'netlify', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg }));
     if (SEM_ENVIO) { quoteMailto(d); return; }
     btn.setAttribute('aria-busy', 'true'); lbl.textContent = d.foto ? 'A enviar a fotografia…' : 'A enviar…'; quoteAlert('');
-    enviaNetlify(d).then(function (ok) {
+    (PEDIDOS ? enviaPedidos(d) : enviaNetlify(d)).then(function (ok) {
       btn.removeAttribute('aria-busy');
       if (ok) {
         lbl.textContent = 'Pedido enviado';

@@ -7,11 +7,16 @@ Só biblioteca padrão. Uso:
     python3 website/build.py --faltam   # lista os dados que só a MDM pode dar (data/dados-mdm.json, factos das obras)
     MDM_OUT=/tmp/x python3 website/build.py --check   # gera noutra pasta (só apaga uma que o build.py gerou: limpa_saida)
     MDM_PRECOS_FICHEIRO=…                # outra tabela de preços em vez de data/precos.json, só para testes
+    MDM_PEDIDOS_URL=…                    # outro endereço para os pedidos em vez de «pedidosUrl» de site.json, só para testes
+    MDM_PEDIDOS_DESDE=AAAA-MM-DD         # com MDM_PEDIDOS_URL: a data em vez de «pedidosDesde» de site.json, só para testes
 
 Sintaxe dos modelos (src/):
     <!--meta {...json...} -->            no topo de cada página: title, description, file, nav, jsonld, css
                                           (jsonld: faq, breadcrumb, servico; este lê "servico": {nome, tipo, ofertas};
                                           a empresa, HVACBusiness, vai sempre em todas as páginas)
+                                          atualizada (AAAA-MM-DD, só a política de privacidade): a data do texto; a página
+                                          mostra page.atualizadaData e page.atualizadaTexto, a mais recente desta e,
+                                          com «pedidosUrl», de «pedidosDesde» (data_politica())
     {{ caminho.ponto }}                   valor de site.*, page.*, obra.*, root (prefixo relativo à raiz), serv_n.* (obras por serviço)
                                           (obra.*: os campos de obras.json e os calculados por campos_obra(): serv, servLabel,
                                           servicoUrl, orcamentoHref, waHref, ctaTitulo, relTitulo, relLigacao, relHref, fotoSizes)
@@ -44,6 +49,7 @@ import json
 import re
 import shutil
 import sys
+from datetime import date
 from pathlib import Path
 from urllib.parse import quote, unquote
 try:
@@ -159,6 +165,97 @@ if not PRECOS_FICHEIRO.exists():
     raise SystemExit(f"build.py: falta {PRECOS_FICHEIRO if PRECOS_OUTRO else 'data/precos.json'} "
                      "(preço provável do formulário; ver README.md, «Preço provável»)")
 PRECOS_DOC = json.loads(PRECOS_FICHEIRO.read_text(encoding="utf-8"))
+
+# Pedidos do formulário pelo Google (README.md, «Encaminhamento dos pedidos»; google/LEIA-ME.md): site.json «pedidosUrl»
+# é o endereço /exec da aplicação web do Apps Script da MDM, que manda cada pedido por email e o regista numa folha do
+# Google. O contacto põe-no no formulário em data-pedidos e o site.js envia para lá. Vazio: o formulário envia para o
+# Netlify Forms, como antes. Sem JavaScript, o envio vai sempre para o Netlify Forms. check_pedidos() valida o endereço.
+# Numa conta do Google Workspace, o Google pode mostrar o endereço com o domínio (…/a/macros/<domínio>/s/…/exec): também
+# se aceita (README.md: abri-lo numa janela privada antes de publicar, para ver que não pede conta Google).
+# «pedidosDesde» (AAAA-MM-DD) é o dia em que o site passa a enviar para lá: a política de privacidade muda de texto nesse
+# dia e mostra essa data no topo (data_politica()). check_pedidos() exige-a com «pedidosUrl» e só com ele.
+# MDM_PEDIDOS_URL: outro endereço no lugar deste, só para testes (tests/encaminhamento.mjs aponta-o para um servidor
+# local, que finge ser o Apps Script), e MDM_PEDIDOS_DESDE a data com ele. No Netlify são recusados: o site publicado
+# usa sempre os de site.json.
+PEDIDOS_RE = re.compile(r"https://script\.google\.com/(?:a/macros/[A-Za-z0-9.-]+/|macros/)s/[\w-]+/exec")
+DATA_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
+PEDIDOS_SITE = SITE.get("pedidosUrl", "")
+DESDE_SITE = SITE.get("pedidosDesde", "")
+PEDIDOS_OUTRO = os.environ.get("MDM_PEDIDOS_URL", "")
+DESDE_OUTRO = os.environ.get("MDM_PEDIDOS_DESDE", "")
+if (PEDIDOS_OUTRO or DESDE_OUTRO) and os.environ.get("NETLIFY") == "true":
+    raise SystemExit("build.py: MDM_PEDIDOS_URL e MDM_PEDIDOS_DESDE são só para testes; no Netlify o site usa sempre "
+                     "«pedidosUrl» e «pedidosDesde» de data/site.json")
+if PEDIDOS_OUTRO and not re.fullmatch(r"https?://[^\s\"'<>]+", PEDIDOS_OUTRO):
+    raise SystemExit(f"build.py: MDM_PEDIDOS_URL tem de ser um endereço http:// ou https:// → «{PEDIDOS_OUTRO}»")
+if DESDE_OUTRO and not PEDIDOS_OUTRO:
+    raise SystemExit("build.py: MDM_PEDIDOS_DESDE só serve com MDM_PEDIDOS_URL")
+
+
+def data_valida(texto):
+    """«2026-10-10» → o mesmo texto, se for uma data que existe; senão None."""
+    if not isinstance(texto, str) or not DATA_RE.fullmatch(texto):
+        return None
+    try:
+        date.fromisoformat(texto)
+    except ValueError:
+        return None
+    return texto
+
+
+if DESDE_OUTRO and not data_valida(DESDE_OUTRO):
+    raise SystemExit(f"build.py: MDM_PEDIDOS_DESDE tem de ser uma data AAAA-MM-DD → «{DESDE_OUTRO}»")
+SITE["pedidosUrl"] = PEDIDOS_OUTRO or (PEDIDOS_SITE if isinstance(PEDIDOS_SITE, str) else "")
+# a data em que o texto da política com «pedidosUrl» passou a valer (vazia sem «pedidosUrl»; check_pedidos() avisa)
+PEDIDOS_DESDE = ((DESDE_OUTRO if PEDIDOS_OUTRO else data_valida(DESDE_SITE)) or "") if SITE["pedidosUrl"] else ""
+MESES = ("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro",
+         "novembro", "dezembro")
+
+
+def data_politica(meta):
+    """A data no topo da política de privacidade: «atualizada» do <!--meta--> (a última mudança do texto) ou, com
+    «pedidosUrl» preenchido, «pedidosDesde» (o dia em que o texto passou a falar do Google), a mais recente das duas.
+    → ("2026-10-10", "10 de outubro de 2026")."""
+    base = data_valida(meta["atualizada"])
+    if not base:
+        raise SystemExit(f"{meta['file']}: «atualizada» no <!--meta--> tem de ser uma data AAAA-MM-DD → «{meta['atualizada']}»")
+    d = max(base, PEDIDOS_DESDE)
+    a = date.fromisoformat(d)
+    return d, f"{a.day} de {MESES[a.month - 1]} de {a.year}"
+
+
+# O Apps Script (google/pedidos.gs, colado à mão na conta Google da MDM) tem a sua lista de campos e os seus limites.
+# check_pedidos() e check_formulario() conferem-nos com os do site: um campo novo que o Apps Script não leia nunca chegaria
+# ao email nem à folha, e um campo ou uma fotografia acima do limite dele seria sempre recusado.
+PEDIDOS_GS = ROOT / "google" / "pedidos.gs"
+# os campos de texto livre do formulário: cada um com maxlength, sem passar o CAMPO_MAX do Apps Script
+FORM_LIVRES = ("nome", "email", "telefone", "mensagem")
+# folga para os campos no pedido inteiro, além da fotografia em base64 (muito mais do que o formulário deixa escrever)
+PEDIDO_FOLGA = 256 * 1024
+
+
+def constante(texto, nome):
+    """«const FOTO_MAX = 8 * 1024 * 1024;» → 8388608 (um número ou números multiplicados; None se não houver)."""
+    m = re.search(r"\b(?:const|var|let)\s+%s\s*=\s*(\d+(?:\s*\*\s*\d+)*)\s*;" % nome, texto)
+    if not m:
+        return None
+    n = 1
+    for x in m.group(1).split("*"):
+        n *= int(x)
+    return n
+
+
+def le_apps_script():
+    """O que se confere no Apps Script: a lista CAMPOS e os limites CAMPO_MAX, FOTO_MAX e PEDIDO_MAX (None se faltar)."""
+    if not PEDIDOS_GS.exists():
+        return None
+    t = re.sub(r"/\*.*?\*/", " ", PEDIDOS_GS.read_text(encoding="utf-8"), flags=re.S)
+    m = re.search(r"\bconst\s+CAMPOS\s*=\s*\[([^\]]*)\]", t)
+    campos = {a or b for a, b in re.findall(r"'([^']*)'|\"([^\"]*)\"", m.group(1))} if m else None
+    return {"CAMPOS": campos, **{k: constante(t, k) for k in ("CAMPO_MAX", "FOTO_MAX", "PEDIDO_MAX")}}
+
+
+APPS_SCRIPT = le_apps_script()
 
 
 def precos_linhas():
@@ -469,6 +566,8 @@ def breadcrumb_ld(trail):
 def page_ctx(meta, file):
     # wa: mensagem de WhatsApp da barra do telemóvel, do rodapé e do contacto (site.wa.*); cada serviço usa a sua
     meta = {"preselect": "", "nav": "", "robots": "index,follow", "og": "", "wa": "geral", **meta}
+    if "atualizada" in meta:   # a política de privacidade: a data no topo (data_politica())
+        meta["atualizadaData"], meta["atualizadaTexto"] = data_politica(meta)
     if PREVIEW and not NOINDEX_RE.search(meta["robots"]):
         meta["robots"] = "noindex"   # pré-visualização: nenhuma página entra no Google antes do lançamento
     depth = file.count("/")
@@ -674,6 +773,8 @@ FORM_CAMPOS = {"form-name", "subject", "pagina", "triagem", "potencia", "estimat
 # enviar. O Netlify só aceita um formulário que encontrou no HTML publicado, por isso build.py gera-o em formularios.html,
 # escondido e com os mesmos campos (pela ordem do formulário visível: o Netlify resume cada pedido pelo primeiro campo de
 # texto e pela primeira caixa de texto). Nenhuma página liga para lá; fica fora do mapa do site e com noindex.
+# Com «pedidosUrl» preenchido (site.json), o site.js manda os pedidos ao Apps Script da MDM (destino «comercial» ou
+# «geral», os mesmos campos) e os formulários Netlify ficam só para quem não tem JavaScript (sempre «orcamento»).
 FORM_COMERCIAL = "orcamento-comercial"
 FORMULARIOS = "formularios.html"
 FORM_ESQUELETO = [("subject", "hidden"), ("pagina", "hidden"), ("triagem", "hidden"), ("potencia", "hidden"),
@@ -774,6 +875,9 @@ def texto_proibido(nome, text):
     descodificados e sem os caracteres invisíveis (espaço de largura zero e outros) no meio de uma frase. E lê-o duas
     vezes: tal como está (os atributos contam) e sem as etiquetas de texto, que não podem esconder uma frase."""
     t = re.sub(r"data:[^,\s\"']*;base64,[A-Za-z0-9+/=]+", "data:", re.sub(r"<!--.*?-->", "", text, flags=re.S))
+    # o endereço do Apps Script (data-pedidos) também são letras ao acaso, que não se leem
+    if SITE["pedidosUrl"]:
+        t = t.replace(html.escape(SITE["pedidosUrl"], quote=True), " ").replace(SITE["pedidosUrl"], " ")
     t = re.sub(r"\\(?:u\{?([0-9a-fA-F]{4})\}?|x([0-9a-fA-F]{2}))", lambda m: chr(int(m.group(1) or m.group(2), 16)), t)
     t = re.sub("[\u00ad\u200b-\u200d\u2060\ufeff]", "", unquote(html.unescape(t)))
     vistas = {t, TAG_TEXTO_RE.sub(lambda m: " " if re.match(r"</?br\b", m.group(0), re.I) else "", t)}
@@ -875,7 +979,7 @@ def check(files):
     problems += check_preview()
     problems += check_regras() + check_duracoes() + check_testemunhos() + check_formatos() + check_btu() + check_precos()
     problems += check_marcas() + check_equipa()
-    problems += check_encaminhamento() + check_precos_teste()
+    problems += check_encaminhamento() + check_pedidos() + check_precos_teste()
     # uma imagem com 0 bytes (gravação interrompida) existe para REF_RE mas não aparece; .tmp é uma gravação a meio
     for img in sorted(p for p in (OUT / "assets" / "img").rglob("*") if p.is_file()):
         if img.stat().st_size == 0:
@@ -895,6 +999,8 @@ def check(files):
     print(f"{len(files)} páginas geradas em {OUT}")
     if PRECOS_OUTRO:
         print(f"Preços de MDM_PRECOS_FICHEIRO ({PRECOS_FICHEIRO}), só para testes: não publicar esta pasta.")
+    if PEDIDOS_OUTRO:
+        print(f"Pedidos para MDM_PEDIDOS_URL ({PEDIDOS_OUTRO}), só para testes: não publicar esta pasta.")
     if PREVIEW:
         print("Pré-visualização: noindex em todas as páginas. No lançamento: \"preview\": false em data/site.json (README.md).")
     n = sum(1 for _ in em_falta())
@@ -964,6 +1070,80 @@ def check_formulario(f, text):
         out.append(f"{f}: falta o campo escondido estimativa (vazio; site.js põe lá o preço provável mostrado)")
     if "data-precos=" not in form:
         out.append(f"{f}: falta o preço provável (data-precos) no formulário")
+    # o endereço do Apps Script (site.json «pedidosUrl»): no formulário só quando está preenchido, e igual
+    pedidos = SITE["pedidosUrl"]
+    if pedidos and f' data-pedidos="{html.escape(pedidos, quote=True)}"' not in abre:
+        out.append(f"{f}: falta data-pedidos com o endereço de «pedidosUrl» no formulário (partials/contacto.html)")
+    elif not pedidos and "data-pedidos=" in abre:
+        out.append(f"{f}: o formulário tem data-pedidos, mas «pedidosUrl» em site.json está vazio")
+    # o texto livre tem maxlength, sem passar o limite de cada campo no Apps Script (CAMPO_MAX, google/pedidos.gs)
+    limite = (APPS_SCRIPT or {}).get("CAMPO_MAX")
+    for nome in FORM_LIVRES:
+        el = re.search(r'<(?:input|textarea)\b[^>]*\bname="%s"[^>]*>' % nome, form)
+        n = el and re.search(r'\bmaxlength="(\d+)"', el.group(0))
+        if el and not n:
+            out.append(f"{f}: o campo «{nome}» não tem maxlength (partials/contacto.html): o Apps Script recusa "
+                       f"campos com mais de {limite or 'CAMPO_MAX'} caracteres")
+        elif n and (int(n.group(1)) < 1 or (limite and int(n.group(1)) > limite)):
+            out.append(f"{f}: o maxlength do campo «{nome}» ({n.group(1)}) tem de ficar entre 1 e o CAMPO_MAX do Apps Script "
+                       f"({limite or '?'}, google/pedidos.gs)")
+    return out
+
+
+def check_pedidos():
+    """site.json «pedidosUrl»: vazio ou o endereço /exec da aplicação web do Apps Script (google/LEIA-ME.md). E os campos
+    que o site.js manda ao Apps Script (CAMPOS_PEDIDO) e os que o Apps Script lê (CAMPOS, google/pedidos.gs) são os do
+    formulário Netlify, menos form-name e a fotografia, que segue à parte: quem mudar os campos do formulário muda também
+    o site.js e o Apps Script. A fotografia maior que o site deixa enviar (FOTO_MAX do site.js) cabe nos limites do Apps
+    Script (FOTO_MAX e, em base64 com os campos, PEDIDO_MAX). «pedidosDesde», o dia em que a política de privacidade
+    passou a falar do Google, vai com «pedidosUrl»: os dois preenchidos ou os dois vazios."""
+    out, v, d = [], PEDIDOS_SITE, DESDE_SITE
+    if not isinstance(v, str):
+        out.append("site.json «pedidosUrl»: tem de ser texto, entre aspas (vazio ou o endereço /exec do Apps Script)")
+    elif v and not PEDIDOS_RE.fullmatch(v):
+        out.append("site.json «pedidosUrl»: vazio ou o endereço da aplicação web do Apps Script, "
+                   "https://script.google.com/macros/s/…/exec (numa conta do Google Workspace, "
+                   f"https://script.google.com/a/macros/<domínio>/s/…/exec; google/LEIA-ME.md) → «{v}»")
+    if d and not data_valida(d):
+        out.append(f"site.json «pedidosDesde»: uma data AAAA-MM-DD (por exemplo 2026-11-03), ou vazio → «{d}»")
+    elif v and not d:
+        out.append("site.json «pedidosDesde»: com «pedidosUrl» preenchido, ponha aqui o dia em que publica o site com ele "
+                   "(AAAA-MM-DD). A política de privacidade passa nesse dia a falar do Google e mostra essa data no topo "
+                   "(README.md, «Encaminhamento dos pedidos»)")
+    elif d and not v:
+        out.append(f"site.json «pedidosDesde» ({d}) sem «pedidosUrl»: deixe-o vazio. Se desligou o envio pelo Google, a "
+                   "política de privacidade voltou ao texto do Netlify: mude «atualizada», no <!--meta--> de "
+                   "src/pages/privacidade.html, para o dia em que publicar")
+    js = OUT / "assets" / "js" / "site.js"
+    js_texto = js.read_text(encoding="utf-8") if js.exists() else ""
+    m = re.search(r"\bCAMPOS_PEDIDO\s*=\s*\[([^\]]*)\]", js_texto)
+    campos_js = set(re.findall(r"'([^']*)'", m.group(1))) if m else None
+    esperado = FORM_CAMPOS - {"form-name", "fotografia"}
+    diferenca = lambda campos: f"a mais {sorted(campos - esperado)}, em falta {sorted(esperado - campos)}"
+    if campos_js is None:
+        out.append("site.js: falta CAMPOS_PEDIDO (os campos que seguem para o Apps Script)")
+    elif campos_js != esperado:
+        out.append(f"site.js: CAMPOS_PEDIDO diferente dos campos do formulário → {diferenca(campos_js)}")
+    gs = APPS_SCRIPT
+    if gs is None:
+        return out + ["google/pedidos.gs: não existe (o Apps Script que recebe os pedidos, google/LEIA-ME.md)"]
+    if gs["CAMPOS"] is None:
+        out.append("google/pedidos.gs: falta a lista CAMPOS (os campos que o Apps Script lê de cada pedido)")
+    elif gs["CAMPOS"] != esperado:
+        out.append(f"google/pedidos.gs: CAMPOS diferente dos campos do formulário → {diferenca(gs['CAMPOS'])}. "
+                   "Um campo que o Apps Script não lê não chega ao email nem à folha")
+    for k in ("CAMPO_MAX", "FOTO_MAX", "PEDIDO_MAX"):
+        if not gs[k]:
+            out.append(f"google/pedidos.gs: falta {k} (um número, ou números multiplicados como 8 * 1024 * 1024)")
+    foto = constante(js_texto, "FOTO_MAX")
+    if not foto:
+        out.append("site.js: falta FOTO_MAX (o tamanho máximo da fotografia, em bytes)")
+    elif gs["FOTO_MAX"] and foto > gs["FOTO_MAX"]:
+        out.append(f"site.js: FOTO_MAX ({foto}) passa o FOTO_MAX do Apps Script ({gs['FOTO_MAX']}, google/pedidos.gs): "
+                   "o Apps Script recusaria fotografias que o site deixa escolher")
+    elif gs["PEDIDO_MAX"] and -(-foto // 3) * 4 + PEDIDO_FOLGA > gs["PEDIDO_MAX"]:
+        out.append(f"google/pedidos.gs: PEDIDO_MAX ({gs['PEDIDO_MAX']}) não chega para a maior fotografia que o site deixa "
+                   f"enviar ({foto} bytes, {-(-foto // 3) * 4} caracteres em base64) com os campos")
     return out
 
 

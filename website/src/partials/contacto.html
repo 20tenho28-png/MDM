@@ -27,9 +27,15 @@
            O browser só valida sozinho sem JavaScript: site.js desliga essa validação e usa a sua.
            Os pedidos de instalação e manutenção seguem como «orcamento-comercial», com o seu email de aviso: site.js troca
            o form-name e build.py gera esse formulário em formularios.html, com os mesmos campos. Quem mudar os campos daqui
-           muda também FORM_CAMPOS e FORM_ESQUELETO no build.py (README.md, «Encaminhamento dos pedidos»). -->
+           muda também FORM_CAMPOS e FORM_ESQUELETO no build.py, CAMPOS_PEDIDO no site.js e o Apps Script em google/
+           (README.md, «Encaminhamento dos pedidos»).
+           Com «pedidosUrl» preenchido em data/site.json, o formulário leva data-pedidos com esse endereço e, com JavaScript,
+           site.js envia o pedido para lá (o Apps Script da MDM, que o manda por email e o regista numa folha do Google),
+           e não para o Netlify. Sem JavaScript, o envio continua a ir para o Netlify Forms.
+           O nome, o email, o telefone e a mensagem têm maxlength: o Apps Script recusa campos com mais de CAMPO_MAX
+           caracteres (google/pedidos.gs) e o pedido nunca seguiria. --check confere que cada maxlength fica abaixo dele. -->
       <form id="quoteForm" name="orcamento" method="POST" action="/obrigado.html" enctype="multipart/form-data"
-            data-netlify="true" netlify-honeypot="bot-field" data-preselect="{{ page.preselect }}" aria-labelledby="quoteTitle">
+            data-netlify="true" netlify-honeypot="bot-field" data-preselect="{{ page.preselect }}"{{#se site.pedidosUrl}} data-pedidos="{{ site.pedidosUrl }}"{{/se}} aria-labelledby="quoteTitle">
         <input type="hidden" name="form-name" value="orcamento">
         <input type="hidden" name="subject" value="Pedido de orçamento MDM" data-assunto>
         <input type="hidden" name="pagina" value="{{ _file }}">
@@ -38,7 +44,7 @@
         <input type="hidden" name="estimativa" value="" data-estimativa-campo>
         <div class="campo">
           <label for="qNome">Nome *</label>
-          <input class="campo-in" id="qNome" name="nome" type="text" autocomplete="name" placeholder="O seu nome ou o da empresa" aria-describedby="eNome" required>
+          <input class="campo-in" id="qNome" name="nome" type="text" maxlength="200" autocomplete="name" placeholder="O seu nome ou o da empresa" aria-describedby="eNome" required>
           <p class="campo-erro" id="eNome"></p>
         </div>
         <fieldset class="campo-par">
@@ -46,12 +52,12 @@
           <div class="campo-2">
             <div class="campo">
               <label for="qEmail">Email</label>
-              <input class="campo-in" id="qEmail" name="email" type="email" inputmode="email" autocomplete="email" placeholder="email@empresa.pt" aria-describedby="eEmail">
+              <input class="campo-in" id="qEmail" name="email" type="email" maxlength="254" inputmode="email" autocomplete="email" placeholder="email@empresa.pt" aria-describedby="eEmail">
               <p class="campo-erro" id="eEmail"></p>
             </div>
             <div class="campo">
               <label for="qTel">Telefone</label>
-              <input class="campo-in" id="qTel" name="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+351 9xx xxx xxx" aria-describedby="eTel">
+              <input class="campo-in" id="qTel" name="telefone" type="tel" maxlength="100" inputmode="tel" autocomplete="tel" placeholder="+351 9xx xxx xxx" aria-describedby="eTel">
               <p class="campo-erro" id="eTel"></p>
             </div>
           </div>
@@ -157,7 +163,7 @@
         </div>
         <div class="campo">
           <label for="qMsg">Mensagem <span class="opcional">(opcional)</span></label>
-          <textarea class="campo-in" id="qMsg" name="mensagem" rows="4" placeholder="Ex.: apartamento em Lisboa, split na sala que pinga água."></textarea>
+          <textarea class="campo-in" id="qMsg" name="mensagem" rows="4" maxlength="5000" placeholder="Ex.: apartamento em Lisboa, split na sala que pinga água."></textarea>
         </div>
         <div class="campo" data-campo-foto>
           <label for="qFoto">Fotografia <span class="opcional">(opcional, até 8 MB)</span></label>
