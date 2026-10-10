@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /api/
+Disallow: /gestao
+Disallow: /en/gestao
+Sitemap: https://mdm-climatizacao-a-medida.jocund-bud-7221.chatgpt.site/sitemap.xml
