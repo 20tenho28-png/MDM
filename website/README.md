@@ -68,6 +68,7 @@ work from this folder alone until they are connected to a new backend:
 
 - Replace `https://mdm-climatizacao-a-medida.jocund-bud-7221.chatgpt.site` in
   canonical, Open Graph, hreflang and `sitemap.xml` with the new domain.
-- The original host serves pages without `.html` (`/obras`) and redirects the
-  `.html` URLs. Pick one form on the new host and keep links, canonical and
-  sitemap consistent.
+- Links, canonical URLs, hreflang, `og:url` and `sitemap.xml` all use the
+  `.html` form (`/obras.html`), so the site works on any static host. The
+  original host served `/obras` and redirected `.html`; this copy no longer
+  depends on that.
