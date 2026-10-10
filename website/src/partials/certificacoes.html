@@ -1,0 +1,37 @@
+<section class="cert" aria-label="Certificações e marcas">
+  <div class="cert-in">
+    <!-- números por preencher em data/dados-mdm.json: enquanto faltarem, o selo mostra só o nome. Nunca inventar um número. -->
+    <div class="cert-selos">
+      <div class="selo">
+        <span class="selo-sigla">APIRAC</span>
+        <span class="selo-txt">Associação Portuguesa da Indústria de Refrigeração e Ar Condicionado{{#se dados.apirac}}<br><span class="selo-num">{{ dados.apirac }}</span>{{/se}}</span>
+      </div>
+      <div class="selo">
+        <span class="selo-sigla">IMPIC</span>
+        <span class="selo-txt">Instituto dos Mercados Públicos, do Imobiliário e da Construção{{#se dados.impic}}<br><span class="selo-num">{{ dados.impic }}</span>{{/se}}</span>
+      </div>
+      <div class="selo">
+        <span class="selo-sigla">F-gas</span>
+        <span class="selo-txt">Certificação para gases fluorados, usados no ar condicionado e nas bombas de calor{{#se dados.gasesFluorados}}<br><span class="selo-num">{{ dados.gasesFluorados }}</span>{{/se}}</span>
+      </div>
+    </div>{{#se dados.garantias}}
+    <div class="cert-garantias">
+      {{#se dados.garantiaInstalacao}}<p class="selo selo-garantia"><span class="selo-sigla">Garantia</span> <span class="selo-txt">{{ dados.garantiaInstalacao }}</span></p>{{/se}}
+      {{#se dados.seguroRC}}<p class="selo selo-garantia"><span class="selo-sigla">Seguro</span> <span class="selo-txt">{{ dados.seguroRC }}</span></p>{{/se}}
+    </div>{{/se}}
+    <!-- marcas: data/site.json «marcas». Com «logo» (e w, h) mostra o logótipo; só com «simbolo», o símbolo e o nome;
+         sem nenhum, o nome. Sem JavaScript é uma linha fixa; o site.js faz dela uma faixa a deslizar (com cópias escondidas
+         dos leitores de ecrã) e mostra o botão de pausa. Com «reduzir movimento» fica fixa. -->
+    <div class="cert-marcas" data-marcas>
+      <p class="rotulo" id="marcas-rotulo">Multimarca, peças originais</p>
+      <div class="marcas-faixa">
+        <div class="marcas-pista">
+          <ul class="marcas" aria-labelledby="marcas-rotulo">
+            {{#cada site.marcas}}<li class="marcas-item" style="--escala: {{ item.escala }}">{{#se item.logo}}<img class="marcas-logo" src="{{ root }}{{ item.logo }}" alt="{{ item.nome }}" width="{{ item.w }}" height="{{ item.h }}" decoding="async">{{/se}}{{#sem item.logo}}{{#se item.simbolo}}<img class="marcas-simbolo" src="{{ root }}{{ item.simbolo }}" alt="" width="24" height="24" decoding="async">{{/se}}<span class="marcas-nome">{{ item.nome }}</span>{{/sem}}</li>{{/cada}}
+          </ul>
+        </div>
+      </div>
+      <button class="marcas-pausa" type="button" hidden><svg class="ico ico-pausa" viewBox="0 0 256 256" aria-hidden="true"><path d="M72 48h36v160H72zm76 0h36v160h-36z"/></svg><svg class="ico ico-continuar" viewBox="0 0 256 256" aria-hidden="true"><path d="M80 44l140 84-140 84z"/></svg><span class="marcas-pausa-txt">Pausa</span></button>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,10 @@
+<div class="slide" role="group" aria-roledescription="diapositivo" aria-label="{{ pos }} de {{ total }}: {{ obra.title }}" data-slide>
+  <a class="slide-link" href="{{ root }}obras/{{ obra.slug }}.html" tabindex="-1" aria-hidden="true" data-visor-item data-visor-t="{{ obra.title }}" data-visor-m="{{ obra.especialidade }} · {{ obra.trabalho }} · {{ obra.equipamento }}">
+    <span class="slide-quadro">{{foto {{ obra.n }} sizes="min(85vw, 596px)"}}</span>
+  </a>
+  <div class="slide-leg">
+    <span class="slide-cab"><a class="slide-t" href="{{ root }}obras/{{ obra.slug }}.html">{{ obra.title }}</a><span class="obra-code">{{ obra.code }}</span></span>
+    <span class="registo">{{ obra.especialidade }} · {{ obra.trabalho }} · {{ obra.equipamento }}</span>
+    {{#se obra.factos.resultado}}<span class="slide-res">{{ obra.factos.resultado }}</span>{{/se}}
+  </div>
+</div>

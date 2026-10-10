@@ -1,0 +1,1297 @@
+#!/usr/bin/env python3
+"""Gera o site estático da MDM a partir de src/ e data/ para public/.
+
+Só biblioteca padrão. Uso:
+    python3 website/build.py            # gera public/
+    python3 website/build.py --check    # gera e valida ligações, recursos, placeholders e decisões do dono
+    python3 website/build.py --faltam   # lista os dados que só a MDM pode dar (data/dados-mdm.json, factos das obras)
+    MDM_OUT=/tmp/x python3 website/build.py --check   # gera noutra pasta (só apaga uma que o build.py gerou: limpa_saida)
+    MDM_PRECOS_FICHEIRO=…                # outra tabela de preços em vez de data/precos.json, só para testes
+
+Sintaxe dos modelos (src/):
+    <!--meta {...json...} -->            no topo de cada página: title, description, file, nav, jsonld, css
+                                          (jsonld: faq, breadcrumb, servico; este lê "servico": {nome, tipo, ofertas};
+                                          a empresa, HVACBusiness, vai sempre em todas as páginas)
+    {{ caminho.ponto }}                   valor de site.*, page.*, obra.*, root (prefixo relativo à raiz), serv_n.* (obras por serviço)
+                                          (obra.*: os campos de obras.json e os calculados por campos_obra(): serv, servLabel,
+                                          servicoUrl, orcamentoHref, waHref, ctaTitulo, relTitulo, relLigacao, relHref, fotoSizes)
+    {{> nome }}                           inclui src/partials/nome.html com o mesmo contexto
+    {{foto NN sizes="..." class="..." loading="eager" alt="..."}}   <picture> avif + webp + jpg da obra NN
+                                          (FOTO_LADOS; tamanhos feitos por gerar_fotos.py)
+    {{wa chave}}                          ligação de WhatsApp com a mensagem pré-preenchida site.wa.chave
+    {{li obra.detalhes}}                  um <li> por texto de uma lista
+    {{each parcial NN,NN,...}} / {{each parcial all}} / {{each parcial cat=vent}} / {{each parcial ctx:related}}   repete um parcial por obra
+                                          (… eagerN no fim: as N primeiras imagens sem lazy, ex.: eager1)
+    {{#se caminho}}…{{/se}}               só aparece se o valor existir e não estiver vazio (dados.*, obra.factos.*);
+                                          blocos dentro de blocos: {{#se dados.a}}{{#se dados.b}}…{{/se}}{{/se}} = «a e b»;
+                                          para «a ou b» há chaves calculadas em DADOS_OU (ex.: {{#se dados.precosAC}})
+    {{#sem caminho}}…{{/sem}}             só aparece se o valor estiver vazio
+    {{#cada caminho}}…{{/cada}}           repete o bloco por cada elemento da lista, com o elemento em {{ item }}
+
+Pré-visualização: "preview": true em data/site.json pede aos motores de busca para não indexar
+(meta robots noindex em todas as páginas, cabeçalho X-Robots-Tag em public/_headers, robots.txt Disallow).
+No lançamento passa a false: ver README.md, "Lançamento".
+
+Dados por preencher: data/dados-mdm.json. Um valor vazio esconde a frase, a linha ou a secção que o usa;
+nunca se mostra um [PLACEHOLDER] e --check falha se algum chegar a public/.
+
+Preço provável do formulário: data/precos.json (começa vazio; copiado à mão da folha da MDM), posto em data-precos no
+bloco do formulário, como data-btu. --check valida a estrutura e os pares [mínimo, máximo]; --faltam diz se está vazio.
+"""
+import hashlib
+import html
+import json
+import re
+import shutil
+import sys
+from pathlib import Path
+from urllib.parse import quote, unquote
+try:
+    import tomllib   # Python 3.11+ (README.md); só o lançamento o usa, para ler o netlify.toml (check_preview)
+except ModuleNotFoundError:
+    tomllib = None
+
+ROOT = Path(__file__).resolve().parent
+import os
+SRC, DATA, ASSETS = ROOT / "src", ROOT / "data", ROOT / "assets"
+# assistente de propostas da equipa (uso interno, fora do site): copiado tal como está para public/equipa/
+EQUIPA = ROOT / "equipa"
+# MDM_OUT permite gerar para outra pasta (por exemplo, várias verificações em paralelo)
+OUT = Path(os.environ["MDM_OUT"]).resolve() if os.environ.get("MDM_OUT") else ROOT / "public"
+# ficheiro que build() deixa em cada pasta que gera: ao gerar de novo, só se apaga uma pasta com ele (limpa_saida)
+MARCA_SAIDA = ".gerado-por-build"
+
+SITE = json.loads((DATA / "site.json").read_text(encoding="utf-8"))
+# marcas da faixa das certificações (site.json «marcas»): os campos que faltam ficam vazios, para o modelo poder
+# perguntar {{#se item.logo}} / {{#se item.simbolo}}. Quando chegar o ficheiro de uma marca, basta juntar logo, w e h.
+MARCA_CAMPOS = {"logo": "", "w": "", "h": "", "simbolo": "", "escala": 1}
+SITE["marcas"] = [dict(MARCA_CAMPOS, **m) for m in SITE.get("marcas", [])]
+OBRAS_DATA = json.loads((DATA / "obras.json").read_text(encoding="utf-8"))
+OBRAS = OBRAS_DATA["obras"]
+OBRA_BY_N = {o["n"]: o for o in OBRAS}
+# serviço de cada obra (filtros de obras.html, ligação da ficha, obras relacionadas), a partir da «especialidade»;
+# o que não é um dos cinco serviços (Climatização, Águas quentes) fica em «outros», sem página de serviço
+SERV = {"Ar condicionado": "ar-condicionado", "Ar condicionado e ventilação": "ar-condicionado", "Ventilação": "ventilacao",
+        "Manutenção": "manutencao", "Eletricidade": "eletricidade", "Bombas de calor": "bombas-de-calor"}
+SERV_LABEL = {"ar-condicionado": "Ar condicionado", "ventilacao": "Ventilação", "manutencao": "Manutenção e avarias",
+              "eletricidade": "Eletricidade", "bombas-de-calor": "Bombas de calor"}
+# trabalhos de avaria: a faixa da página da obra convida a enviar a fotografia da avaria, não a pedir uma obra igual
+TRABALHO_AVARIA = {"Reparação", "Diagnóstico"}
+# a avaria de cada serviço, como no formulário (o value): numa obra de avaria, «Pedir orçamento» abre o formulário já com
+# ela (?servico=…), e o pedido vai para o email geral; a página do serviço sozinha escolheria a instalação ou a manutenção,
+# que são do comercial (README.md, «Encaminhamento dos pedidos»). Manutenção não diz de que equipamento é: fica de fora.
+SERV_AVARIA = {"ar-condicionado": "Ar condicionado: avaria / reparação", "bombas-de-calor": "Bomba de calor: avaria / reparação",
+               "eletricidade": "Eletricidade: avaria / reparação", "ventilacao": "Ventilação: avaria / reparação"}
+# sizes da fotografia grande da página da obra: cabe em 78% da altura do ecrã, nunca mais larga do que o ecrã
+FOTO_OBRA_SIZES = {"landscape": "(min-width: 1280px) min(1280px, calc(78vh * 4 / 3)), min(100vw, calc(78vh * 4 / 3))",
+                   "portrait": "min(100vw, calc(78vh * 3 / 4))"}
+
+
+def campos_obra(o):
+    """Campos calculados de cada obra (modelo obra.html e cartões). As páginas das obras vivem em obras/: root «../»."""
+    serv = SERV.get(o["especialidade"], "outros")
+    label = SERV_LABEL.get(serv, "")
+    o["serv"], o["servLabel"] = serv, label
+    o["servicoUrl"] = f"servicos/{serv}.html" if label else ""
+    avaria = o["trabalho"] in TRABALHO_AVARIA
+    if avaria:
+        # a avaria do serviço já escolhida; sem ela, o formulário da página inicial, sem serviço, para o cliente escolher
+        v = SERV_AVARIA.get(serv)
+        o["orcamentoHref"] = f"../{o['servicoUrl']}?servico={quote(v)}#orcamento" if v and label else "../index.html#orcamento"
+    else:
+        o["orcamentoHref"] = f"../{o['servicoUrl']}#orcamento" if label else "../index.html#orcamento"
+    o["ctaTitulo"] = "Tem uma avaria parecida?" if avaria else "Quer uma obra assim?"
+    # o orçamento pede-se no formulário (por email, ao comercial); o WhatsApp fica para avarias, fotografias e dúvidas
+    msg = (f"Olá MDM. Vi a obra {o['code']} no site ({o['title']}) e tenho uma avaria parecida. Envio já uma fotografia."
+           if avaria else f"Olá MDM. Vi a obra {o['code']} no site ({o['title']}) e envio já fotografias do local.")
+    o["waHref"] = SITE["whatsappBase"] + quote(msg)
+    o["relTitulo"] = f"Outras obras de {label.lower()}" if label else "Outras obras"
+    o["relLigacao"] = f"Todas as obras de {label.lower()}" if label else "Todas as obras"
+    o["relHref"] = f"obras.html#{serv}" if label else "obras.html"
+    o["fotoSizes"] = FOTO_OBRA_SIZES[o["orient"]]
+
+
+for _o in OBRAS:
+    campos_obra(_o)
+# obras por serviço (contagens dos filtros de obras.html; «todas» é o total)
+SERV_N = {**{s: sum(1 for o in OBRAS if o["serv"] == s) for s in SERV_LABEL}, "todas": len(OBRAS)}
+
+
+def relacionadas(o, n=3):
+    """Sempre n obras: primeiro as do mesmo serviço (pela ordem do ficheiro, sem a própria), depois o mesmo local, depois as outras."""
+    out = []
+    for chave in (lambda x: x["serv"] == o["serv"], lambda x: x["cat"] == o["cat"], lambda x: True):
+        out += [x for x in OBRAS if x is not o and x not in out and chave(x)]
+    return out[:n]
+# prévias de 16 px das fotografias (gerar_fotos.py): ficam por trás da fotografia enquanto descarrega; sem o ficheiro, nada
+LQIP = json.loads((DATA / "lqip.json").read_text(encoding="utf-8")) if (DATA / "lqip.json").exists() else {}
+DADOS_DOC = json.loads((DATA / "dados-mdm.json").read_text(encoding="utf-8"))
+DADOS = {k: v["valor"] for k, v in DADOS_DOC.items() if not k.startswith("_")}
+# testemunhos: "tipo" é opcional (sem ele, só o nome); texto e nome em falta são erro de --check, não do modelo
+for _t in DADOS.get("testemunhos") or []:
+    if isinstance(_t, dict):
+        for _c in ("texto", "nome", "tipo"):
+            _t.setdefault(_c, "")
+# números e preços não partem ao fim da linha («1 200», «desde 300 €»): o espaço entre grupos de algarismos e o espaço antes
+# de «€» passam a espaço inseparável (U+00A0) no que se mostra; dados-mdm.json fica como a MDM o escreveu
+NBSP_RE = re.compile(r"(?<=\d) (?=\d{3}(?!\d)|€)")
+for _k, _v in DADOS.items():
+    if isinstance(_v, str):
+        DADOS[_k] = NBSP_RE.sub("\u00a0", _v)
+DADOS_USO = {}   # chave de dados-mdm.json → páginas onde entra (para --faltam)
+
+# Preço provável do formulário (data/precos.json): valores copiados à mão da folha «MDM, tabela de preços para o site».
+# Cada preço é null ou [mínimo, máximo] em euros inteiros com IVA; vazio = não aparece. O site.js lê-os em data-precos
+# (como data-btu) e só mostra um produto com a sua linha e a sua frase de «inclui» preenchidas. check_precos() valida.
+PRECOS_FOLHA = "«MDM, tabela de preços para o site»"
+PRECOS_GAMAS = ("eco", "sup")
+PRECOS_EXTRAS = ("metrosIncluidos", "metroExtra", "preInstalacaoDesconto", "furoBetao", "alturaEscada", "alturaAndaime",
+                 "alturaPlataforma", "ligacaoEletrica", "retirarAntiga")
+PRECOS_INCLUI = ("split", "multisplit", "aguasQuentes")
+# MDM_PRECOS_FICHEIRO: outra tabela no lugar de data/precos.json, só para testes (tests/paridade.mjs gera com a tabela de
+# teste sem tocar no ficheiro verdadeiro). No Netlify é recusada: o site publicado lê sempre data/precos.json.
+PRECOS_OUTRO = os.environ.get("MDM_PRECOS_FICHEIRO", "")
+if PRECOS_OUTRO and os.environ.get("NETLIFY") == "true":
+    raise SystemExit("build.py: MDM_PRECOS_FICHEIRO é só para testes; no Netlify o site lê sempre data/precos.json")
+PRECOS_FICHEIRO = Path(PRECOS_OUTRO).resolve() if PRECOS_OUTRO else DATA / "precos.json"
+PRECOS_NOME = PRECOS_FICHEIRO.name if PRECOS_OUTRO else "precos.json"   # nos avisos de check_precos()
+if not PRECOS_FICHEIRO.exists():
+    raise SystemExit(f"build.py: falta {PRECOS_FICHEIRO if PRECOS_OUTRO else 'data/precos.json'} "
+                     "(preço provável do formulário; ver README.md, «Preço provável»)")
+PRECOS_DOC = json.loads(PRECOS_FICHEIRO.read_text(encoding="utf-8"))
+
+
+def precos_linhas():
+    """Linhas de cada tabela de preços: os tamanhos do split são os de btu.tamanhos (site.json), em texto («12000»)."""
+    tam = (SITE.get("btu") or {}).get("tamanhos") or []
+    return {"split": [str(int(t)) if isinstance(t, (int, float)) and t == int(t) else str(t) for t in tam],
+            "multisplit": ["2", "3", "4", "acrescimoGrande"], "aguasQuentes": ["200", "300"]}
+
+
+# o que vai para a página (sem as chaves «_»); «}}» passa a «} }» (o mesmo JSON), para não parecer sintaxe de modelo
+PRECOS_ATTR = re.sub(r"\}(?=\})", "} ", json.dumps(
+    {k: v for k, v in PRECOS_DOC.items() if not k.startswith("_")} if isinstance(PRECOS_DOC, dict) else {},
+    ensure_ascii=False))
+# campos de "factos" de cada obra em obras.json: vazios, a linha não aparece na ficha
+FACTOS_OBRA = {"data": "Data da obra", "localExato": "Local exato (bairro ou concelho, sem nome do cliente)",
+               "cliente": "Tipo de cliente", "duracao": "Duração",
+               "resultado": "Resultado da obra numa frase (ficha da obra e diapositivo da página inicial)"}
+
+META_RE = re.compile(r"\A\s*<!--meta\s+(\{.*?\})\s*-->\s*", re.S)
+# etiqueta mais interior primeiro: {{foto {{ obra.n }} ...}} resolve {{ obra.n }} e depois {{foto 25 ...}}
+TAG_RE = re.compile(r"\{\{\s*((?:(?!\{\{).)+?)\s*\}\}", re.S)
+ATTR_RE = re.compile(r'(\w[\w-]*)="([^"]*)"')
+
+
+def lookup(ctx, path):
+    cur = ctx
+    for part in path.split("."):
+        if isinstance(cur, dict) and part in cur:
+            cur = cur[part]
+        elif isinstance(cur, list) and part.isdigit() and int(part) < len(cur):
+            cur = cur[int(part)]
+        else:
+            raise KeyError(path)
+    return cur
+
+
+# lado maior de cada tamanho das fotografias das obras (foto-NN-400.avif … foto-NN-1600.avif, e .webp);
+# o JPEG de 1600 é o original e a reserva para browsers antigos. gerar_fotos.py faz os ficheiros.
+FOTO_LADOS = (400, 600, 800, 1000, 1200, 1600)
+# telemóvel com ecrã de 3x: pede-se a imagem de 2x, como no topo da página inicial (à vista é igual e pesa
+# metade). Vai antes do sizes de cada fotografia; o último valor do sizes é sempre o dos ecrãs estreitos.
+FOTO_3X = "(max-width: 599px) and (min-resolution: 2.5dppx)"
+
+
+def ultima_entrada(sizes):
+    """Última entrada de um sizes (a dos ecrãs estreitos): a vírgula conta só fora de parênteses, como em min(a, b)."""
+    nivel, ini = 0, 0
+    for i, c in enumerate(sizes):
+        nivel += (c == "(") - (c == ")")
+        if c == "," and nivel == 0:
+            ini = i + 1
+    return sizes[ini:].strip()
+
+
+def foto(ctx, args):
+    parts = args.split(None, 1)
+    n = parts[0].zfill(2)
+    attrs = dict(ATTR_RE.findall(parts[1])) if len(parts) > 1 else {}
+    o = OBRA_BY_N[n]
+    root = ctx["root"]
+    base = f"{root}assets/img/obras/foto-{n}"
+    w, h = (1600, 1200) if o["orient"] == "landscape" else (1200, 1600)
+    alt = attrs.get("alt", o["alt"])
+    sizes = attrs.get("sizes", "100vw")
+    estreito = ultima_entrada(sizes)
+    sizes = f"{FOTO_3X} calc({estreito} * 2 / 3), {sizes}"
+    loading = attrs.get("loading", "lazy")
+    cls = ("foto " + attrs.get("class", "")).strip()
+    # "foco" em obras.json: o ponto da fotografia que fica à vista quando o cartão a corta (object-position)
+    foco = f' style="object-position: {o["foco"]}"' if o.get("foco") else ""
+    previa = f' style="--lqip: url({LQIP[n]}){"; --lqip-pos: " + o["foco"] if o.get("foco") else ""}"' if n in LQIP else ""
+    # eager leva fetchpriority="high", salvo prioridade="normal" (imagens no primeiro ecrã que não são a principal)
+    extra = ' fetchpriority="high"' if loading == "eager" and attrs.get("prioridade") != "normal" else ""
+
+    def srcset(ext):
+        return ", ".join(f"{base}-{lado}.{ext} {w * lado // 1600}w" for lado in FOTO_LADOS)
+    return (
+        f'<picture class="{cls}"{previa}>'
+        + f'<source type="image/avif" srcset="{srcset("avif")}" sizes="{sizes}">'
+        + f'<source type="image/webp" srcset="{srcset("webp")}" sizes="{sizes}">'
+        + f'<img src="{base}-1600.jpg" alt="{html.escape(alt, quote=True)}" width="{w}" height="{h}"{foco} '
+        + f'loading="{loading}" decoding="async"{extra}></picture>'
+    )
+
+
+def wa(ctx, key):
+    return SITE["whatsappBase"] + quote(SITE["wa"][key])
+
+
+def each(ctx, args):
+    name, sel = args.split(None, 1)
+    sel = sel.strip()
+    # " eagerN": as N primeiras imagens não esperam (ex.: eager1 na grelha de obras.html). No telemóvel só a
+    # primeira cabe no primeiro ecrã e o lazy do browser já traz as seguintes, por isso N > 1 só pesa mais;
+    # só a primeira, a maior candidata a LCP, leva fetchpriority="high"
+    m = re.search(r"\s+eager(\d+)$", sel)
+    eager = int(m.group(1)) if m else 0
+    if m:
+        sel = sel[: m.start()].strip()
+    if sel == "all":
+        items = OBRAS
+    elif sel.startswith("cat="):
+        items = [o for o in OBRAS if o["cat"] == sel[4:]]
+    elif sel.startswith("ctx:"):
+        items = lookup(ctx, sel[4:])
+    elif sel.startswith("registo="):
+        items = [o for o in OBRAS if o["registo"] == sel[8:]]
+    else:
+        items = [OBRA_BY_N[x.strip().zfill(2)] for x in sel.split(",")]
+    tpl = (SRC / "partials" / f"{name}.html").read_text(encoding="utf-8")
+    # tamanho dos cartões de obra na grelha (sizes da imagem); uma página com outra grelha muda-o no <!--meta-->
+    sizes = ctx["page"].get("cartaoSizes") or ("(min-width: 1200px) min(calc(22.25vw - 18px), 302px), "
+                                               "(min-width: 900px) calc(29.67vw - 16px), (min-width: 640px) calc(44.5vw - 12px), 89vw")
+    out = []
+    for i, o in enumerate(items):
+        c = dict(ctx, obra=o, index=i, pos=i + 1, total=len(items), cartaoSizes=sizes,
+                 loading="eager" if i < eager else "lazy", prioridade="alta" if i == 0 and eager else "normal")
+        out.append(render(tpl, c))
+    return "".join(out)
+
+
+ABRE_RE = re.compile(r"\{\{#(se|sem|cada)\s+([\w.]+)\s*\}\}")
+
+
+def tem(v):
+    return bool(v.strip()) if isinstance(v, str) else bool(v)
+
+
+# Chaves calculadas «a ou b»: uma linha ou um bloco que junta vários dados opcionais aparece se pelo menos um estiver
+# preenchido; lá dentro, cada dado continua com o seu {{#se}}. Não se preenchem (não estão em dados-mdm.json) e não entram
+# em --faltam: o que entra são os dados de que dependem. «a e b» não precisa de chave: blocos {{#se}} um dentro do outro.
+DADOS_OU = {"precosAC": ("precoSplit", "precoMultisplit"),              # «Preço indicativo» no cartão Ar condicionado
+            "precosManutencao": ("precoContrato", "precoDiagnostico"),  # «Preço indicativo» no cartão Manutenção
+            "garantias": ("garantiaInstalacao", "seguroRC")}           # garantia e seguro nas certificações
+for _k, _ks in DADOS_OU.items():
+    if _k in DADOS or not all(x in DADOS for x in _ks):
+        raise SystemExit(f"build.py, DADOS_OU «{_k}»: o nome já existe em data/dados-mdm.json ou falta lá um de {_ks}")
+    DADOS[_k] = any(tem(DADOS[x]) for x in _ks)
+
+
+def valor(ctx, caminho):
+    """Valor de um bloco {{#se}}/{{#sem}}/{{#cada}}. Um caminho que não existe é erro (gralha), não "vazio"."""
+    if caminho.startswith("dados."):
+        chave = caminho.split(".")[1]
+        if chave not in DADOS:
+            raise KeyError(f"{caminho}: não existe em data/dados-mdm.json ({ctx.get('_file', '?')})")
+        DADOS_USO.setdefault(chave, set()).add(ctx.get("_file", "?"))
+    try:
+        return lookup(ctx, caminho)
+    except KeyError:
+        raise KeyError(f"{{{{#… {caminho} }}}} não existe em {ctx.get('_file', '?')}")
+
+
+def blocos(text, ctx, depth):
+    """Resolve os blocos de fora para dentro: o conteúdo de um {{#cada}} vê o seu {{ item }}."""
+    out, pos = [], 0
+    while m := ABRE_RE.search(text, pos):
+        tipo, caminho = m.groups()
+        par = re.compile(r"\{\{(?:#%s\s|/%s\}\})" % (tipo, tipo))
+        nivel, fim = 1, m.end()
+        while nivel:
+            t = par.search(text, fim)
+            if not t:
+                raise SyntaxError(f"{{{{#{tipo} {caminho}}}}} sem {{{{/{tipo}}}}} em {ctx.get('_file', '?')}")
+            nivel += 1 if t.group(0)[2] == "#" else -1
+            fim = t.end()
+        corpo, v = text[m.end():t.start()], valor(ctx, caminho)
+        out.append(text[pos:m.start()])
+        if tipo == "cada":
+            out.extend(render(corpo, dict(ctx, item=x), depth + 1) for x in (v or []))
+        elif tem(v) == (tipo == "se"):
+            out.append(blocos(corpo, ctx, depth))
+        else:   # bloco escondido: os dados lá dentro também entram na lista de --faltam (e uma gralha é erro)
+            for chave in re.findall(r"\{\{[^{}]*?\bdados\.(\w+)", corpo):
+                valor(ctx, "dados." + chave)
+        pos = fim
+    out.append(text[pos:])
+    return "".join(out)
+
+
+def render(text, ctx, depth=0):
+    if depth > 12:
+        raise RuntimeError("inclusão recursiva demasiado profunda")
+    text = blocos(text, ctx, depth)
+
+    def sub(m):
+        expr = m.group(1)
+        if expr.startswith(">"):
+            name = expr[1:].strip()
+            return render((SRC / "partials" / f"{name}.html").read_text(encoding="utf-8"), ctx, depth + 1)
+        if expr.startswith("foto "):
+            return foto(ctx, expr[5:])
+        if expr.startswith("wa "):
+            return html.escape(wa(ctx, expr[3:].strip()), quote=True)
+        if expr.startswith("each "):
+            return each(ctx, expr[5:])
+        if expr.startswith("li "):
+            return "".join(f"<li>{html.escape(str(x))}</li>" for x in lookup(ctx, expr[3:].strip()))
+        raw = expr.startswith("{") or expr.startswith("&")
+        key = expr.lstrip("{&").strip()
+        try:
+            val = lookup(ctx, key)
+        except KeyError:
+            raise KeyError(f"{{{{ {key} }}}} não existe em {ctx.get('_file', '?')}")
+        if isinstance(val, (list, dict)):
+            val = json.dumps(val, ensure_ascii=False)
+        val = str(val)
+        return val if raw else html.escape(val, quote=True)
+
+    for _ in range(4):
+        new = TAG_RE.sub(sub, text)
+        if new == text:
+            break
+        text = new
+    return text
+
+
+# os concelhos à volta de Lisboa ainda não foram confirmados pelo dono: fica "Grande Lisboa"
+AREA_LD = [{"@type": "City", "name": "Lisboa"}, {"@type": "AdministrativeArea", "name": "Grande Lisboa"}]
+PREVIEW = bool(SITE.get("preview"))
+# páginas sempre fora do Google, também depois do lançamento (README.md, «Lançamento»); --check confirma
+NOINDEX_SEMPRE = {"404.html", "obrigado.html"}
+# fora do Google: «noindex» ou «none» (o mesmo que «noindex, nofollow»), com qualquer grafia, em qualquer sítio da lista
+# (vírgulas ou espaços) e com ou sem o nome do robô à frente («googlebot: none», no X-Robots-Tag). Antes de procurar
+# tiram-se as diretivas «max-…: valor», porque «none» também é valor delas («max-image-preview:none» só tira a imagem
+# grande e a página continua no Google). O mesmo teste no meta robots das páginas (page_ctx, mapa do site, check_cabeca)
+# e nos cabeçalhos X-Robots-Tag (check_preview)
+class _NoIndex:
+    _fora = re.compile(r"\b(?:noindex|none)\b", re.I)
+    _max = re.compile(r"\bmax-[\w-]+\s*:\s*[\w-]+", re.I)
+
+    def search(self, texto):
+        return self._fora.search(self._max.sub(" ", texto or ""))
+
+
+NOINDEX_RE = _NoIndex()
+# imagem de partilha (og-mdm.jpg): logótipo, frase, telefone e o camião com a matrícula desfocada
+OG_IMG = {"src": "og-mdm.jpg", "w": 1200, "h": 630,
+          "alt": f"MDM Assistência Técnica. Clima, ar e corrente. Desde {SITE['founded']}. Telefone {SITE['phone']}."}
+
+
+def business_ld():
+    """A empresa, igual em todas as páginas (Google: ficha da empresa, painel de conhecimento)."""
+    b = SITE["baseUrl"]
+    cp, cidade = SITE["address2"].split(" ", 1)[0], SITE["address2"].split(" ", 1)[1].split(" · ")[0]
+    return {
+        "@context": "https://schema.org",
+        "@type": ["HVACBusiness", "Electrician"],
+        "@id": b + "/#mdm",
+        "name": SITE["name"],
+        "legalName": SITE["legalName"],
+        "vatID": SITE["vatID"],
+        "taxID": SITE["nif"].replace(" ", ""),
+        "url": b + "/",
+        "logo": b + "/assets/img/logo-mdm.svg",
+        "image": [b + "/assets/img/" + OG_IMG["src"], b + "/assets/img/hero/mdm-plataforma-1200.jpg"],
+        "slogan": f"Clima, ar e corrente. Desde {SITE['founded']}.",
+        "telephone": SITE["phoneE164"],
+        "email": SITE["email"],
+        "foundingDate": SITE["founded"],
+        "address": {"@type": "PostalAddress", "streetAddress": SITE["address1"],
+                    "postalCode": cp, "addressLocality": cidade, "addressCountry": "PT"},
+        "areaServed": AREA_LD,
+        "openingHoursSpecification": [{"@type": "OpeningHoursSpecification",
+                                       "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                                       "opens": "08:00", "closes": "17:00"}],
+        "hasMap": SITE["googleMaps"],
+        "sameAs": [SITE["googleMaps"]],
+        "knowsAbout": ["Ar condicionado", "Multi-split", "Bombas de calor ar-água", "Manutenção AVAC",
+                       "Instalações elétricas", "Ventilação"],
+    }
+
+
+def servico_ld(meta):
+    """Service de cada página de serviço: "servico" no <!--meta--> (nome, tipo e ofertas, só o que a página diz)."""
+    s = meta["servico"]
+    ld = {"@context": "https://schema.org", "@type": "Service", "name": s["nome"], "serviceType": s["tipo"],
+          "description": meta["description"], "url": SITE["baseUrl"] + "/" + meta["file"], "areaServed": AREA_LD,
+          "provider": {"@type": ["HVACBusiness", "Electrician"], "@id": SITE["baseUrl"] + "/#mdm",
+                       "name": SITE["name"], "url": SITE["baseUrl"] + "/", "telephone": SITE["phoneE164"]}}
+    if s.get("ofertas"):
+        ld["hasOfferCatalog"] = {"@type": "OfferCatalog", "name": s["nome"], "itemListElement": [
+            {"@type": "Offer", "itemOffered": {"@type": "Service", "name": n}} for n in s["ofertas"]]}
+    return ld
+
+
+FAQ_RE = re.compile(r'<details class="faq-item"[^>]*>\s*<summary[^>]*>(.*?)</summary>(.*?)</details>', re.S)
+
+
+def strip_tags(s):
+    s = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", s)).strip()
+    return re.sub(r"\s+([.,;:!?)])", r"\1", s)
+
+
+def faq_ld(body):
+    qs = [{"@type": "Question", "name": html.unescape(strip_tags(q)),
+           "acceptedAnswer": {"@type": "Answer", "text": html.unescape(strip_tags(a))}}
+          for q, a in FAQ_RE.findall(body) if not PLACEHOLDER_RE.search(a)]  # respostas por preencher não vão para o Google
+    return {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": qs} if qs else None
+
+
+def breadcrumb_ld(trail):
+    return {"@context": "https://schema.org", "@type": "BreadcrumbList",
+            "itemListElement": [{"@type": "ListItem", "position": i + 1, "name": n, "item": SITE["baseUrl"] + "/" + f}
+                                for i, (n, f) in enumerate(trail)]}
+
+
+def page_ctx(meta, file):
+    # wa: mensagem de WhatsApp da barra do telemóvel, do rodapé e do contacto (site.wa.*); cada serviço usa a sua
+    meta = {"preselect": "", "nav": "", "robots": "index,follow", "og": "", "wa": "geral", **meta}
+    if PREVIEW and not NOINDEX_RE.search(meta["robots"]):
+        meta["robots"] = "noindex"   # pré-visualização: nenhuma página entra no Google antes do lançamento
+    depth = file.count("/")
+    # a 404 é servida em qualquer profundidade (/obras/xyz.html): precisa de caminhos absolutos
+    root = "/" if file == "404.html" else "../" * depth
+    return {"site": SITE, "page": meta, "root": root, "_file": file, "dados": DADOS, "precos": PRECOS_ATTR,
+            "categorias": OBRAS_DATA["categorias"], "serv_n": SERV_N, "year": "2026"}
+
+
+def build_page(meta, body_tpl, extra_ctx=None):
+    file = meta["file"]
+    ctx = page_ctx(meta, file)
+    if extra_ctx:
+        ctx.update(extra_ctx)
+    body = render(body_tpl, ctx)
+    lds = [business_ld()]
+    for kind in meta.get("jsonld", []):
+        if kind == "faq":
+            f = faq_ld(body)
+            if f:
+                lds.append(f)
+        elif kind == "breadcrumb":
+            lds.append(breadcrumb_ld(meta["breadcrumb"]))
+        elif kind == "servico":
+            lds.append(servico_ld(meta))
+    ld_html = "".join(
+        '<script type="application/ld+json">' + json.dumps(x, ensure_ascii=False).replace("</", "<\\/") + "</script>\n"
+        for x in lds)
+    css = "".join(f'<link rel="stylesheet" href="{ctx["root"]}assets/css/{c}">\n' for c in meta.get("css", []))
+    og = meta.get("og") or ""
+    if og:   # fotografia de uma obra: foto-NN-1600.jpg
+        o = OBRA_BY_N[re.match(r"foto-(\d+)-", og).group(1)]
+        w, h = (1600, 1200) if o["orient"] == "landscape" else (1200, 1600)
+        og_img = {"src": "obras/" + og, "w": w, "h": h, "alt": o["alt"]}
+    else:
+        og_img = OG_IMG
+    ctx.update({"og_image": SITE["baseUrl"] + "/assets/img/" + og_img["src"],
+                "og_w": og_img["w"], "og_h": og_img["h"], "og_alt": og_img["alt"],
+                "content": body, "jsonld": ld_html, "page_css": css,
+                "canonical": SITE["baseUrl"] + "/" + ("" if file == "index.html" else file)})
+    layout = (SRC / "templates" / "layout.html").read_text(encoding="utf-8")
+    out = versiona(render(layout, ctx))
+    dest = OUT / file
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(out, encoding="utf-8")
+    return file
+
+
+# Cache: CSS e JS levam ?v=<8 hex do sha1 do ficheiro> (site.css do layout, o CSS de cada página e site.js); com o nome
+# igual e o conteúdo novo, o browser e o Netlify (netlify.toml: um ano, immutable) vão buscar a versão nova.
+# --check ignora o ?… ao resolver a referência (REF_RE para em ? e #).
+VERSAO_RE = re.compile(r'((?:href|src)="(?:[^"?]*/)?assets/(?:css|js)/)([^"?]+)"')
+_VERSOES = {}
+
+
+def versao(nome):
+    if nome not in _VERSOES:
+        _VERSOES[nome] = hashlib.sha1((ASSETS / nome).read_bytes()).hexdigest()[:8]
+    return _VERSOES[nome]
+
+
+def versiona(texto):
+    return VERSAO_RE.sub(lambda m: f'{m.group(1)}{m.group(2)}?v={versao(m.group(1).split("assets/", 1)[1] + m.group(2))}"', texto)
+
+
+def saida_antiga(p):
+    """public/ gerado antes de haver MARCA_SAIDA (num clone antigo): só com nomes que o build.py escreve, e com as páginas."""
+    if p != ROOT / "public":
+        return False
+    nomes = {x.name for x in (SRC / "pages").iterdir()} | {"assets", "equipa", "obras", FORMULARIOS, "sitemap.xml",
+                                                           "robots.txt", "_headers"}
+    tem = {x.name for x in p.iterdir()}
+    return tem <= nomes and {"index.html", "sitemap.xml", "assets"} <= tem
+
+
+def limpa_saida():
+    """Apaga a saída anterior, só se for uma pasta que o build.py gerou (com MARCA_SAIDA), vazia ou o public/ antigo.
+    MDM_OUT aceita qualquer caminho, e um engano (MDM_OUT=., MDM_OUT=~) apagaria o site ou a pasta pessoal: pára antes."""
+    p, casa = OUT, Path.home().resolve()
+    porque = ""
+    if p == Path(p.anchor) or p == casa or p in casa.parents:
+        porque = "é a raiz do disco ou a pasta pessoal"
+    elif p == ROOT or p in ROOT.parents:
+        porque = "é a pasta do site ou uma pasta acima dela"
+    elif ".git" in p.parts:
+        porque = "fica dentro de uma pasta .git"
+    elif any(p == d or d in p.parents for d in (SRC, DATA, ASSETS, EQUIPA)):
+        porque = "fica dentro das fontes do site (src/, data/, assets/ ou equipa/)"
+    elif p.exists() and not p.is_dir():
+        porque = "não é uma pasta"
+    elif p.exists() and any((p / x).exists() for x in ("build.py", "data", ".git")):
+        porque = "tem build.py, data/ ou .git: parece código, não um site gerado"
+    elif p.exists() and any(p.iterdir()) and not (p / MARCA_SAIDA).is_file() and not saida_antiga(p):
+        porque = f"não está vazia e não tem o ficheiro {MARCA_SAIDA}, que o build.py deixa nas pastas que gera"
+    if porque:
+        raise SystemExit(f"build.py: não apago {p}: {porque}. MDM_OUT tem de ser uma pasta nova, vazia ou já gerada pelo "
+                         "build.py. Escolha outra pasta, ou apague esta à mão se tiver a certeza.")
+    if p.exists() and any(p.iterdir()):
+        shutil.rmtree(p)
+
+
+def build():
+    limpa_saida()
+    OUT.mkdir(exist_ok=True)
+    (OUT / MARCA_SAIDA).write_text("Pasta gerada pelo build.py do site da MDM. Ao gerar de novo, o build.py só apaga uma "
+                                   "pasta com este ficheiro.\n", encoding="utf-8")
+    shutil.copytree(ASSETS, OUT / "assets")
+    if EQUIPA.exists():
+        shutil.copytree(EQUIPA, OUT / "equipa")
+    files, fora_do_mapa = [], set()
+    for p in sorted((SRC / "pages").rglob("*.html")):
+        text = p.read_text(encoding="utf-8")
+        m = META_RE.match(text)
+        if not m:
+            raise SystemExit(f"{p}: falta o bloco <!--meta {{...}} -->")
+        meta = json.loads(m.group(1))
+        files.append(build_page(meta, text[m.end():]))
+        if NOINDEX_RE.search(meta.get("robots", "")):
+            fora_do_mapa.add(meta["file"])   # 404 e página de agradecimento
+    obra_tpl_path = SRC / "templates" / "obra.html"
+    if obra_tpl_path.exists():
+        tpl = obra_tpl_path.read_text(encoding="utf-8")
+        for i, o in enumerate(OBRAS):
+            prev_o, next_o = OBRAS[i - 1], OBRAS[(i + 1) % len(OBRAS)]
+            file = f"obras/{o['slug']}.html"
+            meta = {"file": file, "nav": "obras", "css": ["pag-obras.css"],
+                    "title": f"{o['title']}: {o['especialidade'].lower()} · Obras MDM Lisboa",
+                    "description": f"{o['title']}: {o['especialidade'].lower()}, {o['trabalho'].lower()}, {o['equipamento']}. "
+                                   f"Obra da MDM na grande Lisboa, fotografada no local pelos técnicos.",
+                    "og": f"foto-{o['n']}-1600.jpg",
+                    "jsonld": ["breadcrumb"],
+                    "breadcrumb": [["Início", ""], ["Obras", "obras.html"], [o["title"], file]]}
+            files.append(build_page(meta, tpl, {"obra": o, "prev": prev_o, "next": next_o, "related": relacionadas(o)}))
+    # o formulário do comercial, só para o Netlify (não é uma página: fica fora de files e do mapa do site)
+    (OUT / FORMULARIOS).write_text(formularios_html(), encoding="utf-8")
+    urls = "".join(f"<url><loc>{SITE['baseUrl']}/{'' if f == 'index.html' else f}</loc></url>\n"
+                   for f in files if f not in fora_do_mapa)
+    (OUT / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + urls + "</urlset>\n", encoding="utf-8")
+    if PREVIEW:
+        # Netlify lê public/_headers e junta-o aos [[headers]] do netlify.toml (que não aceita condições)
+        (OUT / "robots.txt").write_text("# Pré-visualização: não indexar. No lançamento, \"preview\": false em data/site.json.\n"
+                                        "User-agent: *\nDisallow: /\n", encoding="utf-8")
+        (OUT / "_headers").write_text("# Pré-visualização: gerado por build.py a partir de \"preview\" em data/site.json\n"
+                                      "/*\n  X-Robots-Tag: noindex\n", encoding="utf-8")
+    else:
+        # a página interna equipa/ não leva Disallow: o Google tem de a poder ler para ver o noindex (meta e X-Robots-Tag)
+        (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE['baseUrl']}/sitemap.xml\n", encoding="utf-8")
+    return files
+
+
+# o que sobra de um dado por preencher: [MAIÚSCULAS…], [[CHAVE]], "por preencher", "lorem ipsum" (comentários HTML à parte).
+# Não contam as etiquetas de triagem ([P1 · Montagem AC], só no campo escondido e no assunto do email, postas por site.js).
+PLACEHOLDER_RE = re.compile(r"\[(?!P\d ·)[^\[\]<>\"']*?[A-ZÀ-Ý]{3}[^\[\]<>\"']*\]|\[\[[^\]]*\]\]"
+                            r"|(?i:\b(?:por preencher|lorem ipsum)\b)")
+# Decisões do dono (AUDIT.md da v3, 27/09/2026): nada disto volta ao site, nem em meta, JSON-LD ou mensagens de WhatsApp.
+# Intervalos («2–4 h», «2h-4h», «2 a 4 horas», «entre 2 e 4 horas») com qualquer traço: hífen, travessões, sinal menos.
+TRACOS = "\\-\u2010-\u2015\u2212\u2043\u2e3a\u2e3b\ufe58\ufe63\uff0d"
+# entre o número e a unidade, espaços, um traço ou nada: «24h», «24 horas», «24-horas», «2–4-horas»
+JUNTA_UNIDADE = rf"[\s{TRACOS}]*"
+PRAZO = (re.compile(rf"\b\d+{JUNTA_UNIDADE}(?:h|horas)\s+úteis|\b(?:24|48){JUNTA_UNIDADE}(?:h|horas)\b"
+                    rf"|\b\d+(?:{JUNTA_UNIDADE}(?:h|horas))?(?:\s*(?:a|[{TRACOS}])\s*|\s+e\s+)\d+{JUNTA_UNIDADE}(?:h|horas)\b"
+                    rf"|\bmesmo\s+dia\b|\b\d+{JUNTA_UNIDADE}minutos\b", re.I),
+         "promessa de prazo de resposta (retiradas pelo dono)")
+# a assinatura da France Air: o dono pediu para a tirar (o nome e, quando chegar, o logótipo sem ela)
+ARQUITECTOS_RE = re.compile(r"Arquitec?tos\s+do\s+Ar", re.I)
+# Marcas (data/regras-marcas.json, a mesma lista da função do assistente): no site só as «permitidas»; as «proibidas»
+# apanham-se sem distinguir maiúsculas e como palavra inteira («Mitsubishi Heavy» sim, «Mitsubishi Electric» não)
+if not (DATA / "regras-marcas.json").exists():
+    raise SystemExit("build.py: falta data/regras-marcas.json (marcas permitidas e proibidas; ver README.md, «Marcas»)")
+REGRAS_MARCAS = json.loads((DATA / "regras-marcas.json").read_text(encoding="utf-8"))
+for _k in ("permitidas", "proibidas"):
+    if not (isinstance(REGRAS_MARCAS.get(_k), list) and REGRAS_MARCAS[_k]
+            and all(isinstance(x, str) and x.strip() for x in REGRAS_MARCAS[_k])):
+        raise SystemExit(f"build.py: data/regras-marcas.json «{_k}» tem de ser uma lista de nomes de marcas")
+MARCAS_PERMITIDAS = REGRAS_MARCAS["permitidas"]
+# as palavras de cada nome separadas por espaços, por qualquer traço (hífen, U+2010 a U+2015, sinal menos, os traços
+# pequenos e largos) ou por nada: «Saunier-Duval», «Saunier–Duval», «SaunierDuval». É a mesma junção da função do
+# assistente (JUNTA_MARCA em netlify/functions/proposta.mts). Os nomes mais compridos primeiro
+JUNTA_MARCA = r"[\s\-\u2010-\u2015\u2212\ufe58\ufe63\uff0d]*"
+MARCAS_RE = re.compile(r"(?<!\w)(?:%s)(?!\w)" % "|".join(
+    JUNTA_MARCA.join(map(re.escape, n.split())) for n in sorted(REGRAS_MARCAS["proibidas"], key=len, reverse=True)),
+    re.I)
+PROIBIDO = [
+    PRAZO,
+    (re.compile(r"\b[34]\d\s+anos\b"), "idade da empresa: só «1991», nunca «N anos»"),
+    (MARCAS_RE, f"marca fora da lista do dono ({', '.join(MARCAS_PERMITIDAS)})"),
+    (re.compile(r"Domingues|M\.D\.M\.\s*[—–]"), "nome legal: «M.D.M. - Manuel Domingos Melancia, Lda»"),
+    (ARQUITECTOS_RE,
+     "assinatura da France Air («Os Arquitectos do Ar»): o dono não a quer no site, só o nome ou o logótipo"),
+]
+REF_RE = re.compile(r'(?:href|src|action)="([^"#?]+)|srcset="([^"]+)"|url\(([^)]+)\)')
+# Netlify Forms: o formulário de orçamento tem de chegar ao HTML gerado com o nome, os campos escondidos,
+# a armadilha para robôs e o campo da fotografia, e ser igual em todas as páginas (o Netlify regista um só "orcamento").
+FORM_RE = re.compile(r'<form\b[^>]*\bid="quoteForm"[^>]*>.*?</form>', re.S)
+FORM_EXIGE = [' name="orcamento"', ' method="POST"', ' data-netlify="true"', ' netlify-honeypot="bot-field"',
+              ' enctype="multipart/form-data"', ' action="/obrigado.html"']
+FORM_CAMPOS = {"form-name", "subject", "pagina", "triagem", "potencia", "estimativa", "nome", "email", "telefone", "servico",
+               "mensagem", "fotografia", "bot-field"}
+# Encaminhamento (README.md, «Encaminhamento dos pedidos»): os pedidos de instalação e manutenção vão para um segundo
+# formulário Netlify, «orcamento-comercial», com o seu próprio email de aviso (o comercial). site.js troca o form-name ao
+# enviar. O Netlify só aceita um formulário que encontrou no HTML publicado, por isso build.py gera-o em formularios.html,
+# escondido e com os mesmos campos (pela ordem do formulário visível: o Netlify resume cada pedido pelo primeiro campo de
+# texto e pela primeira caixa de texto). Nenhuma página liga para lá; fica fora do mapa do site e com noindex.
+FORM_COMERCIAL = "orcamento-comercial"
+FORMULARIOS = "formularios.html"
+FORM_ESQUELETO = [("subject", "hidden"), ("pagina", "hidden"), ("triagem", "hidden"), ("potencia", "hidden"),
+                  ("estimativa", "hidden"), ("nome", "text"), ("email", "email"), ("telefone", "tel"), ("servico", "text"),
+                  ("mensagem", "textarea"), ("fotografia", "file"), ("bot-field", "text")]
+
+
+def formularios_html():
+    campos = [f'<input type="hidden" name="form-name" value="{FORM_COMERCIAL}">']
+    for nome, tipo in FORM_ESQUELETO:
+        if tipo == "textarea":
+            campos.append(f'<textarea name="{nome}"></textarea>')
+        elif tipo == "file":
+            campos.append(f'<input name="{nome}" type="file" accept="image/*">')
+        else:
+            campos.append(f'<input type="{tipo}" name="{nome}">')
+    return ('<!doctype html>\n<html lang="pt-PT">\n<head>\n<meta charset="utf-8">\n'
+            '<meta name="robots" content="noindex, nofollow">\n<title>Formulários · MDM</title>\n</head>\n<body>\n'
+            '<!-- Gerado por build.py (FORM_ESQUELETO): só para o Netlify registar o formulário do comercial. '
+            'README.md, «Encaminhamento dos pedidos». -->\n'
+            f'<form name="{FORM_COMERCIAL}" method="POST" action="/obrigado.html" enctype="multipart/form-data" '
+            'data-netlify="true" netlify-honeypot="bot-field" hidden>\n' + "\n".join(campos) + "\n</form>\n</body>\n</html>\n")
+
+
+# Durações dadas pela MDM (quanto tempo leva o trabalho, de quanto em quanto tempo se faz a visita): são factos,
+# não prazos de resposta. A regra dos prazos não as lê no site (as outras regras sim); check_duracoes() vê-as à parte.
+DURACOES = {**{f"dados-mdm.json «{k}»": DADOS.get(k, "")
+               for k in ("duracaoMontagem", "periodicidadeVisitas", "periodicidadeVentilacao")},
+            **{f"obras.json «factos.duracao» da obra {o['n']}": o.get("factos", {}).get("duracao", "") for o in OBRAS}}
+# uma duração que fala em responder, chegar ou atender é um prazo de resposta disfarçado
+RESPOSTA_RE = re.compile(r"\b(?:respo\w*|cheg\w*|atend\w*|desloc\w*|urgênc\w*)", re.I)
+# O horário (site.json «hours», «2ª a 6ª, 8h–17h»): as horas de abrir e fechar têm a forma de «2h–4h», mas são um facto.
+# Só esse intervalo, com «h» nas duas horas e logo a seguir aos dias, sai da regra dos prazos; o resto do horário
+# («24h», «mesmo dia») é visto em todas as páginas, como o outro texto. O horário deixa de ser só um horário, e nenhum
+# intervalo sai da regra, se falar em responder, chegar, deslocação ou urgências (RESPOSTA_RE, à parte «atend…»:
+# «Atendimento: 2ª a 6ª, 8h–17h» é um horário) ou se tiver um intervalo sem os dias logo antes («Atendemos em 1h–2h»,
+# «Avarias: 1h–3h», «2ª a 6ª, em 1h–2h»: prazos, seja qual for a palavra). check_duracoes() diz porquê.
+HORA = rf"\b\d{{1,2}}h(?:\d\d)?(?:\s*(?:a|[{TRACOS}])\s*|\s+e\s+)\d{{1,2}}h(?:\d\d)?\b"
+HORAS_RE = re.compile(HORA, re.I)
+# os dias logo antes das horas: «2ª a 6ª, 8h–17h», «2.ª a 6.ª: 8h–12h e 14h–18h», «sábado 9h–13h», «sáb. 9h–13h»,
+# «segunda a sexta-feira, das 8h–17h», «dias úteis, 8h–17h», «todos os dias 8h–20h»
+DIA = (r"(?:\d\.?ª|(?:segunda|terça|quarta|quinta|sexta)(?:-feira)?s?|sábados?|domingos?|feriados?|úteis"
+       r"|todos\s+os\s+dias|(?:seg|ter|qua|qui|sex|sáb|sab|dom)\.?)")
+ABERTURA_RE = re.compile(rf"(?<!\w){DIA}[\s,:]*(?:(?:das|de|entre)\s+)?{HORA}(?:\s*(?:,|e|/)\s*{HORA})*", re.I)
+
+
+def horario_promete(hours):
+    """Porque é que o horário não é só um horário (vazio: é só um horário). As palavras de RESPOSTA_RE, à parte «atend…»,
+    e os intervalos que não vêm logo a seguir aos dias."""
+    if not isinstance(hours, str):
+        return []
+    palavras = dict.fromkeys(p for p in RESPOSTA_RE.findall(hours) if not p.lower().startswith("atend"))
+    abertura = [m.span() for m in ABERTURA_RE.finditer(hours)]
+    soltas = dict.fromkeys(m.group(0) for m in HORAS_RE.finditer(hours)
+                           if not any(a <= m.start() and m.end() <= b for a, b in abertura))
+    return ([f"fala em {', '.join(f'«{p}»' for p in palavras)}"] if palavras else []) + \
+           ([f"tem {', '.join(f'«{h}»' for h in soltas)} sem os dias logo antes (como em «2ª a 6ª, 8h–17h»)"] if soltas else [])
+
+
+def horario_isento(hours):
+    """Os intervalos do horário que não contam como prazo: as horas de abrir e fechar, se o horário não prometer nada."""
+    if not isinstance(hours, str) or horario_promete(hours):
+        return []
+    return sorted(set(HORAS_RE.findall(hours)))
+
+
+HORARIO = horario_isento(SITE.get("hours"))
+
+
+def sem_duracoes(t):
+    for v in [*DURACOES.values(), *HORARIO]:
+        if not isinstance(v, str) or not v.strip():
+            continue
+        for forma in {v, re.sub(r"\s+", " ", v).strip(), json.dumps(v, ensure_ascii=False)[1:-1]}:
+            t = t.replace(forma, " ")
+    return t
+
+
+def check_duracoes():
+    out = [f"{onde}: {PRAZO[1]} → «{v}»" for onde, v in DURACOES.items()
+           if isinstance(v, str) and PRAZO[0].search(v) and RESPOSTA_RE.search(v)]
+    hours, porque = SITE.get("hours"), horario_promete(SITE.get("hours"))
+    if porque and HORAS_RE.search(hours):
+        out.append(f"site.json «hours»: {' e '.join(porque)}, por isso todas as horas do horário "
+                   f"({', '.join(f'«{h}»' for h in dict.fromkeys(HORAS_RE.findall(hours)))}) contam como prazo de resposta "
+                   f"em todas as páginas → «{hours}»")
+    return out
+
+
+# etiquetas de texto (as que não partem a linha): «<strong>mesmo</strong> dia» lê-se «mesmo dia»; <br> é um espaço
+TAG_TEXTO_RE = re.compile(r"</?(?:a|abbr|b|bdi|bdo|br|cite|code|data|dfn|em|i|kbd|mark|q|s|samp|small|span|strong|sub|sup"
+                          r"|time|u|var|wbr)\b[^<>]*>", re.I)
+
+
+def texto_proibido(nome, text):
+    """Placeholders e frases retiradas pelo dono, também dentro de ligações (WhatsApp), meta e JSON-LD. Lê o texto como
+    aparece: sem as imagens em base64 (letras ao acaso, «LG» ou «24h» por sorte), com os \\uXXXX e \\xXX dos scripts já
+    descodificados e sem os caracteres invisíveis (espaço de largura zero e outros) no meio de uma frase. E lê-o duas
+    vezes: tal como está (os atributos contam) e sem as etiquetas de texto, que não podem esconder uma frase."""
+    t = re.sub(r"data:[^,\s\"']*;base64,[A-Za-z0-9+/=]+", "data:", re.sub(r"<!--.*?-->", "", text, flags=re.S))
+    t = re.sub(r"\\(?:u\{?([0-9a-fA-F]{4})\}?|x([0-9a-fA-F]{2}))", lambda m: chr(int(m.group(1) or m.group(2), 16)), t)
+    t = re.sub("[\u00ad\u200b-\u200d\u2060\ufeff]", "", unquote(html.unescape(t)))
+    vistas = {t, TAG_TEXTO_RE.sub(lambda m: " " if re.match(r"</?br\b", m.group(0), re.I) else "", t)}
+    achados = lambda rx, prazo=False: sorted({m for v in vistas for m in rx.findall(sem_duracoes(v) if prazo else v)})
+    out = [f"{nome}: placeholder visível → {m}" for m in achados(PLACEHOLDER_RE)]
+    for rx, porque in PROIBIDO:
+        out += [f"{nome}: {porque} → «{m}»" for m in achados(rx, (rx, porque) == PRAZO)]
+    return out
+
+
+def check_regras():
+    """Exemplos das regras acima, vistos em cada --check: se uma mudança a uma expressão deixar passar uma frase que tem
+    de falhar, ou apanhar uma que tem de passar, --check diz qual. As marcas vêm de data/regras-marcas.json, como a regra."""
+    juntas = ["\u2011", "\u2013", "", "\u00a0", " - "]
+    regras = [
+        ("prazos", PRAZO[0].search,
+         ["24h", "24 horas", "Assistência 24-horas", "serviço 24\u2011h", "24\u2013horas", "48 h", "2\u20134-horas", "2h-4h",
+          "2 a 4 horas", "entre 2 e 4 horas", "2 \u2212 4 h", "4 horas úteis", "no mesmo dia", "em 30 minutos"],
+         ["desde 1991", "1991\u20132026", "12 000 BTU/h", "9 000 \u2013 12 000 BTU/h", "2,5\u20133,5 kW", "3 a 4 divisões",
+          "12 a 25 m²", "Instalação num dia"]),
+        ("horário", lambda h: not horario_isento(h),   # «apanha»: nenhum intervalo do horário fica de fora da regra
+         ["2ª a 6ª, 8h–17h. Urgências: 1h–3h", "8h–17h, chegamos em 1h–2h", "2ª a 6ª, 8h–17h. Atendemos em 1h–2h",
+          "2ª a 6ª, 8h–17h. Atendimento de avarias em 1h–3h", "2ª a 6ª, 8h–17h. Avarias: 1h–3h",
+          "2ª a 6ª, 8h–17h. Emergências: 1h–3h", "2ª a 6ª, 8h–17h. Visita técnica em 2h–4h", "2ª a 6ª, em 1h–2h",
+          "Sábado: até 1h–2h"],
+         ["2ª a 6ª, 8h–17h", "Atendimento: 2ª a 6ª, 8h–17h", "Atendemos de 2ª a 6ª, 8h–17h",
+          "2ª a 6ª, 8h–17h; sábado 9h–13h", "2.ª a 6.ª: 8h–12h e 14h–18h", "Segunda a sexta-feira, das 8h–17h",
+          "Seg. a sex., 8h00–17h00", "Dias úteis, 8h–17h"]),
+        ("robots", NOINDEX_RE.search,
+         ["noindex", "noindex, nofollow", "NOINDEX,follow", "noindex nofollow", "none", "NONE", "index, None",
+          "googlebot: none", "googlebot:noindex"],
+         ["index,follow", "index, nofollow", "all", "index, follow, max-image-preview:none", "max-image-preview: none",
+          "googlebot: max-image-preview:none, max-snippet:-1", "nosnippet", "noimageindex"]),
+        ("marcas", MARCAS_RE.search,
+         [j.join(n.split()) for n in REGRAS_MARCAS["proibidas"] if len(n.split()) > 1 for j in juntas],
+         [j.join(n.split()) for n in MARCAS_PERMITIDAS for j in juntas]),
+    ]
+    return [f"build.py, regra «{nome}»: {'deixa passar' if falha else 'apanha'} o exemplo «{t}»"
+            for nome, apanha, falham, passam in regras for falha, frases in ((True, falham), (False, passam))
+            for t in frases if bool(apanha(t)) != falha]
+
+
+def check_testemunhos():
+    return [f"dados-mdm.json «testemunhos» n.º {i}: falta o texto ou o nome (o tipo é opcional)"
+            for i, t in enumerate(DADOS.get("testemunhos") or [], 1)
+            if not isinstance(t, dict) or not tem(t.get("texto", "")) or not tem(t.get("nome", ""))]
+
+
+# Formato dos dados que entram na página inicial como número, nota ou preço: um engano (um número JSON em vez de texto, um
+# ponto em vez da vírgula, um preço sem «€», uma frase sem ponto final) aparecia tal e qual no site, sem aviso.
+NUM = r"\d{1,3}(?:[ \u00a0\u202f]?\d{3})*"   # 1200, 1 200 (espaço normal, inseparável ou fino)
+FORMATOS = {
+    "googleNota": (r"(?:[1-4],\d|5,0)", "um algarismo, vírgula e uma casa decimal, de 1,0 a 5,0, sem estrelas"),
+    "googleAvaliacoes": (NUM, "só o número, sem pontos"),
+    "contratosAtivos": (NUM, "só o número, sem pontos"),
+    "unidadesAno": (rf"(?:(?:Cerca|Mais) de )?{NUM}", "só o número, ou «Cerca de …» / «Mais de …», com maiúscula"),
+    **{k: (r".*\d.*€.*", "com o número e «€», no formato «desde … €»")
+       for k in ("precoSplit", "precoMultisplit", "precoContrato", "precoDiagnostico")},
+    **{k: (r".*[.!?]", "uma frase completa, com ponto final") for k in ("garantiaInstalacao", "seguroRC")},
+    "concelhos": (r".+", "uma frase ou uma lista separada por vírgulas"),
+}
+
+
+def check_formatos():
+    out = []
+    for k, (rx, como) in FORMATOS.items():
+        v = DADOS_DOC.get(k, {}).get("valor", "")
+        if not isinstance(v, str):
+            out.append(f"dados-mdm.json «{k}»: tem de ser texto, entre aspas ({como}) → {json.dumps(v, ensure_ascii=False)}")
+        elif tem(v) and not re.fullmatch(rx, v.strip(), re.S):
+            out.append(f"dados-mdm.json «{k}»: {como} → «{v}»")
+    nota, aval = (DADOS_DOC.get(k, {}).get("valor", "") for k in ("googleNota", "googleAvaliacoes"))
+    if isinstance(aval, str) and re.fullmatch(NUM, aval.strip()) and int(re.sub(r"\D", "", aval)) < 2:
+        out.append(f"dados-mdm.json «googleAvaliacoes»: com uma só avaliação a página diria «1 avaliações»; publicar a partir de 2 → «{aval}»")
+    if tem(nota) != tem(aval):
+        out.append("dados-mdm.json «googleNota» preenchida sem «googleAvaliacoes» (ou vice-versa): a nota do Google só aparece no site com as duas")
+    return out
+
+
+def check(files):
+    problems = []
+    for f in files:
+        path = OUT / f
+        text = path.read_text(encoding="utf-8")
+        sem_scripts = re.sub(r"<script.*?</script>", "", text, flags=re.S)
+        if "{{" in sem_scripts or "}}" in sem_scripts:
+            problems.append(f"{f}: sobra sintaxe de modelo {{{{ }}}}")
+        problems += texto_proibido(f, text)
+        problems += check_cabeca(f, text)
+        problems += check_formulario(f, text)
+        for a, b, c in REF_RE.findall(text):
+            refs = [a] if a else ([s.strip().split()[0] for s in b.split(",")] if b else [c.strip("'\"")])
+            for r in refs:
+                if not r or re.match(r"^(https?:|mailto:|tel:|data:|//)", r):
+                    continue
+                target = (OUT / r.lstrip("/")) if r.startswith("/") else (path.parent / r).resolve()
+                if not target.exists():
+                    problems.append(f"{f}: referência partida → {r}")
+    problems += check_preview()
+    problems += check_regras() + check_duracoes() + check_testemunhos() + check_formatos() + check_btu() + check_precos()
+    problems += check_marcas() + check_equipa()
+    problems += check_encaminhamento() + check_precos_teste()
+    # uma imagem com 0 bytes (gravação interrompida) existe para REF_RE mas não aparece; .tmp é uma gravação a meio
+    for img in sorted(p for p in (OUT / "assets" / "img").rglob("*") if p.is_file()):
+        if img.stat().st_size == 0:
+            problems.append(f"{img.relative_to(OUT)}: imagem vazia (0 bytes): fazer de novo (as das obras: python3 website/gerar_fotos.py)")
+        elif img.suffix == ".tmp":
+            problems.append(f"{img.relative_to(OUT)}: sobra de uma gravação interrompida do gerar_fotos.py: apagar")
+    for css in (OUT / "assets" / "css").glob("*.css"):
+        for c in re.findall(r"url\(([^)]+)\)", css.read_text(encoding="utf-8")):
+            c = c.strip("'\"")
+            if c.startswith("data:"):
+                continue
+            if not (css.parent / c).resolve().exists():
+                problems.append(f"{css.name}: url partido → {c}")
+    # o que o visitante lê também vem dos scripts (mensagens do formulário)
+    for extra in sorted((OUT / "assets" / "js").glob("*.js")):
+        problems += texto_proibido(str(extra.relative_to(OUT)), extra.read_text(encoding="utf-8"))
+    print(f"{len(files)} páginas geradas em {OUT}")
+    if PRECOS_OUTRO:
+        print(f"Preços de MDM_PRECOS_FICHEIRO ({PRECOS_FICHEIRO}), só para testes: não publicar esta pasta.")
+    if PREVIEW:
+        print("Pré-visualização: noindex em todas as páginas. No lançamento: \"preview\": false em data/site.json (README.md).")
+    n = sum(1 for _ in em_falta())
+    if n:
+        print(f"\n{n} dados por preencher pela MDM, escondidos no site até lá: python3 website/build.py --faltam")
+    if problems:
+        print("\nPROBLEMAS:")
+        for p in problems:
+            print("  " + p)
+        return 1
+    print("\nSem ligações ou recursos partidos.")
+    return 0
+
+
+LD_RE = re.compile(r'<script type="application/ld\+json">(.*?)</script>', re.S)
+
+
+def check_cabeca(f, text):
+    """JSON-LD válido e com a empresa; robots de acordo com o modo; endereços absolutos que existem em public/."""
+    out = []
+    tipos = []
+    for bloco in LD_RE.findall(text):
+        try:
+            tipos.append(json.loads(bloco).get("@type"))
+        except json.JSONDecodeError as e:
+            out.append(f"{f}: JSON-LD inválido ({e})")
+    if ["HVACBusiness", "Electrician"] not in tipos:
+        out.append(f"{f}: falta o JSON-LD da empresa")
+    robots = re.search(r'<meta name="robots" content="([^"]*)"', text)
+    noindex = bool(robots and NOINDEX_RE.search(robots.group(1)))
+    if PREVIEW and not noindex:
+        out.append(f"{f}: pré-visualização sem <meta name=\"robots\" content=\"noindex\">")
+    elif not PREVIEW and noindex != (f in NOINDEX_SEMPRE):
+        out.append(f"{f}: lançamento com noindex (robots «{robots.group(1)}»: fica fora do Google)" if noindex else
+                   f"{f}: sem <meta name=\"robots\" content=\"noindex\"> (fica sempre fora do Google, NOINDEX_SEMPRE)")
+    base = SITE["baseUrl"] + "/"
+    for prop in ("og:image", "og:url"):
+        m = re.search(r'<meta property="%s" content="([^"]*)"' % prop, text)
+        if not (m and m.group(1).startswith(base)):
+            out.append(f"{f}: {prop} fora de {base}")
+        elif prop == "og:image" and not (OUT / m.group(1)[len(base):]).exists():
+            out.append(f"{f}: og:image não existe → {m.group(1)}")
+    return out
+
+
+def check_formulario(f, text):
+    """O formulário de orçamento, onde existir, é o mesmo formulário Netlify em todas as páginas."""
+    m = FORM_RE.search(text)
+    if not m:
+        return []
+    form = m.group(0)
+    abre = form[:form.index(">") + 1]
+    out = [f"{f}: formulário sem{x}" for x in FORM_EXIGE if x not in abre]
+    campos = set(re.findall(r'<(?:input|select|textarea)\b[^>]*\bname="([^"]+)"', form))
+    if campos != FORM_CAMPOS:
+        out.append(f"{f}: campos do formulário diferentes do esperado → a mais {sorted(campos - FORM_CAMPOS)}, "
+                   f"em falta {sorted(FORM_CAMPOS - campos)}")
+    if not re.search(r'<input type="hidden" name="form-name" value="orcamento">', form):
+        out.append(f"{f}: falta o campo escondido form-name=orcamento")
+    if not re.search(r'<input[^>]*name="fotografia"[^>]*type="file"[^>]*accept="image/\*"', form):
+        out.append(f"{f}: falta o campo da fotografia (type=file, accept=image/*)")
+    if not re.search(r'<input type="hidden" name="potencia" value=""', form):
+        out.append(f"{f}: falta o campo escondido potencia (vazio; site.js põe lá a estimativa de potência)")
+    if "data-btu=" not in form:
+        out.append(f"{f}: falta a estimativa de potência (data-btu) no formulário")
+    if not re.search(r'<input type="hidden" name="estimativa" value=""', form):
+        out.append(f"{f}: falta o campo escondido estimativa (vazio; site.js põe lá o preço provável mostrado)")
+    if "data-precos=" not in form:
+        out.append(f"{f}: falta o preço provável (data-precos) no formulário")
+    return out
+
+
+def check_encaminhamento():
+    """O formulário do comercial (formularios.html) é o formulário de orçamento com outro nome: os mesmos campos e os
+    mesmos atributos. site.js tem de usar o mesmo nome para lá enviar os pedidos de instalação e manutenção."""
+    f = OUT / FORMULARIOS
+    if not f.exists():
+        return [f"{FORMULARIOS}: não foi gerado (formulário do comercial)"]
+    text = f.read_text(encoding="utf-8")
+    m = re.search(r'<form\b[^>]*\bname="%s"[^>]*>.*?</form>' % re.escape(FORM_COMERCIAL), text, re.S)
+    if not m:
+        return [f"{FORMULARIOS}: falta o formulário {FORM_COMERCIAL}"]
+    form = m.group(0)
+    abre = form[:form.index(">") + 1]
+    out = [f"{FORMULARIOS}: formulário sem{x}" for x in FORM_EXIGE if x != ' name="orcamento"' and x not in abre]
+    campos = set(re.findall(r'<(?:input|select|textarea)\b[^>]*\bname="([^"]+)"', form))
+    if campos != FORM_CAMPOS:
+        out.append(f"{FORMULARIOS}: campos diferentes do formulário de orçamento → a mais {sorted(campos - FORM_CAMPOS)}, "
+                   f"em falta {sorted(FORM_CAMPOS - campos)}")
+    if f'<input type="hidden" name="form-name" value="{FORM_COMERCIAL}">' not in form:
+        out.append(f"{FORMULARIOS}: falta o campo escondido form-name={FORM_COMERCIAL}")
+    if not re.search(r'<input[^>]*name="fotografia"[^>]*type="file"', form):
+        out.append(f"{FORMULARIOS}: falta o campo da fotografia (type=file)")
+    if 'name="robots" content="noindex' not in text:
+        out.append(f"{FORMULARIOS}: falta o noindex")
+    js = OUT / "assets" / "js" / "site.js"
+    if js.exists() and f"'{FORM_COMERCIAL}'" not in js.read_text(encoding="utf-8"):
+        out.append(f"site.js: não envia para o formulário {FORM_COMERCIAL} (o nome tem de ser o mesmo de build.py)")
+    # as avarias que as obras pedem no endereço (?servico=…) têm de existir no formulário, senão o serviço não se escolhe
+    inicio = OUT / "index.html"
+    if inicio.exists():
+        valores = set(re.findall(r'<option value="([^"]*)"', inicio.read_text(encoding="utf-8")))
+        out += [f"build.py: SERV_AVARIA tem «{v}», que não é um serviço do formulário" for v in SERV_AVARIA.values() if v not in valores]
+    return out
+
+
+def check_precos(p=None, nome=PRECOS_NOME):
+    """data/precos.json (e a tabela de teste do assistente, precos-teste.json): a estrutura de sempre, preços null ou
+    [mínimo, máximo] inteiros, e os tamanhos de btu.tamanhos."""
+    p, out = (PRECOS_DOC if p is None else p), []
+    if not isinstance(p, dict):
+        return [f"{nome}: tem de ser um objeto JSON, como o modelo do README"]
+    esperado = {"split", "multisplit", "extras", "aguasQuentes", "inclui"}
+    chaves = {k for k in p if not k.startswith("_")}
+    if chaves != esperado:
+        out.append(f"{nome}: chaves diferentes do esperado → a mais {sorted(chaves - esperado)}, em falta {sorted(esperado - chaves)}")
+
+    def par(v, onde):
+        if v is None:
+            return
+        if not (isinstance(v, list) and len(v) == 2 and all(isinstance(x, int) and not isinstance(x, bool) and x >= 0 for x in v)):
+            out.append(f"{nome} «{onde}»: null ou [mínimo, máximo] em euros inteiros, sem aspas → {json.dumps(v, ensure_ascii=False)}")
+        elif v[0] > v[1]:
+            out.append(f"{nome} «{onde}»: o mínimo é maior do que o máximo → {json.dumps(v)}")
+
+    for sec, linhas in precos_linhas().items():
+        s = p.get(sec)
+        if not isinstance(s, dict):
+            out.append(f"{nome} «{sec}»: falta, ou não é um objeto com as linhas {linhas}")
+            continue
+        if set(s) != set(linhas):
+            porque = " (as linhas do split são os tamanhos de «btu.tamanhos» em site.json)" if sec == "split" else ""
+            out.append(f"{nome} «{sec}»: linhas diferentes do esperado{porque} → a mais {sorted(set(s) - set(linhas))}, "
+                       f"em falta {sorted(set(linhas) - set(s))}")
+        for k in linhas:
+            if k not in s:
+                continue
+            l = s[k]
+            if not (isinstance(l, dict) and set(l) == set(PRECOS_GAMAS)):
+                out.append(f'{nome} «{sec}.{k}»: tem de ser {{"eco": …, "sup": …}} → {json.dumps(l, ensure_ascii=False)}')
+                continue
+            for g in PRECOS_GAMAS:
+                par(l[g], f"{sec}.{k}.{g}")
+    ex = p.get("extras")
+    if not isinstance(ex, dict):
+        out.append(f"{nome} «extras»: falta, ou não é um objeto com {list(PRECOS_EXTRAS)}")
+    else:
+        if set(ex) != set(PRECOS_EXTRAS):
+            out.append(f"{nome} «extras»: chaves diferentes do esperado → a mais {sorted(set(ex) - set(PRECOS_EXTRAS))}, "
+                       f"em falta {sorted(set(PRECOS_EXTRAS) - set(ex))}")
+        m = ex.get("metrosIncluidos")
+        if m is not None and not (isinstance(m, int) and not isinstance(m, bool) and m >= 0):
+            out.append(f"{nome} «extras.metrosIncluidos»: null ou um número inteiro de metros, sem aspas → {json.dumps(m, ensure_ascii=False)}")
+        for k in PRECOS_EXTRAS[1:]:
+            if k in ex:
+                par(ex[k], f"extras.{k}")
+    inc = p.get("inclui")
+    if not (isinstance(inc, dict) and set(inc) == set(PRECOS_INCLUI)):
+        out.append(f"{nome} «inclui»: tem de ter as frases {list(PRECOS_INCLUI)} (texto; vazio = o produto não aparece)")
+    else:
+        for k, v in inc.items():
+            if not isinstance(v, str):
+                out.append(f"{nome} «inclui.{k}»: tem de ser texto, entre aspas → {json.dumps(v, ensure_ascii=False)}")
+            elif re.search(r"[{}<>]", v):
+                out.append(f"{nome} «inclui.{k}»: sem chavetas nem < > → «{v}»")
+    return out
+
+
+def check_precos_teste():
+    """data/precos.json nunca leva os números falsos de precos-teste.json: os testes geram com MDM_PRECOS_FICHEIRO e não o
+    tocam. Igual à tabela de teste (sem contar as chaves «_») é erro, salvo com MDM_PRECOS_FICHEIRO, que é para isso."""
+    teste = DATA / "precos-teste.json"
+    if PRECOS_OUTRO or not teste.exists():
+        return []
+    sem_notas = lambda p: {k: v for k, v in p.items() if not k.startswith("_")} if isinstance(p, dict) else p
+    try:
+        igual = sem_notas(json.loads(teste.read_text(encoding="utf-8"))) == sem_notas(PRECOS_DOC)
+    except json.JSONDecodeError:
+        return []   # check_equipa() já diz que precos-teste.json é inválido
+    return ["data/precos.json: tem os números falsos de precos-teste.json; repor a tabela verdadeira antes de publicar "
+            "(git diff website/data/precos.json)"] if igual else []
+
+
+def check_equipa():
+    """Assistente de propostas (equipa/, uso interno): a tabela de teste com a estrutura de precos.json, as regras de
+    texto do dono nas páginas e nos scripts, as ligações, e o noindex."""
+    out = []
+    teste = DATA / "precos-teste.json"
+    if teste.exists():
+        try:
+            out += check_precos(json.loads(teste.read_text(encoding="utf-8")), "precos-teste.json")
+        except json.JSONDecodeError as e:
+            out.append(f"precos-teste.json: JSON inválido → {e}")
+    textos = {".html", ".css", ".js"}   # imagens ou outros ficheiros em equipa/ são só copiados
+    for f in sorted(p for p in (OUT / "equipa").rglob("*") if p.is_file() and p.suffix in textos) if (OUT / "equipa").exists() else []:
+        nome = str(f.relative_to(OUT))
+        text = f.read_text(encoding="utf-8")
+        out += texto_proibido(nome, text)
+        if f.suffix == ".html":
+            if 'name="robots" content="noindex' not in text:
+                out.append(f"{nome}: falta <meta name=\"robots\" content=\"noindex, nofollow\"> (página interna)")
+            for a, b, c in REF_RE.findall(text):
+                r = a or c.strip("'\"")
+                if r and not re.match(r"^(https?:|mailto:|tel:|data:|//|/api/)", r):
+                    alvo = (OUT / r.lstrip("/")) if r.startswith("/") else (f.parent / r).resolve()
+                    if not alvo.exists():
+                        out.append(f"{nome}: referência partida → {r}")
+        if f.suffix == ".css":
+            for c in re.findall(r"url\(([^)]+)\)", text):
+                c = c.strip("'\"")
+                if not c.startswith("data:") and not (f.parent / c).resolve().exists():
+                    out.append(f"{nome}: url partido → {c}")
+    return out
+
+
+def precos_contagem():
+    """(preenchidos, total) de data/precos.json, para --faltam: cada gama de cada linha, cada extra e cada frase."""
+    p = PRECOS_DOC if isinstance(PRECOS_DOC, dict) else {}
+    cheios = total = 0
+    for sec, linhas in precos_linhas().items():
+        s = p.get(sec) if isinstance(p.get(sec), dict) else {}
+        for k in linhas:
+            l = s.get(k) if isinstance(s.get(k), dict) else {}
+            for g in PRECOS_GAMAS:
+                total += 1
+                cheios += l.get(g) is not None
+    ex = p.get("extras") if isinstance(p.get("extras"), dict) else {}
+    inc = p.get("inclui") if isinstance(p.get("inclui"), dict) else {}
+    total += len(PRECOS_EXTRAS) + len(PRECOS_INCLUI)
+    cheios += sum(ex.get(k) is not None for k in PRECOS_EXTRAS) + sum(tem(inc.get(k) or "") for k in PRECOS_INCLUI)
+    return cheios, total
+
+
+def check_btu():
+    """Os números da estimativa de potência (site.json «btu»), que o dono pode mudar: todos positivos e coerentes."""
+    b, out = SITE.get("btu"), []
+    num = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0
+    if not isinstance(b, dict):
+        return ["site.json: falta «btu» (estimativa de potência do formulário)"]
+    for k in ("porM2", "sol", "ultimoAndar", "btuPorKw", "areaMin", "areaMax"):
+        if not num(b.get(k)):
+            out.append(f"site.json «btu.{k}»: tem de ser um número maior do que zero")
+    m = b.get("maxDivisoes")   # um número de divisões: inteiro (2.5 ou 8.0 apareciam assim na página)
+    if not (isinstance(m, int) and not isinstance(m, bool) and m >= 1):
+        out.append("site.json «btu.maxDivisoes»: tem de ser um número inteiro, 1 ou mais")
+    tipos = b.get("tipos")
+    if not (isinstance(tipos, dict) and tipos and all(num(v) for v in tipos.values())):
+        out.append("site.json «btu.tipos»: lista de tipos de divisão, cada um com um fator maior do que zero")
+    t = b.get("tamanhos")
+    if not (isinstance(t, list) and t and all(num(x) for x in t) and t == sorted(set(t))):
+        out.append("site.json «btu.tamanhos»: tamanhos de aparelho em BTU/h, do mais pequeno para o maior, sem repetir")
+    f = b.get("folga", 0)   # margem para não saltar de tamanho por pouco: 0 a 0,49
+    if not (isinstance(f, (int, float)) and not isinstance(f, bool) and 0 <= f < 0.5):
+        out.append("site.json «btu.folga»: margem entre 0 e 0,49 (0,1 = 10%)")
+    if not out and b["areaMin"] >= b["areaMax"]:
+        out.append("site.json «btu»: areaMin tem de ser menor do que areaMax")
+    return out
+
+
+VIEWBOX_RE = re.compile(r'<svg\b[^>]*\bviewBox="\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)\s*"')
+
+
+def check_marcas():
+    """Faixa das marcas (site.json «marcas»): nome entre as permitidas, ficheiros que existem, largura e altura do
+    logótipo certas, escala. E as duas listas de data/regras-marcas.json não se apanham uma à outra."""
+    out, marcas = [], SITE["marcas"]
+    # uma proibida que apanhe uma permitida («Mitsubishi» sozinha apanharia «Mitsubishi Electric») faria falhar o site
+    out += [f"data/regras-marcas.json: a marca permitida «{n}» é apanhada pelas «proibidas» → «{MARCAS_RE.search(n).group(0)}»"
+            for n in MARCAS_PERMITIDAS if MARCAS_RE.search(n)]
+    if not marcas:
+        return out + ["site.json: falta «marcas» (faixa das certificações)"]
+    inteiro = lambda v: isinstance(v, int) and not isinstance(v, bool) and v > 0
+    for m in marcas:
+        nome = m.get("nome")
+        if not (isinstance(nome, str) and nome.strip()):
+            out.append("site.json «marcas»: cada marca tem de ter «nome»")
+            continue
+        if nome not in MARCAS_PERMITIDAS:
+            out.append(f"site.json «marcas» {nome}: não é uma das «permitidas» de data/regras-marcas.json "
+                       f"({', '.join(MARCAS_PERMITIDAS)})")
+        e = m["escala"]
+        if not (isinstance(e, (int, float)) and not isinstance(e, bool) and 0.5 <= e <= 2):
+            out.append(f"site.json «marcas» {nome}: «escala» é um número entre 0,5 e 2 (1 = altura normal)")
+        for campo in ("logo", "simbolo"):
+            if m[campo] and not (ROOT / m[campo]).is_file():
+                out.append(f"site.json «marcas» {nome}: «{campo}» não existe → {m[campo]}")
+        if not m["logo"]:
+            continue
+        if not (inteiro(m["w"]) and inteiro(m["h"])):
+            out.append(f"site.json «marcas» {nome}: com «logo», «w» e «h» são a largura e a altura do ficheiro (inteiros)")
+            continue
+        f = ROOT / m["logo"]
+        if f.suffix.lower() == ".png" and f.is_file():
+            cab = f.read_bytes()[:24]
+            if cab[:8] == b"\x89PNG\r\n\x1a\n" and (int.from_bytes(cab[16:20], "big"), int.from_bytes(cab[20:24], "big")) != (m["w"], m["h"]):
+                out.append(f"site.json «marcas» {nome}: «w»/«h» ({m['w']}×{m['h']}) não são o tamanho do PNG "
+                           f"({int.from_bytes(cab[16:20], 'big')}×{int.from_bytes(cab[20:24], 'big')})")
+        if f.suffix.lower() == ".svg" and f.is_file():
+            svg = f.read_text(encoding="utf-8", errors="replace")
+            vb = VIEWBOX_RE.search(svg)
+            if not vb:
+                out.append(f"{m['logo']}: SVG sem viewBox (o logótipo não escala)")
+            elif abs(float(vb[1]) / float(vb[2]) - m["w"] / m["h"]) > 0.02 * m["w"] / m["h"]:
+                out.append(f"site.json «marcas» {nome}: «w»/«h» ({m['w']}×{m['h']}) não têm a proporção do viewBox "
+                           f"({vb[1]}×{vb[2]}): o logótipo ficaria esticado")
+            if ARQUITECTOS_RE.search(svg):
+                out.append(f"{m['logo']}: traz a assinatura «Os Arquitectos do Ar», que o dono não quer no site")
+    return out
+
+
+def check_preview():
+    """O modo de pré-visualização e o lançamento nunca ficam a meio caminho. O meta robots de cada página vê-o
+    check_cabeca(); aqui, robots.txt, _headers e o netlify.toml, que é escrito à mão e o build.py não muda."""
+    out, robots_f, cab = [], OUT / "robots.txt", OUT / "_headers"
+    robots = robots_f.read_text(encoding="utf-8") if robots_f.exists() else ""
+    disallow = re.search(r"^\s*Disallow:\s*/\s*$", robots, re.I | re.M)
+    # um bloco «/*» do _headers com X-Robots-Tag noindex
+    cab_noindex = cab.exists() and re.search(r"^/\*[ \t]*\n(?:[ \t]+\S.*\n)*?[ \t]+X-Robots-Tag:[^\n]*noindex",
+                                             cab.read_text(encoding="utf-8"), re.I | re.M)
+    if PREVIEW:
+        if not disallow:
+            out.append("pré-visualização: robots.txt sem «Disallow: /»")
+        if not cab_noindex:
+            out.append("pré-visualização: _headers sem «X-Robots-Tag: noindex» em /*")
+        return out
+    if disallow:
+        out.append("lançamento: robots.txt ainda tem «Disallow: /»")
+    sitemap = f"{SITE['baseUrl']}/sitemap.xml"
+    if not re.search(r"^Sitemap:\s*%s\s*$" % re.escape(sitemap), robots, re.M):
+        out.append(f"lançamento: robots.txt sem a linha «Sitemap: {sitemap}»")
+    if cab.exists() and any(map(NOINDEX_RE.search, re.findall(r"X-Robots-Tag:(.*)", cab.read_text(encoding="utf-8"), re.I))):
+        out.append("lançamento: _headers ainda pede noindex")
+    # o netlify.toml só pode tirar do Google a página interna (/equipa/*); cada [[headers]] tem o seu «for». Lido com
+    # tomllib, que entende todas as grafias do TOML (aspas simples, «values = { … }» numa linha, chaves com pontos)
+    toml = ROOT / "netlify.toml"
+    conf = {}
+    if toml.exists() and tomllib is None:
+        out.append("lançamento: o --check precisa de Python 3.11+ para ler o netlify.toml (README.md, «Gerar»)")
+    elif toml.exists():
+        try:
+            conf = tomllib.loads(toml.read_text(encoding="utf-8"))
+        except tomllib.TOMLDecodeError as e:
+            out.append(f"lançamento: netlify.toml inválido → {e}")
+    for h in conf.get("headers", []):
+        para = h.get("for", "?")
+        # entre vírgulas: «X-Robots-Tag» e «x-robots-tag» no mesmo bloco são duas listas de diretivas
+        robots = ", ".join(str(v) for k, v in h.get("values", {}).items() if k.lower() == "x-robots-tag")
+        if NOINDEX_RE.search(robots) and not para.startswith("/equipa/"):
+            out.append(f"lançamento: netlify.toml pede noindex em {para} (só /equipa/* fica fora do Google)")
+    if not SITE["baseUrl"].startswith("https://") or "manus.space" in SITE["baseUrl"]:
+        out.append(f"lançamento: baseUrl não é o domínio final → {SITE['baseUrl']}")
+    return out
+
+
+def em_falta():
+    """(grupo, texto) de cada dado em falta: dados-mdm.json e factos das obras."""
+    for k, v in DADOS_DOC.items():
+        if k.startswith("_") or tem(v["valor"]):
+            continue
+        pags = sorted(DADOS_USO.get(k, ()))
+        onde = ("entra em " + (" e ".join(pags) if len(pags) <= 2 else f"{len(pags)} páginas")) if pags else "não entra em nenhuma página"
+        yield v["grupo"], f"{v['pedido']}.\n      chave «{k}» · {onde}"
+    for campo, nome in FACTOS_OBRA.items():
+        sem = [o["code"] for o in OBRAS if not tem(o.get("factos", {}).get(campo, ""))]
+        if sem:
+            yield ("Obras (data/obras.json, «factos» de cada obra; a linha só aparece na ficha quando existe)",
+                   f"{nome}: falta em {len(sem)} de {len(OBRAS)} obras" + ("" if len(sem) == len(OBRAS) else f" ({', '.join(sem)})"))
+    cheios, total = precos_contagem()
+    if cheios < total:
+        estado = ("Tabela de preços vazia: o formulário não mostra nenhum preço" if not cheios else
+                  f"Tabela de preços preenchida em parte ({cheios} de {total} valores): o que falta não aparece")
+        yield ("Preço provável no formulário (data/precos.json; ver README.md, «Preço provável»)",
+               f"{estado}. Copiar os valores da folha {PRECOS_FOLHA} quando a MDM a preencher.")
+
+
+def faltam():
+    """Lista legível do que só a MDM pode dar. Não falha: enquanto falta, o site esconde o elemento."""
+    grupos = {}
+    for g, txt in em_falta():
+        grupos.setdefault(g, []).append(txt)
+    total = sum(len(v) for v in grupos.values())
+    print(f"\nDados que só a MDM pode dar: {total} em falta. Preencher em website/data/dados-mdm.json"
+          " (as obras em website/data/obras.json).\nNunca escrever um número ou um facto que não esteja confirmado.")
+    for g, linhas in grupos.items():
+        print(f"\n{g}")
+        for l in linhas:
+            print(f"  · {l}")
+    tarefas = DADOS_DOC.get("_tarefas", [])
+    if tarefas:
+        print("\nOutras tarefas antes de publicar")
+        for t in tarefas:
+            print(f"  · {t}")
+
+
+if __name__ == "__main__":
+    built = build()
+    rc = check(built) if "--check" in sys.argv else 0
+    if "--faltam" in sys.argv:
+        faltam()
+    sys.exit(rc)

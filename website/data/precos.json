@@ -1,0 +1,36 @@
+{
+  "_leia": "Preço provável mostrado no formulário, a seguir à estimativa de potência (montagem de ar condicionado e bomba de calor para águas quentes). Os valores vêm da folha «MDM, tabela de preços para o site», copiados à mão quando a MDM a preencher: nada se inventa. Euros com IVA incluído, sem cêntimos. Cada preço é null ou um par [mínimo, máximo] de números inteiros, sem aspas, com o mínimo menor ou igual ao máximo; eco = gama económica (ex.: Midea), sup = gama superior (ex.: Mitsubishi Electric, Daikin). «metrosIncluidos» é um número de metros, não euros. «multisplit.acrescimoGrande» soma-se por cada divisão com mais de 12 000 BTU/h. As linhas de «split» são os tamanhos de «btu.tamanhos» em site.json. «inclui» são as frases da aba «O que inclui». Vazio = não aparece no site: um produto só aparece com a sua linha e a sua frase de «inclui» preenchidas, um extra só com o seu preço. Ver README.md, «Preço provável».",
+  "split": {
+    "7000": {"eco": null, "sup": null},
+    "9000": {"eco": null, "sup": null},
+    "12000": {"eco": null, "sup": null},
+    "18000": {"eco": null, "sup": null},
+    "24000": {"eco": null, "sup": null}
+  },
+  "multisplit": {
+    "2": {"eco": null, "sup": null},
+    "3": {"eco": null, "sup": null},
+    "4": {"eco": null, "sup": null},
+    "acrescimoGrande": {"eco": null, "sup": null}
+  },
+  "extras": {
+    "metrosIncluidos": null,
+    "metroExtra": null,
+    "preInstalacaoDesconto": null,
+    "furoBetao": null,
+    "alturaEscada": null,
+    "alturaAndaime": null,
+    "alturaPlataforma": null,
+    "ligacaoEletrica": null,
+    "retirarAntiga": null
+  },
+  "aguasQuentes": {
+    "200": {"eco": null, "sup": null},
+    "300": {"eco": null, "sup": null}
+  },
+  "inclui": {
+    "split": "",
+    "multisplit": "",
+    "aguasQuentes": ""
+  }
+}

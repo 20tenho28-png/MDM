@@ -1,0 +1,41 @@
+<footer class="rodape">
+  <div class="rodape-in">
+    <div class="rodape-marca">
+      <img src="{{ root }}assets/img/logo-mdm.svg" alt="MDM" width="56" height="58" loading="lazy">
+      <p>Assistência técnica desde {{ site.founded }}.<br>Ar condicionado, bombas de calor, ventilação, eletricidade e manutenção na grande Lisboa.</p>
+    </div>
+    <nav class="rodape-col" aria-label="Serviços">
+      <p class="rotulo">Serviços</p>
+      <a href="{{ root }}servicos/ar-condicionado.html">Ar condicionado</a>
+      <a href="{{ root }}servicos/bombas-de-calor.html">Bombas de calor</a>
+      <a href="{{ root }}servicos/manutencao.html">Manutenção</a>
+      <a href="{{ root }}servicos/eletricidade.html">Eletricidade</a>
+      <a href="{{ root }}servicos/ventilacao.html">Ventilação</a>
+      <a href="{{ root }}obras.html">Obras</a>
+    </nav>
+    <div class="rodape-col">
+      <p class="rotulo">Contacto</p>
+      <a data-lead="tel" href="{{ site.phoneHref }}">{{ site.phone }}</a>
+      <a data-lead="{{ page.wa }}" href="{{wa {{ page.wa }}}}" target="_blank" rel="noopener">WhatsApp {{ site.whatsapp }}</a>
+      <a data-lead="email" href="mailto:{{ site.email }}">{{ site.email }}</a>
+      <span class="nowrap">{{ site.hours }}</span>
+    </div>
+    <div class="rodape-col">
+      <p class="rotulo">Empresa</p>
+      <span>{{ site.legalName }}</span>
+      <span>NIF e matrícula {{ site.nif }}</span>
+      {{#se dados.conservatoria}}<span>{{ dados.conservatoria }}</span>{{/se}}
+      {{#se dados.capitalSocial}}<span>Capital social {{ dados.capitalSocial }}</span>{{/se}}
+      <span>{{ site.address1 }}, {{ site.address2 }}</span>
+      <a class="rodape-mapa" href="{{ site.googleMaps }}" target="_blank" rel="noopener" aria-label="Ver a MDM no Google Maps (abre noutro separador)"><svg class="ico" viewBox="0 0 256 256" aria-hidden="true"><path d="M128,64a40,40,0,1,0,40,40A40,40,0,0,0,128,64Zm0,64a24,24,0,1,1,24-24A24,24,0,0,1,128,128Zm0-112a88.1,88.1,0,0,0-88,88c0,31.4,14.51,64.68,42,96.25a254.19,254.19,0,0,0,41.45,38.3,8,8,0,0,0,9.18,0A254.19,254.19,0,0,0,174,200.25c27.45-31.57,42-64.85,42-96.25A88.1,88.1,0,0,0,128,16Zm0,206c-16.53-13-72-60.75-72-118a72,72,0,0,1,144,0C200,161.23,144.53,209,128,222Z"/></svg>Ver a MDM no Google Maps</a>
+      <span class="rodape-cert">{{ site.certifications }}</span>
+    </div>
+  </div>
+  <div class="rodape-base">
+    <span>© <span data-ano-atual>{{ year }}</span> {{ site.name }}, Lisboa</span>
+    <span class="rodape-legal">
+      <a href="{{ root }}privacidade.html">Política de privacidade</a>
+      <a href="https://www.livroreclamacoes.pt/" target="_blank" rel="noopener" aria-label="Livro de Reclamações Eletrónico (abre noutro separador)">Livro de Reclamações</a>
+    </span>
+  </div>
+</footer>

@@ -1,0 +1,16 @@
+{
+  "name": "mdm-website",
+  "private": true,
+  "description": "Site da MDM (gerado por build.py, sem dependências) e a função do assistente de propostas da equipa (netlify/functions).",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.132.1"
+  },
+  "devDependencies": {
+    "@netlify/functions": "^6.0.2",
+    "esbuild": "^0.28.2"
+  }
+}
