@@ -747,7 +747,7 @@ for _k in ("permitidas", "proibidas"):
 MARCAS_PERMITIDAS = REGRAS_MARCAS["permitidas"]
 # as palavras de cada nome separadas por espaços, por qualquer traço (hífen, U+2010 a U+2015, sinal menos, os traços
 # pequenos e largos) ou por nada: «Saunier-Duval», «Saunier–Duval», «SaunierDuval». É a mesma junção da função do
-# assistente (JUNTA_MARCA em netlify/functions/proposta.mts). Os nomes mais compridos primeiro
+# assistente e da skill de orçamento (JUNTA_MARCA em netlify/lib/proposta-modelo.mjs). Os nomes mais compridos primeiro
 JUNTA_MARCA = r"[\s\-\u2010-\u2015\u2212\ufe58\ufe63\uff0d]*"
 MARCAS_RE = re.compile(r"(?<!\w)(?:%s)(?!\w)" % "|".join(
     JUNTA_MARCA.join(map(re.escape, n.split())) for n in sorted(REGRAS_MARCAS["proibidas"], key=len, reverse=True)),

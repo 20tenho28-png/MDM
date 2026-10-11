@@ -1,5 +1,6 @@
 /* Paridade: o cálculo do assistente de propostas (netlify/lib/calculo.mjs) tem de dar exatamente o mesmo resumo que o
-   formulário do site (assets/js/site.js) para os mesmos dados. Usa a tabela de teste sem tocar em data/precos.json: gera o
+   formulário do site (assets/js/site.js) para os mesmos dados, e a skill «ORÇAMENTO MDM», a ler o pedido como o site o
+   manda (a potência e o preço nos campos do email), tem de dar a mesma potência e o mesmo preço. Usa a tabela de teste sem tocar em data/precos.json: gera o
    site numa pasta temporária (MDM_OUT) com MDM_PRECOS_FICHEIRO=data/precos-teste.json, serve-o numa porta livre, compara
    caso a caso no browser e apaga a pasta no fim (mesmo com erro ou Ctrl+C).
    Precisa do Playwright (fora das dependências do site). Uso, a partir de website/:
@@ -12,6 +13,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { configPotencia, configPreco, potencia, preco } from '../netlify/lib/calculo.mjs';
+/* a skill «ORÇAMENTO MDM» (.claude/skills/mdm-orcamento): lê o pedido como o site o manda e tem de dar o mesmo preço */
+const skill = await import(new URL('../../.claude/skills/mdm-orcamento/scripts/orcamento.mjs', import.meta.url).href);
 
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
@@ -23,6 +26,8 @@ const AC = 'Ar condicionado: montagem / instalação', BC = 'Bomba de calor: ins
 const site = JSON.parse(fs.readFileSync(path.join(W, 'data/site.json'), 'utf8'));
 const tabela = JSON.parse(fs.readFileSync(TESTE, 'utf8'));
 const T = configPreco(tabela, configPotencia(site.btu));
+const D = skill.carregaDados({ teste: true });
+const normal = (t) => String(t).replace(/[\u00a0\u202f]/g, ' ');
 const tipos = Object.keys(site.btu.tipos);
 
 /* gerador pseudoaleatório com semente fixa: os mesmos casos em todas as corridas */
@@ -90,6 +95,9 @@ try {
       const r = page.locator(`input[name="preco-${k}"][value="${v}"]`);
       if (await r.count() && await r.isVisible()) await r.check({ force: true });
     }
+    /* «Juntar ao pedido» põe a potência no campo escondido, como antes de enviar */
+    if (c.servico === 'ac' && await page.locator('[data-pot-juntar]').isVisible()) await page.click('[data-pot-juntar]');
+    const potSite = await page.$eval('[data-potencia-campo]', (x) => x.value);
     const noSite = await page.$eval('[data-estimativa-campo]', (x) => x.value);
     const visitaSite = await page.$eval('.preco-visita', (x) => !!x.getClientRects().length).catch(() => false);
     const r = preco(T, c);
@@ -97,6 +105,13 @@ try {
     const aqui = r.modo === 'preco' ? r.resumo : '';
     const bate = noSite === aqui && (r.modo === 'visita') === visitaSite;
     if (!bate) { falhas++; console.log(`FALHA caso ${i}: ${JSON.stringify(c)}\n  site:   «${noSite}» visita=${visitaSite}\n  cálculo: «${aqui}» modo=${r.modo}`); }
+    /* a skill, com o pedido como o site o manda (o serviço, a potência e o preço nos campos do email), dá o mesmo */
+    const pedido = `Serviço: ${c.servico === 'ac' ? AC : BC}\nPotência estimada: ${potSite || '-'}\nPreço provável: ${noSite || '-'}\n`;
+    const res = skill.orcamento(skill.lePedido(pedido, D), D);
+    const potOk = c.servico !== 'ac' || (normal(potSite) === normal(r.potencia?.resumo || '') && normal(res.proposta?.potencia || '') === normal(potSite));
+    const skillOk = potOk && (res.proposta?.resumo || '') === noSite && (res.modo === 'visita') === visitaSite
+      && !res.avisos.some((a) => /mudou|não dá preço/.test(a));
+    if (!skillOk) { falhas++; console.log(`FALHA caso ${i} (skill): ${JSON.stringify(c)}\n  site:  «${potSite}» «${noSite}»\n  skill: «${res.proposta?.potencia}» «${res.proposta?.resumo}» modo=${res.modo} ${res.avisos.join(' | ')}`); }
   }
   await browser.close();
   /* a tabela verdadeira nunca se toca */

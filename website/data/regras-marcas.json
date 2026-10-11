@@ -1,5 +1,5 @@
 {
-  "_nota": "Regra do dono: no site e nas propostas só se nomeiam as marcas «permitidas». As «proibidas» são as que o build.py (--check, em tudo o que se publica) e a função do assistente (netlify/functions/proposta.mts, nas propostas) recusam, sem distinguir maiúsculas. Texto livre não se pode verificar contra a lista das permitidas, por isso esta lista junta as marcas de ar condicionado, bombas de calor, águas quentes e ventilação mais vendidas em Portugal; uma marca nova junta-se aqui. «Mitsubishi Heavy» fica proibida; «Mitsubishi Electric» é permitida.",
+  "_nota": "Regra do dono: no site e nas propostas só se nomeiam as marcas «permitidas». As «proibidas» são as que o build.py (--check, em tudo o que se publica) e as propostas (netlify/lib/proposta-modelo.mjs, na função do assistente e na skill «ORÇAMENTO MDM») recusam, sem distinguir maiúsculas. Texto livre não se pode verificar contra a lista das permitidas, por isso esta lista junta as marcas de ar condicionado, bombas de calor, águas quentes e ventilação mais vendidas em Portugal; uma marca nova junta-se aqui. «Mitsubishi Heavy» fica proibida; «Mitsubishi Electric» é permitida.",
   "permitidas": ["Midea", "Mitsubishi Electric", "Daikin", "France Air"],
   "proibidas": [
     "LG", "Samsung", "Toshiba", "Fujitsu", "Hitachi", "Panasonic", "Sharp", "Mitsubishi Heavy", "Gree", "Haier", "Hisense",

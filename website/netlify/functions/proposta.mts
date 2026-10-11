@@ -20,12 +20,13 @@
    Netlify. Sem nenhuma das duas, a IA fica desligada e o formulário funciona na mesma. README.md, «Assistente de propostas». */
 import Anthropic from "@anthropic-ai/sdk"
 import type { Config, Context } from "@netlify/functions"
-import { createHash, randomBytes, timingSafeEqual } from "node:crypto"
+import { createHash, timingSafeEqual } from "node:crypto"
 import site from "../../data/site.json" with { type: "json" }
 import precosReais from "../../data/precos.json" with { type: "json" }
 import precosTeste from "../../data/precos-teste.json" with { type: "json" }
 import regrasMarcas from "../../data/regras-marcas.json" with { type: "json" }
 import { configPotencia, configPreco, potencia, preco } from "../lib/calculo.mjs"
+import { CONDICOES, criaRegras, divisoesDe, limpa, montaProposta, opcoesDe } from "../lib/proposta-modelo.mjs"
 
 const MODELO = "claude-opus-5-5"
 const MODELO_LEITURA = "claude-haiku-5-5"
@@ -44,70 +45,9 @@ function tabela(env: Env) {
 }
 type Tabela = ReturnType<typeof tabela>
 
-/* as marcas que o dono não quer (data/regras-marcas.json, «proibidas», a mesma lista do build.py): sem distinguir
-   maiúsculas e só como palavra inteira, por isso um nome de duas palavras não apanha «Mitsubishi Electric» e um nome
-   curto não apanha uma palavra maior que comece por ele. Entre as palavras de um nome pode haver espaços, qualquer traço
-   (hífen, U+2010 a U+2015, sinal menos, os traços pequenos e largos) ou nada: com hífen ou tudo junto, o nome fica de
-   fora na mesma. É a mesma junção do build.py */
-const JUNTA_MARCA = "[\\s\\-\\u2010-\\u2015\\u2212\\ufe58\\ufe63\\uff0d]*"
-const MARCAS_RE = new RegExp(`(?<![\\p{L}\\p{N}])(?:${(regrasMarcas.proibidas as string[])
-  .map((m) => m.trim().split(/\s+/).map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join(JUNTA_MARCA)).join("|")})(?![\\p{L}\\p{N}])`, "iu")
-/* o que o dono não quer em nada escrito pela MDM (as mesmas regras do build.py, PROIBIDO) */
-/* prazos de resposta: a mesma regra do build.py (PRAZO): espaços, um traço qualquer ou nada entre o número e a unidade
-   («24-horas», «24‑h»), e intervalos com traço, «a» ou «e» («2–4 horas», «2 e 4 horas») */
-const TRACOS = "\\-\u2010-\u2015\u2212\u2043\u2e3a\u2e3b\ufe58\ufe63\uff0d"
-const JUNTA_UNIDADE = `[\\s${TRACOS}]*`
-const PRAZO_RE = new RegExp(
-  `\\b\\d+${JUNTA_UNIDADE}(?:h|horas)\\s+úteis|\\b(?:24|48)${JUNTA_UNIDADE}(?:h|horas)\\b`
-  + `|\\b\\d+(?:${JUNTA_UNIDADE}(?:h|horas))?(?:\\s*(?:a|[${TRACOS}])\\s*|\\s+e\\s+)\\d+${JUNTA_UNIDADE}(?:h|horas)\\b`
-  + `|\\bmesmo\\s+dia\\b|\\b\\d+${JUNTA_UNIDADE}minutos\\b`, "i")
-const PROIBIDO: [RegExp, string][] = [
-  [PRAZO_RE, "promessa de prazo de resposta"],
-  [/\b[34]\d\s+anos\b/, "idade da empresa (só «desde 1991»)"],
-  [MARCAS_RE, `marca fora da lista (só ${regrasMarcas.permitidas.join(", ")})`],
-  [/Domingues|M\.D\.M\.\s*[—–]/, "nome legal: «M.D.M. - Manuel Domingos Melancia, Lda»"],
-  [/Arquitec?tos\s+do\s+Ar/i, "assinatura da France Air («Os Arquitectos do Ar»): o dono não a quer"],
-]
-function limpa(t: unknown, max = 300): string {
-  return String(t ?? "").replace(/\s*[—–]\s*/g, ", ").replace(/\s+/g, " ").trim().slice(0, max)
-}
-/* vê o texto limpo e o original: limpa() troca os travessões por vírgulas, e as regras do nome legal e dos prazos
-   («2–4 horas») olham para eles */
-function proibido(...textos: unknown[]): string | null {
-  for (const [re, porque] of PROIBIDO) if (textos.some((t) => re.test(String(t ?? "")))) return porque
-  return null
-}
-
-const SERVICOS: Record<string, string> = {
-  ac: "Montagem de ar condicionado",
-  aguasQuentes: "Bomba de calor para águas quentes",
-}
-const CONDICOES = [
-  "Preço com IVA.",
-  "O preço final fica fechado depois da visita, que é gratuita.",
-  "Proposta modelo, feita a partir do que nos contou. Não é vinculativa.",
-]
-
-function agoraLisboa() {
-  const d = new Date()
-  const p = Object.fromEntries(new Intl.DateTimeFormat("pt-PT", {
-    timeZone: "Europe/Lisbon", year: "2-digit", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23",
-  }).formatToParts(d).map((x) => [x.type, x.value]))
-  return {
-    /* o sufixo distingue duas propostas feitas no mesmo minuto */
-    ref: `MDM-P-${p.year}${p.month}${p.day}-${p.hour}${p.minute}-${randomBytes(2).toString("hex").toUpperCase()}`,
-    data: new Intl.DateTimeFormat("pt-PT", { timeZone: "Europe/Lisbon", day: "numeric", month: "long", year: "numeric" }).format(d),
-  }
-}
-
-/* entrada das ferramentas (o formato do esquema) para o formato de calculo.mjs */
-function divisoesDe(input: any) {
-  return (Array.isArray(input?.divisoes) ? input.divisoes : []).map((d: any) => (
-    { tipo: d.tipo, area: d.area, sol: !!d.sol, ultimoAndar: !!d.ultimo_andar }))
-}
-function opcoesDe(input: any) {
-  return { servico: input?.servico, divisoes: divisoesDe(input), respostas: input?.respostas || {} }
-}
+/* as regras do dono para o texto, a proposta e as condições: netlify/lib/proposta-modelo.mjs, partilhado com a skill
+   «ORÇAMENTO MDM» (.claude/skills/mdm-orcamento), para as duas darem a mesma proposta */
+const { proibido } = criaRegras(regrasMarcas)
 
 /* o que o modelo recebe de volta: só o que precisa para responder, com o texto já formatado */
 function paraModelo(r: any, teste: boolean) {
@@ -129,79 +69,16 @@ function paraModelo(r: any, teste: boolean) {
   return base
 }
 
-function textoProposta(p: any): string {
-  const l: string[] = []
-  if (p.teste) l.push("VALORES DE TESTE, NÃO ENVIAR AO CLIENTE", "")
-  l.push(`Proposta modelo ${p.ref} · ${p.data}`, `${site.name}`, "")
-  const c = p.cliente
-  if (c.nome) l.push(`Cliente: ${c.nome}`)
-  if (c.contacto) l.push(`Contacto: ${c.contacto}`)
-  if (c.local) l.push(`Local: ${c.local}`)
-  if (c.nome || c.contacto || c.local) l.push("")
-  l.push(`${p.servico}`)
-  if (p.pedido) l.push(`O que nos pediu: ${p.pedido}`)
-  if (p.potencia) l.push(`Potência estimada: ${p.potencia}`)
-  l.push("")
-  if (p.modo === "visita") l.push("Para este caso o preço dá-se depois da visita, que é gratuita.")
-  for (const b of p.blocos) {
-    l.push(b.titulo)
-    for (const g of b.gamas) {
-      l.push(`- ${g.gama} (${g.exemplo}): ${g.texto}`)
-      if (g.umaPorDivisao) l.push(`  Com uma máquina para cada divisão: ${g.umaPorDivisao}`)
-    }
-  }
-  if (p.inclui) l.push(`Inclui: ${p.inclui}`)
-  if (p.considerado.length > 1) l.push(`Considerámos: ${p.considerado.slice(1).join(", ")}.`)
-  if (p.observacoes.length) { l.push("", "Notas:"); p.observacoes.forEach((o: string) => l.push(`- ${o}`)) }
-  l.push("", ...p.condicoes, "")
-  l.push(`${site.name} · desde ${site.founded} · ${site.phone} (${site.hours}) · WhatsApp ${site.whatsapp} · ${site.email}`)
-  l.push(`${site.address1}, ${site.address2}`)
-  return l.join("\n")
-}
-
 function prepararProposta(input: any, tab: Tabela) {
-  const servico = input?.servico
-  const r: any = preco(tab.T, opcoesDe(input))
-  if (r.modo === "erro" || r.modo === "sem_tabela" || r.modo === "escolhe") return { erro: paraModelo(r, tab.teste) }
-  const recusadas: string[] = []
-  /* uma nota com um dado escondido pelo corte ([telefone], [NIF]…) não vai para o cliente: o modelo só viu o marcador */
-  const observacoes = (Array.isArray(input?.observacoes) ? input.observacoes : []).slice(0, 6)
-    .map((bruto: unknown) => [limpa(bruto, 240), bruto] as const).filter(([o, bruto]: readonly [string, unknown]) => {
-      const porque = o && (proibido(o, bruto) || (MARCA_RE.test(o) ? "tem um dado pessoal escondido (não vai para a proposta)" : null))
-      if (porque) recusadas.push(`«${o}»: ${porque}`)
-      return o && !porque
-    }).map(([o]: readonly [string, unknown]) => o)
-  const pedido = semMarcas(limpa(input?.pedido, 400))
-  const porque = proibido(pedido, input?.pedido)
-  if (porque) recusadas.push(`pedido: ${porque}`)
-  const contacto = semMarcas(limpa(input?.cliente?.contacto, 120))
-  const { ref, data } = agoraLisboa()
-  const proposta = {
-    ref, data, teste: tab.teste, modo: r.modo,
-    servico: SERVICOS[servico] || servico,
-    cliente: { nome: semMarcas(limpa(input?.cliente?.nome, 120)), contacto: /[\d@]/.test(contacto) ? contacto : "",
-      local: semMarcas(limpa(input?.cliente?.local, 160)) },
-    pedido: porque ? "" : pedido,
-    potencia: r.potencia ? r.potencia.resumo : "",
-    divisoes: r.potencia ? r.potencia.divs : [],
-    blocos: r.modo === "preco" ? r.blocos : [],
-    inclui: r.modo === "preco" ? r.inclui : "",
-    considerado: r.modo === "preco" ? r.dets : [],
-    resumo: r.modo === "preco" ? r.resumo : "",
-    observacoes,
-    condicoes: CONDICOES,
-    empresa: {
-      nome: site.name, nomeLegal: site.legalName, nif: site.nif, desde: site.founded, telefone: site.phone, horario: site.hours,
-      whatsapp: site.whatsapp, email: site.email, morada: [site.address1, site.address2],
-    },
-  }
-  const texto = textoProposta(proposta)
+  const m: any = montaProposta(input, tab.T, { teste: tab.teste, site, proibido })
+  if (!m.proposta) return { erro: paraModelo(m.r, tab.teste) }
+  const r = m.r
   return {
-    proposta: { ...proposta, texto },
+    proposta: m.proposta,
     paraModelo: {
-      ok: true, ref, modo: r.modo, valores_de_teste: tab.teste || undefined,
+      ok: true, ref: m.proposta.ref, modo: r.modo, valores_de_teste: tab.teste || undefined,
       perguntas_por_responder: r.modo === "preco" && r.porResponder?.length ? r.porResponder : undefined,
-      notas_recusadas: recusadas.length ? recusadas : undefined,
+      notas_recusadas: m.recusadas.length ? m.recusadas : undefined,
       mostrada: "A proposta já aparece à equipa, com texto para copiar e PDF. Não a repita por inteiro: diga só o essencial.",
     },
   }
@@ -433,12 +310,6 @@ function emMorada(s: string, i: number): boolean {
   SITIO_DE_MORADA.lastIndex = i
   return SITIO_DE_MORADA.test(s)
 }
-const MARCA_RE = /\[(?:email|NIF|telefone|número|código postal)\]/
-function semMarcas(t: string): string {
-  return t.replace(new RegExp(MARCA_RE.source, "g"), "").replace(/\s+([,;.:])/g, "$1").replace(/([,;:])(?=[,;:.])/g, "")
-    .replace(/\s{2,}/g, " ").replace(/^[\s,;:.\/-]+|[\s,;:\/-]+$/g, "").trim()
-}
-
 /* Como a IA chega à Anthropic:
    - chave da MDM (ANTHROPIC_API_KEY definida pela equipa no Netlify): direto à Anthropic, com «fallbacks» na conversa;
    - sem ela, num plano do Netlify por créditos (Free, Personal, Pro), depois da primeira publicação em produção: o AI
