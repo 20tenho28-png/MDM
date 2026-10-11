@@ -4,7 +4,7 @@
    e o mesmo texto. Os dados (data/site.json, data/regras-marcas.json) entram como argumentos, para a skill poder correr
    fora do repositório com uma cópia deles. */
 import { randomBytes } from 'node:crypto';
-import { preco } from './calculo.mjs';
+import { btuh, milhares, preco } from './calculo.mjs';
 
 export const CONDICOES = [
   'Preço com IVA.',
@@ -32,29 +32,51 @@ export const PRAZO_RE = new RegExp(
   + `|\\b\\d+(?:${JUNTA_UNIDADE}(?:h|horas))?(?:\\s*(?:a|[${TRACOS}])\\s*|\\s+e\\s+)\\d+${JUNTA_UNIDADE}(?:h|horas)\\b`
   + `|\\bmesmo\\s+dia\\b|\\b\\d+${JUNTA_UNIDADE}minutos\\b`, 'i');
 
-/* o que o dono não quer em nada escrito pela MDM (as mesmas regras do build.py, PROIBIDO). Devolve a lista e
-   proibido(...textos): o motivo da primeira regra que um dos textos quebra, ou null */
+/* durações e demoras: um número (em algarismos ou por extenso) e a unidade, com espaços, um traço ou nada pelo meio
+   («2 dias úteis», «3h», «uma semana», «48-horas») */
+const NUMERO = '(?:\\d+(?:[.,]\\d+)?|uma?|numa?|dois|duas|tr[eê]s|quatro|cinco|seis|sete|oito|nove|dez|doze|quinze|vinte|trinta|quarenta'
+  + '|alguns|algumas|poucos|poucas)';
+export const DURACAO_RE = new RegExp(`(?<![\\p{L}\\p{N}])${NUMERO}${JUNTA_UNIDADE}(?:minutos?|min|horas?|h|dias?|semanas?|mês|meses)`
+  + '(?![\\p{L}\\p{N}])', 'iu');
+
+/* o que o dono não quer em nada escrito pela MDM (as mesmas regras do build.py, PROIBIDO). Nas notas e no texto do
+   pedido, que se escrevem à mão para cada proposta, as regras são mais apertadas (PROIBIDO_NOTAS): nada de preços,
+   descontos, garantias, prazos ou durações, nem a idade da empresa por outras palavras. O rodapé fixo da proposta (o
+   horário, «8h–17h») não passa por estas. Devolve as duas listas e:
+   proibido(...textos): o motivo da primeira regra das notas que um dos textos quebra, ou null;
+   proibidoTexto(...textos): o mesmo, só com as regras gerais (para um texto inteiro, com preços da tabela) */
 export function criaRegras(regrasMarcas) {
   const MARCAS_RE = new RegExp(`(?<![\\p{L}\\p{N}])(?:${regrasMarcas.proibidas
     .map((m) => m.trim().split(/\s+/).map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join(JUNTA_MARCA)).join('|')})(?![\\p{L}\\p{N}])`, 'iu');
+  const IDADE = 'idade da empresa (só «desde 1991»)';
   const PROIBIDO = [
     [PRAZO_RE, 'promessa de prazo de resposta'],
-    [/\b[34]\d\s+anos\b/, 'idade da empresa (só «desde 1991»)'],
+    [/\b[34]\d\s+anos\b/i, IDADE],
     [MARCAS_RE, `marca fora da lista (só ${regrasMarcas.permitidas.join(', ')})`],
     [/Domingues|M\.D\.M\.\s*[—–]/, 'nome legal: «M.D.M. - Manuel Domingos Melancia, Lda»'],
     [/Arquitec?tos\s+do\s+Ar/i, 'assinatura da France Air («Os Arquitectos do Ar»): o dono não a quer'],
   ];
+  const PROIBIDO_NOTAS = PROIBIDO.concat([
+    [/€|\beuros?\b|%|\bpor\s+cento\b/i, 'preço ou percentagem (os preços vêm só da tabela da MDM)'],
+    [/\bdescontos?\b/i, 'desconto (os preços vêm só da tabela da MDM)'],
+    [/\bgaranti(?:as?|mos|d[oa]s?)\b/i, 'garantia (não se promete na proposta)'],
+    [/\bdécadas?\b|\banos\s+de\s+experi[eê]ncia\b/i, IDADE],
+    [DURACAO_RE, 'prazo ou duração (não se promete na proposta)'],
+  ]);
   /* vê o texto limpo e o original: limpa() troca os travessões por vírgulas, e as regras do nome legal e dos prazos
      («2–4 horas») olham para eles */
-  function proibido(...textos) {
-    for (const [re, porque] of PROIBIDO) if (textos.some((t) => re.test(String(t ?? '')))) return porque;
+  const motivo = (regras, textos) => {
+    for (const [re, porque] of regras) if (textos.some((t) => re.test(String(t ?? '')))) return porque;
     return null;
-  }
-  return { PROIBIDO, proibido };
+  };
+  return { PROIBIDO, PROIBIDO_NOTAS, proibido: (...textos) => motivo(PROIBIDO_NOTAS, textos),
+    proibidoTexto: (...textos) => motivo(PROIBIDO, textos) };
 }
 
+/* uma linha de texto, sem travessões: os largos («—», «―», «⸺», «⸻») viram vírgula; o «–» e o «‒» entre duas palavras
+   ou números sem espaços («T2–T3», «2–3 splits») viram hífen, com espaços viram vírgula */
 export function limpa(t, max = 300) {
-  return String(t ?? '').replace(/\s*[—–]\s*/g, ', ').replace(/\s+/g, ' ').trim().slice(0, max);
+  return String(t ?? '').replace(/(\S)[–‒](?=\S)/g, '$1-').replace(/\s*[—―⸺⸻–‒]\s*/g, ', ').replace(/\s+/g, ' ').trim().slice(0, max);
 }
 
 /* os marcadores que a função do assistente põe no lugar dos dados pessoais (redige() em proposta.mts) */
@@ -99,6 +121,7 @@ export function textoProposta(p, site) {
   if (p.potencia) l.push(`Potência estimada: ${p.potencia}`);
   l.push('');
   if (p.modo === 'visita') l.push('Para este caso o preço dá-se depois da visita, que é gratuita.');
+  if (p.equipamento) l.push(p.equipamento);
   if (p.gamasSemPreco?.length) l.push(`Gamas: ${p.gamasSemPreco.map((g) => `${g.gama} (${g.exemplo})`).join(' ou ')}.`);
   for (const b of p.blocos) {
     l.push(b.titulo);
@@ -116,19 +139,37 @@ export function textoProposta(p, site) {
   return l.join('\n');
 }
 
+/* com a tabela vazia, o aparelho que a tabela cheia daria, com o mesmo título dos blocos de preco() em calculo.mjs:
+   split ou multi-split com o tamanho de cada divisão, ou a bomba de calor com o depósito que a equipa deu (200 ou
+   300 L; sem ele, nada). tests/orcamento-skill.mjs confirma que os títulos são iguais aos de calculo.mjs */
+function aparelhoSemPreco(servico, r, respostas) {
+  const espacos = (t) => t.replace(/\u00a0/g, ' ');
+  if (servico === 'aguasQuentes') {
+    const dep = String(respostas?.deposito ?? '');
+    return dep === '200' || dep === '300' ? `Bomba de calor para águas quentes, depósito de ${dep} L` : '';
+  }
+  const tams = r.potencia.divs.map((d) => d.tam);
+  if (tams.length === 1) return espacos('Split para 1 divisão, ' + btuh(tams[0]));
+  const ms = tams.map(milhares);
+  return espacos(`Multi-split para ${tams.length} divisões: ${ms.slice(0, -1).join(', ')} e ${ms[ms.length - 1]} BTU/h`);
+}
+
 /* A proposta para o cliente, com os preços de calculo.mjs. input: o formato da ferramenta preparar_proposta
    ({ servico, divisoes: [{ tipo, area, sol, ultimo_andar }], respostas, cliente: { nome, contacto, local }, pedido,
    observacoes }). Sem proposta possível (erro, sem tabela, falta o depósito) devolve só { r } (o resultado de preco());
    senão { r, proposta (com o texto), recusadas (as notas e o pedido que quebram as regras do dono, com o motivo) }.
    semTabela (só a skill, com GAMAS de calculo.mjs): com a tabela ainda sem preços para o produto, a proposta sai na
-   mesma, com a potência e as gamas possíveis, e o preço depois da visita. O assistente da equipa não o usa. */
+   mesma, com a potência, o aparelho e as gamas possíveis, e o preço depois da visita. O assistente da equipa não o usa. */
 export function montaProposta(input, T, { teste = false, site, proibido, semTabela = null }) {
   const servico = input?.servico;
   let r = preco(T, opcoesDe(input));
-  let gamasSemPreco = [];
+  let gamasSemPreco = [], equipamento = '';
   if (semTabela && r.modo === 'sem_tabela' && (servico === 'aguasQuentes' || r.potencia)) {
     /* só se o caso teria preço com a tabela cheia: acima do maior aparelho ou com mais de 4 divisões, é visita sem gamas */
-    if (servico === 'aguasQuentes' || (!r.potencia.acima && r.potencia.n <= 4)) gamasSemPreco = semTabela.map((g) => ({ gama: g.nome, exemplo: g.ex }));
+    if (servico === 'aguasQuentes' || (!r.potencia.acima && r.potencia.n <= 4)) {
+      gamasSemPreco = semTabela.map((g) => ({ gama: g.nome, exemplo: g.ex }));
+      equipamento = aparelhoSemPreco(servico, r, input?.respostas);
+    }
     r = { ...r, modo: 'visita' };
   }
   if (r.modo === 'erro' || r.modo === 'sem_tabela' || r.modo === 'escolhe') return { r };
@@ -158,6 +199,7 @@ export function montaProposta(input, T, { teste = false, site, proibido, semTabe
     considerado: r.modo === 'preco' ? r.dets : [],
     resumo: r.modo === 'preco' ? r.resumo : '',
     ...(gamasSemPreco.length ? { gamasSemPreco } : {}),
+    ...(equipamento ? { equipamento } : {}),
     observacoes,
     condicoes: CONDICOES,
     empresa: {

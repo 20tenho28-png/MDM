@@ -24,3 +24,11 @@ website/public/
 
 # Dependências da função do assistente de propostas (website/package.json)
 node_modules/
+
+# Skill ORÇAMENTO MDM: pedidos e propostas de clientes (dados pessoais) nunca entram no repositório. O SKILL.md manda
+# guardá-los numa pasta temporária fora dele; isto é só a rede, se algum ficar cá dentro. O pacote para o claude.ai
+# (empacota_skill.py) também não.
+pedido*.txt
+proposta*.html
+mdm-orcamento.zip
+!website/equipa/proposta.html
