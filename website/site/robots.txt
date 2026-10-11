@@ -2,4 +2,4 @@ User-agent: *
 Disallow: /api/
 Disallow: /gestao
 Disallow: /en/gestao
-Sitemap: https://www.mdmassist.com.pt/sitemap.xml
+Sitemap: https://www.mdmassist.pt/sitemap.xml

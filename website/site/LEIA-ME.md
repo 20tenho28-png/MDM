@@ -8,7 +8,7 @@ Static HTML/CSS/JS. Portuguese pages at the root, English pages under `en/`.
 ## Source
 
 Imported on 10 Oct 2026 from the published site
-<https://www.mdmassist.com.pt/>, exactly as
+<https://www.mdmassist.pt/>, exactly as
 served (137 files). The first commit on this folder is that untouched copy, so
 `git diff` against it shows every change made here.
 
@@ -66,7 +66,7 @@ work from this folder alone until they are connected to a new backend:
 
 ## Before moving to a new domain
 
-- Replace `https://www.mdmassist.com.pt` in
+- Replace `https://www.mdmassist.pt` in
   canonical, Open Graph, hreflang and `sitemap.xml` with the new domain.
 - Links, canonical URLs, hreflang, `og:url` and `sitemap.xml` all use the
   `.html` form (`/obras.html`), so the site works on any static host. The
