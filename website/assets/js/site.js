@@ -1772,11 +1772,11 @@
          comercial (só por email), por WhatsApp */
       track('quote_form_erro', { servico: d.servico });
       lbl.textContent = 'Tentar novamente';
-      /* com a rede lenta, uma fotografia grande pode não chegar a subir: o pedido segue sem ela */
-      var semFoto = d.foto ? ' Com a rede lenta, a fotografia pode ser o problema: tire-a e tente sem ela.' : '';
-      if (comercial(d.servico)) quoteAlert('Não conseguimos enviar o pedido agora. O que escreveu continua no formulário.' + semFoto + ' Tente de novo ou', false, [ligueTel]);
-      else quoteAlert('Não conseguimos enviar o pedido agora. O que escreveu continua no formulário.' + semFoto + ' Tente de novo,', false,
-        [ligueTel, [WA_BASE + encodeURIComponent(mensagemWhats(d)), 'envie-o por WhatsApp']]);
+      /* com a rede lenta, uma fotografia grande pode não chegar a subir: sem ela, o pedido segue */
+      var falhou = 'Não conseguimos enviar o pedido agora. O que escreveu continua no formulário' +
+        (d.foto ? '. Com a rede lenta, a fotografia pode ser o problema: tire-a e' : ':') + ' tente de novo';
+      if (comercial(d.servico)) quoteAlert(falhou + ' ou', false, [ligueTel]);
+      else quoteAlert(falhou + ',', false, [ligueTel, [WA_BASE + encodeURIComponent(mensagemWhats(d)), 'envie-o por WhatsApp']]);
     });
   });
   /* segunda via: o pedido entregue por WhatsApp, como uma mensagem normal (a fotografia junta-se lá).
