@@ -1,0 +1,13 @@
+/* Página 404. Complementa site.css. */
+.p404-cab .h1 { max-width: 12ch; font-size: clamp(36px, 5vw, 64px); }
+.p404-cod { text-transform: uppercase; font-family: var(--sans); font-size: 13px; font-weight: 700; letter-spacing: .14em; color: var(--carmim); }
+.p404-links strong { display: flex; align-items: center; gap: 8px; }
+.p404-links a { display: block; color: var(--tinta); text-decoration: none; }
+.p404-links a:hover strong { color: var(--carmim); }
+.p404-links a span { font-size: 16px; color: var(--aco); }
+.p404-links .seta { width: 16px; height: 16px; color: var(--carmim); }
+.p404-links a:hover .seta { transform: translateX(4px); }
+.p404-contacto { display: flex; flex-direction: column; gap: 18px; }
+.p404-acoes { display: flex; flex-direction: column; gap: 12px; }
+@media (min-width: 560px) { .p404-acoes { flex-direction: row; flex-wrap: wrap; } }
+@media (prefers-reduced-motion: reduce) { .p404-links a:hover .seta { transform: none; } }

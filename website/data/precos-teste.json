@@ -1,0 +1,36 @@
+{
+  "_leia": "TABELA DE TESTE, com números falsos e redondos. Serve só para experimentar o assistente de propostas da equipa (equipa/proposta.html) enquanto a MDM não preenche a folha «MDM, tabela de preços para o site». Nunca vai para o site: o formulário lê só precos.json. O assistente usa este ficheiro apenas com a variável MDM_PRECOS=teste no Netlify, e cada proposta sai marcada «VALORES DE TESTE». Ver README.md, «Assistente de propostas».",
+  "split": {
+    "7000": {"eco": [900, 1100], "sup": [1200, 1500]},
+    "9000": {"eco": [1000, 1200], "sup": [1300, 1600]},
+    "12000": {"eco": [1100, 1400], "sup": [1400, 1800]},
+    "18000": {"eco": [1500, 1900], "sup": [1900, 2400]},
+    "24000": {"eco": [1900, 2400], "sup": [2400, 3000]}
+  },
+  "multisplit": {
+    "2": {"eco": [2000, 2500], "sup": [2600, 3200]},
+    "3": {"eco": [2800, 3400], "sup": [3500, 4300]},
+    "4": {"eco": [3600, 4400], "sup": [4500, 5500]},
+    "acrescimoGrande": {"eco": [200, 300], "sup": [250, 350]}
+  },
+  "extras": {
+    "metrosIncluidos": 3,
+    "metroExtra": [30, 40],
+    "preInstalacaoDesconto": [100, 150],
+    "furoBetao": [40, 60],
+    "alturaEscada": [50, 100],
+    "alturaAndaime": [300, 500],
+    "alturaPlataforma": [250, 400],
+    "ligacaoEletrica": [150, 250],
+    "retirarAntiga": [50, 80]
+  },
+  "aguasQuentes": {
+    "200": {"eco": [1800, 2200], "sup": [2400, 2900]},
+    "300": {"eco": [2100, 2600], "sup": [2800, 3400]}
+  },
+  "inclui": {
+    "split": "Frase de teste: máquina interior e exterior, montagem, até 3 m de tubagem e calha, e arranque.",
+    "multisplit": "Frase de teste: máquina exterior, uma interior por divisão, montagem, até 3 m de tubagem por divisão, e arranque.",
+    "aguasQuentes": "Frase de teste: bomba de calor com depósito, montagem, ligação à canalização existente e arranque."
+  }
+}

@@ -1,0 +1,31 @@
+/* Páginas de serviço (servicos/*.html): só o que site.css não cobre. */
+
+.serv-h2 { text-wrap: balance; font-size: clamp(28px, 3.2vw, 42px); }   /* um degrau abaixo do título da página */
+
+/* O que fazemos: o título fica por cima do texto */
+.serv-h2 { margin-bottom: 24px; }
+@media (min-width: 1000px) { .duas .lista-traco { margin-top: 40px; } }
+
+/* Obras: grupos por registo fotográfico (máquina / casa) nunca se misturam na mesma grelha */
+.serv-grupo + .serv-grupo { margin-top: clamp(40px, 5vw, 56px); }
+.serv-grupo-t { font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--tinta); padding-bottom: 12px; margin-bottom: 20px; border-bottom: 1px solid var(--linha-2); }
+.serv-mais { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(32px, 4vw, 44px); }
+
+/* Grelha com só duas obras (eletricidade, até chegarem fotografias de quadros): duas grandes lado a lado, sem células vazias */
+@media (min-width: 640px) { .obras-grelha.obras-duas { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Ligação dentro de um passo do método */
+.passo span a { color: var(--carmim); }
+
+@media (max-width: 559px) {
+  .serv-mais .btn { width: 100%; }
+}
+
+/* Ar condicionado: ligação para a estimativa de potência no formulário desta página (só com JavaScript) */
+.faq-pot { margin-top: 18px; max-width: 420px; font-family: var(--sans); font-size: 16px; font-weight: 600; line-height: 1.45; }
+.faq-pot a { display: inline-block; padding: 4px 0; }
+
+/* ilustração na página de eletricidade (imagem de banco licenciada, não uma obra): abaixo de «O que fazemos» */
+.sec > .serv-ilustracao { max-width: 960px; margin-top: clamp(40px, 5vw, 64px); }
+.serv-ilustracao img { display: block; width: 100%; height: auto; aspect-ratio: 1470 / 1070; background: var(--gesso); }
+.serv-ilustracao figcaption { margin-top: 10px; font-family: var(--sans); font-size: 13px; color: var(--aco); }

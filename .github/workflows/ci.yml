@@ -33,3 +33,14 @@ jobs:
       - name: Run tests
         run: npm test
         working-directory: circuit-planner
+
+  website-check:
+    name: Website (build + link check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build and check links, assets and template syntax
+        run: python3 website/build.py --check
