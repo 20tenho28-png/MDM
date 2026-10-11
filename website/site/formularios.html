@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<title>Formulários · MDM</title>
+</head>
+<body>
+<!-- Só para o Netlify registar os dois formulários de pedido. O formulário visível (#quote-form) envia-os por JavaScript
+     (assets/assistant.js); os nomes dos campos têm de ser estes. Sem action: o Netlify responde com 200. -->
+<form name="orcamento" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+<input type="hidden" name="form-name" value="orcamento">
+<input type="hidden" name="subject">
+<input type="hidden" name="pagina">
+<input type="hidden" name="triagem">
+<input type="hidden" name="potencia">
+<input type="hidden" name="estimativa">
+<input type="text" name="nome">
+<input type="email" name="email">
+<input type="tel" name="telefone">
+<input type="text" name="servico">
+<textarea name="mensagem"></textarea>
+<input name="fotografia" type="file" accept="image/*">
+<input type="text" name="bot-field">
+</form>
+<form name="orcamento-comercial" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+<input type="hidden" name="form-name" value="orcamento-comercial">
+<input type="hidden" name="subject">
+<input type="hidden" name="pagina">
+<input type="hidden" name="triagem">
+<input type="hidden" name="potencia">
+<input type="hidden" name="estimativa">
+<input type="text" name="nome">
+<input type="email" name="email">
+<input type="tel" name="telefone">
+<input type="text" name="servico">
+<textarea name="mensagem"></textarea>
+<input name="fotografia" type="file" accept="image/*">
+<input type="text" name="bot-field">
+</form>
+</body>
+</html>

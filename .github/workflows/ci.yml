@@ -44,3 +44,5 @@ jobs:
           python-version: "3.12"
       - name: Build and check links, assets and template syntax
         run: python3 website/build.py --check
+      - name: Publish the new visual (site/) and check forms and links
+        run: python3 website/publica.py
