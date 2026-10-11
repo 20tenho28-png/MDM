@@ -45,7 +45,7 @@ O teu trabalho é provar que as três funcionam juntas, sem falhas, e corrigir o
 ### Peça 2: a skill ORÇAMENTO MDM
 - **Para qualquer pedido** que o site envie (o email do Apps Script ou a linha da folha «Pedidos»), o script `scripts/orcamento.mjs` dá:
   - a mesma potência, o mesmo tamanho, a mesma gama e o mesmo preço que o cliente viu no site;
-  - a mesma proposta que a página da equipa (`equipa/proposta`).
+  - com a tabela preenchida, a mesma proposta que a página da equipa (`equipa/proposta`). Com a tabela vazia, a página da equipa não faz proposta e a skill faz a de visita.
 - **Com a tabela vazia,** a proposta sai com a potência e as gamas, e com o preço depois da visita. Nenhum valor em euros.
 - **Avisa a equipa** quando os números mudaram depois do pedido.
 - **Faltando um dado** (uma área, o depósito), diz o que falta e não adivinha.
@@ -68,7 +68,7 @@ O teu trabalho é provar que as três funcionam juntas, sem falhas, e corrigir o
 1. **Ler** `website/README.md` e o cabeçalho de cada teste em `website/tests/`.
 2. **Gerar a cópia do site** numa pasta temporária. Nunca em `public/`, nunca a mexer em `precos.json`:
    ```
-   MDM_OUT=/tmp/mdm-copia MDM_PRECOS_FICHEIRO=data/precos-teste.json python3 website/build.py --check
+   cd website && MDM_OUT=/tmp/mdm-copia MDM_PRECOS_FICHEIRO=data/precos-teste.json python3 build.py --check
    ```
    Gerar também uma cópia com a tabela vazia, como estará no lançamento.
 3. **Correr todos os testes**, a partir de `website/`:

@@ -668,6 +668,26 @@ function testes() {
   ok(bons === 35 && s.enviados.length === 35 && s.registos.some((x) => x.nivel === 'warn' && /travão/.test(x.texto)),
     'a cache falha: os pedidos passam e o registo diz que o travão não contou', { bons, registos: s.registos.slice(0, 2) });
 
+  // 16b. o mesmo pedido outra vez (o site manda o mesmo id quando a resposta do primeiro se perdeu e o cliente carrega em
+  //      «Tentar novamente»): a mesma referência, um só email e uma só linha. Outro id é outro pedido; um id que não
+  //      tem a forma certa não conta; passadas 6 horas (o máximo da cache) volta a ser novo; com a cache a falhar, segue
+  s = carregaScript({ props: PROPS });
+  const comId = (id) => ({ ...geral(), id });
+  const r1 = s.envia(comId('a1b2c3d4-0001')), r2 = s.envia(comId('a1b2c3d4-0001'));
+  ok(r1.ok && r2.ok && r1.ref && r1.ref === r2.ref && s.enviados.length === 1 && s.linhas.length === 2,
+    'mesmo id: a mesma referência, um só email e uma só linha', { r1, r2, emails: s.enviados.length, linhas: s.linhas.length });
+  const r3 = s.envia(comId('a1b2c3d4-0002'));
+  ok(r3.ok && r3.ref !== r1.ref && s.enviados.length === 2, 'outro id: outro pedido', r3);
+  const r4 = s.envia(comId('mau id!')), r5 = s.envia(comId('mau id!'));
+  ok(r4.ok && r5.ok && r4.ref !== r5.ref && s.enviados.length === 4, 'um id sem a forma certa não conta: os dois seguem');
+  s.relogio.avanca(6 * 3600 * 1000 + 60000);
+  const r6 = s.envia(comId('a1b2c3d4-0001'));
+  ok(r6.ok && r6.ref !== r1.ref && s.enviados.length === 5, 'passadas 6 horas, o mesmo id é um pedido novo', r6);
+  s = carregaScript({ props: PROPS });
+  s.falhas.cache = true;
+  const r7 = s.envia(comId('a1b2c3d4-0003')), r8 = s.envia(comId('a1b2c3d4-0003'));
+  ok(r7.ok && r8.ok && s.enviados.length === 2, 'a cache falha: o pedido repetido segue (mais vale repetido do que perdido)');
+
   // 17. experimentar(): um pedido de teste para o comercial, com linha na folha
   s = carregaScript({ props: PROPS });
   s.experimentar();

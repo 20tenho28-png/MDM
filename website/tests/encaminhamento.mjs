@@ -5,7 +5,8 @@
    200 m², a estimativa tirada com «Retirar» (não volta sozinha ao enviar) e o telefone com +351. Gera o site numa pasta temporária (MDM_OUT) e serve-o num servidor local que guarda cada envio, como o Netlify
    Forms o receberia, e que pode falhar de propósito. No fim, as estatísticas: depois de «Recusar», nada chega ao PostHog,
    nem o reenvio de um envio que tinha falhado, e «Aceitar» outra vez não envia o clique em «Recusar» como clique sem
-   efeito (só com o posthog-js instalado; sem ele, esse caso é saltado). Por último (caso Q), os pedidos pelo Google: o
+   efeito, e um pedido com as estatísticas aceites não leva ao PostHog o email, o telefone nem o texto do painel (só com o
+   posthog-js instalado; sem ele, esse caso é saltado). Por último (caso Q), os pedidos pelo Google: o
    site gerado outra vez com MDM_PEDIDOS_URL (no lugar de «pedidosUrl» de data/site.json) a apontar para um servidor
    local que faz de Apps Script, e cada pedido que o site enviou passa depois pelo Apps Script verdadeiro (google/pedidos.gs,
    com as imitações da Google de tests/apps-script.mjs); os outros casos correm sem ele, com o Netlify.
@@ -307,11 +308,12 @@ else {
     args: ['--disable-blink-features=AutomationControlled'] });
   const ctxP = await browserP.newContext({ viewport: { width: 1440, height: 900 },
     userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36' });
-  const pedidosP = []; let falhou = false;
+  const pedidosP = [], brutosP = []; let falhou = false;
   const eventosP = (q) => {
     const b = q.postDataBuffer(); if (!b) return '';
     let s; try { s = zlib.gunzipSync(b).toString(); } catch (e) { s = b.toString(); }
     if (/^data=/.test(s)) { try { s = Buffer.from(decodeURIComponent(s.slice(5)), 'base64').toString(); } catch (e) {} }
+    brutosP.push({ t: Date.now(), s });
     let j; try { j = JSON.parse(s); } catch (e) { return [...s.matchAll(/"event":"([^"]+)"/g)].map((m) => m[1]).join(','); }
     const evs = Array.isArray(j) ? j : j && Array.isArray(j.batch) ? j.batch : [j];
     /* o clique sem efeito com o texto do elemento; no mapa de cliques, cada ponto (tipo@x,y, na página) */
@@ -374,6 +376,31 @@ else {
   const depoisAceitar = pedidosP.filter((p) => p.t >= tAceita).map((p) => p.txt);
   ok(mapaDepois() && !depoisAceitar.some(noRecusar),
     'P: depois de «Aceitar» outra vez, o mapa de cliques volta e o clique em «Recusar» não segue como clique sem efeito', { caixa, depoisAceitar });
+  /* com as estatísticas aceites, um pedido completo: nada do que o cliente escreve nem o texto da página (o painel
+     «Pedido enviado» tem o email e o telefone, a estimativa tem as divisões) chega ao PostHog, nem em cliques sem efeito
+     no texto (README.md, «Estatísticas e consentimento»: mask_all_text e ph-no-capture na caixa do formulário) */
+  const tDados = Date.now();
+  await page.goto(B + '/index.html#orcamento');
+  await page.waitForFunction(() => window.posthog && window.posthog.__loaded, null, { timeout: 10000 }).catch(() => {});
+  await page.selectOption('#qServico', 'Ar condicionado: montagem / instalação');
+  await page.evaluate(() => { document.getElementById('potencia').open = true; });
+  const divP = page.locator('[data-pot-divs] [data-pot-linha]').first();
+  await divP.locator('[data-pot="tipo"]').selectOption('Sala'); await divP.locator('[data-pot="area"]').fill('25');
+  await page.click('[data-pot-juntar]');
+  await page.fill('#qNome', 'Ana Conceição'); await page.fill('#qEmail', 'ana.conceicao@exemplo.pt'); await page.fill('#qTel', '912 345 678');
+  await page.click('[data-pot-junta-txt]');
+  await page.click('#sendEmail');
+  await page.waitForSelector('[data-form-feito]:not([hidden])', { timeout: 15000 });
+  const txtP = await page.locator('[data-feito-txt]').boundingBox();
+  for (let i = 0; i < 3; i++) await page.mouse.click(txtP.x + 30 + i * 40, txtP.y + txtP.height / 2);
+  await page.waitForTimeout(6500);
+  await page.goto(B + '/privacidade.html');
+  await page.waitForTimeout(1500);
+  const dadosP = brutosP.filter((b) => b.t >= tDados).map((b) => b.s).join('\n');
+  const fugas = ['ana.conceicao', 'Conceição', '912 345 678', '912345678', 'Sala 25', 'Vamos responder'].filter((x) => dadosP.includes(x));
+  const textos = [...dadosP.matchAll(/"\$el_text":"([^"]+)"/g)].map((m) => m[1]);
+  ok(dadosP.includes('quote_form_ok') && !fugas.length && !textos.length,
+    'P: com as estatísticas aceites, um pedido não leva ao PostHog o que o cliente escreveu nem o texto da página', { fugas, textos });
   await browserP.close();
 }
 
@@ -428,8 +455,8 @@ ok(/pequeno programa \(Apps Script\) na conta Google da MDM, que no-lo envia por
   'Q: com «pedidosUrl», a política fala da conta Google da MDM, do Netlify só sem JavaScript, e não promete o email do Netlify');
 ok(!/Gmail/i.test(privN + privQ), 'Q: a política não diz que os pedidos chegam ao Gmail (não se sabe que caixa de correio os recebe)');
 const dataPriv = (t) => (/Última atualização: <time datetime="([\d-]+)">([^<]+)<\/time>/.exec(t) || []).slice(1).join(' ');
-ok(dataPriv(privN) === '2026-10-10 10 de outubro de 2026' && dataPriv(privQ) === '2026-11-03 3 de novembro de 2026',
-  'Q: a data no topo da política: 10 de outubro de 2026 sem «pedidosUrl», a de «pedidosDesde» com ele', [dataPriv(privN), dataPriv(privQ)]);
+ok(dataPriv(privN) === '2026-10-11 11 de outubro de 2026' && dataPriv(privQ) === '2026-11-03 3 de novembro de 2026',
+  'Q: a data no topo da política: 11 de outubro de 2026 sem «pedidosUrl», a de «pedidosDesde» com ele', [dataPriv(privN), dataPriv(privQ)]);
 ok(/passa pela Google, que recebe também o endereço IP/.test(privQ) && /a Google recebe também o endereço IP/.test(privQ) && !/endereço IP[^.]*Google|Google[^.]*endereço IP/.test(privN),
   'Q: com «pedidosUrl», a política diz que a Google recebe o endereço IP de quem envia (sem ele, a Google não aparece)');
 ok(!/<!--/.test(corpoPriv(PUB) + corpoPriv(PUBQ)) && !/jurista/.test(htmlPriv(PUB) + htmlPriv(PUBQ)),

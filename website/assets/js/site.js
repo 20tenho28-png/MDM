@@ -49,6 +49,9 @@
         window.posthog.init('phc_veB6kR2as8m8HuRMEVuTUWubWQxLkPW5D8Uf6wsJcy8A', {
           api_host: 'https://eu.i.posthog.com', persistence: 'memory', person_profiles: 'identified_only',
           autocapture: false, enable_heatmaps: true, capture_dead_clicks: true,
+          /* os cliques sem efeito e o mapa de cliques nunca levam o texto da página: no painel «Pedido enviado» está o
+             email e o telefone do cliente, e na estimativa as divisões. A caixa do formulário tem ainda ph-no-capture */
+          mask_all_text: true, mask_all_element_attributes: true,
           /* cada evento sai logo, sem a fila de 3 s, que podia sair depois de «Recusar». Um envio que falhe fica na fila
              de reenvio do PostHog, que a recusa também para (paraPostHog) */
           request_batching: false,
@@ -418,6 +421,13 @@
       trilho.scrollBy({ left: d * passo(), behavior: reduceMotion ? 'auto' : 'smooth' });
       track('carrossel', { direcao: d > 0 ? 'seguinte' : 'anterior' });
     }
+    /* o Tab num diapositivo fora do ecrã (telemóvel e tablet) leva-o à vista */
+    trilho.addEventListener('focusin', function (e) {
+      var sl = e.target.closest && e.target.closest('[data-slide]');
+      if (!sl) return;
+      var t = trilho.getBoundingClientRect(), r = sl.getBoundingClientRect();
+      if (r.left < t.left - 1 || r.right > t.right + 1) trilho.scrollTo({ left: sl.offsetLeft - slides[0].offsetLeft, behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
     if (prev) prev.addEventListener('click', function () { if (prev.getAttribute('aria-disabled') !== 'true') vai(-1); });
     if (next) next.addEventListener('click', function () { if (next.getAttribute('aria-disabled') !== 'true') vai(1); });
     var tick = false;
@@ -800,17 +810,28 @@
   }
   function assunto(d) { return etiqueta(d.servico) + ' Pedido de orçamento, ' + (d.servico || 'serviços MDM'); }
   /* a mensagem e, se houver, ligações no fim: "…, [ligue 218 935 050] ou [envie-o por WhatsApp]." */
+  /* o que o leitor de ecrã tem de ouvir (o aviso do envio, o erro da fotografia): a região [data-form-voz] existe sempre,
+     ao contrário da caixa do aviso, que vazia fica escondida (uma região que só aparece já com o texto pode não ser lida) */
+  var voz = form.querySelector('[data-form-voz]'), tVoz = 0;
+  function fala(t) {
+    if (!voz) return;
+    clearTimeout(tVoz);
+    voz.textContent = '';
+    if (t) tVoz = setTimeout(function () { voz.textContent = t; }, 60);
+  }
   function quoteAlert(msg, ok, ligacoes) {
     var a = $('quoteAlert');
     a.textContent = msg; a.classList.toggle('ok', !!ok);
-    if (!ligacoes) return;
-    ligacoes.forEach(function (l, i) {
-      var el = document.createElement('a');
-      el.href = l[0]; el.textContent = l[1];
-      if (/^https:/.test(l[0])) { el.target = '_blank'; el.rel = 'noopener'; }
-      a.appendChild(document.createTextNode(i ? ' ou ' : ' ')); a.appendChild(el);
-    });
-    a.appendChild(document.createTextNode('.'));
+    if (ligacoes) {
+      ligacoes.forEach(function (l, i) {
+        var el = document.createElement('a');
+        el.href = l[0]; el.textContent = l[1];
+        if (/^https:/.test(l[0])) { el.target = '_blank'; el.rel = 'noopener'; }
+        a.appendChild(document.createTextNode(i ? ' ou ' : ' ')); a.appendChild(el);
+      });
+      a.appendChild(document.createTextNode('.'));
+    }
+    fala(a.textContent);
   }
   function erroCampo(id, msg) {
     var inp = $(id), e = $('e' + id.slice(1));
@@ -878,7 +899,7 @@
   function confereFoto() {
     var msg = fotoErro(foto.files && foto.files[0]);
     erroCampo('qFoto', msg);
-    if (msg) foto.value = '';
+    if (msg) { foto.value = ''; fala(msg); }
     return !msg;
   }
   /* o nome da fotografia escolhida, no lugar do «Nenhuma escolhida» (o campo nativo, invisível por cima, diz o mesmo ao leitor de ecrã) */
@@ -915,6 +936,8 @@
       juntaAutomatico: function () { return false; },
       ativo: false,
       estado: function () { return null; },
+      retirada: function () { return false; },
+      confereAreas: function () { return true; },
       ouve: function () {}
     };
     var cfg = null;
@@ -951,9 +974,12 @@
     function kw(btu) { return (btu / cfg.btuPorKw).toFixed(1).replace('.', ','); }
     function btuh(n) { return milhares(n) + NB + 'BTU/h'; }
 
-    /* aceita 12, 12,5 e 12.5 (e um «m²» no fim) */
+    /* aceita 12, 12,5 e 12.5, com ou sem a unidade no fim («m²», «m2», «m», «metros», «metros quadrados»), e os milhares
+       à portuguesa: «2.500» e «2 500» são 2 500 m² (um ponto seguido de três algarismos é de milhares, não decimal) */
     function leArea(txt) {
-      var t = String(txt || '').trim().replace(/\s*m(²|2)$/i, '').replace(',', '.');
+      var t = String(txt || '').trim().replace(/\s*(m(²|2)?|mts?|metros(\s+quadrados)?)\.?$/i, '');
+      if (/^\d{1,3}([. ]\d{3})+$/.test(t)) t = t.replace(/[. ]/g, '');
+      t = t.replace(',', '.');
       if (!t) return { vazio: true };
       if (!/^(\d+(\.\d*)?|\.\d+)$/.test(t)) return { erro: 'Escreva a área só com números, por exemplo 12 ou 12,5.' };
       var a = Math.round(parseFloat(t) * 100) / 100;
@@ -985,6 +1011,19 @@
       });
       r.n = r.divs.length;
       return r;
+    }
+    /* a primeira divisão escrita com a área errada (ou null): uma divisão assim não entra na conta, por isso «Juntar ao
+       pedido» e o envio param nela (se ficasse de fora, o preço sairia só das outras, mais baixo) */
+    function comErro() {
+      for (var i = 0; i < linhas.length; i++) if (linhas[i].leitura && linhas[i].leitura.erro) return linhas[i];
+      return null;
+    }
+    function mostraErro(l) {
+      det.open = true;
+      confere(l, false, true);
+      l.area.focus();
+      ultimo = '';
+      anuncia('Divisão ' + (linhas.indexOf(l) + 1) + ': ' + l.leitura.erro, true);
     }
     /* uma parte por divisão e o total. No pedido seguem numa linha, com espaços normais:
        "Quarto 12 m² (muito sol): 7 000 BTU/h · Sala 25 m²: 12 000 BTU/h · Total 19 000 BTU/h (5,6 kW)" */
@@ -1184,11 +1223,13 @@
       notaServico.hidden = !!antes || sel.value !== POT_AC;
       sincroniza();
       visibilidade();
+      ouvintes.forEach(function (fn) { fn(atual); });
       if (viaBotao) caixaTxt.focus();
       track('potencia_junta', { divisoes: r.n, btu: r.total, via: viaBotao ? 'botao' : 'envio' });
     }
     juntar.addEventListener('click', function () {
-      var r = atualiza();
+      var r = atualiza(), errada = comErro();
+      if (errada) { mostraErro(errada); return; }
       if (!r.n) {
         /* o erro de cada divisão fica no seu campo; o foco vai para a primeira e ouve-se uma só mensagem */
         var primeira = null;
@@ -1204,6 +1245,10 @@
       junto = false; retirada = true;
       sincroniza();
       visibilidade();
+      /* o preço provável sai com a estimativa: sem as divisões, não seguia com o pedido */
+      ouvintes.forEach(function (fn) { fn(atual); });
+      /* com outro serviço escolhido o bloco esconde-se: o foco vai para o serviço e o aviso para a região do formulário */
+      if (raiz.hidden) { sel.focus(); fala('Estimativa retirada do pedido.'); return; }
       ultimo = '';
       anuncia('Estimativa retirada do pedido.', true);
       (det.open ? juntar : det.querySelector('summary')).focus();
@@ -1261,7 +1306,18 @@
       ativo: true,
       /* o resultado de agora (divisões com área, cada uma com o tamanho de aparelho «tam»; 0 = acima do maior) */
       estado: function () { return atual; },
+      /* depois de «Retirar», até «Juntar ao pedido» ou um pedido novo */
+      retirada: function () { return retirada; },
       ouve: function (fn) { ouvintes.push(fn); },
+      /* ao enviar: com a estimativa junta ou a juntar-se sozinha, uma divisão com a área errada para o envio e leva lá o
+         foco (como o contacto em falta); depois de «Retirar», ou escondida, não conta */
+      confereAreas: function () {
+        if (retirada || raiz.hidden) return true;
+        atualiza();
+        var l = comErro();
+        if (l) mostraErro(l);
+        return !l;
+      },
       /* ao enviar: uma estimativa à vista com pelo menos uma divisão preenchida, mas não junta, junta-se sozinha
          (menos depois de «Retirar»: aí fica de fora) */
       juntaAutomatico: function () {
@@ -1290,7 +1346,8 @@
      não as limpa (limpam-se aqui). Segue só o resumo, no campo escondido "estimativa", posto a cada mudança e ao enviar. */
   var preco = (function () {
     var raiz = form.querySelector('[data-preco]'), campo = form.querySelector('[data-estimativa-campo]');
-    var sem = { resumo: function () { return campo ? campo.value : ''; }, junta: function () {}, visibilidade: function () {} };
+    var sem = { resumo: function () { return campo ? campo.value : ''; }, junta: function () {}, visibilidade: function () {},
+                visivel: function () { return false; }, esquece: function () {} };
     if (!raiz || !campo) return sem;
     var P = null;
     try { P = JSON.parse(raiz.getAttribute('data-precos')); } catch (e) {}
@@ -1396,6 +1453,7 @@
     }
 
     function calculaAC() {
+      if (pot.retirada()) return { ac: true, modo: 'retirada', n: 0 };
       var e = pot.estado(), n = e ? e.n : 0, visita = { ac: true, modo: 'visita', n: n };
       if (!n) return { ac: true, modo: 'pede', n: 0 };
       if (e.acima || n > MAX_MULTI) return visita;
@@ -1461,8 +1519,9 @@
         if (q.ajuda) q.ajuda.hidden = !(c && c.n > 1);
       });
       res.textContent = '';
-      res.hidden = !(c && (c.modo === 'preco' || c.modo === 'visita'));
+      res.hidden = !(c && (c.modo === 'preco' || c.modo === 'visita' || c.modo === 'retirada'));
       if (res.hidden) return;
+      if (c.modo === 'retirada') { res.appendChild(el('p', 'preco-pede', 'Tirou a estimativa do pedido: o preço provável volta com «Juntar ao pedido».')); return; }
       if (c.modo === 'visita') { res.appendChild(el('p', 'preco-visita', 'Para este caso o preço dá-se depois da visita, que é gratuita.')); return; }
       c.blocos.forEach(function (b) {
         res.appendChild(el('p', 'preco-prod', b.titulo));
@@ -1507,7 +1566,7 @@
       var txt = '';
       if (c && c.modo === 'preco') txt = 'Preço provável: ' + c.blocos.map(function (b) {
         return (c.blocos.length > 1 ? b.curto + ', ' : '') + GAMAS.filter(function (g) { return b.gamas[g.k]; })
-          .map(function (g) { return g.nome + ', ' + faixa(b.gamas[g.k]); }).join('; ');
+          .map(function (g) { return g.nome + ', ' + faixa(b.gamas[g.k]) + (c.confirmar ? ', a confirmar na visita' : ''); }).join('; ');
       }).join('. ') + '.';
       else if (c && c.modo === 'visita') txt = 'Para este caso o preço dá-se depois da visita, que é gratuita.';
       clearTimeout(tAnuncio);
@@ -1548,7 +1607,10 @@
       resumo: function () { return campo.value; },
       /* ao enviar: o preço à vista vai para o campo "estimativa" (já lá está; isto confirma-o com o estado de agora) */
       junta: atualiza,
-      visibilidade: atualiza
+      visibilidade: atualiza,
+      /* o preço estava à vista do visitante (só esse segue no pedido como «mostrado») */
+      visivel: function () { return !raiz.hidden && !res.hidden && !!campo.value; },
+      esquece: function () { campo.value = ''; }
     };
   })();
 
@@ -1557,10 +1619,12 @@
     form.querySelector('[data-triagem]').value = etiqueta(d.servico);
     form.querySelector('[data-assunto]').value = assunto(d);
   }
+  /* quanto se espera por um envio: 20 s, mais o tempo de subir o pedido numa rede móvel fraca (20 kB/s). Uma fotografia
+     de 8 MB demora minutos a subir em 3G lento, e o tempo conta desde o início: com um limite fixo, nunca chegava */
+  function espera(bytes) { return 20000 + Math.round((bytes || 0) / 20); }
   function enviaNetlify(d) {
     var ctl = window.AbortController ? new AbortController() : null;
-    /* uma fotografia grande demora a subir numa rede móvel fraca */
-    var timer = ctl && setTimeout(function () { ctl.abort(); }, d.foto ? 120000 : 20000);
+    var timer = ctl && setTimeout(function () { ctl.abort(); }, espera(d.foto ? d.foto.size : 0));
     /* os pedidos do comercial vão para o outro formulário Netlify (os mesmos campos; build.py gera-o em formularios.html) */
     var dados = new FormData(form);
     if (comercial(d.servico)) dados.set('form-name', FORM_COMERCIAL);
@@ -1588,14 +1652,25 @@
       r.readAsDataURL(f);
     });
   }
+  /* o identificador do pedido: o mesmo pedido, enviado outra vez com «Tentar novamente», leva o mesmo, e o Apps Script
+     não o manda duas vezes (se a resposta do primeiro se perdeu, ele já tinha seguido). Um pedido mudado leva outro */
+  var idPedido = '', ultimoPedido = '';
+  function novoId() {
+    try { if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); } catch (e) {}
+    return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+  }
   function enviaPedidos(d) {
     var c = comercial(d.servico), dados = new FormData(form), campos = {};
     CAMPOS_PEDIDO.forEach(function (n) { var v = dados.get(n); campos[n] = typeof v === 'string' ? v : ''; });
     return leFoto(d.foto).then(function (fotografia) {
+      var pedido = { versao: 1, destino: c ? 'comercial' : 'geral', formulario: c ? FORM_COMERCIAL : FORM_GERAL,
+                     campos: campos, fotografia: fotografia };
+      var igual = JSON.stringify(pedido);
+      if (igual !== ultimoPedido || !idPedido) { idPedido = novoId(); ultimoPedido = igual; }
+      pedido.id = idPedido;
+      var corpo = JSON.stringify(pedido);
       var ctl = window.AbortController ? new AbortController() : null;
-      var timer = ctl && setTimeout(function () { ctl.abort(); }, d.foto ? 120000 : 20000);
-      var corpo = JSON.stringify({ versao: 1, destino: c ? 'comercial' : 'geral', formulario: c ? FORM_COMERCIAL : FORM_GERAL,
-                                   campos: campos, fotografia: fotografia });
+      var timer = ctl && setTimeout(function () { ctl.abort(); }, espera(corpo.length));
       return fetch(PEDIDOS, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: corpo,
                               signal: ctl ? ctl.signal : undefined })
         .then(function (r) { return r.ok ? r.json() : null; })
@@ -1628,9 +1703,15 @@
   var feito = document.querySelector('[data-form-feito]');
   function mostraFeito(d) {
     var txt = feito.querySelector('[data-feito-txt]'), wa = feito.querySelector('[data-feito-wa]');
-    /* o telefone volta com espaços (912 345 678), tal como se diz; espaços que não partem a linha (o número não se divide
-       num telemóvel estreito) */
-    var tel = d.tel ? d.tel.replace(/\D/g, '').replace(/^351(?=\d{9}$)/, '').replace(/(\d{3})(?=\d)/g, '$1\u00a0') : '';
+    /* um número português volta com espaços (912 345 678), tal como se diz, sem o indicativo (+351, 00351 ou 351, como em
+       telValido); espaços que não partem a linha (o número não se divide num telemóvel estreito). Outro número (estrangeiro,
+       dois números) aparece como o cliente o escreveu */
+    var tel = '';
+    if (d.tel) {
+      var alg = d.tel.replace(/\D/g, '');
+      if (/^\s*(\+|00)\s*351/.test(d.tel) || /^351\d{9}$/.test(alg)) alg = alg.replace(/^(00)?351/, '');
+      tel = alg.length === 9 ? alg.replace(/(\d{3})(?=\d)/g, '$1\u00a0') : d.tel.trim().replace(/\s+/g, ' ');
+    }
     var para = [d.email, tel].filter(Boolean).join(' e ');
     if (txt) txt.textContent = para ? 'Vamos responder para ' + para + '.' : 'Vamos responder em breve.';
     if (wa) { wa.href = whatsDepois(d); wa.hidden = comercial(d.servico); }
@@ -1662,8 +1743,13 @@
     if (btn.getAttribute('aria-busy') === 'true' || bloqueado()) return;
     var d = quoteData(); if (!quoteValidate(d)) return;
     if (d.foto && !confereFoto()) { foto.focus(); return; }
-    /* uma estimativa preenchida mas não junta segue também (sem mexer no foco; não depois de «Retirar»), e o preço provável à vista */
-    pot.juntaAutomatico(); preco.junta(); d = quoteData();
+    if (!pot.confereAreas()) return;
+    /* uma estimativa preenchida mas não junta segue também (sem mexer no foco; não depois de «Retirar»), e o preço provável
+       à vista. Um preço que só apareceu agora (a estimativa junta sozinha escolheu a montagem) não foi visto: não segue */
+    var precoVisto = preco.visivel();
+    pot.juntaAutomatico(); preco.junta();
+    if (!precoVisto) preco.esquece();
+    d = quoteData();
     preparaCampos(d);
     track('quote_form_submit', pot.numeros({ via: SEM_ENVIO ? 'mailto' : PEDIDOS ? 'google' : 'netlify', servico: d.servico, prioridade: triagem(d.servico).p, segmento: triagem(d.servico).seg }));
     if (SEM_ENVIO) { quoteMailto(d); return; }
@@ -1686,8 +1772,10 @@
          comercial (só por email), por WhatsApp */
       track('quote_form_erro', { servico: d.servico });
       lbl.textContent = 'Tentar novamente';
-      if (comercial(d.servico)) quoteAlert('Não conseguimos enviar o pedido agora. O que escreveu continua no formulário: tente de novo ou', false, [ligueTel]);
-      else quoteAlert('Não conseguimos enviar o pedido agora. O que escreveu continua no formulário: tente de novo,', false,
+      /* com a rede lenta, uma fotografia grande pode não chegar a subir: o pedido segue sem ela */
+      var semFoto = d.foto ? ' Com a rede lenta, a fotografia pode ser o problema: tire-a e tente sem ela.' : '';
+      if (comercial(d.servico)) quoteAlert('Não conseguimos enviar o pedido agora. O que escreveu continua no formulário.' + semFoto + ' Tente de novo ou', false, [ligueTel]);
+      else quoteAlert('Não conseguimos enviar o pedido agora. O que escreveu continua no formulário.' + semFoto + ' Tente de novo,', false,
         [ligueTel, [WA_BASE + encodeURIComponent(mensagemWhats(d)), 'envie-o por WhatsApp']]);
     });
   });
@@ -1696,7 +1784,7 @@
      Nos pedidos do comercial não existe: canal() esconde o botão, que só segue por email. */
   $('sendWhats').addEventListener('click', function () {
     if (bloqueado()) return;
-    var d = quoteData(); if (comercial(d.servico) || !quoteValidate(d, true)) return;
+    var d = quoteData(); if (comercial(d.servico) || !quoteValidate(d, true) || !pot.confereAreas()) return;
     pot.juntaAutomatico(); preco.junta(); d = quoteData();
     /* sem serviço escolhido, a estimativa de potência junta sozinha escolhe a instalação de ar condicionado: aí o pedido
        passou a ser do comercial e segue só por email (o botão do WhatsApp já saiu; o foco vai para «Enviar pedido») */

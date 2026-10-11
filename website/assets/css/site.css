@@ -683,7 +683,10 @@ html:not(.js) .topo-in > .menu-btn { display: none; }
 .canal-morada { color: var(--tinta) !important; font-size: 16px !important; }
 .fora-horas { border-left: 3px solid var(--carmim); padding: 4px 0 4px 16px; display: flex; flex-direction: column; gap: 6px; }
 .fora-horas p:last-child { font-size: 15px; color: var(--aco-2); }
-.form-caixa { background: var(--branco); padding: clamp(24px, 3.2vw, 40px); scroll-margin-top: calc(var(--topo-h) + 16px); }
+.form-caixa { min-width: 0; background: var(--branco); padding: clamp(24px, 3.2vw, 40px); scroll-margin-top: calc(var(--topo-h) + 16px); }
+/* um item de grelha não pode alargar a coluna com um texto que não parte (o nome de uma fotografia, um email comprido):
+   no telemóvel a página deslizava para o lado */
+.grelha > * { min-width: 0; }
 .form-t { font-size: clamp(24px, 2.4vw, 30px); font-weight: 700; letter-spacing: -.022em; margin-bottom: 22px; }
 #quoteForm { display: flex; flex-direction: column; gap: 18px; }
 .campo { display: flex; flex-direction: column; gap: 8px; }
@@ -695,8 +698,12 @@ html:not(.js) .topo-in > .menu-btn { display: none; }
 .campo-legenda { margin-bottom: 8px; padding: 0; }
 .opcional { font-weight: 400; color: var(--aco); }
 .campo-in { width: 100%; min-height: 48px; padding: 12px 14px; font-family: var(--serif); font-size: 17px; color: var(--tinta); background: #FAF9F5; border: 1px solid var(--linha-2); border-radius: 0; transition: box-shadow 180ms var(--resposta), background-color 180ms, border-color 180ms; }
-select.campo-in { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' fill='%2311161D'%3E%3Cpath d='M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; padding-right: 40px; }
+select.campo-in { text-overflow: ellipsis; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' fill='%2311161D'%3E%3Cpath d='M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; padding-right: 40px; }
 textarea.campo-in { resize: vertical; min-height: 110px; }
+/* telemóveis estreitos: o serviço escolhido cabe na caixa fechada (16 px é o mínimo para o iPhone não aproximar a página
+   ao tocar no campo); a 320 px os textos mais compridos acabam em reticências */
+@media (max-width: 400px) { select.campo-in { font-size: 16px; padding-right: 34px; background-position: right 12px center; } }
+@media (max-width: 359px) { .form-caixa { padding: 18px; } }
 .campo-in:hover { border-color: #A9A397; }
 .campo-in:focus { outline: 2px solid transparent; outline-offset: 0; background-color: #fff; border-color: var(--tinta); box-shadow: inset 0 -3px 0 var(--carmim); }
 .campo-in[aria-invalid="true"] { border-color: var(--carmim); background-color: var(--erro-bg); }
@@ -708,7 +715,8 @@ textarea.campo-in { resize: vertical; min-height: 110px; }
 .ficheiro { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; min-height: 52px; padding: 7px; background: #FAF9F5; border: 1px solid var(--linha-2); transition: border-color 180ms, background-color 180ms; }
 .ficheiro:hover { border-color: #A9A397; }
 .ficheiro:hover .ficheiro-btn { background: var(--carmim); }
-.ficheiro:focus-within { background: #fff; border-color: var(--tinta); box-shadow: 0 0 0 2px var(--gesso), 0 0 0 4px var(--tinta); }
+/* o contorno transparente aparece no modo de cores forçadas (contraste do Windows), que apaga a sombra */
+.ficheiro:focus-within { outline: 2px solid transparent; outline-offset: 2px; background: #fff; border-color: var(--tinta); box-shadow: 0 0 0 2px var(--gesso), 0 0 0 4px var(--tinta); }
 .ficheiro:has([aria-invalid="true"]) { border-color: var(--carmim); background: var(--erro-bg); }
 .ficheiro-btn { flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 6px 14px; font: 600 14px/1.2 var(--sans); color: #fff; background: var(--tinta); transition: background-color 150ms; }
 .ficheiro-btn .ico { width: 18px; height: 18px; }
@@ -716,7 +724,7 @@ textarea.campo-in { resize: vertical; min-height: 110px; }
 .ficheiro.tem .ficheiro-nome { color: var(--tinta); font-weight: 500; }
 .js .ficheiro-in { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 html:not(.js) .ficheiro-btn, html:not(.js) .ficheiro-nome { display: none; }
-.ficheiro-in { font-family: var(--sans); font-size: 15px; }
+.ficheiro-in { max-width: 100%; font-family: var(--sans); font-size: 15px; }
 .ficheiro-in::file-selector-button { margin-right: 12px; min-height: 32px; padding: 6px 14px; font: 600 14px/1.2 var(--sans); color: #fff; background: var(--tinta); border: 0; border-radius: 0; cursor: pointer; }
 /* sem JavaScript o botão do WhatsApp não faz nada: fica o envio normal (e o WhatsApp do bloco de contacto) */
 html:not(.js) #sendWhats { display: none; }
@@ -733,6 +741,7 @@ html:not(.js) #sendWhats { display: none; }
 .form-feito { display: flex; flex-direction: column; gap: 12px; padding: 20px; border-left: 3px solid var(--wa); background: var(--gesso); animation: mdm-cai 300ms var(--mover) both; }
 .form-feito-t { font-family: var(--sans); font-size: 20px; font-weight: 700; letter-spacing: -.015em; line-height: 1.25; color: var(--tinta); }
 .form-feito-txt, .form-feito-urg { font-size: 16px; line-height: 1.5; color: var(--aco-2); }
+.form-feito-txt { overflow-wrap: anywhere; }
 .form-feito-txt:empty { display: none; }
 .form-feito-urg a { font-weight: 700; white-space: nowrap; }
 .form-feito-acoes { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 4px; }
@@ -947,7 +956,7 @@ body.topo-compacto .filtros-wrap { top: 60px; }
 .obra-quadro picture.foto img { transition: transform 600ms var(--mover); }
 .obra-link:hover .obra-quadro img, .obra-link:focus-visible .obra-quadro img { transform: scale(1.04); }
 .obra-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; border-top: 2px solid var(--carmim); padding-top: 12px; }
-.obra-t { font-family: var(--sans); font-size: 17px; font-weight: 700; letter-spacing: -.012em; line-height: 1.25; }
+.obra-t { min-width: 0; overflow-wrap: break-word; hyphens: auto; font-family: var(--sans); font-size: 17px; font-weight: 700; letter-spacing: -.012em; line-height: 1.25; }
 .obra-link:hover .obra-t { text-decoration: underline; text-underline-offset: 3px; }
 .obra-card .registo { margin-top: 7px; }   /* 13 px, como qualquer registo: pode partir em duas linhas */
 /* telemóvel: dois cartões por linha, só fotografia e título (o registo fica para a página da obra) */

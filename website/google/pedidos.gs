@@ -117,6 +117,15 @@ function trataPedido_(texto) {
   if (!comercial) return recusa_('Falta configurar EMAIL_COMERCIAL nas propriedades do script.');
   const para = (p.destino === 'geral' && enderecos_(props.getProperty('EMAIL_GERAL'))) || comercial;
 
+  // o mesmo pedido outra vez («Tentar novamente» depois de a resposta se ter perdido na rede): o site manda o mesmo
+  // identificador e o script responde com a referência do primeiro, sem outro email nem outra linha na folha
+  const id = typeof p.id === 'string' && /^[A-Za-z0-9-]{8,64}$/.test(p.id) ? p.id : '';
+  const jaFoi = id ? refDoPedido_(id) : '';
+  if (jaFoi) {
+    console.log('Pedido ' + jaFoi + ' repetido pelo site: não segue outra vez');
+    return { ok: true, ref: jaFoi };
+  }
+
   if (!contaPedido_()) return recusa_('Muitos pedidos seguidos. Tente daqui a alguns minutos.');
 
   const agora = new Date();
@@ -145,7 +154,19 @@ function trataPedido_(texto) {
     return recusa_('O email do pedido não seguiu.');
   }
   console.log('Pedido ' + ref + ' enviado (' + p.destino + ')' + (falhaFolha ? ', sem linha na folha' : ''));
+  if (id) guardaRef_(id, ref);
   return { ok: true, ref: ref };
+}
+
+/* Os pedidos já enviados, pelo identificador que o site lhes dá, durante 6 horas (o máximo da cache). Se a cache falhar,
+   o pedido segue na mesma: mais vale um email repetido do que um pedido perdido. */
+function refDoPedido_(id) {
+  try { return CacheService.getScriptCache().get('enviado-' + id) || ''; } catch (err) { return ''; }
+}
+function guardaRef_(id, ref) {
+  try { CacheService.getScriptCache().put('enviado-' + id, ref, 21600); } catch (err) {
+    console.warn('Não consegui guardar o identificador do pedido ' + ref + ': ' + motivo_(err));
+  }
 }
 
 /* Os campos do formulário, sempre como texto e sem espaços nas pontas (os que faltam ficam vazios). */

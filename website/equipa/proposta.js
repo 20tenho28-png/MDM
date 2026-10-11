@@ -160,8 +160,11 @@
     focoDepois = true; calcEstado.tabIndex = -1; calcEstado.focus();
     carregaTabela();
   });
+  /* como no formulário do site (assets/js/site.js, leArea): a unidade no fim e os milhares à portuguesa («2.500») */
   function leArea(t) {
-    t = String(t == null ? '' : t).trim().replace(/\s*m(²|2)$/i, '').replace(',', '.');
+    t = String(t == null ? '' : t).trim().replace(/\s*(m(²|2)?|mts?|metros(\s+quadrados)?)\.?$/i, '');
+    if (/^\d{1,3}([. ]\d{3})+$/.test(t)) t = t.replace(/[. ]/g, '');
+    t = t.replace(',', '.');
     if (!t) return null;
     return /^(\d+(\.\d*)?|\.\d+)$/.test(t) ? Math.round(parseFloat(t) * 100) / 100 : NaN;
   }
