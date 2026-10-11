@@ -13,7 +13,7 @@ que conta como "feito".
   raiz de `website/` e EN em `website/en/`. São 66 páginas: início, galeria
   de obras e 24 obras, 5 serviços, calculadora e privacidade, em cada língua.
 - **Origem:** cópia do site publicado em
-  `https://www.mdmassist.com.pt`, tirada a
+  `https://www.mdmassist.pt`, tirada a
   10 out 2026, mais as correções listadas abaixo.
 - **Repositório:** `github.com/20tenho28-png/MDM`, pasta `website/`, ramo
   `bernardo/website-import`, pull request #16. O repositório tem outras apps

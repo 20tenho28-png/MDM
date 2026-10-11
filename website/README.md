@@ -30,7 +30,7 @@ O site publicado é o **visual novo**, em `site/`: HTML estático em português 
 
 ## Publicar
 
-Qualquer alojamento estático serve, **servido na raiz do domínio** (a página 404 usa caminhos absolutos porque é mostrada em qualquer profundidade). Netlify: diretório base `website` (o `netlify.toml` já tem o comando e a pasta). O domínio é `https://www.mdmassist.com.pt` (`baseUrl` em `data/site.json`): dele saem o endereço canónico, `og:url`, `og:image`, o mapa do site, o `robots.txt` e os dados estruturados. Antes de publicar, ver a lista de `--faltam` (abaixo).
+Qualquer alojamento estático serve, **servido na raiz do domínio** (a página 404 usa caminhos absolutos porque é mostrada em qualquer profundidade). Netlify: diretório base `website` (o `netlify.toml` já tem o comando e a pasta). O domínio é `https://www.mdmassist.pt` (`baseUrl` em `data/site.json`): dele saem o endereço canónico, `og:url`, `og:image`, o mapa do site, o `robots.txt` e os dados estruturados. Antes de publicar, ver a lista de `--faltam` (abaixo).
 
 ### Pré-visualização (até ao lançamento)
 
@@ -44,11 +44,11 @@ Enquanto `data/site.json` tiver `"preview": true`, o site pede aos motores de bu
 
 ### Lançamento: desligar a pré-visualização
 
-1. Ligar `www.mdmassist.com.pt` (e o domínio sem `www`, a redirecionar para ele) ao projeto Netlify e esperar pelo certificado HTTPS. Não mexer nos registos de email do DNS.
+1. Ligar `www.mdmassist.pt` (e o domínio sem `www`, a redirecionar para ele) ao projeto Netlify e esperar pelo certificado HTTPS. Não mexer nos registos de email do DNS.
 2. Em `data/site.json`, passar `"preview": true` a `"preview": false`. Mais nada muda: `robots.txt` passa a `Allow: /` com a linha `Sitemap:`, `_headers` deixa de ser gerado e as páginas voltam a `index,follow` (a 404 e `obrigado.html` continuam `noindex`, de propósito).
 3. `python3 website/build.py --check` tem de passar (falha se sobrar algum `noindex` numa página que não seja a 404 ou `obrigado.html`, ou num `X-Robots-Tag` do `netlify.toml` fora de `/equipa/*`, se o `robots.txt` não tiver a linha `Sitemap:` com o domínio, ou se `baseUrl` não for o domínio final; `none` conta como `noindex`, porque é o mesmo que `noindex, nofollow`, e uma página com qualquer dos dois fica fora do mapa do site; `none` só conta como regra inteira entre vírgulas, com ou sem o nome do robô à frente, como `googlebot: none`, e não como valor de outra regra: `max-image-preview:none` só tira a imagem grande e a página continua no Google e no mapa). Fazer commit e esperar pelo deploy.
-4. Confirmar: `curl -I https://www.mdmassist.com.pt/` já não mostra `X-Robots-Tag`, e `https://www.mdmassist.com.pt/robots.txt` mostra `Allow: /`.
-5. Na Google Search Console, enviar `https://www.mdmassist.com.pt/sitemap.xml`. No Perfil da Empresa no Google, pôr `https://www.mdmassist.com.pt` como site.
+4. Confirmar: `curl -I https://www.mdmassist.pt/` já não mostra `X-Robots-Tag`, e `https://www.mdmassist.pt/robots.txt` mostra `Allow: /`.
+5. Na Google Search Console, enviar `https://www.mdmassist.pt/sitemap.xml`. No Perfil da Empresa no Google, pôr `https://www.mdmassist.pt` como site.
 
 ### Dados para o Google
 
