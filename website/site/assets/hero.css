@@ -92,14 +92,14 @@
 @media(max-width:900px){.hero-immersive{padding-bottom:48px}}
 
 /* Preserve the complete original residential and commercial photographs. */
-.hero-immersive .hero-image-frame>img[src$="foto-04-1600.webp"],.hero-immersive .hero-image-frame>img[src$="foto-28-1600.webp"]{object-fit:contain;object-position:right center}
+.hero-immersive .hero-image-frame>img[src$="foto-04-1600.webp"],.hero-immersive .hero-image-frame>img[src$="foto-04-topo-1600.webp"],.hero-immersive .hero-image-frame>img[src$="foto-28-1600.webp"]{object-fit:contain;object-position:right center}
 @media(min-width:901px){
  .hero-mdm-terrace .hero-copy{margin-left:0;margin-right:auto}
  .hero-mdm-terrace .hero-visual:after{background:linear-gradient(90deg,#0b1624ed 0%,#0b1624d9 26%,#0b16248c 42%,#0b16241a 59%,#0b162429 100%),linear-gradient(0deg,#0b1624cf,transparent 32%)}
  .hero-mdm-terrace .photo-tag,.hero-mdm-terrace .photo-controls{left:auto;right:var(--hero-gutter)}
 }
 @media(max-width:900px){
- .hero-immersive .hero-image-frame>img[src$="foto-04-1600.webp"],.hero-immersive .hero-image-frame>img[src$="foto-28-1600.webp"]{object-position:center top}
+ .hero-immersive .hero-image-frame>img[src$="foto-04-1600.webp"],.hero-immersive .hero-image-frame>img[src$="foto-04-topo-1600.webp"],.hero-immersive .hero-image-frame>img[src$="foto-28-1600.webp"]{object-position:center top}
 }
 
 /* Each original aspect ratio receives its own space above the mobile text. */
