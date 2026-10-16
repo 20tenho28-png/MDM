@@ -5,7 +5,7 @@
   "vatID": "PT502644761",
   "founded": "1991",
   "baseUrl": "https://www.mdmassist.pt",
-  "preview": true,
+  "preview": false,
   "phone": "218 935 050",
   "phoneHref": "tel:+351218935050",
   "phoneE164": "+351218935050",
