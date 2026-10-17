@@ -7,6 +7,7 @@ Team workspace with three apps, one folder each:
 | **Email ticket wall** | `src/mdm/` | IMAP-driven ticket tracking with a TV wall display (FastAPI + PostgreSQL) |
 | **Electric simulator** | `electric-simulator/` | Interactive DC circuit simulator (canvas editor + live MNA solver) |
 | **Circuit Planner — EU Edition** | `circuit-planner/` | Single-file EU electrical/HVAC training app (the trainer) |
+| **Calculadora de ar condicionado** | `ac-calculator/` | Client-facing AC sizing calculator (BTU/kW per room, mono vs multi-split), MDM brand design, PT-PT |
 
 ```
 MDM/
@@ -15,6 +16,7 @@ MDM/
 ├── tests/              # Python test suite (ticket wall + simulator routes)
 ├── electric-simulator/ # standalone circuit simulator (HTML/JS + own tests)
 ├── circuit-planner/    # standalone trainer app (HTML/JS + own tests)
+├── ac-calculator/      # client-facing AC sizing calculator (HTML/JS + own tests)
 └── .github/            # CI workflow, PR and issue templates
 ```
 
@@ -40,6 +42,7 @@ uvicorn mdm.main:app --reload
 - `http://localhost:8000/` — TV wall (kiosk) with ticket cards colored by age
 - `http://localhost:8000/simulator` — electric circuit simulator (drag components,
   toggle switches, live current/voltage/power readouts)
+- `http://localhost:8000/calculadora` — AC sizing calculator for clients
 
 ### Tests
 
@@ -58,6 +61,21 @@ circuits (`/simulator/`) and the **Quadro Elétrico** distribution-board trainer
 DIN rails like an electrician. Physics and panel logic have their own Node test
 suites, run automatically from pytest. See
 [`electric-simulator/README.md`](electric-simulator/README.md).
+
+## Calculadora de ar condicionado
+
+Lives in `ac-calculator/` and is served at `/calculadora` by the ticket-wall app
+(or standalone with any static server). A four-step, mobile-first flow in
+European Portuguese modelled on manufacturer configurators: rooms → per-room
+sizing (area, height, glass, shading, orientation, people, top floor, kitchen)
+→ postal code (REH climate zone + Lisbon service area) → result with the
+recommended unit per room, mono vs multi-split comparison and a one-tap quote
+request (WhatsApp / phone / email). The sizing model (`calc_model.js`) is
+DOM-free and Node-tested; prices are off until `prices.js` is filled.
+`node ac-calculator/tools/build_single.js` bundles everything into
+`ac-calculator/dist/calculadora-ar-condicionado.html`, a dependency-free
+single file to drop into the public website. See
+[`ac-calculator/README.md`](ac-calculator/README.md).
 
 ## Circuit Planner
 
