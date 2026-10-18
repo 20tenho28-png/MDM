@@ -93,7 +93,7 @@ function makeSummary(){
  q('#quote-summary').replaceChildren(...entries.map(([key,value])=>{const div=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=key;dd.textContent=value;div.append(dt,dd);return div}));
  requestText=(isEnglish?'Hello MDM. I would like to request a technical assessment for the following intervention:\n\n':'Solicito à MDM avaliação técnica para a seguinte intervenção:\n\n')+entries.map(([k,v])=>k+': '+v).join('\n');
  q('#send-whatsapp').href='https://wa.me/351910307579?text='+encodeURIComponent(requestText);
- q('#send-email').href='mailto:mdmassistencia@gmail.com?subject='+encodeURIComponent((isEnglish?'MDM request · ':'Pedido MDM · ')+t(getValue('purpose')))+'&body='+encodeURIComponent(requestText);
+ q('#send-email').href='mailto:mdmassist@mdmassist.com?subject='+encodeURIComponent((isEnglish?'MDM request · ':'Pedido MDM · ')+t(getValue('purpose')))+'&body='+encodeURIComponent(requestText);
 }
 form?.addEventListener('submit',e=>{e.preventDefault();if(step<3&&validateStep()){if(step===2)makeSummary();goStep(step+1)}});
 q('.copy-request')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(requestText);q('.copy-status').textContent=t('Pedido copiado. Pode colá-lo na sua mensagem.');}catch{q('.copy-status').textContent=t('Não foi possível copiar automaticamente. Use o WhatsApp ou email, ou selecione o resumo para o copiar.')}});
