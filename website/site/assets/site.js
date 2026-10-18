@@ -126,17 +126,3 @@ qa('[data-brand-carousel]').forEach(carousel=>{
  syncBrandMotion();
 });
 
-/* Mapa do rodapé: o Google Maps só carrega quando o visitante clica (sem cookies da Google antes disso). */
-document.querySelectorAll('.mdm-mapa').forEach(function (box) {
-  var btn = box.querySelector('.mdm-mapa__btn');
-  if (!btn) return;
-  btn.addEventListener('click', function () {
-    var f = document.createElement('iframe');
-    f.src = box.getAttribute('data-src');
-    f.title = box.getAttribute('data-title') || 'Google Maps';
-    f.loading = 'lazy';
-    f.referrerPolicy = 'no-referrer-when-downgrade';
-    f.allowFullscreen = true;
-    box.replaceChildren(f);
-  });
-});
