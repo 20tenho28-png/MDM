@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     # ERP (agenda e relatórios de intervenção). Com utilizador definido, /erp pede utilizador e palavra-passe.
     erp_utilizador: str = ""
     erp_palavra_passe: str = ""
+    # Endereço do ERP visto dos telemóveis (ex.: https://erp.mdmassist.pt), para as ligações nos eventos do calendário.
+    erp_url: str = ""
+    # Google Calendar: caminho do ficheiro JSON da conta de serviço. Vazio = não sincroniza.
+    google_credenciais: str = ""
     # Cabeçalho dos relatórios de intervenção.
     empresa_nome: str = "MDM Assistência Técnica"
     empresa_nome_legal: str = "M.D.M. - Manuel Domingos Melancia, Lda"

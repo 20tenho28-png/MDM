@@ -55,7 +55,7 @@ Tests use an in-memory SQLite database — no PostgreSQL or IMAP account needed.
 
 ## ERP: agenda e relatórios de intervenção
 
-Served by the same app at `http://localhost:8000/erp` (needs `alembic upgrade head` for the `0002` tables).
+Served by the same app at `http://localhost:8000/erp` (needs `alembic upgrade head` for the `0002` and `0003` migrations).
 Set `ERP_UTILIZADOR` and `ERP_PALAVRA_PASSE` in `.env` before it is reachable from outside the office: without
 them `/erp` is open.
 
@@ -72,6 +72,12 @@ them `/erp` is open.
   A report closes its visit (by `V0012` in *Ref. interna*, or the client's visit on that day). *Obra não
   concluída* leaves the next visit *por marcar*; *Aguarda peça* holds it until the office records the part arrived.
   A report already accepted never goes back to *emitido*; a rectification marks the original as replaced.
+- **Google Calendar dos técnicos**: each technician gets a Google calendar (ID on `/erp/tecnicos`) shared with
+  the ERP's service account (`GOOGLE_CREDENCIAIS`, a JSON key). Booked and done visits become events with the
+  address, phone and a *Fazer o relatório* link (`ERP_URL`); rebooking updates the event, cancelling, unbooking or
+  changing technician removes it. Sync runs after each change, in the background; `/erp/tecnicos` shows failures
+  and has *Sincronizar agora*. One-way: changes made in Google Calendar do not come back. Setup steps are on that
+  page. Without `GOOGLE_CREDENCIAIS` nothing is sent.
 - **Funil**: `/erp/exportar/agenda.csv` goes into `dados/agenda/` of the funnel project, so the shadow mode measures
   *visita por marcar*, *visita marcada* and *à espera de peça/fornecedor* (see `mdm-funil/README.md`).
 

@@ -17,11 +17,11 @@ import io
 import json
 import re
 import secrets
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from urllib.parse import quote, urlsplit
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.templating import Jinja2Templates
@@ -31,6 +31,7 @@ from sqlalchemy.orm import selectinload
 
 from mdm.config import Settings, get_settings
 from mdm.db import get_sessionmaker
+from mdm.erp import google
 from mdm.erp import service as s
 from mdm.erp.models import (
     ESTADOS_RELATORIO,
@@ -253,7 +254,52 @@ async def equipamento_criar(request: Request, cliente_id: int,
 async def tecnicos(request: Request, session: AsyncSession = Depends(_session),
                    settings: Settings = Depends(get_settings)) -> HTMLResponse:
     todos = list((await session.execute(select(Tecnico).order_by(Tecnico.ativo.desc(), Tecnico.nome))).scalars())
-    return _pagina(request, "tecnicos.html", settings, tecnicos=todos)
+    stmt = (select(Visita).where(Visita.google_erro != "").options(selectinload(Visita.cliente))
+            .order_by(Visita.inicio.desc()).limit(20))
+    com_erro = list((await session.execute(stmt)).scalars())
+    return _pagina(request, "tecnicos.html", settings, tecnicos=todos, google_ativo=google.ativo(settings),
+                   conta_servico=_conta_servico(settings), com_erro=com_erro)
+
+
+def _conta_servico(settings: Settings) -> str:
+    """O email da conta de serviço, para o escritório saber com quem partilhar os calendários."""
+    if not settings.google_credenciais:
+        return ""
+    try:
+        return json.loads(Path(settings.google_credenciais).read_text(encoding="utf-8")).get("client_email", "")
+    except (OSError, ValueError):
+        return ""
+
+
+@router.post("/tecnicos/sincronizar")
+async def tecnicos_sincronizar() -> RedirectResponse:
+    """Põe no Google Calendar todas as visitas de hoje em diante (e tira as que já não devem lá estar)."""
+    if not google.ativo():
+        return _ir("/erp/tecnicos", "O Google Calendar ainda não está configurado (GOOGLE_CREDENCIAIS).")
+    r = await google.sincronizar_visitas(desde=s.agora().date())
+    if r["erros"]:
+        return _ir("/erp/tecnicos", f"{r['visitas']} visitas vistas, {r['erros']} com erro (lista em baixo).")
+    return _ir("/erp/tecnicos", aviso=f"Google Calendar em dia: {r['visitas']} visitas vistas.")
+
+
+@router.post("/tecnicos/{tecnico_id}")
+async def tecnico_guardar(request: Request, tecnico_id: int, tarefas: BackgroundTasks,
+                          session: AsyncSession = Depends(_session)) -> RedirectResponse:
+    t = await _ou_404(session, Tecnico, tecnico_id)
+    dados = await request.form()
+    nome = s.texto(dados, "nome", 120)
+    if not nome:
+        return _ir("/erp/tecnicos", "O técnico precisa de um nome.")
+    calendario = s.texto(dados, "calendario_id", 255)
+    mudou = calendario != t.calendario_id
+    t.nome, t.telefone, t.calendario_id = nome, s.texto(dados, "telefone", 40), calendario
+    await session.commit()
+    if mudou:
+        stmt = select(Visita.id).where(Visita.tecnico_id == t.id, Visita.estado.in_(("marcada", "feita")),
+                                       Visita.inicio >= datetime.combine(s.agora().date(), datetime.min.time()))
+        tarefas.add_task(google.em_segundo_plano, list((await session.execute(stmt)).scalars()))
+    return _ir("/erp/tecnicos", aviso=f"{nome} guardado." + (" As visitas dele seguem para o calendário." if
+                                                            mudou and calendario else ""))
 
 
 @router.post("/tecnicos")
@@ -288,7 +334,8 @@ async def visita_nova(request: Request, cliente: int, dia: str = "", session: As
 
 
 @router.post("/visitas")
-async def visita_criar(request: Request, session: AsyncSession = Depends(_session)) -> RedirectResponse:
+async def visita_criar(request: Request, tarefas: BackgroundTasks,
+                       session: AsyncSession = Depends(_session)) -> RedirectResponse:
     dados = await request.form()
     c = await _ou_404(session, Cliente, s.ler_id(dados.get("cliente_id")) or 0)
     try:
@@ -297,6 +344,7 @@ async def visita_criar(request: Request, session: AsyncSession = Depends(_sessio
         return _ir(f"/erp/visitas/nova?cliente={c.id}", str(erro))
     session.add(v)
     await session.commit()
+    tarefas.add_task(google.em_segundo_plano, [v.id])
     aviso = f"Visita marcada para {v.inicio:%d/%m às %H:%M}." if v.inicio else "Visita por marcar."
     return _ir(f"/erp/visitas/{v.id}", aviso=aviso)
 
@@ -316,7 +364,7 @@ async def visita_ficha(request: Request, visita_id: int, editar: bool = False,
 
 
 @router.post("/visitas/{visita_id}")
-async def visita_guardar(request: Request, visita_id: int,
+async def visita_guardar(request: Request, visita_id: int, tarefas: BackgroundTasks,
                          session: AsyncSession = Depends(_session)) -> RedirectResponse:
     v = await s.obter_visita(session, visita_id)
     if v is None:
@@ -327,11 +375,12 @@ async def visita_guardar(request: Request, visita_id: int,
         await session.rollback()
         return _ir(f"/erp/visitas/{visita_id}?editar=1", str(erro))
     await session.commit()
+    tarefas.add_task(google.em_segundo_plano, [visita_id])
     return _ir(f"/erp/visitas/{visita_id}", aviso="Guardado.")
 
 
 @router.post("/visitas/{visita_id}/cancelar")
-async def visita_cancelar(request: Request, visita_id: int,
+async def visita_cancelar(request: Request, visita_id: int, tarefas: BackgroundTasks,
                           session: AsyncSession = Depends(_session)) -> RedirectResponse:
     v = await s.obter_visita(session, visita_id)
     if v is None:
@@ -341,6 +390,7 @@ async def visita_cancelar(request: Request, visita_id: int,
     except s.Invalido as erro:
         return _ir(f"/erp/visitas/{visita_id}", str(erro))
     await session.commit()
+    tarefas.add_task(google.em_segundo_plano, [visita_id])
     return _ir(f"/erp/visitas/{visita_id}", aviso="Visita cancelada.")
 
 
@@ -380,7 +430,8 @@ async def api_visita(visita_id: int, session: AsyncSession = Depends(_session)) 
 
 
 @router.post("/api/relatorios")
-async def api_relatorios(request: Request, session: AsyncSession = Depends(_session)) -> dict:
+async def api_relatorios(request: Request, tarefas: BackgroundTasks,
+                         session: AsyncSession = Depends(_session)) -> dict:
     """Recebe da app um relatório (mdm-ri/1) ou o lote de «Exportar tudo» (mdm-ri-lote/1), em JSON."""
     if not request.headers.get("content-type", "").startswith("application/json"):
         raise HTTPException(status_code=415, detail="Envia o relatório em JSON.")
@@ -390,6 +441,7 @@ async def api_relatorios(request: Request, session: AsyncSession = Depends(_sess
         raise HTTPException(status_code=400, detail="JSON inválido.") from erro
     resumo = await s.importar_relatorios(session, s.relatorios_do_ficheiro(obj))
     await session.commit()
+    tarefas.add_task(google.em_segundo_plano, resumo["visitas"])
     return resumo
 
 
@@ -413,7 +465,7 @@ async def relatorios_importar_form(request: Request, settings: Settings = Depend
 
 
 @router.post("/relatorios/importar", response_class=HTMLResponse)
-async def relatorios_importar(request: Request, session: AsyncSession = Depends(_session),
+async def relatorios_importar(request: Request, tarefas: BackgroundTasks, session: AsyncSession = Depends(_session),
                               settings: Settings = Depends(get_settings)) -> HTMLResponse:
     form = await request.form()
     relatorios_lidos, ilegiveis = [], []
@@ -426,6 +478,7 @@ async def relatorios_importar(request: Request, session: AsyncSession = Depends(
             ilegiveis.append(f.filename or "?")
     resumo = await s.importar_relatorios(session, relatorios_lidos)
     await session.commit()
+    tarefas.add_task(google.em_segundo_plano, resumo["visitas"])
     resumo["ilegiveis"] = ilegiveis
     return _pagina(request, "importar.html", settings, resumo=resumo)
 
@@ -445,7 +498,7 @@ async def relatorio(request: Request, numero: str, session: AsyncSession = Depen
 
 
 @router.post("/relatorios/{numero}/visita")
-async def relatorio_visita(request: Request, numero: str,
+async def relatorio_visita(request: Request, numero: str, tarefas: BackgroundTasks,
                            session: AsyncSession = Depends(_session)) -> RedirectResponse:
     i = await s.obter_relatorio(session, numero)
     if i is None:
@@ -458,6 +511,8 @@ async def relatorio_visita(request: Request, numero: str,
     except s.Invalido as erro:
         return _ir(f"/erp/relatorios/{numero}", str(erro))
     await session.commit()
+    seguintes = (await session.execute(select(Visita.id).where(Visita.anterior_id == v.id))).scalars().all()
+    tarefas.add_task(google.em_segundo_plano, [v.id, *seguintes])
     return _ir(f"/erp/relatorios/{numero}", aviso=f"Associado à visita {s.ref_visita(v)}, que ficou feita.")
 
 

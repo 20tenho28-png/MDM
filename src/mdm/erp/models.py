@@ -74,6 +74,8 @@ class Tecnico(Base):
     nome: Mapped[str] = mapped_column(String(120))
     telefone: Mapped[str] = mapped_column(String(40), default="")
     ativo: Mapped[bool] = mapped_column(Boolean, default=True)
+    # ID do calendário Google onde aparecem as visitas dele (vazio = não sincroniza).
+    calendario_id: Mapped[str] = mapped_column(String(255), default="")
 
 
 class Equipamento(Base):
@@ -125,6 +127,10 @@ class Visita(Base):
     motivo_cancelamento: Mapped[str] = mapped_column(String(500), default="")
     # A visita que esta continua (nova visita ou peça que chegou).
     anterior_id: Mapped[int | None] = mapped_column(ForeignKey("erp_visitas.id"), nullable=True)
+    # Google Calendar: o calendário onde o evento está agora, o último erro e quando se sincronizou.
+    google_calendario: Mapped[str] = mapped_column(String(255), default="")
+    google_erro: Mapped[str] = mapped_column(String(500), default="")
+    google_sincronizada_em: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     cliente: Mapped[Cliente] = relationship(back_populates="visitas")
     tecnico: Mapped[Tecnico | None] = relationship()

@@ -399,8 +399,9 @@ async def _fechar_visita(session: AsyncSession, i: Intervencao, v: Visita, momen
 async def importar_relatorios(session: AsyncSession, relatorios: list, momento: datetime | None = None) -> dict:
     """Guarda os relatórios recebidos da app. Devolve o resumo para mostrar (novos, atualizados, ignorados...)."""
     momento = momento or agora()
+    # "visitas": as visitas que mudaram (para o Google Calendar).
     resumo = {"novos": [], "atualizados": [], "iguais": [], "ignorados": [], "invalidos": 0, "visitas_seguintes": 0,
-              "sem_visita": []}
+              "sem_visita": [], "visitas": []}
     for r in relatorios:
         if not importavel(r):
             resumo["invalidos"] += 1
@@ -441,8 +442,12 @@ async def importar_relatorios(session: AsyncSession, relatorios: list, momento: 
                     i.visita_id = original.visita_id
         if i.visita_id:
             v = await obter_visita(session, i.visita_id)
-            if v is not None and await _fechar_visita(session, i, v, momento):
-                resumo["visitas_seguintes"] += 1
+            if v is not None:
+                resumo["visitas"].append(v.id)
+                seguinte = await _fechar_visita(session, i, v, momento)
+                if seguinte:
+                    resumo["visitas_seguintes"] += 1
+                    resumo["visitas"].append(seguinte.id)
         else:
             resumo["sem_visita"].append(numero)
     return resumo

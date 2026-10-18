@@ -118,6 +118,10 @@ color:var(--surface);cursor:pointer;text-decoration:none;display:inline-block;li
 form.inline{display:inline}
 .pesquisa{display:flex;gap:8px;max-width:520px}
 
+ol.passos{margin:0;padding-left:20px}
+ol.passos li{margin:8px 0;max-width:85ch}
+code{font-family:var(--mono);font-size:13px;background:var(--sunk);padding:1px 5px;border-radius:4px}
+
 /* Assinaturas vindas da app */
 .assinatura-img{max-width:320px;max-height:140px;background:#fff;border-radius:6px;border:1px solid var(--line)}
 

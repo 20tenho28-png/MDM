@@ -30,7 +30,9 @@
   <dt>Marcada</dt><dd>{{ v.marcada_em.strftime('%d/%m/%Y %H:%M') if v.marcada_em else '—' }}</dd>
   <dt>Feita</dt><dd>{{ v.feita_em.strftime('%d/%m/%Y %H:%M') if v.feita_em else '—' }}</dd>
   {% if v.cancelada_em %}<dt>Cancelada</dt><dd>{{ v.cancelada_em.strftime('%d/%m/%Y %H:%M') }}</dd>{% endif %}
+  {% if v.google_calendario %}<dt>Google Calendar</dt><dd>no calendário de {{ v.tecnico.nome if v.tecnico else 'técnico' }}</dd>{% endif %}
 </dl>
+{% if v.google_erro %}<p class="msg aviso">Não chegou ao Google Calendar: {{ v.google_erro }} (<a href="/erp/tecnicos#google">ver a ligação</a>)</p>{% endif %}
 {% if v.estado in ('por_marcar', 'marcada') and not v.relatorios %}
 <details style="margin-top:10px"><summary>Cancelar a visita</summary>
 <form method="post" action="/erp/visitas/{{ v.id }}/cancelar" class="ficha" style="margin-top:8px">
