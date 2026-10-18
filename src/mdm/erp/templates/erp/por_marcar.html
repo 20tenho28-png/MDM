@@ -1,0 +1,19 @@
+{% extends "erp/base.html" %}{% from "erp/_macros.html" import visita_linha %}
+{% block titulo %}Por marcar{% endblock %}
+{% block corpo %}
+<div class="cab"><div><div class="eyebrow">Agenda</div><h1>Visitas por marcar</h1>
+<p class="meta">P1 primeiro; no mesmo P, a mais antiga. A data em que a visita entrou aqui é o que o funil mede no estado «Visita por marcar».</p></div></div>
+<div class="cartao"><ul class="lista">
+{% for v in visitas %}{{ visita_linha(v) }}
+  <li style="border-top:0;padding-top:0"><span class="sub">à espera desde {{ v.criada_em|data_pt }} ({{ (hoje - v.criada_em.date()).days }} dias)</span>
+  <a class="bt peq" href="/erp/visitas/{{ v.id }}?editar=1">Marcar</a></li>
+{% else %}<li class="vazio">Nada por marcar.</li>{% endfor %}
+</ul></div>
+<h2 id="pecas">À espera de peça</h2>
+<p class="meta">Obras por concluir com «Aguarda peça» no relatório. A visita para montar a peça só aparece por marcar depois de a peça chegar.</p>
+<div class="tw"><table><thead><tr><th>Relatório</th><th>Cliente</th><th>Pendente</th><th>Desde</th><th></th></tr></thead><tbody>
+{% for i in pecas %}<tr><td><a href="/erp/relatorios/{{ i.numero }}">{{ i.numero }}</a></td><td>{{ i.cliente_nome }}</td><td>{{ i.pendentes }}</td><td>{{ i.data|data_pt }}</td>
+<td><form class="inline" method="post" action="/erp/relatorios/{{ i.numero }}/peca"><input type="date" name="dia" value="{{ hoje.isoformat() }}" aria-label="Dia em que a peça chegou" style="width:auto"> <button class="bt peq ok">Peça chegou</button></form></td></tr>
+{% else %}<tr><td colspan="5" class="vazio">Nenhuma obra à espera de peça.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

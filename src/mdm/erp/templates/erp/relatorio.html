@@ -1,0 +1,72 @@
+{% extends "erp/base.html" %}
+{% block titulo %}{{ i.numero }}{% endblock %}
+{% block corpo %}
+{% set c = r.cliente or {} %}{% set f = r.fgas or {} %}
+<div class="cab"><div><div class="eyebrow">Relatório de intervenção · {{ r.impresso or 'FM-TEC-04' }}</div><h1>{{ i.numero }}</h1>
+<p class="meta">{{ i.nome_estado }} · {{ i.data|data_pt }} {{ i.hora_inicio }}–{{ i.hora_fim }}{% if duracao_relatorio(i) %} ({{ duracao_relatorio(i) }}){% endif %} · {{ i.tecnico }}</p></div>
+<div class="acoes"><a class="bt" href="/erp/ri?ver={{ i.numero|urlencode }}">Ver e imprimir (formato da app)</a></div></div>
+{% if i.retificado_por %}<p class="msg aviso">Retificado: substituído por <a href="/erp/relatorios/{{ i.retificado_por }}">{{ i.retificado_por }}</a>. Sem efeito.</p>{% endif %}
+{% if i.retifica %}<p class="msg aviso">Retifica e substitui o <a href="/erp/relatorios/{{ i.retifica }}">{{ i.retifica }}</a>. Motivo: {{ r.motivo_retificacao }}</p>{% endif %}
+<div class="grelha" style="margin-top:14px">
+<section class="cartao"><h2>Cliente e local</h2><dl class="dados">
+  <dt>Cliente</dt><dd>{% if i.cliente %}<a href="/erp/clientes/{{ i.cliente.id }}">{{ c.nome }}</a>{% else %}{{ c.nome }}{% endif %}</dd>
+  <dt>Morada</dt><dd>{{ i.morada or '—' }}</dd>
+  <dt>Contacto</dt><dd>{{ [c.contacto, c.email]|select|join(' · ') or '—' }}</dd>
+  {% if c.nif %}<dt>NIF</dt><dd>{{ c.nif }}</dd>{% endif %}
+  <dt>Tipo</dt><dd>{{ i.tipo_intervencao or '—' }}{% if i.orcamento_numero %} · orçamento {{ i.orcamento_numero }}{% endif %}</dd>
+  <dt>Ref. interna</dt><dd>{{ i.ref_interna or '—' }}</dd>
+</dl></section>
+<section class="cartao"><h2>Visita da agenda</h2>
+{% if i.visita %}
+  <p><a href="/erp/visitas/{{ i.visita.id }}"><b>{{ ref_visita(i.visita) }}</b></a> · {{ i.visita.nome_tipo }} · <span class="et {{ i.visita.estado }}">{{ i.visita.nome_estado }}</span></p>
+{% else %}
+  <p class="msg aviso" style="margin-top:0">Sem visita. O técnico não escreveu a ref. interna (V0012) e não havia visita deste cliente marcada para {{ i.data|data_pt }}.</p>
+  {% if candidatas %}<form method="post" action="/erp/relatorios/{{ i.numero }}/visita" class="ficha">
+    <label>Visita deste cliente<select name="visita_id">{% for v in candidatas %}<option value="{{ v.id }}">{{ ref_visita(v) }} · {{ v.nome_tipo }} · {{ v.inicio.strftime('%d/%m %H:%M') if v.inicio else 'por marcar' }}</option>{% endfor %}</select></label>
+    <div class="acoes"><button class="bt peq">Associar e dar a visita como feita</button></div></form>
+  {% elif i.cliente %}<p class="sub">Este cliente não tem visitas por fazer. Se for um trabalho sem marcação, está bem assim.</p>{% endif %}
+{% endif %}
+<dl class="dados" style="margin-top:8px">
+  <dt>Obra concluída</dt><dd>{{ 'Sim' if i.obra_concluida else 'Não' }}</dd>
+  {% if i.pendentes %}<dt>Pendente</dt><dd>{{ i.pendentes }}</dd>{% endif %}
+  {% if i.aguarda_peca %}<dt>Peça</dt><dd>{% if i.peca_recebida_em %}recebida a {{ i.peca_recebida_em|data_pt }}{% else %}
+    <form class="inline" method="post" action="/erp/relatorios/{{ i.numero }}/peca"><input type="date" name="dia" value="{{ hoje.isoformat() }}" style="width:auto" aria-label="Dia em que a peça chegou"> <button class="bt peq ok">Peça chegou</button></form>{% endif %}</dd>{% endif %}
+  {% if i.proxima_visita %}<dt>Próxima visita</dt><dd>até {{ i.proxima_visita|data_pt }}</dd>{% endif %}
+</dl>
+</section>
+</div>
+<h2>Intervenção</h2>
+<div class="cartao"><p style="white-space:pre-line;margin:0">{{ i.descricao }}</p>
+{% if r.recomendacoes %}<h3>Recomendações</h3><p style="white-space:pre-line;margin:0">{{ r.recomendacoes }}</p>{% endif %}
+{% if r.observacoes %}<h3>Observações do técnico</h3><p style="white-space:pre-line;margin:0">{{ r.observacoes }}</p>{% endif %}</div>
+{% set eqs = r.equipamentos|equipamentos %}
+{% if eqs %}<h2>Equipamento</h2>
+<div class="tw"><table><thead><tr><th>Categoria</th><th>Marca / modelo</th><th>N.º de série</th><th>Localização</th><th>Gás · carga</th></tr></thead><tbody>
+{% for e in eqs %}<tr><td>{{ e.categoria }}</td><td>{{ [e.marca, e.modelo]|select|join(' ') }}</td><td>{{ e.serie }}</td><td>{{ e.localizacao }}</td><td>{{ e.refrigerante_outro if e.refrigerante == 'Outro' else e.refrigerante }}{% if e.carga_kg %} · {{ e.carga_kg }} kg{% endif %}</td></tr>{% endfor %}
+</tbody></table></div>{% endif %}
+{% if i.houve_gas %}<h2>Gases fluorados</h2>
+<div class="cartao"><dl class="dados">
+  <dt>Refrigerante</dt><dd>{{ i.refrigerante or '—' }}</dd>
+  <dt>Motivo</dt><dd>{{ f.motivo or '—' }}</dd>
+  <dt>Verificação de fugas</dt><dd>{{ {'sem_fuga': 'Efetuada, sem fuga', 'fuga': 'Efetuada, fuga detetada', 'nao': 'Não efetuada'}.get(f.verificacao, '—') }}{% if f.fuga_local %} · {{ f.fuga_local }}{% endif %}</dd>
+  <dt>Adicionado</dt><dd>{{ i.gas_adicionado_kg|num or '0' }} kg{% if f.origem %} ({{ f.origem }}){% endif %}</dd>
+  <dt>Recuperado</dt><dd>{{ i.gas_recuperado_kg|num or '0' }} kg{% if f.destino_rec %} · {{ f.destino_rec }}{% endif %}</dd>
+  {% if f.tecnico_cert %}<dt>Certificado do técnico</dt><dd>{{ f.tecnico_cert }}</dd>{% endif %}
+</dl><p class="sub">O registo completo (art. 7.º do Reg. (UE) 2024/573) está na folha impressa pela app.</p></div>{% endif %}
+{% if r.materiais %}<h2>Materiais</h2>
+<div class="tw"><table><thead><tr><th>Designação</th><th>Origem</th><th class="n">Qtd.</th><th>Un.</th></tr></thead><tbody>
+{% for m in r.materiais %}<tr><td>{{ m.designacao }}{% if m.garantia %} <span class="sub">(garantia)</span>{% endif %}</td><td>{{ m.origem }}</td><td class="n">{{ m.qty }}</td><td>{{ m.unidade }}</td></tr>{% endfor %}
+</tbody></table></div>{% endif %}
+<h2>Validação</h2>
+<div class="grelha">
+<section class="cartao"><h3 style="margin-top:0">Técnico responsável</h3>
+  {% if r.assinatura_tecnico and (r.assinatura_tecnico.png or '').startswith('data:image/') %}<img class="assinatura-img" src="{{ r.assinatura_tecnico.png }}" alt="Assinatura do técnico">{% endif %}
+  <p>{{ (r.tecnico or {}).nome }}{% if r.assinatura_tecnico %}<span class="sub bl">assinado a {{ (r.assinatura_tecnico.datahora or '')[:16]|replace('T', ' ') }}</span>{% endif %}</p></section>
+<section class="cartao"><h3 style="margin-top:0">Cliente</h3>
+  {% set a = r.aceitacao %}
+  {% if a and (a.png or '').startswith('data:image/') %}<img class="assinatura-img" src="{{ a.png }}" alt="Assinatura do cliente">{% endif %}
+  <p>{% if a %}{{ a.nome }}{% if a.qualidade %} · {{ a.qualidade }}{% endif %}<span class="sub bl">{{ i.nome_estado }}{% if a.motivo %}: {{ a.motivo }}{% endif %}</span>{% else %}<span class="sub">Ainda sem validação do cliente.</span>{% endif %}</p></section>
+</div>
+{% if r.fotos %}<p class="sub">{{ r.fotos|length }} fotografia(s): estão na folha impressa (Ver e imprimir).</p>{% endif %}
+<p class="sub">Recebido a {{ i.importado_em.strftime('%d/%m/%Y %H:%M') }}{% if i.atualizado_em != i.importado_em %}, atualizado a {{ i.atualizado_em.strftime('%d/%m/%Y %H:%M') }}{% endif %}{% if i.hash %} · ref. {{ i.hash[:12] }}{% endif %}</p>
+{% endblock %}

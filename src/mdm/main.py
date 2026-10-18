@@ -9,6 +9,8 @@ from fastapi.staticfiles import StaticFiles
 
 from mdm.config import get_settings
 from mdm.db import get_sessionmaker
+from mdm.erp.routes import STATIC_DIR as ERP_STATIC_DIR
+from mdm.erp.routes import router as erp_router
 from mdm.web.routes import router
 from mdm.workers.poller import start_scheduler
 
@@ -31,7 +33,7 @@ async def lifespan(app: FastAPI):
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="MDM — Email Tickets", lifespan=lifespan)
+    app = FastAPI(title="MDM — Email Tickets e ERP", lifespan=lifespan)
     # The electric simulator is a standalone static app at the repo root;
     # serve it under /simulator when running from a source checkout.
     simulator_dir = Path(__file__).resolve().parents[2] / "electric-simulator"
@@ -41,7 +43,9 @@ def create_app() -> FastAPI:
             StaticFiles(directory=str(simulator_dir), html=True),
             name="simulator",
         )
+    app.mount("/erp/static", StaticFiles(directory=str(ERP_STATIC_DIR)), name="erp-static")
     app.include_router(router)
+    app.include_router(erp_router)
     return app
 
 

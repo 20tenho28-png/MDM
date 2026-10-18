@@ -1,0 +1,41 @@
+{% extends "erp/base.html" %}{% from "erp/_macros.html" import prio, estado %}
+{% block titulo %}Visita {{ ref_visita(visita) }}{% endblock %}
+{% block corpo %}
+{% set v = visita %}
+<div class="cab"><div><div class="eyebrow">Visita {{ ref_visita(v) }} · {{ v.nome_tipo }}</div>
+<h1><a href="/erp/clientes/{{ v.cliente.id }}" style="color:inherit;text-decoration:none">{{ v.cliente.nome }}</a> {{ prio(v.prioridade) }}</h1>
+<p class="meta">{{ estado(v) }} {% if v.inicio %}{{ DIAS_SEMANA[v.inicio.weekday()] }}, {{ v.inicio|data_pt }} das {{ v.inicio|hora }}{% if v.fim %} às {{ v.fim|hora }}{% endif %}{% endif %}{% if v.tecnico %} · {{ v.tecnico.nome }}{% endif %}</p></div>
+<div class="acoes">
+  {% if v.estado in ('por_marcar', 'marcada') %}
+  <a class="bt" href="/erp/ri?visita={{ v.id }}">Fazer o relatório na app</a>
+  <a class="bt sec" href="/erp/visitas/{{ v.id }}?editar=1">{{ 'Marcar' if v.estado == 'por_marcar' else 'Remarcar / editar' }}</a>
+  {% endif %}
+</div></div>
+<div class="grelha" style="margin-top:14px">
+<section class="cartao"><h2>Detalhes</h2><dl class="dados">
+  <dt>Morada</dt><dd>{% if v.morada %}<a href="https://www.google.com/maps/search/?api=1&query={{ v.morada|urlencode }}" rel="noopener" target="_blank">{{ v.morada }}</a>{% else %}—{% endif %}</dd>
+  <dt>Telefone</dt><dd>{% if v.cliente.telefone %}<a href="tel:{{ v.cliente.telefone|replace(' ', '') }}">{{ v.cliente.telefone }}</a>{% else %}—{% endif %}</dd>
+  <dt>Referência</dt><dd>{{ v.referencia or '—' }}</dd>
+  <dt>A fazer</dt><dd>{{ v.descricao or '—' }}</dd>
+  {% if anterior %}<dt>Continua</dt><dd><a href="/erp/visitas/{{ anterior.id }}">{{ ref_visita(anterior) }}</a> de {{ (anterior.inicio or anterior.criada_em)|data_pt }}</dd>{% endif %}
+  {% if v.motivo_cancelamento %}<dt>Cancelada</dt><dd>{{ v.motivo_cancelamento }}</dd>{% endif %}
+</dl></section>
+<section class="cartao"><h2>Relatório de intervenção</h2>
+  {% for r in v.relatorios %}<p><a href="/erp/relatorios/{{ r.numero }}"><b>{{ r.numero }}</b></a> · {{ r.data|data_pt }} · {{ r.nome_estado }}<span class="sub bl">{{ r.nome_resultado }}{% if r.pendentes %}: {{ r.pendentes }}{% endif %}</span></p>
+  {% else %}<p class="sub">Ainda não chegou. No telemóvel, «Fazer o relatório na app» começa o relatório já com o cliente, a morada e a ref. interna <b>{{ ref_visita(v) }}</b>.
+  Se o técnico o fizer de outra forma, basta escrever <b>{{ ref_visita(v) }}</b> em «Ref. interna / folha de obra».</p>{% endfor %}
+</section>
+<section class="cartao"><h2>Linha do tempo</h2><dl class="dados">
+  <dt>Criada</dt><dd>{{ v.criada_em.strftime('%d/%m/%Y %H:%M') }}</dd>
+  <dt>Marcada</dt><dd>{{ v.marcada_em.strftime('%d/%m/%Y %H:%M') if v.marcada_em else '—' }}</dd>
+  <dt>Feita</dt><dd>{{ v.feita_em.strftime('%d/%m/%Y %H:%M') if v.feita_em else '—' }}</dd>
+  {% if v.cancelada_em %}<dt>Cancelada</dt><dd>{{ v.cancelada_em.strftime('%d/%m/%Y %H:%M') }}</dd>{% endif %}
+</dl>
+{% if v.estado in ('por_marcar', 'marcada') and not v.relatorios %}
+<details style="margin-top:10px"><summary>Cancelar a visita</summary>
+<form method="post" action="/erp/visitas/{{ v.id }}/cancelar" class="ficha" style="margin-top:8px">
+<label>Motivo<input name="motivo" required placeholder="Cliente desmarcou, resolvido por telefone..."></label>
+<div class="acoes"><button class="bt perigo">Cancelar visita</button></div></form></details>{% endif %}
+</section>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "erp/base.html" %}
+{% block titulo %}Técnicos{% endblock %}
+{% block corpo %}
+<div class="cab"><div><div class="eyebrow">Equipa</div><h1>Técnicos</h1>
+<p class="meta">Para atribuir visitas e filtrar a agenda. Os relatórios trazem o nome que cada técnico pôs nas definições da app.</p></div></div>
+<div class="tw" style="margin-top:14px"><table><thead><tr><th>Nome</th><th>Telefone</th><th>Estado</th><th></th></tr></thead><tbody>
+{% for t in tecnicos %}<tr><td><b>{{ t.nome }}</b></td><td>{{ t.telefone }}</td><td>{{ 'Ativo' if t.ativo else 'Inativo' }}</td>
+<td class="n"><a class="bt peq sec" href="/erp/agenda?tecnico={{ t.id }}">Agenda</a>
+<form class="inline" method="post" action="/erp/tecnicos/{{ t.id }}/ativo"><button class="bt peq sec">{{ 'Desativar' if t.ativo else 'Ativar' }}</button></form></td></tr>
+{% else %}<tr><td colspan="4" class="vazio">Ainda não há técnicos.</td></tr>{% endfor %}
+</tbody></table></div>
+<h2>Acrescentar técnico</h2>
+<form class="ficha" method="post" action="/erp/tecnicos"><fieldset><legend>Técnico</legend><div class="campos">
+  <label>Nome *<input name="nome" required maxlength="120"></label>
+  <label>Telemóvel<input name="telefone" type="tel" inputmode="tel"></label>
+</div></fieldset><div class="acoes"><button class="bt">Acrescentar</button></div></form>
+{% endblock %}
