@@ -7,7 +7,7 @@ from pathlib import Path
 from .caracteristicas import NOMES_TIPO
 from .relatorio import _CSS, _tabela, esc, num, pct
 from .saidas import _escrever, _n
-from .sombra import CLASSES, ESTADOS, POR_CHAVE, POR_MEDIR, SIMULAVEIS, Estado, Sombra
+from .sombra import CLASSES, POR_CHAVE, SIMULAVEIS, Estado, Sombra
 
 _UNIDADE = {"horas úteis": "h úteis", "dias úteis": "dias úteis", "dias": "dias"}
 
@@ -68,9 +68,20 @@ def _resumo(s: Sombra) -> list[str]:
     return frases
 
 
+def _visitas(s: Sombra) -> str:
+    if s.por_medir:
+        return ('<p class="nota">Sem a agenda do ERP, a visita conta dentro de «Orçamento por fazer» (antes do '
+                'orçamento) ou de «Em execução» (depois do sim). Para medir as visitas e a espera de peças, exporta a '
+                'agenda do ERP (<code>/erp/exportar/agenda.csv</code>) para <code>dados/agenda/</code>.</p>')
+    return ('<p class="nota">Com a agenda do ERP: a visita conta por marcar desde que o cliente espera por ela (o '
+            'início de «Orçamento por fazer» ou de «Em execução») até ter dia, marcada até chegar o relatório de '
+            'intervenção, e à espera de peça desde a visita que a pediu até a peça chegar. Depois da última visita, '
+            '«Orçamento por fazer» é o tempo até o orçamento seguir e «Em execução» o tempo até à fatura.</p>')
+
+
 def _prazos(s: Sombra) -> str:
     linhas = []
-    for est in ESTADOS:
+    for est in s.estados:
         celulas = []
         for c in CLASSES:
             v = s.prazos[(est.chave, c)]
@@ -78,14 +89,14 @@ def _prazos(s: Sombra) -> str:
             de_onde = "configuração" if origem == "configuração" else s.fonte[(est.chave, c)]
             celulas.append(f"{_v(est, v)}<span class=\"sub bl\">{esc(de_onde)}</span>")
         linhas.append([esc(est.nome), esc(est.bola)] + celulas)
-    for est, falta in POR_MEDIR:
-        linhas.append([esc(est.nome), esc(est.bola), f"<span class=\"vazio\">precisa de {esc(falta)}</span>", "", ""])
+    for est, falta in s.por_medir:
+        linhas.append([esc(est.nome), esc(est.bola), f"<span class=\"vazio\">precisa {esc(falta)}</span>", "", ""])
     return _tabela(["Estado", "Bola com", "P1", "P2", "P3"], linhas)
 
 
 def _tempos(s: Sombra) -> str:
     linhas = []
-    for est in ESTADOS:
+    for est in s.estados:
         grupos = ["todos"] + list(CLASSES) + sorted(g for (e, g) in s.tabela if e == est.chave and g.startswith("tipo:"))
         for g in grupos:
             t = s.tabela.get((est.chave, g))
@@ -113,7 +124,7 @@ def _ordem(s: Sombra) -> str:
 
 def _fora(s: Sombra) -> str:
     linhas = []
-    for est in ESTADOS:
+    for est in s.estados:
         for c in CLASSES:
             f = s.replay["fora"].get((est.chave, c))
             if not f:
@@ -141,7 +152,7 @@ def _cenarios(s: Sombra) -> str:
 
 def _paciencia(s: Sombra) -> str:
     linhas = []
-    for est in ESTADOS:
+    for est in s.estados:
         p = s.paciencia.get(est.chave)
         if not p:
             continue
@@ -202,6 +213,7 @@ orçamentar conta o tempo que o P teria tido se a mesma equipa trabalhasse pela 
 nunca passa do momento em que {fr}% dos clientes já cobraram. O P1 nunca tem mais tempo do que o P2, nem o P2 do que o P3.
 Na espera do cliente, o prazo é o primeiro seguimento: quando metade dos clientes já decidiu (p{round(s.config.get('percentil_seguimento', 0.5) * 100)} do tempo de decisão). Com menos de {s.config['minimo_casos']} casos de um P num estado, não há proposta: o prazo define-se à mão. Horas úteis: das {cal['hora_inicio']}h às {cal['hora_fim']}h, em dias
 úteis, sem feriados.</p>
+{_visitas(s)}
 {_prazos(s)}
 
 <h2>O vermelho é útil?</h2>
@@ -252,9 +264,10 @@ saida/sombra_cenarios.csv, saida/sombra_little.csv e saida/sombra_tempos.csv.</f
 def toml_prazos(s: Sombra) -> str:
     linhas = [f"# Prazos propostos pelo modo sombra com os dados até {s.hoje:%d/%m/%Y}.",
               "# Depois de validar, copia esta secção para o config.toml e corre de novo: python -m funil sombra",
-              "# Unidades: novo em horas úteis; espera_cliente em dias de calendário; os outros em dias úteis.",
+              "# Unidades: novo em horas úteis; espera_cliente em dias de calendário; os outros (também as visitas e a",
+              "# espera de peça) em dias úteis.",
               "[prazos]"]
-    for est in ESTADOS:
+    for est in s.estados:
         vals = [(c, s.propostos.get((est.chave, c))) for c in CLASSES]
         com = [(c, v) for c, v in vals if v is not None]
         sem = [c for c, v in vals if v is None]
@@ -263,16 +276,17 @@ def toml_prazos(s: Sombra) -> str:
             linhas.append(f"{est.chave} = {{ " + ", ".join(f"{c} = {v:g}" for c, v in com) + " }" + nota)
         else:
             linhas.append(f"# {est.chave}: poucos casos para propor; escreve os valores à mão")
-    linhas.append("# Ainda sem dados para propor:")
-    for est, falta in POR_MEDIR:
-        linhas.append(f"# {est.chave} = {{ P1 = 0, P2 = 0, P3 = 0 }}   (precisa de {falta})")
+    if s.por_medir:
+        linhas.append("# Ainda sem dados para propor:")
+    for est, falta in s.por_medir:
+        linhas.append(f"# {est.chave} = {{ P1 = 0, P2 = 0, P3 = 0 }}   (precisa {falta})")
     return "\n".join(linhas) + "\n"
 
 
 def escrever_sombra(s: Sombra, pasta: Path) -> list[Path]:
     pasta.mkdir(parents=True, exist_ok=True)
     linhas = []
-    for est in ESTADOS:
+    for est in s.estados:
         for c in CLASSES:
             f = s.replay["fora"].get((est.chave, c)) or {}
             g = s.simulado.get((est.chave, c)) or {}

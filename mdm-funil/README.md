@@ -39,6 +39,7 @@ funil-mdm/
     orc/               ficheiros ORC0034_2026 Nome do cliente.xlsx (podem estar em subpastas)
     faturas/           lista de faturas (.csv ou .xlsx)
     site/              exportação do formulário do site (.csv ou .json)
+    agenda/            agenda do ERP (.csv), opcional: as visitas e as peças para o modo sombra
 ```
 
 Como obter cada ficheiro sem pagar nada:
@@ -53,6 +54,7 @@ Como obter cada ficheiro sem pagar nada:
 | Orçamentos | Copia a pasta dos ORC. O nome tem de começar por `ORC0034_2026`. |
 | Faturas | Exporta a lista de documentos do programa de faturação (data, número, cliente, NIF, valor sem IVA, descrição e, se houver, tipo de documento) e ajusta os nomes das colunas em `[faturas]`. |
 | Site | Supabase, Table Editor, a tabela dos pedidos, Export to CSV. |
+| Agenda do ERP | No ERP (`/erp`), «exportar a agenda para o funil» no rodapé, ou `/erp/exportar/agenda.csv`. Uma linha por visita, com o relatório de intervenção que a fechou. Põe o ficheiro em `dados/agenda/` (o mais recente basta: tem a agenda toda). |
 
 Três hábitos que tornam a análise muito mais certa, sem trabalho extra:
 
@@ -126,7 +128,8 @@ enviam email e ajuda a escolher os fornecedores e serviços a pôr em `dominios_
    fazer, à espera do cliente, em execução) e propõe um prazo por estado e P: o p80 do tempo de cada P, com a ordem
    por P simulada ao responder e ao orçamentar (os mesmos pedidos, despachados nos mesmos momentos, o de P mais alto
    primeiro), e nunca depois do momento em que 1 em cada 5 clientes já cobrou ("então, já viram?"). Na espera do
-   cliente, o prazo é o primeiro seguimento: quando metade dos clientes já decidiu. Mostra quantos
+   cliente, o prazo é o primeiro seguimento: quando metade dos clientes já decidiu. Com a agenda do ERP em
+   `dados/agenda/`, mede também a visita por marcar, a visita marcada e a espera de peça/fornecedor. Mostra quantos
    pedidos teriam ficado vermelhos, se os perdidos e os clientes que cobraram teriam ficado vermelhos a tempo, os
    vermelhos por manhã e se os prazos cabem na capacidade (lei de Little). Para ajustar, copia
    `saida/prazos_propostos.toml` para o `config.toml`, muda os números e corre outra vez, até o vermelho ser raro e
@@ -151,15 +154,16 @@ enviam email e ajuda a escolher os fornecedores e serviços a pôr em `dominios_
 
 ## Como se sabe que está certo
 
-- `python -m pytest` corre 156 testes. Um deles gera um ano de pedidos inventados com a verdade guardada e com as
+- `python -m pytest` corre 161 testes. Um deles gera um ano de pedidos inventados com a verdade guardada e com as
   armadilhas do dia a dia (técnico e arquiteto nos emails, férias com resposta automática, saudação do WhatsApp
   Business, rascunhos, recibos, pró-formas e notas de crédito, datas escritas como texto) e confirma que o funil
   recupera a verdade: todos os pedidos encontrados, tempos de resposta exatos, orçamentos, valores, aceitações e
   recusas certos, e o efeito real da demora dentro do intervalo que o modelo calcula. Os outros testes reproduzem,
   um a um, os erros encontrados em duas revisões independentes (grupos de WhatsApp, emails com várias pessoas,
   negociações, frases de decisão, ficheiros estragados e outros). Os do modo sombra confirmam as contas do relógio
-  (horas e dias úteis com feriados), a simulação da ordem por P, a lei de Little numa fila conhecida e a deteção das
-  cobranças dos clientes (no mundo de exemplo, todas encontradas e nenhuma a mais).
+  (horas e dias úteis com feriados), a simulação da ordem por P, a lei de Little numa fila conhecida, a deteção das
+  cobranças dos clientes (no mundo de exemplo, todas encontradas e nenhuma a mais) e a divisão dos estados pelas
+  visitas da agenda do ERP (o mundo de exemplo também tem agenda, com peças encomendadas entre duas visitas).
 - Com os teus dados, a prova vem de fora do funil: as **faturas** dizem o que foi ganho, o **registo de chamadas** diz
   quantas chamadas ficaram por atender, o **chefe às cegas** (kappa) diz se as regras são claras, o **teste em dados
   retidos** diz se as regras acertam em pedidos novos, e o **gráfico semanal** depois da mudança diz se ela resultou.
@@ -180,9 +184,12 @@ enviam email e ajuda a escolher os fornecedores e serviços a pôr em `dominios_
   ficam para confirmares em `revisao/pedidos.csv`; um ganho com fatura conta sempre, mesmo sem frase.
 - A relação entre rapidez e ganhos é observada, não provada: se respondem mais depressa aos pedidos bons, o efeito
   parece maior do que é. A mudança medida semana a semana é o teste que tira a dúvida.
-- O modo sombra mede quatro estados. Visita por marcar, visita marcada e à espera de peça/fornecedor precisam do
-  calendário de visitas, das folhas de obra e dos emails de compras, que o funil ainda não lê; até lá, a visita fica
-  dentro de "orçamento por fazer" ou de "em execução".
+- Sem a agenda do ERP, o modo sombra mede quatro estados e a visita fica dentro de "orçamento por fazer" ou de "em
+  execução". Com ela, a visita conta por marcar desde que o cliente espera por ela (o início de "orçamento por fazer"
+  ou de "em execução") até ter dia, marcada até chegar o relatório de intervenção, e à espera de peça desde a visita
+  que a pediu até o escritório registar que a peça chegou. A visita liga-se ao pedido pelo número ORC (campo
+  «Referência» da visita) ou, sem ele, pelo cliente, se houver contacto nos 60 dias antes; as outras ficam de fora
+  e são contadas no relatório. As visitas não são contactos: não mudam a primeira resposta nem os resultados.
 - A simulação da ordem por P supõe que a MDM teria despachado nos mesmos momentos e que um orçamento vale outro. É uma
   estimativa do que a capacidade permite, não uma promessa; a prova é o gráfico semanal depois da mudança.
 - Os seguimentos da MDM (voltar a contactar um cliente que não respondeu) contam-se pelas mensagens enviadas. Uma

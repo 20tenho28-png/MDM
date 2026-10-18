@@ -156,6 +156,7 @@ class Mundo:
         self.rng = random.Random(semente)
         self.ruido = random.Random(semente + 1000)   # só para as armadilhas, para não mudar o resto do mundo
         self.cobra = random.Random(semente + 2000)   # só para as cobranças dos clientes, pela mesma razão
+        self.visitas = random.Random(semente + 3000)  # só para a agenda do ERP, pela mesma razão
         self.cal = Calendario(feriados_extra=["06-13"])
         self.inicio, self.fim, self.hoje, self.por_semana = inicio, fim, hoje, por_semana
         self.clientes: list[Cliente] = []
@@ -309,7 +310,7 @@ class Mundo:
     def escrever(self, destino: Path) -> None:
         destino = Path(destino)
         dados = destino / "dados"
-        for sub in ("email", "whatsapp", "chamadas", "orc", "faturas", "site"):
+        for sub in ("email", "whatsapp", "chamadas", "orc", "faturas", "site", "agenda"):
             (dados / sub).mkdir(parents=True, exist_ok=True)
         visiveis = [v for v in self.pedidos]
         self._escrever_emails(dados / "email" / "Todo o correio, incluindo Spam e Lixo.mbox", visiveis)
@@ -318,6 +319,7 @@ class Mundo:
         self._escrever_site(dados / "site" / "pedidos_site.csv", visiveis)
         self._escrever_orcamentos(dados / "orc", visiveis)
         self._escrever_faturas(dados / "faturas" / "faturas.csv", visiveis)
+        self._escrever_agenda(dados / "agenda" / "agenda.csv", visiveis)
         self._escrever_config(destino / "config.toml")
         self._escrever_verdade(destino / "verdade.csv")
 
@@ -630,6 +632,88 @@ class Mundo:
                                    _pt(round(v.valor * 0.1, 2)), f"Desconto sobre a {ft}", ""])
             for linha in outros:
                 w.writerow(linha)
+
+    def _escrever_agenda(self, caminho: Path, pedidos: list[Verdade]) -> None:
+        """A exportação da agenda do ERP: visitas para orçamentar (instalações e obras) e visitas de execução, algumas
+        à espera de uma peça entre duas visitas."""
+        rng, agora = self.visitas, datetime.combine(self.hoje, time(23, 59), tzinfo=LX)
+        linhas: list[dict] = []
+
+        def ate_hoje(x: datetime | None) -> datetime | None:
+            return x if x is not None and x <= agora else None
+
+        def visita(v: Verdade, tipo: str, criada: datetime, marcada: datetime | None, inicio: datetime | None,
+                   feita: datetime | None, referencia: str = "", anterior: str = "", resultado: str = "concluida",
+                   encomenda: date | None = None, chegada: date | None = None) -> str:
+            if criada > agora:
+                return ""
+            if marcada is not None and inicio is not None and marcada > inicio - timedelta(hours=1):
+                marcada = max(criada, inicio - timedelta(hours=1))   # marcada num fim de semana para segunda
+            marcada, feita = ate_hoje(marcada), ate_hoje(feita)
+            numero = str(len(linhas) + 1)
+            c = v.cliente
+            fmt = lambda x: x.strftime("%Y-%m-%d %H:%M:%S") if x else ""   # noqa: E731
+            linhas.append({
+                "visita": numero, "anterior": anterior, "cliente": c.nome, "telefone": _tel_txt(c.tel),
+                "email": c.email or "", "nif": c.nif, "referencia": referencia, "tipo_trabalho": tipo,
+                "prioridade": "", "tecnico": rng.choice(["Abdul", "Leonardo", "Rui"]),
+                "estado": "feita" if feita else ("marcada" if marcada else "por_marcar"),
+                "criada_em": fmt(criada), "marcada_em": fmt(marcada), "inicio": fmt(inicio if marcada else None),
+                "fim": fmt(inicio + timedelta(hours=2) if marcada and inicio else None), "feita_em": fmt(feita),
+                "cancelada_em": "", "relatorio": f"RI-{feita:%Y}-EX-{numero.zfill(4)}" if feita else "",
+                "resultado": resultado if feita else "",
+                "peca_encomendada_em": encomenda.isoformat() if feita and encomenda else "",
+                "peca_recebida_em": chegada.isoformat() if feita and chegada and chegada <= self.hoje else ""})
+            return numero
+
+        def as_horas(dia: date, hora: int) -> datetime:
+            return datetime.combine(dia, time(hora), tzinfo=LX)
+
+        def entre(a: datetime, b: datetime, lo: float, hi: float) -> datetime:
+            """Um momento em horas úteis entre a e b (a marcação faz-se no escritório)."""
+            return _minuto(self.cal.somar_horas_uteis(a, self.cal.horas_uteis(a, b) * rng.uniform(lo, hi)))
+
+        for v in sorted(pedidos, key=lambda v: v.t_contacto):
+            # Visita para orçamentar: entra na agenda quando a MDM responde e acontece antes de o orçamento seguir.
+            if v.tipo in ("instalacao", "obra") and v.t_resposta and v.t_envio \
+                    and v.t_envio - v.t_resposta >= timedelta(days=2) and rng.random() < 0.7:
+                criada = _minuto(v.t_resposta + timedelta(minutes=10))
+                vao = v.t_envio - criada
+                inicio = as_horas((criada + vao * rng.uniform(0.45, 0.75)).date(), rng.choice([10, 14]))
+                if criada < inicio < v.t_envio - timedelta(hours=1):
+                    marcada = entre(criada, inicio, 0.05, 0.4)
+                    visita(v, "avaliacao", criada, marcada, inicio, inicio + timedelta(hours=1))
+            # Visita de execução: entra na agenda com o sim; o trabalho acaba no dia da fatura.
+            if not (v.ganho and v.t_aceite and v.t_fatura):
+                continue
+            criada = _minuto(v.t_aceite + timedelta(minutes=15))
+            inicio = as_horas(v.t_fatura.date(), 9 if v.tipo in ("instalacao", "obra") else rng.choice([9, 14]))
+            feita = inicio + timedelta(hours={"avaria": 2, "manutencao": 2, "instalacao": 6, "obra": 7}[v.tipo])
+            if inicio <= criada:
+                continue
+            tipo = "instalacao" if v.tipo == "instalacao" else v.tipo
+            if v.tipo in ("avaria", "instalacao") and inicio - criada >= timedelta(days=8) and rng.random() < 0.5:
+                # Primeira visita sem a peça: fica à espera do fornecedor e volta quando ela chega.
+                inicio1 = as_horas((criada + timedelta(days=rng.randint(1, 3))).date(), 10)
+                feita1 = inicio1 + timedelta(hours=2)
+                chegada = (feita1 + timedelta(days=rng.randint(2, max(2, min(12, (inicio - feita1).days - 2))))).date()
+                if chegada >= inicio.date():
+                    chegada = (inicio - timedelta(days=1)).date()
+                marcada1 = entre(criada, inicio1, 0.1, 0.5)
+                primeira = visita(v, tipo, criada, marcada1, inicio1, feita1, v.orc, resultado="pendente_peca",
+                                  encomenda=feita1.date(), chegada=chegada)
+                if primeira and feita1 <= agora:
+                    marcada2 = entre(as_horas(chegada, 16), inicio, 0.0, 0.3)
+                    visita(v, tipo, _minuto(feita1 + timedelta(minutes=5)), min(marcada2, inicio - timedelta(hours=1)),
+                           inicio, feita, v.orc, anterior=primeira)
+                continue
+            marcada = entre(criada, inicio, 0.1, 0.5)
+            visita(v, tipo, criada, marcada, inicio, feita, v.orc)
+
+        with open(caminho, "w", newline="", encoding="utf-8-sig") as f:
+            w = csv.DictWriter(f, fieldnames=list(linhas[0]) if linhas else ["visita"], delimiter=";")
+            w.writeheader()
+            w.writerows(linhas)
 
     def _escrever_config(self, caminho: Path) -> None:
         caminho.write_text(f"""# Configuração do mundo de exemplo (dados inventados).

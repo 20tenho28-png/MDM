@@ -57,3 +57,7 @@ data_mudanca = ""
 # orcamento_por_fazer = { P1 = 2, P2 = 3, P3 = 6 }
 # espera_cliente = { P1 = 7, P2 = 14, P3 = 21 }
 # em_execucao = { P1 = 5, P2 = 20, P3 = 30 }
+# Com a agenda do ERP em dados/agenda/ (dias úteis):
+# visita_por_marcar = { P1 = 1, P2 = 2, P3 = 5 }
+# visita_marcada = { P1 = 2, P2 = 5, P3 = 10 }
+# espera_fornecedor = { P1 = 5, P2 = 10, P3 = 15 }

@@ -1,8 +1,8 @@
 """Modo sombra: aplica as regras de estados e prazos ao histórico, antes de as usar no dia a dia.
 
-Os estados vêm dos pedidos reconstruídos pelo funil. Sem calendário de visitas, folhas de obra nem emails de compras,
-a visita fica dentro de "orçamento por fazer" (antes do orçamento) ou de "em execução" (depois do sim), e a espera de
-peças dentro de "em execução". Quando esses dados existirem, os estados separam-se.
+Os estados vêm dos pedidos reconstruídos pelo funil. Sem a agenda do ERP (dados/agenda/), a visita fica dentro de
+"orçamento por fazer" (antes do orçamento) ou de "em execução" (depois do sim), e a espera de peças dentro de "em
+execução". Com a agenda, os estados separam-se: visita por marcar, visita marcada e à espera de peça/fornecedor.
 
 Responde a três perguntas, por esta ordem:
 1. Quanto tempo fica hoje cada pedido em cada estado (percentis por P e por tipo de trabalho)?
@@ -49,14 +49,20 @@ ESTADOS = (
     Estado("espera_cliente", "À espera do cliente", "cliente", "dias"),
     Estado("em_execucao", "Em execução", "MDM", "dias úteis"),
 )
-# Os que precisam de dados que o funil ainda não lê.
-POR_MEDIR = (
-    (Estado("visita_por_marcar", "Visita por marcar", "MDM", "dias úteis"), "calendário de visitas"),
-    (Estado("visita_marcada", "Visita marcada", "MDM", "dias úteis"), "calendário de visitas e folhas de obra"),
-    (Estado("espera_fornecedor", "À espera de peça/fornecedor", "fornecedor", "dias úteis"),
-     "emails de compras a fornecedores"),
+# Os que a agenda do ERP permite medir (visitas, relatórios de intervenção e peças encomendadas).
+VISITAS = (
+    Estado("visita_por_marcar", "Visita por marcar", "MDM", "dias úteis"),
+    Estado("visita_marcada", "Visita marcada", "MDM", "dias úteis"),
+    Estado("espera_fornecedor", "À espera de peça/fornecedor", "fornecedor", "dias úteis"),
 )
-POR_CHAVE = {e.chave: e for e in ESTADOS}
+# Sem a agenda: os estados por medir e o que falta para os medir.
+POR_MEDIR = tuple((e, "da agenda do ERP (dados/agenda/)") for e in VISITAS)
+POR_CHAVE = {e.chave: e for e in ESTADOS + VISITAS}
+# Com a agenda, por ordem do caminho de um pedido.
+_ORDEM_COM_VISITAS = ("novo", "visita_por_marcar", "visita_marcada", "orcamento_por_fazer", "espera_cliente",
+                      "em_execucao", "espera_fornecedor")
+# Os estados onde as visitas acontecem: antes do orçamento (visita para orçamentar) e depois do sim (execução).
+COM_VISITAS = ("orcamento_por_fazer", "em_execucao")
 # Estados em que a MDM despacha uma fila: a simulação troca a ordem e mantém os momentos em que a MDM despachou.
 SIMULAVEIS = ("novo", "orcamento_por_fazer")
 
@@ -64,9 +70,78 @@ SIMULAVEIS = ("novo", "orcamento_por_fazer")
 # ---------------------------------------------------------------- estados de cada pedido
 
 
+def tem_agenda(pedidos: list[Pedido]) -> bool:
+    return any(e.fonte == "agenda" for p in pedidos if p.incluir for e in p.eventos)
+
+
+def estados_medidos(pedidos: list[Pedido]) -> tuple[tuple[Estado, ...], tuple]:
+    """(estados a medir, estados por medir com o que falta). Os das visitas só com a agenda do ERP."""
+    if tem_agenda(pedidos):
+        return tuple(POR_CHAVE[k] for k in _ORDEM_COM_VISITAS), ()
+    return ESTADOS, POR_MEDIR
+
+
 def _ultimo(p: Pedido, so_cliente: bool = False) -> datetime | None:
-    ts = [e.ts for e in p.eventos if e.fonte != "orc" and (not so_cliente or e.direcao == "entrada")]
+    ts = [e.ts for e in p.eventos if e.fonte not in ("orc", "agenda") and (not so_cliente or e.direcao == "entrada")]
     return max(ts) if ts else None
+
+
+def fases_visitas(p: Pedido) -> list[tuple[str, datetime, datetime | None]]:
+    """(estado, início, fim ou None) de cada visita do pedido, pela agenda do ERP.
+
+    Por marcar desde que a visita entrou na agenda (ou desde que a peça de que esperava chegou) até ser marcada;
+    marcada até ao relatório de intervenção; à espera de peça desde o fim da visita que a pediu até a peça chegar."""
+    visitas = sorted((e for e in p.eventos if e.fonte == "agenda"), key=lambda e: e.ts)
+    por_numero = {e.numero: e for e in visitas if e.numero}
+    out = []
+    for e in visitas:
+        x = e.extra
+        inicio, feita, marcada = e.ts, x.get("feita_em"), x.get("marcada_em")
+        anterior = por_numero.get(x.get("anterior") or "")
+        if anterior is not None and anterior.extra.get("peca_recebida_em"):
+            inicio = max(inicio, anterior.extra["peca_recebida_em"])
+        if marcada is not None:
+            marcada = max(marcada, inicio)
+            if feita is not None and marcada > feita:
+                marcada = None
+        out.append(("visita_por_marcar", inicio, marcada or feita))
+        if marcada is not None:
+            out.append(("visita_marcada", marcada, feita))
+        if feita is not None and x.get("resultado") == "pendente_peca" and x.get("peca_encomendada_em"):
+            out.append(("espera_fornecedor", feita, x.get("peca_recebida_em")))
+    return [(c, a, b) for c, a, b in out if b is None or b > a]
+
+
+def _com_visitas(base: list, fases: list) -> list:
+    """Os estados de base com as visitas por dentro de «orçamento por fazer» e de «em execução».
+
+    A primeira visita de um estado começa por marcar logo no início dele (o cliente já espera pela visita); entre
+    visitas, e depois da última, o tempo continua no estado de base. Uma visita que não fechou na agenda mas cujo
+    estado de base fechou (o orçamento seguiu, a fatura saiu) acaba com ele."""
+    out = []
+    for chave, a, b, terminou in base:
+        dentro = sorted((f for f in fases if f[1] < b and (f[2] is None or f[2] > a)), key=lambda f: f[1])
+        if chave not in COM_VISITAS or not dentro:
+            out.append((chave, a, b, terminou))
+            continue
+        cursor = a
+        for i, (vchave, va, vb) in enumerate(dentro):
+            va = max(va, cursor)
+            if va >= b:
+                break
+            if va > cursor:
+                out.append(("visita_por_marcar" if i == 0 else chave, cursor, va, True))
+            fim = vb if vb is not None and vb <= b else b
+            acabou = (vb is not None and vb <= b) or terminou
+            if fim > va:
+                if out and i == 0 and out[-1][0] == vchave == "visita_por_marcar" and out[-1][2] == va:
+                    out[-1] = (vchave, out[-1][1], fim, acabou)
+                else:
+                    out.append((vchave, va, fim, acabou))
+            cursor = max(cursor, fim)
+        if cursor < b:
+            out.append((chave, cursor, b, terminou))
+    return out
 
 
 def periodos(p: Pedido, agora: datetime, modo: str = "vivos", dias_parado: int = 30, dias_cliente: int = 120,
@@ -108,6 +183,8 @@ def periodos(p: Pedido, agora: datetime, modo: str = "vivos", dias_parado: int =
     if p.t_aceite:
         fim = p.t_fatura if p.t_fatura and p.t_fatura >= p.t_aceite else None
         out.append(("em_execucao", p.t_aceite, fim or fim_aberto("em_execucao"), fim is not None))
+    if any(e.fonte == "agenda" for e in p.eventos):
+        out = _com_visitas(out, fases_visitas(p))
     return out
 
 
@@ -321,8 +398,8 @@ def _arredondar(est: Estado, v: float | None) -> float | None:
     return max(0.5, math.floor(v * 2 + 0.5) / 2)
 
 
-def propor_prazos(tabela: dict, simulados: dict, pac: dict | None, cfg: dict, percentil: float | None = None
-                  ) -> tuple[dict, dict]:
+def propor_prazos(tabela: dict, simulados: dict, pac: dict | None, cfg: dict, percentil: float | None = None,
+                  estados: tuple[Estado, ...] = ESTADOS) -> tuple[dict, dict]:
     """Prazo de cada estado por P, a partir dos dados. Devolve (prazos, de onde veio cada um).
 
     1. O prazo é o percentil (p80) do tempo desse P no estado: 8 em cada 10 pedidos cumpriam-no.
@@ -339,7 +416,7 @@ def propor_prazos(tabela: dict, simulados: dict, pac: dict | None, cfg: dict, pe
     nome_q = f"p{round(q * 100)}"
     limitar = set(s.get("limitar_pela_paciencia") or [])
     prazos, fonte = {}, {}
-    for est in ESTADOS:
+    for est in estados:
         anterior = None
         q_est = s.get("percentil_seguimento", 0.5) if est.chave == "espera_cliente" else q
         nome_est = f"p{round(q_est * 100)}"
@@ -371,11 +448,11 @@ def propor_prazos(tabela: dict, simulados: dict, pac: dict | None, cfg: dict, pe
     return prazos, fonte
 
 
-def prazos_em_uso(propostos: dict, cfg: dict) -> tuple[dict, dict]:
+def prazos_em_uso(propostos: dict, cfg: dict, estados: tuple[Estado, ...] = ESTADOS) -> tuple[dict, dict]:
     """Os prazos escritos em [prazos] (já validados) por cima dos propostos. Devolve (prazos, origem)."""
     s = cfg.get("prazos", {})
     prazos, origem = {}, {}
-    for est in ESTADOS:
+    for est in estados:
         definidos = s.get(est.chave) or {}
         for c in CLASSES:
             valor = definidos.get(c) if isinstance(definidos, dict) else None
@@ -437,7 +514,7 @@ def replay(pedidos: list[Pedido], cal: Calendario, hoje: date, prazos: dict, cfg
             momento = vence(cal, est, a, prazo)
             if est.bola == "MDM":
                 primeiro = momento if primeiro is None else min(primeiro, momento)
-            else:
+            elif chave == "espera_cliente":
                 # Na espera do cliente o prazo é a data de seguimento: a MDM seguiu depois dela?
                 r["seguimentos_devidos"] += 1
                 r["seguimentos_feitos"] += any(momento <= t <= b for t in saidas)
@@ -528,7 +605,8 @@ def vermelhos_por_manha(pedidos: list[Pedido], cal: Calendario, hoje: date, praz
     return out
 
 
-def little(pedidos: list[Pedido], cal: Calendario, hoje: date, prazos: dict, semanas: int = 26) -> list[dict]:
+def little(pedidos: list[Pedido], cal: Calendario, hoje: date, prazos: dict, semanas: int = 26,
+           estados: tuple[Estado, ...] = ESTADOS) -> list[dict]:
     """Lei de Little (fila média = entradas x tempo médio) em cada estado da MDM, nas últimas semanas.
 
     Se a fila média for maior do que entradas x prazo, o tempo médio já passa o prazo: o prazo não se cumpre sem
@@ -542,7 +620,7 @@ def little(pedidos: list[Pedido], cal: Calendario, hoje: date, prazos: dict, sem
     if dias <= 0:
         return []
     out = []
-    for est in ESTADOS:
+    for est in estados:
         if est.bola != "MDM":
             continue
         filas, entradas, saidas, por_classe = {}, 0, 0, defaultdict(int)
@@ -618,6 +696,8 @@ class Sombra:
     cenarios: list
     envios_por_confirmar: int = 0
     quota: dict | None = None
+    estados: tuple = ESTADOS
+    por_medir: tuple = POR_MEDIR
 
 
 def _quota(pedidos: list[Pedido], cfg: dict) -> dict | None:
@@ -638,14 +718,16 @@ def executar_sombra(r: "Resultado") -> Sombra:
     sim = simulacao(pedidos, cal, hoje, cfg)
     simulados = tempos_simulados(sim, pedidos, cal)
     pac = paciencia(pedidos, cal, hoje, cfg)
-    propostos, fonte = propor_prazos(tabela, simulados, pac, cfg)
-    prazos, origem = prazos_em_uso(propostos, cfg)
+    estados, por_medir = estados_medidos(pedidos)
+    propostos, fonte = propor_prazos(tabela, simulados, pac, cfg, estados=estados)
+    prazos, origem = prazos_em_uso(propostos, cfg, estados)
     q = cfg["prazos"]["percentil"]
     opcoes = []
     for x in sorted({0.5, 0.8, 0.9, q}):
         nome = f"p{round(x * 100)}" + (" (proposta)" if x == q else "")
-        opcoes.append((nome, propor_prazos(tabela, simulados, pac, cfg, x)[0]))
-    opcoes.append((f"p{round(q * 100)} sem o limite da paciência", propor_prazos(tabela, simulados, None, cfg)[0]))
+        opcoes.append((nome, propor_prazos(tabela, simulados, pac, cfg, x, estados)[0]))
+    opcoes.append((f"p{round(q * 100)} sem o limite da paciência",
+                   propor_prazos(tabela, simulados, None, cfg, estados=estados)[0]))
     if any(o == "configuração" for o in origem.values()):
         opcoes.append(("Em uso (configuração)", prazos))
     return Sombra(
@@ -653,8 +735,8 @@ def executar_sombra(r: "Resultado") -> Sombra:
         config=dict(cfg["prazos"]), capacidade=capacidade(pedidos, cal, hoje), tabela=tabela, simulados=simulados,
         paciencia=pac, propostos=propostos, fonte=fonte, prazos=prazos, origem=origem,
         replay=replay(pedidos, cal, hoje, prazos, cfg), simulado=fora_simulado(sim, pedidos, cal, prazos),
-        manha=vermelhos_por_manha(pedidos, cal, hoje, prazos, cfg, sim=sim), little=little(pedidos, cal, hoje, prazos),
+        manha=vermelhos_por_manha(pedidos, cal, hoje, prazos, cfg, sim=sim), little=little(pedidos, cal, hoje, prazos, estados=estados),
         cenarios=cenarios(pedidos, cal, hoje, opcoes, cfg),
         envios_por_confirmar=sum(1 for p in pedidos if p.incluir and p.t_envio and not p.envio_confirmado),
-        quota=_quota(pedidos, cfg),
+        quota=_quota(pedidos, cfg), estados=estados, por_medir=por_medir,
     )

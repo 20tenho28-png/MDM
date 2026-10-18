@@ -11,7 +11,6 @@ from sqlalchemy.orm import selectinload
 
 from mdm.erp.models import (
     PRIORIDADES,
-    RESULTADOS,
     TIPOS_TRABALHO,
     Cliente,
     Equipamento,

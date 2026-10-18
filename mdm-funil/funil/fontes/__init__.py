@@ -8,7 +8,7 @@ from pathlib import Path
 
 from ..datas import LX
 from ..modelo import Evento
-from . import chamadas, correio, faturas, orcamentos, site, whatsapp
+from . import agenda, chamadas, correio, faturas, orcamentos, site, whatsapp
 
 PASTAS = {
     "email": "email",
@@ -17,6 +17,7 @@ PASTAS = {
     "orc": "orc",
     "faturas": "faturas",
     "site": "site",
+    "agenda": "agenda",
 }
 
 DESCRICAO = {
@@ -26,6 +27,7 @@ DESCRICAO = {
     "orc": "Ficheiros de orçamento (ORC)",
     "faturas": "Faturas emitidas",
     "site": "Formulário do site",
+    "agenda": "Agenda do ERP (visitas e relatórios)",
 }
 
 FALTA = {
@@ -36,6 +38,7 @@ FALTA = {
     "orc": "Sem ficheiros ORC: não é possível medir o tempo até ao orçamento nem o seu valor.",
     "faturas": "Sem faturas: os ganhos só são reconhecidos pelas mensagens de aceitação, por isso ficam subestimados.",
     "site": "Sem exportação do formulário do site (ignora se os pedidos do site chegam por email).",
+    "agenda": "Sem agenda do ERP: as visitas ficam dentro de «orçamento por fazer» e de «em execução».",
 }
 
 
@@ -182,13 +185,21 @@ def ler_tudo(pasta_dados: Path, cfg: dict) -> tuple[list[Evento], dict]:
         est["notificações por email"] += len(formulario_email)
     registar("site", fich, evs + formulario_email, est)
 
+    est, evs = Counter(), []
+    fich = _ficheiros(pasta_dados / PASTAS["agenda"], ("*.csv", "*.xlsx"))
+    for f in fich:
+        evs += seguro(agenda.ler_agenda, f, est) or []
+    registar("agenda", fich, evs, est)
+
     evs_email = correio.resolver_destinatarios(evs_email, todos + orcs, est_email)
     registar("email", fich_email, [e for e in evs_email if e.fonte == "email"], est_email)
     orcs = _juntar_orcamentos(_datar_orcamentos(orcs, todos, est_orc))
     registar("orc", fich_orc, orcs, est_orc)
     cobertura = {f: cobertura[f] for f in PASTAS if f in cobertura}
 
-    avisos = [FALTA[f] for f, c in cobertura.items() if c["eventos"] == 0 and not (f == "site" and c["ficheiros"])]
+    # A agenda é opcional (só existe com o ERP): sem ela, quem avisa é o modo sombra.
+    avisos = [FALTA[f] for f, c in cobertura.items()
+              if c["eventos"] == 0 and not (f == "site" and c["ficheiros"]) and f != "agenda"]
     if ilegiveis:
         avisos.append(f"{len(ilegiveis)} ficheiros não foram lidos (estragados ou num formato desconhecido): "
                       + ", ".join(ilegiveis[:10]) + (" e outros." if len(ilegiveis) > 10 else "."))

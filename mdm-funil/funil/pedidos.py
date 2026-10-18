@@ -13,7 +13,10 @@ from .texto import contem, norm, preparado
 
 # Eventos do cliente que podem abrir um pedido.
 INICIO = {"mensagem", "chamada_atendida", "chamada_perdida", "formulario"}
-_ORDEM_FONTE = {"site": 0, "email": 1, "whatsapp": 1, "chamada": 1, "orc": 2, "fatura": 3}
+_ORDEM_FONTE = {"site": 0, "email": 1, "whatsapp": 1, "chamada": 1, "orc": 2, "agenda": 2, "fatura": 3}
+# Documentos e registos internos: não são contactos com o cliente (não contam como última mensagem nem mantêm o
+# pedido vivo).
+NAO_CONTACTO = ("orc", "fatura", "agenda")
 
 
 class _Estado:
@@ -84,6 +87,13 @@ def construir(eventos: list[Evento], cfg: dict, cal: Calendario, hoje: date) -> 
                         alvo = novo(e, None)
                 elif e.fonte == "orc":
                     alvo = atual if atual and e.ts - atual.ultimo <= pausa else novo(e, None)
+                elif e.fonte == "agenda":
+                    # Uma visita do ERP entra no pedido do orçamento que refere ou no pedido em curso do cliente.
+                    if atual and e.ts - atual.ultimo <= pausa:
+                        alvo = atual
+                    else:
+                        contagem["visitas da agenda sem pedido aberto"] += 1
+                        continue
                 elif e.direcao == "entrada" and e.tipo in INICIO:
                     continua = atual is not None and (
                         e.ts - atual.ultimo <= pausa
@@ -100,7 +110,8 @@ def construir(eventos: list[Evento], cfg: dict, cal: Calendario, hoje: date) -> 
                     contagem["contactos da MDM sem pedido aberto"] += 1
                     continue
             alvo.pedido.eventos.append(e)
-            alvo.ultimo = max(alvo.ultimo, e.ts)
+            if e.fonte != "agenda":
+                alvo.ultimo = max(alvo.ultimo, e.ts)
             if e.fonte == "orc":
                 alvo.orcs.add(e.numero)
                 alvo.t_orc = alvo.t_orc or e.ts
@@ -203,12 +214,12 @@ def calcular(p: Pedido, cfg: dict, cal: Calendario, hoje: date) -> None:
         p.resultado = "perdido"
     elif p.t_envio:
         # Conta a partir do último contacto: um cliente que ainda está a falar do orçamento não o deixou cair.
-        ultimo = max([e.ts for e in evs if e.fonte not in ("orc", "fatura") and e.ts >= p.t_envio], default=p.t_envio)
+        ultimo = max([e.ts for e in evs if e.fonte not in NAO_CONTACTO and e.ts >= p.t_envio], default=p.t_envio)
         if agora - ultimo > timedelta(days=pc["dias_decisao"]):
             p.resultado, p.motivo = "perdido", "sem resposta depois do orçamento"
         else:
             p.resultado = "em_aberto"
-    elif agora - max([e.ts for e in evs if e.fonte not in ("orc", "fatura")], default=p.t_inicio) \
+    elif agora - max([e.ts for e in evs if e.fonte not in NAO_CONTACTO], default=p.t_inicio) \
             > timedelta(days=pc["dias_sem_orcamento"]):
         p.resultado = "sem_orcamento"
         p.motivo = "a MDM nunca respondeu" if p.nunca_respondido else "sem orçamento enviado"

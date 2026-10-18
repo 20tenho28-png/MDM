@@ -132,12 +132,12 @@ def _sombra(pasta: Path) -> None:
     from .motor import executar
     from .relatorio import num, pct
     from .relatorio_sombra import escrever_sombra
-    from .sombra import CLASSES, ESTADOS, executar_sombra
+    from .sombra import CLASSES, executar_sombra
     r = executar(pasta)
     s = executar_sombra(r)
     ficheiros = escrever_sombra(s, pasta / "saida")
     print("Prazos (P1 / P2 / P3):")
-    for est in ESTADOS:
+    for est in s.estados:
         vals = " / ".join("–" if s.prazos[(est.chave, c)] is None else num(s.prazos[(est.chave, c)], 1) for c in CLASSES)
         origem = " (da configuração)" if any(s.origem[(est.chave, c)] == "configuração" for c in CLASSES) else ""
         print(f"  {est.nome}: {vals} {est.unidade}{origem}")

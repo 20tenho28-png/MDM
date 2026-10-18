@@ -8,6 +8,7 @@ from datetime import date, timedelta
 from .datas import Calendario, dias_entre, fim_do_dia, segunda
 from .estatistica import media, mediana, quantil, wilson
 from .modelo import Pedido
+from .pedidos import NAO_CONTACTO
 
 CANAIS = {"email": "Email", "whatsapp": "WhatsApp", "chamada": "Telefone", "site": "Site",
           "desconhecido": "Sem registo do contacto"}
@@ -133,7 +134,7 @@ def gargalo(pedidos: list[Pedido], cfg: dict, hoje: date) -> dict:
             itens[ETAPAS[0][0]].append((p.t_contacto, fim, p.t_resposta is not None))
         if p.t_resposta:
             seguinte = min([t for t in (p.t_envio, p.t_fatura) if t and t >= p.t_resposta], default=None)
-            ultimo = max([e.ts for e in p.eventos if e.ts >= p.t_resposta and e.fonte != "orc"], default=p.t_resposta)
+            ultimo = max([e.ts for e in p.eventos if e.ts >= p.t_resposta and e.fonte not in NAO_CONTACTO], default=p.t_resposta)
             if seguinte:
                 fim = seguinte
             elif agora - ultimo <= sem_orc:
@@ -151,7 +152,7 @@ def gargalo(pedidos: list[Pedido], cfg: dict, hoje: date) -> dict:
             else:
                 # Orçamento que ficou sem resposta: termina no último contacto, não no fim do prazo.
                 silenciosos += 1
-                fim = max([e.ts for e in p.eventos if e.ts >= p.t_envio and e.fonte != "orc"], default=p.t_envio)
+                fim = max([e.ts for e in p.eventos if e.ts >= p.t_envio and e.fonte not in NAO_CONTACTO], default=p.t_envio)
             itens[ETAPAS[2][0]].append((p.t_envio, fim, bool(p.t_aceite or (p.t_fatura and p.t_fatura >= p.t_envio))))
         if p.t_aceite:
             feito = p.t_fatura if p.t_fatura and p.t_fatura >= p.t_aceite else None

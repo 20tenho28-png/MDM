@@ -175,6 +175,10 @@ novo = {}
 orcamento_por_fazer = {}
 espera_cliente = {}
 em_execucao = {}
+# Com a agenda do ERP (dados/agenda/), em dias úteis:
+visita_por_marcar = {}
+visita_marcada = {}
+espera_fornecedor = {}
 # Como o modo sombra propõe os prazos:
 # 1. O prazo de cada estado e P é este percentil do tempo desse P no estado (0.8 = 8 em cada 10 pedidos cumpriam).
 # 2. Ao responder e ao orçamentar, conta o tempo que esse P teria tido se a mesma equipa trabalhasse pela ordem do P

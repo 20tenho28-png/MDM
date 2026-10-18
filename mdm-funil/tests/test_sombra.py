@@ -242,3 +242,118 @@ def test_orcamento_sem_mensagem_de_envio_fica_por_confirmar(tmp_path):
     r = executar(p)
     ped = next(x for x in r.pedidos if x.orc == "ORC0010_2026")
     assert ped.envio_confirmado and ped.t_envio == t(2026, 3, 5, 11, 0)
+
+
+# ---------------------------------------------------------------- visitas (agenda do ERP)
+
+
+def visita(criada, marcada=None, feita=None, numero="1", anterior="", resultado="", encomenda=None, chegada=None):
+    e = Evento(ts=criada, fonte="agenda", direcao=None, tipo="visita", uid=f"agenda:{numero}", numero=numero)
+    e.extra = {"marcada_em": marcada, "feita_em": feita, "anterior": anterior, "resultado": resultado,
+               "peca_encomendada_em": encomenda, "peca_recebida_em": chegada}
+    return e
+
+
+def test_visitas_separam_os_estados_do_pedido():
+    contacto, resposta = t(2026, 3, 2, 10, 0), t(2026, 3, 2, 15, 0)
+    envio, aceite, fatura = t(2026, 3, 16, 12, 0), t(2026, 3, 18, 10, 0), t(2026, 4, 10, 18, 0)
+    avaliacao = visita(t(2026, 3, 3, 9, 0), marcada=t(2026, 3, 4, 11, 0), feita=t(2026, 3, 9, 11, 0), numero="1")
+    sem_peca = visita(t(2026, 3, 18, 10, 30), marcada=t(2026, 3, 19, 9, 0), feita=t(2026, 3, 23, 12, 0), numero="2",
+                      resultado="pendente_peca", encomenda=t(2026, 3, 23, 18, 0), chegada=t(2026, 3, 30, 18, 0))
+    montagem = visita(t(2026, 3, 23, 12, 5), marcada=t(2026, 3, 31, 10, 0), feita=t(2026, 4, 10, 13, 0), numero="3",
+                      anterior="2")
+    p = pedido(eventos=[ev(contacto, "entrada", "Pedido"), ev(resposta, "saida", "Vamos ver"), avaliacao, sem_peca,
+                        montagem],
+               t_contacto=contacto, t_resposta=resposta, t_envio=envio, t_aceite=aceite, t_fatura=fatura)
+    assert sb.periodos(p, t(2026, 10, 16, 23, 0)) == [
+        ("novo", contacto, resposta, True),
+        # O cliente espera pela visita desde a resposta; a visita fica marcada até ao relatório.
+        ("visita_por_marcar", resposta, t(2026, 3, 4, 11, 0), True),
+        ("visita_marcada", t(2026, 3, 4, 11, 0), t(2026, 3, 9, 11, 0), True),
+        ("orcamento_por_fazer", t(2026, 3, 9, 11, 0), envio, True),
+        ("espera_cliente", envio, aceite, True),
+        ("visita_por_marcar", aceite, t(2026, 3, 19, 9, 0), True),
+        ("visita_marcada", t(2026, 3, 19, 9, 0), t(2026, 3, 23, 12, 0), True),
+        # À espera da peça até ela chegar; só então a visita seguinte conta como por marcar.
+        ("espera_fornecedor", t(2026, 3, 23, 12, 0), t(2026, 3, 30, 18, 0), True),
+        ("visita_por_marcar", t(2026, 3, 30, 18, 0), t(2026, 3, 31, 10, 0), True),
+        ("visita_marcada", t(2026, 3, 31, 10, 0), t(2026, 4, 10, 13, 0), True),
+        ("em_execucao", t(2026, 4, 10, 13, 0), fatura, True),
+    ]
+
+
+def test_visita_por_fechar_na_agenda_acaba_com_o_orcamento():
+    contacto, resposta, envio = t(2026, 3, 2, 10, 0), t(2026, 3, 2, 15, 0), t(2026, 3, 12, 12, 0)
+    marcada = visita(t(2026, 3, 2, 15, 30), marcada=t(2026, 3, 3, 9, 0))   # o relatório nunca chegou ao ERP
+    p = pedido(eventos=[ev(contacto, "entrada", "Pedido"), ev(resposta, "saida", "Vamos ver"), marcada],
+               t_contacto=contacto, t_resposta=resposta, t_envio=envio)
+    estados = sb.periodos(p, t(2026, 3, 20, 23, 0))
+    assert estados[1:4] == [("visita_por_marcar", resposta, t(2026, 3, 3, 9, 0), True),
+                            ("visita_marcada", t(2026, 3, 3, 9, 0), envio, True),
+                            ("espera_cliente", envio, t(2026, 3, 20, 23, 0), False)]
+    # Sem a agenda, o mesmo pedido fica todo em «orçamento por fazer».
+    p.eventos = p.eventos[:2]
+    assert sb.periodos(p, t(2026, 3, 20, 23, 0))[1] == ("orcamento_por_fazer", resposta, envio, True)
+
+
+def test_agenda_do_erp_entra_no_pedido_pelo_orc(tmp_path):
+    from mini import MDM, caixa, email, orcamento, projeto
+    p = projeto(tmp_path)
+    cli = '"Ana Silva" <ana.silva@exemplo.pt>'
+    caixa(p, [email(cli, MDM, t(2026, 3, 2, 10, 0), "Pedido de orçamento", "Bom dia, queria orçamento para 2 splits."),
+              email(MDM, cli, t(2026, 3, 2, 15, 0), "Re: Pedido de orçamento", "Bom dia, vamos preparar o orçamento."),
+              email(MDM, cli, t(2026, 3, 9, 15, 0), "Orçamento", "Segue o ORC0010_2026.")])
+    orcamento(p, "ORC0010_2026", "Ana Silva", data=datetime(2026, 3, 9), contacto="ana.silva@exemplo.pt")
+    (p / "dados" / "agenda").mkdir(parents=True)
+    (p / "dados" / "agenda" / "agenda_2026-10-16.csv").write_text(
+        "﻿visita;anterior;cliente;telefone;email;nif;referencia;tipo_trabalho;prioridade;tecnico;estado;criada_em;"
+        "marcada_em;inicio;fim;feita_em;cancelada_em;relatorio;resultado;peca_encomendada_em;peca_recebida_em\n"
+        "1;;Ana Silva;;ana.silva@exemplo.pt;;;avaliacao;P2;Abdul;feita;2026-03-02 16:00:00;2026-03-03 10:00:00;"
+        "2026-03-05 10:00:00;2026-03-05 11:00:00;2026-03-05 11:00:00;;RI-2026-AL-0001;concluida;;\n"
+        "2;;Ana Silva;;;;ORC0010_2026;instalacao;P2;Abdul;cancelada;2026-03-10 09:00:00;;;;;2026-03-11 09:00:00;;;;\n",
+        encoding="utf-8")
+    r = executar(p)
+    assert r.cobertura["fontes"]["agenda"]["eventos"] == 1
+    assert r.cobertura["fontes"]["agenda"]["detalhe"]["canceladas (não contam)"] == 1
+    ped = next(x for x in r.pedidos if x.orc == "ORC0010_2026")
+    assert [e.fonte for e in ped.eventos].count("agenda") == 1
+    # A visita não é um contacto: não muda a resposta nem o envio.
+    assert ped.t_resposta == t(2026, 3, 2, 15, 0) and ped.t_envio == t(2026, 3, 9, 15, 0)
+    chaves = [c for c, *_ in sb.periodos(ped, fim_do_dia(r.hoje))]
+    assert chaves[:4] == ["novo", "visita_por_marcar", "visita_marcada", "orcamento_por_fazer"]
+    s = sb.executar_sombra(r)
+    assert [e.chave for e in s.estados] == ["novo", "visita_por_marcar", "visita_marcada", "orcamento_por_fazer",
+                                           "espera_cliente", "em_execucao", "espera_fornecedor"]
+    assert s.por_medir == ()
+
+
+def test_sem_agenda_as_visitas_ficam_por_medir(tmp_path):
+    from mini import MDM, caixa, email, projeto
+    p = projeto(tmp_path)
+    cli = '"Ana Silva" <ana.silva@exemplo.pt>'
+    caixa(p, [email(cli, MDM, t(2026, 3, 2, 10, 0), "Pedido de orçamento", "Bom dia, queria orçamento para 2 splits.")])
+    r = executar(p)
+    assert not any("agenda" in a.lower() for a in r.cobertura["avisos"])   # opcional: o relatório principal não avisa
+    s = sb.executar_sombra(r)
+    assert s.estados == sb.ESTADOS and [e.chave for e, _ in s.por_medir] == [e.chave for e in sb.VISITAS]
+    escrever_sombra(s, tmp_path / "saida")
+    html = (tmp_path / "saida" / "sombra.html").read_text(encoding="utf-8")
+    assert "precisa da agenda do ERP" in html and "/erp/exportar/agenda.csv" in html
+
+
+def test_mundo_com_agenda_mede_as_visitas_e_a_espera_de_pecas(mundo, tmp_path):
+    _, r, s = mundo
+    assert s.por_medir == () and "visita_marcada" in [e.chave for e in s.estados]
+    for chave in ("visita_por_marcar", "visita_marcada", "espera_fornecedor"):
+        assert s.tabela[(chave, "todos")]["n"] >= 8, chave
+        assert any(s.propostos[(chave, c)] is not None for c in sb.CLASSES), chave
+    # As visitas tiram tempo a «em execução»: depois da última visita só falta faturar (no mesmo dia).
+    assert s.tabela[("em_execucao", "todos")]["p80"] <= 1
+    # Os estados das visitas não mudam os pedidos nem os tempos de resposta.
+    assert all(e.fonte != "agenda" or e.direcao is None for p in r.pedidos for e in p.eventos)
+    escrever_sombra(s, tmp_path)
+    html = (tmp_path / "sombra.html").read_text(encoding="utf-8")
+    assert "Visita marcada" in html and "À espera de peça/fornecedor" in html and "precisa da agenda" not in html
+    assert "—" not in html
+    toml = (tmp_path / "prazos_propostos.toml").read_text(encoding="utf-8")
+    assert "visita_marcada = {" in toml and "Ainda sem dados" not in toml
