@@ -1,0 +1,26 @@
+{
+  "name": "Melperfaz",
+  "legalName": "Melperfaz, Construção Civil, Lda.",
+  "founded": "2001",
+  "baseUrl": "https://melperfaz.netlify.app",
+  "preview": false,
+  "phone": "961 245 288",
+  "phoneHref": "tel:+351961245288",
+  "phoneE164": "+351961245288",
+  "whatsappBase": "https://wa.me/351961245288?text=",
+  "slogan": "Mãos à obra",
+  "wa": {
+    "geral": "Olá! Gostaria de pedir um orçamento.",
+    "pedido": "Olá! Acabei de enviar um pedido de orçamento pelo site e envio fotografias do local.",
+    "obra": "Olá! Vi a obra {code} no site ({title}) e gostaria de pedir um orçamento para uma obra parecida."
+  },
+  "tiposDeObra": [
+    "Reabilitação de Edifício",
+    "Espaço Comercial",
+    "Apartamento",
+    "Trabalhos de Estrutura",
+    "Fachadas / Impermeabilização",
+    "Acabamentos",
+    "Outro"
+  ]
+}

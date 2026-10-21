@@ -1,0 +1,26 @@
+<header class="topo" data-topo>
+  <nav class="wrap topo-in" aria-label="Principal">
+    <a href="{{ root }}index.html" class="logo"><img src="{{ root }}assets/img/logo-melperfaz.png" alt="Melperfaz, Construção Civil, Lda." class="logo-img" width="400" height="239"></a>
+    <ul class="navlinks">
+      <li><a data-nav-item="servicos" href="{{ root }}index.html#servicos">Serviços</a></li>
+      <li><a data-nav-item="processo" href="{{ root }}index.html#processo">Processo</a></li>
+      <li><a data-nav-item="obras" href="{{ root }}obras.html">Obras</a></li>
+      <li><a data-nav-item="porque-nos" href="{{ root }}index.html#porque-nos">Porquê Nós</a></li>
+    </ul>
+    <a href="{{ root }}index.html#contacto" class="btn topo-btn">Pedir Orçamento</a>
+    <button class="menu-toggle" type="button" data-menu aria-expanded="false" aria-controls="menu-movel" aria-label="Abrir menu"><span aria-hidden="true">≡</span></button>
+  </nav>
+  <!-- menu nos ecrãs estreitos: o botão ≡ abre este painel por baixo do cabeçalho (site.js); sem JavaScript fica escondido
+       e as ligações do rodapé levam às mesmas secções -->
+  <div class="menu-movel" id="menu-movel" hidden>
+    <nav class="wrap menu-movel-in" aria-label="Menu">
+      <a href="{{ root }}index.html#servicos">Serviços</a>
+      <a href="{{ root }}index.html#processo">Processo</a>
+      <a href="{{ root }}obras.html">Obras</a>
+      <a href="{{ root }}index.html#porque-nos">Porquê Nós</a>
+      <a href="{{ root }}index.html#contacto">Contacto</a>
+      <a class="menu-tel" href="{{ site.phoneHref }}">{{ site.phone }}</a>
+      <a class="btn" href="{{ root }}index.html#contacto">Pedir Orçamento</a>
+    </nav>
+  </div>
+</header>

@@ -1,0 +1,38 @@
+<footer class="rodape">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="{{ root }}index.html" class="logo"><img src="{{ root }}assets/img/logo-melperfaz-branco.png" alt="Melperfaz, Construção Civil, Lda." class="logo-img" width="400" height="239" loading="lazy"></a>
+        <p>Construção Civil, Lda. Reabilitação de edifícios, espaços comerciais e apartamentos, assente em rigor e obra limpa. Mãos à obra desde {{ site.founded }}.</p>
+      </div>
+      <nav class="foot-col" aria-labelledby="footServicos">
+        <p class="foot-h" id="footServicos">Serviços</p>
+        <a href="{{ root }}index.html#servicos">Reabilitação de Edifícios</a>
+        <a href="{{ root }}index.html#servicos">Espaços Comerciais</a>
+        <a href="{{ root }}index.html#servicos">Apartamentos</a>
+        <a href="{{ root }}index.html#servicos">Fachadas</a>
+      </nav>
+      <nav class="foot-col" aria-labelledby="footEmpresa">
+        <p class="foot-h" id="footEmpresa">Empresa</p>
+        <a href="{{ root }}index.html#processo">Processo</a>
+        <a href="{{ root }}obras.html">Obras</a>
+        <a href="{{ root }}index.html#porque-nos">Porquê Nós</a>
+        <a href="{{ root }}index.html#contacto">Contacto</a>
+      </nav>
+      <div class="foot-col">
+        <p class="foot-h" id="footContactos">Contactos</p>
+        <a href="{{ site.phoneHref }}">{{ site.phone }}</a>
+        <a href="{{wa {{ page.wa }}}}" target="_blank" rel="noopener">WhatsApp</a>{{#se dados.email}}
+        <a href="mailto:{{ dados.email }}">{{ dados.email }}</a>{{/se}}{{#se dados.googleMaps}}
+        <a href="{{ dados.googleMaps }}" target="_blank" rel="noopener">Google Maps</a>{{/se}}
+        <a href="{{ root }}index.html#contacto">Orçamento Gratuito</a>{{#se dados.morada}}
+        <span class="foot-morada">{{ dados.morada }}</span>{{/se}}
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© {{ year }} {{ site.legalName }} · {{ anos }} Anos ({{ site.founded }}–{{ year }}){{#se dados.nif}} · NIF {{ dados.nif }}{{/se}}</span>
+      <span>Empresa Licenciada{{#se dados.alvara}} · Alvará n.º {{ dados.alvara }}{{/se}}</span>
+      <span class="foot-legal"><a href="{{ root }}privacidade.html">Política de privacidade</a><a href="https://www.livroreclamacoes.pt/" target="_blank" rel="noopener">Livro de Reclamações</a></span>
+    </div>
+  </div>
+</footer>
