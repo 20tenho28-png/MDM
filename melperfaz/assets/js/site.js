@@ -41,8 +41,12 @@
       if (aberto && !painel.contains(e.target) && !btn.contains(e.target)) fecha(false);
     });
     qsa('a', painel).forEach(function (a) { a.addEventListener('click', function () { fecha(false); }); });
+    /* o foco saiu do painel pelo teclado (Tab depois da última ligação): fecha-se, para não tapar o elemento focado */
+    painel.addEventListener('focusout', function (e) {
+      if (aberto && e.relatedTarget && !painel.contains(e.relatedTarget) && e.relatedTarget !== btn) fecha(false);
+    });
     /* ao alargar a janela o menu normal volta: o painel fecha-se */
-    var mm = window.matchMedia ? matchMedia('(min-width: 901px)') : null;
+    var mm = window.matchMedia ? matchMedia('(min-width: 761px)') : null;
     if (mm && mm.addEventListener) mm.addEventListener('change', function (e) { if (e.matches) fecha(false); });
   })();
 
@@ -99,6 +103,8 @@
   (function () {
     var form = qs('#quoteForm');
     if (!form) return;
+    /* um browser sem estas APIs faz o envio normal (para /obrigado.html, pelo Netlify) */
+    if (!window.fetch || !window.URLSearchParams || !window.FormData || !FormData.prototype.forEach) return;
     var ok = qs('[data-form-ok]'), alerta = qs('#formAlerta'), voz = qs('[data-form-voz]'), btn = qs('#sendBtn');
     var campos = { nome: qs('#qNome'), telefone: qs('#qTel'), email: qs('#qEmail') };
     var erros = { nome: qs('#eNome'), telefone: qs('#eTel'), email: qs('#eEmail') };
@@ -118,7 +124,7 @@
       erro('nome', nome ? '' : 'Escreva o seu nome.'); if (!nome) falhas.push('nome');
       var digitos = tel.replace(/\D/g, '');
       var telOk = digitos.length >= 9 && digitos.length <= 15;
-      erro('telefone', tel ? (telOk ? '' : 'Escreva um telefone com pelo menos 9 algarismos.') : 'Escreva o seu telefone.');
+      erro('telefone', tel ? (telOk ? '' : (digitos.length < 9 ? 'Escreva um telefone com pelo menos 9 algarismos.' : 'Escreva um telefone com 15 algarismos no máximo.')) : 'Escreva o seu telefone.');
       if (!telOk) falhas.push('telefone');
       var emailOk = !email || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
       erro('email', emailOk ? '' : 'Este email não parece certo. Confira ou deixe em branco.');
@@ -129,6 +135,7 @@
       if (!alerta) return;
       alerta.innerHTML = html;
       alerta.hidden = false;
+      alerta.focus();   /* o botão ficou desativado com o foco: sem isto o foco caía no body */
     }
     function escondeAlerta() { if (alerta) { alerta.hidden = true; alerta.innerHTML = ''; } }
     ['nome', 'telefone', 'email'].forEach(function (n) {
@@ -148,6 +155,7 @@
       /* a armadilha para robôs: um humano não a vê nem a preenche; se vier cheia, o pedido não segue */
       var isco = qs('[name="bot-field"]', form);
       if (isco && isco.value) { mostraAlerta('Ups, algo correu mal. Ligue ' + TEL + '.'); return; }
+      ['nome', 'telefone', 'email'].forEach(function (n) { if (campos[n]) campos[n].value = campos[n].value.trim(); });
       aEnviar = true;
       btn.disabled = true;
       var rotulo = btn.textContent;
@@ -173,6 +181,7 @@
           aEnviar = false;
           btn.disabled = false;
           btn.textContent = rotulo;
+          if (alerta && !alerta.hidden) alerta.focus();
         });
     });
 

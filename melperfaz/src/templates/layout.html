@@ -26,7 +26,8 @@
 <link rel="icon" type="image/png" sizes="32x32" href="{{ root }}assets/img/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="{{ root }}assets/img/favicon-180.png">
 <link rel="preload" href="{{ root }}assets/fonts/fraunces-latin-400-700-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="{{ root }}assets/fonts/archivo-latin-variable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{ root }}assets/fonts/archivo-latin-variable.woff2" as="font" type="font/woff2" crossorigin>{{#se page.italico}}
+<link rel="preload" href="{{ root }}assets/fonts/fraunces-latin-400-700-italic.woff2" as="font" type="font/woff2" crossorigin>{{/se}}
 <link rel="stylesheet" href="{{ root }}assets/css/site.css">
 {{& page_css }}{{& jsonld }}</head>
 <body class="grain" data-nav="{{ page.nav }}">

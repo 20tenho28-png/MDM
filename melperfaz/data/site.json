@@ -12,7 +12,7 @@
   "wa": {
     "geral": "Olá! Gostaria de pedir um orçamento.",
     "pedido": "Olá! Acabei de enviar um pedido de orçamento pelo site e envio fotografias do local.",
-    "obra": "Olá! Vi a obra {code} no site ({title}) e gostaria de pedir um orçamento para uma obra parecida."
+    "obra": "Olá! Vi a obra {code} no site ({title}) e envio fotografias do meu espaço para pedir um orçamento para uma obra parecida."
   },
   "tiposDeObra": [
     "Reabilitação de Edifício",

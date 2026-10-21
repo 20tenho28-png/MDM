@@ -17,6 +17,8 @@ const SITE = JSON.parse(fs.readFileSync(path.join(W, 'data/site.json'), 'utf8'))
 const OBRAS = JSON.parse(fs.readFileSync(path.join(W, 'data/obras.json'), 'utf8')).obras;
 const FOTOS = Object.entries(JSON.parse(fs.readFileSync(path.join(W, 'data/fotos.json'), 'utf8'))).filter(([k]) => !k.startsWith('_'));
 const le = f => fs.readFileSync(path.join(PUB, f), 'utf8');
+// o texto como o HTML gerado o escreve (html.escape do build.py), pronto para entrar numa RegExp
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const paginas = () => {
   const out = [];
   const anda = d => { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory() && e.name !== 'assets') anda(p); else if (e.name.endsWith('.html')) out.push(path.relative(PUB, p)); } };
@@ -120,8 +122,8 @@ test('as fichas de obra: migalhas, ficha, orçamento pré-escolhido, WhatsApp co
   OBRAS.forEach((o, i) => {
     const f = `obras/${o.slug}.html`;
     const t = le(f);
-    assert.match(t, new RegExp(`<h1 id="obraT">${o.title.replace(/&/g, '&amp;')}</h1>`), f);
-    assert.match(t, new RegExp(`${o.catLabel.replace(/&/g, '&amp;')} · ${o.code}`), f);
+    assert.match(t, new RegExp(`<h1 id="obraT">${esc(o.title)}</h1>`), f);
+    assert.match(t, new RegExp(`${esc(o.catLabel)} · ${esc(o.code)}`), f);
     const lds = [...t.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)].map(m => JSON.parse(m[1]));
     const bc = lds.find(l => l['@type'] === 'BreadcrumbList');
     assert.ok(bc && bc.itemListElement.length === 3 && bc.itemListElement[2].item === `${SITE.baseUrl}/${f}`, `${f}: migalhas`);
@@ -133,7 +135,7 @@ test('as fichas de obra: migalhas, ficha, orçamento pré-escolhido, WhatsApp co
     const prev = OBRAS[(i - 1 + OBRAS.length) % OBRAS.length], next = OBRAS[(i + 1) % OBRAS.length];
     assert.match(t, new RegExp(`href="\\.\\./obras/${prev.slug}\\.html" rel="prev"`), f);
     assert.match(t, new RegExp(`href="\\.\\./obras/${next.slug}\\.html" rel="next"`), f);
-    for (const d of o.detalhes) assert.ok(t.includes(`<li>${d.replace(/&/g, '&amp;')}</li>`), `${f}: detalhe «${d}»`);
+    for (const d of o.detalhes) assert.ok(t.includes(`<li>${d.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;')}</li>`), `${f}: detalhe «${d}»`);
     assert.ok(!t.includes('<dt>Data</dt>') || o.factos.data, `${f}: a data só com facto`);
     if (o.antesDepois) assert.match(t, /data-ba-range/, `${f}: comparador`); else assert.match(t, /class="obra-foto"/, `${f}: fotografia grande`);
   });

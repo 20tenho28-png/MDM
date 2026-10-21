@@ -81,6 +81,9 @@ def main():
         sys.exit("Este Pillow não escreve AVIF: pip install -U \"Pillow>=11.3\"")
     todas = "--todas" in sys.argv
     nums = [a.zfill(2) for a in sys.argv[1:] if not a.startswith("--")]
+    for n in nums:
+        if n not in FOTOS:
+            sys.exit(f"a fotografia {n} não está em data/fotos.json")
     total = 0
     for n in sorted(FOTOS):
         if nums and n not in nums:

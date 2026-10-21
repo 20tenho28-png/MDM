@@ -54,6 +54,12 @@ As do sistema de desenho («Voz e texto»), conferidas pelo `--check` onde dá:
 - telefone sempre «961 245 288»; sem emoji; sem travessões (—): vírgulas ou parênteses;
 - nunca inventar factos: preços, prazos, números, clientes, locais. O que falta fica vazio em `data/` e escondido no site.
 
+Desvios deliberados em relação ao sistema de desenho: as letras alojadas com o site em vez do Google Fonts; um menu para os
+ecrãs estreitos (o botão ≡ entra a 760 px, porque abaixo disso o logótipo, os links e o botão não cabem; o site publicado
+escondia os links a 640 px e o botão não abria nada); âncoras em português; os cartões de serviço como ligações para o
+formulário com o tipo pré-escolhido; a opção «Acabamentos» no formulário; as páginas Obras, fichas, obrigado, 404 e
+privacidade; o foco de teclado visível; a imagem de partilha da empresa nas fichas com fotografia ao alto.
+
 A idade da empresa («25 anos») calcula-se do ano de fundação em cada geração do site. O Netlify gera o site em cada
 publicação; se o site ficar um ano sem mudanças, publicar de novo em janeiro atualiza o número.
 

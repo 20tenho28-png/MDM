@@ -28,7 +28,7 @@
           <p class="field-erro" id="eTel"></p>
         </div>
         <div class="field">
-          <label for="qEmail">Email <span class="opcional">(opcional)</span></label>
+          <label for="qEmail">Email</label>
           <input id="qEmail" name="email" type="email" maxlength="254" inputmode="email" autocomplete="email" placeholder="o.seu@email.pt" aria-describedby="eEmail">
           <p class="field-erro" id="eEmail"></p>
         </div>
@@ -45,10 +45,11 @@
         </div>
         <p class="hp" aria-hidden="true"><label for="qGotcha">Não preencher</label><input id="qGotcha" name="bot-field" type="text" tabindex="-1" autocomplete="off"></p>
         <p class="form-nota">Usamos os seus dados só para responder a este pedido. <a href="{{ root }}privacidade.html">Política de privacidade</a>.</p>
-        <div class="form-alerta" id="formAlerta" hidden></div>
-        <p class="so-leitor" role="status" aria-live="polite" data-form-voz></p>
+        <div class="form-alerta" id="formAlerta" tabindex="-1" hidden></div>
         <button class="btn" type="submit" id="sendBtn">Enviar Pedido</button>
       </form>
+      <!-- a região viva fica fora do formulário: o formulário esconde-se no sucesso e um anúncio lá dentro nunca se ouviria -->
+      <p class="so-leitor" role="status" aria-live="polite" data-form-voz></p>
       <div class="form-ok" data-form-ok hidden tabindex="-1">
         <strong>Pedido enviado!</strong>
         <p>Obrigado. Entraremos em contacto no prazo de um dia útil. Para algo urgente, ligue <a href="{{ site.phoneHref }}">{{ site.phone }}</a>.</p>

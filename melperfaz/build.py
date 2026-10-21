@@ -96,10 +96,12 @@ def campos_obra(o):
     o["orcamentoHref"] = f"../index.html?tipo={quote(tipo)}#contacto"
     msg = SITE["wa"]["obra"].replace("{code}", o["code"]).replace("{title}", o["title"])
     o["waHref"] = SITE["whatsappBase"] + quote(msg)
-    o["relTitulo"] = f"Outras obras de {o['catNome'].lower()}"
+    # «Outras obras de fachadas» só quando há outras da mesma categoria que cheguem; senão, «Outras obras»
+    mesma = sum(1 for x in OBRAS if x is not o and x["cat"] == o["cat"])
+    o["relTitulo"] = f"Outras obras de {o['catNome'].lower()}" if mesma >= 2 else "Outras obras"
     o["relHref"] = f"obras.html#{o['cat']}"
-    o["fotoSizes"] = ("(min-width: 1280px) min(1240px, calc(78vh * 4 / 3)), min(100vw, calc(78vh * 4 / 3))"
-                      if o["orient"] == "landscape" else "min(100vw, calc(78vh * 3 / 4))")
+    # a fotografia da ficha ocupa a largura do contentor (1240px) e no máximo 78% da altura do ecrã, na sua proporção
+    o["fotoSizes"] = f"min(1240px, 100vw, calc(78vh * {f['w']} / {f['h']}))"
     # sem comparador, a chave existe vazia: os modelos perguntam {{#se obra.antesDepois}} (uma chave em falta é erro)
     ad = o.setdefault("antesDepois", "")
     if ad:
@@ -176,7 +178,7 @@ def foto(ctx, args):
     extra = ' fetchpriority="high"' if loading == "eager" and attrs.get("prioridade") != "normal" else ""
 
     def srcset(ext):
-        return ", ".join(f"{base}-{lado}.{ext} {w * lado // maior}w" for lado in lados(n))
+        return ", ".join(f"{base}-{lado}.{ext} {round(w * lado / maior)}w" for lado in lados(n))
     return (f'<picture class="{cls}"{previa}>'
             f'<source type="image/avif" srcset="{srcset("avif")}" sizes="{sizes}">'
             f'<source type="image/webp" srcset="{srcset("webp")}" sizes="{sizes}">'
@@ -206,7 +208,7 @@ def each(ctx, args):
     else:
         items = [OBRA_BY_N[x.strip().zfill(2)] for x in sel.split(",")]
     tpl = (SRC / "partials" / f"{name}.html").read_text(encoding="utf-8")
-    sizes = ctx["page"].get("cartaoSizes") or "(min-width: 980px) min(calc(50vw - 41px), 611px), calc(100vw - 44px)"
+    sizes = ctx["page"].get("cartaoSizes") or "(min-width: 981px) min(calc(50vw - 41px), 611px), calc(100vw - 44px)"
     out = []
     for i, o in enumerate(items):
         c = dict(ctx, obra=o, index=i, pos=i + 1, total=len(items), cartaoSizes=sizes,
@@ -340,14 +342,16 @@ def breadcrumb_ld(trail):
 
 
 def page_ctx(meta, file):
-    meta = {"nav": "", "robots": "index,follow", "og": "", "wa": "geral", "tipo": "", **meta}
+    meta = {"nav": "", "robots": "index,follow", "og": "", "wa": "geral", "tipo": "", "italico": "", **meta}
     if PREVIEW and not NOINDEX_RE.search(meta["robots"]):
         meta["robots"] = "noindex"   # pré-visualização: nenhuma página entra no Google antes do lançamento
     depth = file.count("/")
     # a 404 é servida em qualquer profundidade (/obras/xyz.html): precisa de caminhos absolutos
     root = "/" if file == "404.html" else "../" * depth
     return {"site": SITE, "page": meta, "root": root, "_file": file, "dados": DADOS, "categorias": CATEGORIAS,
-            "cat_n": CAT_N, "year": str(ANO), "anos": str(SITE["anos"]), "tipos": TIPOS_DE_OBRA}
+            "cat_n": CAT_N, "year": str(ANO), "anos": str(SITE["anos"]), "tipos": TIPOS_DE_OBRA,
+            # ficha: «1» nas fichas de obra (o comparador perde o cabeçalho, que repetiria o h1, e carrega as fotos já)
+            "ficha": "", "baLoading": "lazy"}
 
 
 def build_page(meta, body_tpl, extra_ctx=None):
@@ -444,12 +448,17 @@ def build():
     for i, o in enumerate(OBRAS):
         prev_o, next_o = OBRAS[i - 1], OBRAS[(i + 1) % len(OBRAS)]
         file = f"obras/{o['slug']}.html"
+        desc = f"{o['title']}, {o['catNome'].lower()}: {o['resumo']}"
+        if len(desc) > 160:   # a descrição corta-se na última frase inteira que cabe
+            desc = re.sub(r"\s[^.]*$", "", desc[:158]).rstrip(".,;:") + "."
         meta = {"file": file, "nav": "obras", "css": ["pag-obras.css"],
                 "title": f"{o['title']} · Obras Melperfaz",
-                "description": f"{o['title']}: {o['catNome'].lower()}. Obra da Melperfaz, fotografada no local pela nossa equipa.",
-                "og": o["foto"], "jsonld": ["breadcrumb"],
+                "description": desc,
+                # a imagem de partilha ao alto fica cortada nas pré-visualizações: só as deitadas; as outras levam a da empresa
+                "og": o["foto"] if o["orient"] == "landscape" else "", "jsonld": ["breadcrumb"],
                 "breadcrumb": [["Início", ""], ["Obras", "obras.html"], [o["title"], file]]}
-        files.append(build_page(meta, tpl, {"obra": o, "prev": prev_o, "next": next_o, "related": relacionadas(o)}))
+        files.append(build_page(meta, tpl, {"obra": o, "prev": prev_o, "next": next_o, "related": relacionadas(o),
+                                            "ficha": "1", "baLoading": "eager"}))
     urls = "".join(f"<url><loc>{SITE['baseUrl']}/{'' if f == 'index.html' else f}</loc></url>\n"
                    for f in files if f not in fora_do_mapa)
     (OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -563,7 +572,7 @@ def check_formulario(f, text):
                    f"em falta {sorted(FORM_CAMPOS - campos)}")
     if not re.search(r'<input type="hidden" name="form-name" value="orcamento">', form):
         out.append(f"{f}: falta o campo escondido form-name=orcamento")
-    opcoes = re.findall(r"<option value=\"([^\"]*)\"", form)
+    opcoes = [html.unescape(x) for x in re.findall(r"<option value=\"([^\"]*)\"", form)]
     if [o for o in opcoes if o] != TIPOS_DE_OBRA:
         out.append(f"{f}: as opções de «Tipo de Obra» não são as de site.json «tiposDeObra» → {opcoes}")
     for nome in ("nome", "telefone", "email", "mensagem"):
@@ -639,7 +648,6 @@ def check_fotos():
             out.append(f"fotos.json «{n}»: sem prévia em data/lqip.json (python3 gerar_fotos.py)")
     for p in pasta.glob("*.tmp"):
         out.append(f"{p.name}: sobra de uma gravação interrompida do gerar_fotos.py: apagar")
-    usadas = {o["foto"] for o in OBRAS} | {x for o in OBRAS for x in (o.get("antesDepois") or {}).values()}
     for p in sorted(pasta.glob("foto-*")):
         n = re.match(r"foto-(\d+)", p.name).group(1)
         if n not in FOTOS:
@@ -668,7 +676,7 @@ def check_dados():
     if tem(v) and not re.fullmatch(r"\d{3} ?\d{3} ?\d{3}", v.strip()):
         out.append(f"dados-melperfaz.json «nif»: nove algarismos, com ou sem espaços («123 456 789») → «{v}»")
     v = DADOS.get("googleMaps", "")
-    if tem(v) and not re.match(r"https://(?:maps\.app\.goo\.gl/|(?:www\.)?google\.[a-z.]+/maps|g\.page/|goo\.gl/maps/)", v.strip()):
+    if tem(v) and not re.match(r"https://(?:maps\.app\.goo\.gl/|(?:www\.|maps\.)?google\.[a-z.]+/(?:maps|$)|g\.page/|goo\.gl/maps/)", v.strip()):
         out.append(f"dados-melperfaz.json «googleMaps»: tem de ser uma ligação do Google Maps → «{v}»")
     for k in ("alvara", "seguro", "zona", "horario", "morada"):
         if "\u2014" in DADOS.get(k, ""):
@@ -694,9 +702,8 @@ def check_obras():
             out.append(f"obras.json {o['code']}: «detalhes» tem de ser uma lista de frases")
         if set(o["factos"]) != {"data", "localExato", "duracao", "resultado"}:
             out.append(f"obras.json {o['code']}: «factos» tem de ter data, localExato, duracao e resultado (vazios ou não)")
-        if o["foco"] if "foco" in o else False:
-            if not re.fullmatch(r"\d{1,3}% \d{1,3}%", o["foco"]):
-                out.append(f"obras.json {o['code']}: «foco» é «X% Y%» → «{o['foco']}»")
+        if not re.fullmatch(r"\d{1,3}% \d{1,3}%", str(o.get("foco", ""))):
+            out.append(f"obras.json {o['code']}: «foco» é obrigatório, «X% Y%» (o ponto da fotografia que fica à vista) → «{o.get('foco', '')}»")
     return out
 
 

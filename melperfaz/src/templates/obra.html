@@ -57,9 +57,9 @@
       {{each obra-foto ctx:related}}
     </div>
     <nav class="obra-nav" aria-label="Navegação entre obras">
-      <a href="{{ root }}obras/{{ prev.slug }}.html" rel="prev"><span class="obra-nav-l">← Obra anterior</span><strong>{{ prev.title }}</strong></a>
-      <a href="{{ root }}obras/{{ next.slug }}.html" rel="next"><span class="obra-nav-l">Obra seguinte →</span><strong>{{ next.title }}</strong></a>
+      <a href="{{ root }}obras/{{ prev.slug }}.html" rel="prev"><span class="obra-nav-l"><span aria-hidden="true">← </span>Obra anterior</span><strong>{{ prev.title }}</strong></a>
+      <a href="{{ root }}obras/{{ next.slug }}.html" rel="next"><span class="obra-nav-l">Obra seguinte<span aria-hidden="true"> →</span></span><strong>{{ next.title }}</strong></a>
     </nav>
-    <p class="work-mais"><a class="btn btn-ghost-ink" href="{{ root }}obras.html">Todas as Obras</a></p>
+    <p class="work-mais"><a class="btn btn-ghost-ink" href="{{ root }}obras.html">Ver Todas as Obras</a></p>
   </div>
 </section>

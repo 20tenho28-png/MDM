@@ -26,7 +26,13 @@ const { chromium } = require('playwright');
 const W = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'melperfaz-browser-'));
 const PUB = path.join(tmp, 'public');
-execFileSync('python3', ['build.py'], { cwd: W, stdio: 'ignore', env: { ...process.env, MELPERFAZ_OUT: PUB } });
+try {
+  execFileSync('python3', ['build.py'], { cwd: W, stdio: ['ignore', 'ignore', 'inherit'], env: { ...process.env, MELPERFAZ_OUT: PUB } });
+} catch (e) {
+  fs.rmSync(tmp, { recursive: true, force: true });
+  console.log('FALHA: o build.py não gerou o site');
+  process.exit(1);
+}
 const SITE = JSON.parse(fs.readFileSync(path.join(W, 'data/site.json'), 'utf8'));
 const OBRAS = JSON.parse(fs.readFileSync(path.join(W, 'data/obras.json'), 'utf8')).obras;
 
@@ -170,7 +176,8 @@ try {
   /* G. telemóvel: sem deslizar para o lado, sem erros */
   for (const largura of [390, 320]) {
     const { ctx, page } = await pagina({ viewport: { width: largura, height: 800 }, isMobile: true, hasTouch: true });
-    for (const f of ['/', '/obras.html', `/obras/${OBRAS[0].slug}.html`, `/obras/${OBRAS[4].slug}.html`, '/privacidade.html', '/obrigado.html', '/404.html']) {
+    const comComparador = OBRAS.find(o => o.antesDepois) || OBRAS[OBRAS.length - 1];
+    for (const f of ['/', '/obras.html', `/obras/${OBRAS[0].slug}.html`, `/obras/${comComparador.slug}.html`, '/privacidade.html', '/obrigado.html', '/404.html']) {
       await page.goto(srv.base + f, { waitUntil: 'networkidle' });
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
       await page.waitForTimeout(250);
