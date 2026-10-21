@@ -132,7 +132,8 @@ try {
     ok(await page.evaluate(() => Array.from(document.querySelectorAll('.reveal')).every(e => getComputedStyle(e).opacity === '1')), 'D: sem JavaScript nada fica invisível (reveal)');
     ok(await page.isHidden('#menu-movel') && await page.evaluate(() => { const s = document.querySelector('[data-ba-before]'); return s && getComputedStyle(s).width !== '0px'; }), 'D: o comparador fica a meio, sem rebentar');
     await preenche(page, { nome: 'Sem JS', tipo: 'Fachadas / Impermeabilização' });
-    await Promise.all([page.waitForNavigation(), page.click('#sendBtn')]);
+    /* espera-se pelo endereço e pelo DOM, não pelo «load»: num runner lento o load da página seguinte passava os 30 s */
+    await Promise.all([page.waitForURL(/\/obrigado\.html$/, { waitUntil: 'domcontentloaded' }), page.click('#sendBtn')]);
     const p = srv.pedidos.at(-1);
     ok(p && p.caminho === '/obrigado.html' && p.campos['form-name'] === 'orcamento' && p.campos.nome === 'Sem JS' && p.campos.tipo_de_obra === 'Fachadas / Impermeabilização', 'D: o POST normal chega a /obrigado.html com os campos', p);
     ok((await page.textContent('h1')).includes('Obrigado'), 'D: a página de agradecimento');
@@ -149,7 +150,7 @@ try {
     ok(await page.evaluate(() => location.hash === '#contacto'), 'E: e leva ao formulário');
     const obra = OBRAS[0];
     await page.goto(`${srv.base}/obras/${obra.slug}.html`, { waitUntil: 'networkidle' });
-    await Promise.all([page.waitForNavigation(), page.click('.cta-faixa-acoes a.btn:has-text("Pedir Orçamento")')]);
+    await Promise.all([page.waitForURL(/index\.html\?tipo=/, { waitUntil: 'domcontentloaded' }), page.click('.cta-faixa-acoes a.btn:has-text("Pedir Orçamento")')]);
     ok(/\?tipo=.*#contacto$/.test(page.url()), 'E: a ficha leva a index.html?tipo=…#contacto', page.url());
     await page.waitForTimeout(300);
     ok(await page.inputValue('#qTipo') === 'Reabilitação de Edifício', 'E: o tipo vem do endereço');
