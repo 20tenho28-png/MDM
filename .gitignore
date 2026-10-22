@@ -32,3 +32,6 @@ pedido*.txt
 proposta*.html
 mdm-orcamento.zip
 !website/equipa/proposta.html
+
+# Registo de pedidos (website/registo/): os dados dos clientes ficam no Supabase; nenhum SQL de dados entra aqui.
+website/registo/supabase/dados*.sql

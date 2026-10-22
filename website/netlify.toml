@@ -45,3 +45,11 @@
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
     Cache-Control = "no-cache"
+
+# Registo de pedidos da equipa (registo/, uso interno, com entrada por palavra-passe): fora dos motores de busca e sem
+# cache, pela mesma razão que /equipa/*.
+[[headers]]
+  for = "/registo/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-cache"

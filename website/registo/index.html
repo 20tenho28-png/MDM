@@ -1,0 +1,1308 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Registo MDM</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%230D6788%22/%3E%3Ctext x=%2216%22 y=%2221%22 font-family=%22Arial%22 font-weight=%22700%22 font-size=%2214%22 fill=%22%23fff%22 text-anchor=%22middle%22%3EMDM%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0}
+[hidden]{display:none!important}
+/* Layout: três vistas. Triagem = resumo, filtros, lista ordenada pelo P e pelo tempo que falta, fila por estado e por dono.
+   Registo = todos os pedidos, com procura. Prazos = tabela estado x P e a folha na Drive. Cada pedido abre numa folha lateral. */
+:root{
+  --bg:#EDF1F3; --surface:#FFFFFF; --sunk:#E4EAED; --ink:#13212B; --ink-2:#4C5D68; --line:#D2DBE0;
+  --accent:#0D6788; --on-accent:#FFFFFF; --copper:#9C5224;
+  --good:#1D7448; --warn:#9A6200; --bad:#B03535; --info:#3A5BA0; --muted:#66757F;
+  --scrim:rgba(8,16,22,.45);
+  --font-display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E161B; --surface:#152028; --sunk:#0B1216; --ink:#E4ECF0; --ink-2:#9AAEB9; --line:#263540;
+    --accent:#5DB8DD; --on-accent:#06212C; --copper:#E39A68;
+    --good:#62C994; --warn:#E6B450; --bad:#F08A8A; --info:#93ABEB; --muted:#8B9CA6;
+    --scrim:rgba(0,0,0,.6); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E161B; --surface:#152028; --sunk:#0B1216; --ink:#E4ECF0; --ink-2:#9AAEB9; --line:#263540;
+  --accent:#5DB8DD; --on-accent:#06212C; --copper:#E39A68;
+  --good:#62C994; --warn:#E6B450; --bad:#F08A8A; --info:#93ABEB; --muted:#8B9CA6;
+  --scrim:rgba(0,0,0,.6); color-scheme:dark;
+}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.45}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0}
+button{font:inherit;color:inherit}
+a{color:var(--accent);text-underline-offset:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Cabeçalho e separadores */
+.top{padding-block:22px 0}
+.top-in{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+.eyebrow{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2);font-weight:500}
+h1{font-size:36px;font-weight:600;line-height:1.05;letter-spacing:.005em}
+.next{font-size:13px;color:var(--ink-2);display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right}
+.next b{font-family:var(--font-mono);font-weight:500;font-size:15px;color:var(--ink)}
+@media (max-width:639px){.next{align-items:flex-start;text-align:left}}
+.drive-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--muted);margin-right:6px;vertical-align:1px}
+.drive-dot.ok{background:var(--good)}.drive-dot.err{background:var(--bad)}.drive-dot.busy{background:var(--warn)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-top:14px;overflow-x:auto;scrollbar-width:none}
+.tab{flex:none;background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:9px 12px 10px;font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--ink-2);cursor:pointer;display:inline-flex;gap:7px;align-items:center}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.badge{font-family:var(--font-mono);font-size:11.5px;font-weight:500;background:var(--bad);color:var(--surface);border-radius:999px;padding:0 7px;line-height:1.65}
+.badge:empty{display:none}
+
+main.wrap{padding-block:18px 110px}
+.sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
+.sec-h h2{font-size:21px;font-weight:600}
+.sec-h .count{font-family:var(--font-mono);font-size:13px;color:var(--ink-2)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.note{font-size:12.5px;color:var(--ink-2);margin:10px 0 0;max-width:80ch}
+
+/* Resumo */
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+@media (min-width:720px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.kpi{background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0;text-align:left;border:0;cursor:pointer}
+.kpi:hover{background:var(--sunk)}
+.kpi .k-l{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);font-weight:500}
+.kpi .k-v{font-family:var(--font-display);font-size:30px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .k-s{font-size:13px;color:var(--ink-2);overflow-wrap:anywhere}
+.kpi.t-bad .k-v{color:var(--bad)}.kpi.t-warn .k-v{color:var(--warn)}
+
+.cols{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;margin-top:20px}
+@media (min-width:980px){.cols{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);align-items:start}}
+.side{display:flex;flex-direction:column;gap:22px;min-width:0}
+
+/* Filtros */
+.tools{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chips::-webkit-scrollbar,.tabs::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:13.5px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.chip .n{font-family:var(--font-mono);font-size:12px;color:var(--ink-2)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip[aria-pressed="true"] .n{color:var(--bg);opacity:.75}
+.toolrow{display:flex;flex-wrap:wrap;gap:8px}
+.toolrow > *{flex:1 1 200px;min-width:0}
+.search,.selectf{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);padding:10px 12px;font:inherit;font-size:16px}
+
+/* Cartões de pedido */
+.card{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 12px;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:12px 14px 12px 18px;cursor:pointer}
+.card:first-child{border-top:0}
+.card:hover{background:var(--sunk)}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--stripe,transparent)}
+.s-vermelho{--stripe:var(--bad)}.s-amarelo{--stripe:var(--warn)}.s-verde{--stripe:var(--good)}
+.c-top{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;min-width:0}
+.c-client{font-weight:600;font-size:15.5px;overflow-wrap:anywhere}
+.c-id{font-family:var(--font-mono);font-size:12px;color:var(--ink-2)}
+.c-meta{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;font-size:13px;color:var(--ink-2);min-width:0}
+.c-acao{grid-column:1/-1;font-size:13.5px;overflow-wrap:anywhere}
+.c-acao b{font-weight:600}
+.c-time{font-size:13px;font-weight:600;text-align:right;align-self:start;white-space:nowrap;color:var(--tone,var(--ink-2))}
+.c-money{font-family:var(--font-mono);font-size:12.5px;color:var(--copper);white-space:nowrap}
+.pill{font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;color:var(--tone);background:color-mix(in srgb,var(--tone) 14%,transparent);white-space:nowrap}
+.t-good{--tone:var(--good)}.t-warn{--tone:var(--warn)}.t-bad{--tone:var(--bad)}.t-info{--tone:var(--info)}.t-muted{--tone:var(--muted)}.t-accent{--tone:var(--accent)}
+.prio{font-family:var(--font-mono);font-size:11.5px;font-weight:500;border:1px solid currentColor;border-radius:4px;padding:0 5px;line-height:1.5}
+.p-P1{color:var(--bad)}.p-P2{color:var(--warn)}.p-P3{color:var(--info)}
+.esc{font-size:11.5px;font-weight:600;color:var(--bad);border:1px solid color-mix(in srgb,var(--bad) 45%,transparent);border-radius:4px;padding:0 5px;line-height:1.5}
+.conf{font-size:11.5px;font-weight:600;color:var(--warn);border:1px dashed color-mix(in srgb,var(--warn) 60%,transparent);border-radius:4px;padding:0 5px;line-height:1.5}
+.bola{font-size:12px;color:var(--ink-2)}
+.empty{padding:20px 16px;color:var(--ink-2);margin:0}
+.empty b{color:var(--ink);font-family:var(--font-mono);font-weight:500}
+
+/* Tabelas pequenas */
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:500;text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:bottom}
+td{padding:8px 12px;border-top:1px solid var(--line);vertical-align:middle}
+tbody tr:first-child td{border-top:0}
+.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--font-mono);font-size:13px}
+td.n input{width:72px;text-align:right;font-family:var(--font-mono);font-size:15px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);padding:5px 7px}
+.over{color:var(--bad);font-weight:600}
+.sub{color:var(--ink-2);font-size:12px}
+
+/* Botões */
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer;font-size:14.5px}
+.btn:disabled{opacity:.55;cursor:default}
+.btn-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn-ghost:hover{background:var(--sunk)}
+.btn-danger{background:transparent;color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,transparent)}
+.btn-danger.armed{background:var(--bad);color:var(--surface);border-color:var(--bad)}
+.btn-sm{padding:6px 10px;font-size:13.5px}
+.fab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--accent);color:var(--on-accent);border:0;border-radius:999px;padding:13px 20px;font-family:var(--font-display);font-size:18px;font-weight:600;letter-spacing:.01em;cursor:pointer;box-shadow:0 6px 18px rgba(8,30,40,.28);z-index:20}
+
+/* Folha do pedido */
+.backdrop{position:fixed;inset:0;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center;z-index:40}
+.sheet{background:var(--surface);width:100%;max-height:92%;overflow-y:auto;border-radius:14px 14px 0 0;box-sizing:border-box;padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (min-width:640px){.backdrop{align-items:center;padding:24px}.sheet{max-width:660px;border-radius:14px;max-height:100%}}
+.sheet-h{position:sticky;top:0;background:var(--surface);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:14px 16px 12px;border-bottom:1px solid var(--line);z-index:2}
+.sheet-h h2{font-size:22px;font-weight:600;overflow-wrap:anywhere}
+.sheet-h .sub{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-2)}
+.x{background:none;border:1px solid var(--line);border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:18px;line-height:1;flex:none}
+.sheet-b{padding:14px 16px 18px;display:flex;flex-direction:column;gap:18px}
+.block{display:flex;flex-direction:column;gap:8px}
+.block h3{font-size:17px;font-weight:600}
+.status{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:14px}
+.clock{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;background:var(--bg)}
+.clock .big{font-family:var(--font-display);font-size:22px;font-weight:600;color:var(--tone,var(--ink))}
+.clock .small{font-size:13px;color:var(--ink-2)}
+.acao{border:1px solid var(--line);border-left:4px solid var(--stripe,var(--line));border-radius:10px;padding:10px 12px;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;justify-content:space-between}
+.acao .what{font-weight:600;overflow-wrap:anywhere}
+.acao .who{font-size:13px;color:var(--ink-2)}
+.trans{display:flex;flex-wrap:wrap;gap:8px}
+.hint{font-size:13px;color:var(--ink-2);margin:0}
+.hint.alert{color:var(--warn);font-weight:500}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+.fields{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+@media (min-width:480px){.fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.full{grid-column:1/-1}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f label,.f .lbl{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);font-weight:500}
+.f input,.f select,.f textarea{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);padding:9px 10px;font:inherit;font-size:16px;min-width:0}
+.f textarea{min-height:64px;resize:vertical}
+.f .aux{font-size:12.5px;color:var(--ink-2)}
+.f .aux:empty{display:none}
+.f .aux a{color:var(--accent)}
+.check{display:flex;gap:8px;align-items:center;font-size:14.5px}
+.check input{width:18px;height:18px;flex:none}
+.tform{border:1px solid var(--accent);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:12px;background:color-mix(in srgb,var(--accent) 5%,var(--surface))}
+.tform h3{font-size:18px}
+.row-end{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.err{color:var(--bad);font-size:13.5px;margin:0}
+.hist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+.hist li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px}
+.hist .when{font-family:var(--font-mono);font-size:12px;color:var(--ink-2);padding-top:1px}
+details.dados summary{cursor:pointer;font-family:var(--font-display);font-size:17px;font-weight:600}
+details.dados[open] summary{margin-bottom:10px}
+
+/* Entrada */
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-left,0px))}
+.login-box{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:26px 22px;width:100%;max-width:380px;display:flex;flex-direction:column;gap:14px}
+.login-box h1{font-size:30px}
+.login-box .f input{font-size:16px}
+.user{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-2);flex-wrap:wrap;justify-content:flex-end}
+.user b{color:var(--ink);font-weight:600}
+.live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--muted);vertical-align:1px;margin-right:5px}
+.live.ok{background:var(--good)}.live.err{background:var(--bad)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;z-index:60;max-width:calc(100% - 32px);box-sizing:border-box}
+@media (prefers-reduced-motion:no-preference){.card,.chip,.btn,.tab,.kpi{transition:background-color .12s ease,color .12s ease}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+
+<div class="login" id="login" hidden>
+  <form class="login-box" id="loginForm">
+    <div>
+      <div class="eyebrow">MDM · Climatização</div>
+      <h1>Registo de pedidos</h1>
+    </div>
+    <div class="f"><label for="l-email">Email</label><input id="l-email" type="email" autocomplete="username" required></div>
+    <div class="f"><label for="l-pass">Palavra-passe</label><input id="l-pass" type="password" autocomplete="current-password" required></div>
+    <p class="err" id="l-err" hidden></p>
+    <button class="btn" type="submit" id="l-ok">Entrar</button>
+    <p class="hint">Só entra quem o Bernardo autorizou. Sem conta ou sem acesso, fala com ele.</p>
+  </form>
+</div>
+
+<div id="app" hidden>
+<header class="top">
+  <div class="wrap top-in">
+    <div>
+      <div class="eyebrow">MDM · Climatização</div>
+      <h1>Pedidos e orçamentos</h1>
+    </div>
+    <div class="next">
+      <span>Próximo orçamento <b id="nextNum">ORC…</b></span>
+      <span class="user"><span id="liveDot" class="live" aria-hidden="true"></span><span id="userTxt"></span><button class="btn btn-ghost btn-sm" type="button" id="btnSair">Sair</button></span>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="tabs" role="tablist" aria-label="Vistas" id="tabs">
+      <button class="tab" role="tab" type="button" id="tab-triagem" aria-controls="v-triagem" aria-selected="true">Triagem <span class="badge" id="redBadge"></span></button>
+      <button class="tab" role="tab" type="button" id="tab-registo" aria-controls="v-registo" aria-selected="false" tabindex="-1">Registo</button>
+      <button class="tab" role="tab" type="button" id="tab-prazos" aria-controls="v-prazos" aria-selected="false" tabindex="-1">Prazos e exportar</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="v-triagem" role="tabpanel" aria-labelledby="tab-triagem">
+    <section class="kpis" id="kpis" aria-label="Resumo"></section>
+    <div class="cols">
+      <section aria-labelledby="h-lista" style="min-width:0">
+        <div class="sec-h"><h2 id="h-lista">Pela ordem do P e do tempo que falta</h2><span class="count" id="listaCount"></span></div>
+        <div class="tools">
+          <div class="chips" id="chipsT" role="group" aria-label="Filtrar a triagem"></div>
+          <div class="toolrow"><select class="selectf" id="fDono" aria-label="Filtrar por dono"></select></div>
+        </div>
+        <div class="panel" id="lista"></div>
+      </section>
+      <div class="side">
+        <section aria-labelledby="h-fila">
+          <div class="sec-h"><h2 id="h-fila">Fila por estado</h2></div>
+          <div class="panel tw" id="fila"></div>
+        </section>
+        <section aria-labelledby="h-donos">
+          <div class="sec-h"><h2 id="h-donos">Por dono</h2><span class="count" id="limiteTxt"></span></div>
+          <div class="panel tw" id="donos"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div id="v-registo" role="tabpanel" aria-labelledby="tab-registo" hidden>
+    <div class="sec-h"><h2>Todos os pedidos</h2><span class="count" id="regCount"></span></div>
+    <div class="tools">
+      <div class="chips" id="chipsR" role="group" aria-label="Filtrar o registo"></div>
+      <input class="search" id="q" type="search" placeholder="Procurar cliente, localidade, nº ORC ou pedido" autocomplete="off">
+    </div>
+    <div class="panel" id="registo"></div>
+  </div>
+
+  <div id="v-prazos" role="tabpanel" aria-labelledby="tab-prazos" hidden>
+    <div class="cols">
+      <section aria-labelledby="h-prazos" style="min-width:0">
+        <div class="sec-h"><h2 id="h-prazos">Prazos por estado e P</h2><span class="count" id="prazosEstado"></span></div>
+        <div class="panel tw" id="prazos"></div>
+        <p class="note" id="prazosNota"></p>
+        <div class="row-end" style="margin-top:10px"><button class="btn" id="btnPrazos" type="button" hidden>Guardar prazos</button></div>
+      </section>
+      <div class="side">
+        <section aria-labelledby="h-export">
+          <div class="sec-h"><h2 id="h-export">Exportar</h2></div>
+          <div class="panel" style="padding:14px;display:flex;flex-direction:column;gap:10px" id="export"></div>
+        </section>
+        <section aria-labelledby="h-equipa">
+          <div class="sec-h"><h2 id="h-equipa">Equipa</h2></div>
+          <div class="panel tw" id="equipa"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<button class="fab" id="btnNovo" type="button" hidden>+ Novo pedido</button>
+
+<div class="backdrop" id="sheetWrap" hidden>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-h">
+      <div style="min-width:0"><h2 id="sheetTitle">Pedido</h2><div class="sub" id="sheetSub"></div></div>
+      <button class="x" type="button" id="btnClose" aria-label="Fechar">×</button>
+    </div>
+    <div class="sheet-b" id="sheetBody"></div>
+  </div>
+</div>
+
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(() => {
+  /* ---------- Estados (os 9 do documento "Estados, prioridades e prazos") ---------- */
+  const ESTADOS = {
+    novo:                {l:'Novo', bola:'MDM', un:'h', t:'info'},
+    visita_por_marcar:   {l:'Visita por marcar', bola:'MDM', un:'du', t:'info'},
+    visita_marcada:      {l:'Visita marcada', bola:'MDM', un:'data', t:'info'},
+    orcamento_por_fazer: {l:'Orçamento por fazer', bola:'MDM', un:'du', t:'info'},
+    espera_cliente:      {l:'À espera do cliente', bola:'cliente', un:'d', t:'muted'},
+    espera_fornecedor:   {l:'À espera de peça/fornecedor', bola:'fornecedor', un:'du', t:'muted'},
+    em_execucao:         {l:'Em execução', bola:'MDM', un:'du', t:'accent'},
+    resolvido:           {l:'Resolvido', bola:null, t:'good'},
+    perdido:             {l:'Perdido', bola:null, t:'bad'},
+  };
+  const ABERTOS = ['novo','visita_por_marcar','visita_marcada','orcamento_por_fazer','espera_cliente','espera_fornecedor','em_execucao'];
+  const DA_MDM = ['novo','visita_por_marcar','visita_marcada','orcamento_por_fazer','em_execucao'];
+  const ESPERAS = ['espera_cliente','espera_fornecedor'];
+  const COM_TABELA = ['novo','visita_por_marcar','orcamento_por_fazer','espera_cliente','espera_fornecedor','em_execucao'];
+  const UNIDADE = {h:'horas úteis', du:'dias úteis', d:'dias'};
+  // Provisórios até haver dados reais: os definitivos saem do modo sombra (python -m funil sombra).
+  const PRAZOS_PADRAO = {
+    novo:{P1:4,P2:9,P3:18}, visita_por_marcar:{P1:1,P2:2,P3:3}, orcamento_por_fazer:{P1:1,P2:2,P3:3},
+    espera_cliente:{P1:3,P2:5,P3:7}, espera_fornecedor:{P1:3,P2:5,P3:10}, em_execucao:{P1:2,P2:10,P3:15},
+  };
+  const LIMITE_PADRAO = 7;
+  const PRIOS = ['P1','P2','P3'];
+  const PRIO_NOME = {P1:'P1 · Urgente', P2:'P2 · Alta', P3:'P3 · Normal'};
+  const TIPOS = {instalacao:'Instalação', manutencao:'Manutenção', reparacao:'Avaria / reparação', obra:'Obra'};
+  const ORIGENS = {site:'Site', telefone:'Telefone', email:'Email', whatsapp:'WhatsApp', outro:'Outro'};
+  const MOTIVOS = ['Foi com outra empresa','Preço','Prazo','Desistiu ou adiou','Sem resposta','Não fazemos este trabalho','Outro'];
+  const POR_ONDE = {email:'Email', whatsapp:'WhatsApp', em_mao:'Em mão', outro:'Outro'};
+  // A chave publicável do Supabase pode estar à vista: quem lê e escreve é decidido pelas regras da base de dados
+  // (tabela colaboradores e RLS, em supabase/migracao.sql), não pela chave.
+  const SUPABASE_URL = 'https://kfhxlrikqjynvjdtywuc.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_Kpi28Ee4n0q7NAOaFVg7tQ_EtjyFgov';
+  const SEV = {vermelho:0, amarelo:1, verde:2};
+
+  /* ---------- Utilitários ---------- */
+  const F = id => document.getElementById(id);
+  const eurF = new Intl.NumberFormat('pt-PT',{style:'currency',currency:'EUR'});
+  const eur = v => eurF.format(v || 0);
+  const pad = n => String(n).padStart(2,'0');
+  const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const today = () => iso(new Date());
+  const addDays = (s,n) => { const [y,m,d] = s.split('-').map(Number); return iso(new Date(y,m-1,d+n)); };
+  const ddmm = s => { if (!s) return ''; const [, m, d] = s.slice(0,10).split('-'); return `${d}/${m}`; };
+  const hhmm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const quando = d => `${ddmm(iso(d))} ${hhmm(d)}`;
+  const norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const num1 = v => v.toLocaleString('pt-PT',{maximumFractionDigits:1});
+  const up = p => p === 'P3' ? 'P2' : p === 'P2' ? 'P1' : 'P1';
+
+  // replaceChildren escreveria "null" à letra: este deixa cair os vazios.
+  const fill = (el, ...kids) => el.replaceChildren(...kids.flat().filter(k => k != null && k !== false));
+  function h(tag, attrs, ...kids) {
+    const el = document.createElement(tag);
+    if (attrs) for (const [k,v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === 'class') el.className = v;
+      else if (k === 'style') el.setAttribute('style', v);
+      else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? '' : v);
+    }
+    for (const c of kids.flat()) { if (c == null || c === false || c === '') continue; el.append(c.nodeType ? c : document.createTextNode(String(c))); }
+    return el;
+  }
+
+  /* ---------- Calendário: horas úteis 9h-18h, sem feriados nacionais nem Santo António ---------- */
+  const H_INI = 9, H_FIM = 18, H_DIA = 9;
+  const FIXOS = ['01-01','04-25','05-01','06-10','06-13','08-15','10-05','11-01','12-01','12-08','12-25'];
+  const ferCache = {};
+  function pascoa(y) {
+    const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4;
+    const f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), hh = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - hh - k) % 7, m = Math.floor((a + 11 * hh + 22 * l) / 451);
+    const mes = Math.floor((hh + l - 7 * m + 114) / 31), dia = ((hh + l - 7 * m + 114) % 31) + 1;
+    return iso(new Date(y, mes - 1, dia));
+  }
+  function feriados(y) {
+    if (!ferCache[y]) { const p = pascoa(y); ferCache[y] = new Set([...FIXOS.map(md => `${y}-${md}`), addDays(p,-2), p, addDays(p,60)]); }
+    return ferCache[y];
+  }
+  function isUtil(s) { const [y,m,d] = s.split('-').map(Number); const wd = new Date(y,m-1,d).getDay(); return wd !== 0 && wd !== 6 && !feriados(y).has(s); }
+  function addUteis(s, n) { let d = s, c = 0; while (c < n) { d = addDays(d, 1); if (isUtil(d)) c++; } return d; }
+  const janela = d => [new Date(d.getFullYear(), d.getMonth(), d.getDate(), H_INI), new Date(d.getFullYear(), d.getMonth(), d.getDate(), H_FIM)];
+  function horasUteis(a, b) {
+    if (!(b > a)) return 0;
+    let total = 0;
+    const d = new Date(a.getFullYear(), a.getMonth(), a.getDate());
+    for (let i = 0; d <= b && i < 5000; i++) {
+      if (isUtil(iso(d))) {
+        const [ji, jf] = janela(d);
+        const ini = a > ji ? a : ji, fim = b < jf ? b : jf;
+        if (fim > ini) total += (fim - ini) / 3600000;
+      }
+      d.setDate(d.getDate() + 1);
+    }
+    return total;
+  }
+  function somarHorasUteis(a, horas) {
+    let cur = new Date(a), resta = Math.max(0, horas) * 3600000;
+    for (let i = 0; i < 5000; i++) {
+      const d = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate());
+      if (isUtil(iso(d))) {
+        const [ji, jf] = janela(d);
+        const ini = cur > ji ? cur : ji;
+        if (ini < jf) { const disp = jf - ini; if (resta <= disp) return new Date(ini.getTime() + resta); resta -= disp; }
+      }
+      cur = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+    }
+    return cur;
+  }
+  function duracaoTxt(horas, un) {
+    if (un === 'd') { const dd = horas / 24; return dd < 1 ? `${Math.max(1, Math.round(horas))} h` : `${num1(dd)} ${dd < 1.05 ? 'dia' : 'dias'}`; }
+    if (horas < H_DIA) return `${num1(Math.max(horas, 0.1))} h úteis`;
+    const dd = horas / H_DIA;
+    return `${num1(dd)} ${dd < 1.05 ? 'dia útil' : 'dias úteis'}`;
+  }
+
+  /* ---------- Estado da página ---------- */
+  let sb = null, sessao = null, eu = null, equipa = [], rows = [], status = 'loading', canWrite = false;
+  let cfgPrazos = null, cfgPrazosVersao = 0, ligado = false;
+  let filtroT = 'abertos', filtroR = 'abertos', dono = '', query = '';
+  let currentId = null, modo = null, trans = null, saving = false, delArmed = null;
+  let sheetSujo = false, dadosAberto = false, prazosSujos = false;
+
+  const prazosAtuais = () => (cfgPrazos && cfgPrazos.valores) || PRAZOS_PADRAO;
+  const limiteDono = () => (cfgPrazos && Number(cfgPrazos.limiteDono)) || LIMITE_PADRAO;
+  function prazoDe(estado, p) { const t = prazosAtuais()[estado]; const v = t ? Number(t[p || 'P3']) : NaN; return Number.isFinite(v) && v > 0 ? v : null; }
+
+  /* ---------- Relógio ---------- */
+  // Devolve {vence: Date, atrasoH, restaH, un, prazo} para o estado atual do pedido.
+  function relogio(r, agora) {
+    agora = agora || new Date();
+    if (!ABERTOS.includes(r.estado)) return null;
+    const e = ESTADOS[r.estado];
+    // Dados importados por confirmar: o relógio só começa na próxima mudança de estado.
+    if (r.porConfirmar) return {un: e.un, vence: null, parado: true};
+    const p = r.prioridade || 'P3';
+    const desde = r.entrouNoEstado ? new Date(r.entrouNoEstado) : null;
+    if (r.estado === 'visita_marcada') {
+      if (!r.dataVisita) return {un:'data', vence:null};
+      const lim = addUteis(r.dataVisita, 1);
+      const [y,m,d] = lim.split('-').map(Number);
+      const vence = new Date(y, m-1, d, H_FIM);
+      return {un:'data', vence, atrasoH: agora > vence ? horasUteis(vence, agora) : 0, restaH: agora < vence ? horasUteis(agora, vence) : 0};
+    }
+    const v = prazoDe(r.estado, p);
+    if (v == null || !desde) return {un:e.un, vence:null};
+    if (e.un === 'd') {
+      const base = r.ultimoSeguimento ? new Date(r.ultimoSeguimento) : desde;
+      const vence = new Date(base.getTime() + v * 86400000);
+      return {un:'d', prazo:v, vence, atrasoH: agora > vence ? (agora - vence) / 3600000 : 0, restaH: agora < vence ? (vence - agora) / 3600000 : 0};
+    }
+    if (r.estado === 'espera_fornecedor') {
+      const base = r.ultimoSeguimento ? new Date(r.ultimoSeguimento) : desde;
+      const vence = somarHorasUteis(base, v * H_DIA);
+      return {un:'du', prazo:v, vence, atrasoH: agora > vence ? horasUteis(vence, agora) : 0, restaH: agora < vence ? horasUteis(agora, vence) : 0};
+    }
+    const total = e.un === 'h' ? v : v * H_DIA;
+    const gasto = (Number(r.acumuladoH) || 0) + horasUteis(desde, agora);
+    const resta = total - gasto;
+    const vence = resta > 0 ? somarHorasUteis(agora, resta) : new Date(agora.getTime() - 1000);
+    return {un:e.un, prazo:v, vence, gastoH:gasto, atrasoH: Math.max(0, -resta), restaH: Math.max(0, resta)};
+  }
+  function atrasadoNaMDM(r, rel) { return DA_MDM.includes(r.estado) && rel && rel.vence && rel.atrasoH > 0; }
+  function semaforo(r, rel) {
+    if (!ABERTOS.includes(r.estado)) return null;
+    const hoje = today();
+    const acaoAtrasada = r.dataProximaAcao && r.dataProximaAcao < hoje;
+    const acaoHoje = r.dataProximaAcao === hoje;
+    if ((rel && rel.vence && rel.atrasoH > 0) || acaoAtrasada || !r.proximaAcao) return 'vermelho';
+    if ((rel && rel.vence && iso(rel.vence) === hoje) || acaoHoje) return 'amarelo';
+    return 'verde';
+  }
+  // Escalada: sobe um nível uma vez; fica gravada na mudança de estado seguinte. Pedidos por confirmar não escalam.
+  function pEfetiva(r, rel) {
+    const p = r.prioridade || 'P3';
+    if (!r.escalado && !r.porConfirmar && p !== 'P1' && atrasadoNaMDM(r, rel)) return {p: up(p), de: p};
+    return {p, de:null};
+  }
+  function urgencia(r, rel) {
+    const t = [];
+    if (rel && rel.vence) t.push(rel.vence.getTime());
+    if (r.dataProximaAcao) { const [y,m,d] = r.dataProximaAcao.split('-').map(Number); t.push(new Date(y,m-1,d,H_FIM).getTime()); }
+    return t.length ? Math.min(...t) : Infinity;
+  }
+  function tempoTxt(r, rel) {
+    if (rel && rel.parado) return 'Relógio parado';
+    if (!rel || !rel.vence) return r.estado === 'visita_marcada' ? 'Falta a data da visita' : 'Sem prazo';
+    const un = rel.un === 'data' ? 'du' : rel.un;
+    if (r.estado === 'visita_marcada') {
+      if (rel.atrasoH > 0) return `Folha da visita atrasada ${duracaoTxt(rel.atrasoH, un)}`;
+      if (r.dataVisita === today()) return `Visita hoje${r.horaVisita ? ' às ' + r.horaVisita : ''}`;
+      if (r.dataVisita < today()) return 'Folha da visita até hoje';
+      return `Visita a ${ddmm(r.dataVisita)}${r.horaVisita ? ' às ' + r.horaVisita : ''}`;
+    }
+    if (rel.atrasoH > 0) return `Atrasado ${duracaoTxt(rel.atrasoH, un)}`;
+    if (iso(rel.vence) === today()) return `Vence hoje às ${hhmm(rel.vence)}`;
+    return `Faltam ${duracaoTxt(rel.restaH, un)}`;
+  }
+  const semTone = s => s === 'vermelho' ? 'bad' : s === 'amarelo' ? 'warn' : 'good';
+  const ultimoContacto = r => r.ultimoContacto || r.entrouNoEstado || r.criado || null;
+  function semContacto30(r) {
+    if (!ABERTOS.includes(r.estado)) return false;
+    if (r.estado === 'visita_marcada' && r.dataVisita && r.dataVisita >= today()) return false;
+    const u = ultimoContacto(r); if (!u) return false;
+    return (Date.now() - new Date(u).getTime()) > 30 * 86400000;
+  }
+  const novoDesdeOntem = r => r.estado === 'novo' || String(r.dataPedido || (r.criado || '').slice(0,10)) >= addDays(today(), -1);
+
+  /* ---------- Regras de entrada do P ---------- */
+  function sugerirP(d) {
+    if (d.tipo === 'reparacao') return {p:'P1', why:'avaria'};
+    if (d.tipo === 'obra') return {p:'P2', why:'obra'};
+    if (d.dataImposta) return {p:'P2', why:'data imposta pelo cliente'};
+    if ((Number(d.unidades) || 0) >= 3) return {p:'P2', why:'3 ou mais unidades'};
+    return {p:'P3', why:'nenhuma regra de P1 ou P2'};
+  }
+
+  /* ---------- Numeração ---------- */
+  function nextNumber() {
+    const year = new Date().getFullYear();
+    const max = rows.reduce((m, r) => { const x = /^ORC(\d{4})_(\d{4})$/.exec(r.num || ''); return x && Number(x[2]) === year ? Math.max(m, Number(x[1])) : m; }, 0);
+    return `ORC${String(max + 1).padStart(4,'0')}_${year}`;
+  }
+  function nextPedido() {
+    const year = new Date().getFullYear();
+    const max = rows.reduce((m, r) => { const x = /^PED(\d{4})_(\d{4})$/.exec(r.id || ''); return x && Number(x[2]) === year ? Math.max(m, Number(x[1])) : m; }, 0);
+    return `PED${String(max + 1).padStart(4,'0')}_${year}`;
+  }
+
+  /* ---------- Separadores ---------- */
+  const TABS = ['triagem','registo','prazos'];
+  let tab = 'triagem';
+  try { const s = localStorage.getItem('registo-tab'); if (TABS.includes(s)) tab = s; } catch (e) {}
+  if (TABS.includes(location.hash.replace('#',''))) tab = location.hash.replace('#','');
+  function setTab(t, focus) {
+    tab = t;
+    for (const k of TABS) {
+      const b = F('tab-' + k);
+      b.setAttribute('aria-selected', String(k === t)); b.tabIndex = k === t ? 0 : -1;
+      F('v-' + k).hidden = k !== t;
+    }
+    try { localStorage.setItem('registo-tab', t); } catch (e) {}
+    if (focus) F('tab-' + t).focus();
+  }
+  TABS.forEach(k => F('tab-' + k).addEventListener('click', () => setTab(k)));
+  F('tabs').addEventListener('keydown', e => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    const i = TABS.indexOf(tab), n = TABS.length;
+    setTab(TABS[(i + (e.key === 'ArrowRight' ? 1 : n - 1)) % n], true); e.preventDefault();
+  });
+  setTab(tab);
+
+  function stateMsg() {
+    if (status === 'loading') return h('p',{class:'empty'},'A carregar os pedidos…');
+    return h('p',{class:'empty'},'Não foi possível ler os pedidos. Verifica a ligação e recarrega a página.');
+  }
+
+  /* ---------- Triagem ---------- */
+  function enriquecidos() {
+    const agora = new Date();
+    return rows.map(r => { const rel = relogio(r, agora); const sem = semaforo(r, rel); return {r, rel, sem, pe: pEfetiva(r, rel), urg: urgencia(r, rel)}; });
+  }
+  const ordem = (a, b) => (PRIOS.indexOf(a.pe.p) - PRIOS.indexOf(b.pe.p)) || (a.urg - b.urg) || String(a.r.id).localeCompare(String(b.r.id));
+  const FILTROS_T = [
+    ['abertos','Todos abertos', x => ABERTOS.includes(x.r.estado)],
+    ['vermelhos','Vermelhos', x => x.sem === 'vermelho'],
+    ['hoje','Vencem hoje', x => x.sem === 'amarelo'],
+    ['novos','Novos desde ontem', x => ABERTOS.includes(x.r.estado) && novoDesdeOntem(x.r)],
+    ['sem30','Sem contacto há 30 dias', x => semContacto30(x.r)],
+    ['confirmar','Por confirmar', x => ABERTOS.includes(x.r.estado) && x.r.porConfirmar],
+  ];
+
+  function renderKpis(all) {
+    const ab = all.filter(x => ABERTOS.includes(x.r.estado));
+    const mdm = ab.filter(x => DA_MDM.includes(x.r.estado));
+    const verm = ab.filter(x => x.sem === 'vermelho');
+    const hoje = ab.filter(x => x.sem === 'amarelo');
+    const s30 = ab.filter(x => semContacto30(x.r));
+    const ready = status === 'ok';
+    const tile = (l, v, s, tone, filtro) => h('button',{class:'kpi' + (tone ? ' t-' + tone : ''), type:'button', onclick:() => { filtroT = filtro; renderAll(); }},
+      h('span',{class:'k-l'},l), h('span',{class:'k-v'}, ready ? v : '–'), h('span',{class:'k-s'}, ready ? s : ' '));
+    F('kpis').replaceChildren(
+      tile('Bola com a MDM', mdm.length, `${ab.length} pedidos abertos`, '', 'abertos'),
+      tile('Vermelhos', verm.length, verm.length ? 'Decidir hoje na triagem' : 'Nada fora do prazo', verm.length ? 'bad' : '', 'vermelhos'),
+      tile('Vencem hoje', hoje.length, hoje.length ? 'Confirmar quem faz' : 'Nada para hoje', hoje.length ? 'warn' : '', 'hoje'),
+      tile('Sem contacto há 30 dias', s30.length, s30.length ? 'Fechar ou dar ação para hoje' : 'Nenhum parado', s30.length ? 'warn' : '', 'sem30'),
+    );
+  }
+
+  function card(x) {
+    const {r, rel, sem, pe} = x;
+    const e = ESTADOS[r.estado] || ESTADOS.novo;
+    const ids = [r.num, r.id !== r.num ? r.id : null].filter(Boolean).join(' · ');
+    const meta = [TIPOS[r.tipo], r.localidade].filter(Boolean).join(' · ');
+    const acaoAtrasada = r.dataProximaAcao && r.dataProximaAcao < today();
+    return h('button',{class:`card s-${sem || 'none'}`, type:'button', onclick:() => openSheet(r.id)},
+      h('span',{class:'c-top'},
+        h('span',{class:`prio p-${pe.p}`}, pe.p),
+        h('span',{class:'c-client'}, r.cliente || 'Sem nome'),
+        h('span',{class:'c-id'}, ids)),
+      sem ? h('span',{class:'c-time', style:`--tone:var(--${semTone(sem)})`}, tempoTxt(r, rel)) : h('span',{class:'c-time'}, e.l),
+      h('span',{class:'c-meta'},
+        h('span',{class:`pill t-${e.t}`}, e.l),
+        e.bola && e.bola !== 'MDM' ? h('span',{class:'bola'}, `bola com o ${e.bola}`) : null,
+        pe.de ? h('span',{class:'esc'}, `Sobe de ${pe.de}`) : null,
+        r.porConfirmar ? h('span',{class:'conf'}, 'Por confirmar') : null,
+        meta ? h('span',null, meta) : null,
+        r.valor != null ? h('span',{class:'c-money'}, eur(r.valor)) : null),
+      ABERTOS.includes(r.estado) ? h('span',{class:'c-acao'},
+        r.proximaAcao ? [h('b',null, r.dono || 'Sem dono'), ': ', r.proximaAcao, r.dataProximaAcao ? ` · ${acaoAtrasada ? 'devia ser a ' : 'até '}${ddmm(r.dataProximaAcao)}` : '']
+          : h('span',{class:'over'},'Falta dono, próxima ação e data')) : null,
+    );
+  }
+
+  function renderLista(all) {
+    const box = F('lista');
+    if (status !== 'ok') { box.replaceChildren(stateMsg()); F('listaCount').textContent = ''; return; }
+    F('chipsT').replaceChildren(...FILTROS_T.filter(([k,,fn]) => k === 'abertos' || k === filtroT || all.some(fn)).map(([k,l,fn]) =>
+      h('button',{class:'chip', type:'button', 'aria-pressed': String(filtroT === k), onclick:() => { filtroT = k; renderAll(); }}, l, h('span',{class:'n'}, all.filter(fn).length))));
+    const donos = [...new Set(rows.filter(r => ABERTOS.includes(r.estado)).map(r => r.dono || 'Sem dono'))].sort();
+    F('fDono').replaceChildren(h('option',{value:''},'Todos os donos'), ...donos.map(d => h('option',{value:d}, d)));
+    F('fDono').value = donos.includes(dono) ? dono : '';
+    const fn = (FILTROS_T.find(f => f[0] === filtroT) || FILTROS_T[0])[2];
+    const lista = all.filter(fn).filter(x => !F('fDono').value || (x.r.dono || 'Sem dono') === F('fDono').value).sort(ordem);
+    F('listaCount').textContent = lista.length ? String(lista.length) : '';
+    if (!lista.length) {
+      const vazio = rows.length ? 'Nada com este filtro.' : 'Ainda não há pedidos. Toca em «Novo pedido» quando chegar o primeiro.';
+      box.replaceChildren(h('p',{class:'empty'}, vazio)); return;
+    }
+    box.replaceChildren(...lista.map(card));
+  }
+
+  function renderFila(all) {
+    const box = F('fila');
+    if (status !== 'ok') { box.replaceChildren(stateMsg()); return; }
+    const ab = all.filter(x => ABERTOS.includes(x.r.estado));
+    const linhas = ABERTOS.map(k => {
+      const xs = ab.filter(x => x.r.estado === k);
+      const v = xs.filter(x => x.sem === 'vermelho').length;
+      return h('tr',null,
+        h('td',null, ESTADOS[k].l, h('div',{class:'sub'}, ESTADOS[k].bola === 'MDM' ? 'bola com a MDM' : `bola com o ${ESTADOS[k].bola}`)),
+        ...PRIOS.map(p => h('td',{class:'n'}, xs.filter(x => x.pe.p === p).length || '')),
+        h('td',{class:'n' + (v ? ' over' : '')}, v || ''));
+    });
+    box.replaceChildren(h('table',null,
+      h('thead',null, h('tr',null, h('th',null,'Estado'), ...PRIOS.map(p => h('th',{class:'n'}, p)), h('th',{class:'n'},'Verm.'))),
+      h('tbody',null, linhas)));
+  }
+
+  function renderDonos(all) {
+    const box = F('donos');
+    if (status !== 'ok') { box.replaceChildren(stateMsg()); F('limiteTxt').textContent = ''; return; }
+    const lim = limiteDono();
+    F('limiteTxt').textContent = `limite ${lim}`;
+    const mdm = all.filter(x => DA_MDM.includes(x.r.estado));
+    const esp = all.filter(x => ESPERAS.includes(x.r.estado));
+    const nomes = [...new Set([...mdm, ...esp].map(x => x.r.dono || 'Sem dono'))].sort();
+    if (!nomes.length) { box.replaceChildren(h('p',{class:'empty'},'Sem pedidos abertos.')); return; }
+    box.replaceChildren(h('table',null,
+      h('thead',null, h('tr',null, h('th',null,'Dono'), h('th',{class:'n'},'Bola com a MDM'), h('th',{class:'n'},'Em espera'))),
+      h('tbody',null, nomes.map(n => {
+        const k = mdm.filter(x => (x.r.dono || 'Sem dono') === n).length;
+        return h('tr',null, h('td',null,n), h('td',{class:'n' + (k > lim ? ' over' : '')}, `${k} de ${lim}`), h('td',{class:'n'}, esp.filter(x => (x.r.dono || 'Sem dono') === n).length));
+      }))));
+  }
+
+  /* ---------- Registo ---------- */
+  const FILTROS_R = [
+    ['abertos','Abertos', r => ABERTOS.includes(r.estado)],
+    ['resolvidos','Resolvidos', r => r.estado === 'resolvido'],
+    ['perdidos','Perdidos', r => r.estado === 'perdido'],
+    ['todos','Todos', () => true],
+  ];
+  function renderRegisto(all) {
+    const box = F('registo');
+    if (status !== 'ok') { box.replaceChildren(stateMsg()); F('regCount').textContent = ''; return; }
+    F('chipsR').replaceChildren(...FILTROS_R.map(([k,l,fn]) => h('button',{class:'chip', type:'button', 'aria-pressed': String(filtroR === k), onclick:() => { filtroR = k; renderAll(); }}, l, h('span',{class:'n'}, rows.filter(fn).length))));
+    F('regCount').textContent = rows.length ? `${rows.length} no total` : '';
+    const fn = (FILTROS_R.find(f => f[0] === filtroR) || FILTROS_R[0])[2];
+    const q = norm(query.trim());
+    const quandoEntrou = r => String(r.dataPedido || (r.criado || '').slice(0,10));
+    const lista = all.filter(x => fn(x.r)).filter(x => !q || norm([x.r.id, x.r.num, x.r.cliente, x.r.localidade, x.r.descricao, x.r.contacto].join(' ')).includes(q))
+      .sort((a, b) => quandoEntrou(b.r).localeCompare(quandoEntrou(a.r)) || String(b.r.id).localeCompare(String(a.r.id)));
+    box.replaceChildren(...(lista.length ? lista.map(card) : [h('p',{class:'empty'},'Nenhum pedido com este filtro.')]));
+  }
+
+  /* ---------- Prazos e Drive ---------- */
+  function renderPrazos() {
+    const box = F('prazos');
+    // Não apagar o que está a ser escrito na tabela.
+    if (prazosSujos || box.contains(document.activeElement)) return;
+    const valores = prazosAtuais();
+    const editavel = canWrite && status === 'ok';
+    F('prazosEstado').textContent = cfgPrazos && cfgPrazos.provisorio === false ? 'validados' : 'provisórios';
+    box.replaceChildren(h('table',null,
+      h('thead',null, h('tr',null, h('th',null,'Estado'), h('th',null,'Unidade'), ...PRIOS.map(p => h('th',{class:'n'}, p)))),
+      h('tbody',null,
+        ...COM_TABELA.map(k => h('tr',null,
+          h('td',null, ESTADOS[k].l, k === 'espera_cliente' ? h('div',{class:'sub'},'1.º seguimento; os seguintes com o mesmo intervalo') : k === 'espera_fornecedor' ? h('div',{class:'sub'},'perguntar ao fornecedor') : null),
+          h('td',{class:'sub'}, UNIDADE[ESTADOS[k].un]),
+          ...PRIOS.map(p => h('td',{class:'n'}, editavel ? h('input',{id:`pz-${k}-${p}`, inputmode:'decimal', value:String(valores[k] && valores[k][p] != null ? valores[k][p] : '').replace('.',','), 'aria-label':`${ESTADOS[k].l} ${p}`}) : String(valores[k] ? valores[k][p] : '–').replace('.',','))))),
+        h('tr',null, h('td',null,'Visita marcada', h('div',{class:'sub'},'a própria data; a folha da visita até ao dia útil seguinte')), h('td',{class:'sub'},'data'), h('td',{class:'n', colspan:'3'}, '–')),
+        h('tr',null, h('td',null,'Limite de abertos por dono', h('div',{class:'sub'},'pedidos com a bola na MDM')), h('td',{class:'sub'},'pedidos'),
+          h('td',{class:'n', colspan:'3'}, editavel ? h('input',{id:'pz-limite', inputmode:'numeric', value:String(limiteDono()), 'aria-label':'Limite de abertos por dono'}) : String(limiteDono()))))));
+    F('prazosNota').textContent = (cfgPrazos && cfgPrazos.provisorio === false)
+      ? 'Prazos validados. Contam em horas e dias úteis (9h às 18h, sem feriados nem Santo António), menos a espera do cliente, em dias de calendário.'
+      : 'Provisórios, escolhidos à mão até haver dados reais. Os definitivos saem do modo sombra do mdm-funil com 6 a 12 meses de exportações; escreve-os aqui quando o chefe os validar.';
+    F('btnPrazos').hidden = !editavel;
+  }
+
+  async function guardarPrazos() {
+    if (!sb || !canWrite) return;
+    const valores = {};
+    for (const k of COM_TABELA) {
+      valores[k] = {};
+      for (const p of PRIOS) {
+        const v = Number(String(F(`pz-${k}-${p}`).value).replace(',','.'));
+        if (!Number.isFinite(v) || v <= 0) { toast(`Prazo inválido em ${ESTADOS[k].l}, ${p}.`); return; }
+        valores[k][p] = v;
+      }
+      if (!(valores[k].P1 <= valores[k].P2 && valores[k].P2 <= valores[k].P3)) { toast(`Em ${ESTADOS[k].l}, o P1 não pode ter mais tempo do que o P2, nem o P2 do que o P3.`); return; }
+    }
+    const lim = Number(F('pz-limite').value);
+    if (!Number.isInteger(lim) || lim < 1) { toast('O limite por dono tem de ser um número inteiro.'); return; }
+    try {
+      const doc = {valores, limiteDono: lim, provisorio: cfgPrazos ? cfgPrazos.provisorio !== false : true, atualizado: new Date().toISOString()};
+      const {error} = await sb.from('config').upsert({chave:'prazos', valor: doc, atualizado_por: eu.email}, {onConflict:'chave'});
+      if (error) throw error;
+      cfgPrazos = doc; prazosSujos = false;
+      if (document.activeElement && F('prazos').contains(document.activeElement)) document.activeElement.blur();
+      toast('Prazos guardados');
+      renderAll();
+    } catch (e) { toast('Não foi possível guardar os prazos.'); }
+  }
+  F('btnPrazos').addEventListener('click', guardarPrazos);
+  F('prazos').addEventListener('input', () => { prazosSujos = true; });
+
+  function renderExport() {
+    const box = F('export');
+    const n = rows.length;
+    fill(box,
+      h('p',{class:'hint', style:'margin:0'}, 'Descarrega todos os pedidos em CSV (abre no Excel e no Google Sheets, separador vírgula, valores com vírgula decimal). Abertos primeiro, pela ordem da triagem; depois os fechados.'),
+      h('div',{class:'row-end'}, h('button',{class:'btn', type:'button', disabled: status !== 'ok' || !n, onclick: descarregarCSV}, `Exportar CSV (${n})`)));
+  }
+  function renderEquipa() {
+    const box = F('equipa');
+    if (!equipa.length) { fill(box, h('p',{class:'empty'}, 'Sem colaboradores autorizados.')); return; }
+    fill(box, h('table',null, h('thead',null, h('tr',null, h('th',null,'Nome'), h('th',null,'Email'))),
+      h('tbody',null, equipa.map(c => h('tr',null, h('td',null, c.nome || ''), h('td',{class:'sub'}, c.email))))),
+      h('p',{class:'note', style:'padding:10px 12px'}, 'Para dar acesso a mais alguém: criar a conta em Supabase, Authentication, Users, e juntar o email à tabela colaboradores.'));
+  }
+  function descarregarCSV() {
+    const blob = new Blob(['\ufeff' + gerarCSV()], {type:'text/csv;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = `registo-mdm-${today()}.csv`;
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    toast('CSV descarregado');
+  }
+
+  /* ---------- Folha na Drive ---------- */
+  const csvCell = v => v == null ? '' : `"${String(v).replace(/"/g,'""')}"`;
+  const dec = v => v == null ? '' : Number(v).toFixed(2).replace('.',',');
+  function gerarCSV() {
+    const all = enriquecidos();
+    const abertos = all.filter(x => ABERTOS.includes(x.r.estado)).sort(ordem);
+    const fechados = all.filter(x => !ABERTOS.includes(x.r.estado)).sort((a,b) => String(b.r.dataFecho || '').localeCompare(String(a.r.dataFecho || '')));
+    const cab = ['Pedido','ORC','Cliente','Contacto','Localidade','Tipo','P','Estado','Bola com','No estado desde','Dono','Próxima ação','Data da ação','Semáforo','Tempo','Valor s/IVA','Data do pedido','Data da visita','Data de envio','Enviado por','Seguimentos','Motivo','Por confirmar','Notas'];
+    const linhas = [...abertos, ...fechados].map(({r, rel, sem, pe}) => [
+      r.id, r.num, r.cliente, r.contacto, r.localidade, TIPOS[r.tipo] || '', pe.p, (ESTADOS[r.estado] || {}).l || r.estado,
+      (ESTADOS[r.estado] || {}).bola || '', r.entrouNoEstado && !r.porConfirmar ? iso(new Date(r.entrouNoEstado)) : '', r.dono, r.proximaAcao, r.dataProximaAcao,
+      sem || '', sem ? tempoTxt(r, rel) : '', dec(r.valor), r.dataPedido, r.dataVisita, r.dataEnvio,
+      [r.enviadoPor, POR_ONDE[r.enviadoPorOnde]].filter(Boolean).join(', '), r.seguimentos || 0, r.motivo, r.porConfirmar ? 'Sim' : '', r.notas,
+    ].map(v => typeof v === 'number' ? `"${v}"` : csvCell(v)).join(','));
+    return [cab.map(csvCell).join(','), ...linhas].join('\n') + '\n';
+  }
+  function renderAll() {
+    const all = status === 'ok' ? enriquecidos() : [];
+    F('nextNum').textContent = status === 'ok' ? nextNumber() : 'ORC…';
+    const verm = all.filter(x => x.sem === 'vermelho').length;
+    F('redBadge').textContent = verm ? String(verm) : '';
+    renderKpis(all); renderLista(all); renderFila(all); renderDonos(all); renderRegisto(all); renderPrazos(); renderExport(); renderEquipa();
+    F('btnNovo').hidden = !(canWrite && status === 'ok');
+    // Não redesenha a folha aberta enquanto há um formulário a meio.
+    if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
+  }
+
+  /* ---------- Folha de um pedido ---------- */
+  const cur = () => rows.find(r => r.id === currentId) || null;
+  function openSheet(id) { currentId = id; modo = null; trans = null; dadosAberto = false; F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); setTimeout(() => F('btnClose').focus(), 30); }
+  function closeSheet() { F('sheetWrap').hidden = true; document.body.style.overflow = ''; currentId = null; modo = null; trans = null; sheetSujo = false; if (status === 'ok') renderAll(); }
+  F('btnClose').addEventListener('click', closeSheet);
+  F('sheetBody').addEventListener('input', () => { sheetSujo = true; });
+  F('sheetBody').addEventListener('change', () => { sheetSujo = true; });
+  F('sheetWrap').addEventListener('click', e => { if (e.target === F('sheetWrap')) closeSheet(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !F('sheetWrap').hidden) closeSheet(); });
+
+  function sugestaoAcao(para, extra) {
+    return {
+      novo:'Responder ao cliente', visita_por_marcar:'Combinar a data da visita', visita_marcada:'Fazer a visita',
+      orcamento_por_fazer: extra && extra.revisao ? 'Rever e enviar o orçamento' : 'Fazer e enviar o orçamento',
+      espera_cliente: extra && extra.decisao ? 'Ligar ao cliente se não responder' : 'Voltar a pedir ao cliente o que falta',
+      espera_fornecedor:'Perguntar ao fornecedor pela peça', em_execucao:'Acabar o trabalho',
+    }[para] || '';
+  }
+  // Data da próxima ação proposta: quando vence o prazo do estado de destino.
+  function dataProposta(para, p, extra) {
+    const agora = new Date();
+    if (para === 'visita_marcada') return (extra && extra.dataVisita) || today();
+    const v = prazoDe(para, p);
+    if (v == null) return today();
+    if (para === 'espera_cliente') return iso(new Date(agora.getTime() + v * 86400000));
+    const e = ESTADOS[para];
+    const horas = e.un === 'h' ? v : v * H_DIA;
+    const base = extra && extra.acumuladoH ? Math.max(0, horas - extra.acumuladoH) : horas;
+    return iso(somarHorasUteis(agora, base));
+  }
+
+  function transicoes(r) {
+    const T = [];
+    const add = (id, label, para, o) => T.push({id, label, para, ...(o || {})});
+    const origem = ESTADOS[r.esperaDe] ? ESTADOS[r.esperaDe].l : null;
+    switch (r.estado) {
+      case 'novo':
+        add('visita','Precisa de visita','visita_por_marcar');
+        add('marcar','Visita já marcada','visita_marcada',{pedeVisita:true});
+        add('orc','Fazer orçamento sem visita','orcamento_por_fazer');
+        add('tel','Resolvido ao telefone','resolvido',{fecho:true, motivo:'Resolvido ao telefone'});
+        break;
+      case 'visita_por_marcar':
+        add('marcar','Visita marcada','visita_marcada',{pedeVisita:true});
+        break;
+      case 'visita_marcada':
+        add('f_orc','Visita feita: fazer orçamento','orcamento_por_fazer');
+        add('f_exec','Visita feita: o trabalho continua','em_execucao');
+        add('f_res','Resolvido na visita','resolvido',{fecho:true, motivo:'Resolvido na visita'});
+        add('outra','Precisa de outra visita','visita_por_marcar');
+        add('remarcar','Remarcar a visita','visita_marcada',{pedeVisita:true, remarcar:true});
+        break;
+      case 'orcamento_por_fazer':
+        add('enviado','Orçamento enviado','espera_cliente',{envio:true, decisao:true});
+        add('ir','Precisa de ir ao local','visita_por_marcar');
+        break;
+      case 'espera_cliente':
+        if (r.esperaMotivo !== 'pausa') {
+          add('ac_exec','Aceitou: começar o trabalho','em_execucao',{ganho:true});
+          add('ac_vis','Aceitou: marcar a obra','visita_por_marcar',{ganho:true});
+          add('rev','Pediu revisão','orcamento_por_fazer',{revisao:true});
+          add('recusou','Recusou','perdido',{fecho:true});
+        } else if (origem) add('volta',`Chegou o que faltava: volta a ${origem}`, r.esperaDe, {retoma:true});
+        add('seg','Fiz um seguimento', null, {seguimento:true});
+        break;
+      case 'espera_fornecedor':
+        if (origem) add('volta',`Chegou: volta a ${origem}`, r.esperaDe, {retoma:true});
+        if (r.esperaDe !== 'visita_por_marcar') add('ch_vis','Chegou: marcar a instalação','visita_por_marcar');
+        if (r.esperaDe !== 'em_execucao') add('ch_exec','Chegou: continuar o trabalho','em_execucao');
+        add('seg','Perguntei ao fornecedor', null, {seguimento:true});
+        break;
+      case 'em_execucao':
+        add('concl','Trabalho concluído','resolvido',{fecho:true, motivo:'Concluído'});
+        add('vis','Marcar a obra ou outra visita','visita_por_marcar');
+        break;
+      case 'resolvido': case 'perdido':
+        // Reabre-se até 30 dias depois do fecho; depois disso é um pedido novo.
+        if (!r.dataFecho || r.dataFecho >= addDays(today(), -30)) {
+          add('reab_v','Reabrir: marcar visita','visita_por_marcar',{reabrir:true});
+          add('reab_o','Reabrir: rever o orçamento','orcamento_por_fazer',{reabrir:true});
+        }
+        break;
+    }
+    if (DA_MDM.includes(r.estado)) {
+      add('p_cli','Falta resposta do cliente','espera_cliente',{pausa:true});
+      add('p_forn','Falta peça ou cotação','espera_fornecedor',{pausa:true});
+    }
+    if (ABERTOS.includes(r.estado)) add('perd','Perdido','perdido',{fecho:true});
+    return T;
+  }
+
+  function campo(id, label, input, aux, full) {
+    return h('div',{class:'f' + (full ? ' full' : '')}, h('label',{for:id}, label), input, aux ? h('span',{class:'aux', id: id + '-aux'}, aux) : null);
+  }
+  const inp = (id, value, extra) => h('input',{id, value: value == null ? '' : String(value), autocomplete:'off', ...(extra || {})});
+  function sel(id, entries, value, blank) {
+    const s = h('select',{id}, ...(blank ? [h('option',{value:''}, blank)] : []), ...entries.map(([v,l]) => h('option',{value:v}, l)));
+    s.value = value == null ? '' : value; return s;
+  }
+  const meuNome = () => (eu && eu.nome) || 'Bernardo';
+  const donosConhecidos = () => [...new Set([meuNome(), ...equipa.map(c => c.nome).filter(Boolean), ...rows.map(r => r.dono).filter(Boolean)])].sort();
+  function donoInput(id, value) {
+    return [inp(id, value, {list: id + '-l', placeholder:'Nome de quem garante a ação'}), h('datalist',{id: id + '-l'}, donosConhecidos().map(d => h('option',{value:d})))];
+  }
+
+  function renderSheet() {
+    const body = F('sheetBody');
+    sheetSujo = false;
+    if (modo === 'novo') return renderNovo();
+    const r = cur();
+    if (!r) { closeSheet(); return; }
+    const e = ESTADOS[r.estado] || ESTADOS.novo;
+    const rel = relogio(r); const sem = semaforo(r, rel); const pe = pEfetiva(r, rel);
+    F('sheetTitle').textContent = r.cliente || 'Sem nome';
+    F('sheetSub').textContent = [r.id, r.num && r.num !== r.id ? r.num : null].filter(Boolean).join(' · ');
+    const blocos = [];
+    blocos.push(h('div',{class:'status'},
+      h('span',{class:`prio p-${pe.p}`}, pe.p), pe.de ? h('span',{class:'esc'}, `Sobe de ${pe.de} na próxima mudança`) : null,
+      h('span',{class:`pill t-${e.t}`}, e.l), e.bola ? h('span',{class:'bola'}, e.bola !== 'MDM' ? `bola com o ${e.bola}, o relógio da MDM pausa` : rel && rel.parado ? 'bola com a MDM' : 'bola com a MDM, o relógio conta') : null,
+      r.porConfirmar ? h('span',{class:'conf'}, 'Dados por confirmar') : null, r.escalado ? h('span',{class:'esc'}, `Escalado a ${ddmm(r.escaladoEm)}`) : null));
+    if (ABERTOS.includes(r.estado)) {
+      const prazoTxt = rel && rel.parado ? 'Dados importados, por confirmar: o relógio começa a contar na próxima mudança de estado'
+        : r.estado === 'visita_marcada' ? (r.dataVisita ? `Visita a ${ddmm(r.dataVisita)}; folha da visita até ao dia útil seguinte` : 'Falta a data da visita')
+        : rel && rel.prazo ? `Prazo ${String(rel.prazo).replace('.',',')} ${UNIDADE[rel.un]}${ESPERAS.includes(r.estado) ? ' até ao seguimento' : ''}` : 'Sem prazo na tabela';
+      const desde = rel && rel.parado ? '' : ` No estado desde ${r.entrouNoEstado ? quando(new Date(r.entrouNoEstado)) : '–'}.`;
+      blocos.push(h('div',{class:'clock', style:`--tone:var(--${semTone(sem)})`},
+        h('span',{class:'big'}, tempoTxt(r, rel)),
+        h('span',{class:'small', style:'text-align:right'}, rel && rel.vence && rel.atrasoH === 0 ? `vence ${quando(rel.vence)}` : ''),
+        h('span',{class:'small'}, `${prazoTxt}.${desde}`),
+        h('span',{class:'small', style:'text-align:right'}, r.seguimentos ? `${r.seguimentos} seguimento${r.seguimentos > 1 ? 's' : ''}` : '')));
+      const acaoAtrasada = r.dataProximaAcao && r.dataProximaAcao < today();
+      blocos.push(h('div',{class:`acao s-${sem}`},
+        h('div',{style:'min-width:0'}, h('div',{class:'what'}, r.proximaAcao || 'Sem próxima ação'),
+          h('div',{class:'who'}, `${r.dono || 'Sem dono'} · ${r.dataProximaAcao ? (acaoAtrasada ? 'devia ser a ' : 'até ') + ddmm(r.dataProximaAcao) : 'sem data'}`)),
+        canWrite ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => abrirTrans({id:'acao', label:'Mudar a próxima ação', para:null, soAcao:true})}, 'Mudar ação') : null));
+      if (r.esperaMotivo === 'decisao' && (r.seguimentos || 0) >= 3) blocos.push(h('p',{class:'hint alert'}, 'Já houve 3 seguimentos sem resposta: fecha como perdido «Sem resposta», a não ser que o cliente tenha dado uma data.'));
+      if (semContacto30(r)) blocos.push(h('p',{class:'hint alert'}, 'Sem contacto com o cliente há mais de 30 dias: fecha como perdido, com motivo, ou dá-lhe uma ação para hoje.'));
+    } else {
+      blocos.push(h('p',{class:'hint'}, `${e.l}${r.motivo ? ': ' + r.motivo : ''}${r.dataFecho ? ` (${ddmm(r.dataFecho)})` : ''}.`));
+      if (r.dataFecho && r.dataFecho < addDays(today(), -30)) blocos.push(h('p',{class:'hint'}, 'Fechado há mais de 30 dias: se o cliente voltar, regista um pedido novo.'));
+    }
+    if (trans) blocos.push(formTrans(r));
+    else if (canWrite) {
+      const T = transicoes(r), aberto = ABERTOS.includes(r.estado);
+      if (T.length || aberto) blocos.push(h('div',{class:'block'}, h('h3',null,'Mudar o estado'),
+        T.length ? h('div',{class:'trans'}, T.map(t => h('button',{class:'btn' + (t.fecho || t.pausa || t.seguimento ? ' btn-ghost' : ''), type:'button', onclick:() => abrirTrans(t)}, t.label))) : null,
+        aberto ? h('div',{class:'trans'}, h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:registarContacto}, 'Registar contacto com o cliente')) : null));
+    }
+    blocos.push(formDados(r));
+    const hist = (r.historico || []).slice().reverse();
+    if (hist.length) blocos.push(h('div',{class:'block'}, h('h3',null,'Histórico'), h('ul',{class:'hist'}, hist.map(x => h('li',null, h('span',{class:'when'}, x.em ? quando(new Date(x.em)) : ''), h('span',null, x.texto))))));
+    body.replaceChildren(...blocos);
+  }
+
+  function abrirTrans(t) { trans = t; renderSheet(); setTimeout(() => { const el = F('t-acao') || F('t-motivo') || F('t-vis'); if (el) el.focus(); }, 30); }
+
+  function formTrans(r) {
+    const t = trans;
+    const p = r.prioridade || 'P3';
+    const fecho = !!t.fecho;
+    const para = t.para;
+    const extra = {decisao: t.decisao, revisao: t.revisao, acumuladoH: t.retoma ? r.acumuladoPausa : 0};
+    const els = [h('h3',null, t.soAcao ? 'Mudar a próxima ação' : t.seguimento ? t.label : `Passar a ${ESTADOS[para].l}`)];
+    if (t.pedeVisita) els.push(h('div',{class:'fields'}, campo('t-vis','Data da visita', inp('t-vis', t.remarcar ? r.dataVisita : '', {type:'date', onchange: ev => { const d = F('t-data'); if (d && ev.target.value) d.value = ev.target.value; }})),
+      campo('t-vis-h','Hora (opcional)', inp('t-vis-h', r.horaVisita || '', {type:'time'}))));
+    if (t.envio) els.push(h('div',{class:'fields'},
+      campo('t-num','Nº do orçamento', inp('t-num', r.num || nextNumber(), {spellcheck:'false'})),
+      campo('t-valor','Valor s/IVA (€)', inp('t-valor', r.valor != null ? String(r.valor).replace('.',',') : '', {inputmode:'decimal', placeholder:'0,00'})),
+      campo('t-denv','Data de envio', inp('t-denv', today(), {type:'date'})),
+      campo('t-ponde','Por onde', sel('t-ponde', Object.entries(POR_ONDE), r.enviadoPorOnde || 'email')),
+      campo('t-epor','Quem enviou', inp('t-epor', meuNome()), 'É a prova do envio: quem, quando e por onde.', true)));
+    if (fecho) els.push(h('div',{class:'fields'}, para === 'perdido'
+      ? campo('t-motivo','Motivo', sel('t-motivo', MOTIVOS.map(m => [m,m]), '', 'Escolher…'), null, true)
+      : campo('t-motivo','Como ficou resolvido', inp('t-motivo', t.motivo || ''), null, true)));
+    if (!fecho) {
+      const dflt = t.soAcao ? {acao: r.proximaAcao, data: r.dataProximaAcao || today()}
+        : t.seguimento ? {acao: r.estado === 'espera_fornecedor' ? 'Voltar a perguntar ao fornecedor' : 'Fazer o seguimento seguinte', data: iso(new Date(Date.now() + (prazoDe(r.estado, p) || 3) * (r.estado === 'espera_cliente' ? 86400000 : 86400000 * 7 / 5)))}
+        : {acao: sugestaoAcao(para, extra), data: dataProposta(para, p, {...extra, dataVisita: null})};
+      els.push(h('div',{class:'fields'},
+        campo('t-dono','Dono', donoInput('t-dono', r.dono || meuNome())),
+        campo('t-data','Data da próxima ação', inp('t-data', dflt.data, {type:'date'})),
+        campo('t-acao','Próxima ação', inp('t-acao', dflt.acao, {placeholder:'O quê, por exemplo «Ligar a confirmar a visita»'}), null, true)));
+      if (t.pedeVisita) els.push(h('p',{class:'hint'}, 'A data da próxima ação acompanha a da visita, para o pedido ficar amarelo nesse dia; muda-a se for preciso.'));
+    }
+    if (r.porConfirmar && !t.soAcao && !t.seguimento && !t.remarcar) els.push(h('p',{class:'hint'}, 'Ao confirmar, o pedido deixa de estar «por confirmar» e o relógio começa a contar a partir de agora.'));
+    if (DA_MDM.includes(r.estado) && !t.soAcao && !t.seguimento && !t.remarcar) {
+      const rel = relogio(r);
+      if (atrasadoNaMDM(r, rel) && !r.escalado && !r.porConfirmar && p !== 'P1') els.push(h('p',{class:'hint alert'}, `Este estado passou o prazo: ao confirmar, o pedido sobe de ${p} para ${up(p)} (uma vez só).`));
+    }
+    els.push(h('p',{class:'err', id:'t-err', hidden:true}));
+    els.push(h('div',{class:'row-end'},
+      h('button',{class:'btn btn-ghost', type:'button', onclick:() => { trans = null; renderSheet(); }}, 'Voltar'),
+      h('button',{class:'btn', type:'button', id:'t-ok', onclick:confirmarTrans}, 'Confirmar')));
+    return h('div',{class:'tform'}, els);
+  }
+
+  function erroT(msg) { const el = F('t-err'); el.textContent = msg; el.hidden = false; }
+  const val = id => { const el = F(id); return el ? el.value.trim() : ''; };
+  function parseValor(s) {
+    s = String(s || '').replace(/\s|€/g,'');
+    if (!s) return null;
+    if (s.includes(',')) s = s.replace(/\./g,'').replace(',','.');
+    const v = Number(s); return Number.isFinite(v) ? Math.round(v * 100) / 100 : NaN;
+  }
+  const nota = (texto) => ({em: new Date().toISOString(), texto});
+
+  async function confirmarTrans() {
+    const r = cur(); if (!r || !trans || saving) return;
+    const t = trans, agora = new Date(), novo = JSON.parse(JSON.stringify(r));
+    delete novo.id;
+    const hist = novo.historico = (novo.historico || []).slice(-60);
+    const p = r.prioridade || 'P3';
+    if (!t.fecho) {
+      const d = val('t-dono'), a = val('t-acao'), dt = val('t-data');
+      if (!d || !a || !dt) return erroT('Cada mudança precisa de dono, próxima ação e data.');
+      novo.dono = d; novo.proximaAcao = a; novo.dataProximaAcao = dt;
+    }
+    if (t.soAcao) {
+      hist.push(nota(`Próxima ação: ${novo.proximaAcao} (${novo.dono}, ${ddmm(novo.dataProximaAcao)})`));
+      return gravar(r.id, novo, 'Ação atualizada');
+    }
+    if (t.seguimento) {
+      novo.seguimentos = (r.seguimentos || 0) + 1; novo.ultimoSeguimento = agora.toISOString();
+      if (r.estado === 'espera_cliente') novo.ultimoContacto = agora.toISOString();
+      hist.push(nota(`${novo.seguimentos}.º seguimento (${novo.dono})`));
+      return gravar(r.id, novo, `${novo.seguimentos}.º seguimento registado`);
+    }
+    if (t.pedeVisita) {
+      const dv = val('t-vis'); if (!dv) return erroT('Indica a data da visita.');
+      novo.dataVisita = dv; novo.horaVisita = val('t-vis-h') || null;
+      novo.ultimoContacto = agora.toISOString();
+      // Remarcar não muda de estado: nem escala nem mexe no relógio.
+      if (t.remarcar) { novo.remarcacoes = (r.remarcacoes || 0) + 1; hist.push(nota(`Visita remarcada para ${ddmm(dv)}`)); return gravar(r.id, novo, 'Visita remarcada'); }
+    }
+    if (t.envio) {
+      const n = val('t-num').toUpperCase(), m = /^ORC(\d{4})_(\d{4})$/.exec(n);
+      if (!m) return erroT('O número tem de seguir o formato ORC0073_2026.');
+      if (rows.some(x => x.num === n && x.id !== r.id)) return erroT(`O ${n} já está noutro pedido.`);
+      const v = parseValor(val('t-valor'));
+      if (v == null || Number.isNaN(v)) return erroT('Indica o valor s/IVA (por exemplo 1250,00).');
+      if (!val('t-denv') || !val('t-epor')) return erroT('Indica a data de envio e quem enviou.');
+      Object.assign(novo, {num:n, seq:Number(m[1]), ano:Number(m[2]), valor:v, dataEnvio:val('t-denv'), enviadoPor:val('t-epor'), enviadoPorOnde:val('t-ponde'), envioConfirmado:true, ultimoContacto: agora.toISOString()});
+    }
+    if (t.fecho) {
+      const mo = val('t-motivo');
+      if (!mo) return erroT(t.para === 'perdido' ? 'Escolhe o motivo da perda.' : 'Escreve em poucas palavras como ficou resolvido.');
+      novo.motivo = mo; novo.dataFecho = today(); novo.proximaAcao = null; novo.dataProximaAcao = null;
+    }
+    // Escalada: o estado da MDM que se deixa passou o prazo. Sobe um nível, uma vez só.
+    const rel = relogio(r, agora);
+    if (DA_MDM.includes(r.estado) && atrasadoNaMDM(r, rel) && !r.escalado && !r.porConfirmar && p !== 'P1') {
+      novo.prioridade = up(p); novo.escalado = true; novo.escaladoEm = today();
+      hist.push(nota(`Escalado de ${p} para ${novo.prioridade}: ${ESTADOS[r.estado].l} passou o prazo`));
+    }
+    if (r.porConfirmar) { novo.porConfirmar = false; hist.push(nota('Dados confirmados; o relógio passa a contar')); }
+    // Relógio: pausar numa espera guarda o tempo gasto; voltar ao mesmo estado continua; avançar recomeça.
+    const gastoAqui = !r.porConfirmar && DA_MDM.includes(r.estado) && r.estado !== 'visita_marcada' ? (Number(r.acumuladoH) || 0) + horasUteis(new Date(r.entrouNoEstado || agora), agora) : 0;
+    if (t.pausa) { novo.esperaDe = r.estado; novo.esperaMotivo = 'pausa'; novo.acumuladoPausa = gastoAqui; novo.acumuladoH = 0; }
+    else if (t.decisao) { novo.esperaDe = r.estado; novo.esperaMotivo = 'decisao'; novo.acumuladoPausa = 0; novo.acumuladoH = 0; }
+    else if (t.retoma) { novo.acumuladoH = Number(r.acumuladoPausa) || 0; novo.esperaDe = null; novo.esperaMotivo = null; novo.acumuladoPausa = 0; }
+    else { novo.acumuladoH = 0; if (!ESPERAS.includes(t.para)) { novo.esperaDe = null; novo.esperaMotivo = null; novo.acumuladoPausa = 0; } }
+    if (ESPERAS.includes(t.para)) { novo.seguimentos = 0; novo.ultimoSeguimento = null; }
+    if (t.revisao) novo.revisoes = (r.revisoes || 0) + 1;
+    if (t.reabrir) { novo.reaberturas = (r.reaberturas || 0) + 1; novo.motivo = null; novo.dataFecho = null; }
+    if (t.ganho) novo.dataAceite = today();
+    novo.estado = t.para; novo.entrouNoEstado = agora.toISOString();
+    if (t.para === 'resolvido' || t.para === 'perdido') { novo.acumuladoH = 0; novo.esperaDe = null; novo.esperaMotivo = null; }
+    hist.push(nota(`${ESTADOS[r.estado].l} → ${ESTADOS[t.para].l}${t.fecho && novo.motivo ? ` (${novo.motivo})` : ''}${!t.fecho ? ` · ${novo.dono}: ${novo.proximaAcao}` : ''}`));
+    return gravar(r.id, novo, `Passou a ${ESTADOS[t.para].l}`);
+  }
+
+  async function registarContacto() {
+    const r = cur(); if (!r) return;
+    const novo = JSON.parse(JSON.stringify(r)); delete novo.id;
+    novo.ultimoContacto = new Date().toISOString();
+    novo.historico = (novo.historico || []).slice(-60); novo.historico.push(nota('Contacto com o cliente'));
+    await gravar(r.id, novo, 'Contacto registado');
+  }
+
+  async function gravar(id, doc, msg) {
+    if (!sb || saving) return false;
+    saving = true; const ok = F('t-ok'); if (ok) ok.disabled = true;
+    doc.atualizado = new Date().toISOString();
+    doc.atualizadoPor = eu ? eu.email : null;
+    const atual = rows.find(x => x.id === id);
+    const versao = atual ? (atual._versao || 0) : 0;
+    const ultimo = (doc.historico || []).slice(-1)[0];
+    try {
+      const {data, error} = await sb.rpc('guardar_pedido', {p_id: id, p_dados: doc, p_versao: versao, p_evento: ultimo ? ultimo.texto : null});
+      if (error) throw error;
+      // Mostra já a mudança; a leitura seguinte confirma-a.
+      const i = rows.findIndex(x => x.id === id);
+      const linha = {id, ...doc, _versao: Number(data) || versao + 1};
+      if (i >= 0) rows[i] = linha; else rows.push(linha);
+      trans = null; modo = null; sheetSujo = false;
+      toast(msg);
+      renderAll();
+      return true;
+    } catch (e) {
+      const txt = String((e && e.message) || '');
+      let m = 'Não foi possível guardar. Tenta outra vez.';
+      if (txt.includes('conflito')) { m = 'Alguém alterou este pedido entretanto. Recarrega e repete.'; carregar(); }
+      else if (txt.includes('duplicate key')) m = 'Já existe um pedido com este número.';
+      else if (txt.includes('row-level security') || txt.includes('permission')) m = 'A tua conta não tem autorização para gravar.';
+      else if (txt.includes('Failed to fetch') || txt.includes('NetworkError')) m = 'Sem ligação. Verifica a internet e tenta outra vez.';
+      if (F('t-err')) erroT(m); else toast(m);
+      return false;
+    } finally { saving = false; if (ok) ok.disabled = false; }
+  }
+
+  /* ---------- Dados do pedido ---------- */
+  function camposDados(r, novo) {
+    const sug = sugerirP(r);
+    const pastaAux = /^https?:\/\//i.test(r.pasta || '') ? h('a',{href:r.pasta, target:'_blank', rel:'noopener'}, 'Abrir ligação') : null;
+    return h('div',{class:'fields'},
+      campo('d-cliente','Cliente', inp('d-cliente', r.cliente), null, true),
+      campo('d-contacto','Contacto', inp('d-contacto', r.contacto, {placeholder:'Telefone ou email'})),
+      campo('d-localidade','Localidade ou morada', inp('d-localidade', r.localidade)),
+      campo('d-tipo','Tipo', sel('d-tipo', Object.entries(TIPOS), r.tipo, 'Escolher…')),
+      campo('d-origem','Origem', sel('d-origem', Object.entries(ORIGENS), r.origem, 'Escolher…')),
+      campo('d-unid','Unidades', inp('d-unid', r.unidades, {inputmode:'numeric', placeholder:'Nº de máquinas'})),
+      h('div',{class:'f'}, h('span',{class:'lbl'},'Data'), h('label',{class:'check'}, h('input',{type:'checkbox', id:'d-dimp', checked: r.dataImposta ? true : null}), 'Data imposta pelo cliente')),
+      campo('d-prio','Prioridade', sel('d-prio', PRIOS.map(p => [p, PRIO_NOME[p]]), r.prioridade || sug.p), `Pelas regras: ${sug.p} (${sug.why}).`, true),
+      campo('d-desc','Descrição do trabalho', h('textarea',{id:'d-desc'}, r.descricao || ''), null, true),
+      novo ? null : campo('d-num','Nº do orçamento', inp('d-num', r.num, {spellcheck:'false', placeholder:'ORC0073_2026'})),
+      novo ? null : campo('d-valor','Valor s/IVA (€)', inp('d-valor', r.valor != null ? String(r.valor).replace('.',',') : '', {inputmode:'decimal'})),
+      campo('d-dped','Data do pedido', inp('d-dped', r.dataPedido || today(), {type:'date'})),
+      novo ? null : campo('d-denv','Data de envio do orçamento', inp('d-denv', r.dataEnvio, {type:'date'})),
+      campo('d-pasta','Pasta ou ficheiro', inp('d-pasta', r.pasta, {placeholder:'Ligação da Drive ou caminho'}), pastaAux, true),
+      campo('d-notas','Notas', h('textarea',{id:'d-notas'}, r.notas || ''), null, true),
+      novo ? null : h('div',{class:'f full'}, h('label',{class:'check'}, h('input',{type:'checkbox', id:'d-conf', checked: r.porConfirmar ? true : null}), 'Dados por confirmar (importados ou incompletos)')),
+    );
+  }
+  function lerDados(base) {
+    const v = parseValor(val('d-valor'));
+    const n = val('d-num').toUpperCase(), m = /^ORC(\d{4})_(\d{4})$/.exec(n);
+    if (n && !m) return {erro:'O número do orçamento tem de seguir o formato ORC0073_2026.'};
+    if (Number.isNaN(v)) return {erro:'O valor não é um número. Usa por exemplo 1250,00.'};
+    if (!val('d-cliente')) return {erro:'Falta o nome do cliente.'};
+    const u = val('d-unid'); if (u && !/^\d+$/.test(u)) return {erro:'As unidades são um número inteiro.'};
+    return Object.assign(base, {
+      cliente: val('d-cliente'), contacto: val('d-contacto') || null, localidade: val('d-localidade') || null,
+      tipo: val('d-tipo') || null, origem: val('d-origem') || null, unidades: u ? Number(u) : null,
+      dataImposta: F('d-dimp').checked, prioridade: val('d-prio') || 'P3', descricao: val('d-desc') || null,
+      dataPedido: val('d-dped') || null, pasta: val('d-pasta') || null, notas: val('d-notas') || null,
+      ...(F('d-num') ? {num: n || null, seq: m ? Number(m[1]) : null, ano: m ? Number(m[2]) : null, valor: v, dataEnvio: val('d-denv') || null, porConfirmar: F('d-conf').checked} : {}),
+    });
+  }
+  function formDados(r) {
+    const d = h('details',{class:'dados', open: dadosAberto ? true : null, ontoggle: ev => { dadosAberto = ev.currentTarget.open; }}, h('summary',null,'Dados do pedido'),
+      h('fieldset',{id:'fsDados', disabled: !canWrite}, camposDados(r, false)),
+      h('p',{class:'err', id:'d-err', hidden:true}),
+      canWrite ? h('div',{class:'row-end', style:'margin-top:12px'},
+        h('button',{class:'btn btn-danger', type:'button', id:'btnDel', onclick:apagar}, 'Apagar'),
+        h('button',{class:'btn', type:'button', onclick:guardarDados}, 'Guardar dados')) : null);
+    return d;
+  }
+  async function guardarDados() {
+    const r = cur(); if (!r) return;
+    const base = JSON.parse(JSON.stringify(r)); delete base.id;
+    const doc = lerDados(base);
+    if (doc.erro) { const el = F('d-err'); el.textContent = doc.erro; el.hidden = false; return; }
+    if (doc.num && rows.some(x => x.num === doc.num && x.id !== r.id)) { const el = F('d-err'); el.textContent = `O ${doc.num} já está noutro pedido.`; el.hidden = false; return; }
+    doc.historico = (doc.historico || []).slice(-60);
+    if (doc.prioridade !== r.prioridade) doc.historico.push(nota(`P corrigido de ${r.prioridade || '–'} para ${doc.prioridade}`));
+    if (r.porConfirmar && doc.porConfirmar === false) doc.historico.push(nota('Dados confirmados; o relógio passa a contar'));
+    await gravar(r.id, doc, 'Dados guardados');
+  }
+  function disarmDel() { clearTimeout(delArmed); delArmed = null; const b = F('btnDel'); if (b) { b.classList.remove('armed'); b.textContent = 'Apagar'; } }
+  async function apagar() {
+    const r = cur(); if (!r || !sb) return;
+    const b = F('btnDel');
+    if (!delArmed) { b.classList.add('armed'); b.textContent = 'Toca outra vez para apagar'; delArmed = setTimeout(disarmDel, 4000); return; }
+    disarmDel();
+    try {
+      const {error} = await sb.rpc('apagar_pedido', {p_id: r.id});
+      if (error) throw error;
+      rows = rows.filter(x => x.id !== r.id); closeSheet(); toast(`${r.id} apagado`);
+    } catch (e) { toast('Não foi possível apagar.'); }
+  }
+
+  /* ---------- Novo pedido ---------- */
+  function renderNovo() {
+    const id = nextPedido();
+    F('sheetTitle').textContent = 'Novo pedido'; F('sheetSub').textContent = id;
+    const base = {prioridade:null, dataPedido: today()};
+    F('sheetBody').replaceChildren(
+      h('p',{class:'hint'}, 'Regista o pedido assim que chega: entra em Novo, com dono, próxima ação e data. O P sai das regras; muda-o só com razão.'),
+      camposDados(base, true),
+      h('div',{class:'fields'},
+        campo('n-dono','Dono', donoInput('n-dono', meuNome())),
+        campo('n-data','Data da próxima ação', inp('n-data', dataProposta('novo','P3'), {type:'date'})),
+        campo('n-acao','Próxima ação', inp('n-acao', 'Responder ao cliente'), null, true)),
+      h('p',{class:'err', id:'d-err', hidden:true}),
+      h('div',{class:'row-end'}, h('button',{class:'btn btn-ghost', type:'button', onclick:closeSheet}, 'Cancelar'), h('button',{class:'btn', type:'button', id:'t-ok', onclick:() => criar(id)}, 'Registar pedido')));
+    const atualizarP = () => {
+      const s = sugerirP({tipo: val('d-tipo'), dataImposta: F('d-dimp').checked, unidades: val('d-unid')});
+      F('d-prio').value = s.p; F('d-prio-aux').textContent = `Pelas regras: ${s.p} (${s.why}).`;
+      F('n-data').value = dataProposta('novo', s.p);
+    };
+    ['d-tipo','d-unid','d-dimp'].forEach(k => F(k).addEventListener(k === 'd-unid' ? 'input' : 'change', atualizarP));
+    atualizarP();
+    setTimeout(() => F('d-cliente').focus(), 30);
+  }
+  async function criar(id) {
+    if (rows.some(r => r.id === id)) id = nextPedido();
+    const agora = new Date().toISOString();
+    const doc = lerDados({});
+    if (doc.erro) { const el = F('d-err'); el.textContent = doc.erro; el.hidden = false; return; }
+    const d = val('n-dono'), a = val('n-acao'), dt = val('n-data');
+    if (!d || !a || !dt) { const el = F('d-err'); el.textContent = 'Um pedido novo precisa de dono, próxima ação e data.'; el.hidden = false; return; }
+    Object.assign(doc, {estado:'novo', entrouNoEstado: agora, criado: agora, dono:d, proximaAcao:a, dataProximaAcao:dt, prioridadeEntrada: doc.prioridade,
+      acumuladoH:0, seguimentos:0, escalado:false, porConfirmar:false, num:null, valor:null, ultimoContacto: agora, historico:[nota(`Pedido registado em Novo · ${d}: ${a}`)]});
+    if (await gravar(id, doc, `${id} registado`)) { currentId = id; modo = null; renderSheet(); }
+  }
+  F('btnNovo').addEventListener('click', () => { currentId = null; modo = 'novo'; trans = null; F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); });
+  F('q').addEventListener('input', e => { query = e.target.value; renderRegisto(status === 'ok' ? enriquecidos() : []); });
+  F('fDono').addEventListener('change', e => { dono = e.target.value; renderAll(); });
+
+  let toastT = null;
+  function toast(msg) { const t = F('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3600); }
+
+  renderAll();
+  // Os prazos andam com o relógio: redesenha a cada 5 minutos quando nada está aberto para edição.
+  setInterval(() => { if (sessao && status === 'ok') renderAll(); }, 300000);
+
+  /* ---------- Supabase: sessão, dados e tempo real ---------- */
+  const F_LOGIN = () => { F('login').hidden = false; F('app').hidden = true; };
+  const F_APP = () => { F('login').hidden = true; F('app').hidden = false; };
+  function erroLogin(m) { const el = F('l-err'); el.textContent = m || ''; el.hidden = !m; }
+
+  async function carregar() {
+    if (!sb) return;
+    try {
+      const [p, c, q] = await Promise.all([
+        sb.from('pedidos').select('id,dados,versao').order('id'),
+        sb.from('config').select('chave,valor,versao'),
+        sb.from('colaboradores').select('email,nome').order('nome'),
+      ]);
+      if (p.error) throw p.error;
+      rows = p.data.map(r => ({id: r.id, ...r.dados, _versao: r.versao}));
+      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } }
+      if (!q.error) { equipa = q.data; const m = equipa.find(x => x.email === (eu && eu.email)); if (m && m.nome) eu.nome = m.nome; }
+      status = 'ok'; renderAll();
+    } catch (e) {
+      const txt = String((e && e.message) || '');
+      if (status !== 'ok') { status = 'error'; renderAll(); }
+      if (txt.includes('Failed to fetch')) toast('Sem ligação. A mostrar a última leitura.');
+    }
+  }
+
+  let canal = null, recarga = null;
+  function ligarTempoReal() {
+    if (!sb || canal) return;
+    canal = sb.channel('registo-mdm')
+      .on('postgres_changes', {event:'*', schema:'public', table:'pedidos'}, () => { clearTimeout(recarga); recarga = setTimeout(carregar, 250); })
+      .on('postgres_changes', {event:'*', schema:'public', table:'config'}, () => { clearTimeout(recarga); recarga = setTimeout(carregar, 250); })
+      .subscribe(st => { ligado = st === 'SUBSCRIBED'; const d = F('liveDot'); d.className = 'live ' + (ligado ? 'ok' : st === 'CHANNEL_ERROR' || st === 'TIMED_OUT' ? 'err' : ''); d.title = ligado ? 'Atualizações em tempo real ligadas' : 'Sem tempo real; a página recarrega de minuto a minuto'; });
+  }
+  async function entrar(session) {
+    sessao = session; eu = {email: session.user.email, nome: null};
+    // Só quem está na tabela colaboradores pode ler e escrever.
+    const {data, error} = await sb.from('colaboradores').select('email,nome').eq('email', eu.email).maybeSingle();
+    if (error || !data) {
+      await sb.auth.signOut();
+      F_LOGIN(); erroLogin(error && !String(error.message).includes('permission') ? 'Não foi possível verificar a conta. Tenta outra vez.' : 'Esta conta ainda não tem acesso ao registo. Pede ao Bernardo para juntar o teu email aos colaboradores.');
+      return;
+    }
+    eu.nome = data.nome || eu.email.split('@')[0];
+    canWrite = true;
+    F('userTxt').textContent = eu.nome;
+    F_APP(); status = 'loading'; renderAll();
+    await carregar();
+    ligarTempoReal();
+  }
+  function sair() {
+    if (canal) { sb.removeChannel(canal); canal = null; }
+    sessao = null; eu = null; rows = []; canWrite = false; status = 'loading'; ligado = false;
+    F_LOGIN(); erroLogin('');
+  }
+  F('loginForm').addEventListener('submit', async ev => {
+    ev.preventDefault(); erroLogin('');
+    const email = F('l-email').value.trim(), password = F('l-pass').value;
+    F('l-ok').disabled = true;
+    try {
+      const {data, error} = await sb.auth.signInWithPassword({email, password});
+      if (error) throw error;
+      await entrar(data.session);
+    } catch (e) {
+      const txt = String((e && e.message) || '');
+      erroLogin(txt.includes('Invalid login') ? 'Email ou palavra-passe errados.' : txt.includes('Failed to fetch') ? 'Sem ligação. Verifica a internet.' : 'Não foi possível entrar. Tenta outra vez.');
+    } finally { F('l-ok').disabled = false; }
+  });
+  F('btnSair').addEventListener('click', async () => { await sb.auth.signOut(); sair(); });
+
+  (async () => {
+    if (!window.supabase || !window.supabase.createClient) { F_LOGIN(); erroLogin('Não foi possível carregar a biblioteca da base de dados. Recarrega a página.'); return; }
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const {data} = await sb.auth.getSession();
+    if (data && data.session) await entrar(data.session); else F_LOGIN();
+    sb.auth.onAuthStateChange((ev, session) => { if (ev === 'SIGNED_OUT' && sessao) sair(); });
+    // Sem tempo real (rede a bloquear websockets), recarrega de minuto a minuto; com ele, confirma a cada 5 minutos.
+    setInterval(() => { if (sessao && status === 'ok' && !trans && modo !== 'novo' && !sheetSujo) carregar(); }, 60000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && sessao) carregar(); });
+  })();
+})();
+</script>
+</body>
+</html>

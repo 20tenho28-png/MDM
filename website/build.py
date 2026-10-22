@@ -637,7 +637,7 @@ def saida_antiga(p):
     """public/ gerado antes de haver MARCA_SAIDA (num clone antigo): só com nomes que o build.py escreve, e com as páginas."""
     if p != ROOT / "public":
         return False
-    nomes = {x.name for x in (SRC / "pages").iterdir()} | {"assets", "equipa", "obras", FORMULARIOS, "sitemap.xml",
+    nomes = {x.name for x in (SRC / "pages").iterdir()} | {"assets", "equipa", "registo", "obras", FORMULARIOS, "sitemap.xml",
                                                            "robots.txt", "_headers"}
     tem = {x.name for x in p.iterdir()}
     return tem <= nomes and {"index.html", "sitemap.xml", "assets"} <= tem
@@ -1407,7 +1407,7 @@ def check_preview():
         out.append(f"lançamento: robots.txt sem a linha «Sitemap: {sitemap}»")
     if cab.exists() and any(map(NOINDEX_RE.search, re.findall(r"X-Robots-Tag:(.*)", cab.read_text(encoding="utf-8"), re.I))):
         out.append("lançamento: _headers ainda pede noindex")
-    # o netlify.toml só pode tirar do Google a página interna (/equipa/*); cada [[headers]] tem o seu «for». Lido com
+    # o netlify.toml só pode tirar do Google as páginas internas (/equipa/* e /registo/*); cada [[headers]] tem o seu «for». Lido com
     # tomllib, que entende todas as grafias do TOML (aspas simples, «values = { … }» numa linha, chaves com pontos)
     toml = ROOT / "netlify.toml"
     conf = {}
@@ -1422,8 +1422,8 @@ def check_preview():
         para = h.get("for", "?")
         # entre vírgulas: «X-Robots-Tag» e «x-robots-tag» no mesmo bloco são duas listas de diretivas
         robots = ", ".join(str(v) for k, v in h.get("values", {}).items() if k.lower() == "x-robots-tag")
-        if NOINDEX_RE.search(robots) and not para.startswith("/equipa/"):
-            out.append(f"lançamento: netlify.toml pede noindex em {para} (só /equipa/* fica fora do Google)")
+        if NOINDEX_RE.search(robots) and not para.startswith(("/equipa/", "/registo/")):
+            out.append(f"lançamento: netlify.toml pede noindex em {para} (só /equipa/* e /registo/* ficam fora do Google)")
     if not SITE["baseUrl"].startswith("https://") or "manus.space" in SITE["baseUrl"]:
         out.append(f"lançamento: baseUrl não é o domínio final → {SITE['baseUrl']}")
     return out
