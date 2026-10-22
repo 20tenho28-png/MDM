@@ -1,21 +1,24 @@
 <!--meta {"file": "index.html", "title": "Melperfaz, Construção Civil · Reabilitação de edifícios desde 2001", "description": "Reabilitação de edifícios, espaços comerciais e apartamentos, da estrutura ao acabamento, com equipa própria desde 2001. Orçamento gratuito: 961 245 288.", "nav": "", "css": [], "italico": true} -->
-<section class="hero" id="top" aria-labelledby="heroT">
-  <div class="wrap hero-grid">
+<!-- Topo a toda a largura: a fotografia da obra por trás, um véu ink por cima e o texto em bone; os cartões 25 anos e 2001
+     ficam à direita, em baixo. A grelha de planta do design system (bone-05 a cada 39 px) continua por cima da fotografia. -->
+<section class="hero hero-cheio" id="top" aria-labelledby="heroT">
+  <div class="hero-fundo" aria-hidden="true">{{foto 01 loading="eager" sizes="100vw" class="hero-photo" foco="50% 60%" alt=""}}</div>
+  <div class="wrap hero-conteudo">
     <div class="hero-texto">
       <span class="eyebrow">Reabilitação &amp; Construção · Licenciada · Desde {{ site.founded }}</span>
       <h1 id="heroT">Reabilitamos<br><em>de raiz.</em></h1>
       <p class="lead">Reabilitação de edifícios, espaços comerciais e apartamentos. Da estrutura ao acabamento, tratamos da obra completa com {{ anos }} anos de ofício (uma equipa responsável, do início ao fim).</p>
       <div class="hero-cta">
         <a href="#contacto" class="btn">Pedir Orçamento Gratuito</a>
-        <a href="#obras" class="btn btn-ghost">Ver Obras</a>
+        <a href="#obras" class="btn btn-ghost-ink">Ver Obras</a>
       </div>
     </div>
-    <div class="hero-visual">
-      <div class="frame">{{foto 01 loading="eager" sizes="(min-width: 980px) min(calc(42.5vw - 30px), 500px), calc(100vw - 44px)" class="hero-photo"}}</div>
+    <div class="hero-factos">
       <div class="tag-card"><span class="n">{{ anos }}</span><span class="l">Anos de Experiência</span></div>
       <div class="hero-tag2"><span class="n">{{ site.founded }}</span><span class="l">Desde</span></div>
     </div>
   </div>
+  <p class="hero-foto-leg"><a href="{{ root }}obras.html">Carrinha da Melperfaz numa obra de reabilitação<span aria-hidden="true"> →</span></a></p>
 </section>
 
 <div class="strip" aria-hidden="true">
@@ -67,8 +70,8 @@
       <h2 id="obrasT">Do desmonte ao acabamento</h2>
       <p>Uma amostra das obras de reabilitação e construção que temos em mãos pela região. Estrutura, fachadas, revestimentos e acabamentos, tudo executado pela nossa equipa.</p>
     </div>
-    <div class="photo-grid four">
-      {{each obra-foto 01,02,03,04}}
+    <div class="photo-grid mosaico">
+      {{each obra-foto all}}
     </div>
     {{each antes-depois 05}}
     <p class="work-mais reveal"><a class="btn btn-ghost-ink" href="{{ root }}obras.html">Ver Todas as Obras</a></p>

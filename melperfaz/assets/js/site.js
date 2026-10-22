@@ -69,6 +69,22 @@
     setTimeout(function () { els.forEach(function (e) { var r = e.getBoundingClientRect(); if (r.top < innerHeight && r.bottom > 0) e.classList.add('in'); }); }, 900);
   })();
 
+  /* ═══ Filtros das obras (obras.html): esconde as obras das outras categorias ═══ */
+  (function () {
+    var grupo = qs('[data-filtros]'), grelha = qs('[data-obras]');
+    if (!grupo || !grelha) return;
+    var conta = qs('[data-filtros-conta]', grupo), botoes = qsa('[data-filtro]', grupo), obras = qsa('.pg', grelha);
+    function filtra(cat) {
+      var n = 0;
+      obras.forEach(function (o) { var mostra = cat === 'todas' || o.getAttribute('data-cat') === cat; o.hidden = !mostra; if (mostra) { n++; o.classList.add('in'); } });
+      botoes.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-filtro') === cat ? 'true' : 'false'); });
+      if (conta) conta.textContent = n + (n === 1 ? ' obra' : ' obras');
+    }
+    botoes.forEach(function (b) { b.addEventListener('click', function () { filtra(b.getAttribute('data-filtro')); }); });
+    var m = /[?&]cat=([a-z-]+)/.exec(location.search) || /^#(reabilitacao|fachadas|acabamentos)$/.exec(location.hash);
+    if (m && botoes.some(function (b) { return b.getAttribute('data-filtro') === m[1]; })) filtra(m[1]);
+  })();
+
   /* ═══ Comparador antes/depois ═══ */
   qsa('[data-ba]').forEach(function (slider) {
     var before = qs('[data-ba-before]', slider), handle = qs('[data-ba-handle]', slider), range = qs('[data-ba-range]', slider);

@@ -241,6 +241,13 @@ try {
     ok(page.erros.length === 0, 'J: sem erros', page.erros);
     await page.goto(srv.base + '/obras.html', { waitUntil: 'networkidle' });
     ok(await page.getAttribute('.navlinks a[data-nav-item="obras"]', 'aria-current') === 'page', 'J: o menu marca «Obras»');
+    await page.click('[data-filtro="fachadas"]');
+    const vis = await page.evaluate(() => ({ visiveis: Array.from(document.querySelectorAll('[data-obras] .pg')).filter(e => !e.hidden).length, pressed: document.querySelector('[data-filtro="fachadas"]').getAttribute('aria-pressed'), conta: document.querySelector('[data-filtros-conta]').textContent }));
+    ok(vis.visiveis === OBRAS.filter(o => o.cat === 'fachadas').length && vis.pressed === 'true' && /^1 obra$/.test(vis.conta), 'J: o filtro «Fachadas» mostra só essas obras', vis);
+    await page.click('[data-filtro="todas"]');
+    ok(await page.evaluate(() => document.querySelectorAll('[data-obras] .pg:not([hidden])').length) === OBRAS.length, 'J: «Todas» volta a mostrar tudo');
+    await page.goto(srv.base + '/obras.html?cat=acabamentos', { waitUntil: 'networkidle' });
+    ok(await page.evaluate(() => document.querySelectorAll('[data-obras] .pg:not([hidden])').length) === OBRAS.filter(o => o.cat === 'acabamentos').length, 'J: ?cat= no endereço filtra');
     await ctx.close();
   }
 

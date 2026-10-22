@@ -8,8 +8,11 @@
 
 /* filtros por categoria (ligações para as secções da página) */
 .filtros { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: var(--space-50); }
-.chip { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border: var(--border-control) solid var(--bone-15); color: var(--bone); text-decoration: none; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; transition: border-color .2s, color .2s; }
+.chip { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border: var(--border-control) solid var(--bone-15); background: transparent; color: var(--bone); text-decoration: none; font-family: inherit; cursor: pointer; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; transition: border-color .2s, color .2s, background .2s; }
 .chip:hover { border-color: var(--amber); color: var(--amber); }
+.chip[aria-pressed="true"] { background: var(--bone); color: var(--ink); border-color: var(--bone); }
+.chip[aria-pressed="true"] .chip-n { color: var(--clay); }
+.chip:focus-visible { outline-color: var(--focus-on-ink); }
 .chip-n { font-family: var(--font-serif); font-size: .95rem; color: var(--amber); }
 .filtros-conta { margin-left: auto; font-size: .84rem; color: var(--bone-60); }
 .obras-cat { font-size: 1.4rem; color: var(--bone); margin: var(--space-50) 0 var(--space-6); padding-top: var(--space-18); border-top: var(--border-hairline) solid var(--bone-15); }

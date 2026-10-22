@@ -80,14 +80,14 @@ test('cada página: lang, um h1, título, descrição, canonical, og, JSON-LD, v
 
 test('a página inicial: secções pela ordem do sistema de desenho, cartões, passos, obras e comparador', () => {
   const t = le('index.html');
-  const ordem = ['class="hero" id="top"', 'class="strip"', 'id="servicos"', 'id="processo"', 'id="obras"', 'id="porque-nos"', 'id="contacto"'];
+  const ordem = ['id="top"', 'class="strip"', 'id="servicos"', 'id="processo"', 'id="obras"', 'id="porque-nos"', 'id="contacto"'];
   let pos = 0;
   for (const marca of ordem) { const i = t.indexOf(marca); assert.ok(i > pos, `ordem: ${marca}`); pos = i; }
   assert.equal((t.match(/<a class="svc reveal"/g) || []).length, 6, 'seis serviços');
   assert.equal((t.match(/<li class="step reveal"/g) || []).length, 4, 'quatro passos');
-  const grelha = /<div class="photo-grid four">(.*?)<\/div>\s*<div class="ba-wrap/s.exec(t);
-  assert.ok(grelha, 'grelha de quatro fotografias antes do comparador');
-  assert.equal((grelha[1].match(/<figure class="pg reveal">/g) || []).length, 4);
+  const grelha = /<div class="photo-grid mosaico">(.*?)<\/div>\s*<div class="ba-wrap/s.exec(t);
+  assert.ok(grelha, 'mosaico das obras antes do comparador');
+  assert.equal((grelha[1].match(/<figure class="pg reveal" data-cat="/g) || []).length, OBRAS.length);
   assert.match(t, /<input type="range" min="0" max="100" value="50" class="ba-range" data-ba-range aria-label="Comparar demolição e acabamento">/);
   assert.match(t, /<em>de raiz\.<\/em>/);
   const anos = new Date().getFullYear() - Number(SITE.founded);
@@ -141,7 +141,8 @@ test('as fichas de obra: migalhas, ficha, orçamento pré-escolhido, WhatsApp co
   });
   const obras = le('obras.html');
   for (const o of OBRAS) assert.ok(obras.includes(`href="obras/${o.slug}.html"`), `obras.html liga a ${o.slug}`);
-  assert.match(obras, /<a class="chip" href="#reabilitacao">Reabilitação <span class="chip-n">2<\/span><\/a>/);
+  assert.match(obras, /<button class="chip" type="button" data-filtro="reabilitacao" aria-pressed="false">Reabilitação <span class="chip-n">2<\/span><\/button>/);
+  assert.equal((obras.match(/<figure class="pg reveal" data-cat="/g) || []).length, OBRAS.length, 'obras.html mostra todas as obras');
 });
 
 test('a 404 só usa caminhos absolutos', () => {
@@ -171,7 +172,7 @@ test('as fotografias: original, tamanhos, prévias e texto alternativo', () => {
   const t = le('index.html');
   const pic = /<picture class="foto hero-photo"[^>]*>(.*?)<\/picture>/s.exec(t)[1];
   assert.match(pic, /<source type="image\/avif" srcset="assets\/img\/fotos\/foto-01-400\.avif 400w, [^"]*foto-01-1080\.avif 1080w"/);
-  assert.match(pic, /<img src="assets\/img\/fotos\/foto-01\.jpg" alt="[^"]+" width="1080" height="810" loading="eager" decoding="async" fetchpriority="high">/);
+  assert.match(pic, /<img src="assets\/img\/fotos\/foto-01\.jpg" alt="" width="1080" height="810" style="object-position: 50% 60%" loading="eager" decoding="async" fetchpriority="high">/);
 });
 
 function copiaFontes() {

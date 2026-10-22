@@ -99,7 +99,7 @@ def campos_obra(o):
     # «Outras obras de fachadas» só quando há outras da mesma categoria que cheguem; senão, «Outras obras»
     mesma = sum(1 for x in OBRAS if x is not o and x["cat"] == o["cat"])
     o["relTitulo"] = f"Outras obras de {o['catNome'].lower()}" if mesma >= 2 else "Outras obras"
-    o["relHref"] = f"obras.html#{o['cat']}"
+    o["relHref"] = f"obras.html?cat={o['cat']}"
     # a fotografia da ficha ocupa a largura do contentor (1240px) e no máximo 78% da altura do ecrã, na sua proporção
     o["fotoSizes"] = f"min(1240px, 100vw, calc(78vh * {f['w']} / {f['h']}))"
     # sem comparador, a chave existe vazia: os modelos perguntam {{#se obra.antesDepois}} (uma chave em falta é erro)
