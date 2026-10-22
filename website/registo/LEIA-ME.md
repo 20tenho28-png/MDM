@@ -1,8 +1,8 @@
 # Registo de pedidos e orçamentos (equipa, uso interno)
 
-Página interna em `/registo/` (https://www.mdmassist.pt/registo/): os pedidos de clientes do primeiro contacto à fatura, com os 9 estados, dono e próxima ação, relógio de prazos, triagem diária e exportação em CSV. Vários colaboradores ao mesmo tempo, com as mudanças a aparecer em tempo real.
+Página interna em `/registo/` (https://www.mdmassist.pt/registo/): os pedidos de clientes do primeiro contacto à fatura, com os 9 estados, dono e próxima ação, relógio de prazos, triagem diária, painel e exportação em CSV. Vários colaboradores ao mesmo tempo, com as mudanças a aparecer em tempo real.
 
-- `index.html`: a app, um só ficheiro, sem build. Usa `@supabase/supabase-js` (CDN) e as letras do Google.
+- `index.html`: a app, um só ficheiro, sem build. Três vistas: «Gerir pedidos» (mosaico por urgência, filtros e tabela com ações rápidas), «Painel» (números e gráficos calculados na página a partir dos pedidos carregados: bola com a MDM, atrasados, a vencer hoje, novos na semana, orçamentos à espera, ganhos e taxa de aceitação em 90 dias; a lista do que decidir hoje; as visitas a 7 dias; a fila por estado e a carga por dono, por P; novos e fechados por mês; valor dos orçamentos e motivos de perda; origem e tipo; atividade recente. Cada número e cada barra abre a lista já filtrada ou o pedido) e «Prazos e exportar». Usa `@supabase/supabase-js` (CDN) e as letras do Google.
 - `supabase/migracao.sql`: tabelas (`pedidos`, `config`, `eventos`, `colaboradores`), permissões (só quem está em `colaboradores` lê e escreve) e as funções `guardar_pedido` (com controlo de versão) e `apagar_pedido`. Corre-se uma vez no SQL Editor do projeto Supabase da MDM.
 - Os dados (pedidos, clientes) vivem no Supabase e **nunca entram no repositório** (`.gitignore` guarda `dados*.sql`).
 
