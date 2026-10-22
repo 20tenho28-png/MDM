@@ -271,6 +271,16 @@ td.ref button{background:none;border:0;padding:0;font:inherit;font-family:var(--
 td.ref button:hover{text-decoration:underline}
 .tipo-NC{color:var(--copper)}.anulado{text-decoration:line-through;color:var(--ink-2)}
 
+.lp .lb{display:flex;gap:6px;flex-wrap:wrap;grid-column:3;grid-row:1/3;align-self:center}
+.lp .lb button{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 10px;cursor:pointer}
+.lp .lb button:hover{background:var(--sunk)}
+td .lb{display:flex;flex-wrap:nowrap;gap:6px}
+.lp .lb button.pri{border-color:var(--accent);color:var(--accent)}
+@media (max-width:640px){.lp .lb{grid-column:2;grid-row:4}}
+.m-manutencao{--u:var(--info)}.m-cobrar{--u:var(--bad)}.m-frio{--u:var(--warn)}.m-orcamento{--u:var(--copper)}.m-ativo{--u:var(--good)}.m-perdido{--u:var(--muted)}.m-ignorado{--u:var(--muted)}
+.lp .ld.motivo{font-size:12px;font-family:var(--font-body);font-weight:600;color:var(--u);text-transform:uppercase;letter-spacing:.05em;line-height:1.2;max-width:84px;white-space:normal}
+.cli-tag{font-size:11.5px;font-weight:600;color:var(--u);border:1px solid color-mix(in srgb,var(--u) 45%,transparent);border-radius:4px;padding:0 5px;line-height:1.5;white-space:nowrap}
+
 /* Entrada */
 .login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-left,0px))}
 .login-box{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:26px 22px;width:100%;max-width:380px;display:flex;flex-direction:column;gap:14px}
@@ -406,6 +416,7 @@ body.app-on{background:var(--surface)}
   <button class="r-novo" type="button" id="railNovo" title="Novo pedido" aria-label="Novo pedido"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   <button type="button" id="rail-gerir" title="Gerir pedidos" aria-label="Gerir pedidos"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.3c2.5-.2 4.3 1.3 4.8 4.2"/></svg><span class="r-badge" id="redBadge"></span></button>
   <button type="button" id="rail-resumo" title="Painel" aria-label="Painel"><svg viewBox="0 0 24 24"><path d="M5 20V12M10 20V5M15 20v-6M20 20V9"/></svg></button>
+  <button type="button" id="rail-clientes" title="Clientes" aria-label="Clientes"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.6-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.4-7 10-7 10z"/></svg><span class="r-badge" id="cliBadge"></span></button>
   <button type="button" id="rail-faturacao" title="Faturação" aria-label="Faturação"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h6M9 16h6"/></svg></button>
   <button type="button" id="rail-prazos" title="Prazos e exportar" aria-label="Prazos e exportar"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></button>
   <button type="button" class="r-fim" id="btnSair" title="Sair" aria-label="Sair"><svg viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 8l-4 4 4 4M6 12h10"/></svg></button>
@@ -431,6 +442,7 @@ body.app-on{background:var(--surface)}
   <div class="tabs tabs2" role="tablist" aria-label="Vistas" id="tabs" hidden>
     <button class="tab" role="tab" type="button" id="tab-gerir" aria-controls="v-gerir" aria-selected="true">Gerir pedidos</button>
     <button class="tab" role="tab" type="button" id="tab-resumo" aria-controls="v-resumo" aria-selected="false" tabindex="-1">Painel</button>
+    <button class="tab" role="tab" type="button" id="tab-clientes" aria-controls="v-clientes" aria-selected="false" tabindex="-1">Clientes</button>
     <button class="tab" role="tab" type="button" id="tab-faturacao" aria-controls="v-faturacao" aria-selected="false" tabindex="-1">Faturação</button>
     <button class="tab" role="tab" type="button" id="tab-prazos" aria-controls="v-prazos" aria-selected="false" tabindex="-1">Prazos e exportar</button>
   </div>
@@ -491,6 +503,27 @@ body.app-on{background:var(--surface)}
       <section aria-labelledby="h-ativ">
         <div class="sec-h"><h2 id="h-ativ">Atividade recente</h2></div>
         <div class="panel" id="atividade"></div>
+      </section>
+    </div>
+  </div>
+
+  <div id="v-clientes" role="tabpanel" aria-labelledby="tab-clientes" hidden>
+    <p class="note" id="cliRef" style="margin:0 0 12px"></p>
+    <section class="kpis oito" id="cliKpis" aria-label="Clientes"></section>
+    <div class="grid-p">
+      <section aria-labelledby="h-cli-contactar" style="grid-column:1/-1">
+        <div class="sec-h"><h2 id="h-cli-contactar">Para contactar</h2><span class="count" id="cliContactarCount"></span></div>
+        <div class="mos-leg" id="cliLeg" role="group" aria-label="Motivo"></div>
+        <div class="panel lista-p" id="cliContactar"></div>
+        <p class="note">Ninguém se perde por esquecimento: cada cliente aparece aqui quando a manutenção está a chegar, quando há uma fatura por cobrar, quando passou do seu ritmo habitual sem nova fatura ou quando um orçamento está sem resposta. «Contactado» tira-o da lista por 30 dias; «Pedido» abre um pedido novo já com o nome.</p>
+      </section>
+      <section aria-labelledby="h-cli-lista" style="grid-column:1/-1">
+        <div class="sec-h"><h2 id="h-cli-lista">Todos os clientes</h2><span class="count" id="cliListaCount"></span></div>
+        <div class="filtros">
+          <div class="fbox dono"><select id="cliEstado" aria-label="Situação"><option value="">Todas as situações</option><option value="manutencao">Manutenção a vencer</option><option value="cobrar">Fatura por cobrar</option><option value="frio">A esfriar</option><option value="orcamento">Orçamento sem resposta</option><option value="ativo">Em dia</option><option value="perdido">Sem faturação há mais de um ano</option><option value="ignorado">Ignorados</option></select></div>
+          <div class="fbox pesq"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input id="cliQ" type="search" placeholder="Pesquisar cliente" aria-label="Pesquisar cliente" autocomplete="off"></div>
+        </div>
+        <div class="panel tw" id="cliLista"></div>
       </section>
     </div>
   </div>
@@ -689,7 +722,7 @@ body.app-on{background:var(--surface)}
   let cfgPrazos = null, cfgPrazosVersao = 0, ligado = false;
   let dono = '', query = '';
   let currentId = null, modo = null, trans = null, saving = false, delArmed = null;
-  let sheetSujo = false, dadosAberto = false, prazosSujos = false;
+  let sheetSujo = false, dadosAberto = false, prazosSujos = false, novoBase = null;
 
   const prazosAtuais = () => (cfgPrazos && cfgPrazos.valores) || PRAZOS_PADRAO;
   const limiteDono = () => (cfgPrazos && Number(cfgPrazos.limiteDono)) || LIMITE_PADRAO;
@@ -798,7 +831,7 @@ body.app-on{background:var(--surface)}
   }
 
   /* ---------- Separadores ---------- */
-  const TABS = ['gerir','resumo','faturacao','prazos'];
+  const TABS = ['gerir','resumo','clientes','faturacao','prazos'];
   let tab = 'gerir';
   try { const s = localStorage.getItem('registo-tab'); if (TABS.includes(s)) tab = s; } catch (e) {}
   if (TABS.includes(location.hash.replace('#',''))) tab = location.hash.replace('#','');
@@ -1227,14 +1260,14 @@ body.app-on{background:var(--surface)}
       } catch (e) { erros.push(`${f.name}: ${(e && e.message) || 'não foi possível ler'}`); }
     }
     if (!fatMes || !faturacao[fatMes]) fatMes = Object.keys(faturacao).sort().pop() || '';
-    renderFaturacao();
+    renderFaturacao(); renderClientes();
     toast(erros.length ? erros[0] : `${ok} ${ok === 1 ? 'mês lido' : 'meses lidos'}`);
   }
   async function apagarMes(mes) {
     delete faturacao[mes];
     if (sb && canWrite && fatTabela) { const {error} = await sb.from('faturacao').delete().eq('mes', mes); if (error) toast('Não foi possível apagar na base de dados.'); }
     if (fatMes === mes) fatMes = Object.keys(faturacao).sort().pop() || '';
-    renderFaturacao();
+    renderFaturacao(); renderClientes();
   }
 
   const mesesOrd = () => Object.keys(faturacao).sort();
@@ -1385,6 +1418,175 @@ body.app-on{background:var(--surface)}
   F('fatMes').addEventListener('change', e => { fatMes = e.target.value; renderFatDocs(); });
   F('fatQ').addEventListener('input', e => { fatQ = e.target.value; renderFatDocs(); });
 
+
+  /* ---------- Clientes: não perder nenhum ---------- */
+  // Junta os clientes da faturação (SAF-T) e do registo, calcula o ritmo de cada um e quem precisa de contacto.
+  let cfgClientes = {}, cliEstado = '', cliQ = '', cliMotivo = '';
+  const MOTIVO = {manutencao:'Manutenção a vencer', cobrar:'Fatura por cobrar', frio:'A esfriar', orcamento:'Orçamento sem resposta', ativo:'Em dia', perdido:'Sem faturação há mais de um ano', ignorado:'Ignorado'};
+  const MOTIVO_ORD = ['cobrar','manutencao','orcamento','frio'];
+  const MOTIVO_CURTO = {cobrar:'Cobrar', manutencao:'Manutenção', orcamento:'Orçamento', frio:'A esfriar', ativo:'Em dia', perdido:'Parado', ignorado:'Ignorado'};
+  const chaveCli = n => norm(n).replace(/\b(lda|l\.da|unipessoal|s\.?a\.?|sociedade|limitada)\b/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  const CADENCIA_RE = [[/\bmensal/i, 1], [/\bbimestral/i, 2], [/\btrimestral/i, 3], [/\bquadrimestral/i, 4], [/\bsemestral/i, 6], [/\banual/i, 12]];
+  const mesesEntre = (a, b) => (new Date(b) - new Date(a)) / (30.44 * 86400000);
+  const addMeses = (s, n) => { const d = new Date(s + 'T12:00'); d.setMonth(d.getMonth() + Math.round(n)); return iso(d); };
+
+  // Data de referência: hoje, se os ficheiros chegam ao mês passado; senão o fim do último mês carregado, para a lista não
+  // marcar toda a gente como esfriada só porque faltam ficheiros.
+  function dataRef() {
+    const ms = mesesOrd(); if (!ms.length) return today();
+    const ult = ms[ms.length - 1], hoje = today();
+    const [y, m] = ult.split('-').map(Number);
+    const fim = iso(new Date(y, m, 0));
+    return addMeses(ult + '-01', 2) > hoje ? hoje : fim;
+  }
+
+  function clientes() {
+    const ref = dataRef(), ms = mesesOrd();
+    const pagos = new Set(ms.flatMap(m => faturacao[m].recibos.filter(r => r.estado !== 'A').flatMap(r => r.docs)));
+    const map = {};
+    const get = nome => { const k = chaveCli(nome); if (!k || /consumidor final/.test(k)) return null; return map[k] || (map[k] = {k, nome, docs: [], pedidos: [], semRecibo: []}); };
+    for (const m of ms) for (const d of faturacao[m].docs) {
+      if (d.estado === 'A') continue;
+      const c = get(d.cliente); if (!c) continue;
+      c.docs.push(d);
+      if (d.tipo === 'FT' && !pagos.has(d.n)) c.semRecibo.push(d);
+    }
+    for (const r of rows) { const c = get(r.cliente || ''); if (c) { c.pedidos.push(r); if (c.docs.length === 0) c.nome = r.cliente; } }
+    const lista = Object.values(map).map(c => {
+      const fts = c.docs.filter(d => d.tipo === 'FT').sort((a, b) => a.data.localeCompare(b.data));
+      c.n = fts.length; c.total12 = fts.filter(d => d.data >= addMeses(ref, -12)).reduce((t, d) => t + d.liquido, 0);
+      c.ultima = fts.length ? fts[fts.length - 1].data : null; c.primeira = fts.length ? fts[0].data : null;
+      // Ritmo: a palavra da descrição (bimestral, semestral…) ou a mediana dos intervalos entre faturas.
+      const palavras = {};
+      for (const d of fts) for (const [re, n] of CADENCIA_RE) if (re.test(d.desc)) palavras[n] = (palavras[n] || 0) + 1;
+      const pal = Object.entries(palavras).sort((a, b) => b[1] - a[1])[0];
+      c.contrato = fts.some(d => /manuten[çc][ãa]o\s+preventiva|contrato/i.test(d.desc));
+      if (pal) c.cadencia = Number(pal[0]);
+      else if (fts.length >= 3) { const iv = fts.slice(1).map((d, i) => mesesEntre(fts[i].data, d.data)).sort((a, b) => a - b); const med = iv[Math.floor(iv.length / 2)]; c.cadencia = med >= 1.5 ? Math.round(med) : null; }
+      else c.cadencia = null;
+      c.proxima = c.ultima && c.cadencia ? addMeses(c.ultima, c.cadencia) : c.ultima && fts.length === 1 && /instala[çc][ãa]o|fornecimento/i.test(fts[0].desc) ? addMeses(c.ultima, 12) : null;
+      c.abertos = c.pedidos.filter(r => ABERTOS.includes(r.estado));
+      c.orcSemResposta = c.pedidos.filter(r => r.estado === 'espera_cliente' && r.esperaMotivo === 'decisao');
+      const ultimoPedido = c.pedidos.map(r => ultimoContacto(r)).filter(Boolean).sort().pop();
+      const cfg = cfgClientes[c.k] || {};
+      c.cfg = cfg;
+      c.contactado = [cfg.contactado, ultimoPedido && ultimoPedido.slice(0, 10)].filter(Boolean).sort().pop() || null;
+      const cobrar = c.semRecibo.filter(d => mesesEntre(d.data, ref) >= 1);
+      c.motivos = [];
+      if (cfg.ignorar) c.estado = 'ignorado';
+      else {
+        if (cobrar.length) c.motivos.push('cobrar');
+        if (c.proxima && mesesEntre(c.proxima, ref) >= -1) c.motivos.push('manutencao');
+        if (c.orcSemResposta.length) c.motivos.push('orcamento');
+        if (!c.proxima && c.ultima && c.cadencia == null && mesesEntre(c.ultima, ref) >= 6 && mesesEntre(c.ultima, ref) < 12) c.motivos.push('frio');
+        if (c.proxima && mesesEntre(c.proxima, ref) >= 3) { c.motivos = c.motivos.filter(m => m !== 'manutencao'); c.motivos.push('frio'); }
+        // Contactado há menos de 30 dias: sai da lista, menos para cobrar.
+        if (c.contactado && mesesEntre(c.contactado, today()) < 1) c.motivos = c.motivos.filter(m => m === 'cobrar' || m === 'orcamento');
+        c.estado = c.motivos.length ? MOTIVO_ORD.find(m => c.motivos.includes(m)) : c.ultima && mesesEntre(c.ultima, ref) >= 12 ? 'perdido' : 'ativo';
+      }
+      c.urg = c.estado === 'cobrar' ? -cobrar.reduce((t, d) => t + d.bruto, 0) : c.estado === 'manutencao' ? new Date(c.proxima).getTime() : c.estado === 'orcamento' ? 0 : c.ultima ? new Date(c.ultima).getTime() : 0;
+      return c;
+    });
+    return {ref, lista};
+  }
+
+  async function guardarCliente(k, patch) {
+    if (!sb || !canWrite) return;
+    const novo = {...cfgClientes, [k]: {...(cfgClientes[k] || {}), ...patch, por: eu.email}};
+    try {
+      const {error} = await sb.from('config').upsert({chave:'clientes', valor: novo, atualizado_por: eu.email}, {onConflict:'chave'});
+      if (error) throw error;
+      cfgClientes = novo; renderClientes();
+    } catch (e) { toast('Não foi possível guardar.'); }
+  }
+  const abrirNovoPara = nome => { novoBase = {cliente: nome}; abrirNovo(); };
+
+  function renderClientes() {
+    const {ref, lista} = clientes();
+    const temDados = mesesOrd().length > 0 || rows.length > 0;
+    F('cliRef').textContent = !mesesOrd().length ? 'Junta os ficheiros SAF-T em «Faturação» para ver aqui todos os clientes faturados; por agora só os do registo.' : ref !== today() ? `Situação a ${ddmm(ref)}/${ref.slice(2, 4)}, o fim do último mês carregado. Junta os meses seguintes em «Faturação» para a lista ficar atual.` : `Situação a hoje, com os ficheiros de ${mesTxt(mesesOrd()[0])} a ${mesTxt(mesesOrd().slice(-1)[0])}.`;
+    const conta = m => lista.filter(c => c.estado === m).length;
+    const ativos12 = lista.filter(c => c.ultima && mesesEntre(c.ultima, ref) < 12).length;
+    const cobrarV = lista.flatMap(c => c.estado === 'cobrar' ? c.semRecibo.filter(d => mesesEntre(d.data, ref) >= 1) : []).reduce((t, d) => t + d.bruto, 0);
+    const novos = lista.filter(c => c.primeira && mesesEntre(c.primeira, ref) < 3).length;
+    const contratos = lista.filter(c => c.contrato).length;
+    const tile = (l, v, s, tone, filtro) => h('button',{class:'kpi' + (tone ? ' t-' + tone : ''), type:'button', onclick:() => { cliEstado = filtro; F('cliEstado').value = filtro; renderCliLista(lista); F('h-cli-lista').scrollIntoView({behavior:'smooth'}); }},
+      h('span',{class:'k-l'}, l), h('span',{class:'k-v'}, temDados ? v : '–'), h('span',{class:'k-s'}, temDados ? s : ' '));
+    F('cliKpis').replaceChildren(
+      tile('Clientes', String(lista.length), `${ativos12} com fatura nos últimos 12 meses`, '', ''),
+      tile('Por cobrar', String(conta('cobrar')), conta('cobrar') ? `${eur(cobrarV)} com IVA, há mais de 30 dias` : 'Nenhuma fatura por cobrar', conta('cobrar') ? 'bad' : 'good', 'cobrar'),
+      tile('Manutenção a vencer', String(conta('manutencao')), conta('manutencao') ? 'Marcar a visita antes que o cliente ligue' : 'Nenhuma visita a vencer', conta('manutencao') ? 'warn' : '', 'manutencao'),
+      tile('A esfriar', String(conta('frio')), conta('frio') ? 'Passaram do ritmo habitual sem nova fatura' : 'Ninguém parado', conta('frio') ? 'warn' : '', 'frio'),
+      tile('Orçamento sem resposta', String(conta('orcamento')), conta('orcamento') ? 'Ligar antes que escolham outro' : 'Todos respondidos', conta('orcamento') ? 'warn' : '', 'orcamento'),
+      tile('Com contrato', String(contratos), 'manutenção preventiva ou contrato na fatura', '', 'manutencao'),
+      tile('Novos no trimestre', String(novos), 'primeira fatura nos últimos 3 meses', novos ? 'good' : '', ''),
+      tile('Mais de um ano sem fatura', String(conta('perdido')), conta('perdido') ? 'Vale uma chamada: ainda são clientes' : 'Nenhum', '', 'perdido'),
+    );
+    const todos = lista.filter(c => MOTIVO_ORD.includes(c.estado));
+    F('cliBadge').textContent = conta('cobrar') + conta('manutencao') ? String(conta('cobrar') + conta('manutencao')) : '';
+    const leg = F('cliLeg');
+    leg.replaceChildren(...MOTIVO_ORD.map(m => h('button',{type:'button', class:`m-${m}`, 'aria-pressed': String(cliMotivo === m), onclick:() => { cliMotivo = cliMotivo === m ? '' : m; renderClientes(); }}, MOTIVO[m], h('b',null, String(conta(m))))));
+    const box = F('cliContactar');
+    const vis = todos.filter(c => !cliMotivo || c.estado === cliMotivo).sort((a, b) => MOTIVO_ORD.indexOf(a.estado) - MOTIVO_ORD.indexOf(b.estado) || a.urg - b.urg);
+    F('cliContactarCount').textContent = vis.length ? `${vis.length} ${vis.length === 1 ? 'cliente' : 'clientes'}` : '';
+    if (!vis.length) box.replaceChildren(h('p',{class:'empty'}, temDados ? 'Ninguém para contactar: todos os clientes estão em dia.' : 'Sem dados ainda.'));
+    else fill(box, vis.slice(0, 40).map(c => linhaCliente(c, ref)), vis.length > 40 ? h('p',{class:'note', style:'padding:10px 12px'}, `A mostrar 40 de ${vis.length}. Filtra pelo motivo ou vê a lista completa em baixo.`) : null);
+    renderCliLista(lista);
+  }
+
+  function motivoTxt(c, ref) {
+    switch (c.estado) {
+      case 'cobrar': { const xs = c.semRecibo.filter(d => mesesEntre(d.data, ref) >= 1); return `${xs.length} ${xs.length === 1 ? 'fatura' : 'faturas'} sem recibo, ${eur(xs.reduce((t, d) => t + d.bruto, 0))}: a mais antiga de ${ddmm(xs[0].data)}/${xs[0].data.slice(2, 4)}`; }
+      case 'manutencao': { const m = mesesEntre(c.proxima, ref); return `${c.contrato ? 'Manutenção' : 'Visita'} prevista a ${ddmm(c.proxima)}/${c.proxima.slice(2, 4)} (${m >= 0 ? `passou há ${num1(m)} ${m < 1.5 ? 'mês' : 'meses'}` : 'no próximo mês'})${c.cadencia ? ` · ritmo de ${c.cadencia} ${c.cadencia === 1 ? 'mês' : 'meses'}` : ' · um ano depois da instalação'}`; }
+      case 'orcamento': { const r = c.orcSemResposta[0]; return `${r.num || 'Orçamento'} enviado ${r.dataEnvio ? 'a ' + ddmm(r.dataEnvio) : ''}${r.valor ? `, ${eur(r.valor)} s/IVA` : ''}${r.seguimentos ? `, ${r.seguimentos} seguimento${r.seguimentos > 1 ? 's' : ''}` : ', sem seguimentos'}`; }
+      case 'frio': { const m = mesesEntre(c.ultima, ref); return `Última fatura a ${ddmm(c.ultima)}/${c.ultima.slice(2, 4)}, há ${num1(m)} meses${c.cadencia ? `; costumava faturar de ${c.cadencia} em ${c.cadencia} meses` : ''}`; }
+      case 'perdido': return `Última fatura a ${ddmm(c.ultima)}/${c.ultima.slice(2, 4)}`;
+      case 'ignorado': return c.cfg.nota || 'Marcado para ignorar';
+      default: return c.ultima ? `Última fatura a ${ddmm(c.ultima)}/${c.ultima.slice(2, 4)}${c.proxima ? `, próxima prevista a ${ddmm(c.proxima)}/${c.proxima.slice(2, 4)}` : ''}` : 'Só no registo, sem faturas';
+    }
+  }
+  function botoesCliente(c) {
+    if (!canWrite) return null;
+    return h('span',{class:'lb'},
+      h('button',{type:'button', class:'pri', title:'Registar um pedido novo com este cliente', onclick:() => abrirNovoPara(c.nome)}, 'Pedido'),
+      c.abertos.length ? h('button',{type:'button', title:'Abrir o pedido em aberto', onclick:() => openSheet(c.abertos[0].id)}, `Abrir ${c.abertos.length > 1 ? `(${c.abertos.length})` : ''}`) : null,
+      h('button',{type:'button', title:'Falei com o cliente: sai da lista por 30 dias', onclick:() => guardarCliente(c.k, {contactado: today()})}, 'Contactado'),
+      c.cfg.ignorar ? h('button',{type:'button', onclick:() => guardarCliente(c.k, {ignorar:false})}, 'Voltar a seguir')
+        : h('button',{type:'button', title:'Não voltar a lembrar este cliente', onclick:() => { if (confirm(`Deixar de seguir ${c.nome}? Deixa de aparecer na lista para contactar.`)) guardarCliente(c.k, {ignorar:true}); }}, 'Ignorar'));
+  }
+  function linhaCliente(c, ref) {
+    return h('div',{class:`lp m-${c.estado}`, style:'--stripe:var(--u);cursor:default'},
+      h('span',{class:'ld motivo'}, MOTIVO_CURTO[c.estado]),
+      h('span',{class:'ln', style:'white-space:normal'}, c.nome, c.contrato ? [' ', h('span',{class:'cli-tag m-manutencao'}, 'contrato')] : null, c.total12 ? h('span',{class:'c-money', style:'margin-left:8px'}, `${eur(c.total12)} em 12 meses`) : null),
+      h('span',{class:'la', style:'white-space:normal'}, motivoTxt(c, ref), c.contactado ? ` · contactado a ${ddmm(c.contactado)}` : ''),
+      botoesCliente(c));
+  }
+
+  function renderCliLista(lista) {
+    const box = F('cliLista'), q = norm(cliQ.trim());
+    const ref = dataRef();
+    const xs = lista.filter(c => !cliEstado || c.estado === cliEstado).filter(c => !q || norm(c.nome).includes(q))
+      .sort((a, b) => b.total12 - a.total12 || String(b.ultima || '').localeCompare(String(a.ultima || '')));
+    F('cliListaCount').textContent = `${xs.length} ${xs.length === 1 ? 'cliente' : 'clientes'}`;
+    if (!xs.length) { box.replaceChildren(h('p',{class:'empty'}, 'Nenhum cliente com estes filtros.')); return; }
+    const vis = xs.slice(0, 200);
+    fill(box, h('table',null,
+      h('thead',null, h('tr',null, h('th',null,'Cliente'), h('th',null,'Situação'), h('th',{class:'n'},'Faturas'), h('th',{class:'n'},'12 meses'), h('th',null,'Última'), h('th',null,'Ritmo'), h('th',null,'Próxima'), h('th',{class:'n'},'Por cobrar'), h('th',{class:'n'},'Pedidos'), h('th',null,''))),
+      h('tbody',null, vis.map(c => h('tr',null,
+        h('td',null, h('b',null, c.nome), c.contrato ? [' ', h('span',{class:'cli-tag m-manutencao'}, 'contrato')] : null),
+        h('td',null, h('span',{class:`cli-tag m-${c.estado}`}, MOTIVO[c.estado]), h('div',{class:'sub', style:'max-width:34ch'}, motivoTxt(c, ref))),
+        h('td',{class:'n'}, String(c.n)), h('td',{class:'n'}, c.total12 ? eur(c.total12) : ''),
+        h('td',{class:'sub', style:'white-space:nowrap'}, c.ultima ? `${ddmm(c.ultima)}/${c.ultima.slice(2, 4)}` : '–'),
+        h('td',{class:'sub'}, c.cadencia ? `${c.cadencia} ${c.cadencia === 1 ? 'mês' : 'meses'}` : c.n <= 1 ? 'uma fatura' : 'irregular'),
+        h('td',{class:'sub', style:'white-space:nowrap'}, c.proxima ? `${ddmm(c.proxima)}/${c.proxima.slice(2, 4)}` : '–'),
+        h('td',{class:'n' + (c.semRecibo.length ? ' over' : '')}, c.semRecibo.length ? eur(c.semRecibo.reduce((t, d) => t + d.bruto, 0)) : ''),
+        h('td',{class:'n'}, c.abertos.length ? h('button',{type:'button', class:'lk', style:'font-size:14px;margin:0', onclick:() => openSheet(c.abertos[0].id)}, `${c.abertos.length} aberto${c.abertos.length > 1 ? 's' : ''}`) : c.pedidos.length ? h('span',{class:'sub'}, String(c.pedidos.length)) : ''),
+        h('td',null, botoesCliente(c)))))),
+      xs.length > vis.length ? h('p',{class:'note', style:'padding:10px 12px'}, `A mostrar ${vis.length} de ${xs.length}. Pesquisa para ver os outros.`) : null);
+  }
+  F('cliEstado').addEventListener('change', e => { cliEstado = e.target.value; renderClientes(); });
+  F('cliQ').addEventListener('input', e => { cliQ = e.target.value; renderClientes(); });
+
   /* ---------- Prazos e Drive ---------- */
   function renderPrazos() {
     const box = F('prazos');
@@ -1480,7 +1682,7 @@ body.app-on{background:var(--surface)}
     F('nextNum').textContent = status === 'ok' ? nextNumber() : 'ORC…';
     const verm = all.filter(x => x.sem === 'vermelho').length;
     F('redBadge').textContent = verm ? String(verm) : '';
-    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderExport(); renderEquipa(); renderFaturacao();
+    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderExport(); renderEquipa(); renderFaturacao(); renderClientes();
     F('btnNovoTop').hidden = F('railNovo').hidden = !(canWrite && status === 'ok');
     // Não redesenha a folha aberta enquanto há um formulário a meio.
     if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
@@ -1871,7 +2073,7 @@ body.app-on{background:var(--surface)}
   function renderNovo() {
     const id = nextPedido();
     F('sheetTitle').textContent = 'Novo pedido'; F('sheetSub').textContent = id;
-    const base = {prioridade:null, dataPedido: today()};
+    const base = {prioridade:null, dataPedido: today(), ...(novoBase || {})}; novoBase = null;
     F('sheetBody').replaceChildren(
       h('p',{class:'hint'}, 'Regista o pedido assim que chega: entra em Novo, com dono, próxima ação e data. O P sai das regras; muda-o só com razão.'),
       camposDados(base, true),
@@ -1933,7 +2135,7 @@ body.app-on{background:var(--surface)}
       ]);
       if (p.error) throw p.error;
       rows = p.data.map(r => ({id: r.id, ...r.dados, _versao: r.versao}));
-      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } }
+      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; }
       if (ft.error) { if (/relation|does not exist|schema cache/i.test(ft.error.message || '')) fatTabela = false; }
       else { fatTabela = true; const novo = {}; for (const x of ft.data) if (x.dados && x.dados.mes) novo[x.dados.mes] = x.dados; faturacao = novo; if (!faturacao[fatMes]) fatMes = ''; }
       if (!q.error) { equipa = q.data; const m = equipa.find(x => x.email === (eu && eu.email)); if (m && m.nome) eu.nome = m.nome; }
@@ -1972,7 +2174,7 @@ body.app-on{background:var(--surface)}
   }
   function sair() {
     if (canal) { sb.removeChannel(canal); canal = null; }
-    sessao = null; eu = null; rows = []; faturacao = {}; canWrite = false; status = 'loading'; ligado = false;
+    sessao = null; eu = null; rows = []; faturacao = {}; cfgClientes = {}; canWrite = false; status = 'loading'; ligado = false;
     F_LOGIN(); erroLogin('');
   }
   F('loginForm').addEventListener('submit', async ev => {
