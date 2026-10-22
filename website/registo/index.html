@@ -233,7 +233,7 @@ body.app-on{background:var(--surface)}
 .fbox.estado select{font-weight:600;font-size:16px}
 .fbox.ordem{flex:1 1 280px}
 .fbox.dono,.fbox.fprio{flex:0 1 190px}
-.fbox.pesq{flex:1 1 200px}
+.fbox.pesq{flex:2 1 220px}
 .fbox.pesq::after{display:none}
 .fbox.pesq input{border:0;background:transparent;font:inherit;font-size:15px;color:var(--ink);padding:10px 14px 10px 38px;width:100%;min-width:0}
 .fbox.pesq input:focus{outline:none}
@@ -241,7 +241,7 @@ body.app-on{background:var(--surface)}
 .fbox .lbl{font-weight:700;padding-left:14px;white-space:nowrap;font-size:15px}
 .fbox .lbl + select{padding-left:6px}
 .tabela{border-top:1px solid var(--line)}
-.t-head,.t-row{display:grid;grid-template-columns:minmax(220px,1.35fr) minmax(200px,1.2fr) minmax(170px,1fr) 250px;gap:20px;align-items:center;padding:14px 16px 14px 20px}
+.t-head,.t-row{display:grid;grid-template-columns:minmax(200px,1.1fr) minmax(220px,1.5fr) minmax(140px,.7fr) 250px;gap:20px;align-items:center;padding:14px 16px 14px 20px}
 .t-head{background:var(--sunk);font-size:14px;color:var(--ink-2);font-weight:500;padding-top:12px;padding-bottom:12px}
 .t-row{border-bottom:1px solid var(--line);position:relative;align-items:start;padding-top:18px;padding-bottom:18px}
 .t-row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--stripe,transparent)}
@@ -272,6 +272,8 @@ body.app-on{background:var(--surface)}
 .mais:hover{background:var(--sunk)}
 .t-vazio{padding:28px 20px;color:var(--ink-2)}
 .t-conta{font-size:14px;color:var(--ink-2);margin:0 0 10px}
+.t-row .t-sub{gap:3px}
+.t-ativ .tempo{font-size:15px}
 @media (max-width:1100px){
   .t-head{display:none}
   .t-row{grid-template-columns:minmax(0,1fr) auto;gap:10px 14px}
@@ -324,7 +326,7 @@ body.app-on{background:var(--surface)}
 <header class="topbar">
   <div class="logo">MDM<small>Registo de pedidos</small></div>
   <div class="user">
-    <span>Próximo orçamento <b id="nextNum" style="font-family:var(--font-mono);font-weight:500">ORC…</b></span>
+    <b id="nextNum" hidden></b>
     <span><span id="liveDot" class="live" aria-hidden="true"></span><span id="userTxt"></span></span>
   </div>
 </header>
@@ -332,16 +334,13 @@ body.app-on{background:var(--surface)}
 <main class="page">
   <div class="page-h">
     <label class="vista"><span class="sr-only" style="position:absolute;left:-9999px">Vista</span><select id="fVista" aria-label="Vista">
-      <option value="abertos">Todos os pedidos abertos e em espera</option>
-      <option value="mdm">Pedidos com a bola na MDM</option>
-      <option value="vermelhos">Pedidos atrasados</option>
-      <option value="hoje">Pedidos que vencem hoje</option>
+      <option value="abertos">Pedidos em aberto</option>
       <option value="fechados">Pedidos fechados</option>
       <option value="todos">Todos os pedidos</option>
     </select></label>
     <button class="link-add" type="button" id="btnNovoTop">Adicionar pedido</button>
   </div>
-  <div class="tabs tabs2" role="tablist" aria-label="Vistas" id="tabs">
+  <div class="tabs tabs2" role="tablist" aria-label="Vistas" id="tabs" hidden>
     <button class="tab" role="tab" type="button" id="tab-gerir" aria-controls="v-gerir" aria-selected="true">Gerir pedidos</button>
     <button class="tab" role="tab" type="button" id="tab-resumo" aria-controls="v-resumo" aria-selected="false" tabindex="-1">Resumo</button>
     <button class="tab" role="tab" type="button" id="tab-prazos" aria-controls="v-prazos" aria-selected="false" tabindex="-1">Prazos e exportar</button>
@@ -350,14 +349,14 @@ body.app-on{background:var(--surface)}
   <div id="v-gerir" role="tabpanel" aria-labelledby="tab-gerir">
     <div class="filtros">
       <div class="fbox estado"><span class="lbl">Estado:</span><select id="fEstado" aria-label="Estado"></select></div>
-      <div class="fbox ordem"><span class="lbl">Ordenar por:</span><select id="fOrdem" aria-label="Ordenar por">
+      <div class="fbox ordem" hidden><span class="lbl">Ordenar por:</span><select id="fOrdem" aria-label="Ordenar por">
         <option value="prio">Prioridade e tempo que falta</option>
         <option value="antigo">Data do pedido (mais antigo primeiro)</option>
         <option value="recente">Data do pedido (mais recente primeiro)</option>
         <option value="cliente">Cliente (A a Z)</option>
       </select></div>
       <div class="fbox dono"><select id="fDono" aria-label="Dono"></select></div>
-      <div class="fbox fprio"><select id="fPrio" aria-label="Prioridade"><option value="">Prioridade</option><option value="P1">P1 · Urgente</option><option value="P2">P2 · Alta</option><option value="P3">P3 · Normal</option></select></div>
+      <div class="fbox fprio" hidden><select id="fPrio" aria-label="Prioridade"><option value="">Prioridade</option><option value="P1">P1 · Urgente</option><option value="P2">P2 · Alta</option><option value="P3">P3 · Normal</option></select></div>
       <div class="fbox pesq"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input id="q" type="search" placeholder="Pesquisar" aria-label="Pesquisar cliente, localidade, nº ORC" autocomplete="off"></div>
     </div>
     <p class="t-conta" id="listaCount"></p>
@@ -716,9 +715,7 @@ body.app-on{background:var(--surface)}
     ['abertos', 'Todos os abertos', x => ABERTOS.includes(x.r.estado)],
     ['vermelhos', 'Atrasados', x => x.sem === 'vermelho'],
     ['hoje', 'Vencem hoje', x => x.sem === 'amarelo'],
-    ['novos', 'Novos desde ontem', x => ABERTOS.includes(x.r.estado) && novoDesdeOntem(x.r)],
     ['confirmar', 'Por confirmar', x => ABERTOS.includes(x.r.estado) && x.r.porConfirmar],
-    ['sem30', 'Sem contacto há 30 dias', x => semContacto30(x.r)],
     ...ABERTOS.map(k => [k, ESTADOS[k].l, x => x.r.estado === k]),
     ['resolvido', 'Resolvidos', x => x.r.estado === 'resolvido'],
     ['perdido', 'Perdidos', x => x.r.estado === 'perdido'],
@@ -766,17 +763,14 @@ body.app-on{background:var(--surface)}
     const nome = h('button',{class:'t-nome', type:'button', onclick:() => openSheet(r.id)}, r.cliente || 'Sem nome');
     const col1 = h('div',{style:'min-width:0'}, nome,
       h('div',{class:'t-sub'},
-        h('span',{class:'tl'}, h('span',{class:`prio p-${pe.p}`}, pe.p), h('span',null, e.l), pe.de ? h('span',{class:'esc'}, `Sobe de ${pe.de}`) : null, r.porConfirmar ? h('span',{class:'conf'}, 'Por confirmar') : null),
-        pedido ? h('span',null, `Pedido a ${dataCurta(pedido)}`) : null,
-        meta ? h('span',{class:'muted'}, meta) : null,
-        r.valor != null ? h('span',{class:'c-money'}, eur(r.valor)) : null,
-        h('span',{class:'id'}, ids)));
+        h('span',{class:'tl'}, h('span',{class:`prio p-${pe.p}`}, pe.p), h('span',null, e.l)),
+        meta ? h('span',{class:'muted'}, meta) : null));
     const col2 = h('div',{class:'t-acao'}, aberto
-      ? (r.proximaAcao ? [h('b',null, r.dono || 'Sem dono'), ': ', r.proximaAcao, r.dataProximaAcao ? h('span',{class:'quando' + (acaoAtrasada ? ' late' : '')}, acaoAtrasada ? `Devia ser a ${dataCurta(r.dataProximaAcao)}` : r.dataProximaAcao === today() ? 'Hoje' : `Até ${dataCurta(r.dataProximaAcao)}`) : null]
+      ? (r.proximaAcao ? [r.proximaAcao, r.dataProximaAcao ? h('span',{class:'quando' + (acaoAtrasada ? ' late' : '')}, `${r.dono || 'Sem dono'} · ${acaoAtrasada ? 'atrasada desde ' + dataCurta(r.dataProximaAcao) : r.dataProximaAcao === today() ? 'hoje' : 'até ' + dataCurta(r.dataProximaAcao)}`) : null]
         : h('span',{class:'over'}, 'Falta dono, próxima ação e data'))
       : h('span',{class:'muted'}, r.motivo || ''));
     const col3 = h('div',{class:'t-ativ', style: sem ? `--tone:var(--${semTone(sem)})` : null},
-      aberto ? [h('span',{class:'tempo'}, tempoTxt(r, rel)), `${e.bola === 'MDM' ? 'Bola com a MDM' : 'Bola com o ' + e.bola} · no estado ${haDias(diasDesde(r.entrouNoEstado))}`]
+      aberto ? [h('span',{class:'tempo'}, r.porConfirmar ? 'Por confirmar' : tempoTxt(r, rel)), e.bola !== 'MDM' ? `À espera do ${e.bola}` : null]
         : [h('span',null, `${e.l}${r.dataFecho ? ' · ' + haDias(diasDesde(r.dataFecho)) : ''}`), podeReabrir && canWrite ? h('button',{class:'lk', type:'button', onclick:() => acaoRapida(r.id, 'reabrir')}, 'Reabrir') : null]);
     const seg = h('div',{class:'seg', role:'group', 'aria-label':'Ações rápidas'},
       h('button',{type:'button', title: seguinte ? seguinte.label : 'Sem passo seguinte', 'aria-label': seguinte ? seguinte.label : 'Avançar', disabled: !(aberto && seguinte && canWrite), onclick:() => acaoRapida(r.id, 'ok')}, svg(ICO.ok)),
@@ -812,7 +806,7 @@ body.app-on{background:var(--surface)}
     else if (fOrdem === 'cliente') lista.sort((a, b) => String(a.r.cliente || '').localeCompare(String(b.r.cliente || ''), 'pt'));
     else lista.sort(ordem);
     F('listaCount').textContent = `${lista.length} ${lista.length === 1 ? 'pedido' : 'pedidos'}`;
-    const head = h('div',{class:'t-head', role:'row'}, h('span',null,'Pedidos'), h('span',null,'Próxima ação'), h('span',null,'Atividade'), h('span',{style:'text-align:right;padding-right:58px'},'Ações'));
+    const head = h('div',{class:'t-head', role:'row'}, h('span',null,'Cliente'), h('span',null,'O que fazer a seguir'), h('span',null,'Prazo'), h('span',{style:'text-align:right;padding-right:58px'},'Ações'));
     if (!lista.length) { box.replaceChildren(head, h('p',{class:'t-vazio'}, rows.length ? 'Nenhum pedido com estes filtros.' : 'Ainda não há pedidos. Usa «Adicionar pedido» quando chegar o primeiro.')); return; }
     box.replaceChildren(head, ...lista.map(linha));
   }
