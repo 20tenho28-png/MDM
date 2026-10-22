@@ -711,7 +711,7 @@ body.app-on{background:var(--surface)}
         <p class="note">Ninguém se perde por esquecimento: cada cliente aparece aqui quando a manutenção está a chegar, quando há uma fatura por cobrar, quando passou do seu ritmo habitual sem nova fatura ou quando um orçamento está sem resposta. «Contactado» tira-o da lista por 30 dias; «Pedido» abre um pedido novo já com o nome.</p>
       </section>
       <section aria-labelledby="h-cli-lista" style="grid-column:1/-1">
-        <div class="sec-h"><h2 id="h-cli-lista">Todos os clientes</h2><span class="count" id="cliListaCount"></span></div>
+        <div class="sec-h"><h2 id="h-cli-lista">Todos os clientes</h2><span class="count"><button class="link-add" type="button" id="btnNovoCliente" style="font-size:15px;padding:0">Adicionar cliente</button> <span id="cliListaCount"></span></span></div>
         <div class="filtros">
           <div class="fbox dono"><select id="cliEstado" aria-label="Situação"><option value="">Todas as situações</option><option value="manutencao">Manutenção a vencer</option><option value="cobrar">Fatura por cobrar</option><option value="frio">A esfriar</option><option value="orcamento">Orçamento sem resposta</option><option value="ativo">Em dia</option><option value="perdido">Sem faturação há mais de um ano</option><option value="ignorado">Ignorados</option></select></div>
           <div class="fbox pesq"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input id="cliQ" type="search" placeholder="Pesquisar cliente" aria-label="Pesquisar cliente" autocomplete="off"></div>
@@ -747,7 +747,7 @@ body.app-on{background:var(--surface)}
       <section aria-labelledby="h-fat-ficheiros" style="grid-column:1/-1">
         <div class="sec-h"><h2 id="h-fat-ficheiros">Ficheiros SAF-T</h2></div>
         <div class="panel" style="padding:14px;display:flex;flex-direction:column;gap:12px" id="fatFicheiros"></div>
-        <p class="note">Os ficheiros são os que o programa de faturação exporta para a AT todos os meses (<code>DadosFat_AAAA-MM_NIF…xml</code>). A página lê-os aqui no browser e guarda só o resumo (número, data, cliente, valores, descrição) na base de dados da equipa, sem NIF, moradas nem contactos; o ficheiro em si não sai do teu computador. Faturas (FT) somam, notas de crédito (NC) descontam, documentos anulados não contam.</p>
+        <p class="note">Os ficheiros são os que o programa de faturação exporta para a AT todos os meses (<code>DadosFat_AAAA-MM_NIF…xml</code>). A página lê-os aqui no browser e guarda o resumo dos documentos (número, data, cliente, valores, descrição) e, na ficha de cada cliente, o NIF, o telefone, o email e a morada que vêm na tabela de clientes do ficheiro (só nos campos ainda vazios); o ficheiro em si não sai do teu computador. Faturas (FT) somam, notas de crédito (NC) descontam, documentos anulados não contam.</p>
       </section>
     </div>
   </div>
@@ -1420,9 +1420,14 @@ body.app-on{background:var(--surface)}
     const root = dom.documentElement, header = g(root, 'Header');
     const de = t(header, 'StartDate'), ate = t(header, 'EndDate');
     if (!/^\d{4}-\d{2}/.test(de)) throw new Error('O ficheiro não diz o mês (StartDate).');
-    const nomes = {};
+    const nomes = {}, mestres = [];
     const master = g(root, 'MasterFiles');
-    if (master) for (const c of all(master, 'Customer')) nomes[t(c, 'CustomerID')] = t(c, 'CompanyName');
+    if (master) for (const c of all(master, 'Customer')) {
+      nomes[t(c, 'CustomerID')] = t(c, 'CompanyName');
+      const nif = t(c, 'CustomerTaxID'), nome = t(c, 'CompanyName');
+      if (nome && !/consumidor final/i.test(nome)) mestres.push({nome, nif: /^\d{9}$/.test(nif) && nif !== '999999990' ? nif : null, contacto: t(c, 'Contact') || null, telefone: t(c, 'Telephone') || null,
+        email: (t(c, 'Email') || '').split(/[\s\/]/)[0] || null, morada: [t(c, 'BillingAddress', 'AddressDetail'), t(c, 'BillingAddress', 'PostalCode'), t(c, 'BillingAddress', 'City')].filter(x => x && x !== 'Desconhecido' && x !== '0000-000').join(', ') || null});
+    }
     const src = g(root, 'SourceDocuments');
     const docs = [], recibos = [];
     const vendas = src && g(src, 'SalesInvoices');
@@ -1441,7 +1446,7 @@ body.app-on{background:var(--surface)}
       recibos.push({n: t(pg, 'PaymentRefNo'), data: t(pg, 'TransactionDate'), estado: t(pg, 'DocumentStatus', 'PaymentStatus'), cliente: nomes[t(pg, 'CustomerID')] || t(pg, 'CustomerID'),
         valor: num2(t(pg, 'DocumentTotals', 'GrossTotal')), meio: t(pg, 'PaymentMethod', 'PaymentMechanism'), docs: all(pg, 'Line').map(l => t(l, 'SourceDocumentID', 'OriginatingON')).filter(Boolean)});
     }
-    return {mes: de.slice(0, 7), periodo: {de, ate}, ficheiro: nomeFicheiro || '', gerado: t(header, 'DateCreated'), empresa: t(header, 'CompanyName'), docs, recibos};
+    return {mes: de.slice(0, 7), periodo: {de, ate}, ficheiro: nomeFicheiro || '', gerado: t(header, 'DateCreated'), empresa: t(header, 'CompanyName'), docs, recibos, mestres};
   }
 
   async function juntarSaft(files) {
@@ -1454,7 +1459,9 @@ body.app-on{background:var(--surface)}
         const enc = (/encoding="([^"]+)"/i.exec(cab) || [])[1] || 'utf-8';
         let texto; try { texto = new TextDecoder(enc).decode(buf); } catch (e) { texto = new TextDecoder('utf-8').decode(buf); }
         const m = lerSaft(texto, f.name); m.por = eu ? eu.email : null; m.atualizado = new Date().toISOString();
+        const mestres = m.mestres || []; delete m.mestres;
         faturacao[m.mes] = m; ok++;
+        await importarMestres(mestres);
         if (sb && canWrite && fatTabela) {
           const {error} = await sb.from('faturacao').upsert({mes: m.mes, dados: m, atualizado_por: eu.email}, {onConflict: 'mes'});
           if (error) { if (/relation|does not exist|schema cache/i.test(error.message || '')) fatTabela = false; erros.push(`${m.mes}: lido, mas não ficou guardado para a equipa (${fatTabela ? 'erro ao gravar' : 'falta correr o SQL da tabela faturacao'})`); }
@@ -1464,6 +1471,25 @@ body.app-on{background:var(--surface)}
     if (!fatMes || !faturacao[fatMes]) fatMes = Object.keys(faturacao).sort().pop() || '';
     renderAll();
     toast(erros.length ? erros[0] : `${ok} ${ok === 1 ? 'mês lido' : 'meses lidos'}`);
+  }
+  // Os dados de contacto dos clientes (NIF, telefone, email, morada) vêm da tabela de clientes do SAF-T e entram na ficha,
+  // só nos campos que ainda estão vazios: o que a equipa escreveu na ficha manda.
+  async function importarMestres(mestres) {
+    const linhas = [];
+    for (const mdoc of mestres) {
+      const k = chaveCli(mdoc.nome); if (!k) continue;
+      const f = fichas[k] || {}; const patch = {};
+      for (const campo of ['nif', 'contacto', 'telefone', 'email', 'morada']) if (!f[campo] && mdoc[campo]) patch[campo] = mdoc[campo];
+      if (!f.nome) patch.nome = mdoc.nome;
+      if (!Object.keys(patch).length) continue;
+      const doc = {...f, ...patch, atualizado: new Date().toISOString(), por: eu ? eu.email : null}; delete doc._versao; delete doc._novo;
+      fichas[k] = {...doc, _versao: (f._versao || 0) + 1};
+      linhas.push({id: k, dados: doc, atualizado_por: eu ? eu.email : null});
+    }
+    if (linhas.length && sb && canWrite && fichaTabela) {
+      const {error} = await sb.from('clientes').upsert(linhas, {onConflict:'id'});
+      if (error && /relation|does not exist|schema cache/i.test(error.message || '')) fichaTabela = false;
+    }
   }
   async function apagarMes(mes) {
     delete faturacao[mes];
@@ -1623,7 +1649,7 @@ body.app-on{background:var(--surface)}
 
   /* ---------- Clientes: não perder nenhum ---------- */
   // Junta os clientes da faturação (SAF-T) e do registo, calcula o ritmo de cada um e quem precisa de contacto.
-  let cfgClientes = {}, cliEstado = '', cliQ = '', cliMotivo = '';
+  let cfgClientes = {}, fichas = {}, fichaTabela = true, fichaKey = null, cliEstado = '', cliQ = '', cliMotivo = '';
   const MOTIVO = {manutencao:'Manutenção a vencer', cobrar:'Fatura por cobrar', frio:'A esfriar', orcamento:'Orçamento sem resposta', ativo:'Em dia', perdido:'Sem faturação há mais de um ano', ignorado:'Ignorado'};
   const MOTIVO_ORD = ['cobrar','manutencao','orcamento','frio'];
   const MOTIVO_CURTO = {cobrar:'Cobrar', manutencao:'Manutenção', orcamento:'Orçamento', frio:'A esfriar', ativo:'Em dia', perdido:'Parado', ignorado:'Ignorado'};
@@ -1654,6 +1680,7 @@ body.app-on{background:var(--surface)}
       if (d.tipo === 'FT' && !pagos.has(d.n)) c.semRecibo.push(d);
     }
     for (const r of rows) { const c = get(r.cliente || ''); if (c) { c.pedidos.push(r); if (c.docs.length === 0) c.nome = r.cliente; } }
+    for (const [k, f] of Object.entries(fichas)) { if (!map[k] && f.nome) map[k] = {k, nome: f.nome, docs: [], pedidos: [], semRecibo: []}; }
     const lista = Object.values(map).map(c => {
       const fts = c.docs.filter(d => d.tipo === 'FT').sort((a, b) => a.data.localeCompare(b.data));
       c.n = fts.length; c.total12 = fts.filter(d => d.data >= addMeses(ref, -12)).reduce((t, d) => t + d.liquido, 0);
@@ -1670,8 +1697,11 @@ body.app-on{background:var(--surface)}
       c.abertos = c.pedidos.filter(r => ABERTOS.includes(r.estado));
       c.orcSemResposta = c.pedidos.filter(r => r.estado === 'espera_cliente' && r.esperaMotivo === 'decisao');
       const ultimoPedido = c.pedidos.map(r => ultimoContacto(r)).filter(Boolean).sort().pop();
-      const cfg = cfgClientes[c.k] || {};
-      c.cfg = cfg;
+      const cfg = {...(cfgClientes[c.k] || {}), ...(fichas[c.k] || {})};
+      c.cfg = cfg; c.ficha = fichas[c.k] || null;
+      if (cfg.nome) c.nome = cfg.nome;
+      if (cfg.contrato && Number(cfg.contrato.periodicidade) > 0) { c.cadencia = Number(cfg.contrato.periodicidade); c.contrato = true; }
+      if (c.cadencia && c.ultima) c.proxima = addMeses(c.ultima, c.cadencia);
       c.contactado = [cfg.contactado, ultimoPedido && ultimoPedido.slice(0, 10)].filter(Boolean).sort().pop() || null;
       const cobrar = c.semRecibo.filter(d => mesesEntre(d.data, ref) >= 1);
       c.motivos = [];
@@ -1693,14 +1723,29 @@ body.app-on{background:var(--surface)}
     return {ref, lista};
   }
 
-  async function guardarCliente(k, patch) {
-    if (!sb || !canWrite) return;
-    const novo = {...cfgClientes, [k]: {...(cfgClientes[k] || {}), ...patch, por: eu.email}};
+  async function guardarCliente(k, patch, msg) {
+    if (!sb || !canWrite) return false;
+    const atual = fichas[k] || {};
+    const doc = {...atual, ...patch, atualizado: new Date().toISOString(), por: eu.email}; delete doc._versao;
+    if (!doc.nome) { const c = clientes().lista.find(x => x.k === k); doc.nome = (c && c.nome) || k; }
     try {
-      const {error} = await sb.from('config').upsert({chave:'clientes', valor: novo, atualizado_por: eu.email}, {onConflict:'chave'});
-      if (error) throw error;
-      cfgClientes = novo; renderClientes();
-    } catch (e) { toast('Não foi possível guardar.'); }
+      if (fichaTabela) {
+        const {error} = await sb.from('clientes').upsert({id: k, dados: doc, atualizado_por: eu.email}, {onConflict:'id'});
+        if (error) { if (/relation|does not exist|schema cache/i.test(error.message || '')) fichaTabela = false; else throw error; }
+      }
+      if (!fichaTabela) {
+        // Sem a tabela clientes: guarda em config, chave clientes, como antes.
+        const novo = {...cfgClientes, [k]: {...(cfgClientes[k] || {}), ...doc}};
+        const {error} = await sb.from('config').upsert({chave:'clientes', valor: novo, atualizado_por: eu.email}, {onConflict:'chave'});
+        if (error) throw error;
+        cfgClientes = novo;
+      }
+      fichas[k] = {...doc, _versao: (atual._versao || 0) + 1};
+      if (msg) toast(msg);
+      renderClientes();
+      if (modo === 'ficha' && fichaKey === k && !F('sheetWrap').hidden) renderFicha();
+      return true;
+    } catch (e) { toast('Não foi possível guardar.'); return false; }
   }
   const abrirNovoPara = nome => { novoBase = {cliente: nome}; abrirNovo(); };
 
@@ -1760,7 +1805,7 @@ body.app-on{background:var(--surface)}
   function linhaCliente(c, ref) {
     return h('div',{class:`lp m-${c.estado}`, style:'--stripe:var(--u);cursor:default'},
       h('span',{class:'ld motivo'}, MOTIVO_CURTO[c.estado]),
-      h('span',{class:'ln', style:'white-space:normal'}, c.nome, c.contrato ? [' ', h('span',{class:'cli-tag m-manutencao'}, 'contrato')] : null, c.total12 ? h('span',{class:'c-money', style:'margin-left:8px'}, `${eur(c.total12)} em 12 meses`) : null),
+      h('span',{class:'ln', style:'white-space:normal'}, h('button',{class:'t-nome', type:'button', style:'font-size:14.5px', onclick:() => openFicha(c.k)}, c.nome), c.contrato ? [' ', h('span',{class:'cli-tag m-manutencao'}, 'contrato')] : null, c.total12 ? h('span',{class:'c-money', style:'margin-left:8px'}, `${eur(c.total12)} em 12 meses`) : null),
       h('span',{class:'la', style:'white-space:normal'}, motivoTxt(c, ref), c.contactado ? ` · contactado a ${ddmm(c.contactado)}` : ''),
       botoesCliente(c));
   }
@@ -1776,7 +1821,7 @@ body.app-on{background:var(--surface)}
     fill(box, h('table',null,
       h('thead',null, h('tr',null, h('th',null,'Cliente'), h('th',null,'Situação'), h('th',{class:'n'},'Faturas'), h('th',{class:'n'},'12 meses'), h('th',null,'Última'), h('th',null,'Ritmo'), h('th',null,'Próxima'), h('th',{class:'n'},'Por cobrar'), h('th',{class:'n'},'Pedidos'), h('th',null,''))),
       h('tbody',null, vis.map(c => h('tr',null,
-        h('td',null, h('b',null, c.nome), c.contrato ? [' ', h('span',{class:'cli-tag m-manutencao'}, 'contrato')] : null),
+        h('td',null, h('button',{class:'t-nome', type:'button', style:'font-size:15px', onclick:() => openFicha(c.k)}, c.nome), c.contrato ? [' ', h('span',{class:'cli-tag m-manutencao'}, 'contrato')] : null),
         h('td',null, h('span',{class:`cli-tag m-${c.estado}`}, MOTIVO[c.estado]), h('div',{class:'sub', style:'max-width:34ch'}, motivoTxt(c, ref))),
         h('td',{class:'n'}, String(c.n)), h('td',{class:'n'}, c.total12 ? eur(c.total12) : ''),
         h('td',{class:'sub', style:'white-space:nowrap'}, c.ultima ? `${ddmm(c.ultima)}/${c.ultima.slice(2, 4)}` : '–'),
@@ -1787,6 +1832,104 @@ body.app-on{background:var(--surface)}
         h('td',null, botoesCliente(c)))))),
       xs.length > vis.length ? h('p',{class:'note', style:'padding:10px 12px'}, `A mostrar ${vis.length} de ${xs.length}. Pesquisa para ver os outros.`) : null);
   }
+
+  /* ---------- Ficha do cliente (o «Contactos» do Odoo): dados, equipamentos, contrato e todo o histórico ---------- */
+  const EQUIP_TIPOS = ['Split', 'Multi-split', 'Cassete', 'Conduta', 'VRF', 'Bomba de calor AQS', 'Chiller', 'Ventilação', 'Quadro elétrico', 'Outro'];
+  function openFicha(k, nomeNovo) {
+    fichaKey = k || null; currentId = null; modo = 'ficha'; trans = null; dadosAberto = false;
+    if (k && !fichas[k] && nomeNovo) fichas[k] = {nome: nomeNovo, _novo: true};
+    F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); setTimeout(() => F('btnClose').focus(), 30);
+  }
+  function renderFicha() {
+    const body = F('sheetBody'); sheetSujo = false;
+    const todos = clientes();
+    let c = fichaKey ? todos.lista.find(x => x.k === fichaKey) : null;
+    const novo = !fichaKey;
+    if (!c) c = {k: fichaKey, nome: (fichas[fichaKey] && fichas[fichaKey].nome) || '', docs: [], pedidos: [], semRecibo: [], abertos: [], orcSemResposta: [], motivos: [], estado: 'ativo', cfg: fichas[fichaKey] || {}, ficha: fichas[fichaKey] || null, n: 0, total12: 0, cadencia: null, proxima: null, ultima: null, contactado: null};
+    const f = c.cfg || {};
+    F('sheetTitle').textContent = novo ? 'Novo cliente' : c.nome;
+    F('sheetSub').textContent = novo ? 'Ficha do cliente' : [f.nif ? 'NIF ' + f.nif : null, f.telefone, f.email].filter(Boolean).join(' · ') || 'Ficha do cliente';
+    const ref = todos.ref;
+    const fts = c.docs.filter(d => d.tipo === 'FT');
+    const recibos = mesesOrd().flatMap(m => faturacao[m].recibos.filter(r => r.estado !== 'A' && chaveCli(r.cliente) === c.k));
+    const visitas = c.pedidos.filter(r => r.dataVisita);
+    const equip = f.equipamentos || [];
+    const smart = (l, v, s, go) => h('button',{class:'kpi', type:'button', onclick: go, disabled: go ? null : true, style: go ? null : 'cursor:default'}, h('span',{class:'k-l'}, l), h('span',{class:'k-v', style:'font-size:24px'}, v), h('span',{class:'k-s'}, s));
+    const blocos = [];
+    if (!novo) {
+      blocos.push(h('div',{class:'status'}, h('span',{class:`cli-tag m-${c.estado}`}, MOTIVO[c.estado]), h('span',{class:'bola'}, motivoTxt(c, ref)), c.contactado ? h('span',{class:'bola'}, `· contactado a ${ddmm(c.contactado)}`) : null));
+      blocos.push(h('div',{class:'kpis', style:'grid-template-columns:repeat(2,minmax(0,1fr))'},
+        smart('Pedidos', String(c.pedidos.length), c.abertos.length ? `${c.abertos.length} em aberto` : 'nenhum em aberto', c.pedidos.length ? () => { closeSheet(); query = c.nome; F('q').value = c.nome; irPara('todos'); } : null),
+        smart('Faturas', String(fts.length), fts.length ? `${eur(c.total12)} em 12 meses` : 'sem faturas nos SAF-T', fts.length ? () => { closeSheet(); fatQ = c.nome; F('fatQ').value = c.nome; fatMes = ''; setTab('faturacao'); renderFatDocs(); } : null),
+        smart('Por cobrar', c.semRecibo.length ? eur(c.semRecibo.reduce((t, d) => t + d.bruto, 0)) : '0 €', c.semRecibo.length ? `${c.semRecibo.length} ${c.semRecibo.length === 1 ? 'fatura' : 'faturas'} sem recibo` : 'tudo recebido', null),
+        smart('Equipamentos', String(equip.length), c.cadencia ? `manutenção de ${c.cadencia} em ${c.cadencia} meses` : c.proxima ? `próxima visita ${ddmm(c.proxima)}/${c.proxima.slice(2, 4)}` : 'sem ritmo conhecido', null)));
+      if (canWrite) blocos.push(h('div',{class:'trans'},
+        h('button',{class:'btn', type:'button', onclick:() => { closeSheet(); abrirNovoPara(c.nome); }}, 'Novo pedido'),
+        h('button',{class:'btn btn-ghost', type:'button', onclick:() => guardarCliente(c.k, {contactado: today()}, 'Contacto registado')}, 'Contactado hoje'),
+        f.ignorar ? h('button',{class:'btn btn-ghost', type:'button', onclick:() => guardarCliente(c.k, {ignorar:false}, 'Volta a ser seguido')}, 'Voltar a seguir')
+          : h('button',{class:'btn btn-ghost', type:'button', onclick:() => { if (confirm(`Deixar de seguir ${c.nome}?`)) guardarCliente(c.k, {ignorar:true}, 'Deixou de ser seguido'); }}, 'Ignorar')));
+    }
+    // Dados
+    const dados = h('div',{class:'fields'},
+      campo('c-nome','Nome', inp('c-nome', f.nome || c.nome), null, true),
+      campo('c-nif','NIF', inp('c-nif', f.nif, {inputmode:'numeric'})),
+      campo('c-tipo','Particular ou empresa', sel('c-tipo', [['particular','Particular'],['empresa','Empresa'],['condominio','Condomínio']], f.tipoCliente, 'Escolher…')),
+      campo('c-tel','Telefone', inp('c-tel', f.telefone, {type:'tel'})),
+      campo('c-email','Email', inp('c-email', f.email, {type:'email'})),
+      campo('c-contacto','Pessoa de contacto', inp('c-contacto', f.contacto)),
+      campo('c-morada','Morada', inp('c-morada', f.morada)),
+      campo('c-notas','Notas', h('textarea',{id:'c-notas'}, f.notas || ''), 'Acessos, horários, preferências de marca, o que for útil a quem lá vai.', true));
+    // Contrato
+    const ct = f.contrato || {};
+    const contrato = h('div',{class:'fields'},
+      campo('ct-tipo','Contrato de manutenção', sel('ct-tipo', [['nenhum','Sem contrato'],['preventiva','Manutenção preventiva'],['completo','Manutenção com peças'],['garantia','Garantia da instalação']], ct.tipo || 'nenhum')),
+      campo('ct-per','Periodicidade (meses)', inp('ct-per', ct.periodicidade, {inputmode:'numeric', placeholder:'2, 3, 6, 12'}), 'Define o ritmo das visitas; sem valor, a página deduz das faturas.'),
+      campo('ct-ini','Início', inp('ct-ini', ct.inicio, {type:'date'})),
+      campo('ct-fim','Fim ou renovação', inp('ct-fim', ct.fim, {type:'date'})),
+      campo('ct-valor','Valor anual s/IVA (€)', inp('ct-valor', ct.valor != null ? String(ct.valor).replace('.', ',') : '', {inputmode:'decimal'})));
+    // Equipamentos
+    const eqRows = equip.map((e, i) => h('tr',null, h('td',null, e.tipo || ''), h('td',null, [e.marca, e.modelo].filter(Boolean).join(' ')), h('td',{class:'sub'}, e.local || ''), h('td',{class:'sub', style:'white-space:nowrap'}, e.instaladoEm ? `${ddmm(e.instaladoEm)}/${e.instaladoEm.slice(2, 4)}` : ''),
+      h('td',null, canWrite ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => guardarCliente(c.k, {equipamentos: equip.filter((_, j) => j !== i)}, 'Equipamento retirado')}, 'Tirar') : null)));
+    const eqForm = canWrite ? h('div',{class:'fields', style:'margin-top:10px'},
+      campo('e-tipo','Tipo', sel('e-tipo', EQUIP_TIPOS.map(t => [t, t]), 'Split')), campo('e-marca','Marca', inp('e-marca', '', {placeholder:'Mitsubishi Electric, Daikin, Midea…'})),
+      campo('e-modelo','Modelo', inp('e-modelo', '')), campo('e-local','Onde está', inp('e-local', '', {placeholder:'sala, 1.º andar, cobertura'})),
+      campo('e-data','Instalado em', inp('e-data', '', {type:'date'})),
+      h('div',{class:'f', style:'justify-content:flex-end'}, h('button',{class:'btn btn-ghost', type:'button', onclick:() => {
+        const e = {tipo: val('e-tipo'), marca: val('e-marca') || null, modelo: val('e-modelo') || null, local: val('e-local') || null, instaladoEm: val('e-data') || null};
+        if (!e.marca && !e.modelo && !e.local) { toast('Indica pelo menos a marca, o modelo ou onde está.'); return; }
+        guardarCliente(c.k, {equipamentos: [...equip, e]}, 'Equipamento juntado');
+      }}, 'Juntar equipamento'))) : null;
+    const equipBloco = h('div',{class:'block'}, h('h3',null, 'Equipamentos instalados'),
+      equip.length ? h('div',{class:'tw'}, h('table',null, h('thead',null, h('tr',null, h('th',null,'Tipo'), h('th',null,'Marca e modelo'), h('th',null,'Onde'), h('th',null,'Instalado'), h('th',null,''))), h('tbody',null, eqRows))) : h('p',{class:'hint'}, 'Ainda sem equipamentos registados. As faturas de instalação dizem o que lá está; junta-os aqui para a manutenção saber o que vai encontrar.'),
+      eqForm);
+    // Histórico: pedidos, faturas, recibos
+    const hist = [];
+    for (const r of c.pedidos) { hist.push({em: dataPedidoDe(r), t: `Pedido ${r.id}: ${TIPOS[r.tipo] || ''} · ${(ESTADOS[r.estado] || {}).l || r.estado}${r.num ? ' · ' + r.num : ''}${r.valor ? ' · ' + eur(r.valor) : ''}`, go: () => openSheet(r.id)}); if (r.dataVisita) hist.push({em: r.dataVisita, t: `Visita${r.horaVisita ? ' às ' + r.horaVisita : ''} (${r.dono || 'sem técnico'})`, go: () => openSheet(r.id)}); }
+    for (const d of c.docs) hist.push({em: d.data, t: `${TIPO_DOC[d.tipo] || d.tipo} ${d.n.replace(/^\d+\s+/, '')} · ${eur(d.liquido)} s/IVA${d.desc ? ' · ' + d.desc.slice(0, 90) : ''}`, go: null});
+    for (const r of recibos) hist.push({em: r.data, t: `Recibo ${r.n.replace(/^\d+\s+/, '')} · ${eur(r.valor)}`, go: null});
+    hist.sort((a, b) => String(b.em).localeCompare(String(a.em)));
+    const histBloco = novo ? null : h('div',{class:'block'}, h('h3',null, 'Histórico'), hist.length ? h('ul',{class:'hist'}, hist.slice(0, 40).map(x => h('li',null, h('span',{class:'when'}, x.em ? `${ddmm(x.em)}/${String(x.em).slice(2, 4)}` : ''), x.go ? h('button',{class:'lk', type:'button', style:'background:none;border:0;padding:0;font:inherit;color:var(--ink);text-align:left;cursor:pointer', onclick: x.go}, x.t) : h('span',null, x.t)))) : h('p',{class:'hint'}, 'Sem movimentos.'));
+    const guardar = async () => {
+      const nome = val('c-nome'); if (!nome) { toast('Falta o nome.'); return; }
+      const k = fichaKey || chaveCli(nome); if (!k) { toast('Nome inválido.'); return; }
+      const per = val('ct-per'), valor = parseValor(val('ct-valor'));
+      if (per && !/^\d+$/.test(per)) { toast('A periodicidade é um número de meses.'); return; }
+      const patch = {nome, nif: val('c-nif') || null, tipoCliente: val('c-tipo') || null, telefone: val('c-tel') || null, email: val('c-email') || null, contacto: val('c-contacto') || null, morada: val('c-morada') || null, notas: val('c-notas') || null,
+        contrato: {tipo: val('ct-tipo'), periodicidade: per ? Number(per) : null, inicio: val('ct-ini') || null, fim: val('ct-fim') || null, valor: Number.isNaN(valor) ? null : valor}};
+      if (!fichaKey) { fichaKey = k; fichas[k] = fichas[k] || {}; }
+      if (fichas[k]) delete fichas[k]._novo;
+      await guardarCliente(k, patch, 'Ficha guardada');
+    };
+    fill(body, blocos,
+      h('div',{class:'block'}, h('h3',null, 'Dados'), h('fieldset',{disabled: !canWrite}, dados)),
+      h('div',{class:'block'}, h('h3',null, 'Contrato'), h('fieldset',{disabled: !canWrite}, contrato)),
+      canWrite ? h('div',{class:'row-end'}, novo ? h('button',{class:'btn btn-ghost', type:'button', onclick:closeSheet}, 'Cancelar') : null, h('button',{class:'btn', type:'button', onclick:guardar}, novo ? 'Criar cliente' : 'Guardar ficha')) : null,
+      novo ? null : equipBloco, histBloco,
+      !fichaTabela ? h('p',{class:'hint alert'}, 'A tabela «clientes» ainda não existe no Supabase: a ficha fica guardada em config até alguém correr o bloco «Fichas de cliente» de supabase/migracao.sql.') : null);
+    setTimeout(() => { if (novo) F('c-nome').focus(); }, 30);
+  }
+  F('btnNovoCliente').addEventListener('click', () => openFicha(null));
+
   F('cliEstado').addEventListener('change', e => { cliEstado = e.target.value; renderClientes(); });
   F('cliQ').addEventListener('input', e => { cliQ = e.target.value; renderClientes(); });
 
@@ -1977,7 +2120,7 @@ body.app-on{background:var(--surface)}
     const verm = all.filter(x => x.sem === 'vermelho').length;
     F('redBadge').textContent = verm ? String(verm) : '';
     renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderExport(); renderEquipa(); renderFaturacao(); renderClientes(); renderPipeline(all);
-    F('btnNovoTop').hidden = F('railNovo').hidden = !(canWrite && status === 'ok');
+    F('btnNovoTop').hidden = F('railNovo').hidden = F('btnNovoCliente').hidden = !(canWrite && status === 'ok');
     // Não redesenha a folha aberta enquanto há um formulário a meio.
     if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
   }
@@ -1985,7 +2128,7 @@ body.app-on{background:var(--surface)}
   /* ---------- Folha de um pedido ---------- */
   const cur = () => rows.find(r => r.id === currentId) || null;
   function openSheet(id) { currentId = id; modo = null; trans = null; dadosAberto = false; F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); setTimeout(() => F('btnClose').focus(), 30); }
-  function closeSheet() { F('sheetWrap').hidden = true; document.body.style.overflow = ''; currentId = null; modo = null; trans = null; sheetSujo = false; if (status === 'ok') renderAll(); }
+  function closeSheet() { F('sheetWrap').hidden = true; document.body.style.overflow = ''; currentId = null; modo = null; trans = null; fichaKey = null; sheetSujo = false; if (status === 'ok') renderAll(); }
   F('btnClose').addEventListener('click', closeSheet);
   F('sheetBody').addEventListener('input', () => { sheetSujo = true; });
   F('sheetBody').addEventListener('change', () => { sheetSujo = true; });
@@ -2100,12 +2243,13 @@ body.app-on{background:var(--surface)}
     const body = F('sheetBody');
     sheetSujo = false;
     if (modo === 'novo') return renderNovo();
+    if (modo === 'ficha') return renderFicha();
     const r = cur();
     if (!r) { closeSheet(); return; }
     const e = ESTADOS[r.estado] || ESTADOS.novo;
     const rel = relogio(r); const sem = semaforo(r, rel); const pe = pEfetiva(r, rel);
     F('sheetTitle').textContent = r.cliente || 'Sem nome';
-    F('sheetSub').textContent = [r.id, r.num && r.num !== r.id ? r.num : null].filter(Boolean).join(' · ');
+    fill(F('sheetSub'), [r.id, r.num && r.num !== r.id ? r.num : null].filter(Boolean).join(' · '), r.cliente ? [' · ', h('button',{class:'lk', type:'button', style:'background:none;border:0;padding:0;font:inherit;color:var(--accent);cursor:pointer', onclick:() => openFicha(chaveCli(r.cliente), r.cliente)}, 'Ficha do cliente')] : null);
     const blocos = [];
     blocos.push(h('div',{class:'status'},
       h('span',{class:`prio p-${pe.p}`}, pe.p), pe.de ? h('span',{class:'esc'}, `Sobe de ${pe.de} na próxima mudança`) : null,
@@ -2481,17 +2625,20 @@ body.app-on{background:var(--surface)}
   async function carregar() {
     if (!sb) return;
     try {
-      const [p, c, q, ft] = await Promise.all([
+      const [p, c, q, ft, fc] = await Promise.all([
         sb.from('pedidos').select('id,dados,versao').order('id'),
         sb.from('config').select('chave,valor,versao'),
         sb.from('colaboradores').select('email,nome').order('nome'),
         sb.from('faturacao').select('mes,dados'),
+        sb.from('clientes').select('id,dados,versao'),
       ]);
       if (p.error) throw p.error;
       rows = p.data.map(r => ({id: r.id, ...r.dados, _versao: r.versao}));
       if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; }
       if (ft.error) { if (/relation|does not exist|schema cache/i.test(ft.error.message || '')) fatTabela = false; }
       else { fatTabela = true; const novo = {}; for (const x of ft.data) if (x.dados && x.dados.mes) novo[x.dados.mes] = x.dados; faturacao = novo; if (!faturacao[fatMes]) fatMes = ''; }
+      if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) fichaTabela = false; }
+      else { fichaTabela = true; const novo = {}; for (const x of fc.data) novo[x.id] = {...x.dados, _versao: x.versao}; fichas = novo; }
       if (!q.error) { equipa = q.data; const m = equipa.find(x => x.email === (eu && eu.email)); if (m && m.nome) eu.nome = m.nome; }
       status = 'ok'; renderAll();
     } catch (e) {
@@ -2508,6 +2655,7 @@ body.app-on{background:var(--surface)}
       .on('postgres_changes', {event:'*', schema:'public', table:'pedidos'}, () => { clearTimeout(recarga); recarga = setTimeout(carregar, 250); })
       .on('postgres_changes', {event:'*', schema:'public', table:'config'}, () => { clearTimeout(recarga); recarga = setTimeout(carregar, 250); })
       .on('postgres_changes', {event:'*', schema:'public', table:'faturacao'}, () => { clearTimeout(recarga); recarga = setTimeout(carregar, 250); })
+      .on('postgres_changes', {event:'*', schema:'public', table:'clientes'}, () => { clearTimeout(recarga); recarga = setTimeout(carregar, 250); })
       .subscribe(st => { ligado = st === 'SUBSCRIBED'; const d = F('liveDot'); d.className = 'live ' + (ligado ? 'ok' : st === 'CHANNEL_ERROR' || st === 'TIMED_OUT' ? 'err' : ''); d.title = ligado ? 'Atualizações em tempo real ligadas' : 'Sem tempo real; a página recarrega de minuto a minuto'; });
   }
   async function entrar(session) {
@@ -2528,7 +2676,7 @@ body.app-on{background:var(--surface)}
   }
   function sair() {
     if (canal) { sb.removeChannel(canal); canal = null; }
-    sessao = null; eu = null; rows = []; faturacao = {}; cfgClientes = {}; canWrite = false; status = 'loading'; ligado = false;
+    sessao = null; eu = null; rows = []; faturacao = {}; cfgClientes = {}; fichas = {}; canWrite = false; status = 'loading'; ligado = false;
     F_LOGIN(); erroLogin('');
   }
   F('loginForm').addEventListener('submit', async ev => {
