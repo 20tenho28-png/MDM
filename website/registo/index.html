@@ -158,7 +158,7 @@ td.n input{width:72px;text-align:right;font-family:var(--font-mono);font-size:15
 .fab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--accent);color:var(--on-accent);border:0;border-radius:999px;padding:13px 20px;font-family:var(--font-display);font-size:18px;font-weight:600;letter-spacing:.01em;cursor:pointer;box-shadow:0 6px 18px rgba(8,30,40,.28);z-index:20}
 
 /* Folha do pedido */
-.backdrop{position:fixed;inset:0;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center;z-index:40}
+.backdrop{position:fixed;top:0;right:0;bottom:0;left:0;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center;z-index:40}
 .sheet{background:var(--surface);width:100%;max-height:92%;overflow-y:auto;border-radius:14px 14px 0 0;box-sizing:border-box;padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (min-width:640px){.backdrop{align-items:center;padding:24px}.sheet{max-width:660px;border-radius:14px;max-height:100%}}
 .sheet-h{position:sticky;top:0;background:var(--surface);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:14px 16px 12px;border-bottom:1px solid var(--line);z-index:2}
@@ -317,7 +317,7 @@ body.app-on .col{background:var(--sunk)}
 
 
 /* ===== Folha de obra (a cópia do Excel «Folha de Obra Nº»): A4 ao alto, editável no próprio papel ===== */
-.folha-wrap{position:fixed;inset:0;z-index:50;background:var(--sunk);display:flex;flex-direction:column}
+.folha-wrap{position:fixed;top:0;right:0;bottom:0;left:0;z-index:50;background:var(--sunk);display:flex;flex-direction:column}
 .folha-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));background:var(--surface);border-bottom:1px solid var(--line)}
 .folha-bar-l{display:flex;flex-direction:column;min-width:0}.folha-bar-l b{font-family:var(--font-display);font-size:20px}
 .folha-bar-r{display:flex;gap:8px;flex-wrap:wrap}
@@ -345,7 +345,7 @@ body.app-on .col{background:var(--sunk)}
 .f-cli .c{font-weight:700}
 .f-dados{display:grid;grid-template-columns:30mm 1fr;gap:1.5mm 2mm;margin-top:4mm;font-size:9pt;align-items:baseline}
 .f-dados .l{font-weight:700}
-.f-linha4{display:grid;grid-template-columns:30mm 1fr 34mm 34mm;gap:2mm;margin-top:2mm;font-weight:700;font-size:9pt;align-items:baseline}
+.f-linha4{display:grid;grid-template-columns:28mm 1fr 46mm 38mm;gap:2mm;margin-top:2mm;font-weight:700;font-size:9pt;align-items:baseline}
 .f-linha4 label{display:flex;gap:1.5mm;align-items:baseline;white-space:nowrap}
 .f-linha4 input{font-weight:400}
 .f-corpo{position:relative;min-height:122mm;border:1px solid var(--fb);margin-top:1.5mm}
@@ -2302,13 +2302,14 @@ if (!Element.prototype.replaceChildren) {
     fill(F('pnAtrasosTag'), prov());
     var linhas = PRIOS.map(function (p) {
       var xs = a.filter(function (x) { return x.prioridade === p; });
-      return {p: p, abertos: pnSoma(xs, 'n_abertos'), atrasados: pnSoma(xs, 'n_atrasados'), sem: pnSoma(xs, 'n_sem_relogio'), passos: xs.filter(function (x) { return x.n_atrasados > 0; })};
+      return {p: p, abertos: pnSoma(xs, 'n_abertos'), atrasados: pnSoma(xs, 'n_atrasados'), sem: pnSoma(xs, 'n_sem_relogio'), subiram: pnSoma(xs, 'n_subiram'), passos: xs.filter(function (x) { return x.n_atrasados > 0; })};
     });
     fill(F('pnAtrasos'), h('table',{class:'pn-tab'},
-      h('thead',null, h('tr',null, h('th',null,'Prioridade'), h('th',{class:'n'},'Abertos'), h('th',{class:'n'},'Fora do prazo'), h('th',{class:'n'},'Sem relógio'))),
+      h('thead',null, h('tr',null, h('th',null,'Prioridade atual'), h('th',{class:'n'},'Abertos'), h('th',{class:'n'},'Fora do prazo'), h('th',{class:'n'},'Sem relógio'))),
       h('tbody',null, linhas.map(function (l) {
         return h('tr',null, h('td',{class:'lbl'}, h('span',{class:'prio p-' + l.p}, l.p), ' ', PRIO_CURTA[l.p],
-            l.passos.length ? h('div',{class:'sub'}, l.passos.map(function (x) { return 'passo ' + x.passo + ' (' + x.n_atrasados + ')'; }).join(', ')) : null),
+            l.passos.length ? h('div',{class:'sub'}, l.passos.map(function (x) { return 'passo ' + x.passo + ' (' + x.n_atrasados + ')'; }).join(', ')) : null,
+            l.subiram ? h('div',{class:'sub'}, pnPlural(l.subiram, 'subiu', 'subiram') + ' por passar o prazo') : null),
           h('td',{class:'n'}, String(l.abertos)), h('td',{class:'n' + (l.atrasados ? ' mau' : ' zero')}, String(l.atrasados)), h('td',{class:'n zero'}, String(l.sem)));
       }))),
       h('p',{class:'note', style:'padding:0 12px 10px'}, 'Os prazos contam em horas e dias úteis (a espera do cliente em dias de calendário). «Sem relógio»: pedidos por confirmar, que não contam como atrasados.'));
@@ -2921,7 +2922,13 @@ if (!Element.prototype.replaceChildren) {
   const tarifa = (grupo, k) => (tarifas()[grupo].find(t => t[0] === k) || [k, k, 0]);
   const TIPOS_INT = [['contrato','Contrato'], ['pontual_ppag','Pontual PPag.'], ['pontual_credito','Pontual Crédito'], ['garantia_fab','Período Garantia Fab.'], ['garantia_ser','Período Garantia Ser.'], ['outros','Outros']];
   const GRUPOS = [['mo','Mão de obra'], ['desl','Deslocação'], ['mat','Materiais'], ['div','Diversos']];
-  const eur2 = v => (Number(v) || 0).toLocaleString('pt-PT', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
+  // Como o formato do Excel («#,##0.00 €»): milhares com espaço também nos números de 4 algarismos (1 950,00 €).
+  // O formato pt-PT do browser só agrupa a partir de 5 algarismos.
+  const eur2 = v => {
+    const n = Math.round((Number(v) || 0) * 100) / 100, neg = n < 0;
+    const partes = Math.abs(n).toFixed(2).split('.');
+    return (neg ? '-' : '') + partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ',' + partes[1] + ' €';
+  };
   const pontos = s => s ? `${s.slice(8, 10)}.${s.slice(5, 7)}.${s.slice(0, 4)}` : '';
   const numDe = v => { const n = parseValor(v); return n == null || Number.isNaN(n) ? 0 : n; };
   let fol = null, folId = null, folModo = 'custos', folSujo = false;
@@ -2948,7 +2955,7 @@ if (!Element.prototype.replaceChildren) {
     const temContrato = f.contrato && f.contrato.tipo && f.contrato.tipo !== 'nenhum' && f.contrato.tipo !== 'garantia';
     return {
       num: proximaFolha(), emissao: today(), cliente: r.cliente || '', morada,
-      refInterna: [r.id, r.num].filter(Boolean).join(' · '), pedidoPor: contacto ? `Exmo(a). Sr(a). ${contacto}` : '',
+      refInterna: [r.id, r.num].filter(Boolean).join(' · '), pedidoPor: f.contacto ? `Exmo(a). Sr(a). ${contacto}` : contacto,
       local: tarifa('desl', zona)[1], instalacao: '', pat: r.pat || '', fatura: r.fatura || '',
       trabalhos: `Execução dos seguintes trabalhos nas v/Instalações${morada ? ' na ' + morada.replace(/\n/g, ', ') : ''}:` + (linhasDesc.length ? '\n' + linhasDesc.map(x => /^[-•]/.test(x) ? x : '- ' + x).join('\n') : ''),
       linhas: [
@@ -2996,7 +3003,9 @@ if (!Element.prototype.replaceChildren) {
   function linhaFolha(l, i) {
     const modo = folModo, campoPreco = modo === 'debito' ? 'venda' : 'custo';
     const total = h('span',{id:'ft-' + i});
-    const atualizarTotal = () => { const v = numDe(l.qtd) * precoLinha(l, modo); total.textContent = v ? eur2(v) : ''; };
+    // Sem taxa de deslocação, o débito ao cliente não cobra a deslocação: a linha mostra 0, como o total.
+    const semTaxa = () => l.g === 'desl' && modo === 'debito' && !fol.taxaDeslocacao;
+    const atualizarTotal = () => { const v = semTaxa() ? 0 : numDe(l.qtd) * precoLinha(l, modo); total.textContent = v ? eur2(v) : (semTaxa() && numDe(l.qtd) ? eur2(0) : ''); };
     atualizarTotal();
     const muda = (k, v) => { l[k] = v; folSujo = true; atualizarTotal(); recalcFolha(); marcaEstado(); };
     let refCel;
@@ -3063,7 +3072,7 @@ if (!Element.prototype.replaceChildren) {
         h('label',null, 'Factura Nº', campoF('fatura', {label:'Fatura', cls:'auto'}))),
       h('div',{class:'f-corpo'}, ['27mm', '112mm', '135mm', '159mm'].map(x => h('i',{class:'f-v', style:`left:${x}`, 'aria-hidden':'true'})), h('table',{class:'f-tab'},
         h('colgroup',null, h('col',{class:'c1'}), h('col',{class:'c2'}), h('col',{class:'c3'}), h('col',{class:'c4'}), h('col',{class:'c5'})),
-        h('thead',null, h('tr',null, h('th',null,'Referência'), h('th',null,'Designação'), h('th',null,'Quantidade'), h('th',null, folModo === 'debito' ? 'Preço Unitário (venda)' : 'Preço Unitário'), h('th',null,'Preço total'))),
+        h('thead',null, h('tr',null, h('th',null,'Referência'), h('th',null,'Designação'), h('th',null,'Quantidade'), h('th',null, 'Preço Unitário', folModo === 'debito' ? h('span',{class:'so-ecra'}, ' (venda)') : null), h('th',null,'Preço total'))),
         h('tbody',null, corpo))),
       h('div',{class:'f-pe'},
         h('div',{class:'esq'},
@@ -3082,8 +3091,8 @@ if (!Element.prototype.replaceChildren) {
         h('div',{class:'t'}, 'Tipo de Intervenção:'),
         h('div',{class:'barra'}, tipoRadios,
           h('span',{class:'desl'}, 'Taxa de Deslocação:',
-            h('label',null, h('input',{type:'radio', name:'f-desl', checked: fol.taxaDeslocacao ? true : null, disabled: canWrite ? null : true, onchange:() => { fol.taxaDeslocacao = true; folSujo = true; recalcFolha(); marcaEstado(); }}), 'SIM'),
-            h('label',null, h('input',{type:'radio', name:'f-desl', checked: fol.taxaDeslocacao ? null : true, disabled: canWrite ? null : true, onchange:() => { fol.taxaDeslocacao = false; folSujo = true; recalcFolha(); marcaEstado(); }}), 'NÃO')))),
+            h('label',null, h('input',{type:'radio', name:'f-desl', checked: fol.taxaDeslocacao ? true : null, disabled: canWrite ? null : true, onchange:() => { fol.taxaDeslocacao = true; folSujo = true; renderFolha(); }}), 'SIM'),
+            h('label',null, h('input',{type:'radio', name:'f-desl', checked: fol.taxaDeslocacao ? null : true, disabled: canWrite ? null : true, onchange:() => { fol.taxaDeslocacao = false; folSujo = true; renderFolha(); }}), 'NÃO')))),
       h('p',{class:'f-nota no-print'}, 'Os campos amarelos são para preencher; os transparentes vieram do pedido e da ficha do cliente e podem ser corrigidos. As tarifas são as da folha «Folha1» do Excel.'));
     recalcFolha(); marcaEstado();
   }

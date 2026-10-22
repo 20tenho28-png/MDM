@@ -272,7 +272,7 @@ select c.passo, c.nome, c.acao_padrao, c.tem_estado,
        -- Falso = «ainda não registado», que o painel mostra a cinzento em vez de um zero.
        c.tem_estado and (count(i.id) > 0
          or exists (select 1 from public.eventos e
-                    where public.passo_de(jsonb_build_object('estado', e.estado), current_date) = c.passo)
+                    where public.passo_de(jsonb_build_object('estado', e.estado), (now() at time zone 'Europe/Lisbon')::date) = c.passo)
          or (c.passo in (3, 4) and exists (select 1 from public.pedidos p where public.data_de(p.dados ->> 'dataVisita') is not null))
          or (c.passo in (7, 8, 9) and exists (select 1 from public.pedidos p where p.dados ? 'obra' or public.data_de(p.dados ->> 'dataAceite') is not null))
          or (c.passo in (10, 11) and exists (select 1 from public.pedidos p where nullif(p.dados ->> 'fatura', '') is not null))
@@ -293,16 +293,18 @@ select i.id, i.cliente, i.passo, c.nome as passo_nome,
 from public.v_itens i join public.v_catalogo_passos c on c.passo = i.passo
 where i.aguarda in ('input', 'revisao');
 
--- Atrasados por passo e prioridade (SLA de config; «por confirmar» não conta).
+-- Atrasados por passo e prioridade (SLA de config; «por confirmar» não conta). A prioridade é a atual, já com a subida
+-- de quem passou o prazo, a mesma que a fila e o mosaico mostram; n_subiram conta os que subiram.
 create view public.v_atrasos with (security_invoker = true) as
 select c.passo, c.nome, pr.prioridade,
        count(i.id) as n_abertos,
        count(i.id) filter (where i.atrasado) as n_atrasados,
        count(i.id) filter (where i.por_confirmar) as n_sem_relogio,
+       count(i.id) filter (where i.prioridade_efetiva <> i.prioridade) as n_subiram,
        (select sla_provisorio from public.v_config) as sla_provisorio
 from public.v_catalogo_passos c
 cross join (values ('P1'), ('P2'), ('P3')) pr(prioridade)
-left join public.v_itens i on i.passo = c.passo and i.prioridade = pr.prioridade
+left join public.v_itens i on i.passo = c.passo and i.prioridade_efetiva = pr.prioridade
 group by c.passo, c.nome, pr.prioridade;
 
 -- Funil por mês do pedido: pedido, visita, orçamento enviado, aceite, perdido. Aceite (ou perdido com n.º de orçamento)
