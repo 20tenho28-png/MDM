@@ -937,7 +937,7 @@ body.app-on{background:var(--surface)}
 <div class="folha-wrap" id="folhaWrap" hidden>
   <div class="folha-bar" role="toolbar" aria-label="Folha de obra">
     <div class="folha-bar-l"><b id="folhaBarTitulo">Folha de obra</b><span id="folhaBarEstado" class="sub"></span></div>
-    <div class="seg folha-modo" role="group" aria-label="Versão"><button type="button" id="folhaModoCustos" aria-pressed="true">Custos</button><button type="button" id="folhaModoDebito" aria-pressed="false">Débito ao cliente</button></div>
+    <div class="seg folha-modo" role="group" aria-label="Versão" id="folhaModos"><button type="button" id="folhaModoVisita" aria-pressed="true">Para a visita</button><button type="button" id="folhaModoCustos" aria-pressed="false">Custos</button><button type="button" id="folhaModoDebito" aria-pressed="false">Débito ao cliente</button></div>
     <div class="folha-bar-r">
       <button class="btn btn-ghost btn-sm" type="button" id="folhaFechar">Fechar</button>
       <button class="btn btn-ghost btn-sm" type="button" id="folhaGuardar">Guardar</button>
@@ -2685,8 +2685,10 @@ if (!Element.prototype.replaceChildren) {
     }
     blocos.push(h('div',{class:'acao', style:'--stripe:var(--accent)'},
       h('div',{style:'min-width:0'}, h('div',{class:'what'}, r.folha ? `Folha de obra ${r.folha.num}` : 'Folha de obra'),
-        h('div',{class:'who'}, r.folha ? `${eur(r.folha.totalDebito || 0)} a debitar · custo ${eur(r.folha.totalCustos || 0)}` : 'Já preenchida com o cliente, a morada, a deslocação e os trabalhos: falta pôr as horas e os materiais.')),
-      h('button',{class:'btn btn-sm' + (r.folha ? ' btn-ghost' : ''), type:'button', onclick:() => abrirFolha(r.id)}, r.folha ? 'Abrir' : 'Abrir folha de obra')));
+        h('div',{class:'who'}, r.folha && r.folha.totalDebito ? `${eur(r.folha.totalDebito)} a debitar · custo ${eur(r.folha.totalCustos || 0)}`
+          : r.folha ? `Pronta para a visita${r.folha.guardadaEm ? ' · guardada a ' + ddmm(r.folha.guardadaEm.slice(0, 10)) : ''}`
+          : 'Já vem preenchida com o cliente, a morada, o contacto e o que ficou combinado: confirma, ajusta e imprime.')),
+      h('button',{class:'btn btn-sm' + (r.folha ? ' btn-ghost' : ''), type:'button', onclick:() => abrirFolha(r.id)}, r.folha ? 'Abrir' : 'Folha de obra')));
     if (trans) blocos.push(formTrans(r));
     else if (canWrite) {
       const T = transicoes(r), aberto = ABERTOS.includes(r.estado);
@@ -2931,7 +2933,11 @@ if (!Element.prototype.replaceChildren) {
   };
   const pontos = s => s ? `${s.slice(8, 10)}.${s.slice(5, 7)}.${s.slice(0, 4)}` : '';
   const numDe = v => { const n = parseValor(v); return n == null || Number.isNaN(n) ? 0 : n; };
-  let fol = null, folId = null, folModo = 'custos', folSujo = false;
+  let fol = null, folId = null, folModo = 'visita', folSujo = false;
+  // Antes da obra, a folha é só para a visita (confirmar o combinado, linhas e totais em branco para o técnico, como o
+  // Excel impresso). As versões com preços (Custos e Débito) aparecem a partir de «Em execução», para a fatura; o
+  // orçamento faz-se com a skill «ORÇAMENTO MDM».
+  const posVisita = r => ['em_execucao','por_faturar','faturado','resolvido'].includes(r.estado) || (r.estado === 'espera_fornecedor' && r.esperaDe === 'em_execucao');
 
   // Zona pela morada: 1990 e 1998 (Parque das Nações), 1000 a 1999 Lisboa, o resto Arredores.
   function zonaDe(morada) {
@@ -2963,22 +2969,23 @@ if (!Element.prototype.replaceChildren) {
         {g:'mo', ref:'Hora_Ajudante', desc:'Mão de obra: ajudante', qtd:'', custo:20, venda:null},
         {g:'desl', ref:zona, desc:`Deslocação (${tarifa('desl', zona)[1]})`, qtd:1, custo:tarifa('desl', zona)[2], venda:null},
       ],
-      observacoes: r.dataPedido ? `${ORIGENS[r.origem] || 'Pedido'} de ${pontos(r.dataPedido)}` : '',
-      executante: equipa, tipo: temContrato ? 'contrato' : 'pontual_ppag', tipoOutro: '', taxaDeslocacao: true,
+      observacoes: [r.dataPedido ? `${ORIGENS[r.origem] || 'Pedido'} de ${pontos(r.dataPedido)}` : '',
+        r.dataVisita ? `Visita a ${pontos(r.dataVisita)}${r.horaVisita ? ' às ' + r.horaVisita : ''}` : ''].filter(Boolean).join(' · '),
+      executante: equipa, tipo: temContrato ? 'contrato' : '', tipoOutro: '', taxaDeslocacao: null,
     };
   }
   const precoLinha = (l, modo) => modo === 'debito' && l.venda != null && l.venda !== '' ? numDe(l.venda) : numDe(l.custo);
   function totaisFolha(f, modo) {
     const t = {mo:0, desl:0, mat:0, div:0};
     for (const l of f.linhas) t[l.g] += numDe(l.qtd) * precoLinha(l, modo);
-    if (modo === 'debito' && !f.taxaDeslocacao) t.desl = 0;
+    if (modo === 'debito' && f.taxaDeslocacao === false) t.desl = 0;
     t.total = t.mo + t.desl + t.mat + t.div;
     return t;
   }
 
   function abrirFolha(id) {
     const r = rows.find(x => x.id === id); if (!r) return;
-    folId = id; fol = r.folha ? JSON.parse(JSON.stringify(r.folha)) : folhaNova(r); folSujo = !r.folha; folModo = 'custos';
+    folId = id; fol = r.folha ? JSON.parse(JSON.stringify(r.folha)) : folhaNova(r); folSujo = !r.folha; folModo = posVisita(r) ? 'custos' : 'visita';
     F('folhaWrap').hidden = false; document.body.style.overflow = 'hidden';
     renderFolha();
   }
@@ -3004,7 +3011,7 @@ if (!Element.prototype.replaceChildren) {
     const modo = folModo, campoPreco = modo === 'debito' ? 'venda' : 'custo';
     const total = h('span',{id:'ft-' + i});
     // Sem taxa de deslocação, o débito ao cliente não cobra a deslocação: a linha mostra 0, como o total.
-    const semTaxa = () => l.g === 'desl' && modo === 'debito' && !fol.taxaDeslocacao;
+    const semTaxa = () => l.g === 'desl' && modo === 'debito' && fol.taxaDeslocacao === false;
     const atualizarTotal = () => { const v = semTaxa() ? 0 : numDe(l.qtd) * precoLinha(l, modo); total.textContent = v ? eur2(v) : (semTaxa() && numDe(l.qtd) ? eur2(0) : ''); };
     atualizarTotal();
     const muda = (k, v) => { l[k] = v; folSujo = true; atualizarTotal(); recalcFolha(); marcaEstado(); };
@@ -3027,6 +3034,11 @@ if (!Element.prototype.replaceChildren) {
 
   function recalcFolha() {
     if (!fol) return;
+    if (folModo === 'visita') {
+      for (const k of ['mo','mat','desl','div','total']) { const el = F('fto-' + k); if (el) el.textContent = ''; }
+      fill(F('folhaMargem'), ['Para a visita: confirma ou ajusta o que ficou combinado ao telefone ou por email (a caixa amarela) e imprime. O resto veio do pedido e da ficha do cliente. As linhas e os totais ficam em branco para o técnico preencher no local.']);
+      return;
+    }
     const t = totaisFolha(fol, folModo);
     for (const k of ['mo','mat','desl','div','total']) { const el = F('fto-' + k); if (el) el.textContent = eur2(t[k]); }
     const c = totaisFolha(fol, 'custos'), d = totaisFolha(fol, 'debito');
@@ -3038,12 +3050,14 @@ if (!Element.prototype.replaceChildren) {
 
   function renderFolha() {
     const r = rows.find(x => x.id === folId); if (!r || !fol) return;
+    F('folhaModoVisita').setAttribute('aria-pressed', String(folModo === 'visita'));
     F('folhaModoCustos').setAttribute('aria-pressed', String(folModo === 'custos')); F('folhaModoDebito').setAttribute('aria-pressed', String(folModo === 'debito'));
+    F('folhaModos').hidden = !posVisita(r);
     F('folhaBarTitulo').textContent = `Folha de obra ${fol.num || ''} · ${fol.cliente || r.cliente || ''}`;
     F('folhaGuardar').hidden = F('folhaImprimir').hidden = !canWrite;
     const corpo = [];
     corpo.push(h('tr',null, h('td',{class:'f-branco'}, ''), h('td',{colspan:'4', class:'f-branco'}, campoF('trabalhos', {multi:true, label:'Trabalhos'}))));
-    for (const [g, nome] of GRUPOS) {
+    for (const [g, nome] of (folModo === 'visita' ? [] : GRUPOS)) {
       const idx = fol.linhas.map((l, i) => [l, i]).filter(([l]) => l.g === g);
       if (g === 'mat') corpo.push(h('tr',{class:'sep'}, h('td',{colspan:'5'})));
       if (idx.length || canWrite) corpo.push(h('tr',{class:'grupo' + (idx.length ? '' : ' vazio')}, h('td',{colspan:'5'}, nome, canWrite ? [' ', h('button',{class:'f-add no-print', type:'button', onclick:() => {
@@ -3091,9 +3105,11 @@ if (!Element.prototype.replaceChildren) {
         h('div',{class:'t'}, 'Tipo de Intervenção:'),
         h('div',{class:'barra'}, tipoRadios,
           h('span',{class:'desl'}, 'Taxa de Deslocação:',
-            h('label',null, h('input',{type:'radio', name:'f-desl', checked: fol.taxaDeslocacao ? true : null, disabled: canWrite ? null : true, onchange:() => { fol.taxaDeslocacao = true; folSujo = true; renderFolha(); }}), 'SIM'),
-            h('label',null, h('input',{type:'radio', name:'f-desl', checked: fol.taxaDeslocacao ? null : true, disabled: canWrite ? null : true, onchange:() => { fol.taxaDeslocacao = false; folSujo = true; renderFolha(); }}), 'NÃO')))),
-      h('p',{class:'f-nota no-print'}, 'Os campos amarelos são para preencher; os transparentes vieram do pedido e da ficha do cliente e podem ser corrigidos. As tarifas são as da folha «Folha1» do Excel.'));
+            h('label',null, h('input',{type:'radio', name:'f-desl', checked: fol.taxaDeslocacao === true ? true : null, disabled: canWrite ? null : true, onchange:() => { fol.taxaDeslocacao = true; folSujo = true; renderFolha(); }}), 'SIM'),
+            h('label',null, h('input',{type:'radio', name:'f-desl', checked: fol.taxaDeslocacao === false ? true : null, disabled: canWrite ? null : true, onchange:() => { fol.taxaDeslocacao = false; folSujo = true; renderFolha(); }}), 'NÃO')))),
+      h('p',{class:'f-nota no-print'}, folModo === 'visita'
+        ? 'A caixa amarela é o que ficou combinado: confirma ou ajusta. Os campos transparentes vieram do pedido e da ficha do cliente e também se corrigem. O tipo de intervenção e a taxa de deslocação podem ficar para o técnico assinalar.'
+        : 'Os campos amarelos são para preencher; os transparentes vieram do pedido e da ficha do cliente e podem ser corrigidos. As tarifas são as da folha «Folha1» do Excel.'));
     recalcFolha(); marcaEstado();
   }
 
@@ -3107,7 +3123,7 @@ if (!Element.prototype.replaceChildren) {
     const primeira = !r.folha;
     novo.folha = {...fol, num, guardadaEm: new Date().toISOString(), totalCustos: totaisFolha(fol, 'custos').total, totalDebito: totaisFolha(fol, 'debito').total};
     novo.historico = (novo.historico || []).slice(-60);
-    novo.historico.push(nota(primeira ? `Folha de obra ${num} aberta` : `Folha de obra ${num} atualizada (${eur2(novo.folha.totalDebito)} a debitar)`));
+    novo.historico.push(nota(primeira ? `Folha de obra ${num} aberta` : `Folha de obra ${num} atualizada${novo.folha.totalDebito ? ` (${eur2(novo.folha.totalDebito)} a debitar)` : ''}`));
     if (await gravar(r.id, novo, primeira ? `Folha de obra ${num} guardada` : 'Folha de obra guardada')) {
       folSujo = false; fol = JSON.parse(JSON.stringify(novo.folha)); marcaEstado();
       if (imprimir) imprimirFolha();
@@ -3124,6 +3140,7 @@ if (!Element.prototype.replaceChildren) {
   F('folhaFechar').addEventListener('click', () => fecharFolha());
   F('folhaGuardar').addEventListener('click', () => guardarFolha(false));
   F('folhaImprimir').addEventListener('click', () => guardarFolha(true));
+  F('folhaModoVisita').addEventListener('click', () => { folModo = 'visita'; renderFolha(); });
   F('folhaModoCustos').addEventListener('click', () => { folModo = 'custos'; renderFolha(); });
   F('folhaModoDebito').addEventListener('click', () => { folModo = 'debito'; renderFolha(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !F('folhaWrap').hidden) { e.stopImmediatePropagation(); fecharFolha(); } }, true);
