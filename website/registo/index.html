@@ -281,6 +281,40 @@ td .lb{display:flex;flex-wrap:nowrap;gap:6px}
 .lp .ld.motivo{font-size:12px;font-family:var(--font-body);font-weight:600;color:var(--u);text-transform:uppercase;letter-spacing:.05em;line-height:1.2;max-width:84px;white-space:normal}
 .cli-tag{font-size:11.5px;font-weight:600;color:var(--u);border:1px solid color-mix(in srgb,var(--u) 45%,transparent);border-radius:4px;padding:0 5px;line-height:1.5;white-space:nowrap}
 
+.fugas{display:flex;flex-direction:column}
+.fuga{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;background:none;border:0;border-top:1px solid var(--line);padding:9px 12px;text-align:left;cursor:pointer;font:inherit;color:inherit}
+.fuga:first-child{border-top:0}
+.fuga:hover{background:var(--sunk)}
+.fuga[disabled]{cursor:default}.fuga[disabled]:hover{background:none}
+.fuga .fi{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-mono);font-size:12px;font-weight:600;background:color-mix(in srgb,var(--u) 16%,transparent);color:var(--u)}
+.fuga .fi svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.fuga .ft{font-size:14.5px}.fuga .ft small{display:block;font-size:12.5px;color:var(--ink-2)}
+.fuga .fn{font-family:var(--font-mono);font-size:14px;font-weight:600;color:var(--u);white-space:nowrap}
+.fuga.ok{--u:var(--good)}.fuga.warn{--u:var(--warn)}.fuga.bad{--u:var(--bad)}
+.board{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin}
+.col{flex:0 0 236px;background:var(--bg);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;max-height:560px}
+body.app-on .col{background:var(--sunk)}
+.col-h{padding:10px 12px 8px;border-bottom:1px solid var(--line)}
+.col-h .cn{font-family:var(--font-display);font-size:17px;font-weight:600;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.col-h .cn b{font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--ink-2)}
+.col-h .cr{font-size:12px;color:var(--ink-2);margin-top:2px}
+.col-h .cp{display:inline-block;font-family:var(--font-mono);font-size:10.5px;background:var(--accent);color:var(--on-accent);border-radius:999px;padding:0 6px;line-height:1.6;margin-right:6px;vertical-align:1px}
+.col-b{overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:6px;min-height:40px}
+.kcard{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--u);border-radius:8px;padding:8px 10px;text-align:left;cursor:pointer;font:inherit;color:inherit;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kcard:hover{border-color:var(--accent)}
+.kcard .kn{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kcard .ka{font-size:12.5px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kcard .kt{font-size:12.5px;font-weight:600;color:var(--tone,var(--ink-2))}
+.kcard .kp{font-family:var(--font-mono);font-size:11px;margin-right:6px;color:var(--u)}
+.col .vazio{font-size:12.5px;color:var(--ink-2);padding:6px 4px}
+.funil{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line)}
+.fstep{background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.fstep .k-l{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);font-weight:500}
+.fstep .k-v{font-family:var(--font-display);font-size:28px;font-weight:600;line-height:1.1}
+.fstep .k-v small{font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--ink-2);margin-left:6px}
+.fstep .fb{height:8px;border-radius:4px;background:var(--line);overflow:hidden}.fstep .fb i{display:block;height:100%;background:var(--c1)}
+.fstep .k-s{font-size:12.5px;color:var(--ink-2)}
+
 /* Entrada */
 .login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-left,0px))}
 .login-box{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:26px 22px;width:100%;max-width:380px;display:flex;flex-direction:column;gap:14px}
@@ -415,6 +449,7 @@ body.app-on{background:var(--surface)}
 <nav class="rail" aria-label="Menu">
   <button class="r-novo" type="button" id="railNovo" title="Novo pedido" aria-label="Novo pedido"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   <button type="button" id="rail-gerir" title="Gerir pedidos" aria-label="Gerir pedidos"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.3c2.5-.2 4.3 1.3 4.8 4.2"/></svg><span class="r-badge" id="redBadge"></span></button>
+  <button type="button" id="rail-pipeline" title="Pipeline" aria-label="Pipeline"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5" height="11" rx="1.5"/><rect x="16" y="4" width="5" height="7" rx="1.5"/></svg><span class="r-badge" id="fugaBadge"></span></button>
   <button type="button" id="rail-resumo" title="Painel" aria-label="Painel"><svg viewBox="0 0 24 24"><path d="M5 20V12M10 20V5M15 20v-6M20 20V9"/></svg></button>
   <button type="button" id="rail-clientes" title="Clientes" aria-label="Clientes"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.6-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.4-7 10-7 10z"/></svg><span class="r-badge" id="cliBadge"></span></button>
   <button type="button" id="rail-faturacao" title="Faturação" aria-label="Faturação"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h6M9 16h6"/></svg></button>
@@ -441,6 +476,7 @@ body.app-on{background:var(--surface)}
   </div>
   <div class="tabs tabs2" role="tablist" aria-label="Vistas" id="tabs" hidden>
     <button class="tab" role="tab" type="button" id="tab-gerir" aria-controls="v-gerir" aria-selected="true">Gerir pedidos</button>
+    <button class="tab" role="tab" type="button" id="tab-pipeline" aria-controls="v-pipeline" aria-selected="false" tabindex="-1">Pipeline</button>
     <button class="tab" role="tab" type="button" id="tab-resumo" aria-controls="v-resumo" aria-selected="false" tabindex="-1">Painel</button>
     <button class="tab" role="tab" type="button" id="tab-clientes" aria-controls="v-clientes" aria-selected="false" tabindex="-1">Clientes</button>
     <button class="tab" role="tab" type="button" id="tab-faturacao" aria-controls="v-faturacao" aria-selected="false" tabindex="-1">Faturação</button>
@@ -464,6 +500,163 @@ body.app-on{background:var(--surface)}
     </div>
     <p class="t-conta" id="listaCount"></p>
     <div class="tabela" id="lista"></div>
+  </div>
+
+  <div id="v-pipeline" role="tabpanel" aria-labelledby="tab-pipeline" hidden>
+    <section aria-labelledby="h-fugas">
+      <div class="sec-h"><h2 id="h-fugas">Fugas: onde um pedido ou um cliente se pode perder</h2><span class="count" id="fugasCount"></span></div>
+      <div class="panel fugas" id="fugas"></div>
+      <p class="note">Cada linha é uma regra do processo. Verde é zero; um número abre a lista já filtrada. A triagem do dia é limpar esta lista de cima para baixo.</p>
+    </section>
+    <section aria-labelledby="h-board" style="margin-top:22px">
+      <div class="sec-h"><h2 id="h-board">Os nove passos, com os pedidos onde estão</h2><span class="count" id="boardCount"></span></div>
+      <div class="board" id="board"></div>
+    </section>
+    <section aria-labelledby="h-funil" style="margin-top:22px">
+      <div class="sec-h"><h2 id="h-funil">Funil</h2><span class="count">últimos 90 dias</span></div>
+      <div class="panel" id="funil"></div>
+    </section>
+    <section aria-labelledby="h-fluxo" style="margin-top:22px">
+      <div class="sec-h"><h2 id="h-fluxo">O processo, do primeiro contacto à manutenção</h2><span class="count">versão de 22/10/2026</span></div>
+      <figure class="panel" style="margin:0;padding:14px 14px 6px;overflow-x:auto">
+        <div style="min-width:1100px"><svg viewBox="0 0 1760 620" role="img" aria-label="Pipeline do pedido nos nove passos do processo: entrada, novo, visita, orçamento, seguimento, obra, faturação e pagamento; o ciclo fecha quando a manutenção gera um pedido novo" style="max-width:100%;height:auto;font-family:inherit">
+<defs><marker id="fa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker><marker id="fb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#B03535"/></marker></defs>
+<rect x="20" y="90" width="124" height="64" rx="8" fill="rgba(13,103,136,.10)" stroke="#0D6788" stroke-width="1.5"/>
+<text x="82.0" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">Entrada</text>
+<text x="82.0" y="127" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">telefone · WhatsApp ·</text>
+<text x="82.0" y="139" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">email · site</text>
+<rect x="196" y="90" width="124" height="64" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<circle cx="318" cy="92" r="11" fill="#0D6788"/><text x="318" y="96" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">1–2</text>
+<text x="258.0" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">Novo</text>
+<text x="258.0" y="127" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">responder: P1 4 h ·</text>
+<text x="258.0" y="139" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">P2 1 d · P3 2 d úteis</text>
+<rect x="372" y="90" width="124" height="64" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<circle cx="494" cy="92" r="11" fill="#0D6788"/><text x="494" y="96" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">2</text>
+<text x="434.0" y="112" text-anchor="middle" font-size="11.5" font-weight="700" fill="currentColor">Visita por marcar</text>
+<text x="434.0" y="127" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">PAT aberta · marcar</text>
+<text x="434.0" y="139" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">em 1 / 2 / 3 d úteis</text>
+<rect x="548" y="90" width="124" height="64" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<circle cx="670" cy="92" r="11" fill="#0D6788"/><text x="670" y="96" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">3</text>
+<text x="610.0" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">Visita marcada</text>
+<text x="610.0" y="127" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">confirmar na véspera</text>
+<text x="610.0" y="139" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">· folha até ao dia</text>
+<rect x="724" y="90" width="124" height="64" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<circle cx="846" cy="92" r="11" fill="#0D6788"/><text x="846" y="96" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">4</text>
+<text x="786.0" y="112" text-anchor="middle" font-size="11.5" font-weight="700" fill="currentColor">Orçamento por fazer</text>
+<text x="786.0" y="127" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">ORC em 1 / 2 / 3 d</text>
+<text x="786.0" y="139" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">úteis, só com dados</text>
+<rect x="900" y="90" width="124" height="64" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<circle cx="1022" cy="92" r="11" fill="#0D6788"/><text x="1022" y="96" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">5</text>
+<text x="962.0" y="112" text-anchor="middle" font-size="11.5" font-weight="700" fill="currentColor">Orçamento enviado</text>
+<text x="962.0" y="127" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">ligar a 3 / 5 / 7</text>
+<text x="962.0" y="139" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">dias, repetir, até</text>
+<rect x="1076" y="90" width="124" height="64" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<circle cx="1198" cy="92" r="11" fill="#0D6788"/><text x="1198" y="96" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">6–8</text>
+<text x="1138.0" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">Em execução</text>
+<text x="1138.0" y="127" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">obra · encomenda ·</text>
+<text x="1138.0" y="139" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">material · data ·</text>
+<rect x="1252" y="90" width="124" height="64" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<circle cx="1374" cy="92" r="11" fill="#0D6788"/><text x="1374" y="96" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">9</text>
+<text x="1314.0" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">Por faturar</text>
+<text x="1314.0" y="127" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">faturar até 2 d úteis</text>
+<text x="1314.0" y="139" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">depois do RI</text>
+<rect x="1428" y="90" width="124" height="64" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<circle cx="1550" cy="92" r="11" fill="#0D6788"/><text x="1550" y="96" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">9</text>
+<text x="1490.0" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">Faturado</text>
+<text x="1490.0" y="127" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">à espera do pagamento</text>
+<text x="1490.0" y="139" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">· 30 dias: cobrar</text>
+<rect x="1604" y="90" width="124" height="64" rx="8" fill="rgba(29,116,72,.08)" stroke="#1D7448" stroke-width="1.5"/>
+<text x="1666.0" y="112" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">Resolvido</text>
+<text x="1666.0" y="127" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">pago · obra faturada</text>
+<rect x="900" y="280" width="124" height="64" rx="8" fill="rgba(176,53,53,.08)" stroke="#B03535" stroke-width="1.5"/>
+<text x="962.0" y="302" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">Perdido</text>
+<text x="962.0" y="317" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">motivo obrigatório ·</text>
+<text x="962.0" y="329" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">reabre até 30 dias</text>
+<rect x="1076" y="280" width="124" height="64" rx="8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+<text x="1138.0" y="302" text-anchor="middle" font-size="11.5" font-weight="700" fill="currentColor">À espera de fornecedor</text>
+<text x="1138.0" y="317" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">perguntar a 3 / 5 /</text>
+<text x="1138.0" y="329" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">10 d úteis</text>
+<rect x="196" y="280" width="476" height="64" rx="8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="434.0" y="302" text-anchor="middle" font-size="11.5" font-weight="700" fill="currentColor">À espera do cliente (pausa)</text>
+<text x="434.0" y="317" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">o relógio da MDM pára · ligar a 3 / 5 / 7 dias · 30 dias sem contacto:</text>
+<text x="434.0" y="329" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">fechar com motivo ou ação para hoje</text>
+<rect x="1428" y="450" width="124" height="64" rx="8" fill="rgba(29,116,72,.08)" stroke="#1D7448" stroke-width="1.5"/>
+<text x="1490.0" y="472" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">Manutenção</text>
+<text x="1490.0" y="487" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">no ritmo do contrato,</text>
+<text x="1490.0" y="499" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">ou 12 meses depois da</text>
+<rect x="900" y="450" width="124" height="64" rx="8" fill="rgba(29,116,72,.08)" stroke="#1D7448" stroke-width="1.5"/>
+<text x="962.0" y="472" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">Cliente em dia</text>
+<text x="962.0" y="487" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">a lista «Para</text>
+<text x="962.0" y="499" text-anchor="middle" font-size="9.5" fill="currentColor" opacity=".75">contactar» avisa</text>
+<path d="M144 122.0 L196 122.0" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="170.0" y="115.0" text-anchor="middle" font-size="10.5" fill="currentColor">hoje</text>
+<path d="M320 122.0 L372 122.0" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="346.0" y="115.0" text-anchor="middle" font-size="10.5" fill="currentColor">visita</text>
+<path d="M496 122.0 L548 122.0" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="522.0" y="115.0" text-anchor="middle" font-size="10.5" fill="currentColor">marcada</text>
+<path d="M672 122.0 L724 122.0" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="698.0" y="115.0" text-anchor="middle" font-size="10.5" fill="currentColor">feita</text>
+<path d="M848 122.0 L900 122.0" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="874.0" y="115.0" text-anchor="middle" font-size="10.5" fill="currentColor">enviado</text>
+<path d="M1024 122.0 L1076 122.0" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="1050.0" y="115.0" text-anchor="middle" font-size="10.5" fill="currentColor">aceitou</text>
+<path d="M1200 122.0 L1252 122.0" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="1226.0" y="115.0" text-anchor="middle" font-size="10.5" fill="currentColor">RI</text>
+<path d="M1376 122.0 L1428 122.0" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="1402.0" y="115.0" text-anchor="middle" font-size="10.5" fill="currentColor">fatura</text>
+<path d="M1552 122.0 L1604 122.0" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="1578.0" y="115.0" text-anchor="middle" font-size="10.5" fill="currentColor">pago</text>
+<path d="M258.0 90 C258.0 46 786.0 46 786.0 90" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="522.0" y="58" text-anchor="middle" font-size="10.5" fill="currentColor">orçamento sem visita: fotos e medidas chegam</text>
+<path d="M634.0 90 C634.0 26 1114.0 26 1114.0 90" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="944.0" y="40" text-anchor="middle" font-size="10.5" fill="currentColor">o trabalho continua na obra</text>
+<path d="M228.0 90 C228.0 0 1666.0 0 1666.0 90" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="1428" y="20" text-anchor="middle" font-size="10.5" fill="currentColor">resolvido ao telefone</text>
+<path d="M924 154 C924 210 824 210 824 154" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="874.0" y="206" text-anchor="middle" font-size="10.5" fill="currentColor">pediu revisão</text>
+<path d="M992.0 154 L992.0 280" fill="none" stroke="#B03535" stroke-width="1.5" marker-end="url(#fb)"/>
+<text x="986.0" y="213.0" text-anchor="end" font-size="10.5" fill="#B03535">recusou</text>
+<text x="986.0" y="227.0" text-anchor="end" font-size="10.5" fill="#B03535">3.º seguimento sem resposta</text>
+<path d="M1110.0 154 L1110.0 280" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="1104.0" y="221.0" text-anchor="end" font-size="10.5" fill="currentColor">falta equipamento</text>
+<path d="M1166.0 280 L1166.0 154" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="1172.0" y="221.0" text-anchor="start" font-size="10.5" fill="currentColor">chegou</text>
+<path d="M246 280 L246 154" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)" stroke-dasharray="5 4"/>
+<text x="240" y="221.0" text-anchor="end" font-size="10.5" fill="currentColor">falta resposta</text>
+<path d="M622 154 L622 280" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)" stroke-dasharray="5 4"/>
+<text x="628" y="221.0" text-anchor="start" font-size="10.5" fill="currentColor">chegou o que faltava</text>
+<text x="434.0" y="362" text-anchor="middle" font-size="10.5" fill="currentColor" opacity=".75">a partir de qualquer estado com a bola na MDM; volta ao mesmo estado com o tempo gasto guardado</text>
+<path d="M1666.0 154 L1666.0 482.0 L1552 482.0" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="1658.0" y="298.0" text-anchor="end" font-size="10.5" fill="currentColor">obra fechada:</text>
+<text x="1658.0" y="312.0" text-anchor="end" font-size="10.5" fill="currentColor">fica a data da próxima visita</text>
+<path d="M1428 482.0 L1024 482.0" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="1226.0" y="475.0" text-anchor="middle" font-size="10.5" fill="currentColor">visita feita e faturada</text>
+<path d="M900 482.0 L82.0 482.0 L82.0 154" fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#fa)"/>
+<text x="522.0" y="475.0" text-anchor="middle" font-size="10.5" fill="currentColor">a manutenção a vencer gera um pedido novo: o ciclo fecha</text>
+<path d="M962.0 344 L962.0 450" fill="none" stroke="#B03535" stroke-width="1.5" marker-end="url(#fb)"/>
+<text x="970.0" y="401.0" text-anchor="start" font-size="10.5" fill="#B03535">fica na lista «mais de um ano sem fatura»: vale uma chamada</text>
+<path d="M1490.0 154 L1490.0 434" fill="none" stroke="#B03535" stroke-width="1.5" marker-end="url(#fb)"/>
+<text x="1482.0" y="302.0" text-anchor="end" font-size="10.5" fill="#B03535">30 dias sem recibo: «Por cobrar»</text>
+<text x="20" y="592" font-size="11" fill="currentColor" opacity=".8">Regras que fecham as fugas: todo o pedido aberto tem dono, próxima ação e data (não se grava sem eles); o prazo passado põe o pedido a vermelho e sobe o P uma vez; nenhum pedido fica 30 dias sem contacto;</text>
+<text x="20" y="608" font-size="11" fill="currentColor" opacity=".8">a obra só avança com cada passo feito (adjudicado, encomendado, material, data, véspera, RI); a fatura liga ao pedido pelo n.º do orçamento; o recibo e a manutenção entram na lista «Para contactar».</text>
+</svg></div>
+        <figcaption class="note" style="padding:0 2px 8px">Os nove passos do processo interno «Do primeiro contacto à instalação», com os estados do registo e as saídas de cada um. As linhas vermelhas são as fugas que o registo vigia: perdido com motivo, pagamento por cobrar, cliente a esfriar. Os prazos são provisórios até o chefe os validar com dados reais.</figcaption>
+      </figure>
+      <details class="dados" style="margin-top:14px"><summary>Os nove passos: quem, documento, quando avança, prazo</summary>
+      <div class="panel tw" style="margin-top:10px"><table>
+        <thead><tr><th>Passo</th><th>Quem</th><th>Documento</th><th>Só avança quando</th><th>Prazo</th><th>No registo</th></tr></thead>
+        <tbody>
+          <tr><td><b>1. Primeiro contacto</b><div class="sub">registar no próprio dia; fotos; prioridade; dono, ação e data</div></td><td>Escritório</td><td>Pedido no registo</td><td>O cliente recebe uma primeira resposta</td><td class="sub">P1 4 h úteis · P2 1 dia útil · P3 2 dias úteis</td><td>Novo</td></tr>
+          <tr><td><b>2. Decidir o caminho</b><div class="sub">telefone, orçamento sem visita, ou PAT e visita</div></td><td>Escritório</td><td>PAT</td><td>Está decidido se há visita</td><td class="sub">marcar a visita: P1 1 · P2 2 · P3 3 dias úteis</td><td>Novo → Visita por marcar</td></tr>
+          <tr><td><b>3. Visita técnica</b><div class="sub">levantamento por divisão, fotos, NIF, prazo, marca</div></td><td>Técnico</td><td>Folha da visita na PAT</td><td>PAT «visita feita» com o levantamento completo</td><td class="sub">entregar até ao dia útil seguinte</td><td>Visita marcada</td></tr>
+          <tr><td><b>4. Orçamento</b><div class="sub">opções de marca; só com dados medidos; enviar e registar</div></td><td>Escritório</td><td>ORC (Excel e PDF)</td><td>Enviado, com a data registada</td><td class="sub">P1 1 · P2 2 · P3 3 dias úteis</td><td>Orçamento por fazer</td></tr>
+          <tr><td><b>5. Seguimento</b><div class="sub">ligar e repetir; revisão volta ao 4; 3.º sem resposta: perdido</div></td><td>Escritório</td><td>Seguimentos no registo</td><td>Ganho, perdido com motivo ou nova data</td><td class="sub">P1 3 · P2 5 · P3 7 dias; nunca 30 dias sem contacto</td><td>À espera do cliente</td></tr>
+          <tr><td><b>6. Adjudicação</b><div class="sub">aceite por escrito; folha de obra; encomenda</div></td><td>Escritório e chefe</td><td>Folha de obra · Nota de encomenda</td><td>Obra aberta e equipamento encomendado</td><td class="sub">encomendar no próprio dia</td><td>Em execução (obra: adjudicado, encomendado)</td></tr>
+          <tr><td><b>7. Preparar a instalação</b><div class="sub">material recebido; data, técnico e ajudante; acessos; véspera</div></td><td>Escritório e técnico</td><td>Folha de obra com data e equipa</td><td>Nada falta para começar</td><td class="sub">confirmação na véspera</td><td>Em execução (obra: material, data, véspera)</td></tr>
+          <tr><td><b>8. Instalação</b><div class="sub">montar, vácuo, ensaio, arranque; explicar; fotos; RI assinado</div></td><td>Técnico certificado</td><td>Relatório de intervenção (RI)</td><td>Trabalho feito e RI assinado</td><td class="sub">RI no escritório no próprio dia</td><td>«Instalação feita: RI assinado» → Por faturar</td></tr>
+          <tr><td><b>9. Fecho e faturação</b><div class="sub">faturar; registar o número; acompanhar o pagamento</div></td><td>Escritório</td><td>Fatura · obra «faturada»</td><td>Fatura emitida e registada; pago → resolvido</td><td class="sub">faturar até 2 dias úteis depois do RI; cobrar aos 30 dias</td><td>Por faturar → Faturado → Resolvido</td></tr>
+        </tbody></table></div></details>
+    </section>
   </div>
 
   <div id="v-resumo" role="tabpanel" aria-labelledby="tab-resumo" hidden>
@@ -609,18 +802,21 @@ body.app-on{background:var(--surface)}
     espera_cliente:      {l:'À espera do cliente', bola:'cliente', un:'d', t:'muted'},
     espera_fornecedor:   {l:'À espera de peça/fornecedor', bola:'fornecedor', un:'du', t:'muted'},
     em_execucao:         {l:'Em execução', bola:'MDM', un:'du', t:'accent'},
+    por_faturar:         {l:'Por faturar', bola:'MDM', un:'du', t:'accent'},
+    faturado:            {l:'Faturado, à espera do pagamento', bola:'cliente', un:'d', t:'muted'},
     resolvido:           {l:'Resolvido', bola:null, t:'good'},
     perdido:             {l:'Perdido', bola:null, t:'bad'},
   };
-  const ABERTOS = ['novo','visita_por_marcar','visita_marcada','orcamento_por_fazer','espera_cliente','espera_fornecedor','em_execucao'];
-  const DA_MDM = ['novo','visita_por_marcar','visita_marcada','orcamento_por_fazer','em_execucao'];
+  const ABERTOS = ['novo','visita_por_marcar','visita_marcada','orcamento_por_fazer','espera_cliente','espera_fornecedor','em_execucao','por_faturar','faturado'];
+  const DA_MDM = ['novo','visita_por_marcar','visita_marcada','orcamento_por_fazer','em_execucao','por_faturar'];
   const ESPERAS = ['espera_cliente','espera_fornecedor'];
-  const COM_TABELA = ['novo','visita_por_marcar','orcamento_por_fazer','espera_cliente','espera_fornecedor','em_execucao'];
+  const COM_TABELA = ['novo','visita_por_marcar','orcamento_por_fazer','espera_cliente','espera_fornecedor','em_execucao','por_faturar','faturado'];
   const UNIDADE = {h:'horas úteis', du:'dias úteis', d:'dias'};
   // Provisórios até haver dados reais: os definitivos saem do modo sombra (python -m funil sombra).
   const PRAZOS_PADRAO = {
     novo:{P1:4,P2:9,P3:18}, visita_por_marcar:{P1:1,P2:2,P3:3}, orcamento_por_fazer:{P1:1,P2:2,P3:3},
     espera_cliente:{P1:3,P2:5,P3:7}, espera_fornecedor:{P1:3,P2:5,P3:10}, em_execucao:{P1:2,P2:10,P3:15},
+    por_faturar:{P1:2,P2:2,P3:2}, faturado:{P1:30,P2:30,P3:30},
   };
   const LIMITE_PADRAO = 7;
   const PRIOS = ['P1','P2','P3'];
@@ -726,7 +922,7 @@ body.app-on{background:var(--surface)}
 
   const prazosAtuais = () => (cfgPrazos && cfgPrazos.valores) || PRAZOS_PADRAO;
   const limiteDono = () => (cfgPrazos && Number(cfgPrazos.limiteDono)) || LIMITE_PADRAO;
-  function prazoDe(estado, p) { const t = prazosAtuais()[estado]; const v = t ? Number(t[p || 'P3']) : NaN; return Number.isFinite(v) && v > 0 ? v : null; }
+  function prazoDe(estado, p) { const t = prazosAtuais()[estado] || PRAZOS_PADRAO[estado]; const v = t ? Number(t[p || 'P3']) : NaN; return Number.isFinite(v) && v > 0 ? v : null; }
 
   /* ---------- Relógio ---------- */
   // Devolve {vence: Date, atrasoH, restaH, un, prazo} para o estado atual do pedido.
@@ -795,7 +991,7 @@ body.app-on{background:var(--surface)}
       if (r.dataVisita < today()) return 'Folha da visita até hoje';
       return `Visita a ${ddmm(r.dataVisita)}${r.horaVisita ? ' às ' + r.horaVisita : ''}`;
     }
-    if (rel.atrasoH > 0) return `Atrasado ${duracaoTxt(rel.atrasoH, un)}`;
+    if (rel.atrasoH > 0) return r.estado === 'faturado' ? `Pagamento em atraso ${duracaoTxt(rel.atrasoH, un)}: cobrar` : `Atrasado ${duracaoTxt(rel.atrasoH, un)}`;
     if (iso(rel.vence) === today()) return `Vence hoje às ${hhmm(rel.vence)}`;
     return `Faltam ${duracaoTxt(rel.restaH, un)}`;
   }
@@ -831,7 +1027,7 @@ body.app-on{background:var(--surface)}
   }
 
   /* ---------- Separadores ---------- */
-  const TABS = ['gerir','resumo','clientes','faturacao','prazos'];
+  const TABS = ['gerir','pipeline','resumo','clientes','faturacao','prazos'];
   let tab = 'gerir';
   try { const s = localStorage.getItem('registo-tab'); if (TABS.includes(s)) tab = s; } catch (e) {}
   if (TABS.includes(location.hash.replace('#',''))) tab = location.hash.replace('#','');
@@ -1086,6 +1282,12 @@ body.app-on{background:var(--surface)}
     ['vermelhos', 'Atrasados', x => x.sem === 'vermelho'],
     ['hoje', 'Vencem hoje', x => x.sem === 'amarelo'],
     ['confirmar', 'Por confirmar', x => ABERTOS.includes(x.r.estado) && x.r.porConfirmar],
+    ['semdados', 'Sem dono, ação ou data', x => ABERTOS.includes(x.r.estado) && (!x.r.dono || !x.r.proximaAcao || !x.r.dataProximaAcao)],
+    ['visita_sem_data', 'Visita sem data', x => x.r.estado === 'visita_marcada' && !x.r.dataVisita],
+    ['acao_atrasada', 'Ação com a data passada', x => ABERTOS.includes(x.r.estado) && x.r.dataProximaAcao && x.r.dataProximaAcao < today()],
+    ['seg_vencido', 'Seguimento em atraso', x => x.r.estado === 'espera_cliente' && x.rel && x.rel.vence && x.rel.atrasoH > 0],
+    ['seg3', 'Três seguimentos sem resposta', x => x.r.estado === 'espera_cliente' && x.r.esperaMotivo === 'decisao' && (x.r.seguimentos || 0) >= 3],
+    ['sem30', 'Sem contacto há 30 dias', x => semContacto30(x.r)],
     ...ABERTOS.map(k => [k, ESTADOS[k].l, x => x.r.estado === k]),
     ['resolvido', 'Resolvidos', x => x.r.estado === 'resolvido'],
     ['perdido', 'Perdidos', x => x.r.estado === 'perdido'],
@@ -1260,14 +1462,14 @@ body.app-on{background:var(--surface)}
       } catch (e) { erros.push(`${f.name}: ${(e && e.message) || 'não foi possível ler'}`); }
     }
     if (!fatMes || !faturacao[fatMes]) fatMes = Object.keys(faturacao).sort().pop() || '';
-    renderFaturacao(); renderClientes();
+    renderAll();
     toast(erros.length ? erros[0] : `${ok} ${ok === 1 ? 'mês lido' : 'meses lidos'}`);
   }
   async function apagarMes(mes) {
     delete faturacao[mes];
     if (sb && canWrite && fatTabela) { const {error} = await sb.from('faturacao').delete().eq('mes', mes); if (error) toast('Não foi possível apagar na base de dados.'); }
     if (fatMes === mes) fatMes = Object.keys(faturacao).sort().pop() || '';
-    renderFaturacao(); renderClientes();
+    renderAll();
   }
 
   const mesesOrd = () => Object.keys(faturacao).sort();
@@ -1475,7 +1677,8 @@ body.app-on{background:var(--surface)}
       c.motivos = [];
       if (cfg.ignorar) c.estado = 'ignorado';
       else {
-        if (cobrar.length) c.motivos.push('cobrar');
+        const cobrarReg = c.pedidos.filter(r => r.estado === 'faturado' && (() => { const rel = relogio(r); return rel && rel.vence && rel.atrasoH > 0; })());
+        if (cobrar.length || cobrarReg.length) c.motivos.push('cobrar');
         if (c.proxima && mesesEntre(c.proxima, ref) >= -1) c.motivos.push('manutencao');
         if (c.orcSemResposta.length) c.motivos.push('orcamento');
         if (!c.proxima && c.ultima && c.cadencia == null && mesesEntre(c.ultima, ref) >= 6 && mesesEntre(c.ultima, ref) < 12) c.motivos.push('frio');
@@ -1536,7 +1739,7 @@ body.app-on{background:var(--surface)}
 
   function motivoTxt(c, ref) {
     switch (c.estado) {
-      case 'cobrar': { const xs = c.semRecibo.filter(d => mesesEntre(d.data, ref) >= 1); return `${xs.length} ${xs.length === 1 ? 'fatura' : 'faturas'} sem recibo, ${eur(xs.reduce((t, d) => t + d.bruto, 0))}: a mais antiga de ${ddmm(xs[0].data)}/${xs[0].data.slice(2, 4)}`; }
+      case 'cobrar': { const xs = c.semRecibo.filter(d => mesesEntre(d.data, ref) >= 1); if (!xs.length) { const r = c.pedidos.find(r => r.estado === 'faturado'); return `${r.fatura || 'Fatura'} de ${ddmm(r.dataFatura || r.entrouNoEstado)} sem pagamento registado${r.valor ? `, ${eur(r.valor)} s/IVA` : ''}`; } return `${xs.length} ${xs.length === 1 ? 'fatura' : 'faturas'} sem recibo, ${eur(xs.reduce((t, d) => t + d.bruto, 0))}: a mais antiga de ${ddmm(xs[0].data)}/${xs[0].data.slice(2, 4)}`; }
       case 'manutencao': { const m = mesesEntre(c.proxima, ref); return `${c.contrato ? 'Manutenção' : 'Visita'} prevista a ${ddmm(c.proxima)}/${c.proxima.slice(2, 4)} (${m >= 0 ? `passou há ${num1(m)} ${m < 1.5 ? 'mês' : 'meses'}` : 'no próximo mês'})${c.cadencia ? ` · ritmo de ${c.cadencia} ${c.cadencia === 1 ? 'mês' : 'meses'}` : ' · um ano depois da instalação'}`; }
       case 'orcamento': { const r = c.orcSemResposta[0]; return `${r.num || 'Orçamento'} enviado ${r.dataEnvio ? 'a ' + ddmm(r.dataEnvio) : ''}${r.valor ? `, ${eur(r.valor)} s/IVA` : ''}${r.seguimentos ? `, ${r.seguimentos} seguimento${r.seguimentos > 1 ? 's' : ''}` : ', sem seguimentos'}`; }
       case 'frio': { const m = mesesEntre(c.ultima, ref); return `Última fatura a ${ddmm(c.ultima)}/${c.ultima.slice(2, 4)}, há ${num1(m)} meses${c.cadencia ? `; costumava faturar de ${c.cadencia} em ${c.cadencia} meses` : ''}`; }
@@ -1586,6 +1789,97 @@ body.app-on{background:var(--surface)}
   }
   F('cliEstado').addEventListener('change', e => { cliEstado = e.target.value; renderClientes(); });
   F('cliQ').addEventListener('input', e => { cliQ = e.target.value; renderClientes(); });
+
+
+  /* ---------- Pipeline: fugas, os nove passos e o funil ---------- */
+  const PASSOS = [
+    ['novo', '1–2', 'Responder e decidir o caminho'],
+    ['visita_por_marcar', '2', 'Abrir a PAT e marcar a visita'],
+    ['visita_marcada', '3', 'Visita técnica e folha da visita'],
+    ['orcamento_por_fazer', '4', 'Fazer e enviar o orçamento'],
+    ['espera_cliente', '5', 'Seguimento ao cliente'],
+    ['espera_fornecedor', '', 'À espera do fornecedor'],
+    ['em_execucao', '6–8', 'Adjudicação, preparação e instalação'],
+    ['por_faturar', '9', 'Faturar até 2 dias úteis depois do RI'],
+    ['faturado', '9', 'Acompanhar o pagamento'],
+  ];
+  const regraPasso = k => { const v = prazosAtuais()[k] || PRAZOS_PADRAO[k]; if (!v) return k === 'visita_marcada' ? 'folha da visita até ao dia útil seguinte' : ''; const u = ESTADOS[k].un; return `${['P1','P2','P3'].map(p => String(v[p]).replace('.', ',')).join(' / ')} ${u === 'h' ? 'h úteis' : u === 'd' ? 'dias' : 'dias úteis'}`; };
+
+  function fugas(all, cli) {
+    const hoje = today();
+    const ab = all.filter(x => ABERTOS.includes(x.r.estado));
+    const conta = m => cli.lista.filter(c => c.estado === m).length;
+    // Ganhos sem fatura: pedido resolvido com orçamento que não aparece em nenhum ficheiro SAF-T posterior ao fecho.
+    const ms = mesesOrd();
+    const orcsFat = new Set(ms.flatMap(m => faturacao[m].docs.map(d => d.orc).filter(Boolean)));
+    const semFatura = rows.filter(r => r.num && (r.estado === 'resolvido' || r.estado === 'faturado' || r.estado === 'por_faturar') && r.dataFecho && ms.length && ms[ms.length - 1] >= r.dataFecho.slice(0, 7) && !orcsFat.has(r.num) && !r.fatura);
+    return [
+      ['Pedido aberto sem dono, próxima ação ou data', 'a regra base: sem isto fica a vermelho', ab.filter(x => !x.r.dono || !x.r.proximaAcao || !x.r.dataProximaAcao).length, 'bad', () => irPara('semdados')],
+      ['Visita marcada sem data', 'passo 3: a PAT precisa de data, hora e técnico', ab.filter(x => x.r.estado === 'visita_marcada' && !x.r.dataVisita).length, 'bad', () => irPara('visita_sem_data')],
+      ['Próxima ação com a data passada', 'alguém prometeu uma coisa e ainda não a fez', ab.filter(x => x.r.dataProximaAcao && x.r.dataProximaAcao < hoje).length, 'bad', () => irPara('acao_atrasada')],
+      ['Prazo do passo passado com a bola na MDM', 'responder, marcar, orçamentar, instalar ou faturar fora do prazo; o P sobe na próxima mudança', ab.filter(x => DA_MDM.includes(x.r.estado) && x.rel && x.rel.vence && x.rel.atrasoH > 0 && !x.r.porConfirmar).length, 'bad', () => irPara('vermelhos')],
+      ['Seguimento ao cliente em atraso', 'passo 5: ligar a 3 / 5 / 7 dias e repetir', ab.filter(x => x.r.estado === 'espera_cliente' && x.rel && x.rel.vence && x.rel.atrasoH > 0).length, 'warn', () => irPara('seg_vencido')],
+      ['Três seguimentos sem resposta', 'passo 5: fechar como perdido «sem resposta», salvo data combinada', ab.filter(x => x.r.estado === 'espera_cliente' && x.r.esperaMotivo === 'decisao' && (x.r.seguimentos || 0) >= 3).length, 'warn', () => irPara('seg3')],
+      ['Pergunta ao fornecedor em atraso', 'encomenda sem data de entrega confirmada', ab.filter(x => x.r.estado === 'espera_fornecedor' && x.rel && x.rel.vence && x.rel.atrasoH > 0).length, 'warn', () => irPara('espera_fornecedor')],
+      ['Obra com passo por fazer e instalação a menos de 2 dias', 'passos 6 e 7: adjudicado, encomendado, material, data, véspera', ab.filter(x => x.r.estado === 'em_execucao' && obraFalta(x.r) && x.r.obra && x.r.obra.dataInstalacao && x.r.obra.dataInstalacao <= addDays(hoje, 2)).length, 'warn', () => irPara('em_execucao')],
+      ['30 dias sem contacto com o cliente', 'fechar com motivo ou dar ação para hoje', ab.filter(x => semContacto30(x.r)).length, 'warn', () => irPara('sem30')],
+      ['Pagamento em atraso (faturado há mais de 30 dias)', 'passo 9: cobrar', ab.filter(x => x.r.estado === 'faturado' && x.rel && x.rel.vence && x.rel.atrasoH > 0).length, 'bad', () => irPara('faturado')],
+      ['Ganho sem fatura nos ficheiros SAF-T', 'o orçamento não aparece em nenhuma fatura dos meses carregados', semFatura.length, 'warn', () => irPara('todos')],
+      ['Dados por confirmar', 'pedidos importados: confirmar para o relógio contar', ab.filter(x => x.r.porConfirmar).length, 'warn', () => irPara('confirmar')],
+      ['Clientes com fatura por cobrar', 'recibo em falta há mais de 30 dias (SAF-T)', conta('cobrar'), 'bad', () => irCli('cobrar')],
+      ['Clientes com manutenção a vencer', 'no ritmo do contrato ou um ano depois da instalação', conta('manutencao'), 'warn', () => irCli('manutencao')],
+      ['Clientes a esfriar', 'passaram do seu ritmo sem nova fatura', conta('frio'), 'warn', () => irCli('frio')],
+    ];
+  }
+  const irCli = m => { cliEstado = m; F('cliEstado').value = m; cliMotivo = m; setTab('clientes'); renderClientes(); };
+
+  function renderPipeline(all) {
+    const box = F('fugas');
+    if (status !== 'ok') { box.replaceChildren(stateMsg()); F('fugasCount').textContent = ''; F('fugaBadge').textContent = ''; F('board').replaceChildren(); F('funil').replaceChildren(stateMsg()); return; }
+    const cli = clientes();
+    const lista = fugas(all, cli);
+    const total = lista.reduce((t, f) => t + f[2], 0), graves = lista.filter(f => f[3] === 'bad').reduce((t, f) => t + f[2], 0);
+    F('fugasCount').textContent = total ? `${total} ${total === 1 ? 'coisa' : 'coisas'} a tratar` : 'nada a tratar';
+    F('fugaBadge').textContent = graves ? String(graves) : '';
+    box.replaceChildren(...lista.map(([t, sub, n, tone, go]) => h('button',{class:'fuga ' + (n ? tone : 'ok'), type:'button', disabled: n ? null : true, onclick: go},
+      h('span',{class:'fi', 'aria-hidden':'true'}, n ? String(n) : svg('<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>')),
+      h('span',{class:'ft'}, t, h('small',null, sub)), h('span',{class:'fn'}, n ? 'ver' : ''))));
+    // Os nove passos com os pedidos
+    const ab = all.filter(x => ABERTOS.includes(x.r.estado)).sort(ordem);
+    F('boardCount').textContent = `${ab.length} abertos · ${eur(ab.reduce((t, x) => t + valorN(x.r), 0))} em orçamentos`;
+    F('board').replaceChildren(...PASSOS.map(([k, num, titulo]) => {
+      const xs = ab.filter(x => x.r.estado === k);
+      const v = xs.reduce((t, x) => t + valorN(x.r), 0);
+      return h('div',{class:'col'},
+        h('div',{class:'col-h'}, h('div',{class:'cn'}, h('span',null, num ? h('span',{class:'cp'}, num) : null, ESTADOS[k].l.replace(', à espera do pagamento', '')), h('b',null, String(xs.length))),
+          h('div',{class:'cr'}, `${titulo}${regraPasso(k) ? ' · ' + regraPasso(k) : ''}${v ? ' · ' + eur(v) : ''}`)),
+        h('div',{class:'col-b'}, xs.length ? xs.map(({r, rel, sem, pe}) => {
+          const falta = k === 'em_execucao' ? obraFalta(r) : null;
+          return h('button',{class:`kcard u-${pe.p}`, type:'button', style:`--tone:var(--${semTone(sem)})`, onclick:() => openSheet(r.id)},
+            h('span',{class:'kn'}, h('span',{class:'kp'}, pe.p), r.cliente || 'Sem nome'),
+            h('span',{class:'ka'}, falta ? `Falta: ${falta[1].toLowerCase()}` : `${r.dono || 'Sem dono'} · ${r.proximaAcao || 'sem ação'}`),
+            h('span',{class:'kt'}, r.porConfirmar ? 'Por confirmar' : tempoTxt(r, rel)));
+        }) : h('p',{class:'vazio'}, 'Nenhum pedido neste passo.')));
+    }));
+    // Funil
+    const d90 = addDays(today(), -90);
+    const novos = rows.filter(r => dataPedidoDe(r) >= d90);
+    const enviados = rows.filter(r => r.num && (r.dataEnvio || '') >= d90);
+    const ganhos = rows.filter(r => { const d = dataGanho(r); return d && d >= d90; });
+    const perdidos = rows.filter(r => r.estado === 'perdido' && (r.dataFecho || '') >= d90);
+    const ms = mesesOrd(), orcsFat = new Set(ms.flatMap(m => faturacao[m].docs.map(d => d.orc).filter(Boolean)));
+    const faturados = ganhos.filter(r => r.fatura || orcsFat.has(r.num));
+    const abertosAntigos = rows.filter(r => ABERTOS.includes(r.estado) && dataPedidoDe(r) < d90).length;
+    const base = Math.max(1, novos.length);
+    const step = (l, n, sub) => h('div',{class:'fstep'}, h('span',{class:'k-l'}, l), h('span',{class:'k-v'}, String(n), novos.length ? h('small',null, `${Math.round(100 * n / base)}%`) : null), h('span',{class:'fb'}, h('i',{style:`width:${100 * n / base}%`})), h('span',{class:'k-s'}, sub));
+    fill(F('funil'), h('div',{class:'funil'},
+      step('Pedidos registados', novos.length, `${novos.filter(r => ABERTOS.includes(r.estado)).length} ainda abertos`),
+      step('Orçamentos enviados', enviados.length, eur(enviados.reduce((t, r) => t + valorN(r), 0)) + ' s/IVA'),
+      step('Ganhos', ganhos.length, eur(ganhos.reduce((t, r) => t + valorN(r), 0)) + ' s/IVA'),
+      step('Faturados', faturados.length, ms.length ? 'com fatura no registo ou no SAF-T' : 'junta os SAF-T para confirmar'),
+      step('Perdidos', perdidos.length, perdidos.length ? Object.entries(perdidos.reduce((a, r) => { a[r.motivo || 'sem motivo'] = (a[r.motivo || 'sem motivo'] || 0) + 1; return a; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([m, n]) => `${m} ${n}`).join(' · ') : 'nenhum')),
+      abertosAntigos ? h('p',{class:'note', style:'padding:10px 12px'}, `${abertosAntigos} pedidos abertos com mais de 90 dias ficam fora do funil mas não da lista de fugas.`) : null);
+  }
 
   /* ---------- Prazos e Drive ---------- */
   function renderPrazos() {
@@ -1682,7 +1976,7 @@ body.app-on{background:var(--surface)}
     F('nextNum').textContent = status === 'ok' ? nextNumber() : 'ORC…';
     const verm = all.filter(x => x.sem === 'vermelho').length;
     F('redBadge').textContent = verm ? String(verm) : '';
-    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderExport(); renderEquipa(); renderFaturacao(); renderClientes();
+    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderExport(); renderEquipa(); renderFaturacao(); renderClientes(); renderPipeline(all);
     F('btnNovoTop').hidden = F('railNovo').hidden = !(canWrite && status === 'ok');
     // Não redesenha a folha aberta enquanto há um formulário a meio.
     if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
@@ -1703,7 +1997,8 @@ body.app-on{background:var(--surface)}
       novo:'Responder ao cliente', visita_por_marcar:'Combinar a data da visita', visita_marcada:'Fazer a visita',
       orcamento_por_fazer: extra && extra.revisao ? 'Rever e enviar o orçamento' : 'Fazer e enviar o orçamento',
       espera_cliente: extra && extra.decisao ? 'Ligar ao cliente se não responder' : 'Voltar a pedir ao cliente o que falta',
-      espera_fornecedor:'Perguntar ao fornecedor pela peça', em_execucao:'Acabar o trabalho',
+      espera_fornecedor:'Perguntar ao fornecedor pela peça', em_execucao:'Abrir a folha de obra e encomendar o equipamento',
+      por_faturar:'Emitir a fatura e registar o número', faturado:'Confirmar o pagamento',
     }[para] || '';
   }
   // Data da próxima ação proposta: quando vence o prazo do estado de destino.
@@ -1760,8 +2055,16 @@ body.app-on{background:var(--surface)}
         add('seg','Perguntei ao fornecedor', null, {seguimento:true});
         break;
       case 'em_execucao':
-        add('concl','Trabalho concluído','resolvido',{fecho:true, motivo:'Concluído'});
+        add('ri','Instalação feita: RI assinado','por_faturar',{ri:true});
         add('vis','Marcar a obra ou outra visita','visita_por_marcar');
+        add('concl','Concluído sem fatura a emitir (garantia, contrato)','resolvido',{fecho:true, motivo:'Concluído sem fatura'});
+        break;
+      case 'por_faturar':
+        add('fat','Fatura emitida','faturado',{fatura:true});
+        break;
+      case 'faturado':
+        add('pago','Pagamento recebido','resolvido',{fecho:true, motivo:'Pago'});
+        add('seg','Lembrei o pagamento', null, {seguimento:true});
         break;
       case 'resolvido': case 'perdido':
         // Reabre-se até 30 dias depois do fecho; depois disso é um pedido novo.
@@ -1836,6 +2139,7 @@ body.app-on{background:var(--surface)}
         T.length ? h('div',{class:'trans'}, T.map(t => h('button',{class:'btn' + (t.fecho || t.pausa || t.seguimento ? ' btn-ghost' : ''), type:'button', onclick:() => abrirTrans(t)}, t.label))) : null,
         aberto ? h('div',{class:'trans'}, h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:registarContacto}, 'Registar contacto com o cliente')) : null));
     }
+    if (r.estado === 'em_execucao' || (r.estado === 'espera_fornecedor' && r.esperaDe === 'em_execucao')) blocos.push(formObra(r));
     blocos.push(formDados(r));
     const hist = (r.historico || []).slice().reverse();
     if (hist.length) blocos.push(h('div',{class:'block'}, h('h3',null,'Histórico'), h('ul',{class:'hist'}, hist.map(x => h('li',null, h('span',{class:'when'}, x.em ? quando(new Date(x.em)) : ''), h('span',null, x.texto))))));
@@ -1851,6 +2155,9 @@ body.app-on{background:var(--surface)}
     const para = t.para;
     const extra = {decisao: t.decisao, revisao: t.revisao, acumuladoH: t.retoma ? r.acumuladoPausa : 0};
     const els = [h('h3',null, t.soAcao ? 'Mudar a próxima ação' : t.seguimento ? t.label : `Passar a ${ESTADOS[para].l}`)];
+    if (t.ri) els.push(h('div',{class:'fields'}, campo('t-ri','Data do RI', inp('t-ri', today(), {type:'date'})), campo('t-ri-n','N.º do RI (opcional)', inp('t-ri-n', (r.obra && r.obra.riNum) || ''))));
+    if (t.fatura) els.push(h('div',{class:'fields'}, campo('t-fat-n','N.º da fatura', inp('t-fat-n', r.fatura || '', {placeholder:'FT 2600/000082'})), campo('t-fat-d','Data da fatura', inp('t-fat-d', today(), {type:'date'})),
+      campo('t-fat-v','Valor s/IVA (€)', inp('t-fat-v', r.valor != null ? String(r.valor).replace('.',',') : '', {inputmode:'decimal'}))));
     if (t.pedeVisita) els.push(h('div',{class:'fields'}, campo('t-vis','Data da visita', inp('t-vis', t.remarcar ? r.dataVisita : '', {type:'date', onchange: ev => { const d = F('t-data'); if (d && ev.target.value) d.value = ev.target.value; }})),
       campo('t-vis-h','Hora (opcional)', inp('t-vis-h', r.horaVisita || '', {type:'time'}))));
     if (t.envio) els.push(h('div',{class:'fields'},
@@ -1911,7 +2218,7 @@ body.app-on{background:var(--surface)}
     }
     if (t.seguimento) {
       novo.seguimentos = (r.seguimentos || 0) + 1; novo.ultimoSeguimento = agora.toISOString();
-      if (r.estado === 'espera_cliente') novo.ultimoContacto = agora.toISOString();
+      if (r.estado === 'espera_cliente' || r.estado === 'faturado') novo.ultimoContacto = agora.toISOString();
       hist.push(nota(`${novo.seguimentos}.º seguimento (${novo.dono})`));
       return gravar(r.id, novo, `${novo.seguimentos}.º seguimento registado`);
     }
@@ -1921,6 +2228,15 @@ body.app-on{background:var(--surface)}
       novo.ultimoContacto = agora.toISOString();
       // Remarcar não muda de estado: nem escala nem mexe no relógio.
       if (t.remarcar) { novo.remarcacoes = (r.remarcacoes || 0) + 1; hist.push(nota(`Visita remarcada para ${ddmm(dv)}`)); return gravar(r.id, novo, 'Visita remarcada'); }
+    }
+    if (t.ri) {
+      const d = val('t-ri'); if (!d) return erroT('Indica a data do RI.');
+      novo.obra = {...(r.obra || {}), riEm: d, riNum: val('t-ri-n') || null};
+    }
+    if (t.fatura) {
+      const n = val('t-fat-n'), d = val('t-fat-d'); if (!n || !d) return erroT('Indica o número e a data da fatura.');
+      const v = parseValor(val('t-fat-v')); if (Number.isNaN(v)) return erroT('O valor não é um número.');
+      Object.assign(novo, {fatura: n, dataFatura: d, ...(v != null ? {valor: v} : {})});
     }
     if (t.envio) {
       const n = val('t-num').toUpperCase(), m = /^ORC(\d{4})_(\d{4})$/.exec(n);
@@ -1949,7 +2265,7 @@ body.app-on{background:var(--surface)}
     else if (t.decisao) { novo.esperaDe = r.estado; novo.esperaMotivo = 'decisao'; novo.acumuladoPausa = 0; novo.acumuladoH = 0; }
     else if (t.retoma) { novo.acumuladoH = Number(r.acumuladoPausa) || 0; novo.esperaDe = null; novo.esperaMotivo = null; novo.acumuladoPausa = 0; }
     else { novo.acumuladoH = 0; if (!ESPERAS.includes(t.para)) { novo.esperaDe = null; novo.esperaMotivo = null; novo.acumuladoPausa = 0; } }
-    if (ESPERAS.includes(t.para)) { novo.seguimentos = 0; novo.ultimoSeguimento = null; }
+    if (ESPERAS.includes(t.para) || t.para === 'faturado') { novo.seguimentos = 0; novo.ultimoSeguimento = null; }
     if (t.revisao) novo.revisoes = (r.revisoes || 0) + 1;
     if (t.reabrir) { novo.reaberturas = (r.reaberturas || 0) + 1; novo.motivo = null; novo.dataFecho = null; }
     if (t.ganho) novo.dataAceite = today();
@@ -1996,6 +2312,44 @@ body.app-on{background:var(--surface)}
       if (F('t-err')) erroT(m); else toast(m);
       return false;
     } finally { saving = false; if (ok) ok.disabled = false; }
+  }
+
+
+  /* ---------- Obra: passos 6 a 8 do processo (adjudicação, preparação, instalação) ---------- */
+  const OBRA_PASSOS = [
+    ['adjudicadoEm', 'Adjudicado por escrito', 'opção, valor e condições de pagamento confirmados; folha de obra aberta', 'date'],
+    ['encomendadoEm', 'Equipamento encomendado', 'nota de encomenda no próprio dia da adjudicação', 'date'],
+    ['entregaPrevista', 'Entrega prevista pelo fornecedor', 'perguntar a data ao fornecedor', 'date'],
+    ['materialEm', 'Equipamento e material recebidos', 'tubo, suportes, cabo, bomba de condensados se preciso', 'date'],
+    ['dataInstalacao', 'Instalação marcada', 'data com o cliente; técnico e ajudante (1 a 2 dias por máquina); acessos', 'date'],
+    ['confirmadoVespera', 'Confirmado com o cliente na véspera', '', 'check'],
+  ];
+  const obraFalta = r => OBRA_PASSOS.find(([k]) => !(r.obra && r.obra[k]));
+  function formObra(r) {
+    const o = r.obra || {};
+    const falta = obraFalta(r);
+    const linhas = OBRA_PASSOS.map(([k, l, aux, tipo]) => h('div',{class:'f'},
+      tipo === 'check' ? h('label',{class:'check'}, h('input',{type:'checkbox', id:'o-' + k, checked: o[k] ? true : null}), l)
+        : [h('label',{for:'o-' + k}, l), inp('o-' + k, o[k] || '', {type:'date'})],
+      aux ? h('span',{class:'aux'}, aux) : null));
+    return h('div',{class:'block'}, h('h3',null, 'Obra: adjudicação, preparação e instalação'),
+      h('p',{class:'hint' + (falta ? ' alert' : '')}, falta ? `Falta: ${falta[1].toLowerCase()}.` : 'Tudo pronto: no dia da instalação, «Instalação feita: RI assinado» passa a Por faturar.'),
+      h('div',{class:'fields'}, h('div',{class:'f'}, h('label',{for:'o-equipa'}, 'Técnico e ajudante'), inp('o-equipa', o.equipa || '')), h('div',{class:'f'}, h('label',{for:'o-fornecedor'}, 'Fornecedor'), inp('o-fornecedor', o.fornecedor || '')), ...linhas),
+      canWrite ? h('div',{class:'row-end'}, h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:guardarObra}, 'Guardar obra')) : null);
+  }
+  async function guardarObra() {
+    const r = cur(); if (!r) return;
+    const novo = JSON.parse(JSON.stringify(r)); delete novo.id;
+    const o = {...(r.obra || {})};
+    for (const [k, , , tipo] of OBRA_PASSOS) o[k] = tipo === 'check' ? (F('o-' + k).checked ? today() : null) : (val('o-' + k) || null);
+    o.equipa = val('o-equipa') || null; o.fornecedor = val('o-fornecedor') || null;
+    novo.obra = o;
+    const antes = obraFalta(r), depois = obraFalta({obra: o});
+    novo.historico = (novo.historico || []).slice(-60);
+    if (antes && antes !== depois) novo.historico.push(nota(depois ? `Obra: ${antes[1].toLowerCase()} feito; falta ${depois[1].toLowerCase()}` : 'Obra: tudo pronto para a instalação'));
+    // A data da instalação passa a ser a próxima ação, para o pedido ficar amarelo nesse dia.
+    if (o.dataInstalacao && o.dataInstalacao !== (r.obra || {}).dataInstalacao) { novo.proximaAcao = 'Instalar e trazer o RI assinado'; novo.dataProximaAcao = o.dataInstalacao; }
+    await gravar(r.id, novo, 'Obra guardada');
   }
 
   /* ---------- Dados do pedido ---------- */
