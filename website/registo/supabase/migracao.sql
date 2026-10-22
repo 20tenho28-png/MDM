@@ -143,3 +143,24 @@ begin
     alter publication supabase_realtime add table public.config;
   end if;
 end $$;
+
+-- Faturação (SAF-T): um resumo por mês dos ficheiros DadosFat_AAAA-MM (faturas, notas de crédito e recibos), lido pela
+-- página «Faturação» do registo. Só o que a página mostra: número, data, cliente, valores e a descrição; sem NIF, morada
+-- nem contactos. Correr este bloco outra vez não estraga nada.
+create table if not exists public.faturacao (
+  mes text primary key,
+  dados jsonb not null,
+  atualizado timestamptz not null default now(),
+  atualizado_por text
+);
+alter table public.faturacao enable row level security;
+drop policy if exists "faturacao: colaboradores" on public.faturacao;
+create policy "faturacao: colaboradores" on public.faturacao
+  for all to authenticated
+  using (public.autorizado()) with check (public.autorizado());
+do $$
+begin
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'faturacao') then
+    alter publication supabase_realtime add table public.faturacao;
+  end if;
+end $$;
