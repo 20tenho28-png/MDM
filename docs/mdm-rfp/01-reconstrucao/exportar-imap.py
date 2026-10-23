@@ -9,6 +9,7 @@ Uso:
   python3 exportar-imap.py --servidor <servidor IMAP> --listar                 # mostra as pastas da conta
   python3 exportar-imap.py --servidor <servidor IMAP> --desde 2026-07-01 --ate 2026-09-30
   python3 exportar-imap.py --servidor <servidor IMAP> --pastas "INBOX,INBOX.Pedidos" --saida entrada/imap-comercial.mbox
+  python3 exportar-imap.py --servidor <servidor IMAP> --starttls --listar      # se o fornecedor só der a porta 143
 
 O servidor, a porta e o utilizador estão nas definições da conta no Outlook ou no telemóvel (Conta → Servidor de
 entrada, IMAP). Só biblioteca padrão.
@@ -22,8 +23,14 @@ def data_imap(d):
     d = dt.date.fromisoformat(d)
     return f"{d.day:02d}-{MESES[d.month - 1]}-{d.year}"
 
-def ligar(servidor, porta, utilizador, senha):
-    imap = imaplib.IMAP4_SSL(servidor, porta, ssl_context=ssl.create_default_context())
+def ligar(servidor, porta, utilizador, senha, starttls=False):
+    """Porta 993 com SSL (o normal); ou porta 143 com STARTTLS, se o fornecedor só der essa. Nunca sem cifra."""
+    ctx = ssl.create_default_context()
+    if starttls:
+        imap = imaplib.IMAP4(servidor, porta)
+        imap.starttls(ssl_context=ctx)
+    else:
+        imap = imaplib.IMAP4_SSL(servidor, porta, ssl_context=ctx)
     imap.login(utilizador, senha)
     return imap
 
@@ -70,7 +77,8 @@ def exportar(imap, pastas, desde, ate, destino):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--servidor", required=True, help="servidor IMAP de entrada da conta")
-    ap.add_argument("--porta", type=int, default=993)
+    ap.add_argument("--porta", type=int, default=None, help="993 por omissão; 143 com --starttls")
+    ap.add_argument("--starttls", action="store_true", help="para servidores que só aceitam a porta 143 com STARTTLS")
     ap.add_argument("--utilizador", default="mdmassist@mdmassist.com")
     ap.add_argument("--pastas", default="INBOX", help="pastas separadas por vírgula (por omissão só a caixa de entrada)")
     ap.add_argument("--desde", default="2026-07-01"); ap.add_argument("--ate", default="2026-09-30")
@@ -78,7 +86,15 @@ def main(argv=None):
     ap.add_argument("--listar", action="store_true", help="só mostra as pastas da conta")
     a = ap.parse_args(argv)
     senha = os.environ.get("MDM_IMAP_SENHA") or getpass.getpass(f"Palavra-passe de {a.utilizador}: ")
-    imap = ligar(a.servidor, a.porta, a.utilizador, senha)
+    porta = a.porta or (143 if a.starttls else 993)
+    try:
+        imap = ligar(a.servidor, porta, a.utilizador, senha, a.starttls)
+    except imaplib.IMAP4.error as e:
+        sys.exit(f"O servidor recusou a entrada ({e}). Confirma o utilizador e a palavra-passe; se a conta tiver verificação em dois passos, cria uma palavra-passe de aplicação no painel do email.")
+    except ssl.SSLCertVerificationError:
+        sys.exit("O certificado não corresponde a este nome de servidor. Usa o nome exato que o fornecedor indica para o IMAP (não um atalho do domínio).")
+    except OSError as e:
+        sys.exit(f"Não foi possível ligar a {a.servidor}:{porta} ({e}). Confirma o nome do servidor e a porta; se 993 não responder, experimenta --starttls (porta 143).")
     try:
         if a.listar:
             for p in listar(imap): print(p)
