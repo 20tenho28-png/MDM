@@ -10,7 +10,10 @@
    H. o menu dos ecrãs estreitos: abre, foca, fecha com Escape e devolve o foco;
    I. o comparador antes/depois com o rato e com o teclado;
    J. teclado: a primeira tabulação é «Saltar para o conteúdo»; a entrada ao fazer scroll acaba toda visível;
-      todas as imagens carregam; o menu marca a página atual.
+      todas as imagens carregam; o menu marca a página atual; obras.html mostra todas as obras, sem filtros;
+   K. movimento reduzido; nenhuma animação sem fim;
+   L. o sistema visual: uma margem esquerda (h1 do hero, logótipo e cabeçalhos de secção no mesmo x), contraste de 4,5:1
+      nos botões e no texto da faixa clay, o anel de foco da cor da superfície, campos com 16 px e etiquetas com 13 px.
    Precisa do Playwright, fora das dependências (localmente, NODE_PATH para onde ele está). Uso, a partir de melperfaz/:
      NODE_PATH=/caminho/para/node_modules node tests/browser.mjs */
 import { createRequire } from 'node:module';
@@ -151,7 +154,7 @@ try {
     ok(await page.evaluate(() => location.hash === '#contacto'), 'E: e leva ao formulário');
     const obra = OBRAS[0];
     await page.goto(`${srv.base}/obras/${obra.slug}.html`, { waitUntil: 'networkidle' });
-    await Promise.all([page.waitForURL(/index\.html\?tipo=/, { waitUntil: 'domcontentloaded' }), page.click('.cta-faixa-acoes a.btn:has-text("Pedir Orçamento")')]);
+    await Promise.all([page.waitForURL(/index\.html\?tipo=/, { waitUntil: 'domcontentloaded' }), page.click('.cta .acoes a.btn:has-text("Pedir Orçamento")')]);
     ok(/\?tipo=.*#contacto$/.test(page.url()), 'E: a ficha leva a index.html?tipo=…#contacto', page.url());
     await page.waitForTimeout(300);
     ok(await page.inputValue('#qTipo') === 'Reabilitação de Edifícios', 'E: o tipo vem do endereço (?tipo=reabilitacao)');
@@ -187,7 +190,7 @@ try {
       await page.waitForTimeout(250);
       const sw = await page.evaluate(() => document.documentElement.scrollWidth);
       ok(sw <= largura, `G: ${f} a ${largura} px não desliza para o lado`, sw);
-      ok(await page.isVisible('.wa-float'), `G: ${f} a ${largura} px tem o botão WhatsApp`);
+      ok(await page.isVisible('.rodape a[href^="https://wa.me/"]'), `G: ${f} a ${largura} px tem o WhatsApp no rodapé`);
     }
     ok(page.erros.length === 0, `G: sem erros a ${largura} px`, page.erros);
     await ctx.close();
@@ -244,13 +247,8 @@ try {
     ok(page.erros.length === 0, 'J: sem erros', page.erros);
     await page.goto(srv.base + '/obras.html', { waitUntil: 'networkidle' });
     ok(await page.getAttribute('.navlinks a[data-nav-item="obras"]', 'aria-current') === 'page', 'J: o menu marca «Obras»');
-    await page.click('[data-filtro="fachadas"]');
-    const vis = await page.evaluate(() => ({ visiveis: Array.from(document.querySelectorAll('[data-obras] .pg')).filter(e => !e.hidden).length, pressed: document.querySelector('[data-filtro="fachadas"]').getAttribute('aria-pressed'), conta: document.querySelector('[data-filtros-conta]').textContent }));
-    ok(vis.visiveis === OBRAS.filter(o => o.cat === 'fachadas').length && vis.pressed === 'true' && /^1 obra$/.test(vis.conta), 'J: o filtro «Fachadas» mostra só essas obras', vis);
-    await page.click('[data-filtro="todas"]');
-    ok(await page.evaluate(() => document.querySelectorAll('[data-obras] .pg:not([hidden])').length) === OBRAS.length, 'J: «Todas» volta a mostrar tudo');
-    await page.goto(srv.base + '/obras.html?cat=acabamentos', { waitUntil: 'networkidle' });
-    ok(await page.evaluate(() => document.querySelectorAll('[data-obras] .pg:not([hidden])').length) === OBRAS.filter(o => o.cat === 'acabamentos').length, 'J: ?cat= no endereço filtra');
+    const todas = await page.evaluate(() => ({ chips: document.querySelectorAll('[data-filtro], .chip').length, vis: Array.from(document.querySelectorAll('[data-obras] .pg')).filter(e => e.getBoundingClientRect().height > 0).length }));
+    ok(todas.chips === 0 && todas.vis === OBRAS.length, 'J: obras.html mostra todas as obras, sem chips de filtro', todas);
     await ctx.close();
   }
 
@@ -260,6 +258,61 @@ try {
     await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(200);
     ok(await page.evaluate(() => Array.from(document.querySelectorAll('.reveal')).every(e => getComputedStyle(e).opacity === '1')), 'K: com movimento reduzido tudo aparece logo');
+    await ctx.close();
+  }
+  {
+    const { ctx, page } = await pagina();
+    for (const f of ['/', '/obras.html', `/obras/${OBRAS[0].slug}.html`, '/privacidade.html', '/404.html']) {
+      await page.goto(srv.base + f, { waitUntil: 'networkidle' });
+      const sem = await page.evaluate(() => document.getAnimations().filter(a => a.effect && a.effect.getTiming().iterations === Infinity).length);
+      ok(sem === 0, `K: ${f} sem animações infinitas`, sem);
+    }
+    await ctx.close();
+  }
+
+  /* L. o sistema visual */
+  {
+    // contraste WCAG entre o texto e o primeiro fundo opaco por baixo (o do próprio elemento ou o de um antepassado)
+    const contrastes = () => {
+      const rgb = s => { const m = s.match(/[\d.]+/g).map(Number); return { r: m[0], g: m[1], b: m[2], a: m.length > 3 ? m[3] : 1 }; };
+      const lum = c => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
+      const fundo = el => { for (let e = el; e; e = e.parentElement) { const c = rgb(getComputedStyle(e).backgroundColor); if (c.a > 0.5) return c; } return { r: 255, g: 255, b: 255 }; };
+      const razao = el => { const a = lum(rgb(getComputedStyle(el).color)), b = lum(fundo(el)); return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05); };
+      const comTexto = el => Array.from(el.childNodes).some(n => n.nodeType === 3 && n.textContent.trim());
+      const alvos = [...document.querySelectorAll('.btn'), ...Array.from(document.querySelectorAll('.s-clay *')).filter(e => comTexto(e) && !e.closest('.s-paper, .so-leitor'))];
+      return alvos.filter(e => e.getClientRects().length).map(e => ({ t: e.textContent.trim().slice(0, 30), c: Math.round(razao(e) * 100) / 100 }));
+    };
+    for (const largura of [1280, 390]) {
+      const { ctx, page } = await pagina({ viewport: { width: largura, height: 900 } });
+      await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
+      const x = await page.evaluate(() => {
+        const l = e => Math.round(e.getBoundingClientRect().left);
+        return { logo: l(document.querySelector('.topo .logo')), h1: l(document.querySelector('.hero h1')), secs: Array.from(document.querySelectorAll('.sec-head')).map(l) };
+      });
+      ok(x.h1 === x.logo && x.secs.every(s => s === x.logo), `L: a ${largura} px o h1 do hero e os cabeçalhos de secção começam no x do logótipo`, x);
+      const campos = await page.evaluate(() => Array.from(document.querySelectorAll('input:not([type=hidden]), select, textarea')).map(e => parseFloat(getComputedStyle(e).fontSize)));
+      ok(campos.length && campos.every(v => v >= 16), `L: a ${largura} px todos os campos com 16 px ou mais`, campos);
+      const etiquetas = await page.evaluate(() => Array.from(document.querySelectorAll('.eyebrow, .cat, .btn, .ba-tag, .tag-card .l, .foot-h, .cta-phone-l')).filter(e => e.getClientRects().length).map(e => parseFloat(getComputedStyle(e).fontSize)));
+      ok(etiquetas.every(v => v >= 13), `L: a ${largura} px etiquetas com 13 px ou mais`, etiquetas);
+      await ctx.close();
+    }
+    const { ctx, page } = await pagina();
+    for (const f of ['/', '/obras.html', `/obras/${OBRAS[0].slug}.html`, '/obrigado.html', '/404.html']) {
+      await page.goto(srv.base + f, { waitUntil: 'networkidle' });
+      await page.evaluate(() => document.querySelectorAll('.reveal').forEach(e => e.classList.add('in')));
+      await page.waitForTimeout(800);
+      const fracos = (await page.evaluate(contrastes)).filter(c => c.c < 4.5);
+      ok(fracos.length === 0, `L: ${f} botões e faixa clay com 4,5:1 ou mais`, fracos);
+    }
+    // o anel de foco: ink sobre paper (hero) e sobre clay (faixa de contacto), amber sobre ink (obras)
+    await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
+    const anel = async sel => { await page.focus(sel); return page.evaluate(() => { const s = getComputedStyle(document.activeElement); return s.outlineStyle + ' ' + s.outlineWidth + ' ' + s.outlineColor; }); };
+    await page.keyboard.press('Tab'); await page.keyboard.press('Shift+Tab');
+    ok(await anel('.hero .acoes .btn') === 'solid 3px rgb(27, 37, 64)', 'L: foco ink no hero (paper)', await anel('.hero .acoes .btn'));
+    ok(await anel('#obras .work-mais .btn') === 'solid 3px rgb(240, 168, 56)', 'L: foco amber nas obras (ink)', await anel('#obras .work-mais .btn'));
+    ok(await anel('#contacto .cta-phone') === 'solid 3px rgb(27, 37, 64)', 'L: foco ink na faixa clay', await anel('#contacto .cta-phone'));
+    const btn = await page.evaluate(() => { const b = getComputedStyle(document.querySelector('.hero .btn')), g = document.querySelector('.hero .btn-ghost'); return { bg: b.backgroundColor, cor: b.color, alturas: [document.querySelector('.hero .btn').offsetHeight, g.offsetHeight] }; });
+    ok(btn.bg === 'rgb(224, 138, 30)' && btn.cor === 'rgb(27, 37, 64)' && btn.alturas[0] === btn.alturas[1], 'L: «Pedir Orçamento» ink sobre clay e o ghost com a mesma altura', btn);
     await ctx.close();
   }
 } finally {

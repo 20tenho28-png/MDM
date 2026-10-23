@@ -1,18 +1,20 @@
 <!--meta {"file": "obrigado.html", "title": "Pedido recebido · Melperfaz", "description": "O seu pedido de orçamento chegou à Melperfaz. Se for urgente ou quiser juntar fotografias, ligue ou fale connosco por WhatsApp.", "nav": "", "robots": "noindex", "wa": "pedido", "css": ["pag-paginas.css"]} -->
 <!-- Página de agradecimento do formulário (Netlify Forms, action de src/partials/contacto.html). Mostrada pelo Netlify depois
      de um envio sem JavaScript; com JavaScript a confirmação aparece no próprio formulário. Fora do mapa do site (noindex). -->
-<section class="sec pag-simples" aria-labelledby="obgT">
-  <div class="wrap pag-simples-in">
-    <span class="eyebrow">Pedido enviado</span>
-    <h1 id="obgT">Obrigado. Entraremos em contacto no prazo de um dia útil.</h1>
-    <p class="lead">Se tiver fotografias do local, envie-as por WhatsApp: ajudam a preparar o orçamento. Para algo urgente, ligue {{ site.phone }}.</p>
-    <div class="pag-acoes">
+<section class="sec s-paper pag-curta" aria-labelledby="obgT">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Pedido enviado</span>
+      <h1 id="obgT">Obrigado. Entraremos em contacto no prazo de um dia útil.</h1>
+      <p class="lead">Se tiver fotografias do local, envie-as por WhatsApp: ajudam a preparar o orçamento. Para algo urgente, ligue {{ site.phone }}.</p>
+    </div>
+    <div class="acoes">
       <a class="btn" href="{{wa pedido}}" target="_blank" rel="noopener">Enviar Fotografias por WhatsApp</a>
       <a class="btn btn-ghost" href="{{ site.phoneHref }}">Ligar {{ site.phone }}</a>
     </div>
-    <nav class="pag-links" aria-label="Continuar no site">
-      <a href="{{ root }}index.html">Voltar ao início<span aria-hidden="true"> →</span></a>
-      <a href="{{ root }}obras.html">Ver as obras<span aria-hidden="true"> →</span></a>
+    <nav class="links" aria-label="Continuar no site">
+      <a class="link-seta" href="{{ root }}index.html">Voltar ao início<span aria-hidden="true"> →</span></a>
+      <a class="link-seta" href="{{ root }}obras.html">Ver as obras<span aria-hidden="true"> →</span></a>
     </nav>
   </div>
 </section>

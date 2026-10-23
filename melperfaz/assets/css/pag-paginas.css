@@ -1,48 +1,24 @@
-/* Páginas simples (obrigado.html, 404.html) e a política de privacidade */
-.pag-simples { min-height: 60vh; }
-.pag-simples-in { max-width: 720px; }
-.pag-simples h1 { font-size: clamp(2rem, 4.5vw, 3.2rem); margin-bottom: var(--space-22); }
-.pag-simples .lead { font-size: 1.16rem; color: var(--muted); margin-bottom: var(--space-32); }
-.pag-acoes { display: flex; flex-wrap: wrap; gap: var(--space-16); margin-bottom: var(--space-44); }
-.pag-links { display: flex; flex-direction: column; gap: var(--space-12); }
-.pag-links a { color: var(--ink); font-weight: 600; text-decoration: none; }
-.pag-links a:hover { color: var(--clay); text-decoration: underline; text-underline-offset: 3px; }
-
-/* privacidade: índice à esquerda, texto à direita */
-.migalhas { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: .84rem; color: var(--bone-60); margin-bottom: var(--space-32); }
-.migalhas a { color: var(--bone-70); text-decoration: none; }
-.migalhas a:hover { color: var(--bone); text-decoration: underline; text-underline-offset: 3px; }
-.migalhas [aria-current] { color: var(--bone); }
-.pag-cab { padding-top: var(--space-50); padding-bottom: var(--space-64); }
-.pag-cab .sec-head { margin-bottom: 0; max-width: 760px; }
+/* A política de privacidade: índice à esquerda, texto à direita. O cabeçalho de página, as migalhas e a prosa vivem
+   em site.css; obrigado.html e 404.html só usam componentes de site.css. */
 .priv-grelha { display: grid; grid-template-columns: 260px 1fr; gap: var(--space-80); align-items: start; }
-.priv-indice { position: sticky; top: calc(var(--nav-height) + 24px); }
-.priv-indice-t { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: var(--space-12); }
+.priv-grelha > * { width: 100%; min-width: 0; }
+.priv-indice { position: sticky; top: calc(var(--nav-height) + var(--space-22)); }
+.priv-indice-t { font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: var(--space-12); }
 .priv-indice ol { list-style: none; counter-reset: idx; }
-.priv-indice li { counter-increment: idx; padding: 6px 0; border-bottom: var(--border-hairline) solid var(--line); }
-.priv-indice a { color: var(--ink); text-decoration: none; font-size: .92rem; }
-.priv-indice a::before { content: counter(idx, decimal-leading-zero) " "; font-family: var(--font-serif); color: var(--clay); font-weight: 600; margin-right: 6px; }
-.priv-indice a:hover { color: var(--clay); }
-.prosa { max-width: 72ch; }
-.prosa h2 { font-size: 1.7rem; margin: var(--space-44) 0 var(--space-16); }
-.prosa h2:first-child { margin-top: 0; }
-.prosa h3 { font-size: 1.2rem; margin: var(--space-32) 0 var(--space-12); }
-.prosa p, .prosa li { color: var(--muted); font-size: 1rem; }
-.prosa p + p { margin-top: var(--space-12); }
-.prosa ul { padding-left: 1.2em; }
-.prosa li + li { margin-top: 8px; }
-.prosa a { color: var(--ink); text-underline-offset: 3px; }
-.prosa strong { color: var(--ink); }
-.priv-ficha { display: grid; grid-template-columns: 130px 1fr; gap: 10px var(--space-18); border: var(--border-hairline) solid var(--line); padding: var(--space-18) var(--space-22); background: var(--bone); margin-bottom: var(--space-16); }
+.priv-indice li { counter-increment: idx; border-bottom: var(--border-hairline) solid var(--line); }
+.priv-indice a { display: flex; align-items: center; min-height: var(--alvo); color: var(--ink); text-decoration: none; font-size: var(--fs-body); }
+.priv-indice a::before { content: counter(idx, decimal-leading-zero); font-family: var(--font-serif); color: var(--muted); font-weight: 600; margin-right: var(--space-12); }
+.priv-indice a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.priv-ficha { display: grid; grid-template-columns: 130px 1fr; gap: var(--space-12) var(--space-18); border: var(--border-hairline) solid var(--line); padding: var(--space-18) var(--space-22); background: var(--bone); margin-bottom: var(--space-16); }
 .priv-ficha > div { display: contents; }
-.priv-ficha dt { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); padding-top: 3px; }
-.priv-ficha dd { color: var(--ink); font-size: .95rem; }
+.priv-ficha dt { font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); padding-top: var(--space-2); }
+.priv-ficha dd { color: var(--ink); font-size: var(--fs-body); }
 
 @media (max-width: 980px) {
   .priv-grelha { grid-template-columns: 1fr; gap: var(--space-44); }
   .priv-indice { position: static; }
 }
 @media (max-width: 640px) {
-  .priv-ficha { grid-template-columns: 1fr; gap: 4px; }
-  .priv-ficha dd { margin-bottom: 8px; }
+  .priv-ficha { grid-template-columns: 1fr; gap: var(--space-6); }
+  .priv-ficha dd { margin-bottom: var(--space-6); }
 }

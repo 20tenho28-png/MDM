@@ -1,5 +1,5 @@
 <!--meta {"file": "obras.html", "title": "Obras · Melperfaz, Construção Civil", "description": "As obras da Melperfaz fotografadas no local pela nossa equipa: reabilitação de edifícios, fachadas e acabamentos, do desmonte ao revestimento novo.", "nav": "obras", "css": ["pag-obras.css"], "jsonld": ["breadcrumb"], "breadcrumb": [["Início", ""], ["Obras", "obras.html"]]} -->
-<section class="sec work pag-cab" aria-labelledby="obrasT">
+<section class="sec s-ink pag-cab" aria-labelledby="obrasT">
   <div class="wrap">
     <nav class="migalhas" aria-label="Migalhas">
       <a href="{{ root }}index.html">Início</a><span aria-hidden="true">›</span><span aria-current="page">Obras</span>
@@ -9,31 +9,23 @@
       <h1 id="obrasT">Cada fotografia é uma obra nossa</h1>
       <p>Fotografias tiradas no local, durante e no fim de cada trabalho. Abra uma obra para ver o que se fez.</p>
     </div>
-    <!-- filtros (site.js): cada botão esconde as obras das outras categorias; sem JavaScript ficam todas à vista -->
-    <div class="filtros" role="group" aria-label="Filtrar obras por categoria" data-filtros>
-      <button class="chip" type="button" data-filtro="todas" aria-pressed="true">Todas <span class="chip-n">{{ cat_n.todas }}</span></button>
-      <button class="chip" type="button" data-filtro="reabilitacao" aria-pressed="false">Reabilitação <span class="chip-n">{{ cat_n.reabilitacao }}</span></button>
-      <button class="chip" type="button" data-filtro="fachadas" aria-pressed="false">Fachadas <span class="chip-n">{{ cat_n.fachadas }}</span></button>
-      <button class="chip" type="button" data-filtro="acabamentos" aria-pressed="false">Acabamentos <span class="chip-n">{{ cat_n.acabamentos }}</span></button>
-      <span class="filtros-conta" data-filtros-conta aria-live="polite">{{ cat_n.todas }} obras</span>
-    </div>
-    <div class="photo-grid mosaico" data-obras>
+    <div class="photo-grid" data-obras>
       {{each obra-foto all eager1}}
     </div>
     {{each antes-depois 05}}
   </div>
 </section>
 
-<section class="sec cta cta-faixa" aria-labelledby="obrasCtaT">
-  <div class="wrap cta-faixa-in">
+<section class="sec cta s-clay" aria-labelledby="obrasCtaT">
+  <div class="wrap cta-inner">
     <div>
       <span class="eyebrow">Vamos Conversar</span>
       <h2 id="obrasCtaT">Quer uma obra assim?</h2>
       <p>Conte-nos o que precisa de fazer. Visitamos, medimos e damos um orçamento gratuito e sem compromisso.</p>
     </div>
-    <div class="cta-faixa-acoes">
+    <div class="acoes">
       <a class="btn" href="{{ root }}index.html#contacto">Pedir Orçamento</a>
-      <a class="btn btn-ghost-paper" href="{{wa geral}}" target="_blank" rel="noopener">Falar por WhatsApp</a>
+      <a class="btn btn-ghost" href="{{wa geral}}" target="_blank" rel="noopener">Falar por WhatsApp</a>
     </div>
   </div>
 </section>

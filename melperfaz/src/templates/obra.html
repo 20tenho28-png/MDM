@@ -1,4 +1,4 @@
-<section class="sec work pag-cab obra-cab" aria-labelledby="obraT">
+<section class="sec s-ink pag-cab obra-cab" aria-labelledby="obraT">
   <div class="wrap">
     <nav class="migalhas" aria-label="Migalhas">
       <a href="{{ root }}index.html">Início</a><span aria-hidden="true">›</span><a href="{{ root }}obras.html">Obras</a><span aria-hidden="true">›</span><span aria-current="page">{{ obra.title }}</span>
@@ -12,7 +12,7 @@
   </div>
 </section>
 
-<section class="sec obra-corpo" aria-label="Sobre a obra">
+<section class="sec s-paper obra-corpo" aria-label="Sobre a obra">
   <div class="wrap duas">
     <div class="prosa">
       <h2>O que se vê na fotografia</h2>
@@ -32,21 +32,21 @@
   </div>
 </section>
 
-<section class="sec cta cta-faixa" aria-labelledby="obraCtaT">
-  <div class="wrap cta-faixa-in">
+<section class="sec cta s-clay" aria-labelledby="obraCtaT">
+  <div class="wrap cta-inner">
     <div>
       <span class="eyebrow">Vamos Conversar</span>
       <h2 id="obraCtaT">Quer uma obra assim?</h2>
       <p>Peça o orçamento com o tipo de obra já escolhido, ou envie fotografias do seu espaço por WhatsApp.</p>
     </div>
-    <div class="cta-faixa-acoes">
+    <div class="acoes">
       <a class="btn" href="{{ obra.contactoHref }}">Pedir Orçamento</a>
-      <a class="btn btn-ghost-paper" href="{{ obra.waHref }}" target="_blank" rel="noopener">Enviar Fotografias por WhatsApp</a>
+      <a class="btn btn-ghost" href="{{ obra.waHref }}" target="_blank" rel="noopener">Enviar Fotografias por WhatsApp</a>
     </div>
   </div>
 </section>
 
-<section class="sec work obra-rel" aria-labelledby="obraRelT">
+<section class="sec s-ink obra-rel" aria-labelledby="obraRelT">
   <div class="wrap">
     <div class="sec-head">
       <span class="eyebrow">Obras Semelhantes</span>
@@ -55,10 +55,6 @@
     <div class="photo-grid">
       {{each obra-foto ctx:related}}
     </div>
-    <nav class="obra-nav" aria-label="Navegação entre obras">
-      <a href="{{ root }}obras/{{ prev.slug }}.html" rel="prev"><span class="obra-nav-l"><span aria-hidden="true">← </span>Obra anterior</span><strong>{{ prev.title }}</strong></a>
-      <a href="{{ root }}obras/{{ next.slug }}.html" rel="next"><span class="obra-nav-l">Obra seguinte<span aria-hidden="true"> →</span></span><strong>{{ next.title }}</strong></a>
-    </nav>
-    <p class="work-mais"><a class="btn btn-ghost-ink" href="{{ root }}obras.html">Ver Todas as Obras</a></p>
+    <p class="work-mais"><a class="btn btn-ghost" href="{{ root }}obras.html">Ver Todas as Obras</a></p>
   </div>
 </section>

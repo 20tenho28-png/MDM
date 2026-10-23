@@ -77,26 +77,33 @@ test('cada página: lang, um h1, título, descrição, canonical, og, JSON-LD, v
     assert.ok(!visivel.includes('\u2014'), `${f}: sem travessões`);
     assert.ok(!visivel.includes('{{'), `${f}: sem sintaxe de modelo`);
     assert.match(t, /<a class="skip" href="#conteudo">/, `${f}: ligação para saltar`);
-    assert.match(t, /class="wa-float" href="https:\/\/wa\.me\/351961245288\?text=/, `${f}: botão WhatsApp`);
+    assert.match(t, /<footer class="rodape s-ink">[\s\S]*href="https:\/\/wa\.me\/351961245288\?text=/, `${f}: WhatsApp no rodapé`);
+    assert.doesNotMatch(t, /class="wa-float"/, `${f}: sem a bolha de WhatsApp (sai do site)`);
     assert.match(t, /<main id="conteudo" tabindex="-1">/, f);
   }
 });
 
 test('a página inicial: secções pela ordem do sistema de desenho, cartões, passos, obras e comparador', () => {
   const t = le('index.html');
-  const ordem = ['id="top"', 'class="strip"', 'id="servicos"', 'id="processo"', 'id="obras"', 'id="porque-nos"', 'id="contacto"'];
+  const ordem = ['id="top"', 'id="servicos"', 'id="processo"', 'id="obras"', 'id="porque-nos"', 'id="contacto"'];
   let pos = 0;
   for (const marca of ordem) { const i = t.indexOf(marca); assert.ok(i > pos, `ordem: ${marca}`); pos = i; }
   assert.equal((t.match(/<a class="svc reveal"/g) || []).length, 6, 'seis serviços');
   assert.equal((t.match(/<li class="step reveal"/g) || []).length, 4, 'quatro passos');
-  const grelha = /<div class="photo-grid mosaico">(.*?)<\/div>\s*<div class="ba-wrap/s.exec(t);
-  assert.ok(grelha, 'mosaico das obras antes do comparador');
+  const grelha = /<div class="photo-grid">(.*?)<\/div>\s*<div class="ba-wrap/s.exec(t);
+  assert.ok(grelha, 'grelha das obras antes do comparador');
   assert.equal((grelha[1].match(/<figure class="pg reveal" data-cat="/g) || []).length, OBRAS.length);
   assert.match(t, /<input type="range" min="0" max="100" value="50" class="ba-range" data-ba-range aria-label="Comparar demolição e acabamento">/);
   assert.match(t, /<em>de raiz\.<\/em>/);
   const anos = new Date().getFullYear() - Number(SITE.founded);
   assert.match(t, new RegExp(`${anos} anos de ofício`));
-  assert.match(t, new RegExp(`<span class="big">${anos}</span><span class="lbl">Anos de Atividade</span>`));
+  // hero «split»: um só cartão «25 anos, desde 2001», sem rotação; saem o marquee, o stat card e o «100%»
+  assert.match(t, /<section class="hero s-paper" id="top"[^>]*>\s*<div class="wrap hero-grid">/);
+  assert.match(t, new RegExp(`<p class="tag-card"><span class="n">${anos}</span><span class="l">anos, desde ${SITE.founded}</span></p>`));
+  for (const fora of ['class="strip"', 'stat-card', 'hero-cheio', 'hero-tag2', 'hero-foto-leg', '100%</span>']) assert.ok(!t.includes(fora), `sem ${fora}`);
+  // as superfícies, pela ordem da página: paper, bone, paper, ink, bone, clay e o rodapé ink
+  const sups = [...t.matchAll(/<(?:section|footer) class="[^"]*\b(s-(?:paper|bone|ink|clay))\b/g)].map(m => m[1]);
+  assert.deepEqual(sups, ['s-paper', 's-bone', 's-paper', 's-ink', 's-bone', 's-clay', 's-ink']);
   const pre = [...t.matchAll(/data-preselect="([^"]+)"/g)].map(m => m[1]);
   assert.deepEqual(pre, SERVICOS.map(s => s.id), 'um cartão por serviço, com o id de site.json «servicos»');
   const nomes = [...t.matchAll(/<a class="svc reveal"[^>]*><span class="num">\d\d<\/span><h3>([^<]+)<\/h3>/g)].map(m => m[1]);
@@ -141,21 +148,22 @@ test('as fichas de obra: migalhas, serviço, orçamento pré-escolhido, WhatsApp
     const lds = [...t.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)].map(m => JSON.parse(m[1]));
     const bc = lds.find(l => l['@type'] === 'BreadcrumbList');
     assert.ok(bc && bc.itemListElement.length === 3 && bc.itemListElement[2].item === `${SITE.baseUrl}/${f}`, `${f}: migalhas`);
-    const orc = /class="cta-faixa-acoes">\s*<a class="btn" href="([^"]+)">Pedir Orçamento<\/a>/.exec(t)[1];
+    const orc = /<section class="sec cta s-clay"[\s\S]*?class="acoes">\s*<a class="btn" href="([^"]+)">Pedir Orçamento<\/a>/.exec(t)[1];
     const tipo = /\?tipo=([^#]+)#contacto$/.exec(orc)[1];
     assert.equal(tipo, s.id, `${f}: tipo pré-escolhido «${tipo}» é o id do serviço`);
     const wa = /href="(https:\/\/wa\.me\/351961245288\?text=[^"]+)"[^>]*>Enviar Fotografias por WhatsApp/.exec(t)[1];
     assert.ok(decodeURIComponent(wa).includes(o.code), `${f}: mensagem de WhatsApp com o código`);
-    const prev = OBRAS[(i - 1 + OBRAS.length) % OBRAS.length], next = OBRAS[(i + 1) % OBRAS.length];
-    assert.match(t, new RegExp(`href="\\.\\./obras/${prev.slug}\\.html" rel="prev"`), f);
-    assert.match(t, new RegExp(`href="\\.\\./obras/${next.slug}\\.html" rel="next"`), f);
+    // sem anterior/seguinte (as migalhas e «Outras obras» já levam às outras obras)
+    assert.doesNotMatch(t, /rel="(?:prev|next)"|class="obra-nav"/, `${f}: sem navegação anterior/seguinte`);
+    assert.equal((t.match(/<figure class="pg reveal"/g) || []).length, 2, `${f}: duas outras obras`);
     for (const d of o.detalhes) assert.ok(t.includes(`<li>${d.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;')}</li>`), `${f}: detalhe «${d}»`);
     assert.ok(!t.includes('<dt>Data</dt>') || o.factos.data, `${f}: a data só com facto`);
     if (o.antesDepois) assert.match(t, /data-ba-range/, `${f}: comparador`); else assert.match(t, /class="obra-foto"/, `${f}: fotografia grande`);
   });
   const obras = le('obras.html');
   for (const o of OBRAS) assert.ok(obras.includes(`href="obras/${o.slug}.html"`), `obras.html liga a ${o.slug}`);
-  assert.match(obras, /<button class="chip" type="button" data-filtro="reabilitacao" aria-pressed="false">Reabilitação <span class="chip-n">2<\/span><\/button>/);
+  assert.doesNotMatch(obras, /class="chip"|data-filtro|class="filtros"/, 'obras.html sem chips de filtro (voltam com 8 ou mais obras)');
+  assert.doesNotMatch(obras, /mosaico/, 'obras.html sem mosaico');
   assert.equal((obras.match(/<figure class="pg reveal" data-cat="/g) || []).length, OBRAS.length, 'obras.html mostra todas as obras');
 });
 
@@ -217,7 +225,8 @@ test('as fotografias: original, tamanhos, prévias e texto alternativo', () => {
   const t = le('index.html');
   const pic = /<picture class="foto hero-photo"[^>]*>(.*?)<\/picture>/s.exec(t)[1];
   assert.match(pic, /<source type="image\/avif" srcset="assets\/img\/fotos\/foto-01-400\.avif 400w, [^"]*foto-01-1080\.avif 1080w"/);
-  assert.match(pic, /<img src="assets\/img\/fotos\/foto-01\.jpg" alt="" width="1080" height="810" style="object-position: 50% 60%" loading="eager" decoding="async" fetchpriority="high">/);
+  assert.match(pic, /sizes="[^"]*\(max-width: 980px\) calc\(100vw - 32px\), 520px"/, 'hero: sizes da moldura (sem ampliação)');
+  assert.match(pic, new RegExp(`<img src="assets/img/fotos/foto-01\\.jpg" alt="${esc(Object.fromEntries(FOTOS)['01'].alt)}" width="1080" height="810" style="object-position: 50% 60%" loading="eager" decoding="async" fetchpriority="high">`));
 });
 
 function copiaFontes() {
@@ -243,6 +252,51 @@ test('o --check falha com uma ligação partida e com um travessão', () => {
     r = spawnSync('python3', ['build.py', '--check'], { cwd: d, encoding: 'utf8', env: { ...process.env, MELPERFAZ_OUT: path.join(d, 'public') } });
     assert.equal(r.status, 1, 'travessão: sai com 1');
     assert.match(r.stdout, /404\.html: travessão/);
+  } finally { fs.rmSync(d, { recursive: true, force: true }); }
+});
+
+test('as folhas de estilo: superfícies, um só .btn-ghost, estilos de texto e nada retirado', () => {
+  const css = le('assets/css/site.css');
+  for (const s of ['s-paper', 's-bone', 's-ink', 's-clay']) assert.match(css, new RegExp(`\\.${s}\\b[^{]*\\{[^}]*--focus-c:`), `superfície ${s} com foco`);
+  // na faixa clay o texto, o traço do eyebrow e o foco são ink; o botão é ink com texto paper
+  const clay = /\.s-clay \{([^}]*)\}/.exec(css)[1];
+  for (const v of ['--fg: var(--ink)', '--eyebrow-rule: var(--ink)', '--focus-c: var(--focus)', '--btn-bg: var(--ink)']) assert.ok(clay.includes(v), `s-clay: ${v}`);
+  // o botão primário é ink sobre clay por omissão (5,65:1)
+  assert.match(css, /--btn-bg: var\(--clay\); --btn-fg: var\(--ink\);/);
+  assert.match(css, /\.btn-ghost \{[^}]*box-shadow: inset 0 0 0 var\(--border-control\) currentColor/);
+  assert.match(css, /:focus-visible \{ outline: 3px solid var\(--focus-c\); outline-offset: 3px; \}/);
+  assert.match(css, /input, select, textarea \{ font-size: var\(--fs-body\); \}/);
+  assert.match(css, /--fs-category: \.8125rem;/, 'etiquetas com 13 px');
+  const todas = ['site.css', 'pag-obras.css', 'pag-paginas.css'].map(f => le(`assets/css/${f}`)).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
+  const tamanhos = new Set([...todas.matchAll(/font-size:\s*([^;}]+)/g)].map(m => m[1].trim()));
+  assert.ok([...tamanhos].every(v => /^var\(--fs-[a-z-]+\)$/.test(v)), `só tamanhos --fs-*: ${[...tamanhos]}`);
+  assert.ok(new Set([...todas.matchAll(/var\((--fs-[a-z-]+)\)/g)].map(m => m[1])).size <= 11, 'no máximo 10 estilos e o das etiquetas');
+  for (const fora of ['.strip', '.stat-card', '.hero-tag2', '.hero-cheio', '.wa-float', '.chip', '.filtros', '.obra-nav', '.cta-faixa',
+    '.btn-ghost-ink', '.btn-ghost-paper', '.pag-simples', '.mosaico', 'infinite', '@keyframes scroll', 'waPulse']) {
+    assert.ok(!todas.includes(fora), `retirado: ${fora}`);
+  }
+  // uma só definição de .pag-cab, .migalhas e .prosa h2 (em site.css)
+  for (const sel of ['.pag-cab {', '.migalhas {', '.prosa h2 {']) assert.equal(todas.split(sel).length - 1, 1, `uma só regra ${sel}`);
+  assert.deepEqual([...new Set([...todas.matchAll(/@media \((?:max|min)-width: (\d+)px\)/g)].map(m => m[1]))].sort(), ['640', '980']);
+});
+
+test('o lint do --check: falha com px solto, tamanho de letra fora dos estilos, @media, texto claro no clay e infinite', () => {
+  const d = copiaFontes();
+  try {
+    const p = path.join(d, 'assets/css/pag-paginas.css');
+    fs.appendFileSync(p, '\n.x { margin: 10px 0; gap: 14px; }\n.y { font-size: .9rem; }\n@media (max-width: 760px) { .z { color: red; } }\n'
+      + '.s-clay .w { color: var(--paper); }\n.btn.v { color: var(--white); }\n@keyframes q { to { opacity: 0; } }\n.q { animation: q 1s infinite; }\n'
+      + '.so-ok { margin: -1px; padding: env(safe-area-inset-bottom); }\n.s-clay .btn-ok { background: var(--ink); color: var(--paper); }\n');
+    const r = spawnSync('python3', ['build.py', '--check'], { cwd: d, encoding: 'utf8', env: { ...process.env, MELPERFAZ_OUT: path.join(d, 'public') } });
+    assert.equal(r.status, 1, 'sai com 1');
+    assert.match(r.stdout, /pag-paginas\.css: «\.x \{ margin: 10px 0 \}»: espaço em px solto \(10px\)/);
+    assert.match(r.stdout, /pag-paginas\.css: «\.x \{ gap: 14px \}»/);
+    assert.match(r.stdout, /pag-paginas\.css: «\.y \{ font-size: \.9rem \}»: só os estilos de texto/);
+    assert.match(r.stdout, /pag-paginas\.css: @media \(max-width: 760px\) \(só 980 e 640 px\)/);
+    assert.match(r.stdout, /«\.s-clay \.w \{ color: var\(--paper\) \}»: texto claro sobre clay/);
+    assert.match(r.stdout, /«\.btn\.v \{ color: var\(--white\) \}»: texto claro sobre clay/);
+    assert.match(r.stdout, /pag-paginas\.css: animação «infinite»/);
+    assert.doesNotMatch(r.stdout, /so-ok|btn-ok/, 'as exceções: hairline, env() e texto paper sobre fundo ink');
   } finally { fs.rmSync(d, { recursive: true, force: true }); }
 });
 

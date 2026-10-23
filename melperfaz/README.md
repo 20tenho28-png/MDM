@@ -31,8 +31,8 @@ Pré-visualizar: `python3 -m http.server -d public 8000` e abrir `http://localho
 | `data/dados-melperfaz.json` | O que só a Melperfaz pode dar (email, NIF, morada, alvará, seguro, zona, horário, Google Maps). Vazio = a frase ou a linha não aparece |
 | `data/obras.json` | As obras: serviço (`cat`, o de `site.json › servicos`), `destaque` (na página inicial), título, fotografia, o que se vê, os factos (vazios até a empresa os dar), `fotosExtra` |
 | `data/fotos.json` | As fotografias: tamanho do original, origem e texto alternativo. `data/lqip.json` são as prévias (gerado) |
-| `src/templates/` | `layout.html` (a cabeça, o cabeçalho, o rodapé e o botão WhatsApp de todas as páginas) e `obra.html` (a ficha de cada obra) |
-| `src/partials/` | Cabeçalho, rodapé, WhatsApp, faixa de contacto com o formulário, cartão de obra, comparador antes/depois |
+| `src/templates/` | `layout.html` (a cabeça, o cabeçalho e o rodapé de todas as páginas) e `obra.html` (a ficha de cada obra) |
+| `src/partials/` | Cabeçalho, rodapé, faixa de contacto com o formulário, cartão de obra, comparador antes/depois |
 | `src/pages/` | Página inicial, Obras, obrigado, 404 e privacidade, cada uma com o seu `<!--meta {...} -->` |
 | `assets/css/` | `site.css` (o sistema de desenho), `pag-obras.css`, `pag-paginas.css` |
 | `assets/js/site.js` | Menu nos ecrãs estreitos, entrada ao fazer scroll, comparador, tipo de obra pré-escolhido, envio do formulário sem sair da página |
@@ -71,6 +71,24 @@ emoji ou o telefone escrito de outra forma; `lang`, um só `h1`, título e descr
 `site.json`; `robots.txt`, `_headers` e `netlify.toml` de acordo com `preview`; todas as fotografias com os tamanhos e a
 prévia; os dados de `dados-melperfaz.json` com o formato certo (email, NIF, ligação do Google Maps).
 
+E o lint das folhas de estilo, para o sistema visual não voltar a derivar. Fora do bloco `:root` (os tokens), falha com:
+espaços (`margin`, `padding`, `gap`, `inset`, `top`/`right`/`bottom`/`left`) em px soltos em vez de `--space-*`;
+`font-size` fora dos estilos de texto `--fs-*`; `@media` que não seja a 980 ou a 640 px (as de preferência, como
+`prefers-reduced-motion`, passam); texto paper ou branco num seletor de `.s-clay` ou `.btn` sem fundo ink na mesma regra;
+e qualquer animação `infinite`. As exceções são só `1px` (hairline) e `env(safe-area-inset-*)`.
+
+## Sistema visual (`assets/css/site.css`)
+
+- **Superfícies**: cada secção tem `.s-paper`, `.s-bone`, `.s-ink` ou `.s-clay`, que definem `--fg`, `--fg-2`, `--fg-cat`,
+  `--rule`, `--eyebrow-rule`, `--focus-c` e as cores do botão. Os componentes só leem estas variáveis. No clay o texto é
+  ink (5,65:1), nunca paper.
+- **Botões**: `.btn` (clay com texto ink; ink com texto paper na faixa clay) e um só secundário, `.btn-ghost`, com a
+  mesma altura. Grupo `.acoes` (no telemóvel, todos a toda a largura). Ligações: `.link` e `.link-seta`.
+- **Texto**: 10 estilos (`--fs-display-hero`, `--fs-section`, `--fs-cta`, `--fs-card`, `--fs-step`, `--fs-list`,
+  `--fs-lead`, `--fs-body`, `--fs-category` de 13 px, `--fs-phone`) e `--fs-label` para as etiquetas de formulário.
+  Os campos têm 16 px.
+- **Grelha**: `.wrap` com 32 px de margem (16 px até 640 px); só duas quebras, 980 e 640 px.
+
 ## Testes
 
 ```bash
@@ -82,7 +100,9 @@ NODE_PATH=/caminho/para/node_modules node tests/browser.mjs  # no browser; preci
 Os do browser geram o site numa pasta temporária e servem-no num servidor local que guarda cada envio do formulário
 como o Netlify o receberia (e pode falhar de propósito): o pedido que segue, a validação, o aviso de falha com o que se
 escreveu a ficar, o envio sem JavaScript, o tipo de obra pré-escolhido, o isco para robôs, nenhuma página a deslizar
-para o lado a 390 e 320 px, o menu dos ecrãs estreitos, o comparador com rato e teclado, o foco e as imagens. O CI
+para o lado a 390 e 320 px, o menu dos ecrãs estreitos, o comparador com rato e teclado, o foco e as imagens,
+nenhuma animação sem fim, e o sistema visual: o h1 do hero e os cabeçalhos de secção no x do logótipo, contraste de
+4,5:1 nos botões e na faixa clay, o anel de foco da cor de cada superfície, campos de 16 px e etiquetas de 13 px. O CI
 (`.github/workflows/ci.yml`) corre o `--check`, o `npm test` e os testes do browser em cada pull request.
 
 ## Fotografias

@@ -486,8 +486,7 @@ def build():
         if NOINDEX_RE.search(meta.get("robots", "")):
             fora_do_mapa.add(meta["file"])
     tpl = (SRC / "templates" / "obra.html").read_text(encoding="utf-8")
-    for i, o in enumerate(OBRAS):
-        prev_o, next_o = OBRAS[i - 1], OBRAS[(i + 1) % len(OBRAS)]
+    for o in OBRAS:
         file = f"obras/{o['slug']}.html"
         desc = f"{o['title']}, {o['catNome'].lower()}: {o['resumo']}"
         if len(desc) > 160:   # a descrição corta-se na última frase inteira que cabe; sem nenhuma, na última palavra
@@ -500,7 +499,7 @@ def build():
                 # a imagem de partilha ao alto fica cortada nas pré-visualizações: só as deitadas; as outras levam a da empresa
                 "og": o["foto"] if o["orient"] == "landscape" else "", "jsonld": ["breadcrumb"],
                 "breadcrumb": [["Início", ""], ["Obras", "obras.html"], [o["title"], file]]}
-        files.append(build_page(meta, tpl, {"obra": o, "prev": prev_o, "next": next_o, "related": relacionadas(o),
+        files.append(build_page(meta, tpl, {"obra": o, "related": relacionadas(o),
                                             "ficha": "1", "baLoading": "eager"}))
     urls = "".join(f"<url><loc>{SITE['baseUrl']}/{'' if f == 'index.html' else f}</loc></url>\n"
                    for f in files if f not in fora_do_mapa)
@@ -760,6 +759,71 @@ def check_obras():
     return out
 
 
+# ── O sistema visual não volta a derivar: o lint das folhas de estilo (--check) ─────────────────────────────────────
+# Fora do bloco :root (onde vivem os tokens) só se aceitam: espaços em tokens --space-*, tamanhos de letra em --fs-*,
+# @media a 980 ou 640 px (e as de preferência, como prefers-reduced-motion e hover), nada «infinite», e nunca texto paper
+# ou branco num seletor de .s-clay ou .btn sem fundo ink na mesma regra. Exceções, curtas e de propósito: 1px (hairline,
+# como o margin:-1px do texto só para leitores de ecrã) e env(safe-area-inset-*), que não é px.
+CSS_ESPACO = re.compile(r"^(?:margin|padding)(?:-(?:top|right|bottom|left|inline|block)(?:-(?:start|end))?)?$"
+                        r"|^(?:gap|row-gap|column-gap|inset|top|right|bottom|left|scroll-padding(?:-[a-z-]+)?)$")
+CSS_PX = re.compile(r"(?<![\w.-])-?(\d*\.?\d+)px\b")
+CSS_PX_OK = {"1"}   # hairline
+CSS_FS_OK = re.compile(r"^(?:var\(--fs-[a-z0-9-]+\)|inherit)$")
+CSS_MEDIA_OK = {"(max-width: 980px)", "(min-width: 981px)", "(max-width: 640px)", "(min-width: 641px)"}
+CSS_COR_CLARA = re.compile(r"var\(--(?:paper|white|bone)\)|#fff\b|#ffffff\b|\bwhite\b", re.I)
+
+
+def css_regras(texto):
+    """As regras de uma folha de estilo: (seletor, [(propriedade, valor)], [@media à volta]), sem comentários."""
+    texto = re.sub(r"/\*.*?\*/", "", texto, flags=re.S)
+    pilha, regras, inicio = [], [], 0
+    for i, c in enumerate(texto):
+        if c == "{":
+            pilha.append(texto[inicio:i].strip().split(";")[-1].strip())
+            inicio = i + 1
+        elif c == "}":
+            corpo = texto[inicio:i]
+            if pilha and not pilha[-1].startswith("@") and ":" in corpo:
+                decls = [tuple(x.strip() for x in d.split(":", 1)) for d in corpo.split(";") if ":" in d]
+                regras.append((pilha[-1], decls, [p for p in pilha[:-1] if p.startswith("@")]))
+            if pilha:
+                pilha.pop()
+            inicio = i + 1
+    return regras
+
+
+def check_css(nome, texto):
+    out = []
+    sem_comentarios = re.sub(r"/\*.*?\*/", "", texto, flags=re.S)
+    if re.search(r"\binfinite\b", sem_comentarios):
+        out.append(f"{nome}: animação «infinite» (nenhuma animação sem fim)")
+    for m in re.finditer(r"@media\s+([^{]+)\{", sem_comentarios):
+        for q in re.findall(r"\((?:max|min)-(?:width|height)\s*:[^)]*\)", m.group(1)):
+            if re.sub(r"\s+", " ", q.replace(": ", ":").replace(":", ": ")) not in CSS_MEDIA_OK:
+                out.append(f"{nome}: @media {q} (só 980 e 640 px)")
+    for sel, decls, _ in css_regras(texto):
+        if sel == ":root" or sel.startswith("@font-face") or sel in ("from", "to") or sel.endswith("%"):
+            continue
+        props = dict(decls)
+        for prop, val in decls:
+            if prop.startswith("--"):
+                continue
+            if CSS_ESPACO.match(prop):
+                soltos = [m.group(0) for m in CSS_PX.finditer(val) if m.group(1) not in CSS_PX_OK]
+                if soltos:
+                    out.append(f"{nome}: «{sel} {{ {prop}: {val} }}»: espaço em px solto ({', '.join(soltos)}): usar --space-*")
+            elif prop == "font-size" and not CSS_FS_OK.match(val):
+                out.append(f"{nome}: «{sel} {{ font-size: {val} }}»: só os estilos de texto (--fs-*)")
+            elif prop == "font" and val != "inherit":
+                out.append(f"{nome}: «{sel} {{ font: {val} }}»: o atalho font só como inherit (tamanhos em --fs-*)")
+        cor = props.get("color", "")
+        fundo = props.get("background", props.get("background-color", ""))
+        if (re.search(r"\.s-clay\b|\.btn(?![\w-])", sel) and CSS_COR_CLARA.search(cor)
+                and not re.search(r"var\(--ink(?:-deep)?\)", fundo)):
+            out.append(f"{nome}: «{sel} {{ color: {cor} }}»: texto claro sobre clay (2,5:1); na faixa clay e nos botões o texto é ink")
+    return out
+
+
 def check(files):
     problems = []
     for f in files:
@@ -780,7 +844,8 @@ def check(files):
                 if not target.exists():
                     problems.append(f"{f}: referência partida → {r}")
     problems += check_preview() + check_fotos() + check_dados() + check_obras()
-    for css in (OUT / "assets" / "css").glob("*.css"):
+    for css in sorted((OUT / "assets" / "css").glob("*.css")):
+        problems += check_css(css.name, css.read_text(encoding="utf-8"))
         for c in re.findall(r"url\(([^)]+)\)", css.read_text(encoding="utf-8")):
             c = c.strip("'\"")
             if not c.startswith("data:") and not (css.parent / c.split("?")[0]).resolve().exists():

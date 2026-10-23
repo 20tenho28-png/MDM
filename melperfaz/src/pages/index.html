@@ -1,34 +1,25 @@
 <!--meta {"file": "index.html", "title": "Melperfaz, Construção Civil · Reabilitação de edifícios desde 2001", "description": "Reabilitação de edifícios, espaços comerciais e apartamentos, da estrutura ao acabamento, com equipa própria desde 2001. Orçamento gratuito: 961 245 288.", "nav": "", "css": [], "italico": true} -->
-<!-- Topo a toda a largura: a fotografia da obra por trás, um véu ink por cima e o texto em bone; os cartões 25 anos e 2001
-     ficam à direita, em baixo. A grelha de planta do design system (bone-05 a cada 39 px) continua por cima da fotografia. -->
-<section class="hero hero-cheio" id="top" aria-labelledby="heroT">
-  <div class="hero-fundo" aria-hidden="true">{{foto 01 loading="eager" sizes="100vw" class="hero-photo" foco="50% 60%" alt=""}}</div>
-  <div class="wrap hero-conteudo">
+<!-- Hero «split» do design system: o texto à esquerda, a começar na borda da .wrap (como o logótipo), e a fotografia
+     numa moldura 4:3 à direita, com um único cartão «25 anos, desde 2001». No telemóvel: texto, botões e depois a foto. -->
+<section class="hero s-paper" id="top" aria-labelledby="heroT">
+  <div class="wrap hero-grid">
     <div class="hero-texto">
       <span class="eyebrow">Reabilitação &amp; Construção · Licenciada · Desde {{ site.founded }}</span>
       <h1 id="heroT">Reabilitamos<br><em>de raiz.</em></h1>
       <p class="lead">Reabilitação de edifícios, espaços comerciais e apartamentos. Da estrutura ao acabamento, tratamos da obra completa com {{ anos }} anos de ofício (uma equipa responsável, do início ao fim).</p>
-      <div class="hero-cta">
+      <div class="acoes">
         <a href="#contacto" class="btn">Pedir Orçamento Gratuito</a>
-        <a href="#obras" class="btn btn-ghost-ink">Ver Obras</a>
+        <a href="#obras" class="btn btn-ghost">Ver Obras</a>
       </div>
     </div>
-    <div class="hero-factos">
-      <div class="tag-card"><span class="n">{{ anos }}</span><span class="l">Anos de Experiência</span></div>
-      <div class="hero-tag2"><span class="n">{{ site.founded }}</span><span class="l">Desde</span></div>
+    <div class="hero-visual">
+      <div class="frame">{{foto 01 loading="eager" sizes="(max-width: 980px) calc(100vw - 32px), 520px" class="hero-photo" foco="50% 60%"}}</div>
+      <p class="tag-card"><span class="n">{{ anos }}</span><span class="l">anos, desde {{ site.founded }}</span></p>
     </div>
   </div>
-  <p class="hero-foto-leg"><a href="{{ root }}obras.html">Carrinha da Melperfaz numa obra de reabilitação<span aria-hidden="true"> →</span></a></p>
 </section>
 
-<div class="strip" aria-hidden="true">
-  <div class="strip-track">
-    <span>Reabilitação de Edifícios</span><span>Espaços Comerciais</span><span>Apartamentos</span><span>Estrutura</span><span>Fachadas</span><span>Construção Civil</span>
-    <span>Reabilitação de Edifícios</span><span>Espaços Comerciais</span><span>Apartamentos</span><span>Estrutura</span><span>Fachadas</span><span>Construção Civil</span>
-  </div>
-</div>
-
-<section class="sec services" id="servicos" aria-labelledby="servicosT">
+<section class="sec s-bone" id="servicos" aria-labelledby="servicosT">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="eyebrow">O Que Fazemos</span>
@@ -43,7 +34,7 @@
   </div>
 </section>
 
-<section class="sec" id="processo" aria-labelledby="processoT">
+<section class="sec s-paper" id="processo" aria-labelledby="processoT">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="eyebrow">Como Funciona</span>
@@ -59,22 +50,22 @@
   </div>
 </section>
 
-<section class="sec work" id="obras" aria-labelledby="obrasT">
+<section class="sec s-ink" id="obras" aria-labelledby="obrasT">
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="eyebrow">Obras Selecionadas</span>
       <h2 id="obrasT">Do desmonte ao acabamento</h2>
       <p>Uma amostra das obras de reabilitação e construção que temos em mãos pela região. Estrutura, fachadas, revestimentos e acabamentos, tudo executado pela nossa equipa.</p>
     </div>
-    <div class="photo-grid mosaico">
+    <div class="photo-grid">
       {{each obra-foto all}}
     </div>
     {{each antes-depois 05}}
-    <p class="work-mais reveal"><a class="btn btn-ghost-ink" href="{{ root }}obras.html">Ver Todas as Obras</a></p>
+    <p class="work-mais reveal"><a class="btn btn-ghost" href="{{ root }}obras.html">Ver Todas as Obras</a></p>
   </div>
 </section>
 
-<section class="sec trust" id="porque-nos" aria-labelledby="trustT">
+<section class="sec s-bone" id="porque-nos" aria-labelledby="trustT">
   <div class="wrap trust-grid">
     <div class="reveal">
       <span class="eyebrow">Porque Nos Escolhem</span>
@@ -86,17 +77,11 @@
         <li><span class="tick" aria-hidden="true">✓</span><div><h3>Garantia de execução</h3><p>Respondemos pelo nosso trabalho durante dois anos além das garantias de materiais dos fabricantes.</p></div></li>
       </ul>
     </div>
-    <div class="stat-card reveal" role="group" aria-label="A Melperfaz em números">
-      <div class="stat-row">
-        <div class="stat"><span class="big">{{ anos }}</span><span class="lbl">Anos de Atividade</span></div>
-        <div class="stat"><span class="big">{{ site.founded }}</span><span class="lbl">Fundada Em</span></div>
-      </div>
-      <div class="stat-divide"></div>
-      <div class="stat-row">
-        <div class="stat"><span class="big">100%</span><span class="lbl">Licenciada</span></div>
-        <div class="stat"><span class="big">2 anos</span><span class="lbl">De Garantia</span></div>
-      </div>
-    </div>
+    <!-- uma fotografia real em vez de números: a obra M03, com ligação para a ficha -->
+    <figure class="trust-foto reveal">
+      <div class="frame">{{foto 02 sizes="(max-width: 980px) calc(100vw - 32px), 580px" foco="50% 40%"}}</div>
+      <figcaption><a class="link-seta" href="{{ root }}obras/edificios-e-apartamentos.html">Ver a obra<span aria-hidden="true"> →</span></a></figcaption>
+    </figure>
   </div>
 </section>
 
