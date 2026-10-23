@@ -4,14 +4,16 @@
    B. a validação em português: sem nome e telefone não segue; telefone curto; email estranho; corrigido, segue;
    C. o servidor falha: aviso com o telefone, o que se escreveu fica, e a segunda tentativa segue;
    D. sem JavaScript: o envio normal chega a /obrigado.html com os campos;
-   E. o tipo de obra pré-escolhido: pelo cartão de serviço e pelo ?tipo= (e ?de=) da ficha de obra, em orcamento.html;
+   E. o tipo de obra pré-escolhido: pela lista de serviços e pelo ?tipo= (e ?de=) da ficha de obra, em orcamento.html; os
+      endereços antigos da página inicial (#contacto, ?tipo=) vão para orcamento.html;
    F. o isco para robôs: preenchido, não segue;
    G. nenhuma página desliza para o lado a 390 e 320 px, sem erros de JavaScript; a barra de ações (menos em obrigado.html)
       não tapa o rodapé nem o botão de envio;
    H. o menu dos ecrãs estreitos: abre sobre um fundo escurecido, a página não desliza, foca, fecha com Escape e devolve o foco;
    I. o comparador antes/depois com o rato e com o teclado;
    J. teclado: a primeira tabulação é «Saltar para o conteúdo»; a entrada ao fazer scroll acaba toda visível;
-      todas as imagens carregam; o menu marca a página atual; obras.html mostra todas as obras, sem filtros;
+      todas as imagens carregam; o menu marca a página atual; obras.html mostra todas as obras, sem filtros, agrupadas
+      por serviço (o índice leva a cada grupo; H1 › H2 › H3);
    K. movimento reduzido; nenhuma animação sem fim;
    L. o sistema visual: uma margem esquerda (h1 do hero, logótipo e cabeçalhos de secção no mesmo x), contraste de 4,5:1
       nos botões, na barra e no texto da faixa clay, o anel de foco da cor da superfície, campos com 16 px e etiquetas com 13 px.
@@ -134,8 +136,11 @@ try {
     const { ctx, page } = await pagina({ javaScriptEnabled: false });
     await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
     ok(await page.evaluate(() => Array.from(document.querySelectorAll('.reveal')).every(e => getComputedStyle(e).opacity === '1')), 'D: sem JavaScript nada fica invisível (reveal)');
-    ok(await page.isHidden('#menu-movel') && await page.evaluate(() => { const s = document.querySelector('[data-ba-before]'); return s && getComputedStyle(s).width !== '0px'; }), 'D: o comparador fica a meio, sem rebentar');
     ok(await page.getAttribute('.navlinks a[data-nav-item="inicio"]', 'aria-current') === 'page', 'D: a página atual vem marcada sem JavaScript');
+    await page.goto(srv.base + '/#contacto', { waitUntil: 'networkidle' });
+    ok(/\/(#contacto)?$/.test(page.url()) && await page.isVisible('#contacto .btn'), 'D: sem JavaScript o endereço antigo #contacto fica na faixa, com o botão do pedido', page.url());
+    await page.goto(`${srv.base}/obras/${(OBRAS.find(o => o.antesDepois) || OBRAS[0]).slug}.html`, { waitUntil: 'networkidle' });
+    ok(await page.isHidden('#menu-movel') && await page.evaluate(() => { const s = document.querySelector('[data-ba-before]'); return s && getComputedStyle(s).width !== '0px'; }), 'D: o comparador fica a meio, sem rebentar');
     await page.goto(srv.base + '/orcamento.html', { waitUntil: 'networkidle' });
     ok(await page.isVisible('#quoteForm'), 'D: o formulário aparece sem JavaScript');
     await preenche(page, { nome: 'Sem JS', tipo: 'Fachadas e Impermeabilização' });
@@ -151,9 +156,16 @@ try {
   {
     const { ctx, page } = await pagina();
     await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
-    await Promise.all([page.waitForURL(/orcamento\.html\?tipo=apartamentos$/, { waitUntil: 'domcontentloaded' }), page.click('a.svc[data-tipo="apartamentos"]')]);
+    await Promise.all([page.waitForURL(/orcamento\.html\?tipo=apartamentos$/, { waitUntil: 'domcontentloaded' }), page.click('.svc a[data-tipo="apartamentos"]')]);
     await page.waitForTimeout(300);
-    ok(await page.inputValue('#qTipo') === 'Apartamentos', 'E: o cartão de serviço leva a orcamento.html com o tipo escolhido');
+    ok(await page.inputValue('#qTipo') === 'Apartamentos', 'E: «Pedir orçamento» do serviço leva a orcamento.html com o tipo escolhido');
+    // os endereços antigos da página inicial: #contacto e ?tipo= vão para orcamento.html (sem ficar no histórico)
+    await page.goto(srv.base + '/index.html#contacto', { waitUntil: 'networkidle' });
+    ok(/\/orcamento\.html$/.test(page.url()) && await page.isVisible('#quoteForm'), 'E: /index.html#contacto vai para orcamento.html', page.url());
+    await page.goto(srv.base + '/?tipo=fachadas#contacto', { waitUntil: 'networkidle' });
+    ok(/\/orcamento\.html\?tipo=fachadas$/.test(page.url()) && await page.inputValue('#qTipo') === 'Fachadas e Impermeabilização', 'E: /?tipo=fachadas#contacto vai para orcamento.html?tipo=fachadas', page.url());
+    await page.goto(srv.base + '/#obras', { waitUntil: 'networkidle' });
+    ok(/\/#obras$/.test(page.url()), 'E: as outras âncoras da página inicial ficam', page.url());
     const obra = OBRAS[0];
     await page.goto(`${srv.base}/obras/${obra.slug}.html`, { waitUntil: 'networkidle' });
     await Promise.all([page.waitForURL(/orcamento\.html\?tipo=/, { waitUntil: 'domcontentloaded' }), page.click('.cta .acoes a.btn:has-text("Pedir Orçamento")')]);
@@ -234,7 +246,7 @@ try {
   /* I. o comparador */
   {
     const { ctx, page } = await pagina();
-    await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
+    await page.goto(`${srv.base}/obras/${(OBRAS.find(o => o.antesDepois) || OBRAS[0]).slug}.html`, { waitUntil: 'networkidle' });
     await page.locator('[data-ba]').scrollIntoViewIfNeeded();
     await page.locator('[data-ba-range]').fill('20');
     await page.waitForTimeout(100);
@@ -267,6 +279,14 @@ try {
     ok(await page.getAttribute('.navlinks a[data-nav-item="obras"]', 'aria-current') === 'page', 'J: o menu marca «Obras»');
     const todas = await page.evaluate(() => ({ chips: document.querySelectorAll('[data-filtro], .chip').length, vis: Array.from(document.querySelectorAll('[data-obras] .pg')).filter(e => e.getBoundingClientRect().height > 0).length }));
     ok(todas.chips === 0 && todas.vis === OBRAS.length, 'J: obras.html mostra todas as obras, sem chips de filtro', todas);
+    // os grupos por serviço: o índice leva à secção, e um grupo de uma obra fica com meio cartão encostado à esquerda
+    await page.click('.indice-grupos a[href="#fachadas"]');
+    await page.waitForTimeout(600);
+    const g = await page.evaluate(() => { const s = document.querySelector('#fachadas'), c = s.querySelector('.pg'), w = s.querySelector('.wrap'); const r = c.getBoundingClientRect(), rw = w.getBoundingClientRect(), cs = getComputedStyle(w);
+      return { topo: Math.round(s.getBoundingClientRect().top), x: Math.round(r.left), x0: Math.round(rw.left + parseFloat(cs.paddingLeft)), metade: r.width < (rw.width - parseFloat(cs.paddingLeft) * 2) * 0.6 }; });
+    ok(g.topo >= 0 && g.topo < 120 && g.x === g.x0 && g.metade, 'J: o índice leva a #fachadas, com meio cartão encostado à esquerda', g);
+    const titulos = await page.evaluate(() => Array.from(document.querySelectorAll('main h1, main h2, main h3')).map(h => Number(h.tagName[1])));
+    ok(titulos[0] === 1 && titulos.every((n, i) => i === 0 || n <= titulos[i - 1] + 1), 'J: obras.html sem saltos nos títulos (H1 › H2 › H3)', titulos);
     await ctx.close();
   }
 
@@ -341,7 +361,7 @@ try {
     const anel = async sel => { await page.focus(sel); return page.evaluate(() => { const s = getComputedStyle(document.activeElement); return s.outlineStyle + ' ' + s.outlineWidth + ' ' + s.outlineColor; }); };
     await page.keyboard.press('Tab'); await page.keyboard.press('Shift+Tab');
     ok(await anel('.hero .acoes .btn') === 'solid 3px rgb(27, 37, 64)', 'L: foco ink no hero (paper)', await anel('.hero .acoes .btn'));
-    ok(await anel('#obras .work-mais .btn') === 'solid 3px rgb(240, 168, 56)', 'L: foco amber nas obras (ink)', await anel('#obras .work-mais .btn'));
+    ok(await anel('#obras .obras-mais .btn') === 'solid 3px rgb(240, 168, 56)', 'L: foco amber nas obras (ink)', await anel('#obras .obras-mais .btn'));
     ok(await anel('#contacto .cta-phone') === 'solid 3px rgb(27, 37, 64)', 'L: foco ink na faixa clay', await anel('#contacto .cta-phone'));
     const btn = await page.evaluate(() => { const b = getComputedStyle(document.querySelector('.hero .btn')), g = document.querySelector('.hero .btn-ghost'); return { bg: b.backgroundColor, cor: b.color, alturas: [document.querySelector('.hero .btn').offsetHeight, g.offsetHeight] }; });
     ok(btn.bg === 'rgb(224, 138, 30)' && btn.cor === 'rgb(27, 37, 64)' && btn.alturas[0] === btn.alturas[1], 'L: «Pedir Orçamento» ink sobre clay e o ghost com a mesma altura', btn);

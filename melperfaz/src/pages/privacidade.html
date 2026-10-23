@@ -25,37 +25,45 @@
       </ul>
 
       <h2 id="responsavel">Quem é responsável</h2>
-      <p>O responsável pelo tratamento dos dados é a <strong>{{ site.legalName }}</strong>{{#se dados.nif}}, NIF {{ dados.nif }}{{/se}}{{#se dados.morada}}, com sede em {{ dados.morada }}{{/se}}.</p>
+      <p>O responsável pelo tratamento dos dados é a empresa:</p>
+      <div class="ficha">
+        <dl aria-label="Responsável pelos dados">
+          <div class="ficha-largo"><dt>Responsável</dt><dd>{{ site.legalName }}</dd></div>{{#se dados.nif}}
+          <div><dt>NIF</dt><dd>{{ dados.nif }}</dd></div>{{/se}}{{#se dados.morada}}
+          <div class="ficha-largo"><dt>Morada</dt><dd>{{ dados.morada }}</dd></div>{{/se}}{{#se dados.email}}
+          <div><dt>Email</dt><dd><a href="mailto:{{ dados.email }}">{{ dados.email }}</a></dd></div>{{/se}}
+        </dl>
+      </div>
       <p>Para qualquer questão sobre os seus dados, incluindo os direitos descritos <a href="#direitos">mais abaixo</a>, ligue <a href="{{ site.phoneHref }}">{{ site.phone }}</a>{{#se dados.horario}} ({{ dados.horario }}){{/se}}{{#se dados.email}}, escreva para <a href="mailto:{{ dados.email }}">{{ dados.email }}</a>{{/se}}{{#se dados.morada}} ou escreva para a morada acima{{/se}}. A Melperfaz não designou um encarregado de proteção de dados.</p>
 
       <h2 id="dados">Que dados tratamos e porquê</h2>
       <p>Tratamos apenas os dados de que precisamos em cada situação. As alíneas indicadas são do artigo 6.º, n.º 1, do Regulamento Geral sobre a Proteção de Dados (RGPD).</p>
 
       <h3>Pedido de orçamento pelo formulário</h3>
-      <dl class="priv-ficha">
-        <div><dt>Dados</dt><dd>O seu nome, o telefone, o tipo de obra e, se os escrever, a localidade da obra, o email e a mensagem. Com o pedido segue a página de onde o enviou, e ficam registadas a data e a hora. O serviço de formulários do Netlify, a empresa que aloja o site, regista também o endereço IP do seu equipamento e o browser, que usa para filtrar mensagens automáticas (spam).</dd></div>
+      <div class="ficha"><dl>
+        <div class="ficha-largo"><dt>Dados</dt><dd>O seu nome, o telefone, o tipo de obra e, se os escrever, a localidade da obra, o email e a mensagem. Com o pedido segue a página de onde o enviou, e ficam registadas a data e a hora. O serviço de formulários do Netlify, a empresa que aloja o site, regista também o endereço IP do seu equipamento e o browser, que usa para filtrar mensagens automáticas (spam).</dd></div>
         <div><dt>Para quê</dt><dd>Responder ao pedido, marcar a visita, preparar o orçamento e, se o aceitar, fazer a obra.</dd></div>
         <div><dt>Fundamento</dt><dd>Diligências pré-contratuais a seu pedido (alínea b).</dd></div>
         <div><dt>Conservação</dt><dd>Enquanto for preciso para responder e acompanhar o pedido e, depois, só pelo tempo que a lei exigir.</dd></div>
-      </dl>
+      </dl></div>
       <p>Ao carregar em «Enviar pedido de orçamento», o pedido fica guardado no serviço de formulários do Netlify e é-nos enviado por email. Enquanto escreve, o site não guarda nem envia o que escreve.</p>
 
       <h3>Contacto por telefone ou WhatsApp</h3>
-      <dl class="priv-ficha">
-        <div><dt>Dados</dt><dd>O seu número de telefone, o nome, o que nos escrever ou disser e as fotografias que enviar.</dd></div>
+      <div class="ficha"><dl>
+        <div class="ficha-largo"><dt>Dados</dt><dd>O seu número de telefone, o nome, o que nos escrever ou disser e as fotografias que enviar.</dd></div>
         <div><dt>Para quê</dt><dd>Atender, perceber o que precisa e responder.</dd></div>
         <div><dt>Fundamento</dt><dd>Diligências pré-contratuais ou execução do contrato (alínea b).</dd></div>
         <div><dt>Conservação</dt><dd>Enquanto for preciso para responder e, depois, só pelo tempo que a lei exigir.</dd></div>
-      </dl>
+      </dl></div>
       <p>Os botões de WhatsApp do site não enviam nada: abrem o WhatsApp com uma mensagem já escrita, e a mensagem só nos chega quando a enviar por lá. O WhatsApp é um serviço da WhatsApp Ireland Limited, com a sua própria <a href="https://www.whatsapp.com/legal/privacy-policy-eea" target="_blank" rel="noopener">política de privacidade</a>.</p>
 
       <h3>Clientes com obra</h3>
-      <dl class="priv-ficha">
-        <div><dt>Dados</dt><dd>Dados de faturação, o contrato, o orçamento e os registos da obra.</dd></div>
+      <div class="ficha"><dl>
+        <div class="ficha-largo"><dt>Dados</dt><dd>Dados de faturação, o contrato, o orçamento e os registos da obra.</dd></div>
         <div><dt>Para quê</dt><dd>Fazer a obra, faturar e manter os registos que a lei exige.</dd></div>
         <div><dt>Fundamento</dt><dd>Execução do contrato e cumprimento de obrigações legais (alíneas b e c).</dd></div>
         <div><dt>Conservação</dt><dd>10 anos para os documentos fiscais. Os documentos da obra, durante os prazos de garantia e de responsabilidade previstos na lei.</dd></div>
-      </dl>
+      </dl></div>
 
       <h2 id="equipamento">O que fica no seu equipamento</h2>
       <p>Nada. O site não usa cookies nem guarda informação no seu browser, e não tem ferramentas de estatísticas. Os tipos de letra, as imagens e o código vêm do próprio site, sem pedidos a outros serviços.</p>

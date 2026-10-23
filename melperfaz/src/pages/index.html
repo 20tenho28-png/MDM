@@ -1,86 +1,99 @@
-<!--meta {"file": "index.html", "title": "Melperfaz, Construção Civil · Reabilitação de edifícios desde 2001", "description": "Reabilitação de edifícios, espaços comerciais e apartamentos, da estrutura ao acabamento, com equipa própria desde 2001. Orçamento gratuito: 961 245 288.", "nav": "inicio", "css": [], "italico": true} -->
+<!--meta {"file": "index.html", "title": "Melperfaz, Construção Civil · Reabilitação de edifícios desde 2001", "description": "Reabilitação de edifícios, espaços comerciais e apartamentos, da estrutura ao acabamento, com equipa própria desde 2001. Orçamento gratuito: 961 245 288.", "nav": "inicio", "css": [], "italico": true, "reencaminha": true} -->
+<!-- A página inicial: Hero › Obras em destaque › Serviços › Porquê Nós › faixa clay. Superfícies paper › ink › paper ›
+     bone › clay, e o rodapé ink. Sem formulário (o pedido é em orcamento.html) e sem processo (está ao lado do formulário). -->
 <!-- Hero «split» do design system: o texto à esquerda, a começar na borda da .wrap (como o logótipo), e a fotografia
      numa moldura 4:3 à direita, com um único cartão «25 anos, desde 2001». No telemóvel: texto, botões e depois a foto. -->
 <section class="hero s-paper" id="top" aria-labelledby="heroT">
   <div class="wrap hero-grid">
     <div class="hero-texto">
-      <span class="eyebrow">Reabilitação &amp; Construção · Licenciada · Desde {{ site.founded }}</span>
+      <span class="eyebrow">Reabilitação e construção{{#se dados.zona}} · {{ dados.zona }}{{/se}}</span>
       <h1 id="heroT">Reabilitamos<br><em>de raiz.</em></h1>
-      <p class="lead">Reabilitação de edifícios, espaços comerciais e apartamentos. Da estrutura ao acabamento, tratamos da obra completa com {{ anos }} anos de ofício (uma equipa responsável, do início ao fim).</p>
+      <p class="lead">Reabilitação de edifícios, espaços comerciais e apartamentos. Da estrutura ao acabamento, com uma equipa responsável do início ao fim.</p>
       <div class="acoes">
         <a href="{{ root }}orcamento.html" class="btn">Pedir Orçamento</a>
-        <a href="#obras" class="btn btn-ghost">Ver Obras</a>
+        <a href="{{ site.phoneHref }}" class="btn btn-ghost">Ligar {{ site.phone }}</a>
       </div>
+      <p class="hero-apoio">Visita e orçamento gratuitos, sem compromisso.</p>
+      {{> prova }}
     </div>
-    <div class="hero-visual">
-      <div class="frame">{{foto 01 loading="eager" sizes="(max-width: 980px) calc(100vw - 32px), 520px" class="hero-photo" foco="50% 60%"}}</div>
-      <p class="tag-card"><span class="n">{{ anos }}</span><span class="l">anos, desde {{ site.founded }}</span></p>
-    </div>
+    <figure class="hero-visual">
+      <div class="hero-moldura">
+        <div class="frame">{{foto 01 loading="eager" sizes="(max-width: 980px) calc(100vw - 32px), 520px" class="hero-photo" foco="50% 60%"}}</div>
+        <p class="tag-card"><span class="n">{{ anos }}</span><span class="l">anos, desde {{ site.founded }}</span></p>
+      </div>
+      <figcaption class="hero-leg">Carrinha da Melperfaz numa obra de reabilitação</figcaption>
+    </figure>
   </div>
 </section>
 
-<section class="sec s-bone" id="servicos" aria-labelledby="servicosT">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="eyebrow">O Que Fazemos</span>
-      <h2 id="servicosT">Construção e reabilitação, do alicerce ao acabamento</h2>
-      <p>Da estrutura ao acabamento, com uma equipa responsável do início ao fim. Escolha o trabalho e peça o orçamento.</p>
-    </div>
-    <!-- os serviços vêm de data/site.json «servicos»; cada cartão leva a orcamento.html com o tipo de obra já escolhido
-         (?tipo=<id do serviço>) -->
-    <div class="svc-grid">{{#cada servicos}}
-      <a class="svc reveal" href="{{ item.orcamentoHref }}" data-tipo="{{ item.id }}"><span class="num">{{ item.n }}</span><h3>{{ item.nome }}</h3><p>{{ item.texto }}</p><span class="arrow" aria-hidden="true">→</span></a>{{/cada}}
-    </div>
-  </div>
-</section>
-
-<section class="sec s-paper" id="processo" aria-labelledby="processoT">
-  <div class="wrap">
-    <div class="sec-head reveal">
-      <span class="eyebrow">Como Funciona</span>
-      <h2 id="processoT">Um processo sem adivinhas</h2>
-      <p>Sabe sempre o que está a acontecer, o que vem a seguir e quanto custa. É essa toda a filosofia.</p>
-    </div>
-    <ol class="proc-grid">
-      <li class="step reveal"><span class="s" aria-hidden="true">01</span><h3>Consulta</h3><p>Visitamos, ouvimos, medimos e falamos com honestidade sobre âmbito e orçamento antes de gastar um euro.</p></li>
-      <li class="step reveal"><span class="s" aria-hidden="true">02</span><h3>Projeto &amp; Orçamento</h3><p>Um orçamento fixo e detalhado e um plano claro. Sem valores vagos, sem custos a crescer a meio da obra.</p></li>
-      <li class="step reveal"><span class="s" aria-hidden="true">03</span><h3>Execução</h3><p>A nossa equipa trabalha com calendário definido, mantém a obra limpa e dá-lhe atualizações semanais.</p></li>
-      <li class="step reveal"><span class="s" aria-hidden="true">04</span><h3>Entrega</h3><p>Só saímos depois de aprovar cada detalhe, e respondemos pela obra mesmo depois de terminada.</p></li>
-    </ol>
-  </div>
-</section>
-
+<!-- as obras em destaque (data/obras.json «destaque»): a prova logo a seguir ao hero; a segunda fica ao alto -->
 <section class="sec s-ink" id="obras" aria-labelledby="obrasT">
   <div class="wrap">
     <div class="sec-head reveal">
-      <span class="eyebrow">Obras Selecionadas</span>
-      <h2 id="obrasT">Do desmonte ao acabamento</h2>
-      <p>Uma amostra das obras de reabilitação e construção que temos em mãos pela região. Estrutura, fachadas, revestimentos e acabamentos, tudo executado pela nossa equipa.</p>
+      <span class="eyebrow">Obras</span>
+      <h2 id="obrasT">Obras nossas, fotografadas no local</h2>
+      <p>Fotografias tiradas durante e no fim de cada trabalho.</p>
     </div>
-    <div class="photo-grid">
-      {{each obra-foto all}}
+    <div class="photo-grid destaques">
+      {{each obra-foto destaque}}
     </div>
-    {{each antes-depois 05}}
-    <p class="work-mais reveal"><a class="btn btn-ghost" href="{{ root }}obras.html">Ver Todas as Obras</a></p>
+    <div class="acoes obras-mais">
+      <a class="btn btn-ghost" href="{{ root }}obras.html">Ver as {{ cat_n.todas }} obras</a>
+    </div>
+  </div>
+</section>
+
+<!-- ServiceList: os serviços de data/site.json «servicos», em linhas sem caixa e sem seta. A linha não é uma ligação:
+     «Ver obras (N)» só quando o serviço tem obras, e «Pedir orçamento» com o tipo já escolhido (?tipo=<id>) -->
+<section class="sec s-paper" id="servicos" aria-labelledby="servicosT">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">O que fazemos</span>
+      <h2 id="servicosT">Construção e reabilitação, do alicerce ao acabamento</h2>
+    </div>
+    <ul class="svc-lista">{{#cada servicos}}
+      <li class="svc reveal" data-servico="{{ item.id }}">
+        <span class="svc-num" aria-hidden="true">{{ item.n }}</span>
+        <div class="svc-corpo">
+          <h3>{{ item.nome }}</h3>
+          <p>{{ item.texto }}</p>
+          <div class="svc-links">{{#se item.obrasN}}
+            <a class="link-seta" href="{{ root }}{{ item.catAnchor }}">Ver obras ({{ item.obrasN }})<span class="so-leitor"> de {{ item.nome }}</span><span aria-hidden="true"> →</span></a>{{/se}}
+            <a class="link-seta" href="{{ item.orcamentoHref }}" data-tipo="{{ item.id }}">Pedir orçamento<span class="so-leitor"> de {{ item.nome }}</span><span aria-hidden="true"> →</span></a>
+          </div>
+        </div>{{#se item.primeiraFoto}}
+        <div class="svc-mini">{{foto {{ item.primeiraFoto }} sizes="64px" alt=""}}</div>{{/se}}
+      </li>{{/cada}}
+    </ul>
   </div>
 </section>
 
 <section class="sec s-bone" id="porque-nos" aria-labelledby="trustT">
   <div class="wrap trust-grid">
     <div class="reveal">
-      <span class="eyebrow">Porque Nos Escolhem</span>
-      <h2 id="trustT">Reputações constroem-se uma obra de cada vez</h2>
+      <div class="sec-head">
+        <span class="eyebrow">Porque nos escolhem</span>
+        <h2 id="trustT">Reputações constroem-se uma obra de cada vez</h2>
+      </div>
       <ul class="trust-list">
         <li><span class="tick" aria-hidden="true">✓</span><div><h3>Orçamentos a preço fixo</h3><p>O valor que lhe damos é o valor que paga. Alterações só acontecem com a sua aprovação por escrito.</p></div></li>
         <li><span class="tick" aria-hidden="true">✓</span><div><h3>Equipa própria</h3><p>Os nossos próprios profissionais em obra, não um conjunto rotativo de subcontratados desconhecidos.</p></div></li>
         <li><span class="tick" aria-hidden="true">✓</span><div><h3>Licenciada &amp; segurada</h3><p>Empresa licenciada, segurada e em conformidade com as normas em todas as obras com licença.{{#se dados.alvara}} Alvará n.º {{ dados.alvara }}.{{/se}}{{#se dados.seguro}} {{ dados.seguro }}{{/se}}</p></div></li>
         <li><span class="tick" aria-hidden="true">✓</span><div><h3>Garantia de execução</h3><p>Respondemos pelo nosso trabalho durante dois anos além das garantias de materiais dos fabricantes.</p></div></li>
       </ul>
+      <div class="quem-somos">
+        <h3>Quem somos</h3>
+        <p>A {{ site.legalName }} trabalha desde {{ site.founded }} com equipa própria.{{#se dados.zona}} Trabalhamos em {{ dados.zona }}.{{/se}}{{#se dados.morada}} A sede é em {{ dados.morada }}.{{/se}}</p>
+      </div>
     </div>
-    <!-- uma fotografia real em vez de números: a obra M03, com ligação para a ficha -->
+    <!-- uma fotografia real em vez de números: a obra M03, com ligação para a ficha; o perfil do Google quando existir
+         (as avaliações nunca são citadas no site) -->
     <figure class="trust-foto reveal">
       <div class="frame">{{foto 02 sizes="(max-width: 980px) calc(100vw - 32px), 580px" foco="50% 40%"}}</div>
-      <figcaption><a class="link-seta" href="{{ root }}obras/edificios-e-apartamentos.html">Ver a obra<span aria-hidden="true"> →</span></a></figcaption>
+      <figcaption class="links">
+        <a class="link-seta" href="{{ root }}obras/edificios-e-apartamentos.html">Ver a obra<span aria-hidden="true"> →</span></a>{{#se dados.googleMaps}}
+        <a class="link-seta" href="{{ dados.googleMaps }}" target="_blank" rel="noopener">Ver o perfil e as avaliações no Google<span aria-hidden="true"> →</span></a>{{/se}}
+      </figcaption>
     </figure>
   </div>
 </section>

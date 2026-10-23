@@ -1,17 +1,14 @@
-<!--meta {"file": "404.html", "title": "Página não encontrada · Melperfaz", "description": "Esta página não existe ou mudou de sítio. Siga para o início, para as obras ou para os serviços da Melperfaz, ou fale connosco por telefone ou WhatsApp.", "nav": "", "robots": "noindex", "css": ["pag-paginas.css"]} -->
-{{> page-head eyebrow="Erro 404" titulo="Esta página não existe." intro="A ligação pode estar errada ou a página mudou de sítio. Escolha um destes caminhos, ou ligue-nos."}}
+<!--meta {"file": "404.html", "title": "Página não encontrada · Melperfaz", "description": "Esta página não existe ou mudou de sítio. Siga para o início ou para as obras da Melperfaz, ou peça o orçamento da sua obra.", "nav": "", "robots": "noindex", "css": ["pag-paginas.css"]} -->
+{{> page-head eyebrow="Erro 404" titulo="Esta página não existe" intro="A ligação pode estar errada ou a página mudou de sítio. Escolha um destes caminhos."}}
 
 <section class="sec s-paper sec-junta pag-curta" aria-label="Caminhos">
   <div class="wrap">
     <div class="acoes">
-      <a class="btn" href="{{ site.phoneHref }}">Ligar {{ site.phone }}</a>
-      <a class="btn btn-ghost" href="{{wa geral}}" target="_blank" rel="noopener">Falar por WhatsApp</a>
+      <a class="btn" href="{{ root }}orcamento.html">Pedir Orçamento</a>
     </div>
     <nav class="links" aria-label="Páginas do site">
-      <a class="link-seta" href="{{ root }}index.html">Início<span aria-hidden="true"> →</span></a>
-      <a class="link-seta" href="{{ root }}index.html#servicos">Serviços<span aria-hidden="true"> →</span></a>
-      <a class="link-seta" href="{{ root }}obras.html">Obras<span aria-hidden="true"> →</span></a>
-      <a class="link-seta" href="{{ root }}orcamento.html">Pedir Orçamento<span aria-hidden="true"> →</span></a>
+      <a class="link-seta" href="{{ root }}obras.html">Ver as obras<span aria-hidden="true"> →</span></a>
+      <a class="link-seta" href="{{ root }}index.html">Voltar ao início<span aria-hidden="true"> →</span></a>
     </nav>
   </div>
 </section>

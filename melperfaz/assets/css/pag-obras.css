@@ -1,10 +1,18 @@
 /* Página Obras (obras.html) e fichas de obra (obras/<slug>.html). O PageHead (page-head.html), as migalhas, a prosa e
    a ficha vivem em site.css (uma só definição para todas as páginas). */
 
+/* obras.html: o índice dos grupos no PageHead (ligações de 44 px) e um cabeçalho por grupo (h2 com o estilo de cartão) */
+.indice-grupos { display: flex; flex-wrap: wrap; gap: 0 var(--space-26); margin-top: var(--space-22); }
+.indice-grupos a { display: inline-flex; align-items: center; min-height: var(--alvo); color: var(--fg); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.grupo-head { margin-bottom: var(--space-32); }
+.grupo-t { font-size: var(--fs-card); }
+.grupo-n { margin-top: var(--space-6); font-size: var(--fs-label); color: var(--fg-2); }
+
 /* ficha: a fotografia à largura do contentor, até 78% do ecrã de altura, logo por baixo do PageHead */
 .obra-foto .foto { width: 100%; height: min(78vh, 75vw); background: var(--ink-raised); }
 .obra-foto img { width: 100%; height: 100%; object-fit: cover; }
-.obra-corpo .duas { display: grid; grid-template-columns: 1.2fr .8fr; gap: var(--space-80); align-items: start; }
+/* o trabalho: grelha 7/5, com os títulos das duas colunas alinhados no topo */
+.obra-corpo .duas { display: grid; grid-template-columns: 7fr 5fr; gap: var(--space-80); align-items: start; }
 .obra-corpo .duas > * { width: 100%; min-width: 0; }
 .lista-visto { list-style: none; }
 .lista-visto li { position: relative; padding: var(--space-12) 0 var(--space-12) var(--space-44); color: var(--fg-2); border-bottom: var(--border-hairline) solid var(--rule); }
@@ -17,7 +25,4 @@
 
 @media (max-width: 980px) {
   .obra-corpo .duas { grid-template-columns: 1fr; gap: var(--space-44); }
-}
-@media (max-width: 640px) {
-  .ficha dl { grid-template-columns: 1fr; }
 }

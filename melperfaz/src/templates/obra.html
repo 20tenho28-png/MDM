@@ -7,23 +7,27 @@
   </div>
 </section>
 
+<!-- o trabalho: à esquerda o que a Melperfaz deu sobre a obra («O problema» e «O que fizemos», quando existem) e o que
+     se vê na obra; à direita a ficha, só quando há pelo menos um facto (Local, Data, Duração, Resultado) -->
 <section class="sec s-paper sec-junta obra-corpo" aria-label="Sobre a obra">
   <div class="wrap duas">
-    <div class="prosa">
-      <h2>O que se vê na fotografia</h2>
+    <div class="prosa">{{#se obra.factos.problema}}
+      <h2>O problema</h2>
+      <p>{{ obra.factos.problema }}</p>{{/se}}{{#se obra.factos.trabalho}}
+      <h2>O que fizemos</h2>
+      <p>{{ obra.factos.trabalho }}</p>{{/se}}
+      <h2>Na obra</h2>
       <ul class="lista-visto">{{li obra.detalhes}}</ul>
-    </div>
+    </div>{{#se obra.temFactos}}
     <div class="ficha">
       <h2 class="ficha-t" id="fichaT">Ficha da obra</h2>
       <dl aria-labelledby="fichaT">
-        <div><dt>Código</dt><dd>{{ obra.code }}</dd></div>
-        <div><dt>Serviço</dt><dd><a href="{{ root }}{{ obra.catAnchor }}">{{ obra.servico.nome }}</a></dd></div>
-        {{#se obra.factos.data}}<div><dt>Data</dt><dd>{{ obra.factos.data }}</dd></div>{{/se}}
         {{#se obra.factos.localExato}}<div><dt>Local</dt><dd>{{ obra.factos.localExato }}</dd></div>{{/se}}
+        {{#se obra.factos.data}}<div><dt>Data</dt><dd>{{ obra.factos.data }}</dd></div>{{/se}}
         {{#se obra.factos.duracao}}<div><dt>Duração</dt><dd>{{ obra.factos.duracao }}</dd></div>{{/se}}
         {{#se obra.factos.resultado}}<div class="ficha-largo"><dt>Resultado</dt><dd>{{ obra.factos.resultado }}</dd></div>{{/se}}
       </dl>
-    </div>
+    </div>{{/se}}
   </div>
 </section>
 

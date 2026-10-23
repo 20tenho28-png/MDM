@@ -157,32 +157,56 @@ test('os parciais novos: PageHead, CtaBand e ProofLine', () => {
   for (const f of paginas()) assert.ok(!/class="cta-inner"|class="cta-form"|class="cta-faixa/.test(leV(f)), `${f}: sem as faixas antigas`);
 });
 
-test('a página inicial: secções pela ordem do sistema de desenho, cartões, passos, obras e comparador', () => {
+test('a página inicial: Hero › Obras em destaque › Serviços › Porquê Nós › faixa clay, sem formulário nem processo', () => {
   const t = le('index.html');
-  const ordem = ['id="top"', 'id="servicos"', 'id="processo"', 'id="obras"', 'id="porque-nos"', 'id="contacto"'];
+  const ordem = ['id="top"', 'id="obras"', 'id="servicos"', 'id="porque-nos"', 'id="contacto"'];
   let pos = 0;
   for (const marca of ordem) { const i = t.indexOf(marca); assert.ok(i > pos, `ordem: ${marca}`); pos = i; }
-  assert.equal((t.match(/<a class="svc reveal"/g) || []).length, 6, 'seis serviços');
-  assert.equal((t.match(/<li class="step reveal"/g) || []).length, 4, 'quatro passos');
-  const grelha = /<div class="photo-grid">(.*?)<\/div>\s*<div class="ba-wrap/s.exec(t);
-  assert.ok(grelha, 'grelha das obras antes do comparador');
-  assert.equal((grelha[1].match(/<figure class="pg reveal" data-cat="/g) || []).length, OBRAS.length);
-  assert.match(t, /<input type="range" min="0" max="100" value="50" class="ba-range" data-ba-range aria-label="Comparar demolição e acabamento">/);
-  assert.match(t, /<em>de raiz\.<\/em>/);
-  const anos = new Date().getFullYear() - Number(SITE.founded);
-  assert.match(t, new RegExp(`${anos} anos de ofício`));
-  // hero «split»: um só cartão «25 anos, desde 2001», sem rotação; saem o marquee, o stat card e o «100%»
-  assert.match(t, /<section class="hero s-paper" id="top"[^>]*>\s*<div class="wrap hero-grid">/);
-  assert.match(t, new RegExp(`<p class="tag-card"><span class="n">${anos}</span><span class="l">anos, desde ${SITE.founded}</span></p>`));
-  for (const fora of ['class="strip"', 'stat-card', 'hero-cheio', 'hero-tag2', 'hero-foto-leg', '100%</span>']) assert.ok(!t.includes(fora), `sem ${fora}`);
-  // as superfícies, pela ordem da página: paper, bone, paper, ink, bone, clay e o rodapé ink
+  // as superfícies, pela ordem da página: paper, ink, paper, bone, clay e o rodapé ink
   const sups = [...t.matchAll(/<(?:section|footer) class="[^"]*\b(s-(?:paper|bone|ink|clay))\b/g)].map(m => m[1]);
-  assert.deepEqual(sups, ['s-paper', 's-bone', 's-paper', 's-ink', 's-bone', 's-clay', 's-ink']);
-  const pre = [...t.matchAll(/<a class="svc reveal" href="orcamento\.html\?tipo=([^"]+)"/g)].map(m => m[1]);
-  assert.deepEqual(pre, SERVICOS.map(s => s.id), 'um cartão por serviço, que leva a orcamento.html com o id de site.json «servicos»');
+  assert.deepEqual(sups, ['s-paper', 's-ink', 's-paper', 's-bone', 's-clay', 's-ink']);
+  // hero «split»: eyebrow, h1, lead, «Pedir Orçamento» e «Ligar», o texto de apoio, a ProofLine e um só cartão
+  assert.match(t, /<section class="hero s-paper" id="top"[^>]*>\s*<div class="wrap hero-grid">/);
+  assert.match(t, /<span class="eyebrow">Reabilitação e construção<\/span>/, 'eyebrow sem zona enquanto não houver');
+  assert.match(t, /<em>de raiz\.<\/em>/);
+  assert.match(t, /<p class="lead">Reabilitação de edifícios, espaços comerciais e apartamentos\. Da estrutura ao acabamento, com uma equipa responsável do início ao fim\.<\/p>/);
+  assert.match(t, /<div class="acoes">\s*<a href="orcamento\.html" class="btn">Pedir Orçamento<\/a>\s*<a href="tel:\+351961245288" class="btn btn-ghost">Ligar 961 245 288<\/a>\s*<\/div>\s*<p class="hero-apoio">Visita e orçamento gratuitos, sem compromisso\.<\/p>\s*(?:<!--[\s\S]*?-->\s*)?<ul class="prova">/);
+  const anos = new Date().getFullYear() - Number(SITE.founded);
+  assert.match(t, new RegExp(`<p class="tag-card"><span class="n">${anos}</span><span class="l">anos, desde ${SITE.founded}</span></p>`));
+  // cada facto uma vez: «25 anos, desde 2001» só no cartão do hero; «Quem somos» diz desde quando trabalham
+  const principal = /<main[\s\S]*?<\/main>/.exec(leV('index.html'))[0];
+  assert.doesNotMatch(principal, /anos de ofício|Desde 2001|Licenciada · /, 'sem os «25 anos / 2001» repetidos');
+  assert.equal((principal.match(new RegExp(`desde ${SITE.founded}`, 'g')) || []).length, 2, 'o cartão do hero e «Quem somos»');
+  assert.match(t, /<figcaption class="hero-leg">Carrinha da Melperfaz numa obra de reabilitação<\/figcaption>/, 'legenda em texto simples, sem ligação');
+  for (const fora of ['class="strip"', 'stat-card', 'hero-cheio', 'hero-tag2', 'hero-foto-leg', '100%</span>', 'id="processo"', 'class="step', 'Ver Todas as Obras', 'class="svc-grid"', 'data-ba']) assert.ok(!t.includes(fora), `sem ${fora}`);
   assert.doesNotMatch(t, /id="quoteForm"|data-preselect/, 'a página inicial já não tem formulário');
-  const nomes = [...t.matchAll(/<a class="svc reveal"[^>]*><span class="num">\d\d<\/span><h3>([^<]+)<\/h3>/g)].map(m => m[1]);
-  assert.deepEqual(nomes, SERVICOS.map(s => esc(s.nome).replace(/\\/g, '')), 'os nomes dos cartões são os dos serviços');
+  // as obras em destaque (data/obras.json «destaque»), com «Antes e depois» na que tem o comparador, e «Ver as N obras»
+  const grelha = /<div class="photo-grid destaques">([\s\S]*?)<\/div>\s*<div class="acoes obras-mais">/.exec(t);
+  assert.ok(grelha, 'grelha das obras em destaque');
+  const destaques = OBRAS.filter(o => o.destaque);
+  assert.deepEqual([...grelha[1].matchAll(/<h3><a href="obras\/([^"]+)\.html">/g)].map(m => m[1]), destaques.map(o => o.slug));
+  assert.equal((grelha[1].match(/<span class="pg-tag">Antes e depois<\/span>/g) || []).length, destaques.filter(o => o.antesDepois).length);
+  assert.match(t, new RegExp(`<a class="btn btn-ghost" href="obras\\.html">Ver as ${OBRAS.length} obras</a>`));
+  // ServiceList: uma linha por serviço, sem ser ligação; «Ver obras (N)» só com obras; «Pedir orçamento» com o tipo
+  const linhas = [...t.matchAll(/<li class="svc reveal" data-servico="([^"]+)">([\s\S]*?)<\/li>/g)];
+  assert.deepEqual(linhas.map(m => m[1]), SERVICOS.map(s => s.id), 'uma linha por serviço de site.json «servicos»');
+  for (const [, id, corpo] of linhas) {
+    const s = SERVICOS.find(x => x.id === id), n = OBRAS.filter(o => s.cat && o.cat === s.cat).length;
+    assert.match(corpo, new RegExp(`<h3>${esc(s.nome)}</h3>`), `${id}: nome`);
+    assert.match(corpo, new RegExp(`<a class="link-seta" href="orcamento\\.html\\?tipo=${id}" data-tipo="${id}">Pedir orçamento<span class="so-leitor"> de ${esc(s.nome)}</span>`), `${id}: pedir com o tipo`);
+    if (n) {
+      assert.match(corpo, new RegExp(`<a class="link-seta" href="obras\\.html#${s.cat}">Ver obras \\(${n}\\)`), `${id}: ver as ${n} obras`);
+      assert.match(corpo, /<div class="svc-mini"><picture class="foto"[\s\S]*?alt=""/, `${id}: miniatura decorativa`);
+    } else assert.doesNotMatch(corpo, /Ver obras|svc-mini/, `${id}: sem obras, sem promessas vazias`);
+  }
+  assert.doesNotMatch(t, /<a class="svc|class="arrow"/, 'a linha do serviço não é uma ligação e não tem seta');
+  // Porquê Nós: a lista de confiança, «Quem somos» e a fotografia da M03 com «Ver a obra»
+  assert.equal((t.match(/<span class="tick" aria-hidden="true">✓<\/span>/g) || []).length, 4);
+  assert.match(t, /<h3>Quem somos<\/h3>\s*<p>A Melperfaz, Construção Civil, Lda\. trabalha desde 2001 com equipa própria\.<\/p>/);
+  assert.match(t, /<a class="link-seta" href="obras\/edificios-e-apartamentos\.html">Ver a obra/);
+  // os endereços antigos (#contacto, ?tipo=) vão para orcamento.html: o script é o primeiro elemento do <body>
+  assert.match(t, /<body class="[^"]*" data-nav="inicio">\s*<!--[\s\S]*?-->\s*<script>\(function\(\)\{var l=location,m=\/\[\?&\]tipo=\(\[\^&#\]\*\)\/\.exec\(l\.search\);if\(m\|\|l\.hash\.slice\(1\)==='contacto'\)l\.replace\('orcamento\.html'\+\(m\?'\?tipo='\+m\[1\]:''\)\);\}\)\(\);<\/script>/);
+  for (const f of paginas()) if (f !== 'index.html') assert.doesNotMatch(le(f), /l\.replace\('orcamento\.html'/, `${f}: sem reencaminhamento`);
 });
 
 test('o formulário Netlify: só em orcamento.html, atributos, campos pela ordem, opções, isco e agradecimento', () => {
@@ -224,7 +248,7 @@ test('o formulário Netlify: só em orcamento.html, atributos, campos pela ordem
   assert.match(obg, /prazo de um dia útil/);
 });
 
-test('as fichas de obra: migalhas, serviço, orçamento pré-escolhido, WhatsApp com o código, anterior e seguinte', () => {
+test('as fichas de obra: migalhas, serviço, «Na obra», ficha só com factos, orçamento pré-escolhido, WhatsApp com o código', () => {
   OBRAS.forEach((o, i) => {
     const f = `obras/${o.slug}.html`;
     const t = le(f);
@@ -232,7 +256,14 @@ test('as fichas de obra: migalhas, serviço, orçamento pré-escolhido, WhatsApp
     const s = servicoDe(o);
     assert.ok(s, `${f}: o «cat» ${o.cat} é o de um serviço`);
     assert.match(t, new RegExp(`<span class="eyebrow"><a href="\\.\\./obras\\.html#${s.cat}">${esc(s.nome)}</a></span>`), `${f}: eyebrow com o serviço, sem código`);
-    assert.match(t, new RegExp(`<dt>Serviço</dt><dd><a href="\\.\\./obras\\.html#${s.cat}">${esc(s.nome)}</a>`), `${f}: o serviço liga ao grupo em obras.html`);
+    // o trabalho: «Na obra» com os detalhes; «O problema» e «O que fizemos» só com os factos; a ficha só com Local, Data,
+    // Duração ou Resultado (sem «Código» nem «Serviço»: o eyebrow já liga ao serviço)
+    assert.match(t, /<div class="prosa">[\s\S]*?<h2>Na obra<\/h2>\s*<ul class="lista-visto">/, `${f}: «Na obra»`);
+    assert.doesNotMatch(t, /O que se vê na fotografia|<dt>Código<\/dt>|<dt>Serviço<\/dt>/, `${f}: sem a descrição da fotografia nem o código`);
+    assert.equal(t.includes('<h2>O problema</h2>'), Boolean(o.factos.problema), `${f}: «O problema» só com o facto`);
+    assert.equal(t.includes('<h2>O que fizemos</h2>'), Boolean(o.factos.trabalho), `${f}: «O que fizemos» só com o facto`);
+    const temFactos = ['localExato', 'data', 'duracao', 'resultado'].some(k => o.factos[k]);
+    assert.equal(/<div class="ficha">/.test(t), temFactos, `${f}: a ficha só com pelo menos um facto`);
     const lds = [...t.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)].map(m => JSON.parse(m[1]));
     const bc = lds.find(l => l['@type'] === 'BreadcrumbList');
     assert.ok(bc && bc.itemListElement.length === 3 && bc.itemListElement[2].item === `${SITE.baseUrl}/${f}`, `${f}: migalhas`);
@@ -249,13 +280,39 @@ test('as fichas de obra: migalhas, serviço, orçamento pré-escolhido, WhatsApp
     assert.equal((t.match(/<figure class="pg reveal"/g) || []).length, 2, `${f}: duas outras obras`);
     for (const d of o.detalhes) assert.ok(t.includes(`<li>${d.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;')}</li>`), `${f}: detalhe «${d}»`);
     assert.ok(!t.includes('<dt>Data</dt>') || o.factos.data, `${f}: a data só com facto`);
-    if (o.antesDepois) assert.match(t, /data-ba-range/, `${f}: comparador`); else assert.match(t, /class="obra-foto"/, `${f}: fotografia grande`);
+    if (o.antesDepois) {
+      assert.match(t, /data-ba-range/, `${f}: comparador`);
+      assert.doesNotMatch(t, /class="ba-head"/, `${f}: o comparador sem cabeçalho (o h3 repetia o h1)`);
+    } else {
+      assert.match(t, /class="obra-foto"/, `${f}: fotografia grande`);
+      assert.doesNotMatch(t, /data-ba-range/, `${f}: o comparador só na obra que o tem`);
+    }
   });
+});
+
+test('obras.html: o índice, uma secção por serviço com obras (ink e bone a alternar), H1 › H2 › H3, sem comparador', () => {
   const obras = le('obras.html');
   for (const o of OBRAS) assert.ok(obras.includes(`href="obras/${o.slug}.html"`), `obras.html liga a ${o.slug}`);
   assert.doesNotMatch(obras, /class="chip"|data-filtro|class="filtros"/, 'obras.html sem chips de filtro (voltam com 8 ou mais obras)');
-  assert.doesNotMatch(obras, /mosaico/, 'obras.html sem mosaico');
+  assert.doesNotMatch(obras, /mosaico|data-ba/, 'obras.html sem mosaico e sem comparador');
   assert.equal((obras.match(/<figure class="pg reveal" data-cat="/g) || []).length, OBRAS.length, 'obras.html mostra todas as obras');
+  const comObras = SERVICOS.filter(s => s.cat && OBRAS.some(o => o.cat === s.cat));
+  const indice = [.../<nav class="indice-grupos" aria-label="Obras por serviço">([\s\S]*?)<\/nav>/.exec(obras)[1].matchAll(/<a href="#([^"]+)">([^<]+)<\/a>/g)];
+  assert.deepEqual(indice.map(m => [m[1], m[2]]), comObras.map(s => [s.cat, `${s.nome} (${OBRAS.filter(o => o.cat === s.cat).length})`]), 'o índice: os serviços com obras e quantas');
+  const grupos = [...obras.matchAll(/<section class="sec (s-\w+) grupo-obras" id="([^"]+)" aria-labelledby="g-\2">([\s\S]*?)<\/section>/g)];
+  assert.deepEqual(grupos.map(m => m[2]), comObras.map(s => s.cat), 'uma secção por serviço com obras, com a âncora do serviço');
+  assert.deepEqual(grupos.map(m => m[1]), comObras.map((s, i) => ['s-ink', 's-bone'][i % 2]), 'ink e bone a alternar');
+  for (const [, , cat, corpo] of grupos) {
+    const s = comObras.find(x => x.cat === cat), n = OBRAS.filter(o => o.cat === cat);
+    assert.match(corpo, new RegExp(`<h2 class="grupo-t" id="g-${cat}">${esc(s.nome)}</h2>\\s*<p class="grupo-n">${n.length} ${n.length === 1 ? 'obra' : 'obras'}</p>`), `${cat}: h2 e quantas`);
+    assert.deepEqual([...corpo.matchAll(/<h3><a href="obras\/([^"]+)\.html">/g)].map(m => m[1]), n.map(o => o.slug), `${cat}: as obras do serviço, em h3`);
+  }
+  // a primeira fotografia da página carrega já; as outras com carregamento diferido
+  assert.equal((obras.match(/<figure class="pg[\s\S]*?loading="eager"/g) || []).length >= 1 && (obras.match(/fetchpriority="high"/g) || []).length, 1, 'só a primeira fotografia é prioritária');
+  // a ordem das superfícies: paper (PageHead), grupos, clay e o rodapé ink; ink nunca encosta a ink
+  const sups = [...obras.matchAll(/<(?:section|footer) class="[^"]*\b(s-(?:paper|bone|ink|clay))\b/g)].map(m => m[1]);
+  assert.deepEqual(sups, ['s-paper', ...grupos.map(m => m[1]), 's-clay', 's-ink']);
+  for (let i = 1; i < sups.length; i++) assert.ok(!(sups[i] === 's-ink' && sups[i - 1] === 's-ink'), 'duas secções ink nunca se tocam');
 });
 
 test('os dados: vocabulário dos serviços, obras em destaque, factos e o --faltam', () => {
@@ -339,7 +396,7 @@ test('o --check falha com uma ligação partida e com um travessão', () => {
     let r = spawnSync('python3', ['build.py', '--check'], { cwd: d, encoding: 'utf8', env: { ...process.env, MELPERFAZ_OUT: path.join(d, 'public') } });
     assert.equal(r.status, 1, 'ligação partida: sai com 1');
     assert.match(r.stdout, /404\.html: referência partida → \/obras-antigas\.html/);
-    fs.writeFileSync(p, fs.readFileSync(p, 'utf8').replace('obras-antigas.html', 'obras.html').replace('Esta página não existe.', 'Esta página \u2014 não existe.'));
+    fs.writeFileSync(p, fs.readFileSync(p, 'utf8').replace('obras-antigas.html', 'obras.html').replace('titulo="Esta página não existe"', 'titulo="Esta página \u2014 não existe"'));
     r = spawnSync('python3', ['build.py', '--check'], { cwd: d, encoding: 'utf8', env: { ...process.env, MELPERFAZ_OUT: path.join(d, 'public') } });
     assert.equal(r.status, 1, 'travessão: sai com 1');
     assert.match(r.stdout, /404\.html: travessão/);
@@ -360,6 +417,41 @@ test('o --check falha com um «Pedir Orçamento» fora de orcamento.html e com o
     assert.equal(r.status, 1, 'formulário fora de orcamento.html: sai com 1');
     assert.match(r.stdout, /404\.html: o formulário de orçamento só existe em orcamento\.html/);
   } finally { fs.rmSync(d, { recursive: true, force: true }); }
+});
+
+test('o --check falha com os rótulos retirados e com ligações para #contacto', () => {
+  const d = copiaFontes();
+  try {
+    const p = path.join(d, 'src/pages/404.html');
+    fs.appendFileSync(p, '\n<p><a href="{{ root }}index.html#contacto">Contacto</a> <a href="{{ root }}orcamento.html">Orçamento Gratuito</a></p>\n'
+      + '<p><a href="{{ root }}orcamento.html">Pedir Orçamento Gratuito</a> <a href="{{wa geral}}">Chamar no WhatsApp</a></p>\n'
+      + '<p>Visita e orçamento gratuitos, sem compromisso.</p>\n');
+    const r = spawnSync('python3', ['build.py', '--check'], { cwd: d, encoding: 'utf8', env: { ...process.env, MELPERFAZ_OUT: path.join(d, 'public') } });
+    assert.equal(r.status, 1, 'sai com 1');
+    assert.match(r.stdout, /404\.html: ligação para #contacto → href="\/index\.html#contacto"/);
+    assert.match(r.stdout, /404\.html: «Orçamento Gratuito» como nome de ligação/);
+    assert.match(r.stdout, /404\.html: rótulo retirado «Pedir Orçamento Gratuito»/);
+    assert.match(r.stdout, /404\.html: rótulo retirado «Chamar no WhatsApp»/);
+    assert.equal((r.stdout.match(/^ {2}404\.html: /gm) || []).length, 5, 'o texto de apoio «orçamento gratuitos» passa');
+  } finally { fs.rmSync(d, { recursive: true, force: true }); }
+});
+
+test('as páginas curtas e a privacidade: 404 com três caminhos, obrigado sem pedir de novo, a Ficha do responsável', () => {
+  const e = leV('404.html');
+  assert.match(e, /<h1 id="pagT">Esta página não existe<\/h1>/);
+  assert.deepEqual([...e.matchAll(/<a class="(btn|link-seta)" href="([^"]+)">([^<]+)/g)].map(m => [m[1], m[2], m[3]]),
+    [['btn', '/orcamento.html', 'Pedir Orçamento'], ['link-seta', '/obras.html', 'Ver as obras'], ['link-seta', '/index.html', 'Voltar ao início']]);
+  const o = leV('obrigado.html');
+  assert.match(o, /<a class="btn" href="https:\/\/wa\.me\/[^"]+" target="_blank" rel="noopener">Enviar fotografias por WhatsApp<\/a>\s*<a class="btn btn-ghost" href="tel:\+351961245288">Ligar 961 245 288<\/a>/);
+  assert.match(o, /<a class="link-seta" href="obras\.html">Ver as obras/);
+  const p = leV('privacidade.html');
+  const resp = /<dl aria-label="Responsável pelos dados">([\s\S]*?)<\/dl>/.exec(p);
+  assert.ok(resp, 'a Ficha do responsável');
+  assert.match(resp[1], /<dt>Responsável<\/dt><dd>Melperfaz, Construção Civil, Lda\.<\/dd>/);
+  const doc = JSON.parse(fs.readFileSync(path.join(W, 'data/dados-melperfaz.json'), 'utf8'));
+  for (const [k, dt] of [['nif', 'NIF'], ['morada', 'Morada'], ['email', 'Email']]) assert.equal(resp[1].includes(`<dt>${dt}</dt>`), Boolean(doc[k].valor), `${dt} só quando existe`);
+  assert.equal((p.match(/<div class="ficha">/g) || []).length, 4, 'as fichas da privacidade são o componente Ficha');
+  assert.doesNotMatch(p, /priv-ficha/);
 });
 
 test('os parâmetros dos parciais: os declarados, os obrigatórios e nenhum a mais', () => {
@@ -401,7 +493,8 @@ test('as folhas de estilo: superfícies, um só .btn-ghost, estilos de texto e n
   assert.ok(new Set([...todas.matchAll(/var\((--fs-[a-z-]+)\)/g)].map(m => m[1])).size <= 11, 'no máximo 10 estilos e o das etiquetas');
   for (const fora of ['.strip', '.stat-card', '.hero-tag2', '.hero-cheio', '.wa-float', '.chip', '.filtros', '.obra-nav', '.cta-faixa',
     '.btn-ghost-ink', '.btn-ghost-paper', '.pag-simples', '.mosaico', 'infinite', '@keyframes scroll', 'waPulse', '.pag-cab', '.obra-cab',
-    '.cta-inner', '.cta-form', '.foot-morada', '--slider-width']) {
+    '.cta-inner', '.cta-form', '.foot-morada', '--slider-width', '.priv-ficha', '.svc-grid', '.proc-grid', '.step', '.work-mais', '.ba-head',
+    '.svc .arrow', '#porque-nos h2']) {
     assert.ok(!todas.includes(fora), `retirado: ${fora}`);
   }
   // uma só definição do PageHead, das migalhas e de .prosa h2 (em site.css)

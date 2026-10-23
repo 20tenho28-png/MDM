@@ -1,13 +1,20 @@
 <!--meta {"file": "obras.html", "title": "Obras · Melperfaz, Construção Civil", "description": "As obras da Melperfaz fotografadas no local pela nossa equipa: reabilitação de edifícios, fachadas e acabamentos, do desmonte ao revestimento novo.", "nav": "obras", "css": ["pag-obras.css"], "jsonld": ["breadcrumb"], "breadcrumb": [["Início", ""], ["Obras", "obras.html"]]} -->
-{{> page-head eyebrow="Obras" titulo="Cada fotografia é uma obra nossa" intro="Fotografias tiradas no local, durante e no fim de cada trabalho. Abra uma obra para ver o que se fez."}}
-
-<section class="sec s-ink" aria-label="As obras">
+<!-- O catálogo: as obras agrupadas por serviço (data/site.json «servicos»; só os serviços com obras), uma secção por grupo
+     com a âncora do serviço (#reabilitacao, #fachadas, #acabamentos), a alternar ink e bone. H1 › H2 do grupo › H3 de cada
+     obra. Um grupo de uma obra fica com meio cartão encostado à esquerda. Funciona sem JavaScript; os filtros só voltam
+     com 8 ou mais obras. A última secção é a faixa clay, antes do rodapé ink. -->
+{{> page-head eyebrow="Obras" titulo="Cada fotografia é uma obra nossa" intro="Fotografias tiradas no local, durante e no fim de cada trabalho. Abra uma obra para ver o que se fez." indice="Obras por serviço"}}
+{{#cada servicos}}{{#se item.obrasN}}
+<section class="sec {{ item.sup }} grupo-obras" id="{{ item.cat }}" aria-labelledby="g-{{ item.cat }}">
   <div class="wrap">
-    <div class="photo-grid" data-obras>
-      {{each obra-foto all eager1}}
+    <div class="grupo-head">
+      <h2 class="grupo-t" id="g-{{ item.cat }}">{{ item.nome }}</h2>
+      <p class="grupo-n">{{ item.obrasTexto }}</p>
     </div>
-    {{each antes-depois 05}}
+    <div class="photo-grid" data-obras>
+      {{each obra-foto cat={{ item.cat }} eager{{ item.eager }}}}
+    </div>
   </div>
 </section>
-
+{{/se}}{{/cada}}
 {{> cta titulo="Quer uma obra assim?" texto="Conte-nos o que precisa de fazer. Visitamos, medimos e damos um orçamento gratuito e sem compromisso."}}

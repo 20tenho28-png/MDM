@@ -11,7 +11,9 @@ A arquitetura é a do site da MDM (website/build.py), reduzida ao que este site 
 
 Sintaxe dos modelos (src/):
     <!--meta {...json...} -->           no topo de cada página: file, title, description, nav, robots, css, jsonld, breadcrumb,
-                                         header («reduzido»: só o logótipo e o telefone), barra («sem-orcamento» ou «nao»)
+                                         header («reduzido»: só o logótipo e o telefone), barra («sem-orcamento» ou «nao»),
+                                         reencaminha (true na página inicial: os endereços antigos #contacto e ?tipo= vão
+                                         para orcamento.html)
     {{ caminho.ponto }}                  valor de site.*, page.*, dados.*, obra.*, root (prefixo relativo à raiz), year, anos
     {{& caminho }}                       o mesmo, sem escapar o HTML
     {{> nome }}                          inclui src/partials/nome.html com o mesmo contexto
@@ -153,13 +155,18 @@ CAT_N = {**{c: sum(1 for o in OBRAS if o["cat"] == c) for c in CATEGORIAS}, "tod
 
 
 def servicos_ctx(root):
-    """Os serviços para os modelos: n (01…), obrasN, a primeira fotografia das suas obras, a âncora e o pedido."""
-    out = []
+    """Os serviços para os modelos: n (01…), obrasN e «N obras», a primeira fotografia das suas obras, a âncora e o pedido.
+    Os que têm obras são os grupos de obras.html: «sup» alterna ink e bone (a começar em ink, depois do PageHead paper) e
+    «eager» é «1» só no primeiro grupo (a primeira fotografia da página carrega já)."""
+    out, grupo = [], 0
     for i, s in enumerate(SERVICOS):
         obras = [o for o in OBRAS if s["cat"] and o["cat"] == s["cat"]]
         out.append({**s, "n": f"{i + 1:02d}", "obrasN": len(obras), "primeiraFoto": obras[0]["foto"] if obras else "",
+                    "obrasTexto": f"{len(obras)} {'obra' if len(obras) == 1 else 'obras'}",
                     "catAnchor": f"obras.html#{s['cat']}" if obras else "",
+                    "sup": ("s-ink", "s-bone")[grupo % 2] if obras else "", "eager": "1" if obras and grupo == 0 else "0",
                     "orcamentoHref": f"{root}orcamento.html?tipo={s['id']}"})
+        grupo += bool(obras)
     return out
 
 
@@ -416,7 +423,7 @@ HEADERS = ("", "reduzido")
 
 def page_ctx(meta, file):
     meta = {"nav": "", "robots": "index,follow", "og": "", "wa": "geral", "tipo": "", "italico": "", "header": "", "barra": "",
-            "atualizada": "", **meta}
+            "atualizada": "", "reencaminha": "", **meta}
     if meta["barra"] not in BARRAS:
         raise SystemExit(f"{file}: «barra» é {' ou '.join(repr(b) for b in BARRAS)} → {meta['barra']!r}")
     if meta["header"] not in HEADERS:
@@ -441,10 +448,9 @@ def page_ctx(meta, file):
             "barra": {"mostra": "1" if mostra_barra else "", "orcamento": "1" if barra_orcamento else ""},
             # «Pedir Orçamento» do cabeçalho e da barra: com ?tipo= e ?de= quando a página os conhece (fichas de obra)
             "pedidoHref": root + "orcamento.html",
-            # cartaoH: o nível do título dos cartões de obra (obra-foto.html); obras.html agrupa-os sob um h2 por serviço
-            "cartaoH": str(meta.get("cartaoH", 3)),
-            # ficha: «1» nas fichas de obra (o comparador perde o cabeçalho, que repetiria o h1, e carrega as fotos já)
-            "ficha": "", "baLoading": "lazy"}
+            # cartaoH: o nível do título dos cartões de obra (obra-foto.html): h3 debaixo do h2 da secção (na página
+            # inicial, nas outras obras de cada ficha e em cada grupo de obras.html)
+            "cartaoH": str(meta.get("cartaoH", 3))}
 
 
 def build_page(meta, body_tpl, extra_ctx=None):
@@ -551,8 +557,7 @@ def build():
                 # a imagem de partilha ao alto fica cortada nas pré-visualizações: só as deitadas; as outras levam a da empresa
                 "og": o["foto"] if o["orient"] == "landscape" else "", "jsonld": ["breadcrumb"],
                 "breadcrumb": [["Início", ""], ["Obras", "obras.html"], [o["title"], file]]}
-        files.append(build_page(meta, tpl, {"obra": o, "related": relacionadas(o), "pedidoHref": o["orcamentoHref"],
-                                            "ficha": "1", "baLoading": "eager"}))
+        files.append(build_page(meta, tpl, {"obra": o, "related": relacionadas(o), "pedidoHref": o["orcamentoHref"]}))
     urls = "".join(f"<url><loc>{SITE['baseUrl']}/{'' if f == 'index.html' else f}</loc></url>\n"
                    for f in files if f not in fora_do_mapa)
     (OUT / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -672,6 +677,33 @@ def check_pedir(f, text):
         alvo = href.group(1) if href else ""
         if not re.fullmatch(r"(?:/|(?:\.\./)*)%s(?:\?[^#]*)?" % re.escape(PAGINA_PEDIDO), alvo):
             out.append(f"{f}: «{rotulos[0]}» tem de levar a {PAGINA_PEDIDO} → href=\"{alvo}\"")
+    return out
+
+
+# um rótulo por ação: os nomes antigos dos botões e a âncora do formulário que saiu da página inicial não voltam.
+# «Orçamento gratuito» pode ser texto (o eyebrow e o cabeçalho de orcamento.html), mas não o nome de uma ligação.
+ROTULOS_FORA = [(re.compile(r"pedir or[cç]amento gratuito", re.I), "«Pedir Orçamento Gratuito»: o botão é «Pedir Orçamento»"),
+                (re.compile(r"chamar no whatsapp", re.I), "«Chamar no WhatsApp»: é «Falar por WhatsApp»")]
+LIGACAO_FORA = re.compile(r"or[cç]amento gratuito", re.I)
+
+
+def check_rotulos(f, text):
+    """Sem os rótulos antigos (em todo o texto visível, e «Orçamento Gratuito» como nome de ligação) e sem ligações para
+    #contacto: o formulário vive em orcamento.html e a página inicial reencaminha os endereços antigos."""
+    out = []
+    visivel = html.unescape(TAG_TEXTO_RE.sub(" ", re.sub(r"<!--.*?-->|<script.*?</script>", "", text, flags=re.S)))
+    visivel = re.sub(r"\s+", " ", visivel)
+    for rx, porque in ROTULOS_FORA:
+        if rx.search(visivel):
+            out.append(f"{f}: rótulo retirado {porque}")
+    for attrs, dentro in LIGACAO_RE.findall(text):
+        nome = re.search(r'\baria-label="([^"]*)"', attrs)
+        rotulo = " ".join(html.unescape(re.sub(r"<[^>]+>", " ", dentro) + " " + (nome.group(1) if nome else "")).split())
+        if LIGACAO_FORA.search(rotulo):
+            out.append(f"{f}: «{rotulo}» como nome de ligação (o botão é «Pedir Orçamento»; «gratuito» é texto de apoio)")
+        href = re.search(r'\bhref="([^"]*)"', attrs)
+        if href and href.group(1).endswith("#contacto"):
+            out.append(f"{f}: ligação para #contacto → href=\"{href.group(1)}\" (o pedido é em {PAGINA_PEDIDO})")
     return out
 
 
@@ -912,6 +944,7 @@ def check(files):
         problems += check_cabeca(f, text)
         problems += check_formulario(f, text)
         problems += check_pedir(f, text)
+        problems += check_rotulos(f, text)
         for a, b, c in REF_RE.findall(text):
             refs = [a] if a else ([s.strip().split()[0] for s in b.split(",")] if b else [c.strip("'\"")])
             for r in refs:

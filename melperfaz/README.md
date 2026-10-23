@@ -59,8 +59,8 @@ As do sistema de desenho («Voz e texto»), conferidas pelo `--check` onde dá:
 Desvios deliberados em relação ao sistema de desenho: as letras alojadas com o site em vez do Google Fonts; um menu para os
 ecrãs estreitos (o botão entra a 980 px e a barra de ações em baixo leva o telefone, o WhatsApp e o orçamento; o site
 publicado escondia os links a 640 px e o botão não abria nada); o formulário numa página própria, `orcamento.html`, em vez
-do fundo da página inicial; a bolha de WhatsApp sai (o cabeçalho e a barra já o têm); âncoras em português; os cartões de
-serviço como ligações para o pedido com o tipo pré-escolhido; a opção «Acabamentos» no formulário; as páginas Obras, fichas, obrigado, 404 e
+do fundo da página inicial; a bolha de WhatsApp sai (o cabeçalho e a barra já o têm); âncoras em português; a lista de
+serviços com «Ver obras (N)» e «Pedir orçamento» com o tipo pré-escolhido; as obras agrupadas por serviço em `obras.html`; a opção «Acabamentos» no formulário; as páginas Obras, fichas, obrigado, 404 e
 privacidade; o foco de teclado visível; a imagem de partilha da empresa nas fichas com fotografia ao alto.
 
 A idade da empresa («25 anos») calcula-se do ano de fundação em cada geração do site. O Netlify gera o site em cada
@@ -71,7 +71,7 @@ publicação; se o site ficar um ano sem mudanças, publicar de novo em janeiro 
 Ligações, imagens e `srcset` que existem; `?v=` nos CSS e JS; sem sintaxe de modelo nem placeholders; sem travessões,
 emoji ou o telefone escrito de outra forma; `lang`, um só `h1`, título e descrição com tamanho certo, canonical e
 `og:image` no domínio; JSON-LD válido com a empresa; o formulário Netlify só em `orcamento.html`, com os atributos, os
-campos e as opções de `site.json`; todos os «Pedir Orçamento» (texto ou `aria-label`) a levar a `orcamento.html`; `robots.txt`, `_headers` e `netlify.toml` de acordo com `preview`; todas as fotografias com os tamanhos e a
+campos e as opções de `site.json`; todos os «Pedir Orçamento» (texto ou `aria-label`) a levar a `orcamento.html`; nenhuma ligação para `#contacto` e nenhum dos rótulos retirados («Pedir Orçamento Gratuito», «Chamar no WhatsApp», «Orçamento Gratuito» como nome de ligação); `robots.txt`, `_headers` e `netlify.toml` de acordo com `preview`; todas as fotografias com os tamanhos e a
 prévia; os dados de `dados-melperfaz.json` com o formato certo (email, NIF, ligação do Google Maps).
 
 E o lint das folhas de estilo, para o sistema visual não voltar a derivar. Fora do bloco `:root` (os tokens), falha com:
