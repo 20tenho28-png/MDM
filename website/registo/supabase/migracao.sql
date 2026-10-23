@@ -143,3 +143,46 @@ begin
     alter publication supabase_realtime add table public.config;
   end if;
 end $$;
+
+-- Faturação (SAF-T): um resumo por mês dos ficheiros DadosFat_AAAA-MM (faturas, notas de crédito e recibos), lido pela
+-- página «Faturação» do registo. Só o que a página mostra: número, data, cliente, valores e a descrição; sem NIF, morada
+-- nem contactos. Correr este bloco outra vez não estraga nada.
+create table if not exists public.faturacao (
+  mes text primary key,
+  dados jsonb not null,
+  atualizado timestamptz not null default now(),
+  atualizado_por text
+);
+alter table public.faturacao enable row level security;
+drop policy if exists "faturacao: colaboradores" on public.faturacao;
+create policy "faturacao: colaboradores" on public.faturacao
+  for all to authenticated
+  using (public.autorizado()) with check (public.autorizado());
+do $$
+begin
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'faturacao') then
+    alter publication supabase_realtime add table public.faturacao;
+  end if;
+end $$;
+
+-- Fichas de cliente (separador «Clientes»): dados de contacto, equipamentos instalados, contrato de manutenção, notas e
+-- as marcas «contactado» e «ignorar». A chave é o nome normalizado, a mesma que junta o cliente das faturas (SAF-T) ao dos
+-- pedidos. Correr este bloco outra vez não estraga nada.
+create table if not exists public.clientes (
+  id text primary key,
+  dados jsonb not null,
+  versao integer not null default 1,
+  atualizado timestamptz not null default now(),
+  atualizado_por text
+);
+alter table public.clientes enable row level security;
+drop policy if exists "clientes: colaboradores" on public.clientes;
+create policy "clientes: colaboradores" on public.clientes
+  for all to authenticated
+  using (public.autorizado()) with check (public.autorizado());
+do $$
+begin
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and tablename = 'clientes') then
+    alter publication supabase_realtime add table public.clientes;
+  end if;
+end $$;

@@ -35,3 +35,7 @@ mdm-orcamento.zip
 
 # Registo de pedidos (website/registo/): os dados dos clientes ficam no Supabase; nenhum SQL de dados entra aqui.
 website/registo/supabase/dados*.sql
+
+# Ficheiros SAF-T da faturação (dados reais de clientes): nunca entram no repositório
+DadosFat_*.xml
+*.saft.xml
