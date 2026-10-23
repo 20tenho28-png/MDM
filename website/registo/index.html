@@ -475,6 +475,9 @@ body.app-on{background:var(--surface)}
 .logo small{font-family:var(--font-body);font-size:13px;font-weight:500;color:var(--ink-2);margin-left:8px;letter-spacing:0}
 .topbar .user{gap:14px;font-size:14px}
 .page{padding:22px max(16px,env(safe-area-inset-right,0px)) 110px 24px;max-width:1500px}
+.so-gerir{display:none!important}
+.subnav{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 16px}
+.subnav .chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
 .page-h{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .vista{display:inline-flex;align-items:center;gap:6px;position:relative;min-width:0;max-width:100%}
 .page-h > .vista{flex:0 1 auto}
@@ -555,6 +558,55 @@ body.app-on{background:var(--surface)}
   .fbox.dono,.fbox.fprio{flex:1 1 40%}
   .fab{display:none}
 }
+
+/* Quadro: arrastar */
+.kcard{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.kcard.karr{opacity:.35}
+.kfant{position:fixed;left:0;top:0;z-index:300;pointer-events:none;box-shadow:0 12px 30px rgba(8,16,22,.28);transform-origin:0 0;opacity:.95}
+body.a-arrastar{cursor:grabbing}
+body.a-arrastar *{cursor:grabbing!important}
+.col.alvo{outline:2px dashed var(--accent);outline-offset:-2px}
+.col.sobre{outline-style:solid;background:color-mix(in srgb,var(--accent) 10%,var(--sunk))}
+.col.fora{opacity:.45}
+.tag-conf{font-size:11.5px;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:0 7px;align-self:flex-start}
+/* Hoje */
+.tab-t{font-family:var(--font-display);font-size:32px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em}
+.hj-ola{font-size:15px;color:var(--ink-2);margin:2px 0 14px}
+.hj-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;margin-top:22px;align-items:start}
+@media (min-width:980px){.hj-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.hj-l{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center;padding:10px 12px 10px 14px;border-top:1px solid var(--line);position:relative}
+.hj-l:first-child{border-top:0}
+.hj-l::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--stripe,transparent)}
+.hj-n{font:inherit;font-weight:600;font-size:15px;background:none;border:0;padding:0;color:var(--ink);cursor:pointer;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.hj-s{grid-column:1;font-size:13px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;gap:6px;align-items:center;min-width:0}
+.hj-l > .btn,.hj-l > a.btn{grid-column:2;grid-row:1/3;text-decoration:none}
+.hj-mais{display:block;width:100%;font:inherit;font-size:13.5px;font-weight:600;color:var(--accent);background:none;border:0;border-top:1px solid var(--line);padding:10px 14px;text-align:left;cursor:pointer}
+.hj-mais:hover{background:var(--sunk)}
+details.sec-d{margin-top:22px;grid-column:1/-1}
+details.sec-d > summary{cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+details.sec-d > summary::-webkit-details-marker{display:none}
+details.sec-d > summary h2{display:inline}
+details.sec-d > summary::after{content:"Mostrar";font-size:13px;font-weight:600;color:var(--accent);margin-left:auto}
+details.sec-d[open] > summary::after{content:"Esconder"}
+/* Explicações atrás de um (i) e menu «⋯» */
+#app p.note:not(.vis),#app figcaption.note,.sheet p.note:not(.vis){display:none}
+button.i{display:inline-grid;place-items:center;width:20px;height:20px;margin-left:8px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);font:italic 600 12px/1 Georgia,serif;cursor:pointer;vertical-align:middle;padding:0;position:relative}
+button.i::after{content:"";position:absolute;inset:-12px}
+button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:var(--accent)}
+.pop{position:absolute;z-index:200;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 28px rgba(8,16,22,.18);padding:12px 14px;font-size:13.5px;line-height:1.5;max-width:min(360px,calc(100vw - 24px));white-space:pre-line}
+.pop.menu{padding:6px;display:flex;flex-direction:column;min-width:200px;white-space:normal}
+.pop.menu button{font:inherit;font-size:14.5px;text-align:left;background:none;border:0;border-radius:7px;padding:11px 12px;color:var(--ink);cursor:pointer;display:flex;gap:10px;align-items:center}
+.pop.menu button:hover,.pop.menu button:focus-visible{background:var(--sunk)}
+.pop.menu button.perigo{color:var(--bad)}
+.pop.menu svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.mais-b{width:38px;height:34px;border:1px solid var(--line);background:var(--surface);border-radius:8px;cursor:pointer;display:inline-grid;place-items:center;color:var(--ink);padding:0}
+.mais-b:hover{background:var(--sunk)}
+.mais-b svg{width:20px;height:20px;stroke:currentColor;fill:none}
+.ic{display:inline-flex;align-items:center;gap:5px}
+.ic svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.dias-b{font-size:12px;font-weight:700;color:#fff;background:var(--tone,var(--bad));border-radius:999px;padding:1px 8px;white-space:nowrap}
+.sg-h .dias-b{margin-left:auto}
+@media (pointer:coarse){.btn-sm{min-height:40px}.mais-b{width:44px;height:40px}.chip{min-height:38px}}
 /* Agenda */
 .ag-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px}
 .ag-bar .ag-semtxt{font-weight:600;font-size:17px;margin-right:auto}
@@ -629,16 +681,13 @@ body.app-on{background:var(--surface)}
 <div class="shell">
 <nav class="rail" aria-label="Menu">
   <button class="r-novo" type="button" id="railNovo" title="Novo pedido" aria-label="Novo pedido"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
-  <button type="button" id="rail-painel" title="Painel" aria-label="Painel"><svg viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0M12 15l4-5"/><circle cx="12" cy="15" r="1.4" fill="currentColor"/><path d="M4 19h16"/></svg><span class="r-badge" id="painelBadge"></span></button>
-  <button type="button" id="rail-seguimentos" title="Seguimentos de hoje" aria-label="Seguimentos de hoje"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 10.5l2.2 2.2 4.8-4.7"/></svg><span class="r-badge" id="sgBadge"></span></button>
-  <button type="button" id="rail-agenda" title="Agenda" aria-label="Agenda"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h3M8 17h6"/></svg><span class="r-badge" id="agBadge"></span></button>
-  <button type="button" id="rail-gerir" title="Gerir pedidos" aria-label="Gerir pedidos"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.3c2.5-.2 4.3 1.3 4.8 4.2"/></svg><span class="r-badge" id="redBadge"></span></button>
-  <button type="button" id="rail-pipeline" title="Pipeline" aria-label="Pipeline"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5" height="11" rx="1.5"/><rect x="16" y="4" width="5" height="7" rx="1.5"/></svg><span class="r-badge" id="fugaBadge"></span></button>
-  <button type="button" id="rail-resumo" title="Resumo" aria-label="Resumo"><svg viewBox="0 0 24 24"><path d="M5 20V12M10 20V5M15 20v-6M20 20V9"/></svg></button>
-  <button type="button" id="rail-clientes" title="Clientes" aria-label="Clientes"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.6-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.4-7 10-7 10z"/></svg><span class="r-badge" id="cliBadge"></span></button>
-  <button type="button" id="rail-faturacao" title="Faturação" aria-label="Faturação"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h6M9 16h6"/></svg></button>
-  <button type="button" id="rail-prazos" title="Prazos e exportar" aria-label="Prazos e exportar"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
+  <button type="button" id="rail-hoje" title="Hoje" aria-label="Hoje"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg><span class="r-badge" id="hjBadge"></span></button>
+  <button type="button" id="rail-gerir" title="Pedidos" aria-label="Pedidos"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5" height="11" rx="1.5"/><rect x="16" y="4" width="5" height="7" rx="1.5"/></svg></button>
+  <button type="button" id="rail-agenda" title="Agenda" aria-label="Agenda"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h3M8 17h6"/></svg></button>
+  <button type="button" id="rail-clientes" title="Clientes" aria-label="Clientes"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.3c2.5-.2 4.3 1.3 4.8 4.2"/></svg></button>
+  <button type="button" id="rail-prazos" title="Definições" aria-label="Definições"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
   <button type="button" class="r-fim" id="btnSair" title="Sair" aria-label="Sair"><svg viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 8l-4 4 4 4M6 12h10"/></svg></button>
+  <span hidden><span id="painelBadge"></span><span id="sgBadge"></span><span id="agBadge"></span><span id="redBadge"></span><span id="fugaBadge"></span><span id="cliBadge"></span></span>
 </nav>
 <div style="min-width:0">
 <header class="topbar">
@@ -656,18 +705,39 @@ body.app-on{background:var(--surface)}
       <option value="fechados">Pedidos fechados</option>
       <option value="todos">Todos os pedidos</option>
     </select></label>
+    <h1 class="tab-t" id="tabTitulo" hidden></h1>
     <button class="link-add" type="button" id="btnNovoTop">Adicionar pedido</button>
   </div>
+  <div class="subnav" id="subnav" role="tablist" aria-label="Vistas" hidden></div>
   <div class="tabs tabs2" role="tablist" aria-label="Vistas" id="tabs" hidden>
+    <button class="tab" role="tab" type="button" id="tab-hoje" aria-controls="v-hoje" aria-selected="false" tabindex="-1">Hoje</button>
     <button class="tab" role="tab" type="button" id="tab-painel" aria-controls="v-painel" aria-selected="false" tabindex="-1">Painel</button>
     <button class="tab" role="tab" type="button" id="tab-seguimentos" aria-controls="v-seguimentos" aria-selected="false" tabindex="-1">Seguimentos</button>
     <button class="tab" role="tab" type="button" id="tab-agenda" aria-controls="v-agenda" aria-selected="false" tabindex="-1">Agenda</button>
     <button class="tab" role="tab" type="button" id="tab-gerir" aria-controls="v-gerir" aria-selected="true">Gerir pedidos</button>
     <button class="tab" role="tab" type="button" id="tab-pipeline" aria-controls="v-pipeline" aria-selected="false" tabindex="-1">Pipeline</button>
-    <button class="tab" role="tab" type="button" id="tab-resumo" aria-controls="v-resumo" aria-selected="false" tabindex="-1">Resumo</button>
     <button class="tab" role="tab" type="button" id="tab-clientes" aria-controls="v-clientes" aria-selected="false" tabindex="-1">Clientes</button>
     <button class="tab" role="tab" type="button" id="tab-faturacao" aria-controls="v-faturacao" aria-selected="false" tabindex="-1">Faturação</button>
     <button class="tab" role="tab" type="button" id="tab-prazos" aria-controls="v-prazos" aria-selected="false" tabindex="-1">Prazos e exportar</button>
+  </div>
+
+  <div id="v-hoje" role="tabpanel" aria-labelledby="tab-hoje" hidden>
+    <p class="hj-ola" id="hjOla"></p>
+    <section class="kpis" id="hjKpis" aria-label="Hoje em números"></section>
+    <div class="hj-grid">
+      <section aria-labelledby="h-hj-env">
+        <div class="sec-h"><h2 id="h-hj-env">Enviar hoje</h2><span class="count" id="hjEnvCount"></span></div>
+        <div class="panel" id="hjEnv"></div>
+      </section>
+      <section aria-labelledby="h-hj-vis">
+        <div class="sec-h"><h2 id="h-hj-vis">Visitas de hoje</h2><span class="count" id="hjVisCount"></span></div>
+        <div class="panel" id="hjVis"></div>
+      </section>
+      <section aria-labelledby="h-hj-al">
+        <div class="sec-h"><h2 id="h-hj-al">Alertas</h2><span class="count" id="hjAlCount"></span></div>
+        <div class="panel" id="hjAl"></div>
+      </section>
+    </div>
   </div>
 
   <div id="v-painel" role="tabpanel" aria-labelledby="tab-painel" hidden>
@@ -688,7 +758,7 @@ body.app-on{background:var(--surface)}
         <div class="panel" id="pnAtrasos"></div>
       </section>
       <section aria-labelledby="h-pn-follow">
-        <div class="sec-h"><h2 id="h-pn-follow">Seguimentos e cobranças para hoje</h2><span class="count" id="pnFollowCount"></span></div>
+        <div class="sec-h"><h2 id="h-pn-follow">Seguimentos de hoje</h2><span class="count" id="pnFollowCount"></span></div>
         <div class="panel lista-p" id="pnFollow"></div>
       </section>
       <section aria-labelledby="h-pn-carga">
@@ -696,18 +766,15 @@ body.app-on{background:var(--surface)}
         <div class="panel" id="pnCarga"></div>
       </section>
       <section aria-labelledby="h-pn-bloq">
-        <div class="sec-h"><h2 id="h-pn-bloq">Bloqueados (para o scrum)</h2><span class="count" id="pnBloqCount"></span></div>
+        <div class="sec-h"><h2 id="h-pn-bloq">Bloqueados</h2><span class="count" id="pnBloqCount"></span></div>
         <div class="panel lista-p" id="pnBloq"></div>
       </section>
-      <section aria-labelledby="h-pn-tempos" style="grid-column:1/-1">
-        <div class="sec-h"><h2 id="h-pn-tempos">Dias por passo e prazo</h2><span class="count" id="pnTemposTag"></span></div>
-        <div class="panel tw" id="pnTempos"></div>
-      </section>
-      <section aria-labelledby="h-pn-funil" style="grid-column:1/-1">
-        <div class="sec-h"><h2 id="h-pn-funil">Funil por mês</h2><span class="count">pela data do pedido</span></div>
-        <div class="panel tw" id="pnFunil"></div>
-        <p class="note" id="pnFunilNota"></p>
-      </section>
+      <details class="sec-d"><summary><h2 id="h-pn-tempos">Dias por passo</h2><span class="count" id="pnTemposTag"></span></summary>
+        <section aria-labelledby="h-pn-tempos"><div class="panel tw" id="pnTempos"></div></section>
+      </details>
+      <details class="sec-d"><summary><h2 id="h-pn-funil">Funil por mês</h2></summary>
+        <section aria-labelledby="h-pn-funil"><div class="panel tw" id="pnFunil"></div><p class="note vis" id="pnFunilNota"></p></section>
+      </details>
       <section aria-labelledby="h-pn-perdas">
         <div class="sec-h"><h2 id="h-pn-perdas">Motivos de perda</h2><span class="count" id="pnPerdasCount"></span></div>
         <div class="panel" id="pnPerdas"></div>
@@ -717,13 +784,55 @@ body.app-on{background:var(--surface)}
         <div class="panel" id="pnTend"></div>
       </section>
     </div>
-    <p class="note" id="pnCobertura" style="margin-top:16px"></p>
+    <details class="sec-d"><summary><h2>Resumo e números do mês</h2></summary>
+    <section class="kpis oito" id="kpis" aria-label="Resumo"></section>
+    <div class="grid-p">
+      <section aria-labelledby="h-hoje" hidden>
+        <div class="sec-h"><h2 id="h-hoje">Para decidir hoje</h2><span class="count" id="hojeCount"></span></div>
+        <div class="panel lista-p" id="hojeLista"></div>
+        <p class="note">Os pedidos vermelhos e amarelos, pela ordem da triagem: primeiro o P, depois o que vence mais cedo.</p>
+      </section>
+      <section aria-labelledby="h-visitas" hidden>
+        <div class="sec-h"><h2 id="h-visitas">Visitas</h2><span class="count" id="visitasCount"></span></div>
+        <div class="panel lista-p" id="visitas"></div>
+        <p class="note">As visitas marcadas de hoje a 7 dias e as que já passaram sem a folha da visita.</p>
+      </section>
+      <section aria-labelledby="h-fila">
+        <div class="sec-h"><h2 id="h-fila">Fila por estado</h2><span class="count" id="filaCount"></span></div>
+        <div class="panel" id="fila"></div>
+      </section>
+      <section aria-labelledby="h-donos">
+        <div class="sec-h"><h2 id="h-donos">Por dono</h2><span class="count" id="limiteTxt"></span></div>
+        <div class="panel" id="donos"></div>
+        <p class="note">Pedidos com a bola na MDM por dono; o traço é o limite. As esperas (cliente, fornecedor) não contam.</p>
+      </section>
+      <section aria-labelledby="h-meses">
+        <div class="sec-h"><h2 id="h-meses">Novos e fechados por mês</h2><span class="count">últimos 6 meses</span></div>
+        <div class="panel" id="meses"></div>
+      </section>
+      <section aria-labelledby="h-valor">
+        <div class="sec-h"><h2 id="h-valor">Orçamentos</h2><span class="count">últimos 90 dias</span></div>
+        <div class="panel" id="valor"></div>
+      </section>
+      <section aria-labelledby="h-origem">
+        <div class="sec-h"><h2 id="h-origem">De onde vêm os pedidos</h2><span class="count">últimos 90 dias</span></div>
+        <div class="panel" id="origem"></div>
+      </section>
+      <section aria-labelledby="h-ativ">
+        <div class="sec-h"><h2 id="h-ativ">Atividade recente</h2></div>
+        <div class="panel" id="atividade"></div>
+      </section>
+    </div>
+    </details>
+    <details class="sec-d"><summary><h2>Cobertura dos dados</h2></summary>
+      <p class="note vis" id="pnCobertura"></p>
+    </details>
   </div>
 
   <div id="v-seguimentos" role="tabpanel" aria-labelledby="tab-seguimentos" hidden>
     <p class="hint alert" id="sgAviso" hidden></p>
     <section aria-labelledby="h-sg-hoje">
-      <div class="sec-h"><h2 id="h-sg-hoje">Seguimentos de hoje</h2><span class="count" id="sgHojeCount"></span></div>
+      <div class="sec-h"><h2 id="h-sg-hoje">Para enviar hoje</h2><span class="count" id="sgHojeCount"></span></div>
       <div class="chips" id="sgDonos" role="group" aria-label="Dono" style="margin-bottom:10px"></div>
       <div class="panel sg-list" id="sgHoje"></div>
       <p class="note">O sistema nunca envia nada: «Enviar» abre o WhatsApp ou o email com o texto pronto (ou o telefone, com o guião) e marca o passo como enviado; o relógio do passo seguinte começa aí. «Respondeu» cancela os seguimentos que faltam desta fase e pede a próxima ação. Os rascunhos nascem às 07:00, nunca ao fim de semana nem em feriado.</p>
@@ -790,14 +899,15 @@ body.app-on{background:var(--surface)}
   </div>
 
   <div id="v-pipeline" role="tabpanel" aria-labelledby="tab-pipeline" hidden>
-    <section aria-labelledby="h-fugas">
-      <div class="sec-h"><h2 id="h-fugas">Fugas: onde um pedido ou um cliente se pode perder</h2><span class="count" id="fugasCount"></span></div>
-      <div class="panel fugas" id="fugas"></div>
-      <p class="note">Cada linha é uma regra do processo. Verde é zero; um número abre a lista já filtrada. A triagem do dia é limpar esta lista de cima para baixo.</p>
-    </section>
-    <section aria-labelledby="h-board" style="margin-top:22px">
-      <div class="sec-h"><h2 id="h-board">Os nove passos, com os pedidos onde estão</h2><span class="count" id="boardCount"></span></div>
+    <section aria-labelledby="h-board">
+      <div class="sec-h"><h2 id="h-board">Passos</h2><span class="count" id="boardCount"></span></div>
       <div class="board" id="board"></div>
+      <p class="note">Arrasta um pedido para outro passo (no iPad e no telemóvel, carrega meio segundo no cartão e arrasta). Só acendem os passos para onde ele pode ir; ao largar abre-se a mudança já preenchida, para confirmar. Tocar no cartão abre o pedido.</p>
+    </section>
+    <section aria-labelledby="h-fugas" style="margin-top:22px">
+      <div class="sec-h"><h2 id="h-fugas">Fugas</h2><span class="count" id="fugasCount"></span></div>
+      <div class="panel fugas" id="fugas"></div>
+      <p class="note">Cada linha é uma regra do processo que está a ser quebrada agora; um toque abre a lista já filtrada. As regras sem nada a tratar não aparecem.</p>
     </section>
     <section aria-labelledby="h-funil" style="margin-top:22px">
       <div class="sec-h"><h2 id="h-funil">Funil</h2><span class="count">últimos 90 dias</span></div>
@@ -946,49 +1056,8 @@ body.app-on{background:var(--surface)}
     </section>
   </div>
 
-  <div id="v-resumo" role="tabpanel" aria-labelledby="tab-resumo" hidden>
-    <section class="kpis oito" id="kpis" aria-label="Resumo"></section>
-    <div class="grid-p">
-      <section aria-labelledby="h-hoje">
-        <div class="sec-h"><h2 id="h-hoje">Para decidir hoje</h2><span class="count" id="hojeCount"></span></div>
-        <div class="panel lista-p" id="hojeLista"></div>
-        <p class="note">Os pedidos vermelhos e amarelos, pela ordem da triagem: primeiro o P, depois o que vence mais cedo.</p>
-      </section>
-      <section aria-labelledby="h-visitas">
-        <div class="sec-h"><h2 id="h-visitas">Visitas</h2><span class="count" id="visitasCount"></span></div>
-        <div class="panel lista-p" id="visitas"></div>
-        <p class="note">As visitas marcadas de hoje a 7 dias e as que já passaram sem a folha da visita.</p>
-      </section>
-      <section aria-labelledby="h-fila">
-        <div class="sec-h"><h2 id="h-fila">Fila por estado</h2><span class="count" id="filaCount"></span></div>
-        <div class="panel" id="fila"></div>
-      </section>
-      <section aria-labelledby="h-donos">
-        <div class="sec-h"><h2 id="h-donos">Por dono</h2><span class="count" id="limiteTxt"></span></div>
-        <div class="panel" id="donos"></div>
-        <p class="note">Pedidos com a bola na MDM por dono; o traço é o limite. As esperas (cliente, fornecedor) não contam.</p>
-      </section>
-      <section aria-labelledby="h-meses">
-        <div class="sec-h"><h2 id="h-meses">Novos e fechados por mês</h2><span class="count">últimos 6 meses</span></div>
-        <div class="panel" id="meses"></div>
-      </section>
-      <section aria-labelledby="h-valor">
-        <div class="sec-h"><h2 id="h-valor">Orçamentos</h2><span class="count">últimos 90 dias</span></div>
-        <div class="panel" id="valor"></div>
-      </section>
-      <section aria-labelledby="h-origem">
-        <div class="sec-h"><h2 id="h-origem">De onde vêm os pedidos</h2><span class="count">últimos 90 dias</span></div>
-        <div class="panel" id="origem"></div>
-      </section>
-      <section aria-labelledby="h-ativ">
-        <div class="sec-h"><h2 id="h-ativ">Atividade recente</h2></div>
-        <div class="panel" id="atividade"></div>
-      </section>
-    </div>
-  </div>
-
   <div id="v-clientes" role="tabpanel" aria-labelledby="tab-clientes" hidden>
-    <p class="note" id="cliRef" style="margin:0 0 12px"></p>
+    <p class="note vis" id="cliRef" style="margin:0 0 12px"></p>
     <section class="kpis oito" id="cliKpis" aria-label="Clientes"></section>
     <div class="grid-p">
       <section aria-labelledby="h-cli-contactar" style="grid-column:1/-1">
@@ -1059,11 +1128,11 @@ body.app-on{background:var(--surface)}
       </div>
     </div>
     <section aria-labelledby="h-agcfg" id="agCfgSec" style="margin-top:22px" hidden>
-      <div class="sec-h"><h2 id="h-agcfg">Agenda: técnicos e durações</h2></div>
+      <div class="sec-h"><h2 id="h-agcfg">Agenda</h2></div>
       <div class="panel sgc" id="agCfg"></div>
     </section>
     <section aria-labelledby="h-sgcfg" id="sgCfgSec" style="margin-top:22px" hidden>
-      <div class="sec-h"><h2 id="h-sgcfg">Seguimentos: dias e textos</h2><span class="count" id="sgCfgEstado"></span></div>
+      <div class="sec-h"><h2 id="h-sgcfg">Seguimentos</h2><span class="count" id="sgCfgEstado"></span></div>
       <div class="panel sgc" id="sgCfg"></div>
     </section>
   </div>
@@ -1175,6 +1244,93 @@ if (!Element.prototype.replaceChildren) {
     }
     for (const c of kids.flat()) { if (c == null || c === false || c === '') continue; el.append(c.nodeType ? c : document.createTextNode(String(c))); }
     return el;
+  }
+
+
+  /* ---------- (i) e «⋯»: as explicações ficam atrás de um toque, as ações secundárias num menu ----------
+     Cada <p class="note"> fica escondido e a secção ganha um (i) no título que mostra o texto. Funciona também com as
+     notas que a página escreve depois (o texto lê-se no momento do toque). */
+  const IC = {
+    whatsapp: '<svg viewBox="0 0 24 24"><path d="M4 20l1.3-4A8 8 0 1 1 8.6 19z"/><path d="M9 9.5c.3 2 2.5 4.3 5 5l1.3-1.3-1.8-1-1 .8c-1-.4-1.8-1.2-2.2-2.2l.8-1-1-1.8z"/></svg>',
+    email: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></svg>',
+    telefone: '<svg viewBox="0 0 24 24"><path d="M6 3h3l1.5 4.5-2 1.5a11 11 0 0 0 6.5 6.5l1.5-2L21 15v3a2 2 0 0 1-2 2A16 16 0 0 1 4 5a2 2 0 0 1 2-2z"/></svg>',
+    mapa: '<svg viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg>',
+    cal: '<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>',
+    ok: '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    lapis: '<svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+    seta: '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    ligacao: '<svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',
+  };
+  const ico = (nome, texto) => { const sp = document.createElement('span'); sp.className = 'ic'; sp.innerHTML = IC[nome] || ''; if (texto) sp.appendChild(document.createTextNode(texto)); return sp; };
+  let popEl = null, popDe = null;
+  function fechaPop() {
+    if (popEl) { popEl.remove(); popEl = null; }
+    if (popDe) { popDe.setAttribute('aria-expanded', 'false'); popDe = null; }
+  }
+  function abrePop(botao, conteudo, classe) {
+    const mesmo = popDe === botao;
+    fechaPop();
+    if (mesmo) return;
+    popEl = h('div', {class: 'pop' + (classe ? ' ' + classe : ''), role: classe === 'menu' ? 'menu' : 'note'}, conteudo);
+    document.body.appendChild(popEl);
+    popDe = botao; botao.setAttribute('aria-expanded', 'true');
+    const r = botao.getBoundingClientRect(), w = popEl.offsetWidth, hh = popEl.offsetHeight;
+    let left = r.left + window.pageXOffset + (classe === 'menu' ? r.width - w : -12);
+    left = Math.max(12 + window.pageXOffset, Math.min(left, window.pageXOffset + document.documentElement.clientWidth - w - 12));
+    let top = r.bottom + window.pageYOffset + 6;
+    if (r.bottom + hh + 12 > window.innerHeight && r.top > hh + 12) top = r.top + window.pageYOffset - hh - 6;
+    popEl.style.left = left + 'px'; popEl.style.top = top + 'px';
+    const prim = popEl.querySelector('button'); if (prim) prim.focus();
+  }
+  // Um (i) com um texto fixo (para usar dentro das funções que desenham).
+  const info = texto => h('button', {class: 'i', type: 'button', 'aria-label': 'Como funciona', 'aria-expanded': 'false', 'data-info': texto}, 'i');
+  // «⋯»: itens [rótulo, função, ícone?, perigo?]; os vazios caem.
+  function menu(itens, rotulo) {
+    const lista = (itens || []).filter(Boolean);
+    if (!lista.length) return null;
+    const b = h('button', {class: 'mais-b', type: 'button', 'aria-label': rotulo || 'Mais ações', 'aria-haspopup': 'menu', 'aria-expanded': 'false', title: rotulo || 'Mais ações'});
+    b.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/></svg>';
+    b.addEventListener('click', ev => {
+      ev.stopPropagation();
+      abrePop(b, lista.map(([l, fn, ic, perigo]) => {
+        const x = h('button', {type: 'button', role: 'menuitem', class: perigo ? 'perigo' : null, onclick: () => { fechaPop(); fn(); }});
+        if (ic && IC[ic]) x.innerHTML = IC[ic];
+        x.appendChild(document.createTextNode(l));
+        return x;
+      }), 'menu');
+    });
+    return b;
+  }
+  // As notas escondidas viram um (i) no título da secção (ou do bloco).
+  function dobrarNotas() {
+    const notas = document.querySelectorAll('#app p.note:not(.vis), #app figcaption.note, .sheet p.note:not(.vis)');
+    for (let i = 0; i < notas.length; i++) {
+      const sec = notas[i].closest('section, .block, .sgc');
+      if (!sec) continue;
+      const ja = sec._iBotao;
+      if (ja && ja.isConnected) { ja.hidden = !textoNotas(sec); continue; }
+      const alvo = sec.querySelector('.sec-h h2, h2, h3, summary');
+      if (!alvo) continue;
+      const b = info(''); b._sec = sec; sec._iBotao = b;
+      b.hidden = !textoNotas(sec);
+      alvo.appendChild(b);
+    }
+  }
+  function textoNotas(sec) {
+    return Array.prototype.map.call(sec.querySelectorAll('p.note:not(.vis), figcaption.note'), x => x.textContent.trim()).filter(Boolean).join('\n\n');
+  }
+  document.addEventListener('click', ev => {
+    const b = ev.target.closest ? ev.target.closest('button.i') : null;
+    if (b) { ev.preventDefault(); ev.stopPropagation(); const t = b._sec ? textoNotas(b._sec) : b.getAttribute('data-info'); if (t) abrePop(b, t); return; }
+    if (popEl && !popEl.contains(ev.target)) fechaPop();
+  });
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && popEl) { const de = popDe; fechaPop(); if (de) de.focus(); ev.stopImmediatePropagation(); } }, true);
+  window.addEventListener('resize', fechaPop);
+  if (window.MutationObserver) {
+    let agendada = false;
+    new MutationObserver(() => { if (agendada) return; agendada = true; requestAnimationFrame(() => { agendada = false; dobrarNotas(); }); })
+      .observe(document.body, {childList: true, subtree: true});
   }
 
   /* ---------- Calendário: horas úteis 9h-18h, sem feriados nacionais nem Santo António ---------- */
@@ -1343,22 +1499,53 @@ if (!Element.prototype.replaceChildren) {
   }
 
   /* ---------- Separadores ---------- */
-  const TABS = ['painel','seguimentos','agenda','gerir','pipeline','resumo','clientes','faturacao','prazos'];
-  let tab = 'painel';
+  const TABS = ['hoje','painel','seguimentos','agenda','gerir','pipeline','clientes','faturacao','prazos'];
+  // A barra tem cinco grupos; cada grupo mostra por baixo do título as suas vistas (só as que estão instaladas).
+  const SECOES = [['hoje', 'Hoje', ['hoje','seguimentos','painel']], ['gerir', 'Pedidos', ['gerir','pipeline']], ['agenda', 'Agenda', ['agenda']],
+                  ['clientes', 'Clientes', ['clientes','faturacao']], ['prazos', 'Definições', ['prazos']]];
+  const SUB_NOME = {hoje:'Hoje', seguimentos:'Seguimentos', painel:'Números', gerir:'Lista', pipeline:'Quadro', agenda:'Agenda', clientes:'Clientes', faturacao:'Faturação', prazos:'Definições'};
+  const grupoDe = t => SECOES.find(g => g[2].indexOf(t) >= 0) || SECOES[0];
+  // Vistas cuja parte da base de dados ainda não foi instalada não aparecem (as variáveis vêm mais abaixo).
+  function disponivel(t) {
+    try {
+      if (t === 'seguimentos') return segTabela !== false;
+      if (t === 'agenda') return agTabela !== false;
+      if (t === 'painel') return !pnFalta;
+    } catch (e) { return true; }
+    return true;
+  }
+  const ultimaVista = {};
+  let tab = 'hoje';
   try { const s = localStorage.getItem('registo-tab'); if (TABS.includes(s)) tab = s; } catch (e) {}
   if (TABS.includes(location.hash.replace('#',''))) tab = location.hash.replace('#','');
   function setTab(t, focus) {
+    if (!disponivel(t)) t = grupoDe(t)[2].filter(disponivel)[0] || 'hoje';
     tab = t;
+    const g = grupoDe(t);
+    ultimaVista[g[0]] = t;
+    SECOES.forEach(([k, , vs]) => {
+      const rb = F('rail-' + k); if (!rb) return;
+      if (k === g[0]) rb.setAttribute('aria-current', 'page'); else rb.removeAttribute('aria-current');
+      rb.hidden = !vs.some(disponivel);
+    });
+    const subs = g[2].filter(disponivel);
+    F('subnav').hidden = subs.length < 2;
+    fill(F('subnav'), subs.length < 2 ? null : subs.map(v => h('button',{class:'chip', type:'button', role:'tab', id:'sub-' + v, 'aria-selected': String(v === t), 'aria-pressed': String(v === t), onclick:() => setTab(v)}, SUB_NOME[v])));
     for (const k of TABS) {
       const b = F('tab-' + k);
       b.setAttribute('aria-selected', String(k === t)); b.tabIndex = k === t ? 0 : -1;
       F('v-' + k).hidden = k !== t;
-      const rb = F('rail-' + k); if (rb) { if (k === t) rb.setAttribute('aria-current','page'); else rb.removeAttribute('aria-current'); }
     }
     try { localStorage.setItem('registo-tab', t); } catch (e) {}
+    // A escolha «Pedidos em aberto» e «Adicionar pedido» só fazem sentido em Gerir; nos outros, o nome do separador.
+    F('tabTitulo').textContent = g[1];
+    F('tabTitulo').hidden = t === 'gerir';
+    document.querySelector('.page-h .vista').classList.toggle('so-gerir', t !== 'gerir');
+    F('btnNovoTop').classList.toggle('so-gerir', t !== 'gerir');
     if (focus) F('tab-' + t).focus();
   }
-  TABS.forEach(k => { F('tab-' + k).addEventListener('click', () => setTab(k)); F('rail-' + k).addEventListener('click', () => setTab(k)); });
+  TABS.forEach(k => { F('tab-' + k).addEventListener('click', () => setTab(k)); });
+  SECOES.forEach(([k, , vs]) => { F('rail-' + k).addEventListener('click', () => setTab(ultimaVista[k] || vs.filter(disponivel)[0] || vs[0])); });
   F('tabs').addEventListener('keydown', e => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
     const i = TABS.indexOf(tab), n = TABS.length;
@@ -1445,7 +1632,7 @@ if (!Element.prototype.replaceChildren) {
       h('span',{class:'ld'}, pe.p, h('small',null, (ESTADOS[r.estado] || ESTADOS.novo).bola === 'MDM' ? 'MDM' : 'espera')),
       h('span',{class:'ln'}, r.cliente || 'Sem nome'),
       h('span',{class:'la'}, r.proximaAcao ? `${r.dono || 'Sem dono'} · ${r.proximaAcao}` : 'Falta dono, próxima ação e data'),
-      h('span',{class:'lt'}, r.porConfirmar ? 'Por confirmar' : tempoTxt(r, rel)))),
+      r.porConfirmar ? h('span',{class:'lt', style:'--tone:var(--ink-2);font-weight:500'}, 'por confirmar') : h('span',{class:'lt'}, tempoTxt(r, rel)))),
       xs.length > vis.length ? h('button',{class:'lp', type:'button', onclick:() => irPara('vermelhos')}, h('span',{class:'ld'},'…'), h('span',{class:'ln', style:'color:var(--accent)'}, `Ver os outros ${xs.length - vis.length} na triagem`)) : null);
   }
 
@@ -1658,7 +1845,7 @@ if (!Element.prototype.replaceChildren) {
         : h('span',{class:'over'}, 'Falta dono, próxima ação e data'))
       : h('span',{class:'muted'}, r.motivo || ''));
     const col3 = h('div',{class:'t-ativ', style: aberto && !r.porConfirmar && rel && rel.vence && rel.atrasoH > 0 ? '--tone:var(--bad)' : '--tone:var(--ink-2)'},
-      aberto ? [h('span',{class:'tempo'}, r.porConfirmar ? 'Por confirmar' : tempoTxt(r, rel)), e.bola !== 'MDM' ? `À espera do ${e.bola}` : null]
+      aberto ? [r.porConfirmar ? h('span',{class:'tag-conf'}, 'por confirmar') : h('span',{class:'tempo'}, tempoTxt(r, rel)), e.bola !== 'MDM' ? `À espera do ${e.bola}` : null]
         : [h('span',null, `${e.l}${r.dataFecho ? ' · ' + haDias(diasDesde(r.dataFecho)) : ''}`), podeReabrir && canWrite ? h('button',{class:'lk', type:'button', onclick:() => acaoRapida(r.id, 'reabrir')}, 'Reabrir') : null]);
     const seg = h('div',{class:'seg', role:'group', 'aria-label':'Ações rápidas'},
       h('button',{type:'button', title: seguinte ? seguinte.label : 'Sem passo seguinte', 'aria-label': seguinte ? seguinte.label : 'Avançar', disabled: !(aberto && seguinte && canWrite), onclick:() => acaoRapida(r.id, 'ok')}, svg(ICO.ok)),
@@ -1935,7 +2122,7 @@ if (!Element.prototype.replaceChildren) {
           h('td',{class:'n'}, eur(d.liquido)), h('td',{class:'n'}, eur(d.bruto)),
           h('td',{class:'sub'}, d.estado === 'A' ? '' : d.tipo !== 'FT' ? '–' : pagos.has(d.n) ? 'sim' : h('span',{class:'over'}, 'não')));
       }))),
-      docs.length > vis.length ? h('p',{class:'note', style:'padding:10px 12px'}, `A mostrar ${vis.length} de ${docs.length}. Escolhe um mês ou pesquisa para ver os outros.`) : null);
+      docs.length > vis.length ? h('p',{class:'note vis', style:'padding:10px 12px'}, `A mostrar ${vis.length} de ${docs.length}. Escolhe um mês ou pesquisa para ver os outros.`) : null);
   }
 
   function renderFatFicheiros() {
@@ -1957,7 +2144,7 @@ if (!Element.prototype.replaceChildren) {
     }
     fill(box, canWrite ? [input, drop] : null,
       ms.length ? h('div',{class:'meses-l'}, chips) : h('p',{class:'hint', style:'margin:0'}, 'Ainda não há meses carregados.'),
-      !fatTabela ? h('p',{class:'hint alert'}, 'A tabela «faturacao» ainda não existe no Supabase: os meses lidos ficam só nesta página até alguém correr o bloco «Faturação» de supabase/migracao.sql.') : null);
+      !fatTabela ? h('p',{class:'hint alert'}, 'Falta instalar a tabela «faturacao» (migracao.sql): os meses ficam só nesta página.') : null);
   }
   F('fatMes').addEventListener('change', e => { fatMes = e.target.value; renderFatDocs(); });
   F('fatQ').addEventListener('input', e => { fatQ = e.target.value; renderFatDocs(); });
@@ -2094,7 +2281,7 @@ if (!Element.prototype.replaceChildren) {
     const vis = todos.filter(c => !cliMotivo || c.estado === cliMotivo).sort((a, b) => MOTIVO_ORD.indexOf(a.estado) - MOTIVO_ORD.indexOf(b.estado) || a.urg - b.urg);
     F('cliContactarCount').textContent = vis.length ? `${vis.length} ${vis.length === 1 ? 'cliente' : 'clientes'}` : '';
     if (!vis.length) box.replaceChildren(h('p',{class:'empty'}, temDados ? 'Ninguém para contactar: todos os clientes estão em dia.' : 'Sem dados ainda.'));
-    else fill(box, vis.slice(0, 40).map(c => linhaCliente(c, ref)), vis.length > 40 ? h('p',{class:'note', style:'padding:10px 12px'}, `A mostrar 40 de ${vis.length}. Filtra pelo motivo ou vê a lista completa em baixo.`) : null);
+    else fill(box, vis.slice(0, 40).map(c => linhaCliente(c, ref)), vis.length > 40 ? h('p',{class:'note vis', style:'padding:10px 12px'}, `A mostrar 40 de ${vis.length}. Filtra pelo motivo ou vê a lista completa em baixo.`) : null);
     renderCliLista(lista);
   }
 
@@ -2146,7 +2333,7 @@ if (!Element.prototype.replaceChildren) {
         h('td',{class:'n' + (c.semRecibo.length ? ' over' : '')}, c.semRecibo.length ? eur(c.semRecibo.reduce((t, d) => t + d.bruto, 0)) : ''),
         h('td',{class:'n'}, c.abertos.length ? h('button',{type:'button', class:'lk', style:'font-size:14px;margin:0', onclick:() => openSheet(c.abertos[0].id)}, `${c.abertos.length} aberto${c.abertos.length > 1 ? 's' : ''}`) : c.pedidos.length ? h('span',{class:'sub'}, String(c.pedidos.length)) : ''),
         h('td',null, botoesCliente(c)))))),
-      xs.length > vis.length ? h('p',{class:'note', style:'padding:10px 12px'}, `A mostrar ${vis.length} de ${xs.length}. Pesquisa para ver os outros.`) : null);
+      xs.length > vis.length ? h('p',{class:'note vis', style:'padding:10px 12px'}, `A mostrar ${vis.length} de ${xs.length}. Pesquisa para ver os outros.`) : null);
   }
 
   /* ---------- Ficha do cliente (o «Contactos» do Odoo): dados, equipamentos, contrato e todo o histórico ---------- */
@@ -2241,7 +2428,7 @@ if (!Element.prototype.replaceChildren) {
       h('div',{class:'block'}, h('h3',null, 'Contrato'), h('fieldset',{disabled: !canWrite}, contrato)),
       canWrite ? h('div',{class:'row-end'}, novo ? h('button',{class:'btn btn-ghost', type:'button', onclick:closeSheet}, 'Cancelar') : null, h('button',{class:'btn', type:'button', onclick:guardar}, novo ? 'Criar cliente' : 'Guardar ficha')) : null,
       novo ? null : equipBloco, histBloco,
-      !fichaTabela ? h('p',{class:'hint alert'}, 'A tabela «clientes» ainda não existe no Supabase: a ficha fica guardada em config até alguém correr o bloco «Fichas de cliente» de supabase/migracao.sql.') : null);
+      !fichaTabela ? h('p',{class:'hint alert'}, 'Falta instalar a tabela «clientes» (migracao.sql): a ficha fica guardada à parte.') : null);
     setTimeout(() => { if (novo) F('c-nome').focus(); }, 30);
   }
   F('btnNovoCliente').addEventListener('click', () => openFicha(null));
@@ -2300,24 +2487,28 @@ if (!Element.prototype.replaceChildren) {
     const total = lista.reduce((t, f) => t + f[2], 0), graves = lista.filter(f => f[3] === 'bad').reduce((t, f) => t + f[2], 0);
     F('fugasCount').textContent = total ? `${total} ${total === 1 ? 'coisa' : 'coisas'} a tratar` : 'nada a tratar';
     F('fugaBadge').textContent = graves ? String(graves) : '';
-    box.replaceChildren(...lista.map(([t, sub, n, tone, go]) => h('button',{class:'fuga ' + (n ? tone : 'ok'), type:'button', disabled: n ? null : true, onclick: go},
+    // Só as regras com alguma coisa a tratar; as que estão a zero ficam fora da vista.
+    const ativas = lista.filter(f => f[2]);
+    if (!ativas.length) box.replaceChildren(h('p',{class:'empty'}, `Nenhuma fuga: as ${lista.length} regras estão cumpridas.`));
+    else box.replaceChildren(...ativas.map(([t, sub, n, tone, go]) => h('button',{class:'fuga ' + (n ? tone : 'ok'), type:'button', disabled: n ? null : true, onclick: go},
       h('span',{class:'fi', 'aria-hidden':'true'}, n ? String(n) : svg('<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>')),
       h('span',{class:'ft'}, t, h('small',null, sub)), h('span',{class:'fn'}, n ? 'ver' : ''))));
     // Os nove passos com os pedidos
     const ab = all.filter(x => ABERTOS.includes(x.r.estado)).sort(ordem);
     F('boardCount').textContent = `${ab.length} abertos · ${eur(ab.reduce((t, x) => t + valorN(x.r), 0))} em orçamentos`;
-    F('board').replaceChildren(...PASSOS.map(([k, num, titulo]) => {
+    if (kArr) kPendente = true;
+    else F('board').replaceChildren(...PASSOS.map(([k, num, titulo]) => {
       const xs = ab.filter(x => x.r.estado === k);
       const v = xs.reduce((t, x) => t + valorN(x.r), 0);
-      return h('div',{class:'col'},
+      return h('div',{class:'col', 'data-estado': k},
         h('div',{class:'col-h'}, h('div',{class:'cn'}, h('span',null, num ? h('span',{class:'cp'}, num) : null, ESTADOS[k].l.replace(', à espera do pagamento', '')), h('b',null, String(xs.length))),
           h('div',{class:'cr'}, `${titulo}${regraPasso(k) ? ' · ' + regraPasso(k) : ''}${v ? ' · ' + eur(v) : ''}`)),
         h('div',{class:'col-b'}, xs.length ? xs.map(({r, rel, sem, pe}) => {
           const falta = k === 'em_execucao' ? obraFalta(r) : null;
-          return h('button',{class:`kcard u-${pe.p}`, type:'button', style:`--tone:var(--${semTone(sem)})`, onclick:() => openSheet(r.id)},
+          return h('button',{class:`kcard u-${pe.p}`, type:'button', 'data-id': r.id, style:`--tone:var(--${r.porConfirmar ? 'ink-2' : semTone(sem)})`, onclick:() => { if (!kSoltou) openSheet(r.id); }},
             h('span',{class:'kn'}, h('span',{class:'kp'}, pe.p), r.cliente || 'Sem nome'),
             h('span',{class:'ka'}, falta ? `Falta: ${falta[1].toLowerCase()}` : `${r.dono || 'Sem dono'} · ${r.proximaAcao || 'sem ação'}`),
-            h('span',{class:'kt'}, r.porConfirmar ? 'Por confirmar' : tempoTxt(r, rel)));
+            r.porConfirmar ? h('span',{class:'tag-conf'}, 'por confirmar') : h('span',{class:'kt'}, tempoTxt(r, rel)));
         }) : h('p',{class:'vazio'}, 'Nenhum pedido neste passo.')));
     }));
     // Funil
@@ -2337,12 +2528,13 @@ if (!Element.prototype.replaceChildren) {
       step('Ganhos', ganhos.length, eur(ganhos.reduce((t, r) => t + valorN(r), 0)) + ' s/IVA'),
       step('Faturados', faturados.length, ms.length ? 'com fatura no registo ou no SAF-T' : 'junta os SAF-T para confirmar'),
       step('Perdidos', perdidos.length, perdidos.length ? Object.entries(perdidos.reduce((a, r) => { a[r.motivo || 'sem motivo'] = (a[r.motivo || 'sem motivo'] || 0) + 1; return a; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([m, n]) => `${m} ${n}`).join(' · ') : 'nenhum')),
-      abertosAntigos ? h('p',{class:'note', style:'padding:10px 12px'}, `${abertosAntigos} pedidos abertos com mais de 90 dias ficam fora do funil mas não da lista de fugas.`) : null);
+      abertosAntigos ? h('p',{class:'note vis', style:'padding:10px 12px'}, `${abertosAntigos} pedidos abertos com mais de 90 dias ficam fora do funil mas não da lista de fugas.`) : null);
   }
 
   /* ---------- Painel: os números vêm todos das vistas (supabase/painel.sql); a página só formata e desenha ----------
      Escrito para correr em Safari antigo (iPad): sem «?.», sem «??», sem métodos recentes. */
   var VISTAS_PAINEL = ['v_passos','v_fila_humana','v_atrasos','v_funil','v_tempos','v_carga','v_followups','v_bloqueados','v_perdas','v_tendencia','v_cobertura','v_config'];
+  var pnFalta = false;
   var pn = null, pnErro = '', pnSoMeus = true, pnPasso = null, pnMais = false;
   var PRIO_CURTA = {P1:'Urgente', P2:'Alta', P3:'Normal'};
   function carregarPainel() {
@@ -2358,13 +2550,14 @@ if (!Element.prototype.replaceChildren) {
       var falha = null;
       res.forEach(function (r) { if (r.error && !falha) falha = r.error; });
       if (falha) {
-        pnErro = /relation|does not exist|schema cache/i.test(String(falha.message || '')) ? 'As vistas do Painel ainda não existem no Supabase: falta correr supabase/painel.sql no SQL Editor.' : 'Não foi possível ler o Painel. Recarrega a página.';
+        pnFalta = /relation|does not exist|schema cache/i.test(String(falha.message || ''));
+        pnErro = pnFalta ? 'As vistas do Painel ainda não existem no Supabase: falta correr supabase/painel.sql no SQL Editor.' : 'Não foi possível ler o Painel. Recarrega a página.';
         pn = null;
       } else {
-        pnErro = ''; pn = {};
+        pnErro = ''; pnFalta = false; pn = {};
         VISTAS_PAINEL.forEach(function (v, i) { pn[v] = res[i].data || []; });
       }
-      renderPainel();
+      renderPainel(); setTab(tab);
     }).catch(function () { pnErro = 'Sem ligação: não foi possível ler o Painel.'; renderPainel(); });
   }
   var pnSoma = function (xs, k) { return xs.reduce(function (t, x) { return t + (Number(x[k]) || 0); }, 0); };
@@ -2624,7 +2817,7 @@ if (!Element.prototype.replaceChildren) {
     const box = F('export');
     const n = rows.length;
     fill(box,
-      h('p',{class:'hint', style:'margin:0'}, 'Descarrega todos os pedidos em CSV (abre no Excel e no Google Sheets, separador vírgula, valores com vírgula decimal). Abertos primeiro, pela ordem da triagem; depois os fechados.'),
+      h('p',{class:'note', style:'margin:0'}, 'Descarrega todos os pedidos em CSV (abre no Excel e no Google Sheets, separador vírgula, valores com vírgula decimal). Abertos primeiro, pela ordem da triagem; depois os fechados.'),
       h('div',{class:'row-end'}, h('button',{class:'btn', type:'button', disabled: status !== 'ok' || !n, onclick: descarregarCSV}, `Exportar CSV (${n})`)));
   }
   function renderEquipa() {
@@ -2664,7 +2857,7 @@ if (!Element.prototype.replaceChildren) {
     F('nextNum').textContent = status === 'ok' ? nextNumber() : 'ORC…';
     const verm = all.filter(x => x.sem === 'vermelho').length;
     F('redBadge').textContent = verm ? String(verm) : '';
-    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderExport(); renderEquipa(); renderFaturacao(); renderClientes(); renderPipeline(all); renderSeg(); renderSegCfg(); renderAgenda(); renderAgCfg();
+    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderExport(); renderEquipa(); renderFaturacao(); renderClientes(); renderPipeline(all); renderSeg(); renderSegCfg(); renderAgenda(); renderAgCfg(); renderInicio(all);
     F('btnNovoTop').hidden = F('railNovo').hidden = F('btnNovoCliente').hidden = !(canWrite && status === 'ok');
     // Não redesenha a folha aberta enquanto há um formulário a meio.
     if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
@@ -2818,11 +3011,11 @@ if (!Element.prototype.replaceChildren) {
         h('div',{style:'min-width:0'}, h('div',{class:'what'}, r.proximaAcao || 'Sem próxima ação'),
           h('div',{class:'who'}, `${r.dono || 'Sem dono'} · ${r.dataProximaAcao ? (acaoAtrasada ? 'devia ser a ' : 'até ') + ddmm(r.dataProximaAcao) : 'sem data'}`)),
         canWrite ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => abrirTrans({id:'acao', label:'Mudar a próxima ação', para:null, soAcao:true})}, 'Mudar ação') : null));
-      if (!segLigado() && r.esperaMotivo === 'decisao' && (r.seguimentos || 0) >= 3) blocos.push(h('p',{class:'hint alert'}, 'Já houve 3 seguimentos sem resposta: fecha como perdido «Sem resposta», a não ser que o cliente tenha dado uma data.'));
-      if (semContacto30(r)) blocos.push(h('p',{class:'hint alert'}, 'Sem contacto com o cliente há mais de 30 dias: fecha como perdido, com motivo, ou dá-lhe uma ação para hoje.'));
+      if (!segLigado() && r.esperaMotivo === 'decisao' && (r.seguimentos || 0) >= 3) blocos.push(h('p',{class:'hint alert'}, '3 seguimentos sem resposta: fecha como perdido, salvo data dada pelo cliente.'));
+      if (semContacto30(r)) blocos.push(h('p',{class:'hint alert'}, 'Sem contacto há 30 dias: fecha como perdido ou dá-lhe uma ação para hoje.'));
     } else {
       blocos.push(h('p',{class:'hint'}, `${e.l}${r.motivo ? ': ' + r.motivo : ''}${r.dataFecho ? ` (${ddmm(r.dataFecho)})` : ''}.`));
-      if (r.dataFecho && r.dataFecho < addDays(today(), -30)) blocos.push(h('p',{class:'hint'}, 'Fechado há mais de 30 dias: se o cliente voltar, regista um pedido novo.'));
+      if (r.dataFecho && r.dataFecho < addDays(today(), -30)) blocos.push(h('p',{class:'note'}, 'Fechado há mais de 30 dias: se o cliente voltar, regista um pedido novo.'));
     }
     const bs = blocoSeg(r); if (bs) blocos.push(bs);
     const ba = blocoAgenda(r); if (ba) blocos.push(ba);
@@ -2830,14 +3023,18 @@ if (!Element.prototype.replaceChildren) {
       h('div',{style:'min-width:0'}, h('div',{class:'what'}, r.folha ? `Folha de obra ${r.folha.num}` : 'Folha de obra'),
         h('div',{class:'who'}, r.folha && r.folha.totalDebito ? `${eur(r.folha.totalDebito)} a debitar · custo ${eur(r.folha.totalCustos || 0)}`
           : r.folha ? `Pronta para a visita${r.folha.guardadaEm ? ' · guardada a ' + ddmm(r.folha.guardadaEm.slice(0, 10)) : ''}`
-          : 'Já vem preenchida com o cliente, a morada, o contacto e o que ficou combinado: confirma, ajusta e imprime.')),
+          : 'Pronta a imprimir para a visita')),
       h('button',{class:'btn btn-sm' + (r.folha ? ' btn-ghost' : ''), type:'button', onclick:() => abrirFolha(r.id)}, r.folha ? 'Abrir' : 'Folha de obra')));
     if (trans) blocos.push(formTrans(r));
     else if (canWrite) {
       const T = transicoes(r), aberto = ABERTOS.includes(r.estado);
-      if (T.length || aberto) blocos.push(h('div',{class:'block'}, h('h3',null,'Mudar o estado'),
-        T.length ? h('div',{class:'trans'}, T.map(t => h('button',{class:'btn' + (t.fecho || t.pausa || t.seguimento ? ' btn-ghost' : ''), type:'button', onclick:() => abrirTrans(t)}, t.label))) : null,
-        aberto ? h('div',{class:'trans'}, h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:registarContacto}, 'Registar contacto com o cliente')) : null));
+      // Os caminhos normais à vista (no máximo três, o primeiro cheio); pausas, fechos e o contacto no «⋯».
+      const principais = T.filter(t => !t.fecho && !t.pausa && !t.seguimento).slice(0, 3);
+      const resto = T.filter(t => principais.indexOf(t) < 0);
+      if (T.length || aberto) blocos.push(h('div',{class:'block'}, h('h3',null,'Próximo passo'),
+        h('div',{class:'trans'}, principais.map((t, i) => h('button',{class:'btn' + (i ? ' btn-ghost' : ''), type:'button', onclick:() => abrirTrans(t)}, t.label)),
+          menu(resto.map(t => [t.label, () => abrirTrans(t), t.fecho ? 'x' : t.pausa ? 'cal' : 'seta', t.fecho && t.para === 'perdido'])
+            .concat(aberto ? [['Registar contacto com o cliente', registarContacto, 'telefone']] : []), 'Outras mudanças'))));
     }
     if (r.estado === 'em_execucao' || (r.estado === 'espera_fornecedor' && r.esperaDe === 'em_execucao')) blocos.push(formObra(r));
     blocos.push(formDados(r));
@@ -2885,12 +3082,12 @@ if (!Element.prototype.replaceChildren) {
         campo('t-dono','Dono', donoInput('t-dono', r.dono || meuNome())),
         campo('t-data','Data da próxima ação', inp('t-data', dflt.data, {type:'date'})),
         campo('t-acao','Próxima ação', inp('t-acao', dflt.acao, {placeholder:'O quê, por exemplo «Ligar a confirmar a visita»'}), null, true)));
-      if (t.pedeVisita) els.push(h('p',{class:'hint'}, 'A data da próxima ação acompanha a da visita, para o pedido ficar amarelo nesse dia; muda-a se for preciso.'));
+      if (t.pedeVisita) els.push(h('p',{class:'note'}, 'A data da próxima ação acompanha a da visita, para o pedido ficar amarelo nesse dia; muda-a se for preciso.'));
     }
-    if (r.porConfirmar && !t.soAcao && !t.seguimento && !t.remarcar) els.push(h('p',{class:'hint'}, 'Ao confirmar, o pedido deixa de estar «por confirmar» e o relógio começa a contar a partir de agora.'));
+    if (r.porConfirmar && !t.soAcao && !t.seguimento && !t.remarcar) els.push(h('p',{class:'note'}, 'Ao confirmar, o pedido deixa de estar «por confirmar» e o relógio começa a contar a partir de agora.'));
     if (DA_MDM.includes(r.estado) && !t.soAcao && !t.seguimento && !t.remarcar) {
       const rel = relogio(r);
-      if (atrasadoNaMDM(r, rel) && !r.escalado && !r.porConfirmar && p !== 'P1') els.push(h('p',{class:'hint alert'}, `Este estado passou o prazo: ao confirmar, o pedido sobe de ${p} para ${up(p)} (uma vez só).`));
+      if (atrasadoNaMDM(r, rel) && !r.escalado && !r.porConfirmar && p !== 'P1') els.push(h('p',{class:'hint alert'}, `Fora do prazo: ao confirmar, sobe de ${p} para ${up(p)}.`));
     }
     els.push(h('p',{class:'err', id:'t-err', hidden:true}));
     els.push(h('div',{class:'row-end'},
@@ -3434,8 +3631,9 @@ if (!Element.prototype.replaceChildren) {
     const head = h('div',{class:'sg-h'},
       h('button',{class:'sg-cli', type:'button', onclick:() => openSheet(x.pedido_id)}, r.cliente || x.cliente || x.pedido_id),
       h('span',{class:'pill', style:'--tone:var(--info)'}, x.passo),
-      h('span',{class:'pill', style:'--tone:var(--muted)'}, CANAIS[x.canal] || x.canal),
-      h('span',{class:'sg-due', style:`--tone:var(--${atraso > 0 ? 'bad' : 'warn'})`}, atraso > 0 ? `atrasado ${atraso} ${atraso === 1 ? 'dia' : 'dias'}` : 'hoje'));
+      h('span',{class:'pill', style:'--tone:var(--muted)'}, ico(x.canal, CANAIS[x.canal] || x.canal)),
+      atraso > 0 ? h('span',{class:'dias-b', title:`atrasado ${atraso} ${atraso === 1 ? 'dia' : 'dias'}`, 'aria-label':`atrasado ${atraso} ${atraso === 1 ? 'dia' : 'dias'}`}, `${atraso}d`)
+        : h('span',{class:'sg-due', style:'--tone:var(--warn)'}, 'hoje'));
     const meta = h('div',{class:'sg-meta'}, [r.dono || x.dono || 'Sem dono', r.prioridade || 'P3', r.num || null, tel ? (c.telTxt || null) : x.canal === 'email' ? (c.email || null) : (c.telTxt || null), falta || null].filter(Boolean).join(' · '));
     if (editar) {
       return h('div',{class:'sg', style:'--stripe:var(--accent)'}, head, meta, h('div',{class:'sg-ed'},
@@ -3455,11 +3653,16 @@ if (!Element.prototype.replaceChildren) {
     if (canWrite) {
       botoes.push(h('button',{class:'btn btn-sm', type:'button', onclick:() => tel ? (url ? abrirLink(url) : toast('Falta o telefone no pedido.')) : segEnviar(x, r)},
         tel ? 'Ligar' : !url ? 'Marcar como enviado' : x.canal === 'email' ? 'Enviar email' : 'Enviar por WhatsApp'));
+      // Ao telefone o resultado fica à vista; o resto vai para o «⋯».
       if (tel) {
         botoes.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => segAtendeu(x)}, 'Atendeu'));
         botoes.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => segRpc('seg_enviar', {p_id: x.id, p_resultado:'nao_atendeu'}, 'Registado: não atendeu', x.id)}, 'Não atendeu'));
-      } else botoes.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => segRespondeu(x.pedido_id)}, 'Respondeu'));
-      botoes.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { sgEdit = {id: x.id, onde}; renderSeg(); if (currentId) renderSheet(); setTimeout(() => { const t = F('sg-texto'); if (t) t.focus(); }, 30); }}, 'Editar'));
+      }
+      botoes.push(menu([
+        tel ? null : ['Respondeu', () => segRespondeu(x.pedido_id), 'ok'],
+        ['Editar o texto', () => { sgEdit = {id: x.id, onde}; renderSeg(); if (currentId) renderSheet(); setTimeout(() => { const t = F('sg-texto'); if (t) t.focus(); }, 30); }, 'lapis'],
+        ['Abrir o pedido', () => openSheet(x.pedido_id), 'seta'],
+      ]));
     }
     return h('div',{class:'sg', style:`--stripe:var(--${atraso > 0 ? 'bad' : 'warn'})`}, head, meta,
       tel ? h('p',{class:'sg-txt full'}, h('b',null,'Guião da chamada'), x.rascunho || '(sem guião: toca em Editar)')
@@ -3481,13 +3684,13 @@ if (!Element.prototype.replaceChildren) {
       ]);
       const s = res[0];
       if (s.error) {
-        if (/relation|does not exist|schema cache|Could not find/i.test(s.error.message || '')) { segTabela = false; sg = null; renderSeg(); }
+        if (/relation|does not exist|schema cache|Could not find/i.test(s.error.message || '')) { segTabela = false; sg = null; renderSeg(); setTab(tab); }
         return;
       }
       segTabela = true;
       const grupo = lista => { const o = {}; (lista || []).forEach(x => { (o[x.pedido_id] = o[x.pedido_id] || []).push(x); }); return o; };
       sg = {todos: grupo(s.data), hoje: res[1].data || [], prox: grupo(res[2].data), viol: res[3].data || [], taxa: res[4].data || [], perd: res[5].data || [], pag: res[6].data || []};
-      renderSeg(); renderSegCfg();
+      renderSeg(); renderSegCfg(); renderInicio(enriquecidos()); setTab(tab);
       if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
       // Se a tarefa das 07:00 ainda não correu hoje (pg_cron desligado ou atrasado), a primeira página aberta corre-a.
       if (canWrite && !sgCorreu && new Date().getHours() >= 7 && (!segMotor || String(segMotor.dia || '') < today())) {
@@ -3587,8 +3790,8 @@ if (!Element.prototype.replaceChildren) {
       : x.estado === 'cancelado' ? 'cancelado' : x.estado === 'respondido' ? 'respondeu' : x.resultado === 'nao_atendeu' ? 'não atendeu'
       : x.resultado === 'reaberto' ? 'reaberto' : x.resultado === 'recomeçado' ? 'recomeçado' : 'enviado';
     const els = [h('h3',null,'Contactos e seguimentos'),
-      h('p',{class:'hint'}, `Canal preferido: ${CANAIS[canal]}${canal === 'email' ? (c.email ? ' · ' + c.email : ' · falta o email') : (c.telTxt ? ' · ' + c.telTxt : ' · falta o telefone')}${r.canal ? '' : ' (pela origem; muda em Dados do pedido)'}.`)];
-    if (sgRespondeu === r.id) els.push(h('p',{class:'hint alert'}, 'O cliente respondeu: muda o estado (aceitou, recusou, pediu revisão, mandou o que faltava) ou define a próxima ação.'));
+      h('p',{class:'hint'}, ico(canal, `${CANAIS[canal]} · ${canal === 'email' ? (c.email || 'falta o email') : (c.telTxt || 'falta o telefone')}`))];
+    if (sgRespondeu === r.id) els.push(h('p',{class:'hint alert'}, 'Respondeu: escolhe o próximo passo ou a próxima ação.'));
     lista.filter(x => x.estado === 'pendente' && !x.fechado_em).forEach(x => els.push(h('div',{class:'panel'}, sgCard(Object.assign({}, x, {dias_atraso: Math.max(0, Math.round((new Date(today()) - new Date(x.devido_em)) / 86400000))}), 'sheet'))));
     if (lista.length) els.push(h('ul',{class:'hist'}, lista.map(x => h('li',null,
       h('span',{class:'when'}, x.ancora && x.numero === 0 && x.sequencia !== 'A' && x.sequencia !== 'B' || x.resultado === 'reaberto' || x.resultado === 'recomeçado' ? ddmm(x.ancora) : x.enviado_em ? quando(new Date(x.enviado_em)) : ddmm(x.devido_em)),
@@ -3711,7 +3914,7 @@ if (!Element.prototype.replaceChildren) {
         sb.from('v_por_marcar').select('*'),
       ]);
       if (res[0].error) {
-        if (/relation|does not exist|schema cache|Could not find/i.test(res[0].error.message || '')) { agTabela = false; renderAgenda(); renderAgCfg(); }
+        if (/relation|does not exist|schema cache|Could not find/i.test(res[0].error.message || '')) { agTabela = false; renderAgenda(); renderAgCfg(); setTab(tab); }
         return;
       }
       agTabela = true;
@@ -3725,7 +3928,7 @@ if (!Element.prototype.replaceChildren) {
         const l = await sb.rpc('agenda_links_para', {p_pedidos: ids});
         if (!l.error) { const novo = {}; (l.data || []).forEach(x => { novo[x.pedido_id] = x.url; }); agLinks = novo; }
       }
-      renderAgenda(); renderAgCfg(); renderSeg();
+      renderAgenda(); renderAgCfg(); renderSeg(); renderInicio(enriquecidos());
       if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
     } catch (e) { /* sem rede: fica a última leitura */ }
   }
@@ -3910,14 +4113,15 @@ if (!Element.prototype.replaceChildren) {
     const r = rows.find(x => x.id === m.pedido_id) || {};
     const c = contactosDe(r);
     const bts = [h('button',{class:'btn btn-sm', type:'button', onclick:() => openSheet(m.pedido_id)}, 'Abrir pedido')];
-    if (canWrite && m.estado !== 'feita') {
-      bts.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agAbrir('agenda', m.pedido_id, m.tipo, m.id, 'sug')}, 'Mudar'));
-      if (m.estado === 'marcada' || m.estado === 'proposta') bts.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agEstado(m.id, 'confirmada', 'Confirmada com o cliente')}, 'Confirmada'));
-      if (new Date(m.inicio) <= new Date()) bts.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agEstado(m.id, 'feita', 'Marcada como feita')}, 'Feita'));
-      bts.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agCancelar(m.id)}, 'Cancelar'));
-    }
-    bts.push(h('a',{class:'btn btn-ghost btn-sm', href: agGoogle(m), target:'_blank', rel:'noopener'}, 'Google Calendar'));
-    if (m.localidade) bts.push(h('a',{class:'btn btn-ghost btn-sm', href: agMapa(m), target:'_blank', rel:'noopener'}, 'Mapa'));
+    const pode = canWrite && m.estado !== 'feita';
+    if (pode) bts.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agAbrir('agenda', m.pedido_id, m.tipo, m.id, 'sug')}, 'Mudar'));
+    bts.push(menu([
+      pode && (m.estado === 'marcada' || m.estado === 'proposta') ? ['Confirmada com o cliente', () => agEstado(m.id, 'confirmada', 'Confirmada com o cliente'), 'ok'] : null,
+      pode && new Date(m.inicio) <= new Date() ? ['Feita', () => agEstado(m.id, 'feita', 'Marcada como feita'), 'ok'] : null,
+      ['Pôr no Google Calendar', () => abrirLink(agGoogle(m)), 'cal'],
+      m.localidade ? ['Ver no mapa', () => abrirLink(agMapa(m)), 'mapa'] : null,
+      pode ? ['Cancelar a marcação', () => agCancelar(m.id), 'x', true] : null,
+    ]));
     return h('div',{class:'ag-det', style:`--tom:var(--${AG_TOM[m.tipo] || 'muted'})`},
       h('div',{class:'sg-h'}, h('b',{class:'ag-dn'}, m.cliente || m.pedido_id), h('span',{class:'pill', style:'--tone:var(--tom)'}, AG_TIPO[m.tipo]),
         h('span',{class:'pill', style:`--tone:var(--${m.estado === 'confirmada' || m.estado === 'feita' ? 'good' : 'muted'})`}, {proposta:'proposta', marcada:'marcada', confirmada:'confirmada', feita:'feita'}[m.estado] || m.estado),
@@ -3941,8 +4145,8 @@ if (!Element.prototype.replaceChildren) {
       h('div',{class:'sg-meta'}, [p.prioridade, p.zona, String(p.localidade || '').split('\n')[0] || 'sem morada', p.dono || r.dono || 'sem dono'].filter(Boolean).join(' · ')),
       canWrite ? h('div',{class:'sg-b'},
         h('button',{class:'btn btn-sm', type:'button', onclick:() => agAbrir('agenda', p.pedido_id, p.tipo, null, 'sug')}, 'Sugerir'),
-        h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agAbrir('agenda', p.pedido_id, p.tipo, null, 'form')}, 'Escolher'),
-        temLink ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agEnviarLink(p.pedido_id)}, 'Enviar ligação ao cliente') : null) : null,
+        temLink ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agEnviarLink(p.pedido_id)}, ico('ligacao', 'Enviar ligação')) : null,
+        menu([['Escolher à mão', () => agAbrir('agenda', p.pedido_id, p.tipo, null, 'form'), 'cal'], ['Abrir o pedido', () => openSheet(p.pedido_id), 'seta']])) : null,
       agPainel('agenda', 'p' + p.pedido_id));
   }
 
@@ -4044,7 +4248,7 @@ if (!Element.prototype.replaceChildren) {
           h('div',{class:'who'}, [agNomes(m), m.estado === 'confirmada' ? 'confirmada' : m.estado === 'feita' ? 'feita' : null, m.origem === 'cliente' ? 'escolhida pelo cliente' : null].filter(Boolean).join(' · '))),
         canWrite && m.estado !== 'feita' ? h('div',{class:'sg-b'},
           h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agAbrir('sheet', r.id, m.tipo, m.id, 'sug')}, 'Mudar'),
-          h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agCancelar(m.id)}, 'Cancelar')) : null));
+          menu([['Cancelar a marcação', () => agCancelar(m.id), 'x', true]])) : null));
       (agConf[m.id] || []).forEach(t => els.push(h('p',{class:'hint alert'}, t)));
       const pa = agPainel('sheet', 'm' + m.id); if (pa) els.push(pa);
     });
@@ -4053,8 +4257,8 @@ if (!Element.prototype.replaceChildren) {
       else {
         els.push(h('div',{class:'trans'},
           h('button',{class:'btn', type:'button', onclick:() => agAbrir('sheet', r.id, tipo, null, 'sug')}, tipo === 'instalacao' ? 'Marcar a instalação' : 'Marcar a visita'),
-          h('button',{class:'btn btn-ghost', type:'button', onclick:() => agAbrir('sheet', r.id, tipo, null, 'form')}, 'Escolher dia e técnico'),
-          agLinks[r.id] ? h('button',{class:'btn btn-ghost', type:'button', onclick:() => agEnviarLink(r.id)}, 'Enviar ligação ao cliente') : null));
+          agLinks[r.id] ? h('button',{class:'btn btn-ghost', type:'button', onclick:() => agEnviarLink(r.id)}, ico('ligacao', 'Enviar ligação')) : null,
+          menu([['Escolher dia e técnico', () => agAbrir('sheet', r.id, tipo, null, 'form'), 'cal']])));
         const pa = agPainel('sheet', 'p' + r.id); if (pa) els.push(pa);
       }
     }
@@ -4094,7 +4298,7 @@ if (!Element.prototype.replaceChildren) {
           }}, 'Novo endereço')) : null);
     };
     fill(F('agCfg'),
-      h('p',{class:'hint'}, 'Cada técnico pode juntar o seu calendário ao Google Calendar ou ao iPhone: as visitas aparecem lá sozinhas (o Google atualiza de poucas em poucas horas; o iPhone pode ser de 15 em 15 minutos). Quem tem o endereço vê moradas e telefones: não o partilhes.'),
+      h('p',{class:'note'}, 'Cada técnico pode juntar o seu calendário ao Google Calendar ou ao iPhone: as visitas aparecem lá sozinhas (o Google atualiza de poucas em poucas horas; o iPhone pode ser de 15 em 15 minutos). Quem tem o endereço vê moradas e telefones: não o partilhes.'),
       agTec.map(linha), linha({ativo: true}),
       h('details',null, h('summary',null,'Durações'),
         h('div',{class:'fields', style:'margin-top:8px'},
@@ -4142,6 +4346,155 @@ if (!Element.prototype.replaceChildren) {
   F('agHoje').addEventListener('click', () => { agSemana = agSeg(today()); agSel = null; agAcao = null; renderAgenda(); });
   F('agCfg').addEventListener('input', () => { agCfgSujo = true; });
   F('agCfg').addEventListener('change', () => { agCfgSujo = true; });
+
+
+  /* ---------- Quadro: arrastar um pedido para outro passo ----------
+     Só acendem os passos para onde o pedido pode ir (as mesmas mudanças da folha do pedido). Ao largar abre-se a folha
+     com o formulário dessa mudança já preenchido (dono, ação, data e o que o passo pede: data da visita, número da
+     fatura…): nenhuma regra fica por cumprir. Com a agenda, largar em «Visita marcada» abre as sugestões de horas.
+     Rato: arrastar. Toque (iPad, telemóvel): carregar meio segundo no cartão e arrastar. */
+  let kArr = null, kPendente = false, kSoltou = false;
+  function kAlvos(r) {
+    const alvos = {};
+    transicoes(r).forEach(t => { if (t.para && !alvos[t.para] && !t.reabrir) alvos[t.para] = t; });
+    if (agPronto() && (r.estado === 'novo' || r.estado === 'visita_por_marcar') && !r.porConfirmar) alvos.visita_marcada = {agenda: true, label: 'Marcar a visita'};
+    delete alvos[r.estado];
+    return alvos;
+  }
+  function kComeca(card, x, y) {
+    const r = rows.find(z => z.id === card.getAttribute('data-id'));
+    if (!r || !canWrite) return;
+    const alvos = kAlvos(r);
+    const rc = card.getBoundingClientRect();
+    const fant = card.cloneNode(true);
+    fant.classList.add('kfant'); fant.style.width = rc.width + 'px';
+    document.body.appendChild(fant);
+    kArr = {r, card, alvos, fant, dx: x - rc.left, dy: y - rc.top, sobre: null};
+    card.classList.add('karr');
+    document.body.classList.add('a-arrastar');
+    Array.prototype.forEach.call(document.querySelectorAll('#board .col'), c => {
+      const e = c.getAttribute('data-estado');
+      c.classList.add(alvos[e] ? 'alvo' : e === r.estado ? 'origem' : 'fora');
+    });
+    kMove(x, y);
+  }
+  function kMove(x, y) {
+    if (!kArr) return;
+    kArr.fant.style.transform = `translate(${x - kArr.dx}px, ${y - kArr.dy}px)`;
+    const el = document.elementFromPoint(x, y);
+    const col = el && el.closest ? el.closest('#board .col') : null;
+    if (kArr.sobre && kArr.sobre !== col) kArr.sobre.classList.remove('sobre');
+    kArr.sobre = col && col.classList.contains('alvo') ? col : null;
+    if (kArr.sobre) kArr.sobre.classList.add('sobre');
+    // perto da beira, o quadro anda sozinho
+    const b = F('board'), bb = b.getBoundingClientRect();
+    if (x < bb.left + 50) b.scrollLeft -= 18; else if (x > bb.right - 50) b.scrollLeft += 18;
+  }
+  function kFim(largou) {
+    if (!kArr) return;
+    const {r, alvos, sobre} = kArr;
+    kArr.fant.remove(); kArr.card.classList.remove('karr');
+    document.body.classList.remove('a-arrastar');
+    Array.prototype.forEach.call(document.querySelectorAll('#board .col'), c => c.classList.remove('alvo', 'fora', 'origem', 'sobre'));
+    kArr = null;
+    kSoltou = true; setTimeout(() => { kSoltou = false; }, 350);
+    if (kPendente) { kPendente = false; renderAll(); }
+    if (!largou || !sobre) return;
+    const a = alvos[sobre.getAttribute('data-estado')];
+    openSheet(r.id);
+    if (a.agenda) agAbrir('sheet', r.id, r.tipo === 'manutencao' || r.tipo === 'reparacao' ? r.tipo : 'visita', null, 'sug');
+    else abrirTrans(a);
+  }
+  (function () {
+    const board = F('board');
+    let ini = null, temp = null;
+    board.addEventListener('mousedown', ev => {
+      const c = ev.target.closest('.kcard'); if (!c || ev.button !== 0) return;
+      ini = {c, x: ev.clientX, y: ev.clientY};
+    });
+    document.addEventListener('mousemove', ev => {
+      if (kArr) { kMove(ev.clientX, ev.clientY); ev.preventDefault(); return; }
+      if (ini && Math.abs(ev.clientX - ini.x) + Math.abs(ev.clientY - ini.y) > 6) { kComeca(ini.c, ev.clientX, ev.clientY); ini = null; }
+    });
+    document.addEventListener('mouseup', () => { ini = null; if (kArr) kFim(true); });
+    board.addEventListener('touchstart', ev => {
+      const c = ev.target.closest('.kcard'); if (!c || ev.touches.length !== 1) return;
+      const t = ev.touches[0]; ini = {c, x: t.clientX, y: t.clientY};
+      clearTimeout(temp);
+      temp = setTimeout(() => { if (ini) { kComeca(ini.c, ini.x, ini.y); ini = null; } }, 450);
+    }, {passive: true});
+    document.addEventListener('touchmove', ev => {
+      const t = ev.touches[0];
+      if (kArr) { ev.preventDefault(); kMove(t.clientX, t.clientY); return; }
+      if (ini && Math.abs(t.clientX - ini.x) + Math.abs(t.clientY - ini.y) > 10) { clearTimeout(temp); ini = null; }
+    }, {passive: false});
+    document.addEventListener('touchend', ev => { clearTimeout(temp); ini = null; if (kArr) { ev.preventDefault(); kFim(true); } });
+    document.addEventListener('touchcancel', () => { clearTimeout(temp); ini = null; if (kArr) kFim(false); });
+    document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && kArr) kFim(false); });
+  })();
+
+  /* ---------- Hoje: o que enviar, as visitas e os alertas, em três listas curtas ---------- */
+  const DIA_LONGO = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+  function hjLinha(stripe, nome, onNome, sub, acao) {
+    return h('div',{class:'hj-l', style: stripe ? `--stripe:var(--${stripe})` : null},
+      h('button',{class:'hj-n', type:'button', onclick:onNome}, nome), h('span',{class:'hj-s'}, sub), acao);
+  }
+  function hjLista(box, cont, itens, vazio, todos, max) {
+    max = max || 5;
+    F(cont).textContent = itens.length ? String(itens.length) : '';
+    fill(F(box), itens.length ? itens.slice(0, max) : h('p',{class:'empty'}, vazio),
+      itens.length > max && todos ? h('button',{class:'hj-mais', type:'button', onclick:todos}, `Ver todos (${itens.length})`) : null);
+  }
+  function renderInicio(all) {
+    if (!F('hjEnv')) return;
+    const d = new Date(), hora = d.getHours();
+    F('hjOla').textContent = `${hora < 13 ? 'Bom dia' : hora < 20 ? 'Boa tarde' : 'Boa noite'}${eu && eu.nome ? ', ' + eu.nome : ''}. ${DIA_LONGO[d.getDay()].charAt(0).toUpperCase() + DIA_LONGO[d.getDay()].slice(1)}, ${dataCurta(today())}.`;
+    if (status !== 'ok') { ['hjEnv','hjVis','hjAl'].forEach(k => fill(F(k), stateMsg())); fill(F('hjKpis')); return; }
+    const eu1 = meuNome();
+    // Enviar: os rascunhos de hoje (motor de seguimentos), os meus primeiro
+    const env = segLigado() && sg ? sg.hoje.slice().sort((a, b) => ((b.dono === eu1) - (a.dono === eu1)) || (b.dias_atraso - a.dias_atraso)) : [];
+    const linhasEnv = env.map(x => {
+      const r = rows.find(y => y.id === x.pedido_id) || {};
+      const url = linkEnvio(x, r), tel = x.canal === 'telefone';
+      const passo = x.passo || segRotulo(x.sequencia, x.numero, x.total != null ? x.total : segTotal(x.sequencia, r.prioridade));
+      return hjLinha(x.dias_atraso > 0 ? 'bad' : 'warn', r.cliente || x.cliente || x.pedido_id, () => openSheet(x.pedido_id),
+        [ico(x.canal), passo, x.dias_atraso > 0 ? h('span',{class:'dias-b', title:`atrasado ${x.dias_atraso} dias`}, `${x.dias_atraso}d`) : null],
+        canWrite ? h('button',{class:'btn btn-sm', type:'button', onclick:() => tel ? (url ? abrirLink(url) : openSheet(x.pedido_id)) : segEnviar(x, r)}, tel ? 'Ligar' : 'Enviar') : null);
+    });
+    // Visitas de hoje: da agenda, ou da data da visita escrita no pedido
+    const hoje = today();
+    const vis = agLigado()
+      ? agMarc.filter(m => agDiaDe(m.inicio) <= hoje && agDiaDe(m.fim) >= hoje).sort((a, b) => String(a.inicio).localeCompare(String(b.inicio)))
+        .map(m => ({id: m.pedido_id, hora: m.tipo === 'instalacao' ? 'obra' : agHora(m.inicio), cliente: m.cliente, loc: m.localidade, quem: agNomes(m), feita: m.estado === 'feita'}))
+      : rows.filter(r => r.estado === 'visita_marcada' && r.dataVisita === hoje).sort((a, b) => String(a.horaVisita || '').localeCompare(String(b.horaVisita || '')))
+        .map(r => ({id: r.id, hora: r.horaVisita || '', cliente: r.cliente, loc: r.localidade, quem: r.dono || '', feita: false}));
+    const linhasVis = vis.map(v => hjLinha(v.feita ? 'good' : 'info', `${v.hora ? v.hora + '  ' : ''}${v.cliente || v.id}`, () => openSheet(v.id),
+      [ico('mapa'), [String(v.loc || '').split('\n')[0], v.quem].filter(Boolean).join(' · ')],
+      v.loc ? h('a',{class:'btn btn-ghost btn-sm', href:'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(String(v.loc).split('\n')[0]), target:'_blank', rel:'noopener'}, 'Mapa') : null));
+    // Alertas: fora do prazo, sem próxima ação, conflitos na agenda
+    const verm = all.filter(x => ABERTOS.includes(x.r.estado) && x.sem === 'vermelho').sort(ordem);
+    const al = verm.map(x => hjLinha('bad', x.r.cliente || x.r.id, () => openSheet(x.r.id), [h('span',{class:'prio p-' + x.pe.p}, x.pe.p), tempoTxt(x.r, x.rel)],
+      h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => openSheet(x.r.id)}, 'Abrir')));
+    const jaAl = {}; verm.forEach(x => { jaAl[x.r.id] = 1; });
+    if (segLigado() && sg) sg.viol.forEach(v => { if (jaAl[v.pedido_id]) return; jaAl[v.pedido_id] = 1; al.push(hjLinha('warn', v.cliente || v.pedido_id, () => openSheet(v.pedido_id), v.texto || 'Sem próxima ação',
+      h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => openSheet(v.pedido_id)}, 'Abrir'))); });
+    if (agLigado()) {
+      const vistos = {};
+      agMarc.filter(m => agConf[m.id] && new Date(m.fim) > new Date()).forEach(m => { if (vistos[m.pedido_id]) return; vistos[m.pedido_id] = 1;
+        al.push(hjLinha('bad', m.cliente || m.pedido_id, () => { setTab('agenda'); agSemana = agSeg(agDiaDe(m.inicio)); agSel = m.id; renderAgenda(); }, [ico('cal'), agConf[m.id][0]],
+          h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { setTab('agenda'); agSemana = agSeg(agDiaDe(m.inicio)); agSel = m.id; renderAgenda(); }}, 'Ver'))); });
+    }
+    hjLista('hjEnv', 'hjEnvCount', linhasEnv, segTabela === false ? 'O motor de seguimentos ainda não está instalado.' : 'Nada para enviar hoje.', () => setTab('seguimentos'));
+    hjLista('hjVis', 'hjVisCount', linhasVis, 'Nenhuma visita hoje.', () => setTab('agenda'), 6);
+    hjLista('hjAl', 'hjAlCount', al, 'Tudo dentro do prazo.', () => irPara('vermelhos'));
+    const tile = (l, v, tone, fn) => h('button',{class:'kpi' + (tone && v ? ' t-' + tone : ''), type:'button', onclick:fn}, h('span',{class:'k-l'}, l), h('span',{class:'k-v'}, String(v)));
+    fill(F('hjKpis'),
+      tile('Para enviar', env.length, 'warn', () => setTab('seguimentos')),
+      tile('Visitas hoje', vis.length, '', () => setTab('agenda')),
+      tile('Atrasados', verm.length, 'bad', () => irPara('vermelhos')),
+      tile('Por marcar', agLigado() ? agPor.length : rows.filter(r => r.estado === 'visita_por_marcar').length, 'warn', () => agLigado() ? setTab('agenda') : irPara('visita_por_marcar')));
+    F('hjBadge').textContent = env.length + verm.length ? String(env.length + verm.length) : '';
+  }
 
   /* ---------- Dados do pedido ---------- */
   function camposDados(r, novo) {
@@ -4232,7 +4585,7 @@ if (!Element.prototype.replaceChildren) {
     F('sheetTitle').textContent = 'Novo pedido'; F('sheetSub').textContent = id;
     const base = {prioridade:null, dataPedido: today(), ...(novoBase || {})}; novoBase = null;
     F('sheetBody').replaceChildren(
-      h('p',{class:'hint'}, 'Regista o pedido assim que chega: entra em Novo, com dono, próxima ação e data. O P sai das regras; muda-o só com razão.'),
+      h('p',{class:'note'}, 'Regista o pedido assim que chega: entra em Novo, com dono, próxima ação e data. O P sai das regras; muda-o só com razão.'),
       camposDados(base, true),
       h('div',{class:'fields'},
         campo('n-dono','Dono', donoInput('n-dono', meuNome())),
