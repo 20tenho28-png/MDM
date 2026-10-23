@@ -12,6 +12,8 @@
 --   D  pagamento (faturado): lembretes aos 30, 45 e 60 dias da fatura; depois dos 60, tarefa P1 do chefe, nunca perdido
 -- P1 (avarias) usa metade dos intervalos, arredondada para cima (A, B e C). Envios nunca ao fim de semana nem em
 -- feriado: passam para o dia útil seguinte. A perda por silêncio é automática, fica nos eventos e reabre-se num toque.
+-- Os textos do primeiro contacto (A) levam {link_marcacao}: com a agenda (agenda.sql), a página troca-o pela ligação
+-- para o cliente escolher o dia da visita; sem a agenda, desaparece.
 
 -- ---------- Leituras seguras (o JSON vem da página: nunca rebenta com uma data mal escrita) ----------
 
@@ -140,21 +142,21 @@ insert into public.config (chave, valor) values ('seguimentos', $json$
   },
   "textos": {
     "A": [
-      {"whatsapp": "Olá {nome}, obrigado pelo seu pedido à MDM. Para marcarmos a visita técnica, que dia e hora lhe dão mais jeito?",
+      {"whatsapp": "Olá {nome}, obrigado pelo seu pedido à MDM. Para marcarmos a visita técnica, que dia e hora lhe dão mais jeito?{link_marcacao}",
        "email_assunto": "O seu pedido à MDM",
-       "email": "Olá {nome},\n\nObrigado pelo seu pedido. Para marcarmos a visita técnica, diga-nos por favor que dia e hora lhe dão mais jeito.\n\n{assinatura}",
+       "email": "Olá {nome},\n\nObrigado pelo seu pedido. Para marcarmos a visita técnica, diga-nos por favor que dia e hora lhe dão mais jeito.{link_marcacao}\n\n{assinatura}",
        "telefone": "Agradecer o pedido. Propor dois horários para a visita técnica e confirmar a morada."},
-      {"whatsapp": "Olá {nome}, ficámos a aguardar a sua resposta para marcarmos a visita. Que dia lhe dá jeito?",
+      {"whatsapp": "Olá {nome}, ficámos a aguardar a sua resposta para marcarmos a visita. Que dia lhe dá jeito?{link_marcacao}",
        "email_assunto": "Marcação da visita técnica",
-       "email": "Olá {nome},\n\nFicámos a aguardar a sua resposta para marcarmos a visita técnica. Que dia lhe dá mais jeito?\n\n{assinatura}",
+       "email": "Olá {nome},\n\nFicámos a aguardar a sua resposta para marcarmos a visita técnica. Que dia lhe dá mais jeito?{link_marcacao}\n\n{assinatura}",
        "telefone": "Perguntar se ainda precisa da visita. Propor dois horários."},
-      {"whatsapp": "Olá {nome}, ainda precisa da nossa visita? Basta responder com um dia e uma hora e nós tratamos do resto.",
+      {"whatsapp": "Olá {nome}, ainda precisa da nossa visita? Basta responder com um dia e uma hora e nós tratamos do resto.{link_marcacao}",
        "email_assunto": "Ainda precisa da visita?",
-       "email": "Olá {nome},\n\nAinda precisa da nossa visita? Basta responder com um dia e uma hora e nós tratamos do resto.\n\n{assinatura}",
+       "email": "Olá {nome},\n\nAinda precisa da nossa visita? Basta responder com um dia e uma hora e nós tratamos do resto.{link_marcacao}\n\n{assinatura}",
        "telefone": "Perguntar se ainda está interessado(a). Se sim, marcar já a visita."},
-      {"whatsapp": "Olá {nome}, como não tivemos resposta, vamos encerrar o seu pedido nos próximos dias. Se ainda precisar, responda a esta mensagem e retomamos de imediato.",
+      {"whatsapp": "Olá {nome}, como não tivemos resposta, vamos encerrar o seu pedido nos próximos dias. Se ainda precisar, responda a esta mensagem e retomamos de imediato.{link_marcacao}",
        "email_assunto": "O seu pedido à MDM",
-       "email": "Olá {nome},\n\nComo não tivemos resposta, vamos encerrar o seu pedido nos próximos dias. Se ainda precisar, responda a este email e retomamos de imediato.\n\n{assinatura}",
+       "email": "Olá {nome},\n\nComo não tivemos resposta, vamos encerrar o seu pedido nos próximos dias. Se ainda precisar, responda a este email e retomamos de imediato.{link_marcacao}\n\n{assinatura}",
        "telefone": "Última tentativa: avisar que o pedido vai ser encerrado. Se ainda quiser, marcar a visita."}
     ],
     "B": [

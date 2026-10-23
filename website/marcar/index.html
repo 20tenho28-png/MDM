@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Marcar a visita · MDM</title>
+<!-- Página pública para o cliente escolher o dia da visita (ligação enviada pela MDM, /marcar/?t=<código>).
+     Só usa as funções públicas agenda_link_ver e agenda_link_marcar (registo/supabase/agenda.sql): o cliente nunca vê o
+     calendário nem dados de outros clientes. Uma ligação serve uma vez e expira. Corre no iPad com iOS 12 (sem ?. nem ??). -->
+<style>
+@font-face{font-family:Archivo;src:url('/assets/fonts/archivo-latin-500-normal.woff2') format('woff2');font-weight:400 500;font-display:swap}
+@font-face{font-family:Archivo;src:url('/assets/fonts/archivo-latin-700-normal.woff2') format('woff2');font-weight:600 700;font-display:swap}
+:root{--red:#a50b1a;--red-dark:#7f0815;--ink:#19232c;--muted:#5b636b;--paper:#f8f9f9;--card:#fff;--line:#dce0e2;--ok:#1f7a4d;--sel:#fbeced}
+@media (prefers-color-scheme: dark){:root{--ink:#e8ecee;--muted:#a3acb3;--paper:#12181d;--card:#1b232a;--line:#2e3a43;--sel:#3a1c20;--ok:#5cc495}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Archivo,Arial,sans-serif;font-size:17px;line-height:1.5;color:var(--ink);background:var(--paper);-webkit-text-size-adjust:100%}
+header{background:#19232c;color:#fff;padding:14px 16px}
+header .in{max-width:560px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+header .marca{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;line-height:1.2}
+header img{height:32px;width:auto;border-radius:3px}
+header a{color:#fff;text-decoration:none;font-weight:600;font-size:15px;white-space:nowrap}
+main{max-width:560px;margin:auto;padding:24px 16px 48px}
+h1{font-size:26px;line-height:1.15;margin:0 0 6px;letter-spacing:-.02em}
+.sub{color:var(--muted);margin:0 0 22px}
+.dia{margin:0 0 18px}
+.dia h2{font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 8px}
+.horas{display:flex;flex-wrap:wrap;gap:10px}
+.hora{flex:1 1 140px;min-height:56px;border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:inherit;font-weight:700;font-size:19px;cursor:pointer;padding:10px 12px;text-align:left}
+.hora small{display:block;font-weight:500;font-size:14px;color:var(--muted)}
+.hora[aria-pressed="true"]{border-color:var(--red);background:var(--sel)}
+.hora:focus-visible,.btn:focus-visible,a:focus-visible{outline:3px solid #226f9c;outline-offset:3px}
+.barra{position:-webkit-sticky;position:sticky;bottom:0;padding:14px 0 calc(14px + env(safe-area-inset-bottom));background:var(--paper);border-top:1px solid var(--line);margin-top:8px}
+.btn{display:block;width:100%;min-height:54px;border:0;border-radius:10px;background:var(--red);color:#fff;font:inherit;font-weight:700;font-size:18px;cursor:pointer;text-align:center;text-decoration:none;padding:15px}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.sec{background:transparent;color:var(--ink);border:2px solid var(--line);margin-top:10px}
+.caixa{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px}
+.caixa p{margin:0}
+.grande{font-size:22px;font-weight:700;margin:6px 0 2px}
+.ok{color:var(--ok);font-weight:700}
+.nota{color:var(--muted);font-size:15px;margin-top:18px}
+.erro{color:var(--red);font-weight:600;margin:10px 0 0}
+@media (prefers-color-scheme: dark){.erro{color:#ff8a94}}
+.carrega{color:var(--muted)}
+</style>
+</head>
+<body>
+<header><div class="in"><span class="marca"><img src="/assets/img/logo-mdm.svg" alt="" width="31" height="32">MDM Assistência Técnica</span><a href="tel:+351218935050">218 935 050</a></div></header>
+<main id="app"><p class="carrega">A abrir…</p></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  var SUPABASE_URL = 'https://kfhxlrikqjynvjdtywuc.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_Kpi28Ee4n0q7NAOaFVg7tQ_EtjyFgov';
+  var TELEFONE = '218 935 050';
+  var app = document.getElementById('app');
+  var token = (location.search.match(/[?&]t=([A-Za-z0-9]+)/) || [])[1] || '';
+  var sb = null;
+  var escolhida = null;
+  var DIAS = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+  var MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+
+  function h(tag, attrs) {
+    var e = document.createElement(tag), k, i, c;
+    attrs = attrs || {};
+    for (k in attrs) {
+      if (k === 'onclick') e.addEventListener('click', attrs[k]);
+      else if (attrs[k] != null) e.setAttribute(k, attrs[k]);
+    }
+    for (i = 2; i < arguments.length; i++) {
+      c = arguments[i];
+      if (c == null || c === false) continue;
+      e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    }
+    return e;
+  }
+  function mostra() {
+    while (app.firstChild) app.removeChild(app.firstChild);
+    for (var i = 0; i < arguments.length; i++) if (arguments[i]) app.appendChild(arguments[i]);
+    window.scrollTo(0, 0);
+  }
+  // As horas mostram-se sempre em hora de Lisboa, esteja o telemóvel do cliente onde estiver.
+  var fmt = null;
+  try { fmt = new Intl.DateTimeFormat('pt-PT', { timeZone: 'Europe/Lisbon', year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false }); } catch (e) { fmt = null; }
+  function partes(iso) {
+    var d = new Date(iso);
+    if (fmt && fmt.formatToParts) {
+      var p = {}, l = fmt.formatToParts(d), i;
+      for (i = 0; i < l.length; i++) p[l[i].type] = l[i].value;
+      var dl = new Date(Date.UTC(+p.year, +p.month - 1, +p.day));
+      return { ano: +p.year, mes: +p.month - 1, dia: +p.day, sem: dl.getUTCDay(), hora: (p.hour === '24' ? '00' : p.hour) + ':' + p.minute };
+    }
+    return { ano: d.getFullYear(), mes: d.getMonth(), dia: d.getDate(), sem: d.getDay(), hora: ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) };
+  }
+  function diaTexto(p) { return DIAS[p.sem] + ', ' + p.dia + ' de ' + MESES[p.mes]; }
+  function periodo(hora) { return hora < '12:00' ? 'manhã' : 'tarde'; }
+
+  function contacto(texto) {
+    return h('div', {},
+      h('p', { class: 'nota' }, texto),
+      h('a', { class: 'btn sec', href: 'tel:+351218935050' }, 'Ligar ' + TELEFONE));
+  }
+
+  function ics(op) {
+    function z(iso) { return new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); }
+    var linhas = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//MDM//Marcar//PT', 'BEGIN:VEVENT',
+      'UID:visita-' + token.slice(0, 12) + '@mdmassist.pt', 'DTSTAMP:' + z(new Date().toISOString()),
+      'DTSTART:' + z(op.inicio), 'DTEND:' + z(op.fim), 'SUMMARY:Visita da MDM Assistência Técnica',
+      'DESCRIPTION:Para mudar a hora ligue ' + TELEFONE + '.', 'END:VEVENT', 'END:VCALENDAR'];
+    return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(linhas.join('\r\n') + '\r\n');
+  }
+
+  function feito(op, jaEstava) {
+    var p = partes(op.inicio), pf = partes(op.fim);
+    mostra(
+      h('h1', {}, jaEstava ? 'A visita já está marcada' : 'Visita marcada'),
+      h('div', { class: 'caixa' },
+        h('p', { class: 'ok' }, '✓ Confirmado'),
+        h('p', { class: 'grande' }, diaTexto(p)),
+        h('p', {}, 'Chegamos entre as ' + p.hora + ' e as ' + pf.hora + '.')),
+      h('a', { class: 'btn', href: ics(op), download: 'visita-mdm.ics' }, 'Adicionar ao calendário'),
+      contacto('Se precisar de mudar, ligue-nos. Na véspera confirmamos por mensagem.'));
+  }
+
+  function erro(titulo, texto) {
+    mostra(h('h1', {}, titulo), h('p', { class: 'sub' }, texto), contacto('Ligue-nos e marcamos consigo.'));
+  }
+
+  function escolher(dados, aviso) {
+    var ops = dados.opcoes || [];
+    if (!ops.length) return erro('Já não há horas livres nesta lista', 'As horas que tínhamos para si já foram ocupadas.');
+    var grupos = [], porDia = {}, i;
+    for (i = 0; i < ops.length; i++) {
+      var p = partes(ops[i].inicio), chave = p.ano + '-' + p.mes + '-' + p.dia;
+      if (!porDia[chave]) { porDia[chave] = { p: p, ops: [] }; grupos.push(porDia[chave]); }
+      porDia[chave].ops.push({ op: ops[i], p: p });
+    }
+    var botoes = [];
+    var confirmar = h('button', { class: 'btn', type: 'button', disabled: 'disabled' }, 'Escolha uma hora');
+    var msg = h('p', { class: 'erro', role: 'alert' });
+    function marca(b, o) {
+      escolhida = o;
+      for (var j = 0; j < botoes.length; j++) botoes[j].setAttribute('aria-pressed', botoes[j] === b ? 'true' : 'false');
+      confirmar.removeAttribute('disabled');
+      confirmar.textContent = 'Confirmar ' + diaTexto(partes(o.inicio)).split(',')[0] + ' às ' + partes(o.inicio).hora;
+    }
+    var dias = grupos.map(function (g) {
+      return h('section', { class: 'dia' },
+        h('h2', {}, diaTexto(g.p)),
+        h.apply(null, ['div', { class: 'horas' }].concat(g.ops.map(function (x) {
+          var b = h('button', { class: 'hora', type: 'button', 'aria-pressed': 'false' }, x.p.hora, h('small', {}, periodo(x.p.hora)));
+          b.addEventListener('click', function () { marca(b, x.op); });
+          botoes.push(b);
+          return b;
+        }))));
+    });
+    confirmar.addEventListener('click', function () {
+      if (!escolhida) return;
+      confirmar.setAttribute('disabled', 'disabled');
+      confirmar.textContent = 'A marcar…';
+      msg.textContent = '';
+      sb.rpc('agenda_link_marcar', { p_token: token, p_n: escolhida.n }).then(function (r) {
+        var d = r.data || {};
+        if (r.error) throw r.error;
+        if (d.ok) return feito({ inicio: d.inicio, fim: d.fim }, false);
+        if (d.erro === 'ocupada') return abrir('Essa hora acabou de ser ocupada. Escolha outra.');
+        if (d.erro === 'usada') return abrir();
+        erro('Esta ligação já não é válida', 'O prazo para escolher passou ou o pedido mudou.');
+      }).catch(function () {
+        confirmar.removeAttribute('disabled');
+        confirmar.textContent = 'Tentar outra vez';
+        msg.textContent = 'Não foi possível marcar. Verifique a ligação à internet.';
+      });
+    });
+    var ola = dados.nome ? 'Olá ' + dados.nome + '. ' : '';
+    mostra.apply(null, [
+      h('h1', {}, 'Escolha o dia da visita'),
+      h('p', { class: 'sub' }, ola + 'Toque na hora que lhe dá mais jeito' + (dados.localidade ? ' para a visita em ' + dados.localidade : '') + '.')
+    ].concat(aviso ? [h('p', { class: 'erro', role: 'alert' }, aviso)] : [], dias, [h('div', { class: 'barra' }, confirmar, msg), contacto('Nenhuma hora serve?')]));
+  }
+
+  function abrir(aviso) {
+    escolhida = null;
+    sb.rpc('agenda_link_ver', { p_token: token }).then(function (r) {
+      if (r.error) throw r.error;
+      var d = r.data || {};
+      if (d.estado === 'ativa') return escolher(d, aviso);
+      if (d.estado === 'usada' && d.inicio) return feito({ inicio: d.inicio, fim: d.fim }, true);
+      if (d.estado === 'expirada') return erro('Esta ligação já não é válida', 'O prazo para escolher passou ou a visita já foi combinada de outra forma.');
+      erro('Não encontrámos esta ligação', 'Confirme que copiou a ligação inteira da mensagem.');
+    }).catch(function () {
+      erro('Não foi possível abrir', 'Verifique a ligação à internet e volte a abrir a mensagem.');
+    });
+  }
+
+  if (!token) return erro('Falta o código da ligação', 'Abra a ligação que lhe enviámos por mensagem ou email.');
+  if (!window.supabase) return erro('Não foi possível abrir', 'Verifique a ligação à internet e tente outra vez.');
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+  abrir();
+})();
+</script>
+</body>
+</html>

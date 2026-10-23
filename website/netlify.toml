@@ -53,3 +53,12 @@
   [headers.values]
     X-Robots-Tag = "noindex, nofollow"
     Cache-Control = "no-cache"
+
+# Página onde o cliente escolhe o dia da visita (marcar/?t=<código>, pública mas só com a ligação que a MDM envia): fora
+# dos motores de busca, sem cache e sem mandar o endereço (com o código) a outros sites.
+[[headers]]
+  for = "/marcar/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+    Cache-Control = "no-cache"
+    Referrer-Policy = "no-referrer"
