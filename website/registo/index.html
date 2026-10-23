@@ -429,6 +429,31 @@ body.app-on .col{background:var(--sunk)}
 .user b{color:var(--ink);font-weight:600}
 .live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--muted);vertical-align:1px;margin-right:5px}
 .live.ok{background:var(--good)}.live.err{background:var(--bad)}
+/* Seguimentos */
+.sg-list{display:flex;flex-direction:column}
+.sg{border-top:1px solid var(--line);padding:12px 14px 12px 16px;display:flex;flex-direction:column;gap:8px;position:relative;min-width:0}
+.sg:first-child{border-top:0}
+.sg::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--stripe,transparent)}
+.sg-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;min-width:0}
+.sg-h .sg-cli{font:inherit;font-weight:600;font-size:15px;background:none;border:0;padding:0;color:var(--ink);cursor:pointer;text-align:left;overflow-wrap:anywhere}
+.sg-h .sg-due{margin-left:auto;font-size:13px;font-weight:600;color:var(--tone,var(--ink-2));white-space:nowrap}
+.sg-meta{font-size:13px;color:var(--ink-2);overflow-wrap:anywhere}
+.sg-txt{white-space:pre-wrap;font-size:14px;line-height:1.45;background:var(--sunk);border-radius:8px;padding:8px 10px;margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.sg-txt.full{display:block}
+.sg-txt b{display:block;font-weight:600}
+.sg-b{display:flex;flex-wrap:wrap;gap:6px}
+.sg-ed{display:flex;flex-direction:column;gap:8px}
+.sg-ed textarea{min-height:120px}
+.sg-ed input,.sg-ed textarea,.sg-ed select,.sgc textarea,.sgc input,.sgc select{font:inherit;font-size:14.5px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);padding:8px 10px;width:100%;box-sizing:border-box}
+.sgc{display:flex;flex-direction:column;gap:12px;padding:14px}
+.sgc details{border-top:1px solid var(--line);padding-top:10px}
+.sgc summary{cursor:pointer;font-weight:600}
+.sgc .sgc-g{display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px}
+@media (min-width:720px){.sgc .sgc-g{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.sgc label{font-size:12.5px;color:var(--ink-2);display:block;margin-bottom:3px}
+.sgc textarea{min-height:76px}
+.sg-faltas{display:flex;flex-wrap:wrap;gap:6px 14px}
+.toast button{font:inherit;font-weight:600;background:none;border:0;color:var(--bg);text-decoration:underline;margin-left:12px;padding:0;cursor:pointer}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;z-index:60;max-width:calc(100% - 32px);box-sizing:border-box}
 @media (prefers-reduced-motion:no-preference){.card,.chip,.btn,.tab,.kpi{transition:background-color .12s ease,color .12s ease}}
 /* ===== Layout tipo gestor de candidaturas: barra lateral, filtros numa linha, tabela com ações rápidas ===== */
@@ -554,6 +579,7 @@ body.app-on{background:var(--surface)}
 <nav class="rail" aria-label="Menu">
   <button class="r-novo" type="button" id="railNovo" title="Novo pedido" aria-label="Novo pedido"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   <button type="button" id="rail-painel" title="Painel" aria-label="Painel"><svg viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0M12 15l4-5"/><circle cx="12" cy="15" r="1.4" fill="currentColor"/><path d="M4 19h16"/></svg><span class="r-badge" id="painelBadge"></span></button>
+  <button type="button" id="rail-seguimentos" title="Seguimentos de hoje" aria-label="Seguimentos de hoje"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 10.5l2.2 2.2 4.8-4.7"/></svg><span class="r-badge" id="sgBadge"></span></button>
   <button type="button" id="rail-gerir" title="Gerir pedidos" aria-label="Gerir pedidos"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.3c2.5-.2 4.3 1.3 4.8 4.2"/></svg><span class="r-badge" id="redBadge"></span></button>
   <button type="button" id="rail-pipeline" title="Pipeline" aria-label="Pipeline"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5" height="11" rx="1.5"/><rect x="16" y="4" width="5" height="7" rx="1.5"/></svg><span class="r-badge" id="fugaBadge"></span></button>
   <button type="button" id="rail-resumo" title="Resumo" aria-label="Resumo"><svg viewBox="0 0 24 24"><path d="M5 20V12M10 20V5M15 20v-6M20 20V9"/></svg></button>
@@ -582,6 +608,7 @@ body.app-on{background:var(--surface)}
   </div>
   <div class="tabs tabs2" role="tablist" aria-label="Vistas" id="tabs" hidden>
     <button class="tab" role="tab" type="button" id="tab-painel" aria-controls="v-painel" aria-selected="false" tabindex="-1">Painel</button>
+    <button class="tab" role="tab" type="button" id="tab-seguimentos" aria-controls="v-seguimentos" aria-selected="false" tabindex="-1">Seguimentos</button>
     <button class="tab" role="tab" type="button" id="tab-gerir" aria-controls="v-gerir" aria-selected="true">Gerir pedidos</button>
     <button class="tab" role="tab" type="button" id="tab-pipeline" aria-controls="v-pipeline" aria-selected="false" tabindex="-1">Pipeline</button>
     <button class="tab" role="tab" type="button" id="tab-resumo" aria-controls="v-resumo" aria-selected="false" tabindex="-1">Resumo</button>
@@ -638,6 +665,39 @@ body.app-on{background:var(--surface)}
       </section>
     </div>
     <p class="note" id="pnCobertura" style="margin-top:16px"></p>
+  </div>
+
+  <div id="v-seguimentos" role="tabpanel" aria-labelledby="tab-seguimentos" hidden>
+    <p class="hint alert" id="sgAviso" hidden></p>
+    <section aria-labelledby="h-sg-hoje">
+      <div class="sec-h"><h2 id="h-sg-hoje">Seguimentos de hoje</h2><span class="count" id="sgHojeCount"></span></div>
+      <div class="chips" id="sgDonos" role="group" aria-label="Dono" style="margin-bottom:10px"></div>
+      <div class="panel sg-list" id="sgHoje"></div>
+      <p class="note">O sistema nunca envia nada: «Enviar» abre o WhatsApp ou o email com o texto pronto (ou o telefone, com o guião) e marca o passo como enviado; o relógio do passo seguinte começa aí. «Respondeu» cancela os seguimentos que faltam desta fase e pede a próxima ação. Os rascunhos nascem às 07:00, nunca ao fim de semana nem em feriado.</p>
+    </section>
+    <div class="grid-p">
+      <section aria-labelledby="h-sg-viol">
+        <div class="sec-h"><h2 id="h-sg-viol">Sem próxima ação</h2><span class="count" id="sgViolCount"></span></div>
+        <div class="panel lista-p" id="sgViol"></div>
+      </section>
+      <section aria-labelledby="h-sg-perd">
+        <div class="sec-h"><h2 id="h-sg-perd">Perdidos por silêncio esta semana</h2><span class="count" id="sgPerdCount"></span></div>
+        <div class="panel lista-p" id="sgPerd"></div>
+      </section>
+      <section aria-labelledby="h-sg-prox">
+        <div class="sec-h"><h2 id="h-sg-prox">A seguir, 7 dias</h2><span class="count" id="sgProxCount"></span></div>
+        <div class="panel lista-p" id="sgProx"></div>
+      </section>
+      <section aria-labelledby="h-sg-pag">
+        <div class="sec-h"><h2 id="h-sg-pag">Da fatura ao pagamento</h2><span class="count" id="sgPagTag"></span></div>
+        <div class="panel tw" id="sgPag"></div>
+      </section>
+      <section aria-labelledby="h-sg-taxa" style="grid-column:1/-1">
+        <div class="sec-h"><h2 id="h-sg-taxa">Taxa de resposta</h2><span class="count">por sequência, passo e canal</span></div>
+        <div class="panel tw" id="sgTaxa"></div>
+        <p class="note">A resposta conta no último passo enviado antes dela. Mudar o estado do pedido depois de um contacto (aceitou, recusou, pagou) também conta como resposta; a perda por silêncio não.</p>
+      </section>
+    </div>
   </div>
 
   <div id="v-gerir" role="tabpanel" aria-labelledby="tab-gerir">
@@ -928,6 +988,10 @@ body.app-on{background:var(--surface)}
         </section>
       </div>
     </div>
+    <section aria-labelledby="h-sgcfg" id="sgCfgSec" style="margin-top:22px" hidden>
+      <div class="sec-h"><h2 id="h-sgcfg">Seguimentos: dias e textos</h2><span class="count" id="sgCfgEstado"></span></div>
+      <div class="panel sgc" id="sgCfg"></div>
+    </section>
   </div>
 </main>
 </div>
@@ -1001,7 +1065,7 @@ if (!Element.prototype.replaceChildren) {
   const PRIO_NOME = {P1:'P1 · Urgente', P2:'P2 · Alta', P3:'P3 · Normal'};
   const TIPOS = {instalacao:'Instalação', manutencao:'Manutenção', reparacao:'Avaria / reparação', obra:'Obra'};
   const ORIGENS = {site:'Site', telefone:'Telefone', email:'Email', whatsapp:'WhatsApp', outro:'Outro'};
-  const MOTIVOS = ['Foi com outra empresa','Preço','Prazo','Desistiu ou adiou','Sem resposta','Não fazemos este trabalho','Outro'];
+  const MOTIVOS = ['Foi com outra empresa','Preço','Prazo','Desistiu ou adiou','Sem resposta','Não fazemos este trabalho','Resolvido ao telefone (sem fatura)','Sem fatura (garantia ou contrato)','Outro'];
   const POR_ONDE = {email:'Email', whatsapp:'WhatsApp', em_mao:'Em mão', outro:'Outro'};
   // A chave publicável do Supabase pode estar à vista: quem lê e escreve é decidido pelas regras da base de dados
   // (tabela colaboradores e RLS, em supabase/migracao.sql), não pela chave.
@@ -1205,7 +1269,7 @@ if (!Element.prototype.replaceChildren) {
   }
 
   /* ---------- Separadores ---------- */
-  const TABS = ['painel','gerir','pipeline','resumo','clientes','faturacao','prazos'];
+  const TABS = ['painel','seguimentos','gerir','pipeline','resumo','clientes','faturacao','prazos'];
   let tab = 'painel';
   try { const s = localStorage.getItem('registo-tab'); if (TABS.includes(s)) tab = s; } catch (e) {}
   if (TABS.includes(location.hash.replace('#',''))) tab = location.hash.replace('#','');
@@ -2526,7 +2590,7 @@ if (!Element.prototype.replaceChildren) {
     F('nextNum').textContent = status === 'ok' ? nextNumber() : 'ORC…';
     const verm = all.filter(x => x.sem === 'vermelho').length;
     F('redBadge').textContent = verm ? String(verm) : '';
-    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderExport(); renderEquipa(); renderFaturacao(); renderClientes(); renderPipeline(all);
+    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderExport(); renderEquipa(); renderFaturacao(); renderClientes(); renderPipeline(all); renderSeg(); renderSegCfg();
     F('btnNovoTop').hidden = F('railNovo').hidden = F('btnNovoCliente').hidden = !(canWrite && status === 'ok');
     // Não redesenha a folha aberta enquanto há um formulário a meio.
     if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
@@ -2535,7 +2599,7 @@ if (!Element.prototype.replaceChildren) {
   /* ---------- Folha de um pedido ---------- */
   const cur = () => rows.find(r => r.id === currentId) || null;
   function openSheet(id) { currentId = id; modo = null; trans = null; dadosAberto = false; F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); setTimeout(() => F('btnClose').focus(), 30); }
-  function closeSheet() { F('sheetWrap').hidden = true; document.body.style.overflow = ''; currentId = null; modo = null; trans = null; fichaKey = null; sheetSujo = false; if (status === 'ok') renderAll(); }
+  function closeSheet() { F('sheetWrap').hidden = true; document.body.style.overflow = ''; currentId = null; modo = null; trans = null; fichaKey = null; sheetSujo = false; sgRespondeu = null; sgEdit = null; if (status === 'ok') renderAll(); }
   F('btnClose').addEventListener('click', closeSheet);
   F('sheetBody').addEventListener('input', () => { sheetSujo = true; });
   F('sheetBody').addEventListener('change', () => { sheetSujo = true; });
@@ -2573,7 +2637,8 @@ if (!Element.prototype.replaceChildren) {
         add('visita','Precisa de visita','visita_por_marcar');
         add('marcar','Visita já marcada','visita_marcada',{pedeVisita:true});
         add('orc','Fazer orçamento sem visita','orcamento_por_fazer');
-        add('tel','Resolvido ao telefone','resolvido',{fecho:true, motivo:'Resolvido ao telefone'});
+        // Concluído só com o pagamento: o que se resolve sem fatura sai como perdido, com o motivo.
+        add('tel','Resolvido ao telefone, sem fatura','perdido',{fecho:true, motivo:'Resolvido ao telefone (sem fatura)'});
         break;
       case 'visita_por_marcar':
         add('marcar','Visita marcada','visita_marcada',{pedeVisita:true});
@@ -2581,7 +2646,7 @@ if (!Element.prototype.replaceChildren) {
       case 'visita_marcada':
         add('f_orc','Visita feita: fazer orçamento','orcamento_por_fazer');
         add('f_exec','Visita feita: o trabalho continua','em_execucao');
-        add('f_res','Resolvido na visita','resolvido',{fecho:true, motivo:'Resolvido na visita'});
+        add('f_res','Resolvido na visita: faturar','por_faturar');
         add('outra','Precisa de outra visita','visita_por_marcar');
         add('remarcar','Remarcar a visita','visita_marcada',{pedeVisita:true, remarcar:true});
         break;
@@ -2596,7 +2661,7 @@ if (!Element.prototype.replaceChildren) {
           add('rev','Pediu revisão','orcamento_por_fazer',{revisao:true});
           add('recusou','Recusou','perdido',{fecho:true});
         } else if (origem) add('volta',`Chegou o que faltava: volta a ${origem}`, r.esperaDe, {retoma:true});
-        add('seg','Fiz um seguimento', null, {seguimento:true});
+        if (!segLigado()) add('seg','Fiz um seguimento', null, {seguimento:true});
         break;
       case 'espera_fornecedor':
         if (origem) add('volta',`Chegou: volta a ${origem}`, r.esperaDe, {retoma:true});
@@ -2607,14 +2672,14 @@ if (!Element.prototype.replaceChildren) {
       case 'em_execucao':
         add('ri','Instalação feita: RI assinado','por_faturar',{ri:true});
         add('vis','Marcar a obra ou outra visita','visita_por_marcar');
-        add('concl','Concluído sem fatura a emitir (garantia, contrato)','resolvido',{fecho:true, motivo:'Concluído sem fatura'});
+        add('concl','Fechar sem fatura (garantia, contrato)','perdido',{fecho:true, motivo:'Sem fatura (garantia ou contrato)'});
         break;
       case 'por_faturar':
         add('fat','Fatura emitida','faturado',{fatura:true});
         break;
       case 'faturado':
-        add('pago','Pagamento recebido','resolvido',{fecho:true, motivo:'Pago'});
-        add('seg','Lembrei o pagamento', null, {seguimento:true});
+        add('pago','Pagamento recebido','resolvido',{fecho:true, motivo:'Pago', pago:true});
+        if (!segLigado()) add('seg','Lembrei o pagamento', null, {seguimento:true});
         break;
       case 'resolvido': case 'perdido':
         // Reabre-se até 30 dias depois do fecho; depois disso é um pedido novo.
@@ -2677,12 +2742,13 @@ if (!Element.prototype.replaceChildren) {
         h('div',{style:'min-width:0'}, h('div',{class:'what'}, r.proximaAcao || 'Sem próxima ação'),
           h('div',{class:'who'}, `${r.dono || 'Sem dono'} · ${r.dataProximaAcao ? (acaoAtrasada ? 'devia ser a ' : 'até ') + ddmm(r.dataProximaAcao) : 'sem data'}`)),
         canWrite ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => abrirTrans({id:'acao', label:'Mudar a próxima ação', para:null, soAcao:true})}, 'Mudar ação') : null));
-      if (r.esperaMotivo === 'decisao' && (r.seguimentos || 0) >= 3) blocos.push(h('p',{class:'hint alert'}, 'Já houve 3 seguimentos sem resposta: fecha como perdido «Sem resposta», a não ser que o cliente tenha dado uma data.'));
+      if (!segLigado() && r.esperaMotivo === 'decisao' && (r.seguimentos || 0) >= 3) blocos.push(h('p',{class:'hint alert'}, 'Já houve 3 seguimentos sem resposta: fecha como perdido «Sem resposta», a não ser que o cliente tenha dado uma data.'));
       if (semContacto30(r)) blocos.push(h('p',{class:'hint alert'}, 'Sem contacto com o cliente há mais de 30 dias: fecha como perdido, com motivo, ou dá-lhe uma ação para hoje.'));
     } else {
       blocos.push(h('p',{class:'hint'}, `${e.l}${r.motivo ? ': ' + r.motivo : ''}${r.dataFecho ? ` (${ddmm(r.dataFecho)})` : ''}.`));
       if (r.dataFecho && r.dataFecho < addDays(today(), -30)) blocos.push(h('p',{class:'hint'}, 'Fechado há mais de 30 dias: se o cliente voltar, regista um pedido novo.'));
     }
+    const bs = blocoSeg(r); if (bs) blocos.push(bs);
     blocos.push(h('div',{class:'acao', style:'--stripe:var(--accent)'},
       h('div',{style:'min-width:0'}, h('div',{class:'what'}, r.folha ? `Folha de obra ${r.folha.num}` : 'Folha de obra'),
         h('div',{class:'who'}, r.folha && r.folha.totalDebito ? `${eur(r.folha.totalDebito)} a debitar · custo ${eur(r.folha.totalCustos || 0)}`
@@ -2714,7 +2780,12 @@ if (!Element.prototype.replaceChildren) {
     const els = [h('h3',null, t.soAcao ? 'Mudar a próxima ação' : t.seguimento ? t.label : `Passar a ${ESTADOS[para].l}`)];
     if (t.ri) els.push(h('div',{class:'fields'}, campo('t-ri','Data do RI', inp('t-ri', today(), {type:'date'})), campo('t-ri-n','N.º do RI (opcional)', inp('t-ri-n', (r.obra && r.obra.riNum) || ''))));
     if (t.fatura) els.push(h('div',{class:'fields'}, campo('t-fat-n','N.º da fatura', inp('t-fat-n', r.fatura || '', {placeholder:'FT 2600/000082'})), campo('t-fat-d','Data da fatura', inp('t-fat-d', today(), {type:'date'})),
-      campo('t-fat-v','Valor s/IVA (€)', inp('t-fat-v', r.valor != null ? String(r.valor).replace('.',',') : '', {inputmode:'decimal'}))));
+      campo('t-fat-v','Valor da fatura (€)', inp('t-fat-v', r.valorFatura != null ? String(r.valorFatura).replace('.',',') : r.valor != null ? String(r.valor).replace('.',',') : '', {inputmode:'decimal'})),
+      h('div',{class:'f'}, h('span',{class:'lbl'},'Adiantamento'), h('label',{class:'check'}, h('input',{type:'checkbox', id:'t-fat-a', checked: r.adiantamento ? true : null}), 'O cliente pagou um adiantamento'))));
+    if (t.pago) els.push(h('div',{class:'fields'}, campo('t-pag','Data do pagamento', inp('t-pag', today(), {type:'date'}), r.fatura ? `Fatura ${r.fatura}${r.dataFatura ? ' de ' + ddmm(r.dataFatura) : ''}${r.valorFatura != null ? ', ' + eur(r.valorFatura) : ''}.` : null)));
+    if (t.pausa && para === 'espera_cliente') els.push(h('div',{class:'block'}, h('span',{class:'lbl'}, 'O que falta (vai na mensagem ao cliente)'),
+      h('div',{class:'sg-faltas'}, FALTAS.map((f, i) => h('label',{class:'check'}, h('input',{type:'checkbox', id:'t-falta-' + i, checked: (r.falta || []).indexOf(f) >= 0 ? true : null}), f.charAt(0).toUpperCase() + f.slice(1)))),
+      campo('t-falta-o','Outro (opcional)', inp('t-falta-o', (r.falta || []).filter(f => FALTAS.indexOf(f) < 0).join(', '), {placeholder:'por exemplo planta da casa'}), null, true)));
     if (t.pedeVisita) els.push(h('div',{class:'fields'}, campo('t-vis','Data da visita', inp('t-vis', t.remarcar ? r.dataVisita : '', {type:'date', onchange: ev => { const d = F('t-data'); if (d && ev.target.value) d.value = ev.target.value; }})),
       campo('t-vis-h','Hora (opcional)', inp('t-vis-h', r.horaVisita || '', {type:'time'}))));
     if (t.envio) els.push(h('div',{class:'fields'},
@@ -2724,11 +2795,14 @@ if (!Element.prototype.replaceChildren) {
       campo('t-ponde','Por onde', sel('t-ponde', Object.entries(POR_ONDE), r.enviadoPorOnde || 'email')),
       campo('t-epor','Quem enviou', inp('t-epor', meuNome()), 'É a prova do envio: quem, quando e por onde.', true)));
     if (fecho) els.push(h('div',{class:'fields'}, para === 'perdido'
-      ? campo('t-motivo','Motivo', sel('t-motivo', MOTIVOS.map(m => [m,m]), '', 'Escolher…'), null, true)
+      ? campo('t-motivo','Motivo', sel('t-motivo', MOTIVOS.map(m => [m,m]), t.motivo || '', 'Escolher…'), null, true)
       : campo('t-motivo','Como ficou resolvido', inp('t-motivo', t.motivo || ''), null, true)));
     if (!fecho) {
       const dflt = t.soAcao ? {acao: r.proximaAcao, data: r.dataProximaAcao || today()}
         : t.seguimento ? {acao: r.estado === 'espera_fornecedor' ? 'Voltar a perguntar ao fornecedor' : 'Fazer o seguimento seguinte', data: iso(new Date(Date.now() + (prazoDe(r.estado, p) || 3) * (r.estado === 'espera_cliente' ? 86400000 : 86400000 * 7 / 5)))}
+        : segLigado() && para === 'espera_cliente' && t.decisao ? (x => ({acao: `Aguardar resposta; a seguir ${x.rotulo} a ${ddmm(x.data)}`, data: x.data}))(segPrimeiro('C', p, today()))
+        : segLigado() && para === 'espera_cliente' && t.pausa ? {acao: 'Enviar ao cliente o pedido do que falta', data: diaEnvio(today())}
+        : segLigado() && para === 'faturado' ? (x => ({acao: `Aguardar o pagamento; a seguir ${x.rotulo} a ${ddmm(x.data)}`, data: x.data}))(segPrimeiro('D', p, today()))
         : {acao: sugestaoAcao(para, extra), data: dataProposta(para, p, {...extra, dataVisita: null})};
       els.push(h('div',{class:'fields'},
         campo('t-dono','Dono', donoInput('t-dono', r.dono || meuNome())),
@@ -2793,7 +2867,17 @@ if (!Element.prototype.replaceChildren) {
     if (t.fatura) {
       const n = val('t-fat-n'), d = val('t-fat-d'); if (!n || !d) return erroT('Indica o número e a data da fatura.');
       const v = parseValor(val('t-fat-v')); if (Number.isNaN(v)) return erroT('O valor não é um número.');
-      Object.assign(novo, {fatura: n, dataFatura: d, ...(v != null ? {valor: v} : {})});
+      // O valor do orçamento fica em «valor»; o da fatura em «valorFatura».
+      Object.assign(novo, {fatura: n, dataFatura: d, valorFatura: v, adiantamento: F('t-fat-a').checked});
+    }
+    if (t.pago) {
+      const d = val('t-pag'); if (!d) return erroT('Indica a data do pagamento: só fica concluído com ela.');
+      novo.dataPagamento = d;
+    }
+    if (t.pausa && t.para === 'espera_cliente') {
+      const falta = FALTAS.filter((f, i) => F('t-falta-' + i).checked).concat(val('t-falta-o').split(/\s*[,;]\s*/).filter(Boolean));
+      if (segLigado() && !falta.length) return erroT('Escolhe o que falta: a mensagem ao cliente leva a lista.');
+      novo.falta = falta;
     }
     if (t.envio) {
       const n = val('t-num').toUpperCase(), m = /^ORC(\d{4})_(\d{4})$/.exec(n);
@@ -3145,6 +3229,372 @@ if (!Element.prototype.replaceChildren) {
   F('folhaModoDebito').addEventListener('click', () => { folModo = 'debito'; renderFolha(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !F('folhaWrap').hidden) { e.stopImmediatePropagation(); fecharFolha(); } }, true);
 
+  /* ---------- Seguimentos: o motor (supabase/seguimentos.sql) ----------
+     A base de dados decide (sequências, dias, rascunhos, perdas, cobrança ao chefe); a página mostra a lista de hoje,
+     abre o WhatsApp, o email ou o telefone com o texto pronto e regista o toque. Nunca envia nada sozinha. */
+  const SEQ_NOME = {A:'Primeiro contacto', B:'Informação em falta', C:'Orçamento', D:'Pagamento'};
+  const CANAIS = {whatsapp:'WhatsApp', email:'Email', telefone:'Telefone'};
+  // Em minúsculas: entram a meio da frase da mensagem («precisamos de: fotos do local, NIF»).
+  const FALTAS = ['fotos do local', 'datas disponíveis para a visita', 'acesso ao local', 'NIF'];
+  const SEG_PADRAO = {saltarFeriados:true, sequencias:{
+    A:{nome:'Primeiro contacto', dias:[1,3,5], perdidoDia:7, motivo:'sem resposta (primeiro contacto)', metadeP1:true, inicial:true},
+    B:{nome:'Informação em falta', dias:[2,4,6], perdidoDia:7, motivo:'sem resposta (informação em falta)', metadeP1:true, inicial:true},
+    C:{nome:'Orçamento', dias:[3,5,7], perdidoDia:7, motivo:'sem resposta (orçamento)', metadeP1:true, inicial:false},
+    D:{nome:'Pagamento', dias:[30,45,60], escalarDepoisDia:60, metadeP1:false, inicial:false}}};
+  let segTabela = null, cfgSeg = null, cfgSegVersao = 0, segMotor = null, sg = null, sgDono = '', sgEdit = null, sgCorreu = false, sgBusy = false, sgCfgSujo = false, sgRespondeu = null;
+  const segCfg = () => (cfgSeg && cfgSeg.sequencias) ? cfgSeg : SEG_PADRAO;
+  const segLigado = () => segTabela === true;
+
+  // As mesmas regras de supabase/seguimentos.sql, para as sugestões dos formulários.
+  function seqDe(r) {
+    if (r.porConfirmar) return null;
+    if (r.estado === 'novo' || r.estado === 'visita_por_marcar') return 'A';
+    if (r.estado === 'espera_cliente') return r.esperaMotivo === 'pausa' ? 'B' : 'C';
+    if (r.estado === 'faturado') return 'D';
+    return null;
+  }
+  function canalDe(r) {
+    if (CANAIS[r.canal]) return r.canal;
+    if (r.origem === 'whatsapp') return 'whatsapp';
+    if (r.origem === 'telefone') return 'telefone';
+    if (r.origem === 'email' || r.origem === 'site' || /@/.test(r.contacto || '')) return 'email';
+    return 'whatsapp';
+  }
+  // Os dias de cada passo e o da perda (ou da cobrança ao chefe). P1 usa metade de cada intervalo, para cima.
+  function segDias(seq, p1) {
+    const s = segCfg().sequencias[seq] || SEG_PADRAO.sequencias[seq];
+    const base = (s.dias || []).map(Number).concat([s.perdidoDia != null ? Number(s.perdidoDia) : Number(s.escalarDepoisDia) + 1]);
+    if (!(p1 && s.metadeP1)) return base;
+    let ant = 0, acc = 0;
+    return base.map(d => { acc += Math.ceil(Math.max(d - ant, 0) / 2); ant = d; return acc; });
+  }
+  const fimDeSemana = s => { const [y,m,d] = s.split('-').map(Number); const w = new Date(y, m - 1, d).getDay(); return w === 0 || w === 6; };
+  function diaEnvio(s) {
+    let d = s;
+    for (let i = 0; i < 15; i++) { if (segCfg().saltarFeriados === false ? !fimDeSemana(d) : isUtil(d)) break; d = addDays(d, 1); }
+    return d;
+  }
+  const segTotal = (seq, p) => segDias(seq, p === 'P1').length - 1;
+  const segRotulo = (seq, n, total) => n === 0 ? {A:'Primeiro contacto: resposta', B:'Informação em falta: pedido', C:'Orçamento enviado', D:'Fatura emitida'}[seq] : `${SEQ_NOME[seq]} ${n}/${total}`;
+  // O primeiro seguimento depois de enviar o orçamento ou a fatura (para a próxima ação da transição).
+  function segPrimeiro(seq, p, ancora) {
+    const dias = segDias(seq, p === 'P1');
+    return {data: diaEnvio(addDays(ancora || today(), dias[0])), rotulo: segRotulo(seq, 1, dias.length - 1)};
+  }
+
+  // Contactos do pedido e da ficha do cliente.
+  function contactosDe(r) {
+    const f = fichas[chaveCli(r.cliente || '')] || {};
+    const txt = [r.contacto, f.telefone, f.email].filter(Boolean).join(' ');
+    const email = (/[^\s,;<>()]+@[^\s,;<>()]+\.[a-z]{2,}/i.exec(txt) || [])[0] || '';
+    const m = /(?:\+|00)?\d[\d\s.\-]{7,}\d/.exec([r.contacto, f.telefone].filter(Boolean).join(' / '));
+    let tel = m ? m[0].replace(/\D/g, '') : '';
+    if (tel.indexOf('00') === 0) tel = tel.slice(2);
+    if (tel.length === 9) tel = '351' + tel;
+    return {email, tel: tel.length >= 11 ? tel : '', telTxt: m ? m[0].trim() : ''};
+  }
+  // Abre o link no mesmo toque (o Safari bloqueia janelas abertas depois de esperar pela rede).
+  function abrirLink(url) {
+    if (/^https?:/.test(url)) { const w = window.open(url, '_blank'); if (w) { try { w.opener = null; } catch (e) {} return; } }
+    const a = document.createElement('a'); a.href = url; if (/^https?:/.test(url)) { a.target = '_blank'; a.rel = 'noopener'; }
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+  function linkEnvio(x, r) {
+    const c = contactosDe(r || {});
+    const texto = x.rascunho || '';
+    if (x.canal === 'whatsapp') return c.tel ? `https://wa.me/${c.tel}?text=${encodeURIComponent(texto)}` : null;
+    if (x.canal === 'email') return c.email ? `mailto:${c.email}?subject=${encodeURIComponent(x.assunto || '')}&body=${encodeURIComponent(texto)}` : null;
+    return c.tel ? `tel:+${c.tel}` : null;
+  }
+
+  async function segRpc(nome, args, msg, desfazerId) {
+    if (!sb || sgBusy) return false;
+    sgBusy = true;
+    try {
+      const {data, error} = await sb.rpc(nome, args || {});
+      if (error) throw error;
+      if (msg) toast(msg, desfazerId ? {label:'Desfazer', fn: () => segRpc('seg_desfazer', {p_id: desfazerId}, 'Envio desfeito')} : null);
+      sgBusy = false;
+      await carregar();
+      return data === null ? true : data;
+    } catch (e) {
+      const t = String((e && e.message) || '');
+      toast(/permiss/.test(t) ? 'A tua conta não tem autorização para isto.' : /pendente|desfazer|ativos|silêncio/.test(t) ? t.replace(/^.*?:\s*/, '') : /Failed to fetch/.test(t) ? 'Sem ligação. Tenta outra vez.' : 'Não foi possível gravar. Recarrega e repete.');
+      return false;
+    } finally { sgBusy = false; }
+  }
+  function segEnviar(x, r) {
+    const url = linkEnvio(x, r);
+    if (url) abrirLink(url);
+    return segRpc('seg_enviar', {p_id: x.id}, `${x.passo || 'Seguimento'} marcado como enviado`, x.id);
+  }
+  async function segAtendeu(x) {
+    if (await segRpc('seg_enviar', {p_id: x.id, p_resultado: 'atendeu'})) await segRespondeu(x.pedido_id, 'atendeu o telefone');
+  }
+  async function segRespondeu(pid, nota) {
+    if (await segRpc('seg_respondeu', {p_pedido: pid, p_nota: nota || null}, 'Resposta registada: falta a próxima ação')) {
+      sgRespondeu = pid; openSheet(pid);
+    }
+  }
+
+  // A pré-visualização numa linha corrida, sem a assinatura (o texto inteiro vai na mensagem).
+  function previa(t) {
+    const a = String(segCfg().assinatura || '').trim();
+    let x = String(t || '');
+    if (a && x.indexOf(a) >= 0) x = x.replace(a, '');
+    return x.replace(/\s*\n+\s*/g, ' ').trim();
+  }
+  // Um rascunho: cliente, passo, canal, pré-visualização e os botões.
+  function sgCard(x, onde) {
+    const r = rows.find(y => y.id === x.pedido_id) || {};
+    const total = x.total != null ? x.total : segTotal(x.sequencia, r.prioridade);
+    x.passo = x.passo || segRotulo(x.sequencia, x.numero, total);
+    const atraso = Number(x.dias_atraso != null ? x.dias_atraso : Math.round((new Date(today()) - new Date(x.devido_em)) / 86400000)) || 0;
+    const c = contactosDe(r), tel = x.canal === 'telefone';
+    const url = linkEnvio(x, r);
+    const falta = !url ? (x.canal === 'email' ? 'sem email no pedido' : 'sem telemóvel no pedido') : '';
+    const editar = !!sgEdit && sgEdit.id === x.id && sgEdit.onde === onde;
+    const head = h('div',{class:'sg-h'},
+      h('button',{class:'sg-cli', type:'button', onclick:() => openSheet(x.pedido_id)}, r.cliente || x.cliente || x.pedido_id),
+      h('span',{class:'pill', style:'--tone:var(--info)'}, x.passo),
+      h('span',{class:'pill', style:'--tone:var(--muted)'}, CANAIS[x.canal] || x.canal),
+      h('span',{class:'sg-due', style:`--tone:var(--${atraso > 0 ? 'bad' : 'warn'})`}, atraso > 0 ? `atrasado ${atraso} ${atraso === 1 ? 'dia' : 'dias'}` : 'hoje'));
+    const meta = h('div',{class:'sg-meta'}, [r.dono || x.dono || 'Sem dono', r.prioridade || 'P3', r.num || null, tel ? (c.telTxt || null) : x.canal === 'email' ? (c.email || null) : (c.telTxt || null), falta || null].filter(Boolean).join(' · '));
+    if (editar) {
+      return h('div',{class:'sg', style:'--stripe:var(--accent)'}, head, meta, h('div',{class:'sg-ed'},
+        h('label',{class:'sub', for:'sg-canal'}, 'Canal'), sel('sg-canal', Object.entries(CANAIS), x.canal),
+        x.canal === 'email' ? h('input',{id:'sg-assunto', value: x.assunto || '', 'aria-label':'Assunto'}) : null,
+        h('textarea',{id:'sg-texto', 'aria-label':'Texto'}, x.rascunho || ''),
+        h('div',{class:'sg-b'},
+          h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { sgEdit = null; renderSeg(); if (currentId) renderSheet(); }}, 'Cancelar'),
+          h('button',{class:'btn btn-sm', type:'button', onclick: async () => {
+            const canal = val('sg-canal'), texto = F('sg-texto').value, assunto = F('sg-assunto') ? F('sg-assunto').value : null;
+            if (/[—–]/.test(texto + (assunto || ''))) { toast('Sem travessões: usa vírgulas ou parênteses.'); return; }
+            const args = canal !== x.canal && texto === (x.rascunho || '') ? {p_id: x.id, p_canal: canal} : {p_id: x.id, p_texto: texto, p_assunto: assunto, p_canal: canal};
+            if (await segRpc('seg_editar', args, canal !== x.canal && !args.p_texto ? 'Canal mudado: texto refeito para esse canal' : 'Rascunho guardado')) sgEdit = null;
+          }}, 'Guardar'))));
+    }
+    const botoes = [];
+    if (canWrite) {
+      botoes.push(h('button',{class:'btn btn-sm', type:'button', onclick:() => tel ? (url ? abrirLink(url) : toast('Falta o telefone no pedido.')) : segEnviar(x, r)},
+        tel ? 'Ligar' : !url ? 'Marcar como enviado' : x.canal === 'email' ? 'Enviar email' : 'Enviar por WhatsApp'));
+      if (tel) {
+        botoes.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => segAtendeu(x)}, 'Atendeu'));
+        botoes.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => segRpc('seg_enviar', {p_id: x.id, p_resultado:'nao_atendeu'}, 'Registado: não atendeu', x.id)}, 'Não atendeu'));
+      } else botoes.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => segRespondeu(x.pedido_id)}, 'Respondeu'));
+      botoes.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { sgEdit = {id: x.id, onde}; renderSeg(); if (currentId) renderSheet(); setTimeout(() => { const t = F('sg-texto'); if (t) t.focus(); }, 30); }}, 'Editar'));
+    }
+    return h('div',{class:'sg', style:`--stripe:var(--${atraso > 0 ? 'bad' : 'warn'})`}, head, meta,
+      tel ? h('p',{class:'sg-txt full'}, h('b',null,'Guião da chamada'), x.rascunho || '(sem guião: toca em Editar)')
+        : h('div',{class:'sg-txt', title: x.rascunho || ''}, x.canal === 'email' && x.assunto ? h('b',null, x.assunto) : null, previa(x.rascunho) || '(sem texto: toca em Editar)'),
+      botoes.length ? h('div',{class:'sg-b'}, botoes) : null);
+  }
+
+  async function carregarSeg() {
+    if (!sb) return;
+    try {
+      const res = await Promise.all([
+        sb.from('seguimentos').select('id,pedido_id,sequencia,ciclo,numero,ancora,devido_em,canal,assunto,rascunho,estado,enviado_em,enviado_por,resultado,fechado_em,fecho,criado_em').order('id'),
+        sb.from('v_seguimentos_hoje').select('*'),
+        sb.from('v_seg_proximo').select('*'),
+        sb.from('v_violacoes').select('*'),
+        sb.from('v_taxa_resposta').select('*'),
+        sb.from('v_perdidos_silencio_lista').select('*'),
+        sb.from('v_dias_pagamento').select('*'),
+      ]);
+      const s = res[0];
+      if (s.error) {
+        if (/relation|does not exist|schema cache|Could not find/i.test(s.error.message || '')) { segTabela = false; sg = null; renderSeg(); }
+        return;
+      }
+      segTabela = true;
+      const grupo = lista => { const o = {}; (lista || []).forEach(x => { (o[x.pedido_id] = o[x.pedido_id] || []).push(x); }); return o; };
+      sg = {todos: grupo(s.data), hoje: res[1].data || [], prox: grupo(res[2].data), viol: res[3].data || [], taxa: res[4].data || [], perd: res[5].data || [], pag: res[6].data || []};
+      renderSeg(); renderSegCfg();
+      if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
+      // Se a tarefa das 07:00 ainda não correu hoje (pg_cron desligado ou atrasado), a primeira página aberta corre-a.
+      if (canWrite && !sgCorreu && new Date().getHours() >= 7 && (!segMotor || String(segMotor.dia || '') < today())) {
+        sgCorreu = true;
+        const {error} = await sb.rpc('seg_correr');
+        if (!error) carregar();
+      }
+    } catch (e) { /* sem rede: fica a última leitura */ }
+  }
+
+  function segunda() { const d = new Date(); return addDays(today(), -((d.getDay() + 6) % 7)); }
+  function renderSeg() {
+    const av = F('sgAviso');
+    if (segTabela === false) {
+      av.hidden = false; av.textContent = 'O motor de seguimentos ainda não está instalado (supabase/seguimentos.sql). Até lá, os seguimentos registam-se à mão no pedido.';
+      ['sgHoje','sgViol','sgPerd','sgProx','sgPag','sgTaxa','sgDonos'].forEach(k => fill(F(k)));
+      F('sgBadge').textContent = ''; F('sgHojeCount').textContent = ''; return;
+    }
+    if (!sg) { av.hidden = true; fill(F('sgHoje'), h('p',{class:'empty'}, status === 'error' ? 'Não foi possível ler os seguimentos.' : 'A carregar os seguimentos…')); return; }
+    const parado = segMotor && String(segMotor.dia || '') < addDays(today(), -1);
+    av.hidden = !parado;
+    if (parado) av.textContent = `A tarefa diária correu pela última vez a ${ddmm(segMotor.dia)}: confirma no Supabase que o pg_cron está ligado. Abrir a página corre-a.`;
+    const hoje = sg.hoje.slice().sort((a, b) => (b.dias_atraso - a.dias_atraso) || String(a.prioridade).localeCompare(String(b.prioridade)));
+    F('sgBadge').textContent = hoje.length ? String(hoje.length) : '';
+    const porDono = {}; hoje.forEach(x => { porDono[x.dono] = (porDono[x.dono] || 0) + 1; });
+    if (sgDono && !porDono[sgDono]) sgDono = '';
+    fill(F('sgDonos'), hoje.length ? [h('button',{class:'chip', type:'button', 'aria-pressed': String(!sgDono), onclick:() => { sgDono = ''; renderSeg(); }}, 'Todos', h('span',{class:'n'}, String(hoje.length)))]
+      .concat(Object.keys(porDono).sort().map(d => h('button',{class:'chip', type:'button', 'aria-pressed': String(sgDono === d), onclick:() => { sgDono = d; renderSeg(); }}, d, h('span',{class:'n'}, String(porDono[d]))))) : []);
+    const lista = hoje.filter(x => !sgDono || x.dono === sgDono);
+    const atr = lista.filter(x => x.dias_atraso > 0).length;
+    F('sgHojeCount').textContent = lista.length ? `${lista.length} para enviar${atr ? `, ${atr} atrasado${atr > 1 ? 's' : ''}` : ''}` : '';
+    fill(F('sgHoje'), lista.length ? lista.map(x => sgCard(x, 'tab')) : h('p',{class:'empty'}, 'Nada para enviar hoje. Os rascunhos de amanhã aparecem às 07:00.'));
+
+    // Regra 5: cada pedido aberto tem uma próxima ação com data e dono.
+    const viol = {}; sg.viol.forEach(v => { (viol[v.pedido_id] = viol[v.pedido_id] || {v, t: []}).t.push(v.texto); });
+    const vk = Object.keys(viol);
+    F('sgViolCount').textContent = vk.length ? `${vk.length} pedido${vk.length > 1 ? 's' : ''}` : '';
+    fill(F('sgViol'), vk.length ? vk.map(id => h('button',{class:'lp', type:'button', style:'--stripe:var(--bad)', onclick:() => openSheet(id)},
+      h('span',{class:'ld'}, '!'), h('span',{class:'ln'}, viol[id].v.cliente || id),
+      h('span',{class:'la'}, `${(ESTADOS[viol[id].v.estado] || {}).l || viol[id].v.estado} · ${viol[id].t.join('; ')}`))) : h('p',{class:'empty'}, 'Todos os pedidos abertos têm próxima ação, data e dono.'));
+
+    const seg0 = segunda();
+    const perd = sg.perd.filter(x => String(x.semana) >= seg0 || String(x.perdido_em) >= seg0);
+    F('sgPerdCount').textContent = perd.length ? String(perd.length) : '';
+    fill(F('sgPerd'), perd.length ? perd.map(x => {
+      const r = rows.find(y => y.id === x.pedido_id) || {};
+      const pode = canWrite && !x.reaberto && r.estado === 'perdido' && r.perdidoSilencio && !r.perdidoSilencio.reabertoEm;
+      return h('div',{class:'lp', style:'--stripe:var(--muted);cursor:default'},
+        h('span',{class:'ld'}, x.sequencia, h('small',null, ddmm(x.perdido_em))),
+        h('span',{class:'ln'}, h('button',{class:'sg-cli', type:'button', style:'font:inherit;font-weight:600;background:none;border:0;padding:0;color:inherit;cursor:pointer', onclick:() => openSheet(x.pedido_id)}, x.cliente || x.pedido_id)),
+        h('span',{class:'la'}, `${SEQ_NOME[x.sequencia]}${x.orcamento ? ' · ' + x.orcamento : ''}${x.reaberto ? ' · reaberto' : ''}`),
+        pode ? h('span',{class:'lb'}, h('button',{type:'button', class:'pri', onclick:() => segRpc('seg_reabrir', {p_pedido: x.pedido_id}, 'Reaberto: os seguimentos recomeçam hoje')}, 'Reabrir')) : null);
+    }) : h('p',{class:'empty'}, 'Nenhum pedido perdido por silêncio esta semana.'));
+
+    const lim = addDays(today(), 7), prox = [];
+    Object.keys(sg.prox).forEach(id => sg.prox[id].forEach(x => { if (x.tipo !== 'enviar' && x.devido && x.devido <= lim) prox.push(x); }));
+    prox.sort((a, b) => a.devido < b.devido ? -1 : a.devido > b.devido ? 1 : 0);
+    F('sgProxCount').textContent = prox.length ? String(prox.length) : '';
+    fill(F('sgProx'), prox.length ? prox.slice(0, 40).map(x => {
+      const r = rows.find(y => y.id === x.pedido_id) || {};
+      const tone = x.tipo === 'perdido' ? 'bad' : x.tipo === 'escalar' ? 'warn' : 'info';
+      return h('button',{class:'lp', type:'button', style:`--stripe:var(--${tone})`, onclick:() => openSheet(x.pedido_id)},
+        h('span',{class:'ld'}, ddmm(x.devido)), h('span',{class:'ln'}, r.cliente || x.pedido_id),
+        h('span',{class:'la'}, x.tipo === 'perdido' ? 'Sem resposta, fica perdido' : x.tipo === 'escalar' ? 'Cobrança passa à gerência (P1)' : `${x.rotulo} · ${CANAIS[x.canal] || x.canal}`));
+    }) : h('p',{class:'empty'}, 'Nada marcado para os próximos 7 dias.'));
+
+    const pag = sg.pag.filter(x => x.dias != null), dias = pag.map(x => Number(x.dias)).sort((a, b) => a - b);
+    F('sgPagTag').textContent = dias.length ? `mediana ${dias[Math.floor((dias.length - 1) / 2)]} dias` : '';
+    fill(F('sgPag'), dias.length ? h('table',null, h('thead',null, h('tr',null, h('th',null,'Cliente'), h('th',null,'Fatura'), h('th',{class:'n'},'Dias'))),
+      h('tbody',null, pag.slice().sort((a, b) => a.pagamento_data < b.pagamento_data ? 1 : -1).slice(0, 8).map(x => h('tr',null,
+        h('td',null, x.cliente || x.pedido_id), h('td',null, `${x.fatura_num || ''} · ${ddmm(x.fatura_data)} a ${ddmm(x.pagamento_data)}`), h('td',{class:'n' + (x.dias > 60 ? ' over' : '')}, String(x.dias))))),
+      h('tfoot',null, h('tr',null, h('td',{colspan:'2', class:'sub'}, `${dias.length} pagas · média ${num1(dias.reduce((a, b) => a + b, 0) / dias.length)} dias`), h('td')))) : h('p',{class:'empty'}, 'Ainda não há faturas pagas com as duas datas.'));
+
+    const tx = sg.taxa, linhasT = [];
+    ['A','B','C','D'].forEach(q => {
+      const tot = tx.find(x => x.sequencia === q && x.numero == null && x.canal == null);
+      if (!tot) return;
+      linhasT.push(h('tr',null, h('td',null, h('b',null, SEQ_NOME[q])), h('td',{class:'n'}, String(tot.enviados)), h('td',{class:'n'}, String(tot.respondidos)), h('td',{class:'n'}, tot.taxa != null ? num1(Number(tot.taxa)) + ' %' : 'sem envios')));
+      tx.filter(x => x.sequencia === q && x.numero != null && x.canal == null).sort((a, b) => a.numero - b.numero).forEach(x => {
+        const can = tx.filter(y => y.sequencia === q && y.numero === x.numero && y.canal != null).map(y => `${CANAIS[y.canal] || y.canal} ${y.respondidos}/${y.enviados}`).join(' · ');
+        const passo = x.numero === 0 ? {A:'resposta', B:'pedido', C:'orçamento enviado', D:'fatura emitida'}[q] : `${x.numero}.º seguimento`;
+        linhasT.push(h('tr',null, h('td',{style:'padding-left:24px'}, passo, can ? h('div',{class:'sub'}, can) : null), h('td',{class:'n'}, String(x.enviados)), h('td',{class:'n'}, String(x.respondidos)), h('td',{class:'n'}, x.taxa != null ? num1(Number(x.taxa)) + ' %' : 'sem envios')));
+      });
+    });
+    fill(F('sgTaxa'), linhasT.length ? h('table',null, h('thead',null, h('tr',null, h('th',null,'Passo'), h('th',{class:'n'},'Enviados'), h('th',{class:'n'},'Responderam'), h('th',{class:'n'},'Taxa'))), h('tbody',null, linhasT))
+      : h('p',{class:'empty'}, 'Ainda não há envios registados.'));
+  }
+
+  // Na folha do pedido: o canal, a linha do tempo de todos os contactos, o próximo marcado e os botões.
+  function blocoSeg(r) {
+    if (!segLigado() || !sg) return null;
+    const lista = (sg.todos[r.id] || []).slice().sort((a, b) => a.criado_em < b.criado_em ? -1 : a.criado_em > b.criado_em ? 1 : a.numero - b.numero);
+    const prox = sg.prox[r.id] || [];
+    const ativo = lista.some(x => !x.fechado_em);
+    const c = contactosDe(r), canal = canalDe(r);
+    const estadoTxt = x => x.estado === 'pendente' ? (x.fechado_em ? 'não enviado' : `rascunho para ${ddmm(x.devido_em)}`)
+      : x.estado === 'cancelado' ? 'cancelado' : x.estado === 'respondido' ? 'respondeu' : x.resultado === 'nao_atendeu' ? 'não atendeu'
+      : x.resultado === 'reaberto' ? 'reaberto' : x.resultado === 'recomeçado' ? 'recomeçado' : 'enviado';
+    const els = [h('h3',null,'Contactos e seguimentos'),
+      h('p',{class:'hint'}, `Canal preferido: ${CANAIS[canal]}${canal === 'email' ? (c.email ? ' · ' + c.email : ' · falta o email') : (c.telTxt ? ' · ' + c.telTxt : ' · falta o telefone')}${r.canal ? '' : ' (pela origem; muda em Dados do pedido)'}.`)];
+    if (sgRespondeu === r.id) els.push(h('p',{class:'hint alert'}, 'O cliente respondeu: muda o estado (aceitou, recusou, pediu revisão, mandou o que faltava) ou define a próxima ação.'));
+    lista.filter(x => x.estado === 'pendente' && !x.fechado_em).forEach(x => els.push(h('div',{class:'panel'}, sgCard(Object.assign({}, x, {dias_atraso: Math.max(0, Math.round((new Date(today()) - new Date(x.devido_em)) / 86400000))}), 'sheet'))));
+    if (lista.length) els.push(h('ul',{class:'hist'}, lista.map(x => h('li',null,
+      h('span',{class:'when'}, x.ancora && x.numero === 0 && x.sequencia !== 'A' && x.sequencia !== 'B' || x.resultado === 'reaberto' || x.resultado === 'recomeçado' ? ddmm(x.ancora) : x.enviado_em ? quando(new Date(x.enviado_em)) : ddmm(x.devido_em)),
+      h('span',null, `${segRotulo(x.sequencia, x.numero, segTotal(x.sequencia, r.prioridade))} · ${CANAIS[x.canal] || x.canal} · ${estadoTxt(x)}${x.enviado_por ? ` (${x.enviado_por})` : ''}`)))));
+    prox.forEach(x => { if (x.tipo !== 'enviar') els.push(h('p',{class:'hint'}, x.tipo === 'perdido' ? `Sem resposta, fica perdido a ${ddmm(x.devido)} (${(segCfg().sequencias[x.sequencia] || {}).motivo || 'sem resposta'}).`
+      : x.tipo === 'escalar' ? `Sem pagamento, a cobrança passa à gerência (P1) a ${ddmm(x.devido)}.` : `A seguir: ${x.rotulo} a ${ddmm(x.devido)}, por ${CANAIS[x.canal] || x.canal}.`)); });
+    if (r.cobrancaEscalada) els.push(h('p',{class:'hint alert'}, `Cobrança em atraso desde ${ddmm(r.cobrancaEscalada)}: tarefa P1 de ${r.dono || 'o chefe'}.`));
+    const bts = [];
+    if (canWrite && ativo) bts.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => segRespondeu(r.id)}, 'O cliente respondeu'));
+    if (canWrite && !ativo && seqDe(r)) bts.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => segRpc('seg_recomecar', {p_pedido: r.id}, 'Seguimentos recomeçados a partir de hoje')}, 'Recomeçar os seguimentos'));
+    if (canWrite && r.estado === 'perdido' && r.perdidoSilencio && !r.perdidoSilencio.reabertoEm) bts.push(h('button',{class:'btn btn-sm', type:'button', onclick:() => segRpc('seg_reabrir', {p_pedido: r.id}, 'Reaberto: os seguimentos recomeçam hoje')}, 'Reabrir (perdido por silêncio)'));
+    if (bts.length) els.push(h('div',{class:'trans'}, bts));
+    if (!lista.length && !bts.length) return null;
+    return h('div',{class:'block'}, els);
+  }
+
+  // Configuração: dias e textos de cada sequência (config, chave «seguimentos»), sem mexer no código.
+  const SGC_CAMPOS = [['whatsapp','WhatsApp'], ['email_assunto','Email: assunto'], ['email','Email: texto'], ['telefone','Telefone: guião']];
+  function renderSegCfg() {
+    const sec = F('sgCfgSec'); if (!sec) return;
+    sec.hidden = !segLigado();
+    if (!segLigado() || sgCfgSujo) return;
+    const c = cfgSeg || {}, S = c.sequencias || SEG_PADRAO.sequencias, T = c.textos || {};
+    const ro = !canWrite ? true : null;
+    const area = (id, v, lbl) => h('div',null, h('label',{for:id}, lbl), h('textarea',{id, readonly: ro}, v || ''));
+    const blocos = [h('p',{class:'note', style:'margin:0'}, 'Os textos podem levar {nome}, {orc}, {valor}, {falta}, {fatura}, {data_fatura}, {valor_fatura}, {dias} e {assinatura}. Curtos, educados, sem travessões. Os dias contam do envio da mensagem inicial, do orçamento ou da fatura; ao fim de semana e nos feriados passam para o dia útil seguinte. Os P1 usam metade dos intervalos.'),
+      h('div',{class:'sgc-g'},
+        h('div',null, h('label',{for:'sgc-chefe'}, 'Chefe (recebe a cobrança em atraso)'), inp('sgc-chefe', c.chefe || '', {list:'sgc-chefe-l', readonly: ro}), h('datalist',{id:'sgc-chefe-l'}, donosConhecidos().map(d => h('option',{value:d})))),
+        h('div',null, h('label',{for:'sgc-fer'}, 'Feriados'), sel('sgc-fer', [['sim','Também saltam os feriados'], ['nao','Só os fins de semana']], c.saltarFeriados === false ? 'nao' : 'sim')),
+        area('sgc-assin', c.assinatura, 'Assinatura dos emails'))];
+    ['A','B','C','D'].forEach(q => {
+      const s = S[q] || SEG_PADRAO.sequencias[q], n = (s.dias || []).length, txt = T[q] || [];
+      const passos = [];
+      for (let i = s.inicial ? 0 : 1; i <= n; i++) {
+        const t = txt[i] || {};
+        passos.push(h('div',null, h('h3',{style:'font-size:15px;margin:10px 0 0'}, segRotulo(q, i, n)),
+          h('div',{class:'sgc-g'}, SGC_CAMPOS.map(([k, l]) => k === 'email_assunto'
+            ? h('div',null, h('label',{for:`sgc-${q}-${i}-${k}`}, l), inp(`sgc-${q}-${i}-${k}`, t[k] || '', {readonly: ro}))
+            : area(`sgc-${q}-${i}-${k}`, t[k], l)))));
+      }
+      blocos.push(h('details',null, h('summary',null, `${q}. ${SEQ_NOME[q]}: dias ${(s.dias || []).join(', ')}${q === 'D' ? `, gerência depois de ${s.escalarDepoisDia}` : `, perdido ao dia ${s.perdidoDia}`}`),
+        h('div',{class:'sgc-g'},
+          h('div',null, h('label',{for:`sgc-${q}-dias`}, 'Dias dos seguimentos'), inp(`sgc-${q}-dias`, (s.dias || []).join(', '), {readonly: ro, inputmode:'numeric'})),
+          h('div',null, h('label',{for:`sgc-${q}-fim`}, q === 'D' ? 'Passa à gerência depois do dia' : 'Sem resposta, perdido ao dia'), inp(`sgc-${q}-fim`, q === 'D' ? s.escalarDepoisDia : s.perdidoDia, {readonly: ro, inputmode:'numeric'})),
+          q === 'D' ? null : h('div',null, h('label',{for:`sgc-${q}-motivo`}, 'Motivo da perda'), inp(`sgc-${q}-motivo`, s.motivo || '', {readonly: ro}))),
+        passos));
+    });
+    if (canWrite) blocos.push(h('div',{class:'row-end'}, h('p',{class:'err', id:'sgc-err', hidden:true, style:'margin:0 auto 0 0'}), h('button',{class:'btn', type:'button', onclick:guardarSegCfg}, 'Guardar seguimentos')));
+    fill(F('sgCfg'), blocos);
+    F('sgCfgEstado').textContent = c.atualizado ? `mudado a ${ddmm(String(c.atualizado).slice(0, 10))}` : 'valores de origem';
+  }
+  async function guardarSegCfg() {
+    const erro = m => { const e = F('sgc-err'); e.textContent = m; e.hidden = false; };
+    const c = JSON.parse(JSON.stringify(cfgSeg || {})), S = c.sequencias || JSON.parse(JSON.stringify(SEG_PADRAO.sequencias)), T = c.textos || {};
+    for (const q of ['A','B','C','D']) {
+      const dias = val(`sgc-${q}-dias`).split(/[,;\s]+/).filter(Boolean).map(Number), fim = Number(val(`sgc-${q}-fim`));
+      if (!dias.length || dias.some((d, i) => !Number.isInteger(d) || d < 1 || (i && d <= dias[i - 1]))) return erro(`${SEQ_NOME[q]}: os dias são números inteiros a subir, por exemplo 3, 5, 7.`);
+      if (!Number.isInteger(fim) || fim < dias[dias.length - 1]) return erro(`${SEQ_NOME[q]}: o último dia tem de ser igual ou depois do último seguimento.`);
+      const antes = (S[q] && S[q].dias) || [];
+      S[q] = Object.assign({}, SEG_PADRAO.sequencias[q], S[q] || {}, {dias});
+      if (q === 'D') S[q].escalarDepoisDia = fim; else { S[q].perdidoDia = fim; S[q].motivo = val(`sgc-${q}-motivo`) || S[q].motivo; }
+      const txt = (T[q] || []).slice();
+      for (let i = S[q].inicial ? 0 : 1; i <= Math.min(dias.length, antes.length); i++) {
+        const t = {};
+        for (const [k] of SGC_CAMPOS) { const el = F(`sgc-${q}-${i}-${k}`); t[k] = el ? el.value : ''; if (/[—–]/.test(t[k])) return erro('Sem travessões nos textos: usa vírgulas ou parênteses.'); }
+        txt[i] = t;
+      }
+      if (!S[q].inicial) txt[0] = null;
+      txt.length = dias.length + 1;
+      for (let i = 0; i < txt.length; i++) if (txt[i] === undefined) txt[i] = S[q].inicial || i ? {whatsapp:'', email_assunto:'', email:'', telefone:''} : null;
+      T[q] = txt;
+    }
+    const assin = F('sgc-assin').value;
+    if (/[—–]/.test(assin)) return erro('Sem travessões na assinatura.');
+    Object.assign(c, {chefe: val('sgc-chefe'), saltarFeriados: val('sgc-fer') !== 'nao', assinatura: assin, sequencias: S, textos: T, atualizado: new Date().toISOString()});
+    try {
+      const {error} = await sb.from('config').upsert({chave:'seguimentos', valor: c, atualizado_por: eu.email}, {onConflict:'chave'});
+      if (error) throw error;
+      cfgSeg = c; sgCfgSujo = false; toast('Seguimentos guardados: valem a partir da próxima corrida das 07:00'); renderSegCfg();
+    } catch (e) { erro('Não foi possível guardar.'); }
+  }
+  F('sgCfg').addEventListener('input', () => { sgCfgSujo = true; });
+
   /* ---------- Dados do pedido ---------- */
   function camposDados(r, novo) {
     const sug = sugerirP(r);
@@ -3152,6 +3602,8 @@ if (!Element.prototype.replaceChildren) {
     return h('div',{class:'fields'},
       campo('d-cliente','Cliente', inp('d-cliente', r.cliente), null, true),
       campo('d-contacto','Contacto', inp('d-contacto', r.contacto, {placeholder:'Telefone ou email'})),
+      campo('d-canal','Canal preferido para seguimentos', sel('d-canal', Object.entries(CANAIS), r.canal || canalDe(r)), 'O que o cliente usa: os seguimentos saem por aqui.'),
+      campo('d-cnome','Nome nas mensagens (opcional)', inp('d-cnome', r.contactoNome, {placeholder:'Por exemplo D. Marta'}), 'Senão vai o nome do cliente.'),
       campo('d-localidade','Localidade ou morada', inp('d-localidade', r.localidade)),
       campo('d-tipo','Tipo', sel('d-tipo', Object.entries(TIPOS), r.tipo, 'Escolher…')),
       campo('d-origem','Origem', sel('d-origem', Object.entries(ORIGENS), r.origem, 'Escolher…')),
@@ -3163,6 +3615,12 @@ if (!Element.prototype.replaceChildren) {
       novo ? null : campo('d-valor','Valor s/IVA (€)', inp('d-valor', r.valor != null ? String(r.valor).replace('.',',') : '', {inputmode:'decimal'})),
       campo('d-dped','Data do pedido', inp('d-dped', r.dataPedido || today(), {type:'date'})),
       novo ? null : campo('d-denv','Data de envio do orçamento', inp('d-denv', r.dataEnvio, {type:'date'})),
+      !novo && (r.fatura || ['por_faturar','faturado','resolvido'].includes(r.estado)) ? [
+        campo('d-fat-n','N.º da fatura', inp('d-fat-n', r.fatura)),
+        campo('d-fat-d','Data da fatura', inp('d-fat-d', r.dataFatura, {type:'date'})),
+        campo('d-fat-v','Valor da fatura (€)', inp('d-fat-v', r.valorFatura != null ? String(r.valorFatura).replace('.',',') : '', {inputmode:'decimal'})),
+        campo('d-pag','Data do pagamento', inp('d-pag', r.dataPagamento, {type:'date'})),
+        h('div',{class:'f full'}, h('label',{class:'check'}, h('input',{type:'checkbox', id:'d-fat-a', checked: r.adiantamento ? true : null}), 'O cliente pagou um adiantamento'))] : null,
       campo('d-pasta','Pasta ou ficheiro', inp('d-pasta', r.pasta, {placeholder:'Ligação da Drive ou caminho'}), pastaAux, true),
       campo('d-notas','Notas', h('textarea',{id:'d-notas'}, r.notas || ''), null, true),
       novo ? null : h('div',{class:'f full'}, h('label',{class:'check'}, h('input',{type:'checkbox', id:'d-conf', checked: r.porConfirmar ? true : null}), 'Dados por confirmar (importados ou incompletos)')),
@@ -3175,11 +3633,15 @@ if (!Element.prototype.replaceChildren) {
     if (Number.isNaN(v)) return {erro:'O valor não é um número. Usa por exemplo 1250,00.'};
     if (!val('d-cliente')) return {erro:'Falta o nome do cliente.'};
     const u = val('d-unid'); if (u && !/^\d+$/.test(u)) return {erro:'As unidades são um número inteiro.'};
+    const vf = F('d-fat-v') ? parseValor(val('d-fat-v')) : null;
+    if (Number.isNaN(vf)) return {erro:'O valor da fatura não é um número.'};
     return Object.assign(base, {
       cliente: val('d-cliente'), contacto: val('d-contacto') || null, localidade: val('d-localidade') || null,
       tipo: val('d-tipo') || null, origem: val('d-origem') || null, unidades: u ? Number(u) : null,
       dataImposta: F('d-dimp').checked, prioridade: val('d-prio') || 'P3', descricao: val('d-desc') || null,
       dataPedido: val('d-dped') || null, pasta: val('d-pasta') || null, notas: val('d-notas') || null,
+      canal: val('d-canal') || null, contactoNome: val('d-cnome') || null,
+      ...(F('d-fat-n') ? {fatura: val('d-fat-n') || null, dataFatura: val('d-fat-d') || null, valorFatura: vf, dataPagamento: val('d-pag') || null, adiantamento: F('d-fat-a').checked} : {}),
       ...(F('d-num') ? {num: n || null, seq: m ? Number(m[1]) : null, ano: m ? Number(m[2]) : null, valor: v, dataEnvio: val('d-denv') || null, porConfirmar: F('d-conf').checked} : {}),
     });
   }
@@ -3236,6 +3698,11 @@ if (!Element.prototype.replaceChildren) {
       F('n-data').value = dataProposta('novo', s.p);
     };
     ['d-tipo','d-unid','d-dimp'].forEach(k => F(k).addEventListener(k === 'd-unid' ? 'input' : 'change', atualizarP));
+    // O canal preferido segue a origem (WhatsApp, telefone, email) até alguém o mudar à mão.
+    let canalMexido = false;
+    F('d-canal').addEventListener('change', () => { canalMexido = true; });
+    const canalPelaOrigem = () => { if (!canalMexido) F('d-canal').value = canalDe({origem: val('d-origem'), contacto: val('d-contacto')}); };
+    F('d-origem').addEventListener('change', canalPelaOrigem); F('d-contacto').addEventListener('input', canalPelaOrigem);
     atualizarP();
     setTimeout(() => F('d-cliente').focus(), 30);
   }
@@ -3260,7 +3727,11 @@ if (!Element.prototype.replaceChildren) {
   F('fVista').addEventListener('change', e => { fEstado = VISTA_ESTADO[e.target.value] || 'abertos'; setTab('gerir'); renderAll(); });
 
   let toastT = null;
-  function toast(msg) { const t = F('toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3600); }
+  function toast(msg, acao) {
+    const t = F('toast');
+    fill(t, msg, acao ? h('button',{type:'button', onclick:() => { t.hidden = true; acao.fn(); }}, acao.label) : null);
+    t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, acao ? 9000 : 3600);
+  }
 
   renderAll();
   // Os prazos andam com o relógio: redesenha a cada 5 minutos quando nada está aberto para edição.
@@ -3283,7 +3754,7 @@ if (!Element.prototype.replaceChildren) {
       ]);
       if (p.error) throw p.error;
       rows = p.data.map(r => ({id: r.id, ...r.dados, _versao: r.versao}));
-      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; }
+      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; }
       if (ft.error) { if (/relation|does not exist|schema cache/i.test(ft.error.message || '')) fatTabela = false; }
       else { fatTabela = true; const novo = {}; for (const x of ft.data) if (x.dados && x.dados.mes) novo[x.dados.mes] = x.dados; faturacao = novo; if (!faturacao[fatMes]) fatMes = ''; }
       if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) fichaTabela = false; }
@@ -3291,6 +3762,7 @@ if (!Element.prototype.replaceChildren) {
       if (!q.error) { equipa = q.data; const m = equipa.find(x => x.email === (eu && eu.email)); if (m && m.nome) eu.nome = m.nome; }
       status = 'ok'; renderAll();
       carregarPainel();
+      carregarSeg();
     } catch (e) {
       const txt = String((e && e.message) || '');
       if (status !== 'ok') { status = 'error'; renderAll(); }
@@ -3306,6 +3778,7 @@ if (!Element.prototype.replaceChildren) {
       .on('postgres_changes', {event:'*', schema:'public', table:'config'}, () => { clearTimeout(recarga); recarga = setTimeout(carregar, 250); })
       .on('postgres_changes', {event:'*', schema:'public', table:'faturacao'}, () => { clearTimeout(recarga); recarga = setTimeout(carregar, 250); })
       .on('postgres_changes', {event:'*', schema:'public', table:'clientes'}, () => { clearTimeout(recarga); recarga = setTimeout(carregar, 250); })
+      .on('postgres_changes', {event:'*', schema:'public', table:'seguimentos'}, () => { clearTimeout(recarga); recarga = setTimeout(carregar, 250); })
       .subscribe(st => { ligado = st === 'SUBSCRIBED'; const d = F('liveDot'); d.className = 'live ' + (ligado ? 'ok' : st === 'CHANNEL_ERROR' || st === 'TIMED_OUT' ? 'err' : ''); d.title = ligado ? 'Atualizações em tempo real ligadas' : 'Sem tempo real; a página recarrega de minuto a minuto'; });
   }
   async function entrar(session) {
@@ -3326,7 +3799,7 @@ if (!Element.prototype.replaceChildren) {
   }
   function sair() {
     if (canal) { sb.removeChannel(canal); canal = null; }
-    sessao = null; eu = null; rows = []; faturacao = {}; cfgClientes = {}; fichas = {}; pn = null; canWrite = false; status = 'loading'; ligado = false;
+    sessao = null; eu = null; rows = []; faturacao = {}; cfgClientes = {}; fichas = {}; pn = null; sg = null; segTabela = null; cfgSeg = null; segMotor = null; sgCorreu = false; sgEdit = null; canWrite = false; status = 'loading'; ligado = false;
     F_LOGIN(); erroLogin('');
   }
   F('loginForm').addEventListener('submit', async ev => {
