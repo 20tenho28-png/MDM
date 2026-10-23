@@ -435,7 +435,56 @@ try {
     ok(await anel('#contacto .cta-phone') === 'solid 3px rgb(27, 37, 64)', 'L: foco ink na faixa clay', await anel('#contacto .cta-phone'));
     const btn = await page.evaluate(() => { const b = getComputedStyle(document.querySelector('.hero .btn')), g = document.querySelector('.hero .btn-ghost'); return { bg: b.backgroundColor, cor: b.color, alturas: [document.querySelector('.hero .btn').offsetHeight, g.offsetHeight] }; });
     ok(btn.bg === 'rgb(224, 138, 30)' && btn.cor === 'rgb(27, 37, 64)' && btn.alturas[0] === btn.alturas[1], 'L: «Pedir Orçamento» ink sobre clay e o ghost com a mesma altura', btn);
+    // o cartão de obra: o anel desenha-se por fora, na cor da superfície à volta (amber no ink, ink no bone e no paper)
+    const anelCartao = async (sel) => { await page.focus(sel); return page.evaluate(s => { const c = document.querySelector(s).closest('.pg'), st = getComputedStyle(c); return st.outlineStyle + ' ' + st.outlineWidth + ' ' + st.outlineColor; }, sel); };
+    ok(await anelCartao('#obras .pg h3 a') === 'solid 3px rgb(240, 168, 56)', 'L: foco amber no cartão de obra sobre ink', await anelCartao('#obras .pg h3 a'));
+    await page.goto(`${srv.base}/obras/${OBRAS[0].slug}.html`, { waitUntil: 'networkidle' });
+    await page.keyboard.press('Tab'); await page.keyboard.press('Shift+Tab');
+    ok(await anelCartao('.obra-rel .pg h3 a') === 'solid 3px rgb(27, 37, 64)', 'L: foco ink no cartão de obra sobre bone («Obras semelhantes»)', await anelCartao('.obra-rel .pg h3 a'));
+    await page.goto(srv.base + '/obras.html', { waitUntil: 'networkidle' });
+    await page.keyboard.press('Tab'); await page.keyboard.press('Shift+Tab');
+    ok(await anelCartao('section.s-bone .pg h3 a') === 'solid 3px rgb(27, 37, 64)', 'L: foco ink no cartão de obra num grupo bone de obras.html', await anelCartao('section.s-bone .pg h3 a'));
+    // a legenda do cartão sobre a fotografia (acima de 640 px): o .cat amber e o título bone com 4,5:1 ou mais mesmo no
+    // pior caso, a faixa da legenda por cima de uma fotografia toda branca (a cor composta da faixa sobre branco)
+    const legendas = () => {
+      const rgb = s => { const m = s.match(/[\d.]+/g).map(Number); return { r: m[0], g: m[1], b: m[2], a: m.length > 3 ? m[3] : 1 }; };
+      const lum = c => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
+      const razao = (x, y) => { const a = lum(x), b = lum(y); return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05); };
+      return Array.from(document.querySelectorAll('.pg figcaption')).map(f => {
+        const fa = rgb(getComputedStyle(f).backgroundColor), sobre = k => fa[k] * fa.a + 255 * (1 - fa.a);
+        const fundo = { r: sobre('r'), g: sobre('g'), b: sobre('b') };
+        const t = el => Math.round(razao(rgb(getComputedStyle(el).color), fundo) * 100) / 100;
+        return { cat: t(f.querySelector('.cat')), titulo: t(f.querySelector('h2, h3')), alfa: fa.a };
+      });
+    };
+    for (const f of ['/', '/obras.html', `/obras/${OBRAS[0].slug}.html`]) {
+      await page.goto(srv.base + f, { waitUntil: 'networkidle' });
+      const l = await page.evaluate(legendas);
+      ok(l.length > 0 && l.every(c => c.cat >= 4.5 && c.titulo >= 4.5), `L: ${f} .cat e título dos cartões com 4,5:1 ou mais sobre uma fotografia branca`, l);
+    }
+    // a lista «Na obra» começa na margem esquerda, como o h2 (sem o recuo de uma ul)
+    await page.goto(`${srv.base}/obras/${OBRAS[0].slug}.html`, { waitUntil: 'networkidle' });
+    const visto = await page.evaluate(() => { const l = e => Math.round(e.getBoundingClientRect().left), ul = document.querySelector('.lista-visto'); return { h2: l(ul.previousElementSibling), ul: l(ul), tick: l(ul.querySelector('.tick')) }; });
+    ok(visto.h2 === visto.ul && visto.ul === visto.tick, 'L: «Na obra»: os vistos alinhados com o h2', visto);
+    // o cabeçalho fica paper opaco por cima das secções ink (sem vidro translúcido)
+    await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
+    await page.evaluate(() => scrollTo(0, document.querySelector('#obras').offsetTop + 200));
+    await page.waitForTimeout(400);
+    const topo = await page.evaluate(() => { const s = getComputedStyle(document.querySelector('.topo')); return { bg: s.backgroundColor, filtro: s.backdropFilter || 'none' }; });
+    ok(topo.bg === 'rgb(247, 248, 251)' && topo.filtro === 'none', 'L: o cabeçalho é paper opaco por cima das obras (ink)', topo);
     await ctx.close();
+  }
+  {
+    // a altura da página inicial (Fase 7, assertiva 2). O plano aponta para menos de 6.000 px a 390 e cerca de 4.300 a
+    // 1440; sem tirar conteúdo, a página está hoje em cerca de 6.500 e 4.930 (era 8.469 e 4.955). Estes tetos impedem
+    // que volte a crescer; descer até ao alvo do plano é uma decisão de conteúdo (ver o relatório da revisão)
+    for (const [largura, teto] of [[390, 6600], [1440, 5000]]) {
+      const { ctx, page } = await pagina({ viewport: { width: largura, height: 900 } });
+      await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
+      const h = await page.evaluate(() => document.documentElement.scrollHeight);
+      ok(h < teto, `L: a ${largura} px a página inicial tem menos de ${teto} px de altura`, h);
+      await ctx.close();
+    }
   }
   /* M. as fotografias sem ampliação (fase 6) */
   {

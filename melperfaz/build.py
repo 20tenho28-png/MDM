@@ -156,6 +156,9 @@ for _s in SERVICOS:
         raise SystemExit(f"site.json «servicos»: cada serviço tem id, nome, cat (vazio se não tiver obras) e texto → {_s}")
     if _s["cat"] and _s["cat"] != _s["id"]:
         raise SystemExit(f"site.json «servicos» {_s['id']}: «cat» é o próprio id ou vazio → «{_s['cat']}»")
+    # a frase da lista de serviços da página inicial: uma das frases do «texto», tal qual (nada de texto novo)
+    if not _s.get("frase") or _s["frase"] not in _s["texto"] or not _s["frase"].endswith("."):
+        raise SystemExit(f"site.json «servicos» {_s['id']}: «frase» é uma frase inteira do «texto», copiada tal qual → «{_s.get('frase', '')}»")
 if len(SERVICO_BY_ID) != len(SERVICOS):
     raise SystemExit("site.json «servicos»: id repetido")
 for _o in OBRAS:

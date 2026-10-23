@@ -20,37 +20,43 @@
       "id": "reabilitacao",
       "nome": "Reabilitação de Edifícios",
       "cat": "reabilitacao",
-      "texto": "A nossa especialidade. Recuperamos edifícios degradados de raiz (estrutura, fachadas e interiores), devolvendo-lhes solidez e valor."
+      "texto": "A nossa especialidade. Recuperamos edifícios degradados de raiz (estrutura, fachadas e interiores), devolvendo-lhes solidez e valor.",
+      "frase": "Recuperamos edifícios degradados de raiz (estrutura, fachadas e interiores), devolvendo-lhes solidez e valor."
     },
     {
       "id": "comercial",
       "nome": "Espaços Comerciais",
       "cat": "",
-      "texto": "Lojas, escritórios e espaços de trabalho construídos ou renovados para abrir portas a horas, com mínima perturbação ao negócio."
+      "texto": "Lojas, escritórios e espaços de trabalho construídos ou renovados para abrir portas a horas, com mínima perturbação ao negócio.",
+      "frase": "Lojas, escritórios e espaços de trabalho construídos ou renovados para abrir portas a horas, com mínima perturbação ao negócio."
     },
     {
       "id": "apartamentos",
       "nome": "Apartamentos",
       "cat": "",
-      "texto": "Remodelação completa de apartamentos, do desmonte aos acabamentos. Obra limpa, prazos cumpridos e atenção ao detalhe."
+      "texto": "Remodelação completa de apartamentos, do desmonte aos acabamentos. Obra limpa, prazos cumpridos e atenção ao detalhe.",
+      "frase": "Remodelação completa de apartamentos, do desmonte aos acabamentos."
     },
     {
       "id": "estrutura",
       "nome": "Trabalhos de Estrutura",
       "cat": "",
-      "texto": "Fundações, pilares, lajes e alvenaria executados dentro das normas. A base de toda a obra bem feita."
+      "texto": "Fundações, pilares, lajes e alvenaria executados dentro das normas. A base de toda a obra bem feita.",
+      "frase": "Fundações, pilares, lajes e alvenaria executados dentro das normas."
     },
     {
       "id": "fachadas",
       "nome": "Fachadas e Impermeabilização",
       "cat": "fachadas",
-      "texto": "Recuperação e pintura de fachadas, isolamento e impermeabilização, incluindo trabalhos em altura com acesso por corda."
+      "texto": "Recuperação e pintura de fachadas, isolamento e impermeabilização, incluindo trabalhos em altura com acesso por corda.",
+      "frase": "Recuperação e pintura de fachadas, isolamento e impermeabilização, incluindo trabalhos em altura com acesso por corda."
     },
     {
       "id": "acabamentos",
       "nome": "Acabamentos",
       "cat": "acabamentos",
-      "texto": "Revestimentos, pinturas, carpintaria e remates finais. O cuidado que distingue uma obra entregue de uma obra bem entregue."
+      "texto": "Revestimentos, pinturas, carpintaria e remates finais. O cuidado que distingue uma obra entregue de uma obra bem entregue.",
+      "frase": "Revestimentos, pinturas, carpintaria e remates finais."
     }
   ],
   "provas": [

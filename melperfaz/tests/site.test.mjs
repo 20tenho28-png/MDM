@@ -327,6 +327,7 @@ test('os dados: vocabulário dos serviços, obras em destaque, factos e o --falt
   assert.deepEqual(SERVICOS.map(s => s.id), ['reabilitacao', 'comercial', 'apartamentos', 'estrutura', 'fachadas', 'acabamentos']);
   for (const s of SERVICOS) {
     assert.ok(s.nome && s.texto, `${s.id}: nome e texto`);
+    assert.ok(s.frase && s.texto.includes(s.frase) && s.frase.endsWith('.'), `${s.id}: a frase da lista é uma frase do texto, tal qual`);
     assert.ok(s.cat === '' || s.cat === s.id, `${s.id}: cat é o id ou vazio`);
   }
   assert.ok(Array.isArray(SITE.provas) && SITE.provas.length === 3, 'três provas');
@@ -382,8 +383,9 @@ test('as fotografias: original, tamanhos, prévias e texto alternativo', () => {
   assert.match(pic, /<source type="image\/avif" srcset="assets\/img\/fotos\/foto-01-400\.avif 400w, [^"]*foto-01-1080\.avif 1080w"/);
   assert.match(pic, /sizes="[^"]*\(max-width: 980px\) calc\(100vw - 32px\), 520px"/, 'hero: sizes da moldura (sem ampliação)');
   assert.match(pic, new RegExp(`<img src="assets/img/fotos/foto-01\\.jpg" alt="${esc(Object.fromEntries(FOTOS)['01'].alt)}" width="1080" height="810" style="object-position: 50% 60%" loading="eager" decoding="async" fetchpriority="high">`));
-  // a foto-02 (4:3) na moldura 4:5 de Porquê Nós é cortada nos lados: pede 5/3 da largura da moldura
-  assert.match(/<picture class="foto"[^>]*><source type="image\/avif" srcset="[^"]*foto-02-[^"]*" sizes="([^"]*)"/.exec(t)[1], /\(max-width: 980px\) calc\(\(100vw - 32px\) \* 5 \/ 3\), 914px$/, 'Porquê Nós: sizes da moldura 4:5');
+  // a foto-02 (4:3) na moldura 4:5 de Porquê Nós é cortada nos lados: pede 5/3 da largura da moldura (914 px); até
+  // 980 px a moldura é 4:3, como a fotografia, e basta a largura da coluna
+  assert.match(/<picture class="foto"[^>]*><source type="image\/avif" srcset="[^"]*foto-02-[^"]*" sizes="([^"]*)"/.exec(t)[1], /\(max-width: 980px\) calc\(100vw - 32px\), 914px$/, 'Porquê Nós: sizes da moldura (4:5; 4:3 até 980 px)');
   // os cartões: 579 px (duas colunas a partir de 981), uma coluna até lá; no telemóvel a moldura 4:3 ou 4:5 corta as
   // fotografias mais largas do que ela, que pedem proporcionalmente mais (foto-05, 1080 × 620: × 1,31)
   const F = Object.fromEntries(FOTOS);

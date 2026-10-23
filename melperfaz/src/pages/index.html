@@ -43,8 +43,9 @@
   </div>
 </section>
 
-<!-- ServiceList: os serviços de data/site.json «servicos», em linhas sem caixa e sem seta. A linha não é uma ligação:
-     «Ver obras (N)» só quando o serviço tem obras, e «Pedir orçamento» com o tipo já escolhido (?tipo=<id>) -->
+<!-- ServiceList: os serviços de data/site.json «servicos» (o nome e uma frase do texto, «frase»), em linhas sem caixa e sem seta. A linha não é uma ligação:
+     «Ver obras (N)» só quando o serviço tem obras, e «Pedir orçamento» com o tipo já escolhido (?tipo=<id>). A miniatura
+     fica à direita do título e o texto contorna-a; as duas ligações seguem numa só linha, à largura toda da linha -->
 <section class="sec s-paper" id="servicos" aria-labelledby="servicosT">
   <div class="wrap">
     <div class="sec-head reveal">
@@ -55,14 +56,16 @@
       <li class="svc reveal" data-servico="{{ item.id }}">
         <span class="svc-num" aria-hidden="true">{{ item.n }}</span>
         <div class="svc-corpo">
-          <h3>{{ item.nome }}</h3>
-          <p>{{ item.texto }}</p>
+          <div class="svc-txt">{{#se item.primeiraFoto}}
+            <div class="svc-mini">{{foto {{ item.primeiraFoto }} sizes="64px" alt=""}}</div>{{/se}}
+            <h3>{{ item.nome }}</h3>
+            <p>{{ item.frase }}</p>
+          </div>
           <div class="svc-links">{{#se item.obrasN}}
             <a class="link-seta" href="{{ root }}{{ item.catAnchor }}">Ver obras ({{ item.obrasN }})<span class="so-leitor"> de {{ item.nome }}</span>{{icone seta}}</a>{{/se}}
             <a class="link-seta" href="{{ item.orcamentoHref }}" data-tipo="{{ item.id }}">Pedir orçamento<span class="so-leitor"> de {{ item.nome }}</span>{{icone seta}}</a>
           </div>
-        </div>{{#se item.primeiraFoto}}
-        <div class="svc-mini">{{foto {{ item.primeiraFoto }} sizes="64px" alt=""}}</div>{{/se}}
+        </div>
       </li>{{/cada}}
     </ul>
   </div>
@@ -88,9 +91,10 @@
     </div>
     <!-- uma fotografia real em vez de números: a obra M03, com ligação para a ficha; o perfil do Google quando existir
          (as avaliações nunca são citadas no site) -->
-    <!-- a foto-02 (4:3) numa moldura 4:5 é cortada nos lados: precisa de 5/3 da largura da moldura (548 px › 914) -->
+    <!-- a foto-02 (4:3) numa moldura 4:5 é cortada nos lados: precisa de 5/3 da largura da moldura (548 px › 914);
+         até 980 px a moldura é 4:3, a da própria fotografia, e chega a largura da coluna -->
     <figure class="trust-foto reveal">
-      <div class="frame">{{foto 02 sizes="(max-width: 980px) calc((100vw - 32px) * 5 / 3), 914px" foco="50% 40%"}}</div>
+      <div class="frame">{{foto 02 sizes="(max-width: 980px) calc(100vw - 32px), 914px" foco="50% 40%"}}</div>
       <figcaption class="links">
         <a class="link-seta" href="{{ root }}obras/edificios-e-apartamentos.html">Ver a obra{{icone seta}}</a>{{#se dados.googleMaps}}
         <a class="link-seta" href="{{ dados.googleMaps }}" target="_blank" rel="noopener">Ver o perfil e as avaliações no Google{{icone seta}}</a>{{/se}}

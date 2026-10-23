@@ -16,7 +16,8 @@
 /* o trabalho: grelha 7/5, com os títulos das duas colunas alinhados no topo */
 .obra-corpo .duas { display: grid; grid-template-columns: 7fr 5fr; gap: var(--space-80); align-items: start; }
 .obra-corpo .duas > * { width: 100%; min-width: 0; }
-.lista-visto { list-style: none; }
+/* sem o recuo do .prosa ul: os vistos começam na margem esquerda, como o h2 «Na obra» */
+.lista-visto, .prosa .lista-visto { list-style: none; padding-left: 0; }
 .lista-visto li { position: relative; padding: var(--space-12) 0 var(--space-12) var(--space-44); color: var(--fg-2); border-bottom: var(--border-hairline) solid var(--rule); }
 .lista-visto li:last-child { border-bottom: none; }
 /* a caixa de visto do TrustList (.tick de site.css, com o ícone «visto»), à esquerda de cada linha; desenha-se ao
