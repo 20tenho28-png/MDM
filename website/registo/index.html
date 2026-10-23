@@ -555,6 +555,57 @@ body.app-on{background:var(--surface)}
   .fbox.dono,.fbox.fprio{flex:1 1 40%}
   .fab{display:none}
 }
+/* Agenda */
+.ag-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px}
+.ag-bar .ag-semtxt{font-weight:600;font-size:17px;margin-right:auto}
+.ag-bar .btn{min-width:40px}
+.ag-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ag-grid{display:grid;grid-template-columns:104px repeat(var(--n),minmax(112px,1fr));min-width:660px}
+.ag-th{font-size:12.5px;color:var(--ink-2);padding:8px;border-left:1px solid var(--line)}
+.ag-th b{color:var(--ink);font-weight:600;text-transform:capitalize}
+.ag-canto{border-left:0}
+.ag-tn{font-weight:600;font-size:13.5px;padding:8px 8px 8px 12px;border-top:1px solid var(--line);position:relative;overflow-wrap:anywhere}
+.ag-tn::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:4px;border-radius:2px;background:var(--tec)}
+.ag-td{border-top:1px solid var(--line);border-left:1px solid var(--line);padding:5px;display:flex;flex-direction:column;gap:5px;min-height:58px;min-width:0}
+.ag-th.hoje,.ag-td.hoje{background:rgba(13,103,136,.07)}
+.ag-th.fer,.ag-td.fer{background:var(--sunk)}
+.ag-c{display:flex;flex-direction:column;gap:1px;text-align:left;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--tom);border-radius:7px;padding:5px 7px;cursor:pointer;min-width:0;width:100%}
+.ag-c:hover{background:var(--sunk)}
+.ag-c.on{outline:2px solid var(--accent);outline-offset:1px}
+.ag-c.conf{border-color:var(--bad);border-left-color:var(--tom)}
+.ag-c.feita{opacity:.6}
+.ag-ch{font-family:var(--font-mono);font-size:12px;color:var(--ink-2);display:flex;gap:5px;align-items:center}
+.ag-ch i{font-style:normal;font-family:var(--font-body);font-weight:700;font-size:10.5px;line-height:15px;border-radius:4px;padding:0 4px;color:#fff;background:var(--bad)}
+.ag-ch .ag-w{border-radius:50%;width:15px;padding:0;text-align:center}
+.ag-cn{font-weight:600;font-size:13px;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ag-cz{font-size:11.5px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ag-det{border:1px solid var(--line);border-left:4px solid var(--tom);border-radius:10px;background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.ag-dn{font-size:15.5px}
+.ag-det .btn{text-decoration:none;display:inline-block}
+.ag-acao{display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:10px}
+.ag-sug{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.ag-s{display:flex;flex-direction:column;gap:1px;text-align:left;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer}
+.ag-s:hover{border-color:var(--accent)}
+.ag-s b{font-size:14.5px}
+.ag-s span{font-size:13px;color:var(--ink-2)}
+.ag-s small{font-size:12px;color:var(--ink-2)}
+.ag-dia{display:none;flex-direction:column;gap:10px}
+.ag-dnav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ag-dnav b{font-size:17px}
+.ag-dnav .btn{min-width:48px;min-height:44px;font-size:20px;line-height:1}
+.ag-l{border-top:1px solid var(--line);border-left:4px solid var(--tom);padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.ag-l:first-child{border-top:0}
+.ag-lh{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:13.5px;color:var(--ink-2)}
+.ag-lh b{font-family:var(--font-mono);font-size:15px;color:var(--ink)}
+.ag-l .sg-cli{font:inherit;font-weight:600;font-size:16px;background:none;border:0;padding:0;color:var(--ink);cursor:pointer;text-align:left}
+.ag-l .btn,.sg-b a.btn{text-decoration:none;display:inline-block}
+.agt{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}
+.agt:first-of-type{border-top:0;padding-top:0}
+.agt-g{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.agt-g .sub{font-size:12.5px;color:var(--ink-2);flex-basis:100%}
+.agt input[type=color]{padding:2px;height:40px}
+@media (prefers-color-scheme:dark){.ag-th.hoje,.ag-td.hoje{background:rgba(93,184,221,.09)}}
+@media (max-width:640px){.ag-semana{display:none}.ag-dia{display:flex}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
 </head>
@@ -580,12 +631,13 @@ body.app-on{background:var(--surface)}
   <button class="r-novo" type="button" id="railNovo" title="Novo pedido" aria-label="Novo pedido"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   <button type="button" id="rail-painel" title="Painel" aria-label="Painel"><svg viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0M12 15l4-5"/><circle cx="12" cy="15" r="1.4" fill="currentColor"/><path d="M4 19h16"/></svg><span class="r-badge" id="painelBadge"></span></button>
   <button type="button" id="rail-seguimentos" title="Seguimentos de hoje" aria-label="Seguimentos de hoje"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 10.5l2.2 2.2 4.8-4.7"/></svg><span class="r-badge" id="sgBadge"></span></button>
+  <button type="button" id="rail-agenda" title="Agenda" aria-label="Agenda"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h3M8 17h6"/></svg><span class="r-badge" id="agBadge"></span></button>
   <button type="button" id="rail-gerir" title="Gerir pedidos" aria-label="Gerir pedidos"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.3c2.5-.2 4.3 1.3 4.8 4.2"/></svg><span class="r-badge" id="redBadge"></span></button>
   <button type="button" id="rail-pipeline" title="Pipeline" aria-label="Pipeline"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5" height="11" rx="1.5"/><rect x="16" y="4" width="5" height="7" rx="1.5"/></svg><span class="r-badge" id="fugaBadge"></span></button>
   <button type="button" id="rail-resumo" title="Resumo" aria-label="Resumo"><svg viewBox="0 0 24 24"><path d="M5 20V12M10 20V5M15 20v-6M20 20V9"/></svg></button>
   <button type="button" id="rail-clientes" title="Clientes" aria-label="Clientes"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.6-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.4-7 10-7 10z"/></svg><span class="r-badge" id="cliBadge"></span></button>
   <button type="button" id="rail-faturacao" title="Faturação" aria-label="Faturação"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h6M9 16h6"/></svg></button>
-  <button type="button" id="rail-prazos" title="Prazos e exportar" aria-label="Prazos e exportar"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></button>
+  <button type="button" id="rail-prazos" title="Prazos e exportar" aria-label="Prazos e exportar"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
   <button type="button" class="r-fim" id="btnSair" title="Sair" aria-label="Sair"><svg viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 8l-4 4 4 4M6 12h10"/></svg></button>
 </nav>
 <div style="min-width:0">
@@ -609,6 +661,7 @@ body.app-on{background:var(--surface)}
   <div class="tabs tabs2" role="tablist" aria-label="Vistas" id="tabs" hidden>
     <button class="tab" role="tab" type="button" id="tab-painel" aria-controls="v-painel" aria-selected="false" tabindex="-1">Painel</button>
     <button class="tab" role="tab" type="button" id="tab-seguimentos" aria-controls="v-seguimentos" aria-selected="false" tabindex="-1">Seguimentos</button>
+    <button class="tab" role="tab" type="button" id="tab-agenda" aria-controls="v-agenda" aria-selected="false" tabindex="-1">Agenda</button>
     <button class="tab" role="tab" type="button" id="tab-gerir" aria-controls="v-gerir" aria-selected="true">Gerir pedidos</button>
     <button class="tab" role="tab" type="button" id="tab-pipeline" aria-controls="v-pipeline" aria-selected="false" tabindex="-1">Pipeline</button>
     <button class="tab" role="tab" type="button" id="tab-resumo" aria-controls="v-resumo" aria-selected="false" tabindex="-1">Resumo</button>
@@ -698,6 +751,23 @@ body.app-on{background:var(--surface)}
         <p class="note">A resposta conta no último passo enviado antes dela. Mudar o estado do pedido depois de um contacto (aceitou, recusou, pagou) também conta como resposta; a perda por silêncio não.</p>
       </section>
     </div>
+  </div>
+
+  <div id="v-agenda" role="tabpanel" aria-labelledby="tab-agenda" hidden>
+    <p class="hint alert" id="agAviso" hidden></p>
+    <section aria-label="Semana" class="ag-semana">
+      <div class="ag-bar"><span class="ag-semtxt" id="agSemTxt"></span>
+        <button class="btn btn-ghost btn-sm" type="button" id="agPrev" aria-label="Semana anterior">‹</button>
+        <button class="btn btn-ghost btn-sm" type="button" id="agHoje">Esta semana</button>
+        <button class="btn btn-ghost btn-sm" type="button" id="agNext" aria-label="Semana seguinte">›</button></div>
+      <div id="agDet"></div>
+      <div class="panel ag-scroll" id="agSemana"></div>
+    </section>
+    <section aria-label="O dia" class="ag-dia" id="agDia"></section>
+    <section aria-labelledby="h-ag-por" style="margin-top:22px">
+      <div class="sec-h"><h2 id="h-ag-por">Por marcar</h2><span class="count" id="agPorCount"></span></div>
+      <div class="panel sg-list" id="agPor"></div>
+    </section>
   </div>
 
   <div id="v-gerir" role="tabpanel" aria-labelledby="tab-gerir">
@@ -988,6 +1058,10 @@ body.app-on{background:var(--surface)}
         </section>
       </div>
     </div>
+    <section aria-labelledby="h-agcfg" id="agCfgSec" style="margin-top:22px" hidden>
+      <div class="sec-h"><h2 id="h-agcfg">Agenda: técnicos e durações</h2></div>
+      <div class="panel sgc" id="agCfg"></div>
+    </section>
     <section aria-labelledby="h-sgcfg" id="sgCfgSec" style="margin-top:22px" hidden>
       <div class="sec-h"><h2 id="h-sgcfg">Seguimentos: dias e textos</h2><span class="count" id="sgCfgEstado"></span></div>
       <div class="panel sgc" id="sgCfg"></div>
@@ -1269,7 +1343,7 @@ if (!Element.prototype.replaceChildren) {
   }
 
   /* ---------- Separadores ---------- */
-  const TABS = ['painel','seguimentos','gerir','pipeline','resumo','clientes','faturacao','prazos'];
+  const TABS = ['painel','seguimentos','agenda','gerir','pipeline','resumo','clientes','faturacao','prazos'];
   let tab = 'painel';
   try { const s = localStorage.getItem('registo-tab'); if (TABS.includes(s)) tab = s; } catch (e) {}
   if (TABS.includes(location.hash.replace('#',''))) tab = location.hash.replace('#','');
@@ -2590,7 +2664,7 @@ if (!Element.prototype.replaceChildren) {
     F('nextNum').textContent = status === 'ok' ? nextNumber() : 'ORC…';
     const verm = all.filter(x => x.sem === 'vermelho').length;
     F('redBadge').textContent = verm ? String(verm) : '';
-    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderExport(); renderEquipa(); renderFaturacao(); renderClientes(); renderPipeline(all); renderSeg(); renderSegCfg();
+    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderExport(); renderEquipa(); renderFaturacao(); renderClientes(); renderPipeline(all); renderSeg(); renderSegCfg(); renderAgenda(); renderAgCfg();
     F('btnNovoTop').hidden = F('railNovo').hidden = F('btnNovoCliente').hidden = !(canWrite && status === 'ok');
     // Não redesenha a folha aberta enquanto há um formulário a meio.
     if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
@@ -2599,7 +2673,7 @@ if (!Element.prototype.replaceChildren) {
   /* ---------- Folha de um pedido ---------- */
   const cur = () => rows.find(r => r.id === currentId) || null;
   function openSheet(id) { currentId = id; modo = null; trans = null; dadosAberto = false; F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); setTimeout(() => F('btnClose').focus(), 30); }
-  function closeSheet() { F('sheetWrap').hidden = true; document.body.style.overflow = ''; currentId = null; modo = null; trans = null; fichaKey = null; sheetSujo = false; sgRespondeu = null; sgEdit = null; if (status === 'ok') renderAll(); }
+  function closeSheet() { F('sheetWrap').hidden = true; document.body.style.overflow = ''; currentId = null; modo = null; trans = null; fichaKey = null; sheetSujo = false; sgRespondeu = null; sgEdit = null; if (agAcao && agAcao.onde === 'sheet') agAcao = null; if (status === 'ok') renderAll(); }
   F('btnClose').addEventListener('click', closeSheet);
   F('sheetBody').addEventListener('input', () => { sheetSujo = true; });
   F('sheetBody').addEventListener('change', () => { sheetSujo = true; });
@@ -2630,7 +2704,9 @@ if (!Element.prototype.replaceChildren) {
 
   function transicoes(r) {
     const T = [];
-    const add = (id, label, para, o) => T.push({id, label, para, ...(o || {})});
+    // Com técnicos na agenda, a visita marca-se no bloco «Agenda» (sugestões, à mão ou pelo cliente), não com uma data escrita.
+    const pelaAgenda = agPronto(), marcada = pelaAgenda && agMarc.some(m => m.pedido_id === r.id && m.tipo !== 'instalacao' && m.estado !== 'feita' && new Date(m.fim) > new Date());
+    const add = (id, label, para, o) => { if (o && o.pedeVisita && pelaAgenda && (!o.remarcar || marcada)) return; T.push({id, label, para, ...(o || {})}); };
     const origem = ESTADOS[r.esperaDe] ? ESTADOS[r.esperaDe].l : null;
     switch (r.estado) {
       case 'novo':
@@ -2749,6 +2825,7 @@ if (!Element.prototype.replaceChildren) {
       if (r.dataFecho && r.dataFecho < addDays(today(), -30)) blocos.push(h('p',{class:'hint'}, 'Fechado há mais de 30 dias: se o cliente voltar, regista um pedido novo.'));
     }
     const bs = blocoSeg(r); if (bs) blocos.push(bs);
+    const ba = blocoAgenda(r); if (ba) blocos.push(ba);
     blocos.push(h('div',{class:'acao', style:'--stripe:var(--accent)'},
       h('div',{style:'min-width:0'}, h('div',{class:'what'}, r.folha ? `Folha de obra ${r.folha.num}` : 'Folha de obra'),
         h('div',{class:'who'}, r.folha && r.folha.totalDebito ? `${eur(r.folha.totalDebito)} a debitar · custo ${eur(r.folha.totalCustos || 0)}`
@@ -3301,7 +3378,7 @@ if (!Element.prototype.replaceChildren) {
   }
   function linkEnvio(x, r) {
     const c = contactosDe(r || {});
-    const texto = x.rascunho || '';
+    const texto = segTexto(x);
     if (x.canal === 'whatsapp') return c.tel ? `https://wa.me/${c.tel}?text=${encodeURIComponent(texto)}` : null;
     if (x.canal === 'email') return c.email ? `mailto:${c.email}?subject=${encodeURIComponent(x.assunto || '')}&body=${encodeURIComponent(texto)}` : null;
     return c.tel ? `tel:+${c.tel}` : null;
@@ -3386,7 +3463,7 @@ if (!Element.prototype.replaceChildren) {
     }
     return h('div',{class:'sg', style:`--stripe:var(--${atraso > 0 ? 'bad' : 'warn'})`}, head, meta,
       tel ? h('p',{class:'sg-txt full'}, h('b',null,'Guião da chamada'), x.rascunho || '(sem guião: toca em Editar)')
-        : h('div',{class:'sg-txt', title: x.rascunho || ''}, x.canal === 'email' && x.assunto ? h('b',null, x.assunto) : null, previa(x.rascunho) || '(sem texto: toca em Editar)'),
+        : h('div',{class:'sg-txt', title: x.rascunho || ''}, x.canal === 'email' && x.assunto ? h('b',null, x.assunto) : null, previa(segTexto(x)) || '(sem texto: toca em Editar)'),
       botoes.length ? h('div',{class:'sg-b'}, botoes) : null);
   }
 
@@ -3595,6 +3672,477 @@ if (!Element.prototype.replaceChildren) {
   }
   F('sgCfg').addEventListener('input', () => { sgCfgSujo = true; });
 
+  /* ---------- Agenda: técnicos, marcações e a ligação para o cliente escolher o dia (supabase/agenda.sql) ----------
+     A base de dados sugere as horas (horário, almoço, viagem entre zonas, competências, prioridade) e grava a marcação
+     no pedido (data e hora da visita, estado, histórico). A página mostra a semana, a lista do que falta marcar e o dia
+     de cada técnico no telemóvel. Sem agenda.sql, os pedidos continuam com a data da visita escrita à mão. */
+  const AG_TIPO = {visita:'Visita', manutencao:'Manutenção', reparacao:'Reparação', instalacao:'Instalação', outro:'Outro'};
+  const AG_TOM = {visita:'info', manutencao:'good', reparacao:'bad', instalacao:'copper', outro:'muted'};
+  const AG_COMP = [['instalacao','Instalação'], ['manutencao','Manutenção'], ['reparacao','Reparação'], ['obra','Obra']];
+  const AG_ZONAS = ['PN','Lisboa','Arredores'];
+  const AG_DIA = ['dom','seg','ter','qua','qui','sex','sáb'];
+  const AG_PADRAO = {duracoes:{visita:60, reparacao:90, manutencaoUnidade:45, manutencaoMin:60, instalacaoDiasPorUnidade:1, instalacaoMaxDias:2}, sabado:false};
+  let agTabela = null, cfgAgenda = null, agTec = [], agMarc = [], agConf = {}, agPor = [], agLinks = {}, agSemana = null, agSel = null, agAcao = null, agBusy = false;
+  let agDiaVer = null, agTecVer = '';
+  const agLigado = () => agTabela === true;
+  const agPronto = () => agLigado() && agTec.some(t => t.ativo);
+  const agCfg = () => Object.assign({}, AG_PADRAO, cfgAgenda || {}, {duracoes: Object.assign({}, AG_PADRAO.duracoes, (cfgAgenda && cfgAgenda.duracoes) || {})});
+  const agSeg = s => { const [y,m,d] = s.split('-').map(Number); return addDays(s, -((new Date(y, m - 1, d).getDay() + 6) % 7)); };
+  const agDiaDe = t => iso(new Date(t));
+  const agHora = t => hhmm(new Date(t));
+  const agDiaSem = s => { const [y,m,d] = s.split('-').map(Number); return AG_DIA[new Date(y, m - 1, d).getDay()]; };
+  const agDiaTxt = s => `${agDiaSem(s)} ${ddmm(s)}`;
+  const agQuando = m => m.tipo === 'instalacao'
+    ? (agDiaDe(m.inicio) === agDiaDe(m.fim) ? agDiaTxt(agDiaDe(m.inicio)) : `${agDiaTxt(agDiaDe(m.inicio))} a ${agDiaTxt(agDiaDe(m.fim))}`)
+    : `${agDiaTxt(agDiaDe(m.inicio))}, ${agHora(m.inicio)} a ${agHora(m.fim)}`;
+  const agNomes = m => (m.nomes || []).filter(Boolean).join(' e ') || 'sem técnico';
+  const agTecDe = id => agTec.find(t => t.id === id) || null;
+  // O nome da pessoa de contacto para a mensagem: «Marta», «Sr. Tavares» (com o título, nunca só «Sr.»).
+  const agPrimeiroNome = r => { const w = String((r && r.contactoNome) || '').trim().split(/\s+/); return /^(sr|sra|srª|d|dr|dra|drª|eng|enga|engª)\.?$/i.test(w[0] || '') && w[1] ? w[0] + ' ' + w[1] : w[0] || ''; };
+
+  async function carregarAgenda() {
+    if (!sb) return;
+    try {
+      const desde = addDays(agSeg(today()), -35), ate = addDays(agSeg(today()), 120);
+      const res = await Promise.all([
+        sb.from('tecnicos').select('id,nome,cor,telefone,email,competencias,zonas,horario,ativo,ical_token').order('nome'),
+        sb.from('v_agenda').select('*').gte('fim', desde).lt('inicio', ate).order('inicio'),
+        sb.from('v_agenda_conflitos').select('*'),
+        sb.from('v_por_marcar').select('*'),
+      ]);
+      if (res[0].error) {
+        if (/relation|does not exist|schema cache|Could not find/i.test(res[0].error.message || '')) { agTabela = false; renderAgenda(); renderAgCfg(); }
+        return;
+      }
+      agTabela = true;
+      agTec = res[0].data || []; agMarc = res[1].data || [];
+      agConf = {}; (res[2].data || []).forEach(c => { (agConf[c.marcacao_id] = agConf[c.marcacao_id] || []).push(c.texto); });
+      const P = {P1:0, P2:1, P3:2};
+      agPor = (res[3].data || []).slice().sort((a, b) => (P[a.prioridade] - P[b.prioridade]) || (b.dias_espera - a.dias_espera));
+      // As ligações para o cliente escolher o dia já ficam prontas: «Enviar» abre o WhatsApp no mesmo toque (iOS).
+      const ids = rows.filter(r => (r.estado === 'novo' || r.estado === 'visita_por_marcar') && !r.porConfirmar).map(r => r.id);
+      if (ids.length && canWrite) {
+        const l = await sb.rpc('agenda_links_para', {p_pedidos: ids});
+        if (!l.error) { const novo = {}; (l.data || []).forEach(x => { novo[x.pedido_id] = x.url; }); agLinks = novo; }
+      }
+      renderAgenda(); renderAgCfg(); renderSeg();
+      if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
+    } catch (e) { /* sem rede: fica a última leitura */ }
+  }
+
+  // O texto do seguimento com a ligação no lugar de {link_marcacao} (sem agenda, a frase desaparece).
+  function segTexto(x) {
+    const t = String((x && x.rascunho) || '');
+    if (t.indexOf('{link_marcacao}') < 0) return t;
+    const url = agLinks[x.pedido_id];
+    return t.split('{link_marcacao}').join(!url ? '' : x.canal === 'email' ? `\n\nPode escolher já o dia aqui: ${url}` : ` Pode escolher já o dia e a hora aqui: ${url}`);
+  }
+
+  function agErro(e) {
+    const t = String((e && e.message) || '');
+    toast(/permiss/.test(t) ? 'A tua conta não tem autorização para isto.' : /Failed to fetch/.test(t) ? 'Sem ligação. Tenta outra vez.'
+      : /não encontrad|inválido/.test(t) ? t.replace(/^.*?:\s*/, '') : 'Não foi possível gravar. Recarrega e repete.');
+  }
+  function agRedesenha() { renderAgenda(); if (currentId && !F('sheetWrap').hidden && !modo && !trans) renderSheet(); }
+
+  // Guarda o que já está escrito no formulário aberto, para não se perder quando a página se redesenha.
+  function agGuardaForm() {
+    if (!agAcao || agAcao.modo !== 'form' || !F('ag-f-dia')) return;
+    agAcao.vals = {tec: val('ag-f-tec'), aj: val('ag-f-aj'), dia: val('ag-f-dia'), hora: val('ag-f-hora'), dur: val('ag-f-dur'), dias: val('ag-f-dias'), notas: F('ag-f-notas') ? F('ag-f-notas').value : ''};
+  }
+
+  // Abre as sugestões (ou o formulário) de um pedido, ou de uma marcação a mudar.
+  async function agAbrir(onde, pedido, tipo, id, modoA) {
+    const chave = id ? 'm' + id : 'p' + pedido;
+    agAcao = {onde, chave, pedido, tipo, id: id || null, modo: modoA || 'sug', lista: null};
+    agRedesenha();
+    if (agAcao.modo !== 'sug') return;
+    const {data, error} = await sb.rpc('agenda_sugerir', {p_pedido: pedido, p_n: 4, p_tipo: tipo, p_ignorar: id || null});
+    if (!agAcao || agAcao.chave !== chave) return;
+    agAcao.lista = error ? [] : (data || []);
+    agAcao.erro = error ? 'Não foi possível calcular as sugestões.' : null;
+    agRedesenha();
+  }
+
+  async function agMarcar(pedido, tipo, tecs, inicio, fim, notas, id) {
+    if (!sb || agBusy) return false;
+    agBusy = true;
+    try {
+      const {data, error} = await sb.rpc('agenda_marcar', {p_pedido: pedido, p_tipo: tipo, p_tecnicos: tecs, p_inicio: new Date(inicio).toISOString(), p_fim: new Date(fim).toISOString(), p_notas: notas || null, p_id: id || null});
+      if (error) throw error;
+      agAcao = null;
+      const nomes = tecs.map(t => (agTecDe(t) || {}).nome).filter(Boolean).join(' e ');
+      const txt = `${id ? 'Mudado' : 'Marcado'}: ${agQuando({tipo, inicio, fim})}${nomes ? ' com ' + nomes : ''}`;
+      agBusy = false;
+      toast(txt, id ? null : {label:'Desfazer', fn: () => agCancelar(data, true)});
+      await carregar();
+      agRedesenha();
+      return true;
+    } catch (e) { agErro(e); return false; } finally { agBusy = false; }
+  }
+  async function agCancelar(id, desfazer) {
+    if (!sb || agBusy) return;
+    agBusy = true;
+    try {
+      const {error} = await sb.rpc('agenda_cancelar', {p_id: id});
+      if (error) throw error;
+      if (agSel === id) agSel = null;
+      agAcao = null;
+      toast(desfazer ? 'Marcação desfeita' : 'Marcação cancelada');
+      agBusy = false;
+      await carregar();
+      agRedesenha();
+    } catch (e) { agErro(e); } finally { agBusy = false; }
+  }
+  async function agEstado(id, estado, msg) {
+    if (!sb || agBusy) return;
+    agBusy = true;
+    try {
+      const {error} = await sb.rpc('agenda_estado', {p_id: id, p_estado: estado});
+      if (error) throw error;
+      toast(msg); agBusy = false; await carregar();
+    } catch (e) { agErro(e); } finally { agBusy = false; }
+  }
+
+  // A ligação para o cliente escolher o dia, pelo canal preferido do pedido (WhatsApp ou email). Fica no histórico.
+  function agEnviarLink(pid) {
+    const r = rows.find(x => x.id === pid); const url = agLinks[pid];
+    if (!r || !url) { toast('A ligação ainda não está pronta: recarrega a página.'); return; }
+    const c = contactosDe(r), nome = agPrimeiroNome(r);
+    const canalL = canalDe(r) === 'email' && c.email ? 'email' : c.tel ? 'whatsapp' : c.email ? 'email' : null;
+    if (!canalL) { toast('Falta o telemóvel e o email no pedido.'); return; }
+    const assin = String(segCfg().assinatura || 'MDM Assistência Técnica').trim();
+    if (canalL === 'whatsapp') abrirLink(`https://wa.me/${c.tel}?text=${encodeURIComponent(`Olá${nome ? ' ' + nome : ''}, obrigado pelo seu pedido à MDM. Pode escolher já o dia e a hora da visita aqui: ${url}`)}`);
+    else abrirLink(`mailto:${c.email}?subject=${encodeURIComponent('Marcar a visita da MDM')}&body=${encodeURIComponent(`Olá${nome ? ' ' + nome : ''},\n\nObrigado pelo seu pedido. Pode escolher já o dia e a hora da visita aqui:\n${url}\n\n${assin}`)}`);
+    const novo = JSON.parse(JSON.stringify(r)); delete novo.id;
+    novo.historico = (novo.historico || []).slice(-60);
+    novo.historico.push(nota(`Ligação para o cliente escolher o dia enviada por ${canalL === 'email' ? 'email' : 'WhatsApp'}`));
+    novo.ultimoContacto = new Date().toISOString();
+    gravar(r.id, novo, 'Ligação enviada: a visita marca-se sozinha quando o cliente escolher');
+  }
+
+  // Ligação para pôr a marcação no Google Calendar de quem a abre (um toque, sem subscrição).
+  function agGoogle(m) {
+    const z = t => new Date(t).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+    const r = rows.find(x => x.id === m.pedido_id) || {};
+    const detalhes = [m.pedido_id + (m.orcamento ? ' · ' + m.orcamento : ''), r.contacto ? 'Contacto: ' + r.contacto : '', r.descricao || '', m.notas || ''].filter(Boolean).join('\n');
+    return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(`${AG_TIPO[m.tipo] || 'Marcação'}: ${m.cliente || m.pedido_id}`)
+      + '&dates=' + z(m.inicio) + '/' + z(m.fim) + '&details=' + encodeURIComponent(detalhes) + '&location=' + encodeURIComponent(String(m.localidade || '').split('\n')[0]) + '&ctz=Europe/Lisbon';
+  }
+  const agMapa = m => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(String(m.localidade || '').split('\n')[0]);
+
+  // Sugestões ou formulário à mão, por baixo do pedido ou da marcação que os abriu.
+  function agPainel(onde, chave) {
+    if (!agAcao || agAcao.onde !== onde || agAcao.chave !== chave) return null;
+    const a = agAcao;
+    const fechar = h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { agAcao = null; agRedesenha(); }}, 'Fechar');
+    if (a.modo === 'sug') {
+      const corpo = a.lista === null ? h('p',{class:'hint'}, 'A procurar horas livres…')
+        : !a.lista.length ? h('p',{class:'hint'}, a.erro || 'Sem horas livres nos próximos dias para este trabalho: escolhe à mão.')
+        : h('div',{class:'ag-sug'}, a.lista.map(s => h('button',{class:'ag-s', type:'button', onclick:() => agMarcar(a.pedido, a.tipo, [s.tecnico], s.inicio, s.fim, null, a.id)},
+            h('b',null, a.tipo === 'instalacao' ? agQuando({tipo:'instalacao', inicio:s.inicio, fim:s.fim}) : `${agDiaTxt(agDiaDe(s.inicio))}, ${agHora(s.inicio)}`),
+            h('span',null, `${s.tecnico_nome}${a.tipo === 'instalacao' ? '' : ' · até ' + agHora(s.fim)}`),
+            s.razao ? h('small',null, s.razao) : null)));
+      return h('div',{class:'ag-acao'}, corpo, h('div',{class:'sg-b'},
+        h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { agAcao.modo = 'form'; agRedesenha(); }}, 'Escolher à mão'), fechar));
+    }
+    const m = a.id ? agMarc.find(x => x.id === a.id) : null;
+    const v = a.vals || {};
+    const d = agCfg().duracoes;
+    const durPadrao = a.tipo === 'reparacao' ? d.reparacao : a.tipo === 'manutencao' ? d.manutencaoMin : d.visita;
+    const ativos = agTec.filter(t => t.ativo || (m && (m.tecnicos || []).indexOf(t.id) >= 0));
+    const opts = [['', 'Escolher']].concat(ativos.map(t => [t.id, t.nome]));
+    const inst = a.tipo === 'instalacao';
+    const dur = m ? Math.round((new Date(m.fim) - new Date(m.inicio)) / 60000) : durPadrao;
+    const els = h('div',{class:'fields'},
+      campo('ag-f-tec', 'Técnico', sel('ag-f-tec', opts, v.tec != null ? v.tec : (m && m.tecnicos && m.tecnicos[0]) || '')),
+      campo('ag-f-aj', 'Ajudante', sel('ag-f-aj', [['', 'Sem ajudante']].concat(ativos.map(t => [t.id, t.nome])), v.aj != null ? v.aj : (m && m.tecnicos && m.tecnicos[1]) || '')),
+      campo('ag-f-dia', inst ? 'Primeiro dia' : 'Dia', inp('ag-f-dia', v.dia || (m ? agDiaDe(m.inicio) : addUteis(today(), 1)), {type:'date'})),
+      inst ? campo('ag-f-dias', 'Dias de obra', sel('ag-f-dias', [['1','1 dia'], ['2','2 dias'], ['3','3 dias'], ['4','4 dias']], v.dias || (m ? String(Math.max(1, Math.round((new Date(m.fim) - new Date(m.inicio)) / 86400000 + 0.4))) : '1')))
+        : campo('ag-f-hora', 'Hora', inp('ag-f-hora', v.hora || (m ? agHora(m.inicio) : '09:00'), {type:'time', step:'1800'})),
+      inst ? null : campo('ag-f-dur', 'Duração (minutos)', inp('ag-f-dur', v.dur || String(dur), {type:'number', min:'15', step:'15', inputmode:'numeric'})),
+      campo('ag-f-notas', 'Notas para o técnico', inp('ag-f-notas', v.notas != null ? v.notas : (m && m.notas) || ''), null, true));
+    const err = h('p',{class:'hint alert', id:'ag-f-err', hidden:true});
+    const ok = h('button',{class:'btn btn-sm', type:'button', onclick:() => {
+      const e = msg => { err.textContent = msg; err.hidden = false; };
+      const tec = val('ag-f-tec'), aj = val('ag-f-aj'), dia = val('ag-f-dia');
+      if (!tec) return e('Escolhe o técnico.');
+      if (!dia) return e('Escolhe o dia.');
+      const notas = F('ag-f-notas').value.trim();
+      if (/[—–]/.test(notas)) return e('Sem travessões: usa vírgulas ou parênteses.');
+      const tecs = aj && aj !== tec ? [tec, aj] : [tec];
+      const [y, mo, dd] = dia.split('-').map(Number);
+      let ini, fim;
+      if (inst) {
+        const t = agTecDe(tec) || {}, hor = t.horario || {};
+        const [hi, mi] = String(hor.inicio || '08:00').split(':').map(Number), [hf, mf] = String(hor.fim || '17:00').split(':').map(Number);
+        let ult = dia; for (let i = 1; i < Number(val('ag-f-dias') || 1); i++) ult = addUteis(ult, 1);
+        const [y2, mo2, d2] = ult.split('-').map(Number);
+        ini = new Date(y, mo - 1, dd, hi, mi); fim = new Date(y2, mo2 - 1, d2, hf, mf);
+      } else {
+        const hora = val('ag-f-hora'), minutos = Number(val('ag-f-dur'));
+        if (!/^\d{1,2}:\d{2}$/.test(hora)) return e('Indica a hora.');
+        if (!(minutos >= 15 && minutos <= 600)) return e('A duração vai de 15 a 600 minutos.');
+        const [hh, mm] = hora.split(':').map(Number);
+        ini = new Date(y, mo - 1, dd, hh, mm); fim = new Date(ini.getTime() + minutos * 60000);
+      }
+      agMarcar(a.pedido, a.tipo, tecs, ini, fim, notas, a.id);
+    }}, a.id ? 'Mudar' : 'Marcar');
+    return h('div',{class:'ag-acao'}, els, err, h('div',{class:'sg-b'}, ok,
+      h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agAbrir(a.onde, a.pedido, a.tipo, a.id, 'sug')}, 'Ver sugestões'), fechar));
+  }
+
+  // Uma marcação na grelha da semana.
+  function agCartao(m) {
+    const conf = agConf[m.id];
+    const t = agTecDe((m.tecnicos || [])[0]);
+    return h('button',{class:'ag-c' + (agSel === m.id ? ' on' : '') + (conf ? ' conf' : '') + (m.estado === 'feita' ? ' feita' : ''), type:'button',
+        style:`--tom:var(--${AG_TOM[m.tipo] || 'muted'});--tec:${(t && t.cor) || 'var(--line)'}`, title: conf ? conf.join('\n') : null,
+        onclick:() => { agSel = agSel === m.id ? null : m.id; agAcao = null; renderAgenda(); }},
+      h('span',{class:'ag-ch'}, m.tipo === 'instalacao' ? 'Obra' : agHora(m.inicio), m.prioridade === 'P1' ? h('i',{class:'ag-p1'}, 'P1') : null, conf ? h('i',{class:'ag-w', 'aria-label':'Conflito'}, '!') : null),
+      h('span',{class:'ag-cn'}, m.cliente || m.pedido_id),
+      h('span',{class:'ag-cz'}, [AG_TIPO[m.tipo], m.zona].filter(Boolean).join(' · ')));
+  }
+
+  // O detalhe da marcação escolhida, com as ações.
+  function agDetalhe(m) {
+    const conf = agConf[m.id] || [];
+    const r = rows.find(x => x.id === m.pedido_id) || {};
+    const c = contactosDe(r);
+    const bts = [h('button',{class:'btn btn-sm', type:'button', onclick:() => openSheet(m.pedido_id)}, 'Abrir pedido')];
+    if (canWrite && m.estado !== 'feita') {
+      bts.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agAbrir('agenda', m.pedido_id, m.tipo, m.id, 'sug')}, 'Mudar'));
+      if (m.estado === 'marcada' || m.estado === 'proposta') bts.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agEstado(m.id, 'confirmada', 'Confirmada com o cliente')}, 'Confirmada'));
+      if (new Date(m.inicio) <= new Date()) bts.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agEstado(m.id, 'feita', 'Marcada como feita')}, 'Feita'));
+      bts.push(h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agCancelar(m.id)}, 'Cancelar'));
+    }
+    bts.push(h('a',{class:'btn btn-ghost btn-sm', href: agGoogle(m), target:'_blank', rel:'noopener'}, 'Google Calendar'));
+    if (m.localidade) bts.push(h('a',{class:'btn btn-ghost btn-sm', href: agMapa(m), target:'_blank', rel:'noopener'}, 'Mapa'));
+    return h('div',{class:'ag-det', style:`--tom:var(--${AG_TOM[m.tipo] || 'muted'})`},
+      h('div',{class:'sg-h'}, h('b',{class:'ag-dn'}, m.cliente || m.pedido_id), h('span',{class:'pill', style:'--tone:var(--tom)'}, AG_TIPO[m.tipo]),
+        h('span',{class:'pill', style:`--tone:var(--${m.estado === 'confirmada' || m.estado === 'feita' ? 'good' : 'muted'})`}, {proposta:'proposta', marcada:'marcada', confirmada:'confirmada', feita:'feita'}[m.estado] || m.estado),
+        m.origem === 'cliente' ? h('span',{class:'pill', style:'--tone:var(--info)'}, 'escolhida pelo cliente') : null),
+      h('div',{class:'sg-meta'}, [agQuando(m), agNomes(m), String(m.localidade || '').split('\n')[0], c.telTxt || null].filter(Boolean).join(' · ')),
+      m.notas ? h('p',{class:'hint'}, m.notas) : null,
+      conf.map(t => h('p',{class:'hint alert'}, t)),
+      h('div',{class:'sg-b'}, bts),
+      agPainel('agenda', 'm' + m.id));
+  }
+
+  // Uma linha de «Por marcar», com Sugerir, Escolher e a ligação para o cliente.
+  function agPorMarcar(p) {
+    const temLink = !!agLinks[p.pedido_id] && (p.estado === 'novo' || p.estado === 'visita_por_marcar');
+    const r = rows.find(x => x.id === p.pedido_id) || {};
+    return h('div',{class:`sg u-${p.prioridade}`, style:'--stripe:var(--u)'},
+      h('div',{class:'sg-h'},
+        h('button',{class:'sg-cli', type:'button', onclick:() => openSheet(p.pedido_id)}, p.cliente || p.pedido_id),
+        h('span',{class:'pill', style:`--tone:var(--${AG_TOM[p.tipo] || 'muted'})`}, AG_TIPO[p.tipo] || p.tipo),
+        h('span',{class:'sg-due', style:`--tone:var(--${p.dias_espera > 2 ? 'bad' : 'ink-2'})`}, p.dias_espera > 0 ? `há ${p.dias_espera} ${p.dias_espera === 1 ? 'dia' : 'dias'}` : 'hoje')),
+      h('div',{class:'sg-meta'}, [p.prioridade, p.zona, String(p.localidade || '').split('\n')[0] || 'sem morada', p.dono || r.dono || 'sem dono'].filter(Boolean).join(' · ')),
+      canWrite ? h('div',{class:'sg-b'},
+        h('button',{class:'btn btn-sm', type:'button', onclick:() => agAbrir('agenda', p.pedido_id, p.tipo, null, 'sug')}, 'Sugerir'),
+        h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agAbrir('agenda', p.pedido_id, p.tipo, null, 'form')}, 'Escolher'),
+        temLink ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agEnviarLink(p.pedido_id)}, 'Enviar ligação ao cliente') : null) : null,
+      agPainel('agenda', 'p' + p.pedido_id));
+  }
+
+  function agDias() {
+    const n = agCfg().sabado ? 6 : 5, seg = agSemana || agSeg(today());
+    const out = []; for (let i = 0; i < n; i++) out.push(addDays(seg, i)); return out;
+  }
+  // As marcações de um técnico (ou sem técnico) num dia; as instalações aparecem em todos os dias da obra.
+  function agDoDia(dia, tec) {
+    return agMarc.filter(m => {
+      const di = agDiaDe(m.inicio), df = agDiaDe(m.fim);
+      if (dia < di || dia > df) return false;
+      const ts = m.tecnicos || [];
+      return tec ? ts.indexOf(tec) >= 0 : !ts.some(t => agTecDe(t));
+    }).sort((a, b) => String(a.inicio).localeCompare(String(b.inicio)));
+  }
+
+  function renderAgenda() {
+    const box = F('agSemana'); if (!box) return;
+    agGuardaForm();
+    const av = F('agAviso');
+    if (agTabela === false) {
+      av.hidden = false; av.textContent = 'A agenda ainda não está instalada (supabase/agenda.sql). Até lá, a data da visita escreve-se no pedido.';
+      ['agSemana','agDia','agPor','agDet'].forEach(k => fill(F(k))); F('agBadge').textContent = ''; F('agPorCount').textContent = ''; F('agSemTxt').textContent = ''; return;
+    }
+    if (agTabela === null) { av.hidden = true; fill(box, h('p',{class:'empty'}, 'A carregar a agenda…')); return; }
+    av.hidden = agTec.some(t => t.ativo);
+    if (!av.hidden) av.textContent = 'Ainda não há técnicos: junta-os em «Prazos e exportar», Agenda.';
+    if (!agSemana) agSemana = agSeg(today());
+    const dias = agDias(), hoje = today();
+    F('agSemTxt').textContent = `${dataCurta(dias[0])} a ${dataCurta(dias[dias.length - 1])}`;
+    const tecs = agTec.filter(t => t.ativo || agMarc.some(m => (m.tecnicos || []).indexOf(t.id) >= 0 && dias.some(d => agDiaDe(m.inicio) <= d && agDiaDe(m.fim) >= d)));
+    const linhas = tecs.map(t => ({id: t.id, nome: t.nome, cor: t.cor}));
+    if (dias.some(d => agDoDia(d, null).length)) linhas.push({id: null, nome: 'Por atribuir', cor: 'var(--line)'});
+    const celulas = [h('div',{class:'ag-th ag-canto'})];
+    dias.forEach(d => celulas.push(h('div',{class:'ag-th' + (d === hoje ? ' hoje' : '') + (!isUtil(d) ? ' fer' : '')}, h('b',null, agDiaSem(d)), ' ', ddmm(d))));
+    linhas.forEach(l => {
+      celulas.push(h('div',{class:'ag-tn', style:`--tec:${l.cor}`}, l.nome));
+      dias.forEach(d => celulas.push(h('div',{class:'ag-td' + (d === hoje ? ' hoje' : '') + (!isUtil(d) ? ' fer' : '')}, agDoDia(d, l.id).map(agCartao))));
+    });
+    const grelha = h('div',{class:'ag-grid', style:`--n:${dias.length}`}, celulas);
+    fill(box, linhas.length ? grelha : h('p',{class:'empty'}, 'Sem técnicos nem marcações nesta semana.'));
+    const m = agSel ? agMarc.find(x => x.id === agSel) : null;
+    if (agSel && !m) agSel = null;
+    fill(F('agDet'), m ? agDetalhe(m) : null);
+    F('agBadge').textContent = agPor.length ? String(agPor.length) : '';
+    F('agPorCount').textContent = agPor.length ? String(agPor.length) : '';
+    fill(F('agPor'), agPor.length ? agPor.map(agPorMarcar) : h('p',{class:'empty'}, 'Nada por marcar.'));
+    renderAgDia();
+  }
+
+  // Telemóvel: o dia de um técnico, por ordem, com mapa, telefone e folha de obra.
+  function renderAgDia() {
+    const box = F('agDia'); if (!box) return;
+    if (!agDiaVer) agDiaVer = isUtil(today()) ? today() : addUteis(today(), 1);
+    if (agTecVer && !agTecDe(agTecVer)) agTecVer = '';
+    const meu = agTec.find(t => eu && t.email && t.email.toLowerCase() === String(eu.email || '').toLowerCase());
+    if (agTecVer === '' && meu && !box.dataset.escolhido) agTecVer = meu.id;
+    const lista = agMarc.filter(m => agDiaDe(m.inicio) <= agDiaVer && agDiaDe(m.fim) >= agDiaVer && (!agTecVer || (m.tecnicos || []).indexOf(agTecVer) >= 0))
+      .sort((a, b) => String(a.inicio).localeCompare(String(b.inicio)));
+    const mudaDia = n => { let d = agDiaVer; do { d = addDays(d, n); } while (!agCfg().sabado && !isUtil(d)); agDiaVer = d; renderAgDia(); };
+    fill(box,
+      h('div',{class:'ag-dnav'},
+        h('button',{class:'btn btn-ghost btn-sm', type:'button', 'aria-label':'Dia anterior', onclick:() => mudaDia(-1)}, '‹'),
+        h('b',null, agDiaVer === today() ? `Hoje, ${ddmm(agDiaVer)}` : agDiaTxt(agDiaVer)),
+        h('button',{class:'btn btn-ghost btn-sm', type:'button', 'aria-label':'Dia seguinte', onclick:() => mudaDia(1)}, '›')),
+      h('div',{class:'chips', role:'group', 'aria-label':'Técnico'},
+        [h('button',{class:'chip', type:'button', 'aria-pressed': String(!agTecVer), onclick:() => { agTecVer = ''; box.dataset.escolhido = '1'; renderAgDia(); }}, 'Todos')]
+          .concat(agTec.filter(t => t.ativo).map(t => h('button',{class:'chip', type:'button', 'aria-pressed': String(agTecVer === t.id), onclick:() => { agTecVer = t.id; box.dataset.escolhido = '1'; renderAgDia(); }}, t.nome)))),
+      h('div',{class:'panel'}, lista.length ? lista.map(m => {
+        const r = rows.find(x => x.id === m.pedido_id) || {}, c = contactosDe(r), conf = agConf[m.id];
+        return h('div',{class:'ag-l', style:`--tom:var(--${AG_TOM[m.tipo] || 'muted'})`},
+          h('div',{class:'ag-lh'}, h('b',null, m.tipo === 'instalacao' ? 'Obra' : `${agHora(m.inicio)} a ${agHora(m.fim)}`), h('span',null, [AG_TIPO[m.tipo], agTecVer ? null : agNomes(m)].filter(Boolean).join(' · '))),
+          h('button',{class:'sg-cli', type:'button', onclick:() => openSheet(m.pedido_id)}, m.cliente || m.pedido_id),
+          h('div',{class:'sg-meta'}, [String(m.localidade || '').split('\n')[0], m.notas].filter(Boolean).join(' · ')),
+          conf ? h('p',{class:'hint alert'}, conf.join('. ')) : null,
+          h('div',{class:'sg-b'},
+            m.localidade ? h('a',{class:'btn btn-sm', href: agMapa(m), target:'_blank', rel:'noopener'}, 'Mapa') : null,
+            c.tel ? h('a',{class:'btn btn-ghost btn-sm', href:`tel:+${c.tel}`}, 'Ligar') : null,
+            h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => abrirFolha(m.pedido_id)}, 'Folha de obra'),
+            canWrite && m.estado !== 'feita' ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agEstado(m.id, 'feita', 'Marcada como feita')}, 'Feita') : m.estado === 'feita' ? h('span',{class:'pill', style:'--tone:var(--good)'}, 'feita') : null));
+      }) : h('p',{class:'empty'}, 'Nada marcado neste dia.')));
+  }
+
+  // Bloco «Agenda» na folha do pedido: o que está marcado e, se falta marcar, Sugerir, Escolher e a ligação.
+  function blocoAgenda(r) {
+    if (!agLigado()) return null;
+    agGuardaForm();
+    const agora = new Date();
+    const marcs = agMarc.filter(m => m.pedido_id === r.id && new Date(m.fim) > new Date(agora.getTime() - 86400000));
+    const tipo = r.estado === 'em_execucao' ? 'instalacao' : r.tipo === 'manutencao' || r.tipo === 'reparacao' ? r.tipo : 'visita';
+    const falta = !r.porConfirmar && (r.estado === 'novo' || r.estado === 'visita_por_marcar' || (r.estado === 'em_execucao' && !(r.obra && r.obra.dataInstalacao)))
+      && !marcs.some(m => m.estado !== 'feita' && new Date(m.fim) > agora);
+    if (!marcs.length && !falta) return null;
+    const els = [h('h3',null,'Agenda')];
+    marcs.forEach(m => {
+      els.push(h('div',{class:'acao', style:`--stripe:var(--${AG_TOM[m.tipo] || 'muted'})`},
+        h('div',{style:'min-width:0'}, h('div',{class:'what'}, `${AG_TIPO[m.tipo]}: ${agQuando(m)}`),
+          h('div',{class:'who'}, [agNomes(m), m.estado === 'confirmada' ? 'confirmada' : m.estado === 'feita' ? 'feita' : null, m.origem === 'cliente' ? 'escolhida pelo cliente' : null].filter(Boolean).join(' · '))),
+        canWrite && m.estado !== 'feita' ? h('div',{class:'sg-b'},
+          h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agAbrir('sheet', r.id, m.tipo, m.id, 'sug')}, 'Mudar'),
+          h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => agCancelar(m.id)}, 'Cancelar')) : null));
+      (agConf[m.id] || []).forEach(t => els.push(h('p',{class:'hint alert'}, t)));
+      const pa = agPainel('sheet', 'm' + m.id); if (pa) els.push(pa);
+    });
+    if (falta && canWrite) {
+      if (!agPronto()) els.push(h('p',{class:'hint'}, 'Para marcar pela agenda, junta os técnicos em «Prazos e exportar».'));
+      else {
+        els.push(h('div',{class:'trans'},
+          h('button',{class:'btn', type:'button', onclick:() => agAbrir('sheet', r.id, tipo, null, 'sug')}, tipo === 'instalacao' ? 'Marcar a instalação' : 'Marcar a visita'),
+          h('button',{class:'btn btn-ghost', type:'button', onclick:() => agAbrir('sheet', r.id, tipo, null, 'form')}, 'Escolher dia e técnico'),
+          agLinks[r.id] ? h('button',{class:'btn btn-ghost', type:'button', onclick:() => agEnviarLink(r.id)}, 'Enviar ligação ao cliente') : null));
+        const pa = agPainel('sheet', 'p' + r.id); if (pa) els.push(pa);
+      }
+    }
+    return h('div',{class:'block'}, els);
+  }
+
+  // Configuração: técnicos (tabela tecnicos) e durações (config, chave «agenda»).
+  let agCfgSujo = false;
+  function renderAgCfg() {
+    const sec = F('agCfgSec'); if (!sec) return;
+    sec.hidden = !agLigado();
+    if (!agLigado() || agCfgSujo) return;
+    const d = agCfg().duracoes;
+    const base = location.host ? `${location.protocol}//${location.host}` : 'https://www.mdmassist.pt';
+    const linha = t => {
+      const p = 'agt-' + (t.id || 'novo');
+      const comp = t.competencias || AG_COMP.map(c => c[0]), zonas = t.zonas || [], hor = t.horario || {};
+      const ics = t.ical_token ? `${base}/api/agenda/${t.ical_token}.ics` : '';
+      return h('div',{class:'agt', 'data-id': t.id || ''},
+        h('div',{class:'fields'},
+          campo(p + '-nome', 'Nome', inp(p + '-nome', t.nome || '')),
+          campo(p + '-cor', 'Cor', inp(p + '-cor', t.cor || '#0D6788', {type:'color'})),
+          campo(p + '-tel', 'Telemóvel', inp(p + '-tel', t.telefone || '', {inputmode:'tel'})),
+          campo(p + '-email', 'Email (para «O meu dia»)', inp(p + '-email', t.email || '', {type:'email'})),
+          campo(p + '-ini', 'Entra', inp(p + '-ini', hor.inicio || '08:00', {type:'time'})),
+          campo(p + '-fim', 'Sai', inp(p + '-fim', hor.fim || '17:00', {type:'time'}))),
+        h('div',{class:'agt-g'}, h('span',{class:'sub'}, 'Faz'), AG_COMP.map(([k, l]) => h('label',{class:'check'}, h('input',{type:'checkbox', id:`${p}-c-${k}`, checked: comp.indexOf(k) >= 0 ? true : null}), l))),
+        h('div',{class:'agt-g'}, h('span',{class:'sub'}, 'Zonas (nenhuma: todas)'), AG_ZONAS.map(z => h('label',{class:'check'}, h('input',{type:'checkbox', id:`${p}-z-${z}`, checked: zonas.indexOf(z) >= 0 ? true : null}), z)),
+          h('label',{class:'check'}, h('input',{type:'checkbox', id:`${p}-ativo`, checked: t.ativo === false ? null : true}), 'Ativo')),
+        ics ? h('div',{class:'agt-g'}, h('span',{class:'sub'}, 'Calendário'),
+          h('a',{class:'btn btn-ghost btn-sm', href:`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(ics.replace(/^https?:/, 'webcal:'))}`, target:'_blank', rel:'noopener'}, 'Juntar ao Google Calendar'),
+          h('a',{class:'btn btn-ghost btn-sm', href: ics.replace(/^https?:/, 'webcal:')}, 'iPhone'),
+          h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { try { navigator.clipboard.writeText(ics); toast('Endereço copiado'); } catch (e) { window.prompt('Endereço do calendário', ics); } }}, 'Copiar endereço'),
+          h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick: async () => {
+            if (!window.confirm(`Trocar o endereço do calendário de ${t.nome}? O antigo deixa de funcionar e tem de se juntar outra vez.`)) return;
+            const {error} = await sb.rpc('agenda_novo_token', {p_tecnico: t.id}); if (error) agErro(error); else { toast('Endereço novo criado'); carregar(); }
+          }}, 'Novo endereço')) : null);
+    };
+    fill(F('agCfg'),
+      h('p',{class:'hint'}, 'Cada técnico pode juntar o seu calendário ao Google Calendar ou ao iPhone: as visitas aparecem lá sozinhas (o Google atualiza de poucas em poucas horas; o iPhone pode ser de 15 em 15 minutos). Quem tem o endereço vê moradas e telefones: não o partilhes.'),
+      agTec.map(linha), linha({ativo: true}),
+      h('details',null, h('summary',null,'Durações'),
+        h('div',{class:'fields', style:'margin-top:8px'},
+          campo('agc-visita', 'Visita (min)', inp('agc-visita', d.visita, {type:'number', min:'15', step:'15'})),
+          campo('agc-reparacao', 'Avaria (min)', inp('agc-reparacao', d.reparacao, {type:'number', min:'15', step:'15'})),
+          campo('agc-manut', 'Manutenção por máquina (min)', inp('agc-manut', d.manutencaoUnidade, {type:'number', min:'15', step:'15'})),
+          campo('agc-inst', 'Instalação: dias por máquina', inp('agc-inst', d.instalacaoDiasPorUnidade, {type:'number', min:'1', step:'1'})),
+          campo('agc-sab', 'Sábado', sel('agc-sab', [['nao','Não se marca'], ['sim','Também se marca']], agCfg().sabado ? 'sim' : 'nao')))),
+      h('p',{class:'hint alert', id:'agc-err', hidden:true}),
+      canWrite ? h('div',{class:'row-end'}, h('button',{class:'btn', type:'button', onclick: guardarAgCfg}, 'Guardar agenda')) : null);
+  }
+  async function guardarAgCfg() {
+    const erro = m => { const e = F('agc-err'); e.textContent = m; e.hidden = false; };
+    const lerT = (id, t) => {
+      const p = 'agt-' + (id || 'novo');
+      const nome = val(p + '-nome');
+      if (!nome) return null;
+      return {nome, cor: val(p + '-cor') || '#0D6788', telefone: val(p + '-tel') || null, email: val(p + '-email') || null,
+        competencias: AG_COMP.map(c => c[0]).filter(k => F(`${p}-c-${k}`).checked), zonas: AG_ZONAS.filter(z => F(`${p}-z-${z}`).checked),
+        horario: Object.assign({}, (t && t.horario) || {cliente:'09:00', almoco:['12:00','13:00'], dias:[1,2,3,4,5]}, {inicio: val(p + '-ini') || '08:00', fim: val(p + '-fim') || '17:00'}),
+        ativo: F(`${p}-ativo`).checked};
+    };
+    const mudas = [];
+    for (const t of agTec) { const n = lerT(t.id, t); if (!n) return erro(`Falta o nome de um técnico (era ${t.nome}).`); if (!n.competencias.length) return erro(`${n.nome}: escolhe pelo menos um trabalho.`); mudas.push(['u', t.id, n]); }
+    const novo = lerT(null, null); if (novo) { if (!novo.competencias.length) return erro(`${novo.nome}: escolhe pelo menos um trabalho.`); mudas.push(['i', null, novo]); }
+    const num = id => Number(val(id));
+    const dur = {visita: num('agc-visita'), reparacao: num('agc-reparacao'), manutencaoUnidade: num('agc-manut'), instalacaoDiasPorUnidade: num('agc-inst')};
+    if (Object.keys(dur).some(k => !(dur[k] > 0))) return erro('As durações são números maiores do que zero.');
+    const c = JSON.parse(JSON.stringify(cfgAgenda || {}));
+    c.duracoes = Object.assign({}, AG_PADRAO.duracoes, c.duracoes || {}, dur);
+    c.sabado = val('agc-sab') === 'sim';
+    try {
+      for (const [op, id, dados] of mudas) {
+        const {error} = op === 'i' ? await sb.from('tecnicos').insert(dados) : await sb.from('tecnicos').update(dados).eq('id', id);
+        if (error) throw error;
+      }
+      const {error} = await sb.from('config').upsert({chave:'agenda', valor: c, atualizado_por: eu.email}, {onConflict:'chave'});
+      if (error) throw error;
+      agCfgSujo = false; toast('Agenda guardada'); carregar();
+    } catch (e) { agErro(e); }
+  }
+
+  F('agPrev').addEventListener('click', () => { agSemana = addDays(agSemana || agSeg(today()), -7); agSel = null; agAcao = null; renderAgenda(); });
+  F('agNext').addEventListener('click', () => { agSemana = addDays(agSemana || agSeg(today()), 7); agSel = null; agAcao = null; renderAgenda(); });
+  F('agHoje').addEventListener('click', () => { agSemana = agSeg(today()); agSel = null; agAcao = null; renderAgenda(); });
+  F('agCfg').addEventListener('input', () => { agCfgSujo = true; });
+  F('agCfg').addEventListener('change', () => { agCfgSujo = true; });
+
   /* ---------- Dados do pedido ---------- */
   function camposDados(r, novo) {
     const sug = sugerirP(r);
@@ -3754,7 +4302,7 @@ if (!Element.prototype.replaceChildren) {
       ]);
       if (p.error) throw p.error;
       rows = p.data.map(r => ({id: r.id, ...r.dados, _versao: r.versao}));
-      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; }
+      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; }
       if (ft.error) { if (/relation|does not exist|schema cache/i.test(ft.error.message || '')) fatTabela = false; }
       else { fatTabela = true; const novo = {}; for (const x of ft.data) if (x.dados && x.dados.mes) novo[x.dados.mes] = x.dados; faturacao = novo; if (!faturacao[fatMes]) fatMes = ''; }
       if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) fichaTabela = false; }
@@ -3763,6 +4311,7 @@ if (!Element.prototype.replaceChildren) {
       status = 'ok'; renderAll();
       carregarPainel();
       carregarSeg();
+      carregarAgenda();
     } catch (e) {
       const txt = String((e && e.message) || '');
       if (status !== 'ok') { status = 'error'; renderAll(); }
@@ -3779,6 +4328,8 @@ if (!Element.prototype.replaceChildren) {
       .on('postgres_changes', {event:'*', schema:'public', table:'faturacao'}, () => { clearTimeout(recarga); recarga = setTimeout(carregar, 250); })
       .on('postgres_changes', {event:'*', schema:'public', table:'clientes'}, () => { clearTimeout(recarga); recarga = setTimeout(carregar, 250); })
       .on('postgres_changes', {event:'*', schema:'public', table:'seguimentos'}, () => { clearTimeout(recarga); recarga = setTimeout(carregar, 250); })
+      .on('postgres_changes', {event:'*', schema:'public', table:'marcacoes'}, () => { clearTimeout(recarga); recarga = setTimeout(carregar, 250); })
+      .on('postgres_changes', {event:'*', schema:'public', table:'tecnicos'}, () => { clearTimeout(recarga); recarga = setTimeout(carregar, 250); })
       .subscribe(st => { ligado = st === 'SUBSCRIBED'; const d = F('liveDot'); d.className = 'live ' + (ligado ? 'ok' : st === 'CHANNEL_ERROR' || st === 'TIMED_OUT' ? 'err' : ''); d.title = ligado ? 'Atualizações em tempo real ligadas' : 'Sem tempo real; a página recarrega de minuto a minuto'; });
   }
   async function entrar(session) {
@@ -3799,7 +4350,7 @@ if (!Element.prototype.replaceChildren) {
   }
   function sair() {
     if (canal) { sb.removeChannel(canal); canal = null; }
-    sessao = null; eu = null; rows = []; faturacao = {}; cfgClientes = {}; fichas = {}; pn = null; sg = null; segTabela = null; cfgSeg = null; segMotor = null; sgCorreu = false; sgEdit = null; canWrite = false; status = 'loading'; ligado = false;
+    sessao = null; eu = null; rows = []; faturacao = {}; cfgClientes = {}; fichas = {}; pn = null; sg = null; segTabela = null; cfgSeg = null; segMotor = null; sgCorreu = false; sgEdit = null; agTabela = null; cfgAgenda = null; agTec = []; agMarc = []; agConf = {}; agPor = []; agLinks = {}; agSel = null; agAcao = null; agCfgSujo = false; canWrite = false; status = 'loading'; ligado = false;
     F_LOGIN(); erroLogin('');
   }
   F('loginForm').addEventListener('submit', async ev => {

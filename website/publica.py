@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Publica o site: o visual novo (site/, HTML estático em PT e EN, sem build) vai para public/, com a página interna
-da equipa (equipa/), o registo de pedidos da equipa (registo/) e as letras de que ela precisa. O Netlify corre isto em cada publicação (netlify.toml).
+da equipa (equipa/), o registo de pedidos da equipa (registo/), a página onde o cliente escolhe o dia da visita
+(marcar/) e as letras de que ela precisa. O Netlify corre isto em cada publicação (netlify.toml).
 
 Enquanto data/site.json tiver "preview": true, o site fica fora dos motores de busca: public/_headers com
 X-Robots-Tag: noindex em todos os endereços e robots.txt com Disallow: /. Sem "preview", ficam o robots.txt e o
@@ -42,6 +43,8 @@ def publica():
     shutil.copytree(ROOT / "equipa", OUT / "equipa")
     # registo de pedidos da equipa (registo/, uso interno): só a app; o LEIA-ME e o SQL do Supabase ficam no repositório
     shutil.copytree(ROOT / "registo", OUT / "registo", ignore=lambda pasta, nomes: [n for n in nomes if n in NAO_PUBLICAR or n == "supabase"])
+    # página pública para o cliente escolher o dia da visita (marcar/?t=<código>, registo/supabase/agenda.sql)
+    shutil.copytree(ROOT / "marcar", OUT / "marcar")
     # a página da equipa usa ../assets/fonts e ../assets/img/logo-mdm.svg: junta as letras que o visual novo não tem
     for f in (ROOT / "assets/fonts").glob("*.woff2"):
         destino = OUT / "assets/fonts" / f.name
