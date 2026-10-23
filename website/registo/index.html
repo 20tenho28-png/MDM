@@ -609,6 +609,19 @@ table.tb{border-collapse:separate;border-spacing:0;min-width:100%;font-size:13.5
 .fbox.agrupar select{border:0;background:transparent;font:inherit;color:inherit;width:100%}
 @media (min-width:768px){#lista,#v-gerir #mosLeg,#v-gerir #mosaico{display:none}}
 @media (max-width:767px){.tb-wrap,.fbox.agrupar{display:none}}
+.tb th.tb-mov{cursor:grab}
+
+.tb .tb-rz{position:absolute;top:0;right:-3px;width:7px;height:100%;cursor:col-resize;z-index:4}
+.tb .tb-rz:hover,body.a-redimensionar .tb-rz{background:var(--accent);opacity:.5}
+body.a-redimensionar,body.a-redimensionar *{cursor:col-resize!important;-webkit-user-select:none;user-select:none}
+.tb th.karr{opacity:.5}
+.tb-guia{position:fixed;width:3px;background:var(--accent);z-index:300;pointer-events:none;border-radius:2px}
+.tb-pega{display:inline-block;width:16px;color:var(--ink-2);cursor:grab;font-size:14px;line-height:1;margin-left:2px;-webkit-user-select:none;user-select:none;touch-action:none}
+.tb tr.karr td{opacity:.4}
+.tb-fant{position:fixed;left:0;top:0;z-index:300;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--accent);border-radius:8px;padding:6px 12px;font-weight:600;font-size:13.5px;box-shadow:0 10px 26px rgba(8,16,22,.25)}
+.tb tbody.tb-g.alvo .tb-gh td{background:color-mix(in srgb,var(--accent) 8%,var(--surface));outline:2px dashed var(--accent);outline-offset:-3px}
+.tb tbody.tb-g.sobre .tb-gh td{outline-style:solid;background:color-mix(in srgb,var(--accent) 16%,var(--surface))}
+.tb tbody.tb-g.fora{opacity:.45}
 /* Quadro: arrastar */
 .kcard{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .kcard.karr{opacity:.35}
@@ -1988,10 +2001,21 @@ if (!Element.prototype.replaceChildren) {
   const TOM_P = {P1:'var(--bad)', P2:'var(--warn)', P3:'var(--good)'};
   const iniciais = n => String(n || '?').trim().split(/\s+/).map(x => x[0]).slice(0, 2).join('').toUpperCase();
   function tbColunas() {
-    const c = tbCfg();
-    return TB_BASE.map(x => Object.assign({}, x, {oculta: !x.fixa && c.ocultas.indexOf(x.id) >= 0}))
+    const c = tbCfg(), ordem = (cfgColunas && cfgColunas.ordem) || [];
+    const todas = TB_BASE.map(x => Object.assign({}, x, {oculta: !x.fixa && c.ocultas.indexOf(x.id) >= 0}))
       .concat(c.extra.map(x => Object.assign({}, x, {extra: true, oculta: !!x.oculta})));
+    const pos = x => { const i = ordem.indexOf(x.id); return x.fixa ? -100 + TB_BASE.indexOf(x) : i < 0 ? 1000 + todas.indexOf(x) : i; };
+    return todas.slice().sort((a, b) => pos(a) - pos(b));
   }
+  // Larguras de cada pessoa (localStorage): uma regra de CSS por coluna, para o cabeçalho, as linhas e os totais.
+  let tbLarg = {};
+  try { tbLarg = JSON.parse(localStorage.getItem('registo-larguras') || '{}') || {}; } catch (e) {}
+  function tbAplicaLarguras() {
+    let st = F('tbLarg');
+    if (!st) { st = document.createElement('style'); st.id = 'tbLarg'; document.head.appendChild(st); }
+    st.textContent = Object.keys(tbLarg).map(k => `.tb .k-${k}{width:${tbLarg[k]}px;min-width:${tbLarg[k]}px;max-width:${tbLarg[k]}px}`).join('\n');
+  }
+  function tbGuardaLarguras() { try { localStorage.setItem('registo-larguras', JSON.stringify(tbLarg)); } catch (e) {} }
   function trimestre(r) { const d = dataPedidoDe(r); if (!d) return 'Sem data'; return `T${Math.floor((Number(d.slice(5, 7)) - 1) / 3) + 1} ${d.slice(0, 4)}`; }
   function tbAgrupadores() {
     const base = [['estado','Passo'], ['dono','Dono'], ['prioridade','Prioridade'], ['tipo','Tipo'], ['trimestre','Trimestre'], ['nenhum','Sem grupos']];
@@ -2030,7 +2054,8 @@ if (!Element.prototype.replaceChildren) {
       return ed(txt, td => tbEditarTexto(td, r, c, c.tipo === 'numero' ? 'number' : c.tipo === 'data' ? 'date' : 'text'), c.tipo === 'numero' ? 'num' : '');
     }
     switch (c.id) {
-      case 'cliente': return h('td',{class:'tb-c tb-cli'}, h('button',{type:'button', onclick:() => openSheet(r.id)}, r.cliente || 'Sem nome'),
+      case 'cliente': return h('td',{class:'tb-c tb-cli'}, canWrite && tbArrastavel() ? h('span',{class:'tb-pega', title:'Arrastar para outro grupo', 'aria-hidden':'true'}, '⠿') : null,
+        h('button',{type:'button', onclick:() => openSheet(r.id)}, r.cliente || 'Sem nome'),
         r.porConfirmar ? h('span',{class:'tag-conf'}, 'por confirmar') : null);
       case 'estado': return ed(pill((ESTADOS[r.estado] || {}).l || r.estado, tomEstado(r.estado), 'cheia'), td => tbPasso(td, x), 'tb-estado');
       case 'prioridade': return ed(pill(x.pe.p, TOM_P[x.pe.p], 'cheia'), aberto ? td => tbPrioridade(td, r) : null, 'tb-estado tb-p');
@@ -2109,9 +2134,9 @@ if (!Element.prototype.replaceChildren) {
     }), 'menu');
   }
   // P: só com um motivo (as regras dão o P; mudá-lo à mão fica explicado no histórico).
-  function tbPrioridade(td, r) {
+  function tbPrioridade(td, r, destino) {
     const s = h('select',null, PRIOS.map(p => h('option',{value:p}, PRIO_NOME[p])));
-    s.value = r.prioridade || 'P3';
+    s.value = destino || r.prioridade || 'P3';
     const motivo = h('input',{type:'text', placeholder:'Porquê? (fica no histórico)'});
     const box = h('div',{class:'tb-ed-p'}, s, motivo);
     tbEditor(td, 'Prioridade', box, () => {
@@ -2122,7 +2147,7 @@ if (!Element.prototype.replaceChildren) {
       tbGuardar(r, 'prioridade', s.value, 'Prioridade', r.prioridade || 'P3', s.value, m);
       return null;
     });
-    setTimeout(() => s.focus(), 40);
+    setTimeout(() => (destino ? motivo : s).focus(), 40);
   }
   // Passo: as mesmas mudanças do quadro; abre o formulário curto (ou a agenda) e só muda ao confirmar.
   function tbPasso(td, x) {
@@ -2181,13 +2206,15 @@ if (!Element.prototype.replaceChildren) {
     setTimeout(() => nome.focus(), 40);
   }
   function tbMenuCabecalho(th, c) {
-    const itens = [['Esconder', () => { if (c.extra) tbGuardarCfg({extra: tbCfg().extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: true}) : z)}, `«${c.nome}» escondida`); else tbGuardarCfg({ocultas: tbCfg().ocultas.concat([c.id])}, `«${c.nome}» escondida`); }, 'x']];
+    const itens = [];
+    if (tbLarg[c.id]) itens.push(['Largura normal', () => { delete tbLarg[c.id]; tbGuardaLarguras(); tbAplicaLarguras(); }, 'seta']);
+    itens.push(['Esconder', () => { if (c.extra) tbGuardarCfg({extra: tbCfg().extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: true}) : z)}, `«${c.nome}» escondida`); else tbGuardarCfg({ocultas: tbCfg().ocultas.concat([c.id])}, `«${c.nome}» escondida`); }, 'x']);
     if (c.extra) {
       itens.unshift(['Mudar o nome ou as opções', () => tbNovaColuna(th, c), 'lapis']);
       itens.push(['Apagar a coluna', () => { if (window.confirm(`Apagar a coluna «${c.nome}»? Os valores ficam guardados nos pedidos mas deixam de se ver.`)) tbGuardarCfg({extra: tbCfg().extra.filter(z => z.id !== c.id)}, `Coluna «${c.nome}» apagada`); }, 'x']);
     }
     if (c.tipo === 'estado' || c.tipo === 'lista' || ['dono','prioridade','tipo','estado'].indexOf(c.id) >= 0) itens.unshift(['Agrupar por esta coluna', () => tbAgrupar(c.extra ? 'x:' + c.id : c.id), 'seta']);
-    abrePop(th, itens.map(([l, fn, ic]) => { const b = h('button',{type:'button', role:'menuitem', class: l === 'Apagar a coluna' ? 'perigo' : null, onclick:() => { fechaPop(); fn(); }}); b.innerHTML = IC[ic] || ''; b.appendChild(document.createTextNode(l)); return b; }), 'menu');
+    abrePop(th.closest('th') || th, itens.map(([l, fn, ic]) => { const b = h('button',{type:'button', role:'menuitem', class: l === 'Apagar a coluna' ? 'perigo' : null, onclick:() => { fechaPop(); fn(); }}); b.innerHTML = IC[ic] || ''; b.appendChild(document.createTextNode(l)); return b; }), 'menu');
   }
   function tbAgrupar(g) { tbGrupo = g; try { localStorage.setItem('registo-agrupar', g); } catch (e) {} renderAll(); }
 
@@ -2202,8 +2229,11 @@ if (!Element.prototype.replaceChildren) {
     const grupos = {}, ordemG = [];
     lista.forEach(x => { const g = tbGrupoDe(x); if (!grupos[g.k]) { grupos[g.k] = Object.assign(g, {xs: []}); ordemG.push(g.k); } grupos[g.k].xs.push(x); });
     ordemG.sort((a, b) => { const A = grupos[a], B = grupos[b]; return A.desc ? String(B.ordem).localeCompare(String(A.ordem)) : (A.ordem - B.ordem) || String(A.nome).localeCompare(String(B.nome), 'pt'); });
-    const thead = h('thead',null, h('tr',null, cols.map(c => h('th',{class: (c.id === 'cliente' ? 'tb-cli' : '') + (['valor','prob','previsao'].indexOf(c.id) >= 0 || c.tipo === 'numero' ? ' num' : '')},
-      h('span',null, c.nome), c.fixa || !canWrite ? null : h('button',{class:'tb-hm', type:'button', 'aria-label':'Opções da coluna ' + c.nome, onclick: ev => { ev.stopPropagation(); tbMenuCabecalho(ev.currentTarget, c); }}, '⋯'))),
+    if (tbArr || tbCol) { tbPendente = true; return; }
+    tbAplicaLarguras();
+    const thead = h('thead',null, h('tr',null, cols.map(c => h('th',{class: 'k-' + c.id + (c.id === 'cliente' ? ' tb-cli' : '') + (['valor','prob','previsao'].indexOf(c.id) >= 0 || c.tipo === 'numero' ? ' num' : '') + (c.fixa || !canWrite ? '' : ' tb-mov'), 'data-col': c.id},
+      h('span',null, c.nome), c.fixa || !canWrite ? null : h('button',{class:'tb-hm', type:'button', 'aria-label':'Opções da coluna ' + c.nome, onclick: ev => { ev.stopPropagation(); tbMenuCabecalho(ev.currentTarget, c); }}, '⋯'),
+      h('span',{class:'tb-rz', 'aria-hidden':'true', title:'Arrastar para mudar a largura'}))),
       h('th',{class:'tb-mais'}, canWrite ? h('button',{type:'button', 'aria-label':'Juntar ou esconder colunas', title:'Colunas', onclick: ev => tbMenuColunas(ev.currentTarget)}, '+') : null)));
     const corpos = ordemG.map(k => {
       const g = grupos[k], fechado = !!tbFechados[tbGrupo + '|' + k];
@@ -2211,8 +2241,8 @@ if (!Element.prototype.replaceChildren) {
       const cab = h('tr',{class:'tb-gh', style:`--g:${g.cor}`}, h('td',{colspan: String(cols.length + 1)},
         h('button',{type:'button', class:'tb-gt', 'aria-expanded': String(!fechado), onclick:() => { tbFechados[tbGrupo + '|' + k] = !fechado; try { localStorage.setItem('registo-grupos-fechados', JSON.stringify(tbFechados)); } catch (e) {} renderAll(); }},
           h('span',{class:'tb-chev'}, fechado ? '▸' : '▾'), g.nome), h('span',{class:'tb-gn'}, ` ${g.xs.length} ${g.xs.length === 1 ? 'pedido' : 'pedidos'}${soma ? ' · ' + eur(soma) : ''}`)));
-      if (fechado) return h('tbody',{class:'tb-g', style:`--g:${g.cor}`}, cab);
-      const linhas = g.xs.map(x => h('tr',{class:'tb-r' + (ABERTOS.includes(x.r.estado) ? '' : ' fechado'), 'data-id': x.r.id}, cols.map(c => tbCelula(x, c)), h('td',{class:'tb-c'})));
+      if (fechado) return h('tbody',{class:'tb-g', style:`--g:${g.cor}`, 'data-k': k}, cab);
+      const linhas = g.xs.map(x => h('tr',{class:'tb-r' + (ABERTOS.includes(x.r.estado) ? '' : ' fechado'), 'data-id': x.r.id}, cols.map(c => { const td = tbCelula(x, c); td.classList.add('k-' + c.id); return td; }), h('td',{class:'tb-c'})));
       const pode = canWrite && (tbGrupo !== 'estado' || k === 'novo') && tbGrupo !== 'trimestre' && tbGrupo.indexOf('x:') !== 0;
       const add = pode ? h('tr',{class:'tb-add'}, h('td',{colspan: String(cols.length + 1)}, h('button',{type:'button', onclick:() => {
         novoBase = tbGrupo === 'prioridade' ? {prioridade: k} : tbGrupo === 'tipo' && k ? {tipo: k} : {};
@@ -2224,9 +2254,9 @@ if (!Element.prototype.replaceChildren) {
       const bateria = h('span',{class:'tb-bat', title: Object.keys(porEstado).map(e => `${(ESTADOS[e] || {}).l || e}: ${porEstado[e]}`).join('\n')},
         Object.keys(porEstado).map(e => h('i',{style:`background:${tomEstado(e)};width:${(100 * porEstado[e] / g.xs.length).toFixed(1)}%`})));
       const pm = g.xs.length ? Math.round(g.xs.reduce((t, x) => t + probDe(x.r), 0) / g.xs.length) : 0;
-      const tot = h('tr',{class:'tb-tot'}, cols.map(c => h('td',{class: c.id === 'cliente' ? 'tb-cli' : ['valor','previsao','prob'].indexOf(c.id) >= 0 ? 'num' : ''},
+      const tot = h('tr',{class:'tb-tot'}, cols.map(c => h('td',{class: 'k-' + c.id + (c.id === 'cliente' ? ' tb-cli' : ['valor','previsao','prob'].indexOf(c.id) >= 0 ? ' num' : '')},
         c.id === 'estado' ? bateria : c.id === 'valor' ? (soma ? eur(soma) : '') : c.id === 'previsao' ? (prev ? eur(prev) : '') : c.id === 'prob' ? `${pm}% méd.` : '')), h('td'));
-      return h('tbody',{class:'tb-g', style:`--g:${g.cor}`}, cab, linhas, add, tot);
+      return h('tbody',{class:'tb-g', style:`--g:${g.cor}`, 'data-k': k}, cab, linhas, add, tot);
     });
     fill(box, lista.length ? h('table',{class:'tb'}, thead, corpos) : h('p',{class:'t-vazio'}, rows.length ? 'Nenhum pedido com estes filtros.' : 'Ainda não há pedidos.'));
   }
@@ -2246,6 +2276,168 @@ if (!Element.prototype.replaceChildren) {
   }
 
   F('tbAgrupar').addEventListener('change', ev => tbAgrupar(ev.target.value));
+
+  /* ---------- Tabela: arrastar ----------
+     Colunas: arrastar o cabeçalho muda a ordem (para a equipa, config «colunas».ordem); a beira direita muda a largura
+     (de cada pessoa). Linhas: a pega «⠿» leva o pedido para outro grupo; só acendem os grupos permitidos. Por Passo abre
+     a mudança curta (as regras do processo); por Prioridade pede o motivo; por Dono, Tipo ou coluna da equipa muda logo,
+     com histórico e «Desfazer». Rato: arrastar. Toque: carregar meio segundo e arrastar. */
+  let tbArr = null, tbCol = null, tbPendente = false;
+  // O clique que o browser dispara ao largar não conta (não fecha o editor que o largar abriu nem recolhe um grupo).
+  document.addEventListener('click', ev => { if (kSoltou) { ev.stopPropagation(); ev.preventDefault(); } }, true);
+  const tbArrastavel = () => ['estado', 'dono', 'prioridade', 'tipo'].indexOf(tbGrupo) >= 0 || tbGrupo.indexOf('x:') === 0;
+  function tbAlvosLinha(r, chaves) {
+    const ok = {};
+    if (tbGrupo === 'estado') { const a = kAlvos(r); chaves.forEach(k => { if (a[k]) ok[k] = a[k]; }); return ok; }
+    const atual = tbGrupoDe({r, pe: pEfetiva(r, relogio(r))}).k;
+    chaves.forEach(k => { if (k === atual) return; if (tbGrupo === 'dono' && !k && ABERTOS.includes(r.estado)) return; ok[k] = true; });
+    return ok;
+  }
+  function tbFimSujo() { if (tbPendente) { tbPendente = false; renderAll(); } }
+  function tbLargou(r, k, alvo, linha) {
+    if (tbGrupo === 'estado') {
+      openSheet(r.id);
+      if (alvo.agenda) agAbrir('sheet', r.id, r.tipo === 'manutencao' || r.tipo === 'reparacao' ? r.tipo : 'visita', null, 'sug'); else abrirTrans(alvo);
+    } else if (tbGrupo === 'dono') tbGuardar(r, 'dono', k, 'Dono', r.dono || 'vazio', k || 'vazio');
+    else if (tbGrupo === 'prioridade') { const td = linha && linha.querySelector('.k-prioridade'); tbPrioridade(td || linha, r, k); }
+    else if (tbGrupo === 'tipo') tbGuardar(r, 'tipo', k, 'Tipo', tbTexto('tipo', r.tipo), tbTexto('tipo', k));
+    else if (tbGrupo.indexOf('x:') === 0) {
+      const c = tbCfg().extra.find(z => z.id === tbGrupo.slice(2)); if (!c) return;
+      const antes = (r.extra || {})[c.id];
+      tbGuardar(r, {extra: c.id}, k, c.nome, antes || 'vazio', k || 'vazio');
+    }
+  }
+  function tbComecaLinha(tr, x, y) {
+    const r = rows.find(z => z.id === tr.getAttribute('data-id')); if (!r) return;
+    const corpos = Array.prototype.slice.call(document.querySelectorAll('#tabela tbody.tb-g'));
+    const alvos = tbAlvosLinha(r, corpos.map(c => c.getAttribute('data-k')));
+    const fant = h('div',{class:'tb-fant'}, r.cliente || r.id);
+    document.body.appendChild(fant);
+    tbArr = {r, tr, alvos, fant, sobre: null};
+    tr.classList.add('karr'); document.body.classList.add('a-arrastar');
+    corpos.forEach(c => c.classList.add(alvos[c.getAttribute('data-k')] ? 'alvo' : c.contains(tr) ? 'origem' : 'fora'));
+    tbMoveLinha(x, y);
+  }
+  function tbAutoScroll(x, y) {
+    const w = document.querySelector('.tb-wrap'); if (!w) return;
+    // a parte da tabela que se vê (pode passar do fundo do ecrã); quando a tabela já não desce, desce a página
+    const b = w.getBoundingClientRect(), cima = Math.max(b.top, 0), baixo = Math.min(b.bottom, window.innerHeight);
+    if (y < cima + 40) { if (w.scrollTop > 0) w.scrollTop -= 16; else window.scrollBy(0, -16); }
+    else if (y > baixo - 40) { if (w.scrollTop + w.clientHeight < w.scrollHeight) w.scrollTop += 16; else window.scrollBy(0, 16); }
+    if (x < b.left + 40) w.scrollLeft -= 16; else if (x > b.right - 40) w.scrollLeft += 16;
+  }
+  function tbMoveLinha(x, y) {
+    if (!tbArr) return;
+    tbArr.fant.style.transform = `translate(${x + 12}px, ${y - 14}px)`;
+    const el = document.elementFromPoint(x, y);
+    const c = el && el.closest ? el.closest('#tabela tbody.tb-g') : null;
+    if (tbArr.sobre && tbArr.sobre !== c) tbArr.sobre.classList.remove('sobre');
+    tbArr.sobre = c && c.classList.contains('alvo') ? c : null;
+    if (tbArr.sobre) tbArr.sobre.classList.add('sobre');
+    tbAutoScroll(x, y);
+  }
+  function tbFimLinha(largou) {
+    if (!tbArr) return;
+    const {r, tr, alvos, sobre} = tbArr;
+    tbArr.fant.remove(); tr.classList.remove('karr'); document.body.classList.remove('a-arrastar');
+    Array.prototype.forEach.call(document.querySelectorAll('#tabela tbody.tb-g'), c => c.classList.remove('alvo', 'fora', 'origem', 'sobre'));
+    tbArr = null;
+    kSoltou = true; setTimeout(() => { kSoltou = false; }, 350);
+    tbFimSujo();
+    if (!largou || !sobre) return;
+    const k = sobre.getAttribute('data-k');
+    tbLargou(r, k, alvos[k], document.querySelector(`#tabela tr[data-id="${r.id}"]`));
+  }
+  // Colunas: mudar a ordem
+  function tbComecaCol(th, x) {
+    const ths = Array.prototype.slice.call(th.parentNode.children).filter(t => t.getAttribute('data-col'));
+    const guia = h('div',{class:'tb-guia'});
+    document.body.appendChild(guia);
+    tbCol = {th, id: th.getAttribute('data-col'), ths, guia, antes: null};
+    th.classList.add('karr'); document.body.classList.add('a-arrastar');
+    tbMoveCol(x);
+  }
+  function tbMoveCol(x) {
+    if (!tbCol) return;
+    // a coluna vai para antes da primeira (que não seja fixa) cujo meio fica à direita do cursor
+    const movs = tbCol.ths.filter(t => t.classList.contains('tb-mov'));
+    let antes = null;
+    for (let i = 0; i < movs.length; i++) { const b = movs[i].getBoundingClientRect(); if (x < b.left + b.width / 2) { antes = movs[i]; break; } }
+    tbCol.antes = antes;
+    const ref = antes ? antes.getBoundingClientRect() : movs[movs.length - 1].getBoundingClientRect();
+    const xl = antes ? ref.left : ref.right;
+    const t = document.querySelector('#tabela table').getBoundingClientRect(), w = document.querySelector('.tb-wrap').getBoundingClientRect();
+    tbCol.guia.style.left = (xl - 1) + 'px'; tbCol.guia.style.top = Math.max(t.top, w.top) + 'px'; tbCol.guia.style.height = (Math.min(t.bottom, w.bottom) - Math.max(t.top, w.top)) + 'px';
+    tbAutoScroll(x, (w.top + w.bottom) / 2);
+  }
+  function tbFimCol(largou) {
+    if (!tbCol) return;
+    const {th, id, guia, antes} = tbCol;
+    guia.remove(); th.classList.remove('karr'); document.body.classList.remove('a-arrastar');
+    tbCol = null;
+    kSoltou = true; setTimeout(() => { kSoltou = false; }, 350);
+    if (!largou) { tbFimSujo(); return; }
+    const ids = tbColunas().filter(c => !c.fixa).map(c => c.id).filter(z => z !== id);
+    const i = antes ? ids.indexOf(antes.getAttribute('data-col')) : -1;
+    if (i < 0) ids.push(id); else ids.splice(i, 0, id);
+    const atual = tbColunas().filter(c => !c.fixa).map(c => c.id);
+    if (ids.join() === atual.join()) { tbFimSujo(); return; }
+    tbPendente = false;
+    tbGuardarCfg({ordem: ids}, 'Ordem das colunas guardada');
+  }
+  // Colunas: mudar a largura
+  let tbRz = null;
+  function tbMoveRz(x) { if (!tbRz) return; const w = Math.max(60, Math.min(480, Math.round(tbRz.w + x - tbRz.x))); tbLarg[tbRz.id] = w; tbAplicaLarguras(); }
+  function tbFimRz() { if (!tbRz) return; tbRz = null; document.body.classList.remove('a-redimensionar'); tbGuardaLarguras(); kSoltou = true; setTimeout(() => { kSoltou = false; }, 350); }
+  (function () {
+    const box = F('tabela');
+    let ini = null, temp = null;
+    const inicio = (ev, x, y) => {
+      if (!canWrite) return null;
+      const rz = ev.target.closest('.tb-rz');
+      if (rz) { const th = rz.closest('th'); tbRz = {id: th.getAttribute('data-col'), x, w: th.getBoundingClientRect().width}; document.body.classList.add('a-redimensionar'); return 'rz'; }
+      const pega = ev.target.closest('.tb-pega');
+      if (pega) return {tipo: 'linha', el: pega.closest('tr'), x, y};
+      const th = ev.target.closest('th.tb-mov');
+      if (th && !ev.target.closest('button')) return {tipo: 'col', el: th, x, y};
+      return null;
+    };
+    const arranca = (i, x, y) => { if (i.tipo === 'linha') tbComecaLinha(i.el, x, y); else tbComecaCol(i.el, x); };
+    box.addEventListener('mousedown', ev => {
+      if (ev.button !== 0) return;
+      const i = inicio(ev, ev.clientX, ev.clientY);
+      if (i === 'rz') { ev.preventDefault(); return; }
+      if (i) { ini = i; if (i.tipo === 'linha') ev.preventDefault(); }
+    });
+    document.addEventListener('mousemove', ev => {
+      if (tbRz) { tbMoveRz(ev.clientX); ev.preventDefault(); return; }
+      if (tbArr) { tbMoveLinha(ev.clientX, ev.clientY); ev.preventDefault(); return; }
+      if (tbCol) { tbMoveCol(ev.clientX); ev.preventDefault(); return; }
+      if (ini && Math.abs(ev.clientX - ini.x) + Math.abs(ev.clientY - ini.y) > 6) { arranca(ini, ev.clientX, ev.clientY); ini = null; }
+    });
+    document.addEventListener('mouseup', () => { ini = null; if (tbRz) tbFimRz(); if (tbArr) tbFimLinha(true); if (tbCol) tbFimCol(true); });
+    box.addEventListener('touchstart', ev => {
+      if (ev.touches.length !== 1) return;
+      const t = ev.touches[0], i = inicio(ev, t.clientX, t.clientY);
+      if (i === 'rz') return;
+      if (!i) return;
+      ini = i; clearTimeout(temp);
+      // a pega da linha arranca logo; o cabeçalho espera meio segundo (para o dedo poder deslizar a tabela)
+      if (i.tipo === 'linha') { arranca(i, i.x, i.y); ini = null; }
+      else temp = setTimeout(() => { if (ini) { arranca(ini, ini.x, ini.y); ini = null; } }, 450);
+    }, {passive: true});
+    document.addEventListener('touchmove', ev => {
+      const t = ev.touches[0];
+      if (tbRz) { ev.preventDefault(); tbMoveRz(t.clientX); return; }
+      if (tbArr) { ev.preventDefault(); tbMoveLinha(t.clientX, t.clientY); return; }
+      if (tbCol) { ev.preventDefault(); tbMoveCol(t.clientX); return; }
+      if (ini && Math.abs(t.clientX - ini.x) + Math.abs(t.clientY - ini.y) > 10) { clearTimeout(temp); ini = null; }
+    }, {passive: false});
+    document.addEventListener('touchend', ev => { clearTimeout(temp); ini = null; if (tbRz) tbFimRz(); if (tbArr) { ev.preventDefault(); tbFimLinha(true); } if (tbCol) { ev.preventDefault(); tbFimCol(true); } });
+    document.addEventListener('touchcancel', () => { clearTimeout(temp); ini = null; tbFimRz(); tbFimLinha(false); tbFimCol(false); });
+    document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { tbFimLinha(false); tbFimCol(false); } });
+  })();
+
 
   /* ---------- Faturação (SAF-T) ---------- */
   // faturacao: {mes: {mes, periodo:{de, ate}, ficheiro, gerado, docs:[...], recibos:[...], por}}. Lido do Supabase (tabela faturacao)
