@@ -1,0 +1,99 @@
+{
+  "_nota": "As obras do site: a grelha da página inicial, a página Obras e uma ficha por obra (obras/<slug>.html). Os textos descrevem só o que se vê nas fotografias; «factos» (o problema, o trabalho feito, data, local, duração, resultado) ficam vazios até a Melperfaz os dar, e a linha só aparece na ficha quando existe. O «cat» de cada obra é o «cat» de um serviço de data/site.json («servicos»), que dá o nome, a âncora em obras.html e o tipo de obra do formulário; «destaque»: true põe a obra na página inicial; «fotosExtra» são mais fotografias de data/fotos.json. Uma obra nova: juntar a fotografia (data/fotos.json e gerar_fotos.py) e uma entrada aqui; python3 build.py --check confirma.",
+  "obras": [
+    {
+      "n": "01",
+      "code": "M01",
+      "destaque": true,
+      "slug": "recuperacao-integral-de-fachada-e-estrutura",
+      "cat": "reabilitacao",
+      "title": "Recuperação integral de fachada e estrutura",
+      "foto": "03",
+      "foco": "50% 60%",
+      "resumo": "Edifício em reabilitação com a estrutura de betão à vista e as paredes de tijolo a subir. A obra está vedada, com as placas de obra e a sinalização de segurança à entrada.",
+      "detalhes": [
+        "Estrutura de betão armado com as paredes de alvenaria de tijolo à vista",
+        "Trabalhador no topo da estrutura, no piso superior",
+        "Vedação de obra com a placa da Melperfaz e o telefone 961 245 288",
+        "Sinalização de segurança e barreiras à entrada"
+      ],
+      "factos": {"problema": "", "trabalho": "", "data": "", "localExato": "", "duracao": "", "resultado": ""},
+      "fotosExtra": []
+    },
+    {
+      "n": "02",
+      "code": "M02",
+      "slug": "espaco-interior-pronto-a-entregar",
+      "cat": "acabamentos",
+      "title": "Espaço interior pronto a entregar",
+      "foto": "05",
+      "foco": "50% 40%",
+      "resumo": "Divisão interior com a pintura feita e o ar condicionado de teto montado, na fase dos remates finais.",
+      "detalhes": [
+        "Paredes e teto pintados de branco",
+        "Unidade de ar condicionado de cassete montada no teto",
+        "Caixas elétricas abertas na parede, para os remates finais",
+        "Escadote e um balde de tinta ainda na divisão"
+      ],
+      "factos": {"problema": "", "trabalho": "", "data": "", "localExato": "", "duracao": "", "resultado": ""},
+      "fotosExtra": []
+    },
+    {
+      "n": "03",
+      "code": "M03",
+      "slug": "edificios-e-apartamentos",
+      "cat": "reabilitacao",
+      "title": "Edifícios e apartamentos",
+      "foto": "02",
+      "foco": "50% 55%",
+      "resumo": "Fachada de um edifício em reabilitação, com andaime e rede de proteção de alto a baixo. Na vedação, a placa da Melperfaz com o telefone e os serviços.",
+      "detalhes": [
+        "Andaime e rede de proteção em toda a fachada",
+        "Vedação de obra com a placa da Melperfaz: reabilitação de edifícios e apartamentos",
+        "Trabalhador junto ao rés-do-chão, entre os materiais",
+        "Paredes exteriores do rés-do-chão em trabalhos de alvenaria"
+      ],
+      "factos": {"problema": "", "trabalho": "", "data": "", "localExato": "", "duracao": "", "resultado": ""},
+      "fotosExtra": []
+    },
+    {
+      "n": "04",
+      "code": "M04",
+      "destaque": true,
+      "slug": "reboco-e-tratamento-de-fachada",
+      "cat": "fachadas",
+      "title": "Reboco e tratamento de fachada",
+      "foto": "04",
+      "foco": "50% 45%",
+      "resumo": "Tratamento de uma fachada em altura, com acesso por corda em vez de andaime. O trabalhador leva o material consigo e trabalha preso ao arnês.",
+      "detalhes": [
+        "Trabalho em altura com acesso por corda, capacete e arnês",
+        "Fachada rebocada e pintada de branco",
+        "Balde de material pendurado no arnês",
+        "Telhados e o mar ao fundo"
+      ],
+      "factos": {"problema": "", "trabalho": "", "data": "", "localExato": "", "duracao": "", "resultado": ""},
+      "fotosExtra": []
+    },
+    {
+      "n": "05",
+      "code": "M05",
+      "destaque": true,
+      "slug": "da-remocao-ao-revestimento-novo",
+      "cat": "acabamentos",
+      "title": "Da remoção ao revestimento novo",
+      "foto": "07",
+      "foco": "50% 60%",
+      "antesDepois": {"antes": "06", "depois": "07"},
+      "resumo": "O desmonte de revestimentos degradados e o assentamento de pavimento novo, numa casa de banho. Tratamos das duas fases.",
+      "detalhes": [
+        "Antes: azulejos arrancados, parede com humidade e cacos no chão",
+        "Depois: pavimento cerâmico de imitação de madeira assente sobre cimento-cola",
+        "Paredes novas revestidas a cerâmico de imitação de mármore",
+        "Rodapé antigo ainda à vista na zona por acabar"
+      ],
+      "factos": {"problema": "", "trabalho": "", "data": "", "localExato": "", "duracao": "", "resultado": ""},
+      "fotosExtra": []
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+<div class="ba-wrap">
+  <!-- comparador antes/depois (site.js), só na ficha da obra que o tem (data/obras.json «antesDepois»), logo por baixo
+       do PageHead, por isso as duas fotografias carregam já. O depois fica em baixo, o antes por cima recortado à largura
+       do range. À largura do contentor, sem margem (alinhado com o h1). O range invisível cobre tudo e deixa passar o deslize vertical
+       (touch-action: pan-y), por isso a página continua a deslizar no telemóvel; com o teclado, as setas movem-no e o
+       anel de foco desenha-se à volta da pega. Sem JavaScript ficam as duas a meio. -->
+  <div class="ba-slider" data-ba>
+    {{foto {{ obra.antesDepois.depois }} class="ba-after-img" sizes="min(100vw - 32px, 1176px)" foco="{{ obra.foco }}" loading="eager"}}
+    <div class="ba-before-img" data-ba-before>{{foto {{ obra.antesDepois.antes }} class="ba-before" sizes="min(100vw - 32px, 1176px)" loading="eager" prioridade="normal"}}</div>
+    <div class="ba-handle" data-ba-handle aria-hidden="true"><span class="ba-arrows">{{icone seta-esq}}{{icone seta-dir}}</span></div>
+    <span class="ba-tag tag-before" aria-hidden="true">Demolição</span>
+    <span class="ba-tag tag-after" aria-hidden="true">Acabamento</span>
+    <input type="range" min="0" max="100" value="50" class="ba-range" data-ba-range aria-label="Comparar demolição e acabamento">
+  </div>
+</div>

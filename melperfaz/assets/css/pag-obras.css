@@ -1,0 +1,32 @@
+/* Página Obras (obras.html) e fichas de obra (obras/<slug>.html). O PageHead (page-head.html), as migalhas, a prosa e
+   a ficha vivem em site.css (uma só definição para todas as páginas). */
+
+/* obras.html: o índice dos grupos no PageHead (ligações de 44 px) e um cabeçalho por grupo (h2 com o estilo de cartão) */
+.indice-grupos { display: flex; flex-wrap: wrap; gap: 0 var(--space-26); margin-top: var(--space-22); }
+.indice-grupos a { display: inline-flex; align-items: center; min-height: var(--alvo); color: var(--fg); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.grupo-head { margin-bottom: var(--space-32); }
+.grupo-t { font-size: var(--fs-card); }
+.grupo-n { margin-top: var(--space-6); font-size: var(--fs-label); color: var(--fg-2); }
+
+/* ficha: a fotografia na sua proporção (--foto-r, largura/altura, posto pelo build), à largura do contentor e no máximo
+   78% do ecrã de altura (um retrato fica mais estreito, encostado à esquerda), logo por baixo do PageHead. Sem corte e
+   sem ampliar: o sizes da fotografia (obra.fotoSizes) diz a mesma largura */
+.obra-foto .foto { width: min(100%, calc(78vh * var(--foto-r))); aspect-ratio: var(--foto-r); background-color: var(--ink-raised); }
+.obra-foto img { width: 100%; height: 100%; object-fit: cover; }
+/* o trabalho: grelha 7/5, com os títulos das duas colunas alinhados no topo */
+.obra-corpo .duas { display: grid; grid-template-columns: 7fr 5fr; gap: var(--space-80); align-items: start; }
+.obra-corpo .duas > * { width: 100%; min-width: 0; }
+/* sem o recuo do .prosa ul: os vistos começam na margem esquerda, como o h2 «Na obra» */
+.lista-visto, .prosa .lista-visto { list-style: none; padding-left: 0; }
+.lista-visto li { position: relative; padding: var(--space-12) 0 var(--space-12) var(--space-44); color: var(--fg-2); border-bottom: var(--border-hairline) solid var(--rule); }
+.lista-visto li:last-child { border-bottom: none; }
+/* a caixa de visto do TrustList (.tick de site.css, com o ícone «visto»), à esquerda de cada linha; desenha-se ao
+   entrar no ecrã, em cascata, como na página inicial ({{li obra.detalhes visto}} no modelo obra.html) */
+.lista-visto .tick { position: absolute; left: 0; top: var(--space-12); }
+
+/* obras semelhantes */
+.obra-rel .sec-head { margin-bottom: var(--space-32); }
+
+@media (max-width: 980px) {
+  .obra-corpo .duas { grid-template-columns: 1fr; gap: var(--space-44); }
+}

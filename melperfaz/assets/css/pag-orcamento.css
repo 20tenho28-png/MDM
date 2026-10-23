@@ -1,0 +1,55 @@
+/* A página do pedido (orcamento.html): o QuoteForm (orcamento-form.html), um cartão branco com linha de 1 px, e a
+   lateral bone com o telefone, «O que acontece a seguir», a confiança e uma fotografia. Abaixo de 980 px o formulário
+   vem primeiro. Campos com 16 px (sem zoom no iOS) e etiquetas com 14 px. */
+.orc-grelha { display: grid; grid-template-columns: 1.1fr .9fr; gap: var(--space-50); align-items: start; }
+.orc-grelha > * { width: 100%; min-width: 0; }
+
+/* ── QuoteForm ── */
+.form-cartao { background: var(--white); border: var(--border-hairline) solid var(--line); padding: var(--space-38); }
+.form-t { font-size: var(--fs-card); margin-bottom: var(--space-12); }
+/* «Pedido para: X · alterar» em texto corrido, com a altura de linha do texto: num telemóvel o nome parte onde tiver de
+   partir e o «·» fica agarrado a ele (&nbsp;), com «alterar» no fim da mesma linha */
+.pedido-para { font-size: var(--fs-body); margin-bottom: var(--space-16); }
+/* «alterar» leva o foco à lista do tipo de obra: parece uma ligação. O alvo de 44 px desenha-se por fora (::after,
+   centrado no texto), sem engordar a linha (como inline-flex de 44 px, que afastava as linhas do nome) */
+.pedido-alterar { position: relative; display: inline; padding: 0; border: 0; background: none; font: inherit; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; white-space: nowrap; }
+.pedido-alterar::after { content: ""; position: absolute; left: calc(-1 * var(--space-6)); right: calc(-1 * var(--space-6)); top: 50%; height: var(--alvo); transform: translateY(-50%); }
+.form-legenda { font-size: var(--fs-label); color: var(--muted); margin-bottom: var(--space-16); }
+.obrig { color: var(--erro); font-weight: 700; }
+.field { margin-bottom: var(--space-18); }
+.field label { display: block; font-size: var(--fs-label); font-weight: 700; margin-bottom: var(--space-6); }
+.field .opcional { font-weight: 400; color: var(--muted); }
+.field input, .field select, .field textarea { width: 100%; min-height: 48px; padding: var(--space-12); border: var(--border-control) solid var(--muted); background: var(--white); font-family: inherit; font-size: var(--fs-body); color: var(--ink); border-radius: var(--radius-none); }
+.field textarea { resize: vertical; min-height: 110px; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--ink); }
+.field [aria-invalid="true"] { border-color: var(--erro); }
+.field-ajuda { margin-top: var(--space-6); font-size: var(--fs-label); color: var(--muted); }
+.field-erro { display: none; margin-top: var(--space-6); font-size: var(--fs-label); font-weight: 600; color: var(--erro); }
+.field-erro:not(:empty) { display: block; }
+.hp { position: absolute; left: -100vw; top: auto; width: 1px; height: 1px; overflow: hidden; }
+.form-nota { font-size: var(--fs-label); color: var(--muted); margin-top: var(--space-16); }
+.form-alerta { margin-bottom: var(--space-16); padding: var(--space-12); border: var(--border-control) solid var(--erro); color: var(--erro); font-size: var(--fs-label); font-weight: 600; background: var(--white); }
+.form-alerta a { color: inherit; text-underline-offset: 3px; }
+.form-cartao .btn[type="submit"] { width: 100%; }
+
+/* ── Lateral (bone) ── */
+.orc-lateral { padding: var(--space-38); display: flex; flex-direction: column; gap: var(--space-38); }
+.orc-t { font-size: var(--fs-step); margin-bottom: var(--space-12); }
+.orc-lateral .cta-phone { margin-top: 0; }
+.orc-lateral .acoes { margin-top: var(--space-18); }
+.orc-passos { list-style: none; counter-reset: passo; }
+.orc-passos li { counter-increment: passo; position: relative; padding: var(--space-12) 0 var(--space-12) var(--space-44); border-top: var(--border-hairline) solid var(--rule); }
+.orc-passos li::before { content: counter(passo, decimal-leading-zero); position: absolute; left: 0; top: var(--space-12); font-family: var(--font-serif); font-size: var(--fs-step); font-weight: 700; color: var(--fg); }
+.orc-passos h3 { font-size: var(--fs-list); }
+.orc-passos p { color: var(--fg-2); margin-top: var(--space-2); }
+.orc-confianca { list-style: none; }
+.orc-confianca li { padding: var(--space-6) 0; border-top: var(--border-hairline) solid var(--rule); font-weight: 600; }
+.orc-foto .foto { aspect-ratio: 4 / 3; overflow: hidden; }
+.orc-foto figcaption { margin-top: var(--space-6); font-size: var(--fs-label); color: var(--fg-2); }
+
+@media (max-width: 980px) {
+  .orc-grelha { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .form-cartao, .orc-lateral { padding: var(--space-26); }
+}

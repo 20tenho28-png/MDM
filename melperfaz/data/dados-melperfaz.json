@@ -1,0 +1,11 @@
+{
+  "_nota": "Dados que só a Melperfaz pode dar. Um valor vazio esconde a frase, a linha ou a ligação que o usa; nunca aparece um texto por preencher. python3 build.py --faltam lista o que falta. Não inventar: só o que a empresa confirmar.",
+  "email": {"valor": "", "grupo": "Contactos", "pedido": "Email da empresa, para o rodapé, a página de agradecimento e a política de privacidade"},
+  "nif": {"valor": "", "grupo": "Empresa", "pedido": "NIF (número de identificação fiscal), para a linha legal do rodapé e a política de privacidade"},
+  "morada": {"valor": "", "grupo": "Empresa", "pedido": "Morada da sede (rua, código postal e localidade), para a política de privacidade e o rodapé"},
+  "alvara": {"valor": "", "grupo": "Empresa", "pedido": "Número do alvará ou título de registo no IMPIC, para junto de «Empresa Licenciada»"},
+  "seguro": {"valor": "", "grupo": "Empresa", "pedido": "Seguro de responsabilidade civil (seguradora e, se quiser, número da apólice), para a lista «Porquê Nós»"},
+  "zona": {"valor": "", "grupo": "Contactos", "pedido": "Zona onde a Melperfaz trabalha (concelhos ou região), para a página inicial e a ficha da empresa no Google"},
+  "horario": {"valor": "", "grupo": "Contactos", "pedido": "Horário de atendimento telefónico (ex.: 2ª a 6ª, 8h–18h), para junto do telefone"},
+  "googleMaps": {"valor": "", "grupo": "Contactos", "pedido": "Ligação do Perfil da Empresa no Google Maps, para o rodapé e a ficha da empresa"}
+}

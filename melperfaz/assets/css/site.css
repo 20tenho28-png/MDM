@@ -1,0 +1,515 @@
+/* Melperfaz, Construção Civil, Lda.: sistema visual (design system «Melperfaz», tokens.css + components/bundle.css).
+   Azul-marinho (ink) e laranja de obra (clay), cantos vivos, títulos em Fraunces, texto em Archivo, fotografias reais.
+   Tipos de letra alojados com o site (sem pedidos a terceiros); Fraunces e Archivo em ficheiros variáveis, só latim. */
+
+@font-face { font-family: 'Fraunces'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(../fonts/fraunces-latin-400-700-normal.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Fraunces'; font-style: italic; font-weight: 400 700; font-display: swap; src: url(../fonts/fraunces-latin-400-700-italic.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Archivo'; font-style: normal; font-weight: 100 900; font-display: swap; src: url(../fonts/archivo-latin-variable.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+/* ── Tokens (tokens.json do sistema de desenho) ──
+   Fora deste bloco, o build.py --check só aceita espaços (margin, padding, gap, inset/top/right/bottom/left) em tokens
+   --space-*, tamanhos de letra em --fs-*, @media a 980 e 640 px, durações e curvas em --dur-* e --ease-* e nada
+   «infinite». Exceções: 1px (hairline), env() e 0s. */
+:root {
+  --ink: #1b2540;
+  --bone: #eef1f6;
+  --paper: #f7f8fb;
+  --clay: #e08a1e;
+  --clay-deep: #bd6f10;
+  --sage: #3a4763;
+  --line: #d4d9e3;
+  --muted: #5c6479;
+  --shadow: rgba(27,37,64,0.14);
+  --white: #ffffff;
+  --amber: #f0a838;
+  --ink-deep: #0f1628;
+  --ink-raised: #2c3a5e;
+  --bone-70: rgba(238,241,246,0.7);
+  --bone-60: rgba(238,241,246,0.6);
+  --bone-50: rgba(238,241,246,0.5);
+  --bone-15: rgba(238,241,246,0.15);
+  --bone-07: rgba(238,241,246,0.07);
+  --bone-05: rgba(238,241,246,0.05);
+  --overlay: rgba(15,22,40,0.85);
+  --overlay-soft: rgba(15,22,40,0.1);
+  --overlay-menu: rgba(15,22,40,0.5);
+  --whatsapp: #25d366;
+  --erro: #b3261e;
+  --focus: var(--ink);
+  --focus-on-ink: var(--amber);
+  --shadow-tag: 0 20px 50px rgba(27,37,64,0.14);
+  --shadow-badge: 0 14px 36px rgba(27,37,64,0.14);
+  --shadow-knob: 0 4px 14px rgba(0,0,0,0.3);
+  --space-2: 2px; --space-6: 6px; --space-12: 12px; --space-16: 16px; --space-18: 18px; --space-22: 22px; --space-26: 26px;
+  --space-32: 32px; --space-36: 36px; --space-38: 38px; --space-44: 44px; --space-50: 50px; --space-60: 60px; --space-64: 64px;
+  --space-80: 80px; --space-90: 90px; --space-110: 110px;
+  --radius-none: 0; --radius-round: 50%;
+  --border-hairline: 1px; --border-control: 1.5px; --border-rule: 2px; --border-step: 3px; --border-accent: 4px;
+  --container: 1240px; --sec-head-width: 640px; --col-acoes: 360px; --nav-height: 78px; --logo-height: 52px; --logo-height-footer: 64px;
+  --photo-row: 300px; --photo-row-1col: 280px; --mini: 48px; --alvo: 44px; --alvo-menu: 48px; --barra-height: 56px; --wa-icon: 22px;
+  --z-header: 100; --z-menu-fundo: 95; --z-barra: 90; --z-skip: 200; --z-grain: 9999;
+  --font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* os 10 estilos de texto (de 29 tamanhos para 10) e o das etiquetas de formulário; mais nenhum font-size */
+  --fs-display-hero: clamp(2.6rem, 9vw, 5rem);    /* h1 da página inicial, só */
+  --fs-section: clamp(2.2rem, 6vw, 3.4rem);       /* h2 de secção e h1 das páginas interiores */
+  --fs-cta: clamp(2.4rem, 6vw, 3.6rem);           /* h2 da faixa de contacto */
+  --fs-card: 1.5rem;                              /* títulos de cartão, h2 dos grupos de obras */
+  --fs-step: 1.25rem;                             /* passos, títulos da lateral */
+  --fs-list: 1.12rem;                             /* linhas de serviço, lista de confiança */
+  --fs-lead: 1.15rem;                             /* lead do hero e introduções */
+  --fs-body: 1rem;                                /* texto e todos os campos de formulário (16 px: sem zoom no iOS) */
+  --fs-category: .8125rem;                        /* 13 px, maiúsculas: eyebrow, .cat, dt, rodapé, etiquetas, botões */
+  --fs-phone: 2.4rem;                             /* telefone da faixa de contacto e o número do cartão do hero */
+  --fs-label: .875rem;                            /* etiquetas de formulário e notas, sem maiúsculas */
+  /* superfície por omissão (paper): cada .s-* redefine estas variáveis e os componentes só leem estas */
+  --bg: var(--paper); --fg: var(--ink); --fg-2: var(--muted); --fg-cat: var(--muted); --rule: var(--line);
+  --eyebrow-rule: var(--clay); --focus-c: var(--focus);
+  --btn-bg: var(--clay); --btn-fg: var(--ink); --btn-bg-h: var(--ink); --btn-fg-h: var(--paper);
+  /* movimento: três durações (nenhuma passa de 500 ms) e duas curvas; só se anima transform, opacity, as cores e o
+     traço dos ícones. --cascata separa os elementos de uma grelha ou de uma lista que entram juntos; --espera-js é
+     quanto a página espera pelo site.js antes de mostrar tudo sem animação (rede lenta, bloqueador) */
+  --dur-1: 150ms; --dur-2: 250ms; --dur-3: 500ms;
+  --ease-out: cubic-bezier(.2,.7,.3,1); --ease-in-out: cubic-bezier(.65,0,.35,1);
+  --cascata: 80ms; --espera-js: 2.5s;
+}
+
+/* ── Superfícies: a superfície decide a cor do texto, do traço do eyebrow, do botão e do foco ──
+   paper e bone: texto ink, foco ink; ink: texto bone, traço e foco amber; clay: texto ink (5,65:1), nunca paper */
+.s-paper, .s-bone { --fg: var(--ink); --fg-2: var(--muted); --fg-cat: var(--muted); --rule: var(--line); --eyebrow-rule: var(--clay); --focus-c: var(--focus);
+  --btn-bg: var(--clay); --btn-fg: var(--ink); --btn-bg-h: var(--ink); --btn-fg-h: var(--paper); color: var(--fg); }
+.s-paper { --bg: var(--paper); background: var(--paper); }
+.s-bone { --bg: var(--bone); background: var(--bone); }
+.s-ink { --bg: var(--ink); --fg: var(--bone); --fg-2: var(--bone-70); --fg-cat: var(--amber); --rule: var(--bone-15); --eyebrow-rule: var(--amber);
+  --focus-c: var(--focus-on-ink); --btn-bg: var(--clay); --btn-fg: var(--ink); --btn-bg-h: var(--amber); --btn-fg-h: var(--ink);
+  background: var(--ink); color: var(--fg); }
+.s-clay { --bg: var(--clay); --fg: var(--ink); --fg-2: var(--ink); --fg-cat: var(--ink); --rule: var(--ink); --eyebrow-rule: var(--ink);
+  --focus-c: var(--focus); --btn-bg: var(--ink); --btn-fg: var(--paper); --btn-bg-h: var(--ink-deep); --btn-fg-h: var(--paper);
+  background: var(--clay); color: var(--fg); }
+
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
+html { color-scheme: only light; -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--nav-height) + var(--space-16)); }
+/* deslizar suave só sem pedido de movimento reduzido, e só com foco dentro da página (ligações âncora clicadas ou pelo
+   teclado); ao abrir um endereço com #âncora a página salta logo */
+@media (prefers-reduced-motion: no-preference) {
+  html:focus-within { scroll-behavior: smooth; }
+}
+body { font-family: var(--font-sans); font-size: var(--fs-body); background: var(--paper); color: var(--ink); line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 600; line-height: 1.05; letter-spacing: -.01em; }
+img, picture, svg { display: block; max-width: 100%; }
+a { color: inherit; }
+button, input, select, textarea { font: inherit; color: inherit; }
+input, select, textarea { font-size: var(--fs-body); }
+main:focus { outline: none; }
+::selection { background: var(--clay); color: var(--ink); }
+/* grão de ruído sobre a página inteira, a 4% (sem eventos de rato) */
+body.grain::before { content: ""; position: fixed; inset: 0; z-index: var(--z-grain); pointer-events: none; opacity: .04; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+/* uma margem esquerda: todo o conteúdo começa na borda da .wrap (32 px; 16 px até 640 px) */
+.wrap { width: 100%; max-width: var(--container); margin: 0 auto; padding: 0 var(--space-32); }
+.so-leitor { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.skip { position: absolute; left: var(--space-12); top: calc(-1 * var(--space-60)); z-index: var(--z-skip); background: var(--ink); color: var(--paper); padding: var(--space-12) var(--space-16); font-weight: 700; text-decoration: none; --focus-c: var(--focus-on-ink); }
+.skip:focus { top: var(--space-12); }
+/* fotografias: a prévia de 16 px (data/lqip.json) por trás enquanto a fotografia descarrega */
+.foto { display: block; background: var(--lqip, none) var(--lqip-pos, 50% 50%) / cover no-repeat; }
+.foto img { width: 100%; height: 100%; object-fit: cover; transition: opacity var(--dur-3) var(--ease-out), transform var(--dur-3) var(--ease-out); }
+/* LQIP: com o site.js a correr (.js-pronto), uma fotografia em lazy load fica transparente sobre a prévia até chegar
+   (.carregada) e entra num fade; as de carregamento imediato (hero, a primeira obra) nunca esperam */
+.js-pronto .foto img[loading="lazy"]:not(.carregada) { opacity: 0; }
+/* moldura de fotografia (hero, Porquê Nós): ink por trás e a grelha de planta (bone a 5%, a cada 39 px) por cima */
+.frame { position: relative; overflow: hidden; background: linear-gradient(145deg, var(--ink), var(--ink-raised)); }
+.frame .foto, .frame img { width: 100%; height: 100%; object-fit: cover; }
+.frame::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, transparent, transparent 38px, var(--bone-05) 38px, var(--bone-05) 39px), repeating-linear-gradient(90deg, transparent, transparent 38px, var(--bone-05) 38px, var(--bone-05) 39px); }
+
+/* ── Ícones (src/partials/icones.svg, {{icone nome}}): traço de 1,75 em currentColor, ao tamanho do texto ── */
+.icone { display: block; width: 1.25em; height: 1.25em; flex-shrink: 0; }
+
+/* ── Foco de teclado: um anel por superfície (ink no claro e no clay, amber no ink) ── */
+:focus-visible { outline: 3px solid var(--focus-c); outline-offset: 3px; }
+
+/* ── Cabeçalho: logo, menu (Início, Obras), telefone, WhatsApp e «Pedir Orçamento»; abaixo de 980 px, logo e menu ──
+   fundo paper opaco: a superfície do cabeçalho é sempre paper, também por cima das secções ink (sem vidro translúcido,
+   que ficava cinzento e deixava ver os títulos brancos por trás) */
+.topo { position: sticky; top: 0; z-index: var(--z-header); background: var(--paper); border-bottom: var(--border-hairline) solid var(--line); color: var(--ink); transition: box-shadow var(--dur-2) var(--ease-out); }
+/* depois de 80 px de scroll (site.js, .topo-compacto): sombra e o logótipo mais pequeno. A altura não muda (o conteúdo
+   não salta e o CLS fica em 0): o logótipo encolhe com transform, a partir da esquerda */
+.topo-compacto { box-shadow: var(--shadow-badge); }
+.topo-in { display: flex; align-items: center; gap: var(--space-38); height: var(--nav-height); }
+.logo { display: inline-flex; align-items: center; flex-shrink: 0; }
+.logo-img { height: var(--logo-height); width: auto; }
+.topo .logo-img { transform-origin: left center; transition: transform var(--dur-2) var(--ease-out); }
+.topo-compacto .logo-img { transform: scale(.85); }
+.navlinks { display: flex; gap: var(--space-38); list-style: none; align-items: center; }
+.navlinks a { color: var(--ink); text-decoration: none; font-size: var(--fs-category); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; position: relative; white-space: nowrap; display: inline-flex; align-items: center; min-height: var(--alvo); }
+/* o traço clay por baixo é decoração; o texto fica sempre ink (clay sobre paper não chega a 4,5:1) */
+.navlinks a::after { content: ""; position: absolute; left: 0; bottom: var(--space-6); width: 100%; height: var(--border-rule); background: var(--clay); transform: scaleX(0); transform-origin: left; transition: transform var(--dur-2) var(--ease-out); }
+.navlinks a:hover::after, .navlinks a[aria-current="page"]::after { transform: none; }
+.topo-contactos { display: flex; align-items: center; gap: var(--space-22); margin-left: auto; }
+.topo-tel { display: inline-flex; align-items: center; gap: var(--space-6); min-height: var(--alvo); color: var(--ink); text-decoration: none; font-family: var(--font-serif); font-size: var(--fs-step); font-weight: 700; line-height: 1.1; white-space: nowrap; }
+.topo-tel-txt { display: flex; flex-direction: column; justify-content: center; }
+.topo-tel .icone { width: 1em; height: 1em; }
+.topo-tel:hover .topo-tel-txt { text-decoration: underline; text-underline-offset: 3px; }
+/* o telefone abana uma vez ao passar o rato */
+.topo-tel:hover .i-telefone { animation: abana var(--dur-3) var(--ease-in-out); }
+@keyframes abana { 20% { transform: rotate(-14deg); } 40% { transform: rotate(12deg); } 60% { transform: rotate(-8deg); } 80% { transform: rotate(4deg); } }
+.topo-horario { font-family: var(--font-sans); font-size: var(--fs-category); font-weight: 600; color: var(--muted); margin-top: var(--space-2); }
+.topo-wa { display: inline-grid; place-items: center; width: var(--alvo); height: var(--alvo); color: var(--ink); box-shadow: inset 0 0 0 var(--border-control) currentColor; }
+.topo-wa .icone, .barra-cel .icone { width: var(--wa-icon); height: var(--wa-icon); }
+/* o WhatsApp pulsa duas vezes ao carregar a página e pára (nada infinite) */
+.topo-wa .i-whatsapp, .barra-cel .i-whatsapp { animation: acena var(--dur-3) var(--ease-in-out) var(--dur-3) 2; }
+@keyframes acena { 50% { transform: scale(1.18); } }
+.topo-wa:hover { background: var(--ink); color: var(--paper); }
+.topo-btn { white-space: nowrap; }
+/* em orcamento.html o botão dá lugar ao nome da página atual */
+.topo-atual { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-12); font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .07em; box-shadow: inset 0 calc(-1 * var(--border-rule)) 0 var(--clay); }
+.topo-reduzido .topo-tel { margin-left: auto; }
+/* o botão do menu: 48 × 48, o ícone «menu» (24 px, traço de 1,75): as três barras viram X com aria-expanded */
+.menu-toggle { display: none; margin-left: auto; background: none; border: var(--border-control) solid var(--ink); color: var(--ink); cursor: pointer; width: var(--alvo-menu); height: var(--alvo-menu); align-items: center; justify-content: center; }
+.menu-toggle .icone { width: 24px; height: 24px; }
+.i-menu path { transform-box: fill-box; transform-origin: center; transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out); }
+.menu-toggle[aria-expanded="true"] .i-menu .b1 { transform: translateY(6px) rotate(45deg); }
+.menu-toggle[aria-expanded="true"] .i-menu .b2 { opacity: 0; }
+.menu-toggle[aria-expanded="true"] .i-menu .b3 { transform: translateY(-6px) rotate(-45deg); }
+/* o painel (ink) e o fundo escurecido entram com fade (e o painel desce 12 px); com o menu aberto a página não
+   desliza (html.menu-aberto, site.js). Ao fechar, site.js só esconde (hidden) no fim da transição */
+html.menu-aberto { overflow: hidden; }
+.menu-fundo { position: fixed; inset: 0; z-index: var(--z-menu-fundo); background: var(--overlay-menu); opacity: 0; transition: opacity var(--dur-2) var(--ease-out); }
+.menu-movel { position: absolute; left: 0; right: 0; top: 100%; max-height: calc(100vh - var(--nav-height)); max-height: calc(100dvh - var(--nav-height)); overflow-y: auto; box-shadow: var(--shadow-badge); opacity: 0; transform: translateY(calc(-1 * var(--space-12))); transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out); }
+html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transform: none; }
+.menu-movel-in { display: flex; flex-direction: column; align-items: stretch; padding-top: var(--space-12); padding-bottom: var(--space-26); }
+.menu-movel-in a { color: var(--fg); text-decoration: none; font-size: var(--fs-category); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; display: flex; align-items: center; min-height: var(--alvo-menu); border-bottom: var(--border-hairline) solid var(--rule); }
+.menu-movel-in a[aria-current="page"] { box-shadow: inset var(--border-step) 0 0 var(--amber); padding-left: var(--space-12); }
+
+/* ── Botões: um primário (.btn) e um secundário (.btn-ghost), com a mesma altura; a cor vem da superfície ── */
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; background: var(--btn-bg); color: var(--btn-fg); padding: var(--space-12) var(--space-26); text-decoration: none; font-family: inherit; font-weight: 700; font-size: var(--fs-category); line-height: 1.3; text-transform: uppercase; letter-spacing: .07em; transition: background-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out); border: none; cursor: pointer; text-align: center; }
+.btn:hover { background: var(--btn-bg-h); color: var(--btn-fg-h); }
+.btn-ghost { background: transparent; color: var(--fg); box-shadow: inset 0 0 0 var(--border-control) currentColor; }
+.btn-ghost:hover { background: var(--fg); color: var(--bg); }
+.btn[disabled] { opacity: .7; cursor: wait; }
+/* o indicador de carga do envio (site.js põe .a-enviar): um anel que gira durante no máximo 20 s (40 voltas de 500 ms,
+   o mesmo tempo que o site.js espera pelo Netlify antes de desistir); nada infinite */
+.btn.a-enviar::before { content: ""; width: 1.1em; height: 1.1em; margin-right: var(--space-12); border: var(--border-rule) solid currentColor; border-right-color: transparent; border-radius: var(--radius-round); flex-shrink: 0; animation: gira var(--dur-3) var(--ease-in-out) 40; }
+@keyframes gira { to { transform: rotate(360deg); } }
+/* grupo de ações: 12 px entre botões; no telemóvel todos a toda a largura */
+.acoes { display: flex; flex-wrap: wrap; gap: var(--space-12); align-items: center; }
+
+/* ── Ligações: só duas ── */
+.link { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
+.link-seta { display: inline-flex; align-items: center; gap: var(--space-6); min-height: var(--alvo); padding: var(--space-12) 0; color: var(--fg); font-weight: 600; text-decoration: none; }
+.link-seta:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* a seta avança 5 px com o rato e com o foco do teclado */
+.i-seta { width: 1.125em; height: 1.125em; transition: transform var(--dur-1) var(--ease-out); }
+.link-seta:hover .i-seta, .link-seta:focus-visible .i-seta, .pg:hover .pg-ver .i-seta, .pg:has(a:focus-visible) .pg-ver .i-seta { transform: translateX(5px); }
+.links { display: flex; flex-direction: column; align-items: flex-start; }
+
+/* ── Eyebrow: texto da cor da superfície e traço de 34 px (clay no claro, amber no ink, ink no clay) ── */
+.eyebrow { display: inline-flex; align-items: center; gap: var(--space-12); font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .16em; color: var(--fg); margin-bottom: var(--space-26); }
+.eyebrow::before { content: ""; width: 34px; height: var(--border-rule); background: var(--eyebrow-rule); flex-shrink: 0; }
+.cat { display: block; font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--fg-cat); }
+
+/* ── Hero (split do design system) ── */
+.hero { position: relative; padding: var(--space-80) 0 var(--space-90); }
+.hero-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: var(--space-60); align-items: center; }
+/* os filhos da grelha ocupam a coluna inteira: o h1 começa na borda da .wrap, como o logótipo */
+.hero-grid > * { width: 100%; min-width: 0; }
+.hero h1 { font-size: var(--fs-display-hero); margin-bottom: var(--space-26); }
+/* o itálico fica em clay-deep (3,6:1, texto grande): clay puro sobre paper não chega a 3:1 */
+.hero h1 em { font-style: italic; color: var(--clay-deep); }
+.hero .lead { font-size: var(--fs-lead); color: var(--fg-2); max-width: 480px; margin-bottom: var(--space-38); }
+.hero-apoio { margin-top: var(--space-18); font-size: var(--fs-label); color: var(--fg-2); }
+.hero .prova { margin-top: var(--space-12); }
+.hero-moldura { position: relative; }
+.hero-moldura .frame { aspect-ratio: 4 / 3; }
+.hero-leg { margin-top: var(--space-12); font-size: var(--fs-label); color: var(--fg-2); }
+/* um só cartão, direito, encostado ao canto da fotografia */
+.tag-card { position: absolute; left: 0; bottom: 0; background: var(--paper); color: var(--ink); padding: var(--space-18) var(--space-22); border-left: var(--border-accent) solid var(--clay); box-shadow: var(--shadow-tag); }
+.tag-card .n { display: block; font-family: var(--font-serif); font-size: var(--fs-phone); font-weight: 700; line-height: 1; }
+.tag-card .l { display: block; font-size: var(--fs-category); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-top: var(--space-6); }
+
+/* ── Secções: 80 px em cima e em baixo (50 até 640 px) e 44 px do SectionHead ao conteúdo (38 até 640 px), um passo
+   de token abaixo dos 90 e 50 de antes (o design system tem 110 e 64), para a página inicial caber nos 4.400 px a 1440
+   e nos 6.000 a 390 ── */
+.sec { padding: var(--space-80) 0; }
+.sec-head { max-width: var(--sec-head-width); margin-bottom: var(--space-44); }
+.sec-head .eyebrow { margin-bottom: var(--space-18); }
+.sec-head h1, .sec-head h2 { font-size: var(--fs-section); }
+.sec-head p { color: var(--fg-2); font-size: var(--fs-lead); margin-top: var(--space-18); }
+.lead { font-size: var(--fs-lead); }
+
+/* ── Serviços (ServiceList): linhas em 2 colunas (1 abaixo de 640 px), separadas por uma linha de 1 px, sem caixas nem
+   setas. A linha não é uma ligação: as ligações ficam em baixo (margin-top: auto), alinhadas entre linhas vizinhas.
+   Em baixo a linha só tem 6 px: as ligações já trazem 12 px de alvo por baixo do texto, e assim o texto fica à mesma
+   distância das linhas de cima e de baixo ── */
+.svc-lista { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--space-60); list-style: none; }
+.svc { display: flex; gap: var(--space-18); padding: var(--space-22) 0 var(--space-6); border-top: var(--border-hairline) solid var(--rule); }
+/* o número com uma largura fixa (o Fraunces não traz algarismos tabulares): os títulos de todas as linhas começam no
+   mesmo x, do 01 ao 06 */
+.svc-num { flex-shrink: 0; min-width: 1.3em; font-family: var(--font-serif); font-size: var(--fs-body); font-weight: 600; color: var(--fg-2); line-height: 1.9; }
+.svc-corpo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.svc h3 { font-size: var(--fs-list); margin-bottom: var(--space-6); }
+.svc p { color: var(--fg-2); font-size: var(--fs-body); }
+/* a miniatura (48 × 48, --mini) flutua à direita do título e o texto contorna-a: só estreita o título e a primeira
+   linha da frase, e assim não acrescenta linhas (um teste do browser confirma a 1280 e a 1440 px). Até 980 px, com as
+   colunas mais estreitas, acrescentava: sai (as fotografias das obras estão logo acima). As duas ligações cabem numa
+   só linha, também a 375 px */
+.svc-txt { display: flow-root; }
+.svc-links { margin-top: auto; padding-top: var(--space-6); display: flex; flex-wrap: wrap; gap: 0 var(--space-22); }
+.svc-mini { float: right; margin-left: var(--space-16); width: var(--mini); height: var(--mini); overflow: hidden; background: var(--ink-raised); }
+.svc-mini .foto { width: 100%; height: 100%; }
+
+/* ── Grelha de obras (ProjectGrid / ProjectCard): 2 colunas, gap 18, linhas de 300 px ── */
+/* as obras em destaque: «Ver as N obras» à direita do SectionHead, alinhado pela base do texto (o h2 só ocupa 640 px);
+   no HTML vem depois dos cartões, e até 980 px fica lá, por baixo deles */
+.obras-wrap { display: grid; grid-template-columns: 1fr auto; column-gap: var(--space-60); align-items: end; }
+.obras-wrap > .photo-grid { grid-column: 1 / -1; grid-row: 2; }
+.obras-wrap > .obras-mais { grid-column: 2; grid-row: 1; margin-bottom: var(--space-44); }
+/* o cartão (obra-foto.html): a legenda por cima da fotografia, na faixa escura, a todas as larguras (um só cartão); até
+   980 px numa coluna, com linhas de 280 px (--photo-row-1col, como o design system) */
+.photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: var(--photo-row); gap: var(--space-18); }
+/* o anel de foco do cartão desenha-se por fora, sobre a superfície à volta: usa o --focus-c dela (ink no paper e no
+   bone, amber no ink), não o do interior escuro do cartão */
+.pg { position: relative; overflow: hidden; background: var(--ink-raised); min-height: 0; --fg-cat: var(--amber); color: var(--bone); }
+/* as obras em destaque da página inicial: com três, a segunda ocupa duas linhas (ao alto, ao lado das outras duas) */
+.destaques .pg:nth-child(2):nth-last-child(2) { grid-row: span 2; }
+.pg .foto { position: absolute; inset: 0; }
+.pg img { width: 100%; height: 100%; object-fit: cover; filter: saturate(1.02); }
+.pg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, var(--overlay) 0%, var(--overlay-soft) 45%, transparent 70%); pointer-events: none; transition: background var(--dur-2) var(--ease-out); }
+.pg:hover img { transform: scale(1.05); }
+.pg:hover::after { background: linear-gradient(to top, var(--overlay) 0%, rgba(15,22,40,.45) 55%, rgba(15,22,40,.15) 100%); }
+/* a legenda assenta numa faixa --overlay (85% de ink-deep) que sobe 44 px em degradê acima do texto: mesmo sobre a
+   parte mais clara de uma fotografia (branco), o .cat amber fica acima de 5:1 e o título bone acima de 10:1 */
+.pg figcaption { position: absolute; left: 0; bottom: 0; z-index: 2; padding: var(--space-26); width: 100%; background-color: var(--overlay); }
+.pg figcaption::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: var(--space-44); background: linear-gradient(to top, var(--overlay), transparent); pointer-events: none; }
+/* «Antes e depois» na obra que tem o comparador */
+.pg-tag { display: inline-block; margin-bottom: var(--space-6); padding: var(--space-2) var(--space-6); background: var(--clay); color: var(--ink); font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
+.pg figcaption h2, .pg figcaption h3 { font-size: var(--fs-card); margin-top: var(--space-6); color: inherit; line-height: 1.15; }
+.pg-ver { display: flex; align-items: center; gap: var(--space-6); margin-top: var(--space-12); font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--amber); opacity: 0; transform: translateY(6px); transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out); }
+.pg:hover .pg-ver, .pg:has(a:focus-visible) .pg-ver { opacity: 1; transform: none; }
+@media (hover: none) { .pg-ver { opacity: 1; transform: none; } }
+/* a ligação do título cobre o cartão inteiro; o anel de foco desenha-se à volta do cartão */
+.pg figcaption a { color: inherit; text-decoration: none; }
+.pg figcaption a::after { content: ""; position: absolute; inset: 0; z-index: 3; }
+.pg:has(a:focus-visible) { outline: 3px solid var(--focus-c); outline-offset: 3px; }
+.pg figcaption a:focus-visible { outline: none; }
+
+/* ── Comparador antes/depois ── */
+.ba-wrap { margin: 0; }
+/* à largura do contentor, sem margem: alinhado com o h1; no máximo 78% da altura do ecrã */
+.ba-slider { position: relative; width: 100%; margin: 0; aspect-ratio: 4 / 3; max-height: 78vh; overflow: hidden; user-select: none; background: var(--ink-deep); touch-action: pan-y; }
+.ba-slider .foto { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ba-slider img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.ba-before-img { position: absolute; inset: 0; width: 50%; overflow: hidden; z-index: 2; }
+/* o antes tem sempre a largura do comparador: por omissão o dobro do seu contentor a 50%; site.js põe --ba-w em px */
+.ba-before-img .foto { width: var(--ba-w, 200%); max-width: none; }
+.ba-handle { position: absolute; top: 0; bottom: 0; left: 50%; width: var(--border-step); background: var(--white); z-index: 3; transform: translateX(-50%); pointer-events: none; }
+.ba-handle .ba-arrows { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 46px; height: 46px; background: var(--white); color: var(--ink); border-radius: var(--radius-round); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-knob); }
+.ba-arrows .icone { width: 18px; height: 18px; transition: transform var(--dur-1) var(--ease-out); }
+/* ao agarrar a pega (site.js, .ba-a-arrastar) as setas afastam-se */
+.ba-a-arrastar .ba-arrows .i-seta-esq { transform: translateX(-3px); }
+.ba-a-arrastar .ba-arrows .i-seta-dir { transform: translateX(3px); }
+.ba-tag { position: absolute; bottom: var(--space-16); z-index: 4; font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; padding: var(--space-6) var(--space-12); pointer-events: none; }
+.tag-before { left: var(--space-16); background: var(--ink); color: var(--paper); }
+.tag-after { right: var(--space-16); background: var(--clay); color: var(--ink); }
+/* o range cobre o comparador mas deixa passar o deslize vertical (pan-y); o foco desenha-se à volta da pega */
+.ba-range { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 5; opacity: 0; cursor: ew-resize; margin: 0; touch-action: pan-y; }
+.ba-slider:has(.ba-range:focus-visible) .ba-arrows { outline: 3px solid var(--focus-c); outline-offset: 3px; }
+/* com site.js (.ba-js) o range fica só para o teclado e o leitor de ecrã: arrasta-se a partir da pega, numa faixa de
+   32 px para cada lado da linha (BA_PEGA em site.js); no resto da fotografia o toque não mexe a linha */
+.ba-js .ba-range { pointer-events: none; }
+.ba-js .ba-handle { pointer-events: auto; cursor: ew-resize; touch-action: pan-y; }
+.ba-js .ba-handle::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 64px; transform: translateX(-50%); }
+.ba-js.ba-a-arrastar { cursor: ew-resize; }
+
+/* ── Porquê Nós: o SectionHead à largura da .wrap; por baixo, as garantias (em duas colunas, uma até 640 px) e «Quem
+   somos» à esquerda, e a fotografia 4:3 à direita, com o topo na primeira garantia e na coluna das ações da faixa clay
+   logo abaixo (360 px, --col-acoes; um terço da .wrap nos ecrãs mais estreitos) ── */
+.trust-grid { display: grid; grid-template-columns: minmax(0, 1fr) min(var(--col-acoes), 33%); gap: var(--space-80); align-items: start; }
+.trust-grid > * { width: 100%; min-width: 0; }
+.trust-list { list-style: none; display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--space-38); }
+.trust-list li { display: flex; gap: var(--space-18); padding: var(--space-22) 0; border-bottom: var(--border-hairline) solid var(--rule); }
+/* a última fila (uma ou duas garantias) sem linha por baixo: a linha seguinte é a de «Quem somos» */
+.trust-list li:last-child, .trust-list li:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+/* a caixa de visto (28 px, borda clay de 2 px) com o ícone «visto» em clay-deep; também na lista «Na obra» das fichas */
+.tick { flex-shrink: 0; width: 28px; height: 28px; border: var(--border-rule) solid var(--clay); display: grid; place-items: center; color: var(--clay-deep); }
+.tick .icone { width: 20px; height: 20px; }
+/* os traços que se desenham têm pathLength="1" (icones.svg); o traço e o intervalo de 1,05 cobrem a junta do fim com o
+   princípio (sem a falha de um píxel que o arredondamento deixava no círculo) */
+.tick path { stroke-dasharray: 1.05; }
+.trust-list .tick { margin-top: var(--space-2); }
+/* os vistos desenham-se quando a lista entra no ecrã (.reveal.in), um a seguir ao outro (--cascata) */
+.trust-list li, .lista-visto li { --i: 0; }
+.trust-list li:nth-child(2), .lista-visto li:nth-child(2) { --i: 1; }
+.trust-list li:nth-child(3), .lista-visto li:nth-child(3) { --i: 2; }
+.trust-list li:nth-child(4), .lista-visto li:nth-child(4) { --i: 3; }
+.trust-list li:nth-child(5), .lista-visto li:nth-child(5) { --i: 4; }
+.trust-list li:nth-child(n+6), .lista-visto li:nth-child(n+6) { --i: 5; }
+.js .reveal .tick path { stroke-dashoffset: 1.05; }
+.js .reveal.in .tick path { stroke-dashoffset: 0; transition: stroke-dashoffset var(--dur-3) var(--ease-out); transition-delay: calc(var(--dur-2) + var(--i) * var(--cascata)); }
+.trust-list h3 { font-size: var(--fs-list); margin-bottom: var(--space-6); }
+.trust-list p { color: var(--fg-2); font-size: var(--fs-body); }
+.quem-somos { padding-top: var(--space-22); border-top: var(--border-hairline) solid var(--rule); }
+.quem-somos h3 { font-size: var(--fs-list); margin-bottom: var(--space-6); }
+.quem-somos p { color: var(--fg-2); }
+/* a foto-02 é 4:3: a moldura tem a mesma proporção, sem corte; o topo alinha com a primeira garantia */
+.trust-foto { margin-top: var(--space-22); }
+.trust-foto .frame { aspect-ratio: 4 / 3; }
+.trust-foto figcaption { margin-top: var(--space-6); }
+
+/* ── Faixa de contacto (CtaBand, clay: texto, traços e foco ink) ── */
+.cta { position: relative; overflow: hidden; }
+.cta::before { content: ""; position: absolute; top: -50%; right: -10%; width: 600px; height: 600px; border: 60px solid var(--bone-07); border-radius: var(--radius-round); pointer-events: none; }
+.cta-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: var(--space-60); align-items: center; position: relative; z-index: 2; }
+.cta-grid > * { width: 100%; min-width: 0; }
+.cta h2 { font-size: var(--fs-cta); }
+.cta-p { margin-top: var(--space-18); font-size: var(--fs-lead); max-width: 420px; }
+.cta-phone { display: inline-block; margin-top: var(--space-32); font-family: var(--font-serif); font-size: var(--fs-phone); font-weight: 700; line-height: 1.1; color: var(--fg); text-decoration: none; letter-spacing: -.01em; }
+.cta-phone:hover { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; }
+.cta-phone-l { display: block; font-size: var(--fs-category); text-transform: uppercase; letter-spacing: .1em; margin-top: var(--space-6); color: var(--fg-2); }
+/* a coluna das ações: botões, referência e ProofLine com a mesma largura (até 360 px), encostada à direita */
+.cta-grid > .cta-acoes { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-18); justify-self: end; max-width: var(--col-acoes); }
+/* os botões empilhados, com a mesma largura (no mínimo 280 px; toda a largura no telemóvel) */
+.acoes-pilha { flex-direction: column; align-items: stretch; min-width: 280px; }
+.cta-ref { font-size: var(--fs-label); }
+/* ProofLine: as garantias em linha, separadas por pontos; a cor vem da superfície */
+.prova { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-12); list-style: none; font-size: var(--fs-label); color: var(--fg-2); }
+/* um quadrado pequeno antes de cada garantia (não um separador): ao partir a linha nada fica solto no início */
+.prova li { display: inline-flex; align-items: center; gap: var(--space-6); }
+.prova li::before { content: ""; width: 6px; height: 6px; background: currentColor; flex-shrink: 0; }
+
+/* ── PageHead (paper): migalhas, eyebrow, h1 e introdução; .sec-junta continua a secção de cima (sem espaço) ── */
+.page-head { padding-top: var(--space-50); padding-bottom: var(--space-64); }
+.page-head-compacto { padding-bottom: var(--space-38); }
+.page-head .sec-head { max-width: 760px; margin-bottom: 0; }
+.page-head .eyebrow a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; min-height: var(--alvo); }
+.page-head .eyebrow a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.sec.sec-junta { padding-top: 0; }
+/* o ícone do PageHead (obrigado.html: «enviado», um visto desenhado num círculo ao abrir a página) */
+.pag-icone { display: block; color: var(--clay-deep); margin-bottom: var(--space-22); }
+.pag-icone .icone { width: 64px; height: 64px; }
+.pag-icone circle, .pag-icone path { stroke-dasharray: 1.05; animation: desenha var(--dur-3) var(--ease-out) both; }
+.pag-icone path { animation-delay: var(--dur-3); }
+@keyframes desenha { from { stroke-dashoffset: 1.05; } to { stroke-dashoffset: 0; } }
+.migalhas { display: flex; flex-wrap: wrap; gap: 0 var(--space-6); align-items: center; font-size: var(--fs-label); color: var(--fg-2); margin-bottom: var(--space-22); }
+.migalhas a { color: var(--fg-2); text-decoration: none; display: inline-flex; align-items: center; min-height: var(--alvo); }
+.migalhas a:hover { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
+.migalhas [aria-current] { color: var(--fg); }
+/* páginas curtas (obrigado, 404): o cabeçalho e as ações, sem coluna centrada */
+.pag-curta { min-height: 40vh; }
+.pag-curta .acoes { margin-bottom: var(--space-32); }
+
+/* ── Texto corrido (privacidade, fichas de obra) ── */
+.prosa { max-width: 72ch; }
+.prosa h2 { font-size: var(--fs-card); margin: var(--space-44) 0 var(--space-16); }
+.prosa h2:first-child { margin-top: 0; }
+.prosa h3 { font-size: var(--fs-step); margin: var(--space-32) 0 var(--space-12); }
+.prosa p, .prosa li { color: var(--fg-2); font-size: var(--fs-body); }
+.prosa p + p { margin-top: var(--space-12); }
+.prosa ul { padding-left: 1.2em; }
+.prosa li + li { margin-top: var(--space-6); }
+.prosa a { color: var(--fg); text-underline-offset: 3px; }
+.prosa strong { color: var(--fg); }
+
+/* ── Ficha (fundo bone, dl em 2 colunas) ── */
+.ficha { background: var(--bone); color: var(--ink); padding: var(--space-32); border: var(--border-hairline) solid var(--line); }
+.ficha h2 { font-size: var(--fs-card); margin-bottom: var(--space-22); }
+.ficha dl { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-18) var(--space-22); }
+.ficha dl > div { min-width: 0; }
+.ficha .ficha-largo { grid-column: 1 / -1; }
+.ficha dt { font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: var(--space-6); }
+.ficha dd { font-size: var(--fs-body); overflow-wrap: anywhere; }
+.ficha dd a { color: var(--ink); text-underline-offset: 3px; }
+.prosa .ficha { margin: var(--space-16) 0; }
+
+/* ── Rodapé (ink), 3 colunas; todas as ligações com 44 px de altura ── */
+.rodape { padding: var(--space-64) 0 var(--space-44); }
+.foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: var(--space-50); margin-bottom: var(--space-44); }
+.foot-brand .logo { margin-bottom: var(--space-18); }
+.foot-brand .logo-img { height: var(--logo-height-footer); margin-bottom: var(--space-6); }
+.foot-brand p { color: var(--fg-2); max-width: 360px; font-size: var(--fs-body); }
+.foot-brand p + p { margin-top: var(--space-12); }
+.foot-h { font-size: var(--fs-category); text-transform: uppercase; letter-spacing: .1em; color: var(--amber); font-weight: 700; margin-bottom: var(--space-6); }
+.foot-col a, .foot-bottom a { display: flex; align-items: center; min-height: var(--alvo); color: var(--fg-2); text-decoration: none; font-size: var(--fs-body); transition: color var(--dur-1) var(--ease-out); }
+.foot-col a:hover, .foot-bottom a:hover { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
+.foot-txt { display: block; color: var(--fg-2); font-size: var(--fs-body); padding: var(--space-12) 0; }
+.foot-bottom { border-top: var(--border-hairline) solid var(--rule); padding-top: var(--space-18); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-6) var(--space-26); font-size: var(--fs-label); color: var(--fg-2); }
+.foot-bottom a { font-size: var(--fs-label); }
+
+/* ── Barra de ações (ActionBar): só abaixo de 980 px, fixa em baixo; Ligar e WhatsApp ink, Orçamento clay com texto ink ── */
+.barra { display: none; }
+
+/* ── Entrada ao fazer scroll (site.js põe .in): sobe 16 px em 500 ms; numa grelha, os que entram juntos seguem-se
+   a 80 ms (site.js põe --i, a posição no grupo) ── */
+.js .reveal { opacity: 0; transform: translateY(var(--space-16)); transition: opacity var(--dur-3) var(--ease-out), transform var(--dur-3) var(--ease-out); transition-delay: calc(var(--i, 0) * var(--cascata)); }
+.js .reveal.in { opacity: 1; transform: none; }
+/* se o site.js não chegar a correr (rede, bloqueador: falta .js-pronto), nada fica invisível: ao fim de --espera-js
+   tudo aparece, vistos incluídos. Com o site.js a correr, esta regra deixa de valer e a entrada é a do scroll */
+.js:not(.js-pronto) .reveal, .js:not(.js-pronto) .reveal .tick path { animation: revelaSemJs 0s var(--espera-js) forwards; }
+@keyframes revelaSemJs { to { opacity: 1; transform: none; stroke-dashoffset: 0; } }
+
+/* ── Movimento reduzido: as animações e as transições acabam logo (as mudanças de cor ficam, sem transição) e nada se
+   desloca: a entrada ao fazer scroll, as setas, o logótipo compacto e o painel do menu ficam no sítio. As barras do
+   menu continuam a virar X (é o estado do botão), sem animação ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0s !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: 0s !important; transition-delay: 0s !important; }
+  .js .reveal { opacity: 1; transform: none; }
+  .js .reveal .tick path { stroke-dashoffset: 0; }
+  .pg:hover img, .pg-ver, .i-seta, .ba-arrows .icone, .topo-compacto .logo-img, .menu-movel { transform: none !important; }
+}
+
+/* ── Quebras: só duas (980 px: o cabeçalho colapsa, aparece a barra de ações e as grelhas de 2 colunas empilham;
+   640 px: 1 coluna e menos espaço) ── */
+@media (max-width: 980px) {
+  :root { --nav-height: 64px; }
+  .navlinks, .topo-nav, .topo-contactos { display: none; }
+  .menu-toggle { display: inline-flex; }
+  .hero-grid, .trust-grid, .cta-grid { grid-template-columns: 1fr; }
+  /* empilhada, a foto do Porquê Nós fica por baixo de «Quem somos», à largura toda */
+  .trust-grid { gap: var(--space-44); }
+  .trust-foto { margin-top: 0; }
+  .svc-mini { display: none; }
+  .cta-grid > .cta-acoes { justify-self: start; }
+  .obras-wrap { display: block; }
+  .obras-wrap > .obras-mais { margin: var(--space-44) 0 0; }
+  .photo-grid { grid-template-columns: 1fr; grid-auto-rows: var(--photo-row-1col); }
+  .destaques .pg:nth-child(2):nth-last-child(2) { grid-row: span 1; }
+  .foot-grid { grid-template-columns: 1fr 1fr; }
+  .foot-brand { grid-column: 1 / -1; }
+  /* a barra: três células de 56 px mais a margem segura do ecrã; o body reserva o mesmo espaço em baixo */
+  .barra { display: grid; grid-template-columns: 1fr 1fr 1fr; position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-barra); background: var(--ink); padding-bottom: env(safe-area-inset-bottom); border-top: var(--border-hairline) solid var(--bone-15); }
+  .barra-cel { display: flex; align-items: center; justify-content: center; gap: var(--space-6); min-height: var(--barra-height); padding: 0 var(--space-6); color: var(--bone); text-decoration: none; font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .07em; text-align: center; --focus-c: var(--focus-on-ink); }
+  .barra-cel + .barra-cel { border-left: var(--border-hairline) solid var(--bone-15); }
+  .barra-orc { background: var(--clay); color: var(--ink); --focus-c: var(--focus); }
+  .barra-cel:focus-visible { outline-offset: -4px; }
+  body.com-barra { padding-bottom: calc(var(--barra-height) + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 640px) {
+  .wrap { padding: 0 var(--space-16); }
+  .sec { padding: var(--space-50) 0; }
+  .sec-head { margin-bottom: var(--space-38); }
+  .hero { padding: var(--space-50) 0; }
+  .page-head { padding-top: var(--space-26); padding-bottom: var(--space-44); }
+  .svc-lista { grid-template-columns: 1fr; }
+  .svc { padding: var(--space-18) 0 var(--space-6); gap: var(--space-12); }
+  .trust-list { grid-template-columns: 1fr; }
+  .trust-list li { padding: var(--space-18) 0; }
+  .trust-list li:nth-last-child(2):nth-child(odd) { border-bottom: var(--border-hairline) solid var(--rule); }
+  .trust-list li:last-child { border-bottom: none; }
+  .quem-somos { padding-top: var(--space-18); }
+  .ficha dl { grid-template-columns: 1fr; }
+  .acoes { flex-direction: column; align-items: stretch; }
+  .acoes .btn { width: 100%; }
+  .cta-grid > .cta-acoes { max-width: none; }
+  .acoes-pilha { min-width: 0; }
+  /* a marca a toda a largura; «Site» e «Contactos» lado a lado */
+  .foot-grid { gap: var(--space-32) var(--space-22); }
+  .foot-col a { overflow-wrap: anywhere; }
+  .hero-grid, .cta-grid { gap: var(--space-38); }
+  .obras-wrap > .obras-mais { margin-top: var(--space-32); }
+  /* a foto do Porquê Nós sai no telemóvel (a prova fotográfica já está nas obras logo acima) */
+  .trust-foto { display: none; }
+  .foot-bottom { flex-direction: column; align-items: flex-start; }
+  /* ProjectCard no telemóvel: o mesmo cartão, com a legenda na faixa escura por cima da fotografia (cortada a partir do
+     «foco»), um passo de token mais junta à borda, como a .wrap */
+  .pg figcaption { padding: var(--space-22); }
+}

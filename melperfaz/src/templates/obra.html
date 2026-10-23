@@ -1,0 +1,47 @@
+{{> page-head eyebrow="{{ obra.servico.nome }}" eyebrowHref="{{ root }}{{ obra.catAnchor }}" titulo="{{ obra.title }}" intro="{{ obra.resumo }}"}}
+
+<!-- a fotografia (ou, na M05, o comparador) à largura do contentor, na mesma superfície do cabeçalho -->
+<section class="sec s-paper sec-junta obra-media" aria-label="Fotografia da obra">
+  <div class="wrap">
+    {{#sem obra.antesDepois}}<div class="obra-foto" style="--foto-r: {{ obra.fotoR }}">{{foto {{ obra.foto }} loading="eager" sizes="{{ obra.fotoSizes }}" class="obra-foto-img" foco="{{ obra.foco }}"}}</div>{{/sem}}{{#se obra.antesDepois}}{{> antes-depois }}{{/se}}
+  </div>
+</section>
+
+<!-- o trabalho: à esquerda o que a Melperfaz deu sobre a obra («O problema» e «O que fizemos», quando existem) e o que
+     se vê na obra; à direita a ficha, só quando há pelo menos um facto (Local, Data, Duração, Resultado) -->
+<section class="sec s-paper sec-junta obra-corpo" aria-label="Sobre a obra">
+  <div class="wrap duas">
+    <div class="prosa">{{#se obra.factos.problema}}
+      <h2>O problema</h2>
+      <p>{{ obra.factos.problema }}</p>{{/se}}{{#se obra.factos.trabalho}}
+      <h2>O que fizemos</h2>
+      <p>{{ obra.factos.trabalho }}</p>{{/se}}
+      <h2>Na obra</h2>
+      <ul class="lista-visto reveal">{{li obra.detalhes visto}}</ul>
+    </div>{{#se obra.temFactos}}
+    <div class="ficha">
+      <h2 class="ficha-t" id="fichaT">Ficha da obra</h2>
+      <dl aria-labelledby="fichaT">
+        {{#se obra.factos.localExato}}<div><dt>Local</dt><dd>{{ obra.factos.localExato }}</dd></div>{{/se}}
+        {{#se obra.factos.data}}<div><dt>Data</dt><dd>{{ obra.factos.data }}</dd></div>{{/se}}
+        {{#se obra.factos.duracao}}<div><dt>Duração</dt><dd>{{ obra.factos.duracao }}</dd></div>{{/se}}
+        {{#se obra.factos.resultado}}<div class="ficha-largo"><dt>Resultado</dt><dd>{{ obra.factos.resultado }}</dd></div>{{/se}}
+      </dl>
+    </div>{{/se}}
+  </div>
+</section>
+
+{{> cta titulo="Quer uma obra assim?" texto="Peça o orçamento com o tipo de obra já escolhido, ou envie fotografias do seu espaço por WhatsApp." tipo="{{ obra.servico.id }}" de="obras/{{ obra.slug }}" waHref="{{ obra.waHref }}" waRotulo="Enviar fotografias por WhatsApp" ref="{{ obra.code }}"}}
+
+<!-- outras obras (bone, depois da faixa clay: ink nunca encosta a ink no rodapé); as migalhas já levam a todas -->
+<section class="sec s-bone obra-rel" aria-labelledby="obraRelT">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Obras semelhantes</span>
+      <h2 id="obraRelT">{{ obra.relTitulo }}</h2>
+    </div>
+    <div class="photo-grid">
+      {{each obra-foto ctx:related}}
+    </div>
+  </div>
+</section>

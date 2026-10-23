@@ -1,0 +1,83 @@
+{
+  "name": "Melperfaz",
+  "legalName": "Melperfaz, Construção Civil, Lda.",
+  "founded": "2001",
+  "baseUrl": "https://melperfaz.netlify.app",
+  "preview": false,
+  "phone": "961 245 288",
+  "phoneHref": "tel:+351961245288",
+  "phoneE164": "+351961245288",
+  "whatsappBase": "https://wa.me/351961245288?text=",
+  "slogan": "Mãos à obra",
+  "wa": {
+    "geral": "Olá! Gostaria de pedir um orçamento.",
+    "pedido": "Olá! Acabei de enviar um pedido de orçamento pelo site e envio fotografias do local.",
+    "obra": "Olá! Vi a obra {code} no site ({title}) e envio fotografias do meu espaço para pedir um orçamento para uma obra parecida.",
+    "erro": "Olá! Sou {nome} e queria um orçamento para {tipo}. O formulário do site não enviou."
+  },
+  "servicos": [
+    {
+      "id": "reabilitacao",
+      "nome": "Reabilitação de Edifícios",
+      "cat": "reabilitacao",
+      "texto": "A nossa especialidade. Recuperamos edifícios degradados de raiz (estrutura, fachadas e interiores), devolvendo-lhes solidez e valor.",
+      "frase": "Recuperamos edifícios degradados de raiz (estrutura, fachadas e interiores), devolvendo-lhes solidez e valor.",
+      "antigos": ["Reabilitação de Edifício"]
+    },
+    {
+      "id": "comercial",
+      "nome": "Espaços Comerciais",
+      "cat": "",
+      "texto": "Lojas, escritórios e espaços de trabalho construídos ou renovados para abrir portas a horas, com mínima perturbação ao negócio.",
+      "frase": "Lojas, escritórios e espaços de trabalho construídos ou renovados para abrir portas a horas, com mínima perturbação ao negócio.",
+      "antigos": ["Espaço Comercial"]
+    },
+    {
+      "id": "apartamentos",
+      "nome": "Apartamentos",
+      "cat": "",
+      "texto": "Remodelação completa de apartamentos, do desmonte aos acabamentos. Obra limpa, prazos cumpridos e atenção ao detalhe.",
+      "frase": "Remodelação completa de apartamentos, do desmonte aos acabamentos.",
+      "antigos": ["Apartamento"]
+    },
+    {
+      "id": "estrutura",
+      "nome": "Trabalhos de Estrutura",
+      "cat": "",
+      "texto": "Fundações, pilares, lajes e alvenaria executados dentro das normas. A base de toda a obra bem feita.",
+      "frase": "Fundações, pilares, lajes e alvenaria executados dentro das normas."
+    },
+    {
+      "id": "fachadas",
+      "nome": "Fachadas e Impermeabilização",
+      "cat": "fachadas",
+      "texto": "Recuperação e pintura de fachadas, isolamento e impermeabilização, incluindo trabalhos em altura com acesso por corda.",
+      "frase": "Recuperação e pintura de fachadas, isolamento e impermeabilização, incluindo trabalhos em altura com acesso por corda.",
+      "antigos": ["Fachadas / Impermeabilização"]
+    },
+    {
+      "id": "acabamentos",
+      "nome": "Acabamentos",
+      "cat": "acabamentos",
+      "texto": "Revestimentos, pinturas, carpintaria e remates finais. O cuidado que distingue uma obra entregue de uma obra bem entregue.",
+      "frase": "Revestimentos, pinturas, carpintaria e remates finais."
+    }
+  ],
+  "provas": [
+    "Equipa própria",
+    "Orçamento a preço fixo",
+    "2 anos de garantia de execução"
+  ],
+  "menu": [
+    {
+      "id": "inicio",
+      "nome": "Início",
+      "href": "index.html"
+    },
+    {
+      "id": "obras",
+      "nome": "Obras",
+      "href": "obras.html"
+    }
+  ]
+}

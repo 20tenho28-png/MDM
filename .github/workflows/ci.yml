@@ -46,3 +46,38 @@ jobs:
         run: python3 website/build.py --check
       - name: Publish the new visual (site/) and check forms and links
         run: python3 website/publica.py
+
+  melperfaz-check:
+    name: Melperfaz (build + check + tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Build and check links, assets, forms and text rules
+        run: python3 melperfaz/build.py --check
+      - name: Tests of the generated site (node:test)
+        run: npm test
+        working-directory: melperfaz
+
+  melperfaz-browser:
+    name: Melperfaz (browser tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Playwright (not a dependency of the site)
+        run: npm install --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
+        working-directory: melperfaz
+      - name: Browser tests (form, phone widths, menu, comparator, keyboard)
+        run: node tests/browser.mjs
+        working-directory: melperfaz
