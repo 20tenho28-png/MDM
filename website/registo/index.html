@@ -559,6 +559,112 @@ body.app-on{background:var(--surface)}
   .fab{display:none}
 }
 
+/* Pedidos › Tabela (estilo monday) */
+.tb-wrap{overflow:auto;max-height:calc(100vh - 210px);border:1px solid var(--line);border-radius:10px;background:var(--surface);-webkit-overflow-scrolling:touch}
+table.tb{border-collapse:separate;border-spacing:0;min-width:100%;font-size:13.5px}
+.tb th{position:-webkit-sticky;position:sticky;top:0;z-index:2;background:var(--surface);font-weight:500;color:var(--ink-2);font-size:12.5px;text-transform:none;letter-spacing:0;font-family:var(--font-body);text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);white-space:nowrap}
+.tb th.num,.tb td.num{text-align:right}
+.tb .tb-cli{position:-webkit-sticky;position:sticky;left:0;z-index:1;background:var(--surface);min-width:190px;max-width:260px}
+.tb th.tb-cli{z-index:3}
+.tb td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:0 10px;height:40px;white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+.tb .tb-r td.tb-cli{box-shadow:inset 5px 0 0 var(--g)}
+.tb .tb-cli button{font:inherit;font-weight:600;background:none;border:0;padding:0 0 0 6px;color:var(--ink);cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+.tb .tb-cli .tag-conf{margin-left:8px}
+.tb .tb-ed{cursor:pointer}
+.tb .tb-ed:hover{outline:1px solid var(--accent);outline-offset:-1px}
+.tb td.tb-estado{padding:0;text-align:center;min-width:130px}
+.tb td.tb-p{min-width:52px}
+.tb-pill{display:inline-block;padding:1px 9px;border-radius:999px;border:1px solid var(--c);color:var(--c);font-size:12.5px;font-weight:600;line-height:1.5}
+.tb-pill.cheia{display:flex;align-items:center;justify-content:center;height:40px;border:0;border-radius:0;color:var(--surface);background:var(--c);padding:0 10px;font-size:13px}
+.tb-dono{display:inline-flex;align-items:center;gap:6px}
+.tb-dono i{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-style:normal;font-size:10.5px;font-weight:700}
+.tb-vazio,.tb-padrao{color:var(--ink-2)}
+.tb-late{color:var(--bad);font-weight:600}
+.tb-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:6px}
+.tb-prazo{color:var(--ink-2);font-size:12.5px}
+.tb-caixa{display:inline-grid;place-items:center;width:20px;height:20px;border:1.5px solid var(--line);border-radius:4px;font-size:13px}
+.tb-caixa.on{background:var(--good);border-color:var(--good);color:var(--surface)}
+.tb-notas{max-width:280px}
+.tb-hm{border:0;background:none;color:var(--ink-2);cursor:pointer;margin-left:6px;font-size:15px;padding:0 2px}
+.tb th.tb-mais{width:40px;text-align:center}
+.tb-mais button{width:28px;height:26px;border-radius:6px;border:1px dashed var(--ink-2);background:none;cursor:pointer;font-size:17px;line-height:1;color:var(--ink-2)}
+.tb .tb-gh td{border-right:0;padding:16px 10px 6px;height:auto;background:var(--surface)}
+.tb-gt{font:inherit;font-weight:700;font-size:15.5px;color:var(--g);background:none;border:0;padding:0;cursor:pointer;position:-webkit-sticky;position:sticky;left:10px}
+.tb-chev{display:inline-block;width:18px}
+.tb-gn{margin-left:12px;color:var(--ink-2);font-size:12.5px}
+.tb .tb-add td{height:34px;border-right:0}
+.tb-add button{font:inherit;color:var(--ink-2);background:none;border:0;padding:0 0 0 12px;cursor:pointer;position:-webkit-sticky;position:sticky;left:0}
+.tb-add button:hover{color:var(--accent)}
+.tb .tb-tot td{background:var(--bg);font-weight:600;font-size:12.5px;height:36px}
+.tb-bat{display:flex;height:22px;border-radius:4px;overflow:hidden;margin:0 8px;background:var(--line)}
+.tb-bat i{display:block;height:100%}
+.tb-r.fechado td{color:var(--ink-2)}
+.tb-ed-box{display:flex;flex-direction:column;gap:8px;min-width:250px}
+.tb-ed-box input,.tb-ed-box select,.tb-ed-box textarea{font:inherit;font-size:15px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);padding:8px 10px;width:100%;box-sizing:border-box}
+.tb-ed-p,.tb-nova{display:flex;flex-direction:column;gap:8px}
+.tb-err{color:var(--bad);font-size:13px;margin:0}
+.tb-cor{display:inline-block;width:12px;height:12px;border-radius:3px;flex:none}
+.tb-cols{display:flex;flex-direction:column;gap:8px;min-width:220px}
+.tb-cols small{color:var(--ink-2)}
+.fbox.agrupar select{border:0;background:transparent;font:inherit;color:inherit;width:100%}
+@media (min-width:768px){#lista,#v-gerir #mosLeg,#v-gerir #mosaico{display:none}}
+@media (max-width:767px){.tb-wrap,.fbox.agrupar{display:none}}
+.tb th.tb-mov{cursor:grab}
+
+.tb .tb-rz{position:absolute;top:0;right:-3px;width:7px;height:100%;cursor:col-resize;z-index:4}
+.tb .tb-rz:hover,body.a-redimensionar .tb-rz{background:var(--accent);opacity:.5}
+body.a-redimensionar,body.a-redimensionar *{cursor:col-resize!important;-webkit-user-select:none;user-select:none}
+.tb th.karr{opacity:.5}
+.tb-guia{position:fixed;width:3px;background:var(--accent);z-index:300;pointer-events:none;border-radius:2px}
+.tb-pega{display:inline-block;width:16px;color:var(--ink-2);cursor:grab;font-size:14px;line-height:1;margin-left:2px;-webkit-user-select:none;user-select:none;touch-action:none}
+.tb tr.karr td{opacity:.4}
+.tb-fant{position:fixed;left:0;top:0;z-index:300;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--accent);border-radius:8px;padding:6px 12px;font-weight:600;font-size:13.5px;box-shadow:0 10px 26px rgba(8,16,22,.25)}
+.tb tbody.tb-g.alvo .tb-gh td{background:color-mix(in srgb,var(--accent) 8%,var(--surface));outline:2px dashed var(--accent);outline-offset:-3px}
+.tb tbody.tb-g.sobre .tb-gh td{outline-style:solid;background:color-mix(in srgb,var(--accent) 16%,var(--surface))}
+.tb tbody.tb-g.fora{opacity:.45}
+/* Números: widgets */
+.dash{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:22px}
+.dw{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.dw.largo{grid-column:span 2}
+@media (max-width:1100px){.dash{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.dash{grid-template-columns:minmax(0,1fr)}.dw.largo{grid-column:auto}}
+.dw-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.dw-h h3{margin:0;font-size:15px;font-weight:600}
+.dw-ed{font:inherit;font-size:12.5px;font-weight:600;color:var(--accent);background:none;border:0;cursor:pointer;padding:0;white-space:nowrap}
+.dw-gwrap{display:flex;flex-direction:column;gap:6px}
+.dw-gauge{width:100%;max-width:250px;margin:0 auto;display:block}
+.g-fundo{fill:none;stroke:var(--sunk);stroke-width:22}
+.g-valor{fill:none;stroke:var(--accent);stroke-width:22}
+.g-ponteiro{stroke:var(--ink);stroke-width:4;stroke-linecap:round}
+.g-centro{fill:var(--ink)}
+.g-pct{font-size:22px;font-weight:600;fill:var(--ink)}
+.dw-par{display:flex;justify-content:space-between;gap:10px}
+.dw-par > div:last-child{text-align:right}
+.dw-par small{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2)}
+.dw-par b{font-family:var(--font-display);font-size:22px;font-weight:600}
+.dw-mes{display:flex;flex-direction:column;gap:16px;justify-content:center;flex:1}
+.dw-bar{height:34px;border-radius:6px;background:var(--sunk);overflow:hidden}
+.dw-bar i{display:block;height:100%;background:var(--accent)}
+.dw-num{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:4px;font:inherit;color:inherit;background:none;border:0;padding:12px 0;text-align:center}
+button.dw-num{cursor:pointer;border-radius:8px}
+button.dw-num:hover{background:var(--sunk)}
+.dw-num b{font-family:var(--font-display);font-size:34px;font-weight:600;line-height:1.1}
+.dw-num small{color:var(--ink-2);font-size:13px}
+.dw-pie{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.dw-donut{width:140px;height:140px;flex:none}
+.d-fatia{cursor:pointer;stroke:var(--surface);stroke-width:1.5}
+.d-n{font-size:22px;font-weight:600;fill:var(--ink)}
+.d-l{font-size:10px;fill:var(--ink-2)}
+.dw-leg{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;font-size:13px;flex:1;min-width:150px}
+.dw-leg button{font:inherit;background:none;border:0;padding:3px 0;cursor:pointer;color:var(--ink);display:flex;gap:8px;align-items:center;width:100%;text-align:left}
+.dw-leg i{width:10px;height:10px;border-radius:3px;flex:none}
+.dw-leg b{margin-left:auto;font-weight:600;color:var(--ink-2)}
+.dw-barras{width:100%;height:auto;display:block}
+.b-barra{fill:var(--info)}
+.b-atual .b-barra{fill:var(--accent)}
+.b-v,.b-m{font-size:11px;fill:var(--ink-2)}
+.b-eixo{stroke:var(--line)}
+.dw-fonte{font-size:12px;color:var(--ink-2);margin:4px 0 0}
 /* Quadro: arrastar */
 .kcard{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .kcard.karr{opacity:.35}
@@ -742,6 +848,8 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
 
   <div id="v-painel" role="tabpanel" aria-labelledby="tab-painel" hidden>
     <p class="hint alert" id="pnAviso" hidden></p>
+    <div class="dash" id="dash" aria-label="Números"></div>
+    <div id="pnVistas">
     <section aria-labelledby="h-pn-fila">
       <div class="sec-h"><h2 id="h-pn-fila">A tua fila</h2><span class="count"><span id="pnFilaCount"></span> <button class="link-add" type="button" id="pnFilaModo" style="font-size:15px;padding:0 0 0 8px"></button></span></div>
       <div class="panel lista-p" id="pnFila"></div>
@@ -784,6 +892,7 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
         <div class="panel" id="pnTend"></div>
       </section>
     </div>
+    </div>
     <details class="sec-d"><summary><h2>Resumo e números do mês</h2></summary>
     <section class="kpis oito" id="kpis" aria-label="Resumo"></section>
     <div class="grid-p">
@@ -824,7 +933,7 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
       </section>
     </div>
     </details>
-    <details class="sec-d"><summary><h2>Cobertura dos dados</h2></summary>
+    <details class="sec-d" id="pnCobSec"><summary><h2>Cobertura dos dados</h2></summary>
       <p class="note vis" id="pnCobertura"></p>
     </details>
   </div>
@@ -891,10 +1000,12 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
         <option value="cliente">Cliente (A a Z)</option>
       </select></div>
       <div class="fbox dono"><select id="fDono" aria-label="Dono"></select></div>
+      <div class="fbox agrupar"><select id="tbAgrupar" aria-label="Agrupar por"></select></div>
       <div class="fbox fprio" hidden><select id="fPrio" aria-label="Prioridade"><option value="">Prioridade</option><option value="P1">P1 · Urgente</option><option value="P2">P2 · Alta</option><option value="P3">P3 · Normal</option></select></div>
       <div class="fbox pesq"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input id="q" type="search" placeholder="Pesquisar" aria-label="Pesquisar cliente, localidade, nº ORC" autocomplete="off"></div>
     </div>
     <p class="t-conta" id="listaCount"></p>
+    <div class="tb-wrap"><div id="tabela"></div></div>
     <div class="tabela" id="lista"></div>
   </div>
 
@@ -1127,6 +1238,16 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
         </section>
       </div>
     </div>
+    <section aria-labelledby="h-obj" style="margin-top:22px">
+      <div class="sec-h"><h2 id="h-obj">Objetivos de faturação</h2></div>
+      <div class="panel sgc" id="objCfg"></div>
+      <p class="note">Os objetivos aparecem em Hoje › Números (conta-quilómetros do ano e barra do mês). O faturado vem dos SAF-T carregados em Faturação; nos meses sem SAF-T, das faturas registadas nos pedidos. Valores sem IVA.</p>
+    </section>
+    <section aria-labelledby="h-prob" style="margin-top:22px">
+      <div class="sec-h"><h2 id="h-prob">Probabilidade de fecho por passo</h2></div>
+      <div class="panel sgc" id="probCfg"></div>
+      <p class="note">A probabilidade de cada passo dá a coluna «Previsão» da tabela de pedidos (valor × probabilidade). Num pedido, escrever outra probabilidade na célula sobrepõe-se a esta; apagar volta a esta.</p>
+    </section>
     <section aria-labelledby="h-agcfg" id="agCfgSec" style="margin-top:22px" hidden>
       <div class="sec-h"><h2 id="h-agcfg">Agenda</h2></div>
       <div class="panel sgc" id="agCfg"></div>
@@ -1263,7 +1384,7 @@ if (!Element.prototype.replaceChildren) {
     ligacao: '<svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',
   };
   const ico = (nome, texto) => { const sp = document.createElement('span'); sp.className = 'ic'; sp.innerHTML = IC[nome] || ''; if (texto) sp.appendChild(document.createTextNode(texto)); return sp; };
-  let popEl = null, popDe = null;
+  let popEl = null, popDe = null, popNovo = false;
   function fechaPop() {
     if (popEl) { popEl.remove(); popEl = null; }
     if (popDe) { popDe.setAttribute('aria-expanded', 'false'); popDe = null; }
@@ -1275,6 +1396,7 @@ if (!Element.prototype.replaceChildren) {
     popEl = h('div', {class: 'pop' + (classe ? ' ' + classe : ''), role: classe === 'menu' ? 'menu' : 'note'}, conteudo);
     document.body.appendChild(popEl);
     popDe = botao; botao.setAttribute('aria-expanded', 'true');
+    popNovo = true; setTimeout(() => { popNovo = false; }, 0);
     const r = botao.getBoundingClientRect(), w = popEl.offsetWidth, hh = popEl.offsetHeight;
     let left = r.left + window.pageXOffset + (classe === 'menu' ? r.width - w : -12);
     left = Math.max(12 + window.pageXOffset, Math.min(left, window.pageXOffset + document.documentElement.clientWidth - w - 12));
@@ -1323,7 +1445,7 @@ if (!Element.prototype.replaceChildren) {
   document.addEventListener('click', ev => {
     const b = ev.target.closest ? ev.target.closest('button.i') : null;
     if (b) { ev.preventDefault(); ev.stopPropagation(); const t = b._sec ? textoNotas(b._sec) : b.getAttribute('data-info'); if (t) abrePop(b, t); return; }
-    if (popEl && !popEl.contains(ev.target)) fechaPop();
+    if (popEl && !popNovo && !popEl.contains(ev.target)) fechaPop();
   });
   document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && popEl) { const de = popDe; fechaPop(); if (de) de.focus(); ev.stopImmediatePropagation(); } }, true);
   window.addEventListener('resize', fechaPop);
@@ -1503,14 +1625,13 @@ if (!Element.prototype.replaceChildren) {
   // A barra tem cinco grupos; cada grupo mostra por baixo do título as suas vistas (só as que estão instaladas).
   const SECOES = [['hoje', 'Hoje', ['hoje','seguimentos','painel']], ['gerir', 'Pedidos', ['gerir','pipeline']], ['agenda', 'Agenda', ['agenda']],
                   ['clientes', 'Clientes', ['clientes','faturacao']], ['prazos', 'Definições', ['prazos']]];
-  const SUB_NOME = {hoje:'Hoje', seguimentos:'Seguimentos', painel:'Números', gerir:'Lista', pipeline:'Quadro', agenda:'Agenda', clientes:'Clientes', faturacao:'Faturação', prazos:'Definições'};
+  const SUB_NOME = {hoje:'Hoje', seguimentos:'Seguimentos', painel:'Números', gerir:'Tabela', pipeline:'Quadro', agenda:'Agenda', clientes:'Clientes', faturacao:'Faturação', prazos:'Definições'};
   const grupoDe = t => SECOES.find(g => g[2].indexOf(t) >= 0) || SECOES[0];
   // Vistas cuja parte da base de dados ainda não foi instalada não aparecem (as variáveis vêm mais abaixo).
   function disponivel(t) {
     try {
       if (t === 'seguimentos') return segTabela !== false;
       if (t === 'agenda') return agTabela !== false;
-      if (t === 'painel') return !pnFalta;
     } catch (e) { return true; }
     return true;
   }
@@ -1900,11 +2021,611 @@ if (!Element.prototype.replaceChildren) {
     else if (fOrdem === 'cliente') lista.sort((a, b) => String(a.r.cliente || '').localeCompare(String(b.r.cliente || ''), 'pt'));
     else lista.sort(ordem);
     F('listaCount').textContent = `${lista.length} ${lista.length === 1 ? 'pedido' : 'pedidos'}`;
+    renderTabela(lista);
     const head = h('div',{class:'t-head', role:'row'}, h('span',null,'Cliente'), h('span',null,'O que fazer a seguir'), h('span',null,'Prazo'), h('span',{style:'text-align:right;padding-right:58px'},'Ações'));
     if (!lista.length) { box.replaceChildren(head, h('p',{class:'t-vazio'}, rows.length ? 'Nenhum pedido com estes filtros.' : 'Ainda não há pedidos. Usa «Adicionar pedido» quando chegar o primeiro.')); return; }
     box.replaceChildren(head, ...lista.map(linha));
   }
 
+
+  /* ---------- Pedidos › Tabela: grupos, colunas com tipo e edição na célula (ao estilo do monday.com) ----------
+     Cada linha é um pedido. As colunas base são fixas; a equipa pode juntar colunas suas (config «colunas», valores em
+     dados.extra). Os campos simples mudam-se na célula (com versão, histórico e «Desfazer»); o Passo abre a mesma
+     mudança curta do quadro e da folha, para as regras do processo valerem sempre. A partir de 768 px; no telemóvel fica a
+     lista. */
+  const PROB_PADRAO = {novo:10, visita_por_marcar:20, visita_marcada:30, orcamento_por_fazer:40, espera_cliente:50, espera_fornecedor:60, em_execucao:90, por_faturar:100, faturado:100, resolvido:100, perdido:0};
+  const TB_CORES = ['#00A86B','#F2A33A','#E2445C','#579BFC','#A25DDC','#FDAB3D','#66CCFF','#7F8C8D'];
+  const TB_TIPOS_COL = [['texto','Texto'], ['numero','Número'], ['data','Data'], ['caixa','Caixa (sim/não)'], ['lista','Lista'], ['estado','Estado (com cores)']];
+  const TB_BASE = [
+    {id:'cliente', nome:'Cliente', fixa:true}, {id:'estado', nome:'Passo', fixa:true}, {id:'prioridade', nome:'P'}, {id:'dono', nome:'Dono'},
+    {id:'proximaAcao', nome:'Próxima ação'}, {id:'dataProximaAcao', nome:'Data'}, {id:'prazo', nome:'Prazo'}, {id:'valor', nome:'Valor'},
+    {id:'prob', nome:'Prob.'}, {id:'previsao', nome:'Previsão'}, {id:'dataFechoPrevista', nome:'Fecho previsto'}, {id:'tipo', nome:'Tipo'},
+    {id:'origem', nome:'Origem'}, {id:'localidade', nome:'Localidade'}, {id:'contacto', nome:'Contacto'}, {id:'notas', nome:'Notas'}];
+  const TB_OCULTAS_PADRAO = ['origem','localidade','contacto','notas'];
+  let cfgColunas = null, cfgProb = null, tbGrupo = 'estado', tbFechados = {};
+  try { tbGrupo = localStorage.getItem('registo-agrupar') || 'estado'; tbFechados = JSON.parse(localStorage.getItem('registo-grupos-fechados') || '{}') || {}; } catch (e) {}
+  const tbCfg = () => ({ocultas: (cfgColunas && cfgColunas.ocultas) || TB_OCULTAS_PADRAO, extra: (cfgColunas && cfgColunas.extra) || []});
+  const probDe = r => r.probabilidade != null && r.probabilidade !== '' ? Number(r.probabilidade) : Number(((cfgProb || {})[r.estado] != null ? cfgProb : PROB_PADRAO)[r.estado] || 0);
+  const previsaoDe = r => valorN(r) * probDe(r) / 100;
+  const tomEstado = k => ({info:'var(--info)', muted:'var(--muted)', accent:'var(--accent)', good:'var(--good)', bad:'var(--bad)'})[(ESTADOS[k] || {}).t] || 'var(--info)';
+  const TOM_P = {P1:'var(--bad)', P2:'var(--warn)', P3:'var(--good)'};
+  const iniciais = n => String(n || '?').trim().split(/\s+/).map(x => x[0]).slice(0, 2).join('').toUpperCase();
+  function tbColunas() {
+    const c = tbCfg(), ordem = (cfgColunas && cfgColunas.ordem) || [];
+    const todas = TB_BASE.map(x => Object.assign({}, x, {oculta: !x.fixa && c.ocultas.indexOf(x.id) >= 0}))
+      .concat(c.extra.map(x => Object.assign({}, x, {extra: true, oculta: !!x.oculta})));
+    const pos = x => { const i = ordem.indexOf(x.id); return x.fixa ? -100 + TB_BASE.indexOf(x) : i < 0 ? 1000 + todas.indexOf(x) : i; };
+    return todas.slice().sort((a, b) => pos(a) - pos(b));
+  }
+  // Larguras de cada pessoa (localStorage): uma regra de CSS por coluna, para o cabeçalho, as linhas e os totais.
+  let tbLarg = {};
+  try { tbLarg = JSON.parse(localStorage.getItem('registo-larguras') || '{}') || {}; } catch (e) {}
+  function tbAplicaLarguras() {
+    let st = F('tbLarg');
+    if (!st) { st = document.createElement('style'); st.id = 'tbLarg'; document.head.appendChild(st); }
+    st.textContent = Object.keys(tbLarg).map(k => `.tb .k-${k}{width:${tbLarg[k]}px;min-width:${tbLarg[k]}px;max-width:${tbLarg[k]}px}`).join('\n');
+  }
+  function tbGuardaLarguras() { try { localStorage.setItem('registo-larguras', JSON.stringify(tbLarg)); } catch (e) {} }
+  function trimestre(r) { const d = dataPedidoDe(r); if (!d) return 'Sem data'; return `T${Math.floor((Number(d.slice(5, 7)) - 1) / 3) + 1} ${d.slice(0, 4)}`; }
+  function tbAgrupadores() {
+    const base = [['estado','Passo'], ['dono','Dono'], ['prioridade','Prioridade'], ['tipo','Tipo'], ['trimestre','Trimestre'], ['nenhum','Sem grupos']];
+    return base.concat(tbCfg().extra.filter(c => c.tipo === 'estado' || c.tipo === 'lista').map(c => ['x:' + c.id, c.nome]));
+  }
+  function tbGrupoDe(x) {
+    const r = x.r;
+    if (tbGrupo === 'estado') return {k: r.estado, nome: (ESTADOS[r.estado] || {}).l || r.estado, cor: tomEstado(r.estado), ordem: Object.keys(ESTADOS).indexOf(r.estado)};
+    if (tbGrupo === 'dono') return {k: r.dono || '', nome: r.dono || 'Sem dono', cor: 'var(--accent)', ordem: r.dono ? 0 : 1};
+    if (tbGrupo === 'prioridade') return {k: x.pe.p, nome: PRIO_NOME[x.pe.p], cor: TOM_P[x.pe.p], ordem: PRIOS.indexOf(x.pe.p)};
+    if (tbGrupo === 'tipo') return {k: r.tipo || '', nome: TIPOS[r.tipo] || 'Sem tipo', cor: 'var(--copper)', ordem: r.tipo ? Object.keys(TIPOS).indexOf(r.tipo) : 99};
+    if (tbGrupo === 'trimestre') { const t = trimestre(r); return {k: t, nome: t, cor: 'var(--info)', ordem: t === 'Sem data' ? '0' : t.slice(3) + t.slice(1, 2), desc: true}; }
+    if (tbGrupo.indexOf('x:') === 0) {
+      const c = tbCfg().extra.find(z => z.id === tbGrupo.slice(2));
+      const v = r.extra && c ? r.extra[c.id] : '';
+      const o = c && (c.opcoes || []).find(z => z.nome === v);
+      return {k: v || '', nome: v || 'Sem valor', cor: o ? o.cor : 'var(--muted)', ordem: c && o ? c.opcoes.indexOf(o) : 99};
+    }
+    return {k: '', nome: 'Todos os pedidos', cor: 'var(--accent)', ordem: 0};
+  }
+
+  // Uma célula: o que se vê e, se for editável, o que acontece ao tocar.
+  function tbCelula(x, c) {
+    const r = x.r, aberto = ABERTOS.includes(r.estado);
+    const ed = (conteudo, fn, classe) => h('td',{class:'tb-c' + (classe ? ' ' + classe : '') + (canWrite && fn ? ' tb-ed' : ''), onclick: canWrite && fn ? ev => fn(ev.currentTarget) : null}, conteudo);
+    const pill = (txt, cor, extra) => h('span',{class:'tb-pill' + (extra ? ' ' + extra : ''), style:`--c:${cor}`}, txt);
+    if (c.extra) {
+      const v = r.extra ? r.extra[c.id] : null;
+      const vazio = v == null || v === '';
+      if (c.tipo === 'caixa') return ed(h('span',{class:'tb-caixa' + (v ? ' on' : ''), 'aria-label': v ? 'sim' : 'não'}, v ? '✓' : ''), () => tbGuardar(r, {extra: c.id}, !v, c.nome, v ? 'sim' : 'não', !v ? 'sim' : 'não'));
+      if (c.tipo === 'estado' || c.tipo === 'lista') {
+        const o = (c.opcoes || []).find(z => z.nome === v);
+        return ed(vazio ? '' : c.tipo === 'estado' ? pill(v, o ? o.cor : 'var(--muted)', 'cheia') : pill(v, o ? o.cor : 'var(--muted)'), td => tbEscolher(td, r, c, (c.opcoes || []).map(z => [z.nome, z.nome, z.cor]).concat([['', 'Limpar']])), c.tipo === 'estado' ? 'tb-estado' : '');
+      }
+      const txt = vazio ? '' : c.tipo === 'numero' ? String(v).replace('.', ',') : c.tipo === 'data' ? ddmm(v) : String(v);
+      return ed(txt, td => tbEditarTexto(td, r, c, c.tipo === 'numero' ? 'number' : c.tipo === 'data' ? 'date' : 'text'), c.tipo === 'numero' ? 'num' : '');
+    }
+    switch (c.id) {
+      case 'cliente': return h('td',{class:'tb-c tb-cli'}, canWrite && tbArrastavel() ? h('span',{class:'tb-pega', title:'Arrastar para outro grupo', 'aria-hidden':'true'}, '⠿') : null,
+        h('button',{type:'button', onclick:() => openSheet(r.id)}, r.cliente || 'Sem nome'),
+        r.porConfirmar ? h('span',{class:'tag-conf'}, 'por confirmar') : null);
+      case 'estado': return ed(pill((ESTADOS[r.estado] || {}).l || r.estado, tomEstado(r.estado), 'cheia'), td => tbPasso(td, x), 'tb-estado');
+      case 'prioridade': return ed(pill(x.pe.p, TOM_P[x.pe.p], 'cheia'), aberto ? td => tbPrioridade(td, r) : null, 'tb-estado tb-p');
+      case 'dono': return ed(r.dono ? h('span',{class:'tb-dono'}, h('i',null, iniciais(r.dono)), r.dono) : h('span',{class:'tb-vazio'}, 'Sem dono'),
+        td => tbEscolher(td, r, {id:'dono', nome:'Dono'}, donosConhecidos().map(d => [d, d])));
+      case 'proximaAcao': return ed(r.proximaAcao || '', td => tbEditarTexto(td, r, {id:'proximaAcao', nome:'Próxima ação'}, 'text'));
+      case 'dataProximaAcao': return ed(r.dataProximaAcao ? ddmm(r.dataProximaAcao) : '', td => tbEditarTexto(td, r, {id:'dataProximaAcao', nome:'Data da próxima ação'}, 'date'),
+        aberto && r.dataProximaAcao && r.dataProximaAcao < today() ? 'tb-late' : '');
+      case 'prazo': return h('td',{class:'tb-c tb-prazo'}, aberto && !r.porConfirmar ? [h('i',{class:'tb-dot', style:`--c:var(--${semTone(x.sem)})`}), tempoTxt(r, x.rel)] : '');
+      case 'valor': return ed(r.valor ? eur(valorN(r)) : '', td => tbEditarTexto(td, r, {id:'valor', nome:'Valor s/IVA'}, 'number'), 'num');
+      case 'prob': return ed(h('span',{class: r.probabilidade != null && r.probabilidade !== '' ? '' : 'tb-padrao'}, probDe(r) + '%'), td => tbEditarTexto(td, r, {id:'probabilidade', nome:'Probabilidade (%)'}, 'number'), 'num');
+      case 'previsao': return h('td',{class:'tb-c num'}, valorN(r) ? eur(previsaoDe(r)) : '');
+      case 'dataFechoPrevista': return ed(r.dataFechoPrevista ? ddmm(r.dataFechoPrevista) : '', td => tbEditarTexto(td, r, {id:'dataFechoPrevista', nome:'Fecho previsto'}, 'date'));
+      case 'tipo': return ed(r.tipo ? pill(TIPOS[r.tipo], 'var(--copper)') : '', td => tbEscolher(td, r, {id:'tipo', nome:'Tipo'}, Object.entries(TIPOS)));
+      case 'origem': return ed(ORIGENS[r.origem] || '', td => tbEscolher(td, r, {id:'origem', nome:'Origem'}, Object.entries(ORIGENS)));
+      case 'localidade': return ed(String(r.localidade || '').split('\n')[0], td => tbEditarTexto(td, r, {id:'localidade', nome:'Localidade'}, 'text'));
+      case 'contacto': return ed(r.contacto || '', td => tbEditarTexto(td, r, {id:'contacto', nome:'Contacto'}, 'text'));
+      case 'notas': return ed(r.notas || '', td => tbEditarTexto(td, r, {id:'notas', nome:'Notas'}, 'text'), 'tb-notas');
+    }
+    return h('td',{class:'tb-c'});
+  }
+
+  // Guardar um campo: cópia do pedido, histórico, versão (guardar_pedido) e «Desfazer».
+  const tbTexto = (campo, v) => v == null || v === '' ? 'vazio' : campo === 'valor' ? eur(Number(v)) : /^data/.test(campo) ? ddmm(v) : campo === 'probabilidade' ? v + '%' : campo === 'tipo' ? TIPOS[v] : campo === 'origem' ? ORIGENS[v] : String(v);
+  async function tbGuardar(r, alvo, valor, rotulo, antesTxt, depoisTxt, motivo) {
+    const novo = JSON.parse(JSON.stringify(r)); delete novo.id; delete novo._versao;
+    let antes;
+    if (alvo.extra) { novo.extra = Object.assign({}, novo.extra || {}); antes = novo.extra[alvo.extra]; if (valor === '' || valor == null) delete novo.extra[alvo.extra]; else novo.extra[alvo.extra] = valor; }
+    else { antes = novo[alvo]; if (valor === '' || valor == null) delete novo[alvo]; else novo[alvo] = valor; }
+    novo.historico = (novo.historico || []).slice(-60);
+    novo.historico.push(nota(`${rotulo}: ${antesTxt} → ${depoisTxt}${motivo ? ' (' + motivo + ')' : ''}`));
+    fechaPop();
+    const ok = await gravar(r.id, novo, `${rotulo} guardado`);
+    if (ok) toast(`${rotulo}: ${depoisTxt}`, {label:'Desfazer', fn: () => { const atual = rows.find(z => z.id === r.id); if (atual) tbGuardar(atual, alvo, antes, rotulo, depoisTxt, antesTxt, 'desfeito'); }});
+    return ok;
+  }
+  const tbObrigatorio = (r, campo) => ABERTOS.includes(r.estado) && ['dono', 'proximaAcao', 'dataProximaAcao'].indexOf(campo) >= 0;
+  function tbEditor(td, titulo, input, guardar, aviso) {
+    const err = h('p',{class:'tb-err', hidden:true});
+    const ok = () => { const m = guardar(); if (m) { err.textContent = m; err.hidden = false; } };
+    input.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); ok(); } });
+    abrePop(td, h('div',{class:'tb-ed-box'}, h('b',null, titulo), aviso ? h('p',{class:'hint'}, aviso) : null, input, err,
+      h('div',{class:'sg-b'}, h('button',{class:'btn btn-sm', type:'button', onclick: ok}, 'Guardar'), h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick: fechaPop}, 'Cancelar'))), 'tb-ed');
+    setTimeout(() => { try { input.focus(); if (input.select) input.select(); } catch (e) {} }, 30);
+  }
+  function tbEditarTexto(td, r, c, tipo) {
+    const campo = c.extra ? c.id : c.id;
+    const atual = c.extra ? (r.extra || {})[c.id] : r[c.id];
+    // Números em texto com teclado decimal: aceita «1 250,50» como se escreve em Portugal.
+    const input = h('input',{type: tipo === 'number' ? 'text' : tipo, value: atual == null ? '' : tipo === 'number' ? String(atual).replace('.', ',') : String(atual), inputmode: tipo === 'number' ? 'decimal' : null});
+    tbEditor(td, c.nome, input, () => {
+      let v = input.value.trim();
+      if (/[—–]/.test(v)) return 'Sem travessões: usa vírgulas ou parênteses.';
+      if (!v && !c.extra && tbObrigatorio(r, campo)) return 'Um pedido aberto tem sempre dono, próxima ação e data.';
+      if (tipo === 'number' && v) {
+        const n = c.id === 'valor' ? parseValor(v) : Number(v.replace(',', '.'));
+        if (Number.isNaN(n)) return 'Não é um número.';
+        if (c.id === 'probabilidade' && (n < 0 || n > 100)) return 'A probabilidade vai de 0 a 100.';
+        v = n;
+      }
+      if (String(v) === String(atual == null ? '' : atual)) { fechaPop(); return null; }
+      tbGuardar(r, c.extra ? {extra: c.id} : c.id, v, c.nome, c.extra ? (atual == null || atual === '' ? 'vazio' : String(atual)) : tbTexto(c.id, atual), c.extra ? (v === '' ? 'vazio' : String(v)) : tbTexto(c.id, v));
+      return null;
+    }, c.id === 'probabilidade' ? `Vazio volta ao valor do passo (${Number(((cfgProb || {})[r.estado] != null ? cfgProb : PROB_PADRAO)[r.estado] || 0)}%).` : null);
+  }
+  function tbEscolher(td, r, c, opcoes) {
+    const atual = c.extra ? (r.extra || {})[c.id] : r[c.id];
+    abrePop(td, opcoes.map(([v, l, cor]) => {
+      const b = h('button',{type:'button', role:'menuitem', onclick: () => {
+        fechaPop();
+        if (String(v) === String(atual == null ? '' : atual)) return;
+        if (!v && !c.extra && tbObrigatorio(r, c.id)) { toast('Um pedido aberto tem sempre dono.'); return; }
+        tbGuardar(r, c.extra ? {extra: c.id} : c.id, v, c.nome, c.extra ? (atual || 'vazio') : tbTexto(c.id, atual), c.extra ? (v || 'vazio') : tbTexto(c.id, v));
+      }}, cor ? h('i',{class:'tb-cor', style:`background:${cor}`}) : null, l, String(v) === String(atual == null ? '' : atual) ? ' ✓' : '');
+      return b;
+    }), 'menu');
+  }
+  // P: só com um motivo (as regras dão o P; mudá-lo à mão fica explicado no histórico).
+  function tbPrioridade(td, r, destino) {
+    const s = h('select',null, PRIOS.map(p => h('option',{value:p}, PRIO_NOME[p])));
+    s.value = destino || r.prioridade || 'P3';
+    const motivo = h('input',{type:'text', placeholder:'Porquê? (fica no histórico)'});
+    const box = h('div',{class:'tb-ed-p'}, s, motivo);
+    tbEditor(td, 'Prioridade', box, () => {
+      if (s.value === (r.prioridade || 'P3')) { fechaPop(); return null; }
+      const m = motivo.value.trim();
+      if (!m) return 'Escreve o motivo: o P sai das regras e só muda com razão.';
+      if (/[—–]/.test(m)) return 'Sem travessões: usa vírgulas ou parênteses.';
+      tbGuardar(r, 'prioridade', s.value, 'Prioridade', r.prioridade || 'P3', s.value, m);
+      return null;
+    });
+    setTimeout(() => (destino ? motivo : s).focus(), 40);
+  }
+  // Passo: as mesmas mudanças do quadro; abre o formulário curto (ou a agenda) e só muda ao confirmar.
+  function tbPasso(td, x) {
+    const alvos = kAlvos(x.r);
+    const itens = Object.keys(alvos).map(k => [alvos[k].agenda ? 'Marcar a visita (agenda)' : alvos[k].label, () => {
+      openSheet(x.r.id);
+      if (alvos[k].agenda) agAbrir('sheet', x.r.id, x.r.tipo === 'manutencao' || x.r.tipo === 'reparacao' ? x.r.tipo : 'visita', null, 'sug'); else abrirTrans(alvos[k]);
+    }, 'seta']);
+    itens.push(['Abrir o pedido', () => openSheet(x.r.id), 'lapis']);
+    abrePop(td, itens.map(([l, fn, ic]) => { const b = h('button',{type:'button', role:'menuitem', onclick:() => { fechaPop(); fn(); }}); b.innerHTML = IC[ic] || ''; b.appendChild(document.createTextNode(l)); return b; }), 'menu');
+  }
+
+  // Colunas: mostrar, esconder, juntar, mudar o nome e apagar (config «colunas», partilhada pela equipa).
+  async function tbGuardarCfg(novo, msg) {
+    const c = Object.assign({ocultas: tbCfg().ocultas, extra: tbCfg().extra}, novo);
+    try {
+      const {error} = await sb.from('config').upsert({chave:'colunas', valor: c, atualizado_por: eu.email}, {onConflict:'chave'});
+      if (error) throw error;
+      cfgColunas = c; toast(msg); renderAll();
+    } catch (e) { toast(/permiss|row-level/.test(String(e.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar as colunas.'); }
+  }
+  function tbMenuColunas(botao) {
+    const cols = tbColunas();
+    const lista = h('div',{class:'tb-cols'}, h('b',null, 'Colunas'),
+      cols.filter(c => !c.fixa).map(c => h('label',{class:'check'}, h('input',{type:'checkbox', checked: c.oculta ? null : true, disabled: canWrite ? null : true, onchange: ev => {
+        if (c.extra) tbGuardarCfg({extra: tbCfg().extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: !ev.target.checked}) : z)}, ev.target.checked ? `«${c.nome}» à vista` : `«${c.nome}» escondida`);
+        else { const o = tbCfg().ocultas.filter(z => z !== c.id); if (!ev.target.checked) o.push(c.id); tbGuardarCfg({ocultas: o}, ev.target.checked ? `«${c.nome}» à vista` : `«${c.nome}» escondida`); }
+      }}), c.nome, c.extra ? h('small',null, ' · ' + (TB_TIPOS_COL.find(t => t[0] === c.tipo) || [0, ''])[1]) : null)),
+      canWrite ? h('button',{class:'btn btn-sm', type:'button', onclick:() => { fechaPop(); tbNovaColuna(botao); }}, '+ Nova coluna') : null);
+    abrePop(botao, lista, 'tb-ed');
+  }
+  function tbNovaColuna(botao, editar) {
+    const nome = h('input',{type:'text', placeholder:'Nome da coluna', value: editar ? editar.nome : ''});
+    const tipo = h('select',{disabled: editar ? true : null}, TB_TIPOS_COL.map(([v, l]) => h('option',{value:v}, l)));
+    if (editar) tipo.value = editar.tipo;
+    const ops = h('textarea',{placeholder:'Uma opção por linha (por exemplo: Pedido de peça, Em stock, Encomendado)', rows:'4'}, editar ? (editar.opcoes || []).map(o => o.nome).join('\n') : '');
+    const opsBox = h('div',{class:'tb-ops'}, ops);
+    const mostra = () => { opsBox.hidden = !(tipo.value === 'lista' || tipo.value === 'estado'); };
+    tipo.addEventListener('change', mostra); mostra();
+    const box = h('div',{class:'tb-nova'}, nome, tipo, opsBox);
+    tbEditor(botao, editar ? 'Mudar a coluna' : 'Nova coluna', box, () => {
+      const n = nome.value.trim();
+      if (!n) return 'Dá um nome à coluna.';
+      if (/[—–]/.test(n + ops.value)) return 'Sem travessões: usa vírgulas ou parênteses.';
+      if (tbColunas().some(c => c.nome.toLowerCase() === n.toLowerCase() && (!editar || c.id !== editar.id))) return 'Já há uma coluna com esse nome.';
+      const opcoes = ops.value.split('\n').map(z => z.trim()).filter(Boolean).filter((z, i, a) => a.indexOf(z) === i).map((z, i) => {
+        const velha = editar && (editar.opcoes || []).find(o => o.nome === z);
+        return {nome: z, cor: velha ? velha.cor : TB_CORES[i % TB_CORES.length]};
+      });
+      if ((tipo.value === 'lista' || tipo.value === 'estado') && !opcoes.length) return 'Escreve pelo menos uma opção.';
+      fechaPop();
+      if (editar) tbGuardarCfg({extra: tbCfg().extra.map(z => z.id === editar.id ? Object.assign({}, z, {nome: n, opcoes}) : z)}, 'Coluna mudada');
+      else tbGuardarCfg({extra: tbCfg().extra.concat([{id: 'c' + Date.now().toString(36), nome: n, tipo: tipo.value, opcoes}])}, `Coluna «${n}» criada`);
+      return null;
+    });
+    setTimeout(() => nome.focus(), 40);
+  }
+  function tbMenuCabecalho(th, c) {
+    const itens = [];
+    if (tbLarg[c.id]) itens.push(['Largura normal', () => { delete tbLarg[c.id]; tbGuardaLarguras(); tbAplicaLarguras(); }, 'seta']);
+    itens.push(['Esconder', () => { if (c.extra) tbGuardarCfg({extra: tbCfg().extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: true}) : z)}, `«${c.nome}» escondida`); else tbGuardarCfg({ocultas: tbCfg().ocultas.concat([c.id])}, `«${c.nome}» escondida`); }, 'x']);
+    if (c.extra) {
+      itens.unshift(['Mudar o nome ou as opções', () => tbNovaColuna(th, c), 'lapis']);
+      itens.push(['Apagar a coluna', () => { if (window.confirm(`Apagar a coluna «${c.nome}»? Os valores ficam guardados nos pedidos mas deixam de se ver.`)) tbGuardarCfg({extra: tbCfg().extra.filter(z => z.id !== c.id)}, `Coluna «${c.nome}» apagada`); }, 'x']);
+    }
+    if (c.tipo === 'estado' || c.tipo === 'lista' || ['dono','prioridade','tipo','estado'].indexOf(c.id) >= 0) itens.unshift(['Agrupar por esta coluna', () => tbAgrupar(c.extra ? 'x:' + c.id : c.id), 'seta']);
+    abrePop(th.closest('th') || th, itens.map(([l, fn, ic]) => { const b = h('button',{type:'button', role:'menuitem', class: l === 'Apagar a coluna' ? 'perigo' : null, onclick:() => { fechaPop(); fn(); }}); b.innerHTML = IC[ic] || ''; b.appendChild(document.createTextNode(l)); return b; }), 'menu');
+  }
+  function tbAgrupar(g) { tbGrupo = g; try { localStorage.setItem('registo-agrupar', g); } catch (e) {} renderAll(); }
+
+  // A tabela: um <tbody> por grupo (cabeçalho com cor, linhas, «+ Adicionar pedido» e totais com a barra de cores).
+  function renderTabela(lista) {
+    const box = F('tabela'); if (!box) return;
+    if (status !== 'ok') { fill(box, stateMsg()); return; }
+    if (!tbAgrupadores().some(a => a[0] === tbGrupo)) tbGrupo = 'estado';
+    F('tbAgrupar').replaceChildren(...tbAgrupadores().map(([v, l]) => h('option',{value:v}, 'Agrupar: ' + l)));
+    F('tbAgrupar').value = tbGrupo;
+    const cols = tbColunas().filter(c => !c.oculta);
+    const grupos = {}, ordemG = [];
+    lista.forEach(x => { const g = tbGrupoDe(x); if (!grupos[g.k]) { grupos[g.k] = Object.assign(g, {xs: []}); ordemG.push(g.k); } grupos[g.k].xs.push(x); });
+    ordemG.sort((a, b) => { const A = grupos[a], B = grupos[b]; return A.desc ? String(B.ordem).localeCompare(String(A.ordem)) : (A.ordem - B.ordem) || String(A.nome).localeCompare(String(B.nome), 'pt'); });
+    if (tbArr || tbCol) { tbPendente = true; return; }
+    tbAplicaLarguras();
+    const thead = h('thead',null, h('tr',null, cols.map(c => h('th',{class: 'k-' + c.id + (c.id === 'cliente' ? ' tb-cli' : '') + (['valor','prob','previsao'].indexOf(c.id) >= 0 || c.tipo === 'numero' ? ' num' : '') + (c.fixa || !canWrite ? '' : ' tb-mov'), 'data-col': c.id},
+      h('span',null, c.nome), c.fixa || !canWrite ? null : h('button',{class:'tb-hm', type:'button', 'aria-label':'Opções da coluna ' + c.nome, onclick: ev => { ev.stopPropagation(); tbMenuCabecalho(ev.currentTarget, c); }}, '⋯'),
+      h('span',{class:'tb-rz', 'aria-hidden':'true', title:'Arrastar para mudar a largura'}))),
+      h('th',{class:'tb-mais'}, canWrite ? h('button',{type:'button', 'aria-label':'Juntar ou esconder colunas', title:'Colunas', onclick: ev => tbMenuColunas(ev.currentTarget)}, '+') : null)));
+    const corpos = ordemG.map(k => {
+      const g = grupos[k], fechado = !!tbFechados[tbGrupo + '|' + k];
+      const soma = g.xs.reduce((t, x) => t + valorN(x.r), 0), prev = g.xs.reduce((t, x) => t + previsaoDe(x.r), 0);
+      const cab = h('tr',{class:'tb-gh', style:`--g:${g.cor}`}, h('td',{colspan: String(cols.length + 1)},
+        h('button',{type:'button', class:'tb-gt', 'aria-expanded': String(!fechado), onclick:() => { tbFechados[tbGrupo + '|' + k] = !fechado; try { localStorage.setItem('registo-grupos-fechados', JSON.stringify(tbFechados)); } catch (e) {} renderAll(); }},
+          h('span',{class:'tb-chev'}, fechado ? '▸' : '▾'), g.nome), h('span',{class:'tb-gn'}, ` ${g.xs.length} ${g.xs.length === 1 ? 'pedido' : 'pedidos'}${soma ? ' · ' + eur(soma) : ''}`)));
+      if (fechado) return h('tbody',{class:'tb-g', style:`--g:${g.cor}`, 'data-k': k}, cab);
+      const linhas = g.xs.map(x => h('tr',{class:'tb-r' + (ABERTOS.includes(x.r.estado) ? '' : ' fechado'), 'data-id': x.r.id}, cols.map(c => { const td = tbCelula(x, c); td.classList.add('k-' + c.id); return td; }), h('td',{class:'tb-c'})));
+      const pode = canWrite && (tbGrupo !== 'estado' || k === 'novo') && tbGrupo !== 'trimestre' && tbGrupo.indexOf('x:') !== 0;
+      const add = pode ? h('tr',{class:'tb-add'}, h('td',{colspan: String(cols.length + 1)}, h('button',{type:'button', onclick:() => {
+        novoBase = tbGrupo === 'prioridade' ? {prioridade: k} : tbGrupo === 'tipo' && k ? {tipo: k} : {};
+        abrirNovo();
+        if (tbGrupo === 'dono' && k && F('n-dono')) F('n-dono').value = k;
+      }}, '+ Adicionar pedido'))) : null;
+      // Totais: barra de cores dos passos (como a «bateria» do monday), soma do valor e da previsão
+      const porEstado = {}; g.xs.forEach(x => { porEstado[x.r.estado] = (porEstado[x.r.estado] || 0) + 1; });
+      const bateria = h('span',{class:'tb-bat', title: Object.keys(porEstado).map(e => `${(ESTADOS[e] || {}).l || e}: ${porEstado[e]}`).join('\n')},
+        Object.keys(porEstado).map(e => h('i',{style:`background:${tomEstado(e)};width:${(100 * porEstado[e] / g.xs.length).toFixed(1)}%`})));
+      const pm = g.xs.length ? Math.round(g.xs.reduce((t, x) => t + probDe(x.r), 0) / g.xs.length) : 0;
+      const tot = h('tr',{class:'tb-tot'}, cols.map(c => h('td',{class: 'k-' + c.id + (c.id === 'cliente' ? ' tb-cli' : ['valor','previsao','prob'].indexOf(c.id) >= 0 ? ' num' : '')},
+        c.id === 'estado' ? bateria : c.id === 'valor' ? (soma ? eur(soma) : '') : c.id === 'previsao' ? (prev ? eur(prev) : '') : c.id === 'prob' ? `${pm}% méd.` : '')), h('td'));
+      return h('tbody',{class:'tb-g', style:`--g:${g.cor}`, 'data-k': k}, cab, linhas, add, tot);
+    });
+    fill(box, lista.length ? h('table',{class:'tb'}, thead, corpos) : h('p',{class:'t-vazio'}, rows.length ? 'Nenhum pedido com estes filtros.' : 'Ainda não há pedidos.'));
+  }
+
+  // Definições: a probabilidade de fecho de cada passo (o «win probability» da folha de Excel do pipeline).
+  function renderProb() {
+    const box = F('probCfg'); if (!box) return;
+    const p = Object.assign({}, PROB_PADRAO, cfgProb || {});
+    fill(box, h('div',{class:'fields'}, ABERTOS.map(k => campo('prob-' + k, ESTADOS[k].l, inp('prob-' + k, p[k], {type:'number', min:'0', max:'100', step:'5', inputmode:'numeric'})))),
+      canWrite ? h('div',{class:'row-end', style:'margin-top:10px'}, h('button',{class:'btn', type:'button', onclick: async () => {
+        const novo = {};
+        for (const k of ABERTOS) { const n = Number(val('prob-' + k)); if (!(n >= 0 && n <= 100)) { toast('Cada probabilidade vai de 0 a 100.'); return; } novo[k] = n; }
+        novo.resolvido = 100; novo.perdido = 0;
+        const {error} = await sb.from('config').upsert({chave:'probabilidades', valor: novo, atualizado_por: eu.email}, {onConflict:'chave'});
+        if (error) toast('Não foi possível guardar.'); else { cfgProb = novo; toast('Probabilidades guardadas'); renderAll(); }
+      }}, 'Guardar probabilidades')) : null);
+  }
+
+  F('tbAgrupar').addEventListener('change', ev => tbAgrupar(ev.target.value));
+
+  /* ---------- Tabela: arrastar ----------
+     Colunas: arrastar o cabeçalho muda a ordem (para a equipa, config «colunas».ordem); a beira direita muda a largura
+     (de cada pessoa). Linhas: a pega «⠿» leva o pedido para outro grupo; só acendem os grupos permitidos. Por Passo abre
+     a mudança curta (as regras do processo); por Prioridade pede o motivo; por Dono, Tipo ou coluna da equipa muda logo,
+     com histórico e «Desfazer». Rato: arrastar. Toque: carregar meio segundo e arrastar. */
+  let tbArr = null, tbCol = null, tbPendente = false;
+  // O clique que o browser dispara ao largar não conta (não fecha o editor que o largar abriu nem recolhe um grupo).
+  document.addEventListener('click', ev => { if (kSoltou) { ev.stopPropagation(); ev.preventDefault(); } }, true);
+  const tbArrastavel = () => ['estado', 'dono', 'prioridade', 'tipo'].indexOf(tbGrupo) >= 0 || tbGrupo.indexOf('x:') === 0;
+  function tbAlvosLinha(r, chaves) {
+    const ok = {};
+    if (tbGrupo === 'estado') { const a = kAlvos(r); chaves.forEach(k => { if (a[k]) ok[k] = a[k]; }); return ok; }
+    const atual = tbGrupoDe({r, pe: pEfetiva(r, relogio(r))}).k;
+    chaves.forEach(k => { if (k === atual) return; if (tbGrupo === 'dono' && !k && ABERTOS.includes(r.estado)) return; ok[k] = true; });
+    return ok;
+  }
+  function tbFimSujo() { if (tbPendente) { tbPendente = false; renderAll(); } }
+  function tbLargou(r, k, alvo, linha) {
+    if (tbGrupo === 'estado') {
+      openSheet(r.id);
+      if (alvo.agenda) agAbrir('sheet', r.id, r.tipo === 'manutencao' || r.tipo === 'reparacao' ? r.tipo : 'visita', null, 'sug'); else abrirTrans(alvo);
+    } else if (tbGrupo === 'dono') tbGuardar(r, 'dono', k, 'Dono', r.dono || 'vazio', k || 'vazio');
+    else if (tbGrupo === 'prioridade') { const td = linha && linha.querySelector('.k-prioridade'); tbPrioridade(td || linha, r, k); }
+    else if (tbGrupo === 'tipo') tbGuardar(r, 'tipo', k, 'Tipo', tbTexto('tipo', r.tipo), tbTexto('tipo', k));
+    else if (tbGrupo.indexOf('x:') === 0) {
+      const c = tbCfg().extra.find(z => z.id === tbGrupo.slice(2)); if (!c) return;
+      const antes = (r.extra || {})[c.id];
+      tbGuardar(r, {extra: c.id}, k, c.nome, antes || 'vazio', k || 'vazio');
+    }
+  }
+  function tbComecaLinha(tr, x, y) {
+    const r = rows.find(z => z.id === tr.getAttribute('data-id')); if (!r) return;
+    const corpos = Array.prototype.slice.call(document.querySelectorAll('#tabela tbody.tb-g'));
+    const alvos = tbAlvosLinha(r, corpos.map(c => c.getAttribute('data-k')));
+    const fant = h('div',{class:'tb-fant'}, r.cliente || r.id);
+    document.body.appendChild(fant);
+    tbArr = {r, tr, alvos, fant, sobre: null};
+    tr.classList.add('karr'); document.body.classList.add('a-arrastar');
+    corpos.forEach(c => c.classList.add(alvos[c.getAttribute('data-k')] ? 'alvo' : c.contains(tr) ? 'origem' : 'fora'));
+    tbMoveLinha(x, y);
+  }
+  function tbAutoScroll(x, y) {
+    const w = document.querySelector('.tb-wrap'); if (!w) return;
+    // a parte da tabela que se vê (pode passar do fundo do ecrã); quando a tabela já não desce, desce a página
+    const b = w.getBoundingClientRect(), cima = Math.max(b.top, 0), baixo = Math.min(b.bottom, window.innerHeight);
+    if (y < cima + 40) { if (w.scrollTop > 0) w.scrollTop -= 16; else window.scrollBy(0, -16); }
+    else if (y > baixo - 40) { if (w.scrollTop + w.clientHeight < w.scrollHeight) w.scrollTop += 16; else window.scrollBy(0, 16); }
+    if (x < b.left + 40) w.scrollLeft -= 16; else if (x > b.right - 40) w.scrollLeft += 16;
+  }
+  function tbMoveLinha(x, y) {
+    if (!tbArr) return;
+    tbArr.fant.style.transform = `translate(${x + 12}px, ${y - 14}px)`;
+    const el = document.elementFromPoint(x, y);
+    const c = el && el.closest ? el.closest('#tabela tbody.tb-g') : null;
+    if (tbArr.sobre && tbArr.sobre !== c) tbArr.sobre.classList.remove('sobre');
+    tbArr.sobre = c && c.classList.contains('alvo') ? c : null;
+    if (tbArr.sobre) tbArr.sobre.classList.add('sobre');
+    tbAutoScroll(x, y);
+  }
+  function tbFimLinha(largou) {
+    if (!tbArr) return;
+    const {r, tr, alvos, sobre} = tbArr;
+    tbArr.fant.remove(); tr.classList.remove('karr'); document.body.classList.remove('a-arrastar');
+    Array.prototype.forEach.call(document.querySelectorAll('#tabela tbody.tb-g'), c => c.classList.remove('alvo', 'fora', 'origem', 'sobre'));
+    tbArr = null;
+    kSoltou = true; setTimeout(() => { kSoltou = false; }, 350);
+    tbFimSujo();
+    if (!largou || !sobre) return;
+    const k = sobre.getAttribute('data-k');
+    tbLargou(r, k, alvos[k], document.querySelector(`#tabela tr[data-id="${r.id}"]`));
+  }
+  // Colunas: mudar a ordem
+  function tbComecaCol(th, x) {
+    const ths = Array.prototype.slice.call(th.parentNode.children).filter(t => t.getAttribute('data-col'));
+    const guia = h('div',{class:'tb-guia'});
+    document.body.appendChild(guia);
+    tbCol = {th, id: th.getAttribute('data-col'), ths, guia, antes: null};
+    th.classList.add('karr'); document.body.classList.add('a-arrastar');
+    tbMoveCol(x);
+  }
+  function tbMoveCol(x) {
+    if (!tbCol) return;
+    // a coluna vai para antes da primeira (que não seja fixa) cujo meio fica à direita do cursor
+    const movs = tbCol.ths.filter(t => t.classList.contains('tb-mov'));
+    let antes = null;
+    for (let i = 0; i < movs.length; i++) { const b = movs[i].getBoundingClientRect(); if (x < b.left + b.width / 2) { antes = movs[i]; break; } }
+    tbCol.antes = antes;
+    const ref = antes ? antes.getBoundingClientRect() : movs[movs.length - 1].getBoundingClientRect();
+    const xl = antes ? ref.left : ref.right;
+    const t = document.querySelector('#tabela table').getBoundingClientRect(), w = document.querySelector('.tb-wrap').getBoundingClientRect();
+    tbCol.guia.style.left = (xl - 1) + 'px'; tbCol.guia.style.top = Math.max(t.top, w.top) + 'px'; tbCol.guia.style.height = (Math.min(t.bottom, w.bottom) - Math.max(t.top, w.top)) + 'px';
+    tbAutoScroll(x, (w.top + w.bottom) / 2);
+  }
+  function tbFimCol(largou) {
+    if (!tbCol) return;
+    const {th, id, guia, antes} = tbCol;
+    guia.remove(); th.classList.remove('karr'); document.body.classList.remove('a-arrastar');
+    tbCol = null;
+    kSoltou = true; setTimeout(() => { kSoltou = false; }, 350);
+    if (!largou) { tbFimSujo(); return; }
+    const ids = tbColunas().filter(c => !c.fixa).map(c => c.id).filter(z => z !== id);
+    const i = antes ? ids.indexOf(antes.getAttribute('data-col')) : -1;
+    if (i < 0) ids.push(id); else ids.splice(i, 0, id);
+    const atual = tbColunas().filter(c => !c.fixa).map(c => c.id);
+    if (ids.join() === atual.join()) { tbFimSujo(); return; }
+    tbPendente = false;
+    tbGuardarCfg({ordem: ids}, 'Ordem das colunas guardada');
+  }
+  // Colunas: mudar a largura
+  let tbRz = null;
+  function tbMoveRz(x) { if (!tbRz) return; const w = Math.max(60, Math.min(480, Math.round(tbRz.w + x - tbRz.x))); tbLarg[tbRz.id] = w; tbAplicaLarguras(); }
+  function tbFimRz() { if (!tbRz) return; tbRz = null; document.body.classList.remove('a-redimensionar'); tbGuardaLarguras(); kSoltou = true; setTimeout(() => { kSoltou = false; }, 350); }
+  (function () {
+    const box = F('tabela');
+    let ini = null, temp = null;
+    const inicio = (ev, x, y) => {
+      if (!canWrite) return null;
+      const rz = ev.target.closest('.tb-rz');
+      if (rz) { const th = rz.closest('th'); tbRz = {id: th.getAttribute('data-col'), x, w: th.getBoundingClientRect().width}; document.body.classList.add('a-redimensionar'); return 'rz'; }
+      const pega = ev.target.closest('.tb-pega');
+      if (pega) return {tipo: 'linha', el: pega.closest('tr'), x, y};
+      const th = ev.target.closest('th.tb-mov');
+      if (th && !ev.target.closest('button')) return {tipo: 'col', el: th, x, y};
+      return null;
+    };
+    const arranca = (i, x, y) => { if (i.tipo === 'linha') tbComecaLinha(i.el, x, y); else tbComecaCol(i.el, x); };
+    box.addEventListener('mousedown', ev => {
+      if (ev.button !== 0) return;
+      const i = inicio(ev, ev.clientX, ev.clientY);
+      if (i === 'rz') { ev.preventDefault(); return; }
+      if (i) { ini = i; if (i.tipo === 'linha') ev.preventDefault(); }
+    });
+    document.addEventListener('mousemove', ev => {
+      if (tbRz) { tbMoveRz(ev.clientX); ev.preventDefault(); return; }
+      if (tbArr) { tbMoveLinha(ev.clientX, ev.clientY); ev.preventDefault(); return; }
+      if (tbCol) { tbMoveCol(ev.clientX); ev.preventDefault(); return; }
+      if (ini && Math.abs(ev.clientX - ini.x) + Math.abs(ev.clientY - ini.y) > 6) { arranca(ini, ev.clientX, ev.clientY); ini = null; }
+    });
+    document.addEventListener('mouseup', () => { ini = null; if (tbRz) tbFimRz(); if (tbArr) tbFimLinha(true); if (tbCol) tbFimCol(true); });
+    box.addEventListener('touchstart', ev => {
+      if (ev.touches.length !== 1) return;
+      const t = ev.touches[0], i = inicio(ev, t.clientX, t.clientY);
+      if (i === 'rz') return;
+      if (!i) return;
+      ini = i; clearTimeout(temp);
+      // a pega da linha arranca logo; o cabeçalho espera meio segundo (para o dedo poder deslizar a tabela)
+      if (i.tipo === 'linha') { arranca(i, i.x, i.y); ini = null; }
+      else temp = setTimeout(() => { if (ini) { arranca(ini, ini.x, ini.y); ini = null; } }, 450);
+    }, {passive: true});
+    document.addEventListener('touchmove', ev => {
+      const t = ev.touches[0];
+      if (tbRz) { ev.preventDefault(); tbMoveRz(t.clientX); return; }
+      if (tbArr) { ev.preventDefault(); tbMoveLinha(t.clientX, t.clientY); return; }
+      if (tbCol) { ev.preventDefault(); tbMoveCol(t.clientX); return; }
+      if (ini && Math.abs(t.clientX - ini.x) + Math.abs(t.clientY - ini.y) > 10) { clearTimeout(temp); ini = null; }
+    }, {passive: false});
+    document.addEventListener('touchend', ev => { clearTimeout(temp); ini = null; if (tbRz) tbFimRz(); if (tbArr) { ev.preventDefault(); tbFimLinha(true); } if (tbCol) { ev.preventDefault(); tbFimCol(true); } });
+    document.addEventListener('touchcancel', () => { clearTimeout(temp); ini = null; tbFimRz(); tbFimLinha(false); tbFimCol(false); });
+    document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { tbFimLinha(false); tbFimCol(false); } });
+  })();
+
+
+  /* ---------- Números: painel de widgets (ao estilo do dashboard do monday) ----------
+     Tudo calculado na página, com os dados que já existem: a faturação vem dos SAF-T (Faturação) ou, sem eles, das
+     faturas registadas nos pedidos; os objetivos estão em config, chave «objetivos» (mudam-se em Definições ou no próprio
+     widget). Não precisa de painel.sql. */
+  let cfgObjetivos = null;
+  const DASH_NS = 'http://www.w3.org/2000/svg';
+  const sv = (t, a, txt) => { const e = document.createElementNS(DASH_NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+  const kEur = v => Math.abs(v) >= 1000 ? `${(v / 1000).toLocaleString('pt-PT', {maximumFractionDigits: 1})} k€` : `${Math.round(v)} €`;
+  // Faturado sem IVA por mês (AAAA-MM): os SAF-T quando existem para esse mês, senão as faturas registadas nos pedidos.
+  function faturadoMes(ym) {
+    if (faturacao[ym]) return {v: liquidoMes(ym), fonte: 'saft'};
+    const v = rows.filter(r => String(r.dataFatura || '').slice(0, 7) === ym).reduce((t, r) => t + (Number(r.valorFatura) || 0), 0);
+    return {v, fonte: 'pedidos'};
+  }
+  function dashCartao(titulo, corpo, extra, largo) {
+    return h('section',{class:'dw' + (largo ? ' largo' : '')}, h('div',{class:'dw-h'}, h('h3',null, titulo), extra || null), corpo);
+  }
+  // Mudar um objetivo no próprio widget (fica em config, chave «objetivos»)
+  function dashObjetivo(botao, chave, nome) {
+    const atual = (cfgObjetivos || {})[chave];
+    const input = h('input',{type:'text', inputmode:'decimal', value: atual ? String(atual).replace('.', ',') : '', placeholder:'por exemplo 150 000'});
+    tbEditor(botao, nome + ' (sem IVA)', input, () => {
+      const v = input.value.trim() ? parseValor(input.value) : null;
+      if (v != null && (Number.isNaN(v) || v < 0)) return 'Escreve um valor em euros.';
+      dashGuardaObj(Object.assign({}, cfgObjetivos || {}, {[chave]: v}));
+      return null;
+    }, chave === 'mensal' ? 'Vazio: o objetivo anual a dividir por 12.' : null);
+  }
+  async function dashGuardaObj(novo) {
+    fechaPop();
+    const {error} = await sb.from('config').upsert({chave:'objetivos', valor: novo, atualizado_por: eu.email}, {onConflict:'chave'});
+    if (error) { toast(/permiss|row-level/.test(String(error.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar o objetivo.'); return; }
+    cfgObjetivos = novo; toast('Objetivo guardado'); renderAll();
+  }
+  // Conta-quilómetros: meia circunferência, arco do valor e ponteiro.
+  function dashGauge(v, alvo) {
+    const W = 240, H = 140, cx = 120, cy = 120, r = 92, f = alvo ? Math.max(0, Math.min(1, v / alvo)) : 0;
+    const pt = a => [cx + r * Math.cos(Math.PI * (1 - a)), cy - r * Math.sin(Math.PI * (1 - a))];
+    const arco = (a0, a1) => { const [x0, y0] = pt(a0), [x1, y1] = pt(a1); return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`; };
+    const s = sv('svg', {viewBox:`0 0 ${W} ${H}`, class:'dw-gauge', role:'img', 'aria-label': alvo ? `${Math.round(f * 100)}% do objetivo` : 'Sem objetivo'});
+    s.appendChild(sv('path', {d: arco(0, 1), class:'g-fundo'}));
+    if (f > 0) s.appendChild(sv('path', {d: arco(0, Math.max(f, 0.005)), class:'g-valor'}));
+    const [nx, ny] = [cx + (r - 18) * Math.cos(Math.PI * (1 - f)), cy - (r - 18) * Math.sin(Math.PI * (1 - f))];
+    s.appendChild(sv('line', {x1: cx, y1: cy, x2: nx.toFixed(1), y2: ny.toFixed(1), class:'g-ponteiro'}));
+    s.appendChild(sv('circle', {cx, cy, r: 6, class:'g-centro'}));
+    s.appendChild(sv('text', {x: cx, y: cy - 34, 'text-anchor':'middle', class:'g-pct'}, alvo ? `${Math.round(v / alvo * 100)}%` : ''));
+    return s;
+  }
+  // Uma cor por passo, pela ordem do processo (tomEstado repete cores entre passos vizinhos).
+  const DASH_CORES = ['#579BFC','#F2A33A','#A25DDC','#00A86B','#E2445C','#66CCFF','#0D6788','#9CD326','#7F8C8D'];
+  function dashDonut(partes, total) {
+    const s = sv('svg', {viewBox:'0 0 120 120', class:'dw-donut', role:'img', 'aria-label':'Pedidos abertos por passo'});
+    let a = -Math.PI / 2;
+    const R = 52, r = 32;
+    partes.forEach(pp => {
+      const ang = 2 * Math.PI * pp.n / total, a1 = a + Math.min(ang, 2 * Math.PI - 0.0001);
+      const g = (rad, t) => [60 + rad * Math.cos(t), 60 + rad * Math.sin(t)];
+      const [x0, y0] = g(R, a), [x1, y1] = g(R, a1), [x2, y2] = g(r, a1), [x3, y3] = g(r, a), big = ang > Math.PI ? 1 : 0;
+      const p = sv('path', {d:`M${x0} ${y0} A${R} ${R} 0 ${big} 1 ${x1} ${y1} L${x2} ${y2} A${r} ${r} 0 ${big} 0 ${x3} ${y3} Z`, style:`fill:${pp.cor}`, class:'d-fatia'});
+      p.appendChild(sv('title', {}, `${pp.nome}: ${pp.n}`));
+      p.addEventListener('click', () => irPara(pp.k));
+      s.appendChild(p); a = a1;
+    });
+    s.appendChild(sv('text', {x: 60, y: 58, 'text-anchor':'middle', class:'d-n'}, String(total)));
+    s.appendChild(sv('text', {x: 60, y: 74, 'text-anchor':'middle', class:'d-l'}, 'abertos'));
+    return s;
+  }
+  function dashBarras(dados, destaque) {
+    const W = 520, H = 200, L = 8, R = 8, T = 22, B = 24, pw = W - L - R, ph = H - T - B, gw = pw / dados.length, bw = Math.min(34, gw * 0.62);
+    const max = Math.max(1, ...dados.map(d => d.v));
+    const s = sv('svg', {viewBox:`0 0 ${W} ${H}`, class:'dw-barras', role:'img', 'aria-label':'Faturado por mês'});
+    s.appendChild(sv('line', {x1: L, x2: W - R, y1: T + ph, y2: T + ph, class:'b-eixo'}));
+    dados.forEach((d, i) => {
+      const x = L + gw * i + (gw - bw) / 2, hh = ph * Math.max(0, d.v) / max;
+      const g = sv('g', {class: d.ym === destaque ? 'b-atual' : ''});
+      g.appendChild(sv('title', {}, `${mesTxt(d.ym)}: ${eur(d.v)}${d.fonte === 'pedidos' ? ' (faturas dos pedidos)' : ''}`));
+      g.appendChild(sv('rect', {x: x.toFixed(1), y: (T + ph - hh).toFixed(1), width: bw.toFixed(1), height: Math.max(0, hh).toFixed(1), rx: 3, class:'b-barra'}));
+      if (d.v > 0) g.appendChild(sv('text', {x: (x + bw / 2).toFixed(1), y: (T + ph - hh - 5).toFixed(1), 'text-anchor':'middle', class:'b-v'}, kEur(d.v)));
+      g.appendChild(sv('text', {x: (x + bw / 2).toFixed(1), y: H - 6, 'text-anchor':'middle', class:'b-m'}, MES[Number(d.ym.slice(5)) - 1]));
+      s.appendChild(g);
+    });
+    return s;
+  }
+  function renderDash() {
+    const box = F('dash'); if (!box) return;
+    if (status !== 'ok') { fill(box, stateMsg()); return; }
+    const hoje = today(), ano = hoje.slice(0, 4), mesAtual = hoje.slice(0, 7);
+    const obj = cfgObjetivos || {}, anual = Number(obj.anual) || 0, mensal = Number(obj.mensal) || (anual ? anual / 12 : 0);
+    // 12 meses até este
+    const meses = [];
+    for (let i = 11; i >= 0; i--) { const d = new Date(Number(ano), Number(hoje.slice(5, 7)) - 1 - i, 1); meses.push(`${d.getFullYear()}-${pad(d.getMonth() + 1)}`); }
+    const porMes = meses.map(ym => Object.assign({ym}, faturadoMes(ym)));
+    const temSaft = porMes.some(d => d.fonte === 'saft');
+    const noAno = meses.filter(ym => ym.slice(0, 4) === ano).reduce((t, ym) => t + faturadoMes(ym).v, 0);
+    const noMes = faturadoMes(mesAtual).v;
+    const fonte = temSaft ? 'SAF-T' + (porMes.some(d => d.fonte === 'pedidos' && d.v) ? ' e faturas dos pedidos' : '') : 'faturas registadas nos pedidos';
+    const ed = (chave, nome) => canWrite ? h('button',{class:'dw-ed', type:'button', onclick: ev => { ev.stopPropagation(); dashObjetivo(ev.currentTarget, chave, nome); }}, (chave === 'anual' ? anual : obj.mensal) ? 'Mudar' : 'Definir objetivo') : null;
+    // 1. objetivo anual
+    const w1 = dashCartao(`Objetivo anual ${ano}`, h('div',{class:'dw-gwrap'}, dashGauge(noAno, anual),
+      h('div',{class:'dw-par'}, h('div',null, h('small',null,'Faturado'), h('b',null, kEur(noAno))), h('div',null, h('small',null,'Objetivo'), h('b',null, anual ? kEur(anual) : 'por definir')))), ed('anual', 'Objetivo anual'));
+    // 2. objetivo do mês
+    const fm = mensal ? Math.min(1, noMes / mensal) : 0;
+    const w2 = dashCartao('Objetivo do mês', h('div',{class:'dw-mes'},
+      h('div',{class:'dw-bar'}, h('i',{style:`width:${(fm * 100).toFixed(1)}%`})),
+      h('div',{class:'dw-par'}, h('div',null, h('small',null, mesTxt(mesAtual)), h('b',null, kEur(noMes))), h('div',null, h('small',null,'Objetivo'), h('b',null, mensal ? kEur(mensal) : 'por definir')))), ed('mensal', 'Objetivo mensal'));
+    // 3. valor médio dos orçamentos (12 meses)
+    const d365 = addDays(hoje, -365);
+    const orcs = rows.filter(r => r.num && valorN(r) > 0 && String(r.dataEnvio || r.dataPedido || '').slice(0, 10) >= d365);
+    const media = orcs.length ? orcs.reduce((t, r) => t + valorN(r), 0) / orcs.length : 0;
+    const w3 = dashCartao('Valor médio dos orçamentos', h('div',{class:'dw-num'}, h('b',null, orcs.length ? eur(media) : 'sem dados'), h('small',null, orcs.length ? `${orcs.length} orçamentos nos últimos 12 meses` : 'Ainda sem orçamentos com valor')));
+    // 4. previsão dos pedidos abertos
+    const ab = rows.filter(r => ABERTOS.includes(r.estado));
+    const prev = ab.reduce((t, r) => t + previsaoDe(r), 0), emJogo = ab.reduce((t, r) => t + valorN(r), 0);
+    const w4 = dashCartao('Previsão em aberto', h('button',{class:'dw-num', type:'button', onclick:() => { setTab('gerir'); tbAgrupar('estado'); }},
+      h('b',null, eur(prev)), h('small',null, emJogo ? `de ${eur(emJogo)} em pedidos abertos (valor × probabilidade)` : 'Sem valores nos pedidos abertos')));
+    // 5. pedidos abertos por passo
+    const porEstado = ABERTOS.map((k, i) => ({k, nome: ESTADOS[k].l, cor: DASH_CORES[i % DASH_CORES.length], n: ab.filter(r => r.estado === k).length})).filter(x => x.n);
+    const w5 = dashCartao('Pedidos abertos por passo', ab.length ? h('div',{class:'dw-pie'}, dashDonut(porEstado, ab.length),
+      h('ul',{class:'dw-leg'}, porEstado.map(x => h('li',null, h('button',{type:'button', onclick:() => irPara(x.k)}, h('i',{style:`background:${x.cor}`}), x.nome, h('b',null, `${Math.round(100 * x.n / ab.length)}%`)))))) : h('p',{class:'empty'}, 'Nenhum pedido aberto.'));
+    // 6. faturado por mês
+    const w6 = dashCartao('Faturado por mês', h('div',null, dashBarras(porMes, mesAtual), h('p',{class:'dw-fonte'}, `Sem IVA. Fonte: ${fonte}.`)), null, true);
+    fill(box, w1, w2, w3, w4, w5, w6);
+  }
+
+  // Definições: objetivos de faturação
+  function renderObjCfg() {
+    const box = F('objCfg'); if (!box) return;
+    const o = cfgObjetivos || {};
+    fill(box, h('div',{class:'fields'},
+      campo('obj-anual', 'Objetivo anual (sem IVA)', inp('obj-anual', o.anual ? String(o.anual).replace('.', ',') : '', {inputmode:'decimal', placeholder:'por exemplo 150 000'})),
+      campo('obj-mensal', 'Objetivo mensal (sem IVA)', inp('obj-mensal', o.mensal ? String(o.mensal).replace('.', ',') : '', {inputmode:'decimal', placeholder:'vazio: anual a dividir por 12'}))),
+      canWrite ? h('div',{class:'row-end', style:'margin-top:10px'}, h('button',{class:'btn', type:'button', onclick:() => {
+        const a = val('obj-anual') ? parseValor(val('obj-anual')) : null, m = val('obj-mensal') ? parseValor(val('obj-mensal')) : null;
+        if ((a != null && (Number.isNaN(a) || a < 0)) || (m != null && (Number.isNaN(m) || m < 0))) { toast('Os objetivos são valores em euros.'); return; }
+        dashGuardaObj({anual: a, mensal: m});
+      }}, 'Guardar objetivos')) : null);
+  }
 
   /* ---------- Faturação (SAF-T) ---------- */
   // faturacao: {mes: {mes, periodo:{de, ate}, ficheiro, gerado, docs:[...], recibos:[...], por}}. Lido do Supabase (tabela faturacao)
@@ -2567,7 +3288,9 @@ if (!Element.prototype.replaceChildren) {
 
   function renderPainel() {
     var aviso = F('pnAviso');
-    aviso.hidden = !pnErro; aviso.textContent = pnErro;
+    // Sem painel.sql, os widgets de cima chegam; as partes que vêm das vistas não aparecem.
+    F('pnVistas').hidden = pnFalta; F('pnCobSec').hidden = pnFalta;
+    aviso.hidden = !pnErro || pnFalta; aviso.textContent = pnErro;
     var ids = ['pnFila','pnPassos','pnAtrasos','pnFollow','pnCarga','pnBloq','pnTempos','pnFunil','pnPerdas','pnTend'];
     if (!pn) {
       ids.forEach(function (id) { F(id).replaceChildren(h('p',{class:'empty'}, pnErro ? 'Sem dados.' : 'A carregar o Painel…')); });
@@ -2843,12 +3566,13 @@ if (!Element.prototype.replaceChildren) {
     const all = enriquecidos();
     const abertos = all.filter(x => ABERTOS.includes(x.r.estado)).sort(ordem);
     const fechados = all.filter(x => !ABERTOS.includes(x.r.estado)).sort((a,b) => String(b.r.dataFecho || '').localeCompare(String(a.r.dataFecho || '')));
-    const cab = ['Pedido','ORC','Cliente','Contacto','Localidade','Tipo','P','Estado','Bola com','No estado desde','Dono','Próxima ação','Data da ação','Semáforo','Tempo','Valor s/IVA','Data do pedido','Data da visita','Data de envio','Enviado por','Seguimentos','Motivo','Por confirmar','Notas'];
+    const cab = ['Pedido','ORC','Cliente','Contacto','Localidade','Tipo','P','Estado','Bola com','No estado desde','Dono','Próxima ação','Data da ação','Semáforo','Tempo','Valor s/IVA','Data do pedido','Data da visita','Data de envio','Enviado por','Seguimentos','Motivo','Por confirmar','Notas', 'Probabilidade', 'Previsão s/IVA', 'Fecho previsto', ...tbCfg().extra.map(c => c.nome)];
     const linhas = [...abertos, ...fechados].map(({r, rel, sem, pe}) => [
       r.id, r.num, r.cliente, r.contacto, r.localidade, TIPOS[r.tipo] || '', pe.p, (ESTADOS[r.estado] || {}).l || r.estado,
       (ESTADOS[r.estado] || {}).bola || '', r.entrouNoEstado && !r.porConfirmar ? iso(new Date(r.entrouNoEstado)) : '', r.dono, r.proximaAcao, r.dataProximaAcao,
       sem || '', sem ? tempoTxt(r, rel) : '', dec(r.valor), r.dataPedido, r.dataVisita, r.dataEnvio,
       [r.enviadoPor, POR_ONDE[r.enviadoPorOnde]].filter(Boolean).join(', '), r.seguimentos || 0, r.motivo, r.porConfirmar ? 'Sim' : '', r.notas,
+      probDe(r) + '%', dec(previsaoDe(r)), r.dataFechoPrevista, ...tbCfg().extra.map(c => { const v = (r.extra || {})[c.id]; return c.tipo === 'caixa' ? (v ? 'Sim' : '') : v; }),
     ].map(v => typeof v === 'number' ? `"${v}"` : csvCell(v)).join(','));
     return [cab.map(csvCell).join(','), ...linhas].join('\n') + '\n';
   }
@@ -2857,7 +3581,7 @@ if (!Element.prototype.replaceChildren) {
     F('nextNum').textContent = status === 'ok' ? nextNumber() : 'ORC…';
     const verm = all.filter(x => x.sem === 'vermelho').length;
     F('redBadge').textContent = verm ? String(verm) : '';
-    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderExport(); renderEquipa(); renderFaturacao(); renderClientes(); renderPipeline(all); renderSeg(); renderSegCfg(); renderAgenda(); renderAgCfg(); renderInicio(all);
+    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderExport(); renderEquipa(); renderFaturacao(); renderClientes(); renderPipeline(all); renderSeg(); renderSegCfg(); renderAgenda(); renderAgCfg(); renderInicio(all); renderProb(); renderDash(); renderObjCfg();
     F('btnNovoTop').hidden = F('railNovo').hidden = F('btnNovoCliente').hidden = !(canWrite && status === 'ok');
     // Não redesenha a folha aberta enquanto há um formulário a meio.
     if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
@@ -3224,7 +3948,8 @@ if (!Element.prototype.replaceChildren) {
       else if (txt.includes('duplicate key')) m = 'Já existe um pedido com este número.';
       else if (txt.includes('row-level security') || txt.includes('permission')) m = 'A tua conta não tem autorização para gravar.';
       else if (txt.includes('Failed to fetch') || txt.includes('NetworkError')) m = 'Sem ligação. Verifica a internet e tenta outra vez.';
-      if (F('t-err')) erroT(m); else toast(m);
+      // O erro vai para o formulário aberto; sem folha aberta (edição na tabela), aparece em baixo.
+      if (F('t-err') && !F('sheetWrap').hidden) erroT(m); else toast(m);
       return false;
     } finally { saving = false; if (ok) ok.disabled = false; }
   }
@@ -4655,7 +5380,7 @@ if (!Element.prototype.replaceChildren) {
       ]);
       if (p.error) throw p.error;
       rows = p.data.map(r => ({id: r.id, ...r.dados, _versao: r.versao}));
-      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; }
+      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') cfgColunas = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
       if (ft.error) { if (/relation|does not exist|schema cache/i.test(ft.error.message || '')) fatTabela = false; }
       else { fatTabela = true; const novo = {}; for (const x of ft.data) if (x.dados && x.dados.mes) novo[x.dados.mes] = x.dados; faturacao = novo; if (!faturacao[fatMes]) fatMes = ''; }
       if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) fichaTabela = false; }
