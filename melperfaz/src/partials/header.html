@@ -1,26 +1,34 @@
-<header class="topo" data-topo>
-  <nav class="wrap topo-in" aria-label="Principal">
-    <a href="{{ root }}index.html" class="logo"><img src="{{ root }}assets/img/logo-melperfaz.png" alt="Melperfaz, Construção Civil, Lda." class="logo-img" width="400" height="239"></a>
-    <ul class="navlinks">
-      <li><a data-nav-item="servicos" href="{{ root }}index.html#servicos">Serviços</a></li>
-      <li><a data-nav-item="processo" href="{{ root }}index.html#processo">Processo</a></li>
-      <li><a data-nav-item="obras" href="{{ root }}obras.html">Obras</a></li>
-      <li><a data-nav-item="porque-nos" href="{{ root }}index.html#porque-nos">Porquê Nós</a></li>
-    </ul>
-    <a href="{{ root }}index.html#contacto" class="btn topo-btn">Pedir Orçamento</a>
-    <button class="menu-toggle" type="button" data-menu aria-expanded="false" aria-controls="menu-movel" aria-label="Abrir menu"><span aria-hidden="true">≡</span></button>
-  </nav>
-  <!-- menu nos ecrãs estreitos: o botão ≡ abre este painel por baixo do cabeçalho (site.js); sem JavaScript fica escondido
-       e as ligações do rodapé levam às mesmas secções -->
-  <div class="menu-movel" id="menu-movel" hidden>
-    <nav class="wrap menu-movel-in" aria-label="Menu">
-      <a href="{{ root }}index.html#servicos">Serviços</a>
-      <a href="{{ root }}index.html#processo">Processo</a>
-      <a href="{{ root }}obras.html">Obras</a>
-      <a href="{{ root }}index.html#porque-nos">Porquê Nós</a>
-      <a href="{{ root }}index.html#contacto">Contacto</a>
-      <a class="menu-tel" href="{{ site.phoneHref }}">{{ site.phone }}</a>
-      <a class="btn" href="{{ root }}index.html#contacto">Pedir Orçamento</a>
+<!-- Cabeçalho (paper, fixo ao topo). Uma só lista de páginas (data/site.json «menu»), desenhada duas vezes: na barra
+     (computador) e no painel do menu (ecrãs estreitos, abaixo de 980 px). Em computador: telefone, WhatsApp e «Pedir
+     Orçamento»; abaixo de 980 px esses três vivem na barra de ações (barra-acoes.html) e no painel. A variante «reduzido»
+     (obrigado.html) só tem o logótipo e o telefone. -->
+{{#sem page.header}}<div class="menu-fundo" data-menu-fundo hidden></div>
+{{/sem}}<header class="topo{{#se page.header}} topo-reduzido{{/se}}" data-topo>
+  <div class="wrap topo-in">
+    <a href="{{ root }}index.html" class="logo"><img src="{{ root }}assets/img/logo-melperfaz.png" alt="Melperfaz, Construção Civil, Lda." class="logo-img" width="400" height="239"></a>{{#se page.header}}
+    <a class="topo-tel" href="{{ site.phoneHref }}"><span class="so-leitor">Ligar </span>{{ site.phone }}</a>{{/se}}{{#sem page.header}}
+    <nav class="topo-nav" aria-label="Principal">
+      <ul class="navlinks">{{#cada menu}}
+        <li><a data-nav-item="{{ item.id }}" href="{{ item.href }}"{{#se item.atual}} aria-current="page"{{/se}}>{{ item.nome }}</a></li>{{/cada}}
+      </ul>
     </nav>
-  </div>
+    <div class="topo-contactos">
+      <a class="topo-tel" href="{{ site.phoneHref }}"><span class="so-leitor">Ligar </span>{{ site.phone }}{{#se dados.horario}}<span class="topo-horario">{{ dados.horario }}</span>{{/se}}</a>
+      <a class="topo-wa" href="{{wa {{ page.wa }}}}" target="_blank" rel="noopener" aria-label="Falar por WhatsApp"><svg aria-hidden="true" focusable="false"><use href="#i-wa"></use></svg></a>{{#sem emOrcamento}}
+      <a href="{{ pedidoHref }}" class="btn topo-btn">Pedir Orçamento</a>{{/sem}}{{#se emOrcamento}}
+      <span class="topo-atual" aria-current="page">Orçamento gratuito</span>{{/se}}
+    </div>
+    <button class="menu-toggle" type="button" data-menu aria-expanded="false" aria-controls="menu-movel" aria-label="Abrir menu"><span class="menu-barras" aria-hidden="true"><span></span><span></span><span></span></span></button>{{/sem}}
+  </div>{{#sem page.header}}
+  <!-- o painel do menu (ink) por cima de um fundo escurecido (.menu-fundo, fora do cabeçalho: o blur do cabeçalho
+       prenderia nele um elemento fixo); site.js abre e fecha (Esc, clique fora, o foco volta ao botão). Sem JavaScript
+       fica escondido: a barra de ações e o rodapé levam aos mesmos sítios -->
+  <div class="menu-movel s-ink" id="menu-movel" hidden>
+    <nav class="wrap menu-movel-in" aria-label="Menu">{{#cada menu}}
+      <a href="{{ item.href }}"{{#se item.atual}} aria-current="page"{{/se}}>{{ item.nome }}</a>{{/cada}}
+      <a href="{{ pedidoHref }}"{{#se emOrcamento}} aria-current="page"{{/se}}>Pedir Orçamento</a>
+      <a href="{{ site.phoneHref }}">Ligar {{ site.phone }}</a>
+      <a href="{{wa {{ page.wa }}}}" target="_blank" rel="noopener">Falar por WhatsApp</a>
+    </nav>
+  </div>{{/sem}}
 </header>

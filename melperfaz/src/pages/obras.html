@@ -1,14 +1,8 @@
 <!--meta {"file": "obras.html", "title": "Obras · Melperfaz, Construção Civil", "description": "As obras da Melperfaz fotografadas no local pela nossa equipa: reabilitação de edifícios, fachadas e acabamentos, do desmonte ao revestimento novo.", "nav": "obras", "css": ["pag-obras.css"], "jsonld": ["breadcrumb"], "breadcrumb": [["Início", ""], ["Obras", "obras.html"]]} -->
-<section class="sec s-ink pag-cab" aria-labelledby="obrasT">
+{{> page-head eyebrow="Obras" titulo="Cada fotografia é uma obra nossa" intro="Fotografias tiradas no local, durante e no fim de cada trabalho. Abra uma obra para ver o que se fez."}}
+
+<section class="sec s-ink" aria-label="As obras">
   <div class="wrap">
-    <nav class="migalhas" aria-label="Migalhas">
-      <a href="{{ root }}index.html">Início</a><span aria-hidden="true">›</span><span aria-current="page">Obras</span>
-    </nav>
-    <div class="sec-head">
-      <span class="eyebrow">Obras</span>
-      <h1 id="obrasT">Cada fotografia é uma obra nossa</h1>
-      <p>Fotografias tiradas no local, durante e no fim de cada trabalho. Abra uma obra para ver o que se fez.</p>
-    </div>
     <div class="photo-grid" data-obras>
       {{each obra-foto all eager1}}
     </div>
@@ -16,16 +10,4 @@
   </div>
 </section>
 
-<section class="sec cta s-clay" aria-labelledby="obrasCtaT">
-  <div class="wrap cta-inner">
-    <div>
-      <span class="eyebrow">Vamos Conversar</span>
-      <h2 id="obrasCtaT">Quer uma obra assim?</h2>
-      <p>Conte-nos o que precisa de fazer. Visitamos, medimos e damos um orçamento gratuito e sem compromisso.</p>
-    </div>
-    <div class="acoes">
-      <a class="btn" href="{{ root }}index.html#contacto">Pedir Orçamento</a>
-      <a class="btn btn-ghost" href="{{wa geral}}" target="_blank" rel="noopener">Falar por WhatsApp</a>
-    </div>
-  </div>
-</section>
+{{> cta titulo="Quer uma obra assim?" texto="Conte-nos o que precisa de fazer. Visitamos, medimos e damos um orçamento gratuito e sem compromisso."}}

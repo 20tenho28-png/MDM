@@ -10,10 +10,14 @@ Só biblioteca padrão (Python 3.11+). Uso, a partir de melperfaz/:
 A arquitetura é a do site da MDM (website/build.py), reduzida ao que este site usa.
 
 Sintaxe dos modelos (src/):
-    <!--meta {...json...} -->           no topo de cada página: file, title, description, nav, robots, css, jsonld, breadcrumb
+    <!--meta {...json...} -->           no topo de cada página: file, title, description, nav, robots, css, jsonld, breadcrumb,
+                                         header («reduzido»: só o logótipo e o telefone), barra («sem-orcamento» ou «nao»)
     {{ caminho.ponto }}                  valor de site.*, page.*, dados.*, obra.*, root (prefixo relativo à raiz), year, anos
     {{& caminho }}                       o mesmo, sem escapar o HTML
     {{> nome }}                          inclui src/partials/nome.html com o mesmo contexto
+    {{> nome chave="valor" …}}           o mesmo, com parâmetros em {{ p.chave }}: o parcial declara-os no topo com
+                                         <!--parametros {"chave": "por omissão", "outra": null} --> (null: obrigatório);
+                                         um parâmetro que o parcial não declara é erro
     {{foto NN sizes="..." class="..." loading="eager" alt="..." foco="50% 40%"}}   <picture> avif + webp + jpg da fotografia NN
                                          (data/fotos.json; tamanhos feitos por gerar_fotos.py)
     {{wa chave}}                         ligação de WhatsApp com a mensagem site.wa.chave já escrita
@@ -97,10 +101,8 @@ def campos_obra(o):
     o["servico"] = s
     o["catNome"] = s["nome"]
     o["tipoDeObra"] = s["nome"]
-    # o pedido com o tipo já escolhido e a obra de onde veio (campo escondido «pagina»): orcamento.html (fase 4 do plano)
+    # o pedido com o tipo já escolhido e a obra de onde veio (campo escondido «pagina»): orcamento.html
     o["orcamentoHref"] = f"../orcamento.html?tipo={s['id']}&de=obras/{o['slug']}"
-    # enquanto orcamento.html não existe, a ficha leva ao formulário da página inicial com o mesmo ?tipo=<id>
-    o["contactoHref"] = f"../index.html?tipo={s['id']}#contacto"
     # a âncora do grupo da obra em obras.html (relativa à raiz: {{ root }}{{ obra.catAnchor }})
     o["catAnchor"] = f"obras.html#{o['cat']}"
     o.setdefault("destaque", False)
@@ -302,6 +304,33 @@ def blocos(text, ctx, depth):
     return "".join(out)
 
 
+PARAM_RE = re.compile(r"\A\s*<!--parametros\s+(\{.*?\})\s*-->\s*", re.S)
+
+
+def parcial(nome, args, ctx, depth):
+    """{{> nome chave="valor"}}: inclui src/partials/nome.html. Os parâmetros ficam em {{ p.chave }}, com os valores por
+    omissão do <!--parametros {...} --> do parcial. Os valores chegam já escritos em HTML (um {{ obra.title }} lá dentro
+    foi escapado): desfaz-se o escape aqui e {{ p.chave }} escapa uma vez só."""
+    texto = (SRC / "partials" / f"{nome}.html").read_text(encoding="utf-8")
+    dados = dict(ATTR_RE.findall(args))
+    if ATTR_RE.sub("", args).strip():
+        raise SyntaxError(f"{{{{> {nome} {args}}}}}: os parâmetros escrevem-se chave=\"valor\" ({ctx.get('_file', '?')})")
+    m = PARAM_RE.match(texto)
+    if not m:
+        if dados:
+            raise KeyError(f"{{{{> {nome}}}}} não declara parâmetros (<!--parametros {{...}} -->) ({ctx.get('_file', '?')})")
+        return render(texto, ctx, depth + 1)
+    p = json.loads(m.group(1))
+    fora = sorted(set(dados) - set(p))
+    if fora:
+        raise KeyError(f"{{{{> {nome}}}}}: parâmetros que o parcial não declara → {fora} ({ctx.get('_file', '?')})")
+    p.update({k: html.unescape(v) for k, v in dados.items()})
+    falta = sorted(k for k, v in p.items() if v is None)
+    if falta:
+        raise KeyError(f"{{{{> {nome}}}}}: faltam os parâmetros obrigatórios {falta} ({ctx.get('_file', '?')})")
+    return render(texto[m.end():], dict(ctx, p=p), depth + 1)
+
+
 def render(text, ctx, depth=0):
     if depth > 12:
         raise RuntimeError("inclusão recursiva demasiado profunda")
@@ -310,8 +339,8 @@ def render(text, ctx, depth=0):
     def sub(m):
         expr = m.group(1)
         if expr.startswith(">"):
-            name = expr[1:].strip()
-            return render((SRC / "partials" / f"{name}.html").read_text(encoding="utf-8"), ctx, depth + 1)
+            nome, _, args = expr[1:].strip().partition(" ")
+            return parcial(nome, args, ctx, depth)
         if expr.startswith("foto "):
             return foto(ctx, expr[5:])
         if expr.startswith("wa "):
@@ -379,16 +408,39 @@ def breadcrumb_ld(trail):
                                 for i, (n, f) in enumerate(trail)]}
 
 
+# a barra de ações dos ecrãs estreitos (barra-acoes.html): "" em todas as páginas, «sem-orcamento» em orcamento.html (a
+# terceira célula passa a «Enviar fotografias») e «nao» em obrigado.html
+BARRAS = {"": (True, True), "sem-orcamento": (True, False), "nao": (False, False)}
+HEADERS = ("", "reduzido")
+
+
 def page_ctx(meta, file):
-    meta = {"nav": "", "robots": "index,follow", "og": "", "wa": "geral", "tipo": "", "italico": "", **meta}
+    meta = {"nav": "", "robots": "index,follow", "og": "", "wa": "geral", "tipo": "", "italico": "", "header": "", "barra": "",
+            "atualizada": "", **meta}
+    if meta["barra"] not in BARRAS:
+        raise SystemExit(f"{file}: «barra» é {' ou '.join(repr(b) for b in BARRAS)} → {meta['barra']!r}")
+    if meta["header"] not in HEADERS:
+        raise SystemExit(f"{file}: «header» é \"\" ou «reduzido» → {meta['header']!r}")
     if PREVIEW and not NOINDEX_RE.search(meta["robots"]):
         meta["robots"] = "noindex"   # pré-visualização: nenhuma página entra no Google antes do lançamento
     depth = file.count("/")
     # a 404 é servida em qualquer profundidade (/obras/xyz.html): precisa de caminhos absolutos
     root = "/" if file == "404.html" else "../" * depth
+    # as migalhas do PageHead (page-head.html): as de meta «breadcrumb»; a última é a página atual, sem ligação
+    trilho = meta.get("breadcrumb") or []
+    migalhas = [{"nome": n, "href": "" if i == len(trilho) - 1 else root + (f or "index.html")} for i, (n, f) in enumerate(trilho)]
+    mostra_barra, barra_orcamento = BARRAS[meta["barra"]]
     return {"site": SITE, "page": meta, "root": root, "_file": file, "dados": DADOS, "categorias": CATEGORIAS,
             "cat_n": CAT_N, "year": str(ANO), "anos": str(SITE["anos"]), "tipos": TIPOS_DE_OBRA,
-            "servicos": servicos_ctx(root), "provas": SITE["provas"], "menu": SITE["menu"],
+            "servicos": servicos_ctx(root), "provas": SITE["provas"],
+            # o menu (site.json «menu»), igual no cabeçalho e no painel; «atual» dá aria-current sem JavaScript
+            "menu": [{**m, "href": root + m["href"], "atual": "1" if m["id"] == meta["nav"] else ""} for m in SITE["menu"]],
+            "migalhas": migalhas,
+            # em orcamento.html o botão do cabeçalho dá lugar a «Orçamento gratuito» (aria-current)
+            "emOrcamento": "1" if meta["nav"] == "orcamento" else "",
+            "barra": {"mostra": "1" if mostra_barra else "", "orcamento": "1" if barra_orcamento else ""},
+            # «Pedir Orçamento» do cabeçalho e da barra: com ?tipo= e ?de= quando a página os conhece (fichas de obra)
+            "pedidoHref": root + "orcamento.html",
             # cartaoH: o nível do título dos cartões de obra (obra-foto.html); obras.html agrupa-os sob um h2 por serviço
             "cartaoH": str(meta.get("cartaoH", 3)),
             # ficha: «1» nas fichas de obra (o comparador perde o cabeçalho, que repetiria o h1, e carrega as fotos já)
@@ -499,7 +551,7 @@ def build():
                 # a imagem de partilha ao alto fica cortada nas pré-visualizações: só as deitadas; as outras levam a da empresa
                 "og": o["foto"] if o["orient"] == "landscape" else "", "jsonld": ["breadcrumb"],
                 "breadcrumb": [["Início", ""], ["Obras", "obras.html"], [o["title"], file]]}
-        files.append(build_page(meta, tpl, {"obra": o, "related": relacionadas(o),
+        files.append(build_page(meta, tpl, {"obra": o, "related": relacionadas(o), "pedidoHref": o["orcamentoHref"],
                                             "ficha": "1", "baLoading": "eager"}))
     urls = "".join(f"<url><loc>{SITE['baseUrl']}/{'' if f == 'index.html' else f}</loc></url>\n"
                    for f in files if f not in fora_do_mapa)
@@ -601,11 +653,35 @@ def check_cabeca(f, text):
     return out
 
 
+# a página do pedido: o único sítio com o formulário, e o destino de todos os «Pedir Orçamento»
+PAGINA_PEDIDO = "orcamento.html"
+LIGACAO_RE = re.compile(r"<a\b([^>]*)>(.*?)</a>", re.S)
+PEDIR_RE = re.compile(r"^pedir or[cç]amento\b", re.I)
+
+
+def check_pedir(f, text):
+    """Cada «Pedir Orçamento» (botão, ligação, barra) leva a orcamento.html, com ou sem ?tipo= e ?de=."""
+    out = []
+    for attrs, dentro in LIGACAO_RE.findall(text):
+        rotulo = html.unescape(re.sub(r"<[^>]+>", " ", dentro)).split()
+        nome = re.search(r'\baria-label="([^"]*)"', attrs)
+        rotulos = [" ".join(rotulo)] + ([html.unescape(nome.group(1))] if nome else [])
+        if not any(PEDIR_RE.match(r) for r in rotulos):
+            continue
+        href = re.search(r'\bhref="([^"]*)"', attrs)
+        alvo = href.group(1) if href else ""
+        if not re.fullmatch(r"(?:/|(?:\.\./)*)%s(?:\?[^#]*)?" % re.escape(PAGINA_PEDIDO), alvo):
+            out.append(f"{f}: «{rotulos[0]}» tem de levar a {PAGINA_PEDIDO} → href=\"{alvo}\"")
+    return out
+
+
 def check_formulario(f, text):
-    """O formulário de orçamento, onde existir, é o mesmo formulário Netlify em todas as páginas."""
+    """O formulário de orçamento existe só em orcamento.html e é o formulário Netlify «orcamento»."""
     m = FORM_RE.search(text)
     if not m:
-        return []
+        return [f"{f}: falta o formulário de orçamento (#quoteForm)"] if f == PAGINA_PEDIDO else []
+    if f != PAGINA_PEDIDO:
+        return [f"{f}: o formulário de orçamento só existe em {PAGINA_PEDIDO}"]
     form = m.group(0)
     abre = form[:form.index(">") + 1]
     out = [f"{f}: formulário sem{x}" for x in FORM_EXIGE if x not in abre]
@@ -835,6 +911,7 @@ def check(files):
         problems += texto_proibido(f, text)
         problems += check_cabeca(f, text)
         problems += check_formulario(f, text)
+        problems += check_pedir(f, text)
         for a, b, c in REF_RE.findall(text):
             refs = [a] if a else ([s.strip().split()[0] for s in b.split(",")] if b else [c.strip("'\"")])
             for r in refs:
@@ -843,6 +920,8 @@ def check(files):
                 target = (OUT / r.lstrip("/")) if r.startswith("/") else (path.parent / r).resolve()
                 if not target.exists():
                     problems.append(f"{f}: referência partida → {r}")
+    if PAGINA_PEDIDO not in files:
+        problems.append(f"falta a página {PAGINA_PEDIDO} (o formulário de orçamento)")
     problems += check_preview() + check_fotos() + check_dados() + check_obras()
     for css in sorted((OUT / "assets" / "css").glob("*.css")):
         problems += check_css(css.name, css.read_text(encoding="utf-8"))

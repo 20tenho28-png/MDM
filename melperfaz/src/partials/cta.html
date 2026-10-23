@@ -1,0 +1,24 @@
+<!--parametros {"id": "", "eyebrow": "Vamos conversar", "titulo": null, "texto": null, "tipo": "", "de": "", "waHref": "", "waRotulo": "Falar por WhatsApp", "ref": ""} -->
+<!-- CtaBand (clay, texto ink): o fecho de cada página. Um só layout: à esquerda o convite e o telefone em grande (com o
+     horário quando existir), à direita «Pedir Orçamento» (orcamento.html, com ?tipo= e ?de= quando os parâmetros os dão),
+     o WhatsApp (a mensagem de page.wa, ou waHref) e a ProofLine. Parâmetros: titulo e texto (obrigatórios), id da
+     secção, eyebrow, tipo (id do serviço), de (a página de origem), waHref, waRotulo e ref (código da obra). -->
+<section class="sec cta s-clay"{{#se p.id}} id="{{ p.id }}"{{/se}} aria-labelledby="ctaT">
+  <div class="wrap cta-grid">
+    <div class="cta-texto reveal">
+      <span class="eyebrow">{{ p.eyebrow }}</span>
+      <h2 id="ctaT">{{ p.titulo }}</h2>
+      <p class="cta-p">{{ p.texto }}</p>
+      <a href="{{ site.phoneHref }}" class="cta-phone"><span class="so-leitor">Ligar </span>{{ site.phone }}</a>{{#se dados.horario}}
+      <span class="cta-phone-l">{{ dados.horario }}</span>{{/se}}
+    </div>
+    <div class="cta-acoes reveal">
+      <div class="acoes acoes-pilha">
+        <a class="btn" href="{{ root }}orcamento.html{{#se p.tipo}}?tipo={{ p.tipo }}{{#se p.de}}&amp;de={{ p.de }}{{/se}}{{/se}}">Pedir Orçamento</a>
+        <a class="btn btn-ghost" href="{{#se p.waHref}}{{ p.waHref }}{{/se}}{{#sem p.waHref}}{{wa {{ page.wa }}}}{{/sem}}" target="_blank" rel="noopener">{{ p.waRotulo }}</a>
+      </div>{{#se p.ref}}
+      <p class="cta-ref">Referência da obra: {{ p.ref }}</p>{{/se}}
+      {{> prova }}
+    </div>
+  </div>
+</section>

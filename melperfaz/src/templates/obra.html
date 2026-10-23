@@ -1,18 +1,13 @@
-<section class="sec s-ink pag-cab obra-cab" aria-labelledby="obraT">
+{{> page-head eyebrow="{{ obra.servico.nome }}" eyebrowHref="{{ root }}{{ obra.catAnchor }}" titulo="{{ obra.title }}" intro="{{ obra.resumo }}"}}
+
+<!-- a fotografia (ou, na M05, o comparador) à largura do contentor, na mesma superfície do cabeçalho -->
+<section class="sec s-paper sec-junta obra-media" aria-label="Fotografia da obra">
   <div class="wrap">
-    <nav class="migalhas" aria-label="Migalhas">
-      <a href="{{ root }}index.html">Início</a><span aria-hidden="true">›</span><a href="{{ root }}obras.html">Obras</a><span aria-hidden="true">›</span><span aria-current="page">{{ obra.title }}</span>
-    </nav>
-    <div class="sec-head">
-      <span class="eyebrow">{{ obra.servico.nome }} · {{ obra.code }}</span>
-      <h1 id="obraT">{{ obra.title }}</h1>
-      <p>{{ obra.resumo }}</p>
-    </div>
     {{#sem obra.antesDepois}}<div class="obra-foto">{{foto {{ obra.foto }} loading="eager" sizes="{{ obra.fotoSizes }}" class="obra-foto-img" foco="{{ obra.foco }}"}}</div>{{/sem}}{{#se obra.antesDepois}}{{> antes-depois }}{{/se}}
   </div>
 </section>
 
-<section class="sec s-paper obra-corpo" aria-label="Sobre a obra">
+<section class="sec s-paper sec-junta obra-corpo" aria-label="Sobre a obra">
   <div class="wrap duas">
     <div class="prosa">
       <h2>O que se vê na fotografia</h2>
@@ -32,29 +27,17 @@
   </div>
 </section>
 
-<section class="sec cta s-clay" aria-labelledby="obraCtaT">
-  <div class="wrap cta-inner">
-    <div>
-      <span class="eyebrow">Vamos Conversar</span>
-      <h2 id="obraCtaT">Quer uma obra assim?</h2>
-      <p>Peça o orçamento com o tipo de obra já escolhido, ou envie fotografias do seu espaço por WhatsApp.</p>
-    </div>
-    <div class="acoes">
-      <a class="btn" href="{{ obra.contactoHref }}">Pedir Orçamento</a>
-      <a class="btn btn-ghost" href="{{ obra.waHref }}" target="_blank" rel="noopener">Enviar Fotografias por WhatsApp</a>
-    </div>
-  </div>
-</section>
+{{> cta titulo="Quer uma obra assim?" texto="Peça o orçamento com o tipo de obra já escolhido, ou envie fotografias do seu espaço por WhatsApp." tipo="{{ obra.servico.id }}" de="obras/{{ obra.slug }}" waHref="{{ obra.waHref }}" waRotulo="Enviar fotografias por WhatsApp" ref="{{ obra.code }}"}}
 
-<section class="sec s-ink obra-rel" aria-labelledby="obraRelT">
+<!-- outras obras (bone, depois da faixa clay: ink nunca encosta a ink no rodapé); as migalhas já levam a todas -->
+<section class="sec s-bone obra-rel" aria-labelledby="obraRelT">
   <div class="wrap">
     <div class="sec-head">
-      <span class="eyebrow">Obras Semelhantes</span>
+      <span class="eyebrow">Obras semelhantes</span>
       <h2 id="obraRelT">{{ obra.relTitulo }}</h2>
     </div>
     <div class="photo-grid">
       {{each obra-foto ctx:related}}
     </div>
-    <p class="work-mais"><a class="btn btn-ghost" href="{{ root }}obras.html">Ver Todas as Obras</a></p>
   </div>
 </section>

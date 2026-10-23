@@ -1,5 +1,6 @@
 /* Melperfaz: comportamento do site. Sem dependências. O site funciona sem este ficheiro (o formulário envia pelo Netlify
-   para obrigado.html, o comparador fica a meio, o menu dos ecrãs estreitos fica no rodapé). */
+   para obrigado.html, o comparador fica a meio, a página atual já vem marcada no HTML e, nos ecrãs estreitos, a barra de
+   ações e o rodapé levam aos mesmos sítios que o menu). */
 (function () {
   'use strict';
   var d = document;
@@ -8,20 +9,16 @@
   var reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   var TEL = '961 245 288';
 
-  /* ═══ Menu atual ═══ */
-  var nav = d.body.getAttribute('data-nav');
-  if (nav) {
-    qsa('[data-nav-item="' + nav + '"]').forEach(function (a) { a.setAttribute('aria-current', 'page'); });
-  }
-
-  /* ═══ Menu nos ecrãs estreitos ═══ */
+  /* ═══ Menu nos ecrãs estreitos: o painel por cima de um fundo escurecido, sem a página deslizar por trás ═══ */
   (function () {
-    var btn = qs('[data-menu]'), painel = qs('#menu-movel');
+    var btn = qs('[data-menu]'), painel = qs('#menu-movel'), fundo = qs('[data-menu-fundo]');
     if (!btn || !painel) return;
     var aberto = false;
     function abre() {
       aberto = true;
       painel.hidden = false;
+      if (fundo) fundo.hidden = false;
+      d.documentElement.classList.add('menu-aberto');
       btn.setAttribute('aria-expanded', 'true');
       btn.setAttribute('aria-label', 'Fechar menu');
       var primeiro = qs('a', painel);
@@ -31,6 +28,8 @@
       if (!aberto) return;
       aberto = false;
       painel.hidden = true;
+      if (fundo) fundo.hidden = true;
+      d.documentElement.classList.remove('menu-aberto');
       btn.setAttribute('aria-expanded', 'false');
       btn.setAttribute('aria-label', 'Abrir menu');
       if (foco) btn.focus();
@@ -81,8 +80,8 @@
     if ('ResizeObserver' in window) new ResizeObserver(largura).observe(slider);
   });
 
-  /* ═══ Tipo de obra pré-escolhido: ?tipo=<id do serviço> no endereço ou data-preselect numa ligação da própria página.
-     O id é o de data/site.json «servicos» (data-tipo de cada opção); o nome da opção também serve ═══ */
+  /* ═══ Tipo de obra pré-escolhido em orcamento.html: ?tipo=<id do serviço> no endereço. O id é o de data/site.json
+     «servicos» (data-tipo de cada opção); o nome da opção também serve ═══ */
   var tipoSel = qs('#qTipo');
   function escolheTipo(v) {
     if (!tipoSel || !v) return false;
@@ -95,9 +94,6 @@
     if (m) {
       try { escolheTipo(decodeURIComponent(m[1].replace(/\+/g, ' '))); } catch (e) { /* endereço estranho: ignora-se */ }
     }
-    qsa('[data-preselect]').forEach(function (a) {
-      a.addEventListener('click', function () { escolheTipo(a.getAttribute('data-preselect')); });
-    });
   })();
 
   /* ═══ Formulário de pedido (Netlify Forms, sem sair da página) ═══ */

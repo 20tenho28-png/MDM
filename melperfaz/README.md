@@ -32,17 +32,19 @@ Pré-visualizar: `python3 -m http.server -d public 8000` e abrir `http://localho
 | `data/obras.json` | As obras: serviço (`cat`, o de `site.json › servicos`), `destaque` (na página inicial), título, fotografia, o que se vê, os factos (vazios até a empresa os dar), `fotosExtra` |
 | `data/fotos.json` | As fotografias: tamanho do original, origem e texto alternativo. `data/lqip.json` são as prévias (gerado) |
 | `src/templates/` | `layout.html` (a cabeça, o cabeçalho e o rodapé de todas as páginas) e `obra.html` (a ficha de cada obra) |
-| `src/partials/` | Cabeçalho, rodapé, faixa de contacto com o formulário, cartão de obra, comparador antes/depois |
-| `src/pages/` | Página inicial, Obras, obrigado, 404 e privacidade, cada uma com o seu `<!--meta {...} -->` |
-| `assets/css/` | `site.css` (o sistema de desenho), `pag-obras.css`, `pag-paginas.css` |
-| `assets/js/site.js` | Menu nos ecrãs estreitos, entrada ao fazer scroll, comparador, tipo de obra pré-escolhido, envio do formulário sem sair da página |
+| `src/partials/` | Os componentes: `header` (menu de `site.json`, telefone, WhatsApp, «Pedir Orçamento»; variante `reduzido`), `barra-acoes` (Ligar, WhatsApp e Orçamento, fixa em baixo abaixo de 980 px), `footer`, `page-head` (migalhas, eyebrow, h1, introdução), `cta` (a faixa clay), `prova` (a linha de garantias), `orcamento-form` (o único formulário), `obra-foto` (cartão de obra) e `antes-depois` |
+| `src/pages/` | Página inicial, Obras, Pedir Orçamento (`orcamento.html`, com o formulário), obrigado, 404 e privacidade, cada uma com o seu `<!--meta {...} -->` |
+| `assets/css/` | `site.css` (o sistema de desenho), `pag-obras.css`, `pag-paginas.css`, `pag-orcamento.css` (formulário e lateral) |
+| `assets/js/site.js` | Menu nos ecrãs estreitos (com fundo escurecido), entrada ao fazer scroll, comparador, tipo de obra pré-escolhido pelo `?tipo=`, envio do formulário sem sair da página |
 | `assets/fonts/` | Fraunces (normal e itálico) e Archivo, variáveis, só latim, com as licenças (SIL OFL). Nada vem de terceiros |
 | `assets/img/` | Logótipos, favicons, imagem de partilha e `fotos/` (o original `foto-NN.jpg` e os tamanhos em AVIF e WebP) |
 | `tests/` | `site.test.mjs` (o site gerado, sem browser) e `browser.mjs` (Playwright) |
 | `netlify.toml` | A publicação: `python3 build.py`, pasta `public`, cache de um ano para o que leva versão |
 
-A sintaxe dos modelos está no topo de `build.py`: `{{ site.phone }}`, `{{> parcial }}`, `{{foto 01 sizes="…"}}`,
-`{{wa geral}}`, `{{each obra-foto all}}`, `{{#se dados.email}}…{{/se}}`, `{{#cada servicos}}…{{/cada}}`.
+A sintaxe dos modelos está no topo de `build.py`: `{{ site.phone }}`, `{{> parcial }}`, `{{> cta titulo="…" texto="…"}}`
+(parâmetros declarados no topo do parcial com `<!--parametros {...} -->`), `{{foto 01 sizes="…"}}`, `{{wa geral}}`,
+`{{each obra-foto all}}`, `{{#se dados.email}}…{{/se}}`, `{{#cada servicos}}…{{/cada}}`. No `<!--meta {...} -->`,
+`"header": "reduzido"` e `"barra": "sem-orcamento"` ou `"nao"` mudam o cabeçalho e a barra de ações.
 
 ## Regras do texto
 
@@ -55,9 +57,10 @@ As do sistema de desenho («Voz e texto»), conferidas pelo `--check` onde dá:
 - nunca inventar factos: preços, prazos, números, clientes, locais. O que falta fica vazio em `data/` e escondido no site.
 
 Desvios deliberados em relação ao sistema de desenho: as letras alojadas com o site em vez do Google Fonts; um menu para os
-ecrãs estreitos (o botão ≡ entra a 760 px, porque abaixo disso o logótipo, os links e o botão não cabem; o site publicado
-escondia os links a 640 px e o botão não abria nada); âncoras em português; os cartões de serviço como ligações para o
-formulário com o tipo pré-escolhido; a opção «Acabamentos» no formulário; as páginas Obras, fichas, obrigado, 404 e
+ecrãs estreitos (o botão entra a 980 px e a barra de ações em baixo leva o telefone, o WhatsApp e o orçamento; o site
+publicado escondia os links a 640 px e o botão não abria nada); o formulário numa página própria, `orcamento.html`, em vez
+do fundo da página inicial; a bolha de WhatsApp sai (o cabeçalho e a barra já o têm); âncoras em português; os cartões de
+serviço como ligações para o pedido com o tipo pré-escolhido; a opção «Acabamentos» no formulário; as páginas Obras, fichas, obrigado, 404 e
 privacidade; o foco de teclado visível; a imagem de partilha da empresa nas fichas com fotografia ao alto.
 
 A idade da empresa («25 anos») calcula-se do ano de fundação em cada geração do site. O Netlify gera o site em cada
@@ -67,8 +70,8 @@ publicação; se o site ficar um ano sem mudanças, publicar de novo em janeiro 
 
 Ligações, imagens e `srcset` que existem; `?v=` nos CSS e JS; sem sintaxe de modelo nem placeholders; sem travessões,
 emoji ou o telefone escrito de outra forma; `lang`, um só `h1`, título e descrição com tamanho certo, canonical e
-`og:image` no domínio; JSON-LD válido com a empresa; o formulário Netlify com os atributos, os campos e as opções de
-`site.json`; `robots.txt`, `_headers` e `netlify.toml` de acordo com `preview`; todas as fotografias com os tamanhos e a
+`og:image` no domínio; JSON-LD válido com a empresa; o formulário Netlify só em `orcamento.html`, com os atributos, os
+campos e as opções de `site.json`; todos os «Pedir Orçamento» (texto ou `aria-label`) a levar a `orcamento.html`; `robots.txt`, `_headers` e `netlify.toml` de acordo com `preview`; todas as fotografias com os tamanhos e a
 prévia; os dados de `dados-melperfaz.json` com o formato certo (email, NIF, ligação do Google Maps).
 
 E o lint das folhas de estilo, para o sistema visual não voltar a derivar. Fora do bloco `:root` (os tokens), falha com:

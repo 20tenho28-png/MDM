@@ -1,4 +1,4 @@
-<!--meta {"file": "index.html", "title": "Melperfaz, Construção Civil · Reabilitação de edifícios desde 2001", "description": "Reabilitação de edifícios, espaços comerciais e apartamentos, da estrutura ao acabamento, com equipa própria desde 2001. Orçamento gratuito: 961 245 288.", "nav": "", "css": [], "italico": true} -->
+<!--meta {"file": "index.html", "title": "Melperfaz, Construção Civil · Reabilitação de edifícios desde 2001", "description": "Reabilitação de edifícios, espaços comerciais e apartamentos, da estrutura ao acabamento, com equipa própria desde 2001. Orçamento gratuito: 961 245 288.", "nav": "inicio", "css": [], "italico": true} -->
 <!-- Hero «split» do design system: o texto à esquerda, a começar na borda da .wrap (como o logótipo), e a fotografia
      numa moldura 4:3 à direita, com um único cartão «25 anos, desde 2001». No telemóvel: texto, botões e depois a foto. -->
 <section class="hero s-paper" id="top" aria-labelledby="heroT">
@@ -8,7 +8,7 @@
       <h1 id="heroT">Reabilitamos<br><em>de raiz.</em></h1>
       <p class="lead">Reabilitação de edifícios, espaços comerciais e apartamentos. Da estrutura ao acabamento, tratamos da obra completa com {{ anos }} anos de ofício (uma equipa responsável, do início ao fim).</p>
       <div class="acoes">
-        <a href="#contacto" class="btn">Pedir Orçamento Gratuito</a>
+        <a href="{{ root }}orcamento.html" class="btn">Pedir Orçamento</a>
         <a href="#obras" class="btn btn-ghost">Ver Obras</a>
       </div>
     </div>
@@ -26,10 +26,10 @@
       <h2 id="servicosT">Construção e reabilitação, do alicerce ao acabamento</h2>
       <p>Da estrutura ao acabamento, com uma equipa responsável do início ao fim. Escolha o trabalho e peça o orçamento.</p>
     </div>
-    <!-- os serviços vêm de data/site.json «servicos»; cada cartão leva ao formulário com o tipo de obra já escolhido
-         (data-preselect com o id do serviço, site.js); sem JavaScript vai só a #contacto -->
+    <!-- os serviços vêm de data/site.json «servicos»; cada cartão leva a orcamento.html com o tipo de obra já escolhido
+         (?tipo=<id do serviço>) -->
     <div class="svc-grid">{{#cada servicos}}
-      <a class="svc reveal" href="#contacto" data-preselect="{{ item.id }}"><span class="num">{{ item.n }}</span><h3>{{ item.nome }}</h3><p>{{ item.texto }}</p><span class="arrow" aria-hidden="true">→</span></a>{{/cada}}
+      <a class="svc reveal" href="{{ item.orcamentoHref }}" data-tipo="{{ item.id }}"><span class="num">{{ item.n }}</span><h3>{{ item.nome }}</h3><p>{{ item.texto }}</p><span class="arrow" aria-hidden="true">→</span></a>{{/cada}}
     </div>
   </div>
 </section>
@@ -85,4 +85,4 @@
   </div>
 </section>
 
-{{> contacto }}
+{{> cta id="contacto" titulo="Peça o orçamento. A visita é gratuita." texto="Respondemos no prazo de um dia útil e marcamos uma visita sem compromisso."}}

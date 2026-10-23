@@ -1,6 +1,6 @@
 # Netlify: no painel do site, «Base directory» = melperfaz (este ficheiro é lido a partir daí).
 # O site publicado é o que o build.py gera em public/. Formulário de pedido: Netlify Forms «orcamento», declarado em
-# index.html; a deteção e os avisos por email ligam-se no painel do Netlify (Forms → Form notifications).
+# orcamento.html; a deteção e os avisos por email ligam-se no painel do Netlify (Forms → Form notifications).
 [build]
   command = "python3 build.py"
   publish = "public"

@@ -1,19 +1,20 @@
 /* O site no browser (Playwright): gera numa pasta temporária (MELPERFAZ_OUT) e serve-a num servidor local que guarda cada
    envio do formulário como o Netlify Forms o receberia e pode falhar de propósito. Casos:
-   A. o pedido segue com os campos certos e aparece «Pedido enviado!», com o foco lá;
+   A. o pedido (orcamento.html, o único formulário) segue com os campos certos e aparece «Pedido enviado!», com o foco lá;
    B. a validação em português: sem nome e telefone não segue; telefone curto; email estranho; corrigido, segue;
    C. o servidor falha: aviso com o telefone, o que se escreveu fica, e a segunda tentativa segue;
    D. sem JavaScript: o envio normal chega a /obrigado.html com os campos;
-   E. o tipo de obra pré-escolhido: pelo cartão de serviço e pelo ?tipo= da ficha de obra;
+   E. o tipo de obra pré-escolhido: pelo cartão de serviço e pelo ?tipo= (e ?de=) da ficha de obra, em orcamento.html;
    F. o isco para robôs: preenchido, não segue;
-   G. nenhuma página desliza para o lado a 390 e 320 px, e sem erros de JavaScript;
-   H. o menu dos ecrãs estreitos: abre, foca, fecha com Escape e devolve o foco;
+   G. nenhuma página desliza para o lado a 390 e 320 px, sem erros de JavaScript; a barra de ações (menos em obrigado.html)
+      não tapa o rodapé nem o botão de envio;
+   H. o menu dos ecrãs estreitos: abre sobre um fundo escurecido, a página não desliza, foca, fecha com Escape e devolve o foco;
    I. o comparador antes/depois com o rato e com o teclado;
    J. teclado: a primeira tabulação é «Saltar para o conteúdo»; a entrada ao fazer scroll acaba toda visível;
       todas as imagens carregam; o menu marca a página atual; obras.html mostra todas as obras, sem filtros;
    K. movimento reduzido; nenhuma animação sem fim;
    L. o sistema visual: uma margem esquerda (h1 do hero, logótipo e cabeçalhos de secção no mesmo x), contraste de 4,5:1
-      nos botões e no texto da faixa clay, o anel de foco da cor da superfície, campos com 16 px e etiquetas com 13 px.
+      nos botões, na barra e no texto da faixa clay, o anel de foco da cor da superfície, campos com 16 px e etiquetas com 13 px.
    Precisa do Playwright, fora das dependências (localmente, NODE_PATH para onde ele está). Uso, a partir de melperfaz/:
      NODE_PATH=/caminho/para/node_modules node tests/browser.mjs */
 import { createRequire } from 'node:module';
@@ -65,7 +66,7 @@ try {
   /* A. o pedido segue */
   {
     const { ctx, page } = await pagina();
-    await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
+    await page.goto(srv.base + '/orcamento.html', { waitUntil: 'networkidle' });
     await preenche(page);
     await page.click('#sendBtn');
     await page.waitForSelector('[data-form-ok]:not([hidden])');
@@ -73,7 +74,7 @@ try {
     ok(p && p.caminho === '/' && p.tipo.includes('application/x-www-form-urlencoded'), 'A: POST para / em urlencoded', p);
     ok(p && p.campos['form-name'] === 'orcamento' && p.campos.nome === 'Ana Teste' && p.campos.telefone === '912 345 678'
       && p.campos.email === 'ana@teste.pt' && p.campos.tipo_de_obra === 'Apartamentos' && p.campos.localidade === 'Lisboa' && p.campos.mensagem.startsWith('Remodelação')
-      && p.campos.pagina === 'index.html' && p.campos['bot-field'] === '' && p.campos.subject, 'A: os campos do pedido', p && p.campos);
+      && p.campos.pagina === 'orcamento.html' && p.campos['bot-field'] === '' && p.campos.subject, 'A: os campos do pedido', p && p.campos);
     ok(await page.isHidden('#quoteForm'), 'A: o formulário esconde-se');
     ok(await page.evaluate(() => document.activeElement === document.querySelector('[data-form-ok]')), 'A: o foco vai para «Pedido enviado!»');
     ok((await page.textContent('[data-form-ok]')).includes('961 245 288'), 'A: o painel tem o telefone');
@@ -87,7 +88,7 @@ try {
   /* B. validação */
   {
     const { ctx, page } = await pagina();
-    await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
+    await page.goto(srv.base + '/orcamento.html', { waitUntil: 'networkidle' });
     const antes = srv.pedidos.length;
     await page.click('#sendBtn');
     await page.waitForTimeout(200);
@@ -112,14 +113,14 @@ try {
   /* C. o servidor falha */
   {
     const { ctx, page } = await pagina();
-    await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
+    await page.goto(srv.base + '/orcamento.html', { waitUntil: 'networkidle' });
     await preenche(page, { nome: 'Rui Falha' });
     srv.falhar(true);
     await page.click('#sendBtn');
     await page.waitForSelector('#formAlerta:not([hidden])');
     ok((await page.textContent('#formAlerta')).includes('961 245 288'), 'C: o aviso tem o telefone');
     ok(await page.isVisible('#quoteForm') && (await page.inputValue('#qNome')) === 'Rui Falha' && (await page.inputValue('#qMsg')).startsWith('Remodelação'), 'C: o que se escreveu fica');
-    ok(await page.isEnabled('#sendBtn') && (await page.textContent('#sendBtn')).trim() === 'Enviar Pedido', 'C: o botão volta a «Enviar Pedido»');
+    ok(await page.isEnabled('#sendBtn') && (await page.textContent('#sendBtn')).trim() === 'Enviar pedido de orçamento', 'C: o botão volta a «Enviar pedido de orçamento»');
     srv.falhar(false);
     await page.click('#sendBtn');
     await page.waitForSelector('[data-form-ok]:not([hidden])');
@@ -132,9 +133,11 @@ try {
   {
     const { ctx, page } = await pagina({ javaScriptEnabled: false });
     await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
-    ok(await page.isVisible('#quoteForm'), 'D: o formulário aparece sem JavaScript');
     ok(await page.evaluate(() => Array.from(document.querySelectorAll('.reveal')).every(e => getComputedStyle(e).opacity === '1')), 'D: sem JavaScript nada fica invisível (reveal)');
     ok(await page.isHidden('#menu-movel') && await page.evaluate(() => { const s = document.querySelector('[data-ba-before]'); return s && getComputedStyle(s).width !== '0px'; }), 'D: o comparador fica a meio, sem rebentar');
+    ok(await page.getAttribute('.navlinks a[data-nav-item="inicio"]', 'aria-current') === 'page', 'D: a página atual vem marcada sem JavaScript');
+    await page.goto(srv.base + '/orcamento.html', { waitUntil: 'networkidle' });
+    ok(await page.isVisible('#quoteForm'), 'D: o formulário aparece sem JavaScript');
     await preenche(page, { nome: 'Sem JS', tipo: 'Fachadas e Impermeabilização' });
     /* espera-se pelo endereço e pelo DOM, não pelo «load»: num runner lento o load da página seguinte passava os 30 s */
     await Promise.all([page.waitForURL(/\/obrigado\.html$/, { waitUntil: 'domcontentloaded' }), page.click('#sendBtn')]);
@@ -148,19 +151,18 @@ try {
   {
     const { ctx, page } = await pagina();
     await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
-    await page.click('a.svc[data-preselect="apartamentos"]');
+    await Promise.all([page.waitForURL(/orcamento\.html\?tipo=apartamentos$/, { waitUntil: 'domcontentloaded' }), page.click('a.svc[data-tipo="apartamentos"]')]);
     await page.waitForTimeout(300);
-    ok(await page.inputValue('#qTipo') === 'Apartamentos', 'E: o cartão de serviço escolhe o tipo');
-    ok(await page.evaluate(() => location.hash === '#contacto'), 'E: e leva ao formulário');
+    ok(await page.inputValue('#qTipo') === 'Apartamentos', 'E: o cartão de serviço leva a orcamento.html com o tipo escolhido');
     const obra = OBRAS[0];
     await page.goto(`${srv.base}/obras/${obra.slug}.html`, { waitUntil: 'networkidle' });
-    await Promise.all([page.waitForURL(/index\.html\?tipo=/, { waitUntil: 'domcontentloaded' }), page.click('.cta .acoes a.btn:has-text("Pedir Orçamento")')]);
-    ok(/\?tipo=.*#contacto$/.test(page.url()), 'E: a ficha leva a index.html?tipo=…#contacto', page.url());
+    await Promise.all([page.waitForURL(/orcamento\.html\?tipo=/, { waitUntil: 'domcontentloaded' }), page.click('.cta .acoes a.btn:has-text("Pedir Orçamento")')]);
+    ok(page.url().endsWith(`/orcamento.html?tipo=reabilitacao&de=obras/${obra.slug}`), 'E: a ficha leva a orcamento.html?tipo=…&de=…', page.url());
     await page.waitForTimeout(300);
     ok(await page.inputValue('#qTipo') === 'Reabilitação de Edifícios', 'E: o tipo vem do endereço (?tipo=reabilitacao)');
-    await page.goto(srv.base + '/?tipo=fachadas#contacto', { waitUntil: 'networkidle' });
+    await page.goto(srv.base + '/orcamento.html?tipo=fachadas', { waitUntil: 'networkidle' });
     ok(await page.inputValue('#qTipo') === 'Fachadas e Impermeabilização', 'E: ?tipo=fachadas escolhe «Fachadas e Impermeabilização»');
-    await page.goto(srv.base + '/?tipo=Inventado#contacto', { waitUntil: 'networkidle' });
+    await page.goto(srv.base + '/orcamento.html?tipo=Inventado', { waitUntil: 'networkidle' });
     ok(await page.inputValue('#qTipo') === '', 'E: um tipo que não existe fica em «Escolha uma opção»');
     ok(page.erros.length === 0, 'E: sem erros', page.erros);
     await ctx.close();
@@ -169,7 +171,7 @@ try {
   /* F. isco para robôs */
   {
     const { ctx, page } = await pagina();
-    await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
+    await page.goto(srv.base + '/orcamento.html', { waitUntil: 'networkidle' });
     await preenche(page);
     await page.evaluate(() => { document.querySelector('[name="bot-field"]').value = 'spam'; });
     const antes = srv.pedidos.length;
@@ -184,14 +186,26 @@ try {
   for (const largura of [390, 320]) {
     const { ctx, page } = await pagina({ viewport: { width: largura, height: 800 }, isMobile: true, hasTouch: true });
     const comComparador = OBRAS.find(o => o.antesDepois) || OBRAS[OBRAS.length - 1];
-    for (const f of ['/', '/obras.html', `/obras/${OBRAS[0].slug}.html`, `/obras/${comComparador.slug}.html`, '/privacidade.html', '/obrigado.html', '/404.html']) {
+    for (const f of ['/', '/obras.html', `/obras/${OBRAS[0].slug}.html`, `/obras/${comComparador.slug}.html`, '/orcamento.html', '/privacidade.html', '/obrigado.html', '/404.html']) {
       await page.goto(srv.base + f, { waitUntil: 'networkidle' });
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
       await page.waitForTimeout(250);
       const sw = await page.evaluate(() => document.documentElement.scrollWidth);
       ok(sw <= largura, `G: ${f} a ${largura} px não desliza para o lado`, sw);
       ok(await page.isVisible('.rodape a[href^="https://wa.me/"]'), `G: ${f} a ${largura} px tem o WhatsApp no rodapé`);
+      // a barra de ações: fixa em baixo, e no fim da página não tapa a última ligação do rodapé
+      const b = await page.evaluate(() => {
+        const barra = document.querySelector('.barra');
+        if (!barra) return null;
+        const r = barra.getBoundingClientRect(), ultimo = Array.from(document.querySelectorAll('.rodape a')).pop().getBoundingClientRect();
+        return { topo: Math.round(r.top), fundo: Math.round(r.bottom), alt: innerHeight, cels: Array.from(barra.children).map(c => Math.round(c.getBoundingClientRect().height)), ultimo: Math.round(ultimo.bottom) };
+      });
+      if (f === '/obrigado.html') ok(b === null, `G: ${f} sem barra de ações`, b);
+      else ok(b && b.fundo === b.alt && b.cels.every(h => h >= 56) && b.ultimo <= b.topo, `G: ${f} a ${largura} px barra fixa em baixo, células de 56 px, sem tapar o rodapé`, b);
     }
+    await page.goto(srv.base + '/orcamento.html', { waitUntil: 'networkidle' });
+    await page.locator('#sendBtn').scrollIntoViewIfNeeded();
+    ok(await page.evaluate(() => { const r = document.querySelector('#sendBtn').getBoundingClientRect(); const el = document.elementFromPoint(r.left + r.width / 2, r.bottom - 2); return el && el.closest('#sendBtn') !== null; }), `G: a ${largura} px a barra não tapa o botão de envio`);
     ok(page.erros.length === 0, `G: sem erros a ${largura} px`, page.erros);
     await ctx.close();
   }
@@ -203,13 +217,17 @@ try {
     ok(await page.isVisible('[data-menu]') && await page.isHidden('.navlinks'), 'H: o botão ≡ aparece e o menu normal não');
     await page.click('[data-menu]');
     ok(await page.isVisible('#menu-movel') && await page.getAttribute('[data-menu]', 'aria-expanded') === 'true', 'H: abre');
+    ok(await page.isVisible('[data-menu-fundo]') && await page.evaluate(() => document.documentElement.classList.contains('menu-aberto') && getComputedStyle(document.documentElement).overflow === 'hidden'), 'H: fundo escurecido e a página não desliza');
+    const itens = await page.evaluate(() => Array.from(document.querySelectorAll('#menu-movel a')).map(a => Math.round(a.getBoundingClientRect().height)));
+    ok(itens.length === 5 && itens.every(h => h >= 48), 'H: cinco itens com 48 px', itens);
     ok(await page.evaluate(() => document.activeElement.closest('#menu-movel') !== null), 'H: o foco entra no menu');
     await page.keyboard.press('Escape');
     ok(await page.isHidden('#menu-movel') && await page.evaluate(() => document.activeElement.hasAttribute('data-menu')), 'H: Escape fecha e devolve o foco ao botão');
+    ok(await page.isHidden('[data-menu-fundo]') && await page.evaluate(() => !document.documentElement.classList.contains('menu-aberto')), 'H: fechado, sem fundo e a página volta a deslizar');
     await page.click('[data-menu]');
-    await page.click('#menu-movel a[href$="#servicos"]');
+    await Promise.all([page.waitForURL(/index\.html$/, { waitUntil: 'domcontentloaded' }), page.click('#menu-movel a[href$="index.html"]')]);
     await page.waitForTimeout(300);
-    ok(await page.isHidden('#menu-movel') && /index\.html#servicos$/.test(page.url()), 'H: uma ligação do menu fecha-o e navega', page.url());
+    ok(await page.isHidden('#menu-movel') && /index\.html$/.test(page.url()), 'H: uma ligação do menu fecha-o e navega', page.url());
     await ctx.close();
   }
 
@@ -290,19 +308,33 @@ try {
         return { logo: l(document.querySelector('.topo .logo')), h1: l(document.querySelector('.hero h1')), secs: Array.from(document.querySelectorAll('.sec-head')).map(l) };
       });
       ok(x.h1 === x.logo && x.secs.every(s => s === x.logo), `L: a ${largura} px o h1 do hero e os cabeçalhos de secção começam no x do logótipo`, x);
-      const campos = await page.evaluate(() => Array.from(document.querySelectorAll('input:not([type=hidden]), select, textarea')).map(e => parseFloat(getComputedStyle(e).fontSize)));
-      ok(campos.length && campos.every(v => v >= 16), `L: a ${largura} px todos os campos com 16 px ou mais`, campos);
-      const etiquetas = await page.evaluate(() => Array.from(document.querySelectorAll('.eyebrow, .cat, .btn, .ba-tag, .tag-card .l, .foot-h, .cta-phone-l')).filter(e => e.getClientRects().length).map(e => parseFloat(getComputedStyle(e).fontSize)));
+      const etiquetas = await page.evaluate(() => Array.from(document.querySelectorAll('.eyebrow, .cat, .btn, .ba-tag, .tag-card .l, .foot-h, .cta-phone-l, .barra-cel, .navlinks a')).filter(e => e.getClientRects().length).map(e => parseFloat(getComputedStyle(e).fontSize)));
       ok(etiquetas.every(v => v >= 13), `L: a ${largura} px etiquetas com 13 px ou mais`, etiquetas);
+      await page.goto(srv.base + '/orcamento.html', { waitUntil: 'networkidle' });
+      const campos = await page.evaluate(() => Array.from(document.querySelectorAll('input:not([type=hidden]):not([name=bot-field]), select, textarea')).map(e => parseFloat(getComputedStyle(e).fontSize)));
+      ok(campos.length === 6 && campos.every(v => v >= 16), `L: a ${largura} px os campos de orcamento.html com 16 px ou mais`, campos);
+      const rotulos = await page.evaluate(() => Array.from(document.querySelectorAll('.field label')).map(e => parseFloat(getComputedStyle(e).fontSize)));
+      ok(rotulos.every(v => v >= 14), `L: a ${largura} px etiquetas dos campos com 14 px`, rotulos);
+      const xo = await page.evaluate(() => { const l = e => Math.round(e.getBoundingClientRect().left); return { logo: l(document.querySelector('.topo .logo')), h1: l(document.querySelector('h1')), migalhas: l(document.querySelector('.migalhas')) }; });
+      ok(xo.h1 === xo.logo && xo.migalhas === xo.logo, `L: a ${largura} px o PageHead começa no x do logótipo`, xo);
       await ctx.close();
     }
     const { ctx, page } = await pagina();
-    for (const f of ['/', '/obras.html', `/obras/${OBRAS[0].slug}.html`, '/obrigado.html', '/404.html']) {
+    for (const f of ['/', '/obras.html', `/obras/${OBRAS[0].slug}.html`, '/orcamento.html', '/obrigado.html', '/404.html']) {
       await page.goto(srv.base + f, { waitUntil: 'networkidle' });
       await page.evaluate(() => document.querySelectorAll('.reveal').forEach(e => e.classList.add('in')));
       await page.waitForTimeout(800);
       const fracos = (await page.evaluate(contrastes)).filter(c => c.c < 4.5);
       ok(fracos.length === 0, `L: ${f} botões e faixa clay com 4,5:1 ou mais`, fracos);
+    }
+    {
+      // a barra de ações (só abaixo de 980 px): Ligar e WhatsApp bone sobre ink, Orçamento ink sobre clay
+      const m = await pagina({ viewport: { width: 390, height: 800 } });
+      await m.page.goto(srv.base + '/obras.html', { waitUntil: 'networkidle' });
+      const cels = await m.page.evaluate(contrastes.toString().replace("[...document.querySelectorAll('.btn'),", "[...document.querySelectorAll('.btn, .barra-cel'),").replace(/^\(\) =>/, '(() =>') + ')()');
+      const barra = cels.filter(c => /^(Ligar|WhatsApp|Orçamento)$/.test(c.t));
+      ok(barra.length === 3 && barra.every(c => c.c >= 4.5), 'L: a barra de ações com 4,5:1 ou mais', barra);
+      await m.ctx.close();
     }
     // o anel de foco: ink sobre paper (hero) e sobre clay (faixa de contacto), amber sobre ink (obras)
     await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
