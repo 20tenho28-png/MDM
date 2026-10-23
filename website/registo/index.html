@@ -476,6 +476,8 @@ body.app-on{background:var(--surface)}
 .topbar .user{gap:14px;font-size:14px}
 .page{padding:22px max(16px,env(safe-area-inset-right,0px)) 110px 24px;max-width:1500px}
 .so-gerir{display:none!important}
+.subnav{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 16px}
+.subnav .chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
 .page-h{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .vista{display:inline-flex;align-items:center;gap:6px;position:relative;min-width:0;max-width:100%}
 .page-h > .vista{flex:0 1 auto}
@@ -557,6 +559,16 @@ body.app-on{background:var(--surface)}
   .fab{display:none}
 }
 
+/* Quadro: arrastar */
+.kcard{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.kcard.karr{opacity:.35}
+.kfant{position:fixed;left:0;top:0;z-index:300;pointer-events:none;box-shadow:0 12px 30px rgba(8,16,22,.28);transform-origin:0 0;opacity:.95}
+body.a-arrastar{cursor:grabbing}
+body.a-arrastar *{cursor:grabbing!important}
+.col.alvo{outline:2px dashed var(--accent);outline-offset:-2px}
+.col.sobre{outline-style:solid;background:color-mix(in srgb,var(--accent) 10%,var(--sunk))}
+.col.fora{opacity:.45}
+.tag-conf{font-size:11.5px;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:0 7px;align-self:flex-start}
 /* Hoje */
 .tab-t{font-family:var(--font-display);font-size:32px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em}
 .hj-ola{font-size:15px;color:var(--ink-2);margin:2px 0 14px}
@@ -670,15 +682,12 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
 <nav class="rail" aria-label="Menu">
   <button class="r-novo" type="button" id="railNovo" title="Novo pedido" aria-label="Novo pedido"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   <button type="button" id="rail-hoje" title="Hoje" aria-label="Hoje"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg><span class="r-badge" id="hjBadge"></span></button>
-  <button type="button" id="rail-painel" title="Painel" aria-label="Painel"><svg viewBox="0 0 24 24"><path d="M4 15a8 8 0 0 1 16 0M12 15l4-5"/><circle cx="12" cy="15" r="1.4" fill="currentColor"/><path d="M4 19h16"/></svg><span class="r-badge" id="painelBadge"></span></button>
-  <button type="button" id="rail-seguimentos" title="Seguimentos de hoje" aria-label="Seguimentos de hoje"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8.5 10.5l2.2 2.2 4.8-4.7"/></svg><span class="r-badge" id="sgBadge"></span></button>
-  <button type="button" id="rail-agenda" title="Agenda" aria-label="Agenda"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h3M8 17h6"/></svg><span class="r-badge" id="agBadge"></span></button>
-  <button type="button" id="rail-gerir" title="Gerir pedidos" aria-label="Gerir pedidos"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.3c2.5-.2 4.3 1.3 4.8 4.2"/></svg><span class="r-badge" id="redBadge"></span></button>
-  <button type="button" id="rail-pipeline" title="Pipeline" aria-label="Pipeline"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5" height="11" rx="1.5"/><rect x="16" y="4" width="5" height="7" rx="1.5"/></svg><span class="r-badge" id="fugaBadge"></span></button>
-  <button type="button" id="rail-clientes" title="Clientes" aria-label="Clientes"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.6-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.4-7 10-7 10z"/></svg><span class="r-badge" id="cliBadge"></span></button>
-  <button type="button" id="rail-faturacao" title="Faturação" aria-label="Faturação"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4M9 12h6M9 16h6"/></svg></button>
-  <button type="button" id="rail-prazos" title="Prazos e exportar" aria-label="Prazos e exportar"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
+  <button type="button" id="rail-gerir" title="Pedidos" aria-label="Pedidos"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5" height="11" rx="1.5"/><rect x="16" y="4" width="5" height="7" rx="1.5"/></svg></button>
+  <button type="button" id="rail-agenda" title="Agenda" aria-label="Agenda"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h3M8 17h6"/></svg></button>
+  <button type="button" id="rail-clientes" title="Clientes" aria-label="Clientes"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.3c2.5-.2 4.3 1.3 4.8 4.2"/></svg></button>
+  <button type="button" id="rail-prazos" title="Definições" aria-label="Definições"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
   <button type="button" class="r-fim" id="btnSair" title="Sair" aria-label="Sair"><svg viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 8l-4 4 4 4M6 12h10"/></svg></button>
+  <span hidden><span id="painelBadge"></span><span id="sgBadge"></span><span id="agBadge"></span><span id="redBadge"></span><span id="fugaBadge"></span><span id="cliBadge"></span></span>
 </nav>
 <div style="min-width:0">
 <header class="topbar">
@@ -699,6 +708,7 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
     <h1 class="tab-t" id="tabTitulo" hidden></h1>
     <button class="link-add" type="button" id="btnNovoTop">Adicionar pedido</button>
   </div>
+  <div class="subnav" id="subnav" role="tablist" aria-label="Vistas" hidden></div>
   <div class="tabs tabs2" role="tablist" aria-label="Vistas" id="tabs" hidden>
     <button class="tab" role="tab" type="button" id="tab-hoje" aria-controls="v-hoje" aria-selected="false" tabindex="-1">Hoje</button>
     <button class="tab" role="tab" type="button" id="tab-painel" aria-controls="v-painel" aria-selected="false" tabindex="-1">Painel</button>
@@ -889,14 +899,15 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
   </div>
 
   <div id="v-pipeline" role="tabpanel" aria-labelledby="tab-pipeline" hidden>
-    <section aria-labelledby="h-fugas">
-      <div class="sec-h"><h2 id="h-fugas">Fugas</h2><span class="count" id="fugasCount"></span></div>
-      <div class="panel fugas" id="fugas"></div>
-      <p class="note">Cada linha é uma regra do processo. Verde é zero; um número abre a lista já filtrada. A triagem do dia é limpar esta lista de cima para baixo.</p>
-    </section>
-    <section aria-labelledby="h-board" style="margin-top:22px">
+    <section aria-labelledby="h-board">
       <div class="sec-h"><h2 id="h-board">Passos</h2><span class="count" id="boardCount"></span></div>
       <div class="board" id="board"></div>
+      <p class="note">Arrasta um pedido para outro passo (no iPad e no telemóvel, carrega meio segundo no cartão e arrasta). Só acendem os passos para onde ele pode ir; ao largar abre-se a mudança já preenchida, para confirmar. Tocar no cartão abre o pedido.</p>
+    </section>
+    <section aria-labelledby="h-fugas" style="margin-top:22px">
+      <div class="sec-h"><h2 id="h-fugas">Fugas</h2><span class="count" id="fugasCount"></span></div>
+      <div class="panel fugas" id="fugas"></div>
+      <p class="note">Cada linha é uma regra do processo que está a ser quebrada agora; um toque abre a lista já filtrada. As regras sem nada a tratar não aparecem.</p>
     </section>
     <section aria-labelledby="h-funil" style="margin-top:22px">
       <div class="sec-h"><h2 id="h-funil">Funil</h2><span class="count">últimos 90 dias</span></div>
@@ -1489,27 +1500,52 @@ if (!Element.prototype.replaceChildren) {
 
   /* ---------- Separadores ---------- */
   const TABS = ['hoje','painel','seguimentos','agenda','gerir','pipeline','clientes','faturacao','prazos'];
-  const TAB_NOME = {hoje:'Hoje', painel:'Painel', seguimentos:'Seguimentos', agenda:'Agenda', gerir:'Pedidos', pipeline:'Pipeline', clientes:'Clientes', faturacao:'Faturação', prazos:'Prazos e exportar'};
+  // A barra tem cinco grupos; cada grupo mostra por baixo do título as suas vistas (só as que estão instaladas).
+  const SECOES = [['hoje', 'Hoje', ['hoje','seguimentos','painel']], ['gerir', 'Pedidos', ['gerir','pipeline']], ['agenda', 'Agenda', ['agenda']],
+                  ['clientes', 'Clientes', ['clientes','faturacao']], ['prazos', 'Definições', ['prazos']]];
+  const SUB_NOME = {hoje:'Hoje', seguimentos:'Seguimentos', painel:'Números', gerir:'Lista', pipeline:'Quadro', agenda:'Agenda', clientes:'Clientes', faturacao:'Faturação', prazos:'Definições'};
+  const grupoDe = t => SECOES.find(g => g[2].indexOf(t) >= 0) || SECOES[0];
+  // Vistas cuja parte da base de dados ainda não foi instalada não aparecem (as variáveis vêm mais abaixo).
+  function disponivel(t) {
+    try {
+      if (t === 'seguimentos') return segTabela !== false;
+      if (t === 'agenda') return agTabela !== false;
+      if (t === 'painel') return !pnFalta;
+    } catch (e) { return true; }
+    return true;
+  }
+  const ultimaVista = {};
   let tab = 'hoje';
   try { const s = localStorage.getItem('registo-tab'); if (TABS.includes(s)) tab = s; } catch (e) {}
   if (TABS.includes(location.hash.replace('#',''))) tab = location.hash.replace('#','');
   function setTab(t, focus) {
+    if (!disponivel(t)) t = grupoDe(t)[2].filter(disponivel)[0] || 'hoje';
     tab = t;
+    const g = grupoDe(t);
+    ultimaVista[g[0]] = t;
+    SECOES.forEach(([k, , vs]) => {
+      const rb = F('rail-' + k); if (!rb) return;
+      if (k === g[0]) rb.setAttribute('aria-current', 'page'); else rb.removeAttribute('aria-current');
+      rb.hidden = !vs.some(disponivel);
+    });
+    const subs = g[2].filter(disponivel);
+    F('subnav').hidden = subs.length < 2;
+    fill(F('subnav'), subs.length < 2 ? null : subs.map(v => h('button',{class:'chip', type:'button', role:'tab', id:'sub-' + v, 'aria-selected': String(v === t), 'aria-pressed': String(v === t), onclick:() => setTab(v)}, SUB_NOME[v])));
     for (const k of TABS) {
       const b = F('tab-' + k);
       b.setAttribute('aria-selected', String(k === t)); b.tabIndex = k === t ? 0 : -1;
       F('v-' + k).hidden = k !== t;
-      const rb = F('rail-' + k); if (rb) { if (k === t) rb.setAttribute('aria-current','page'); else rb.removeAttribute('aria-current'); }
     }
     try { localStorage.setItem('registo-tab', t); } catch (e) {}
     // A escolha «Pedidos em aberto» e «Adicionar pedido» só fazem sentido em Gerir; nos outros, o nome do separador.
-    F('tabTitulo').textContent = TAB_NOME[t] || '';
+    F('tabTitulo').textContent = g[1];
     F('tabTitulo').hidden = t === 'gerir';
     document.querySelector('.page-h .vista').classList.toggle('so-gerir', t !== 'gerir');
     F('btnNovoTop').classList.toggle('so-gerir', t !== 'gerir');
     if (focus) F('tab-' + t).focus();
   }
-  TABS.forEach(k => { F('tab-' + k).addEventListener('click', () => setTab(k)); F('rail-' + k).addEventListener('click', () => setTab(k)); });
+  TABS.forEach(k => { F('tab-' + k).addEventListener('click', () => setTab(k)); });
+  SECOES.forEach(([k, , vs]) => { F('rail-' + k).addEventListener('click', () => setTab(ultimaVista[k] || vs.filter(disponivel)[0] || vs[0])); });
   F('tabs').addEventListener('keydown', e => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
     const i = TABS.indexOf(tab), n = TABS.length;
@@ -1596,7 +1632,7 @@ if (!Element.prototype.replaceChildren) {
       h('span',{class:'ld'}, pe.p, h('small',null, (ESTADOS[r.estado] || ESTADOS.novo).bola === 'MDM' ? 'MDM' : 'espera')),
       h('span',{class:'ln'}, r.cliente || 'Sem nome'),
       h('span',{class:'la'}, r.proximaAcao ? `${r.dono || 'Sem dono'} · ${r.proximaAcao}` : 'Falta dono, próxima ação e data'),
-      h('span',{class:'lt'}, r.porConfirmar ? 'Por confirmar' : tempoTxt(r, rel)))),
+      r.porConfirmar ? h('span',{class:'lt', style:'--tone:var(--ink-2);font-weight:500'}, 'por confirmar') : h('span',{class:'lt'}, tempoTxt(r, rel)))),
       xs.length > vis.length ? h('button',{class:'lp', type:'button', onclick:() => irPara('vermelhos')}, h('span',{class:'ld'},'…'), h('span',{class:'ln', style:'color:var(--accent)'}, `Ver os outros ${xs.length - vis.length} na triagem`)) : null);
   }
 
@@ -1809,7 +1845,7 @@ if (!Element.prototype.replaceChildren) {
         : h('span',{class:'over'}, 'Falta dono, próxima ação e data'))
       : h('span',{class:'muted'}, r.motivo || ''));
     const col3 = h('div',{class:'t-ativ', style: aberto && !r.porConfirmar && rel && rel.vence && rel.atrasoH > 0 ? '--tone:var(--bad)' : '--tone:var(--ink-2)'},
-      aberto ? [h('span',{class:'tempo'}, r.porConfirmar ? 'Por confirmar' : tempoTxt(r, rel)), e.bola !== 'MDM' ? `À espera do ${e.bola}` : null]
+      aberto ? [r.porConfirmar ? h('span',{class:'tag-conf'}, 'por confirmar') : h('span',{class:'tempo'}, tempoTxt(r, rel)), e.bola !== 'MDM' ? `À espera do ${e.bola}` : null]
         : [h('span',null, `${e.l}${r.dataFecho ? ' · ' + haDias(diasDesde(r.dataFecho)) : ''}`), podeReabrir && canWrite ? h('button',{class:'lk', type:'button', onclick:() => acaoRapida(r.id, 'reabrir')}, 'Reabrir') : null]);
     const seg = h('div',{class:'seg', role:'group', 'aria-label':'Ações rápidas'},
       h('button',{type:'button', title: seguinte ? seguinte.label : 'Sem passo seguinte', 'aria-label': seguinte ? seguinte.label : 'Avançar', disabled: !(aberto && seguinte && canWrite), onclick:() => acaoRapida(r.id, 'ok')}, svg(ICO.ok)),
@@ -2451,24 +2487,28 @@ if (!Element.prototype.replaceChildren) {
     const total = lista.reduce((t, f) => t + f[2], 0), graves = lista.filter(f => f[3] === 'bad').reduce((t, f) => t + f[2], 0);
     F('fugasCount').textContent = total ? `${total} ${total === 1 ? 'coisa' : 'coisas'} a tratar` : 'nada a tratar';
     F('fugaBadge').textContent = graves ? String(graves) : '';
-    box.replaceChildren(...lista.map(([t, sub, n, tone, go]) => h('button',{class:'fuga ' + (n ? tone : 'ok'), type:'button', disabled: n ? null : true, onclick: go},
+    // Só as regras com alguma coisa a tratar; as que estão a zero ficam fora da vista.
+    const ativas = lista.filter(f => f[2]);
+    if (!ativas.length) box.replaceChildren(h('p',{class:'empty'}, `Nenhuma fuga: as ${lista.length} regras estão cumpridas.`));
+    else box.replaceChildren(...ativas.map(([t, sub, n, tone, go]) => h('button',{class:'fuga ' + (n ? tone : 'ok'), type:'button', disabled: n ? null : true, onclick: go},
       h('span',{class:'fi', 'aria-hidden':'true'}, n ? String(n) : svg('<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>')),
       h('span',{class:'ft'}, t, h('small',null, sub)), h('span',{class:'fn'}, n ? 'ver' : ''))));
     // Os nove passos com os pedidos
     const ab = all.filter(x => ABERTOS.includes(x.r.estado)).sort(ordem);
     F('boardCount').textContent = `${ab.length} abertos · ${eur(ab.reduce((t, x) => t + valorN(x.r), 0))} em orçamentos`;
-    F('board').replaceChildren(...PASSOS.map(([k, num, titulo]) => {
+    if (kArr) kPendente = true;
+    else F('board').replaceChildren(...PASSOS.map(([k, num, titulo]) => {
       const xs = ab.filter(x => x.r.estado === k);
       const v = xs.reduce((t, x) => t + valorN(x.r), 0);
-      return h('div',{class:'col'},
+      return h('div',{class:'col', 'data-estado': k},
         h('div',{class:'col-h'}, h('div',{class:'cn'}, h('span',null, num ? h('span',{class:'cp'}, num) : null, ESTADOS[k].l.replace(', à espera do pagamento', '')), h('b',null, String(xs.length))),
           h('div',{class:'cr'}, `${titulo}${regraPasso(k) ? ' · ' + regraPasso(k) : ''}${v ? ' · ' + eur(v) : ''}`)),
         h('div',{class:'col-b'}, xs.length ? xs.map(({r, rel, sem, pe}) => {
           const falta = k === 'em_execucao' ? obraFalta(r) : null;
-          return h('button',{class:`kcard u-${pe.p}`, type:'button', style:`--tone:var(--${semTone(sem)})`, onclick:() => openSheet(r.id)},
+          return h('button',{class:`kcard u-${pe.p}`, type:'button', 'data-id': r.id, style:`--tone:var(--${r.porConfirmar ? 'ink-2' : semTone(sem)})`, onclick:() => { if (!kSoltou) openSheet(r.id); }},
             h('span',{class:'kn'}, h('span',{class:'kp'}, pe.p), r.cliente || 'Sem nome'),
             h('span',{class:'ka'}, falta ? `Falta: ${falta[1].toLowerCase()}` : `${r.dono || 'Sem dono'} · ${r.proximaAcao || 'sem ação'}`),
-            h('span',{class:'kt'}, r.porConfirmar ? 'Por confirmar' : tempoTxt(r, rel)));
+            r.porConfirmar ? h('span',{class:'tag-conf'}, 'por confirmar') : h('span',{class:'kt'}, tempoTxt(r, rel)));
         }) : h('p',{class:'vazio'}, 'Nenhum pedido neste passo.')));
     }));
     // Funil
@@ -2494,6 +2534,7 @@ if (!Element.prototype.replaceChildren) {
   /* ---------- Painel: os números vêm todos das vistas (supabase/painel.sql); a página só formata e desenha ----------
      Escrito para correr em Safari antigo (iPad): sem «?.», sem «??», sem métodos recentes. */
   var VISTAS_PAINEL = ['v_passos','v_fila_humana','v_atrasos','v_funil','v_tempos','v_carga','v_followups','v_bloqueados','v_perdas','v_tendencia','v_cobertura','v_config'];
+  var pnFalta = false;
   var pn = null, pnErro = '', pnSoMeus = true, pnPasso = null, pnMais = false;
   var PRIO_CURTA = {P1:'Urgente', P2:'Alta', P3:'Normal'};
   function carregarPainel() {
@@ -2509,13 +2550,14 @@ if (!Element.prototype.replaceChildren) {
       var falha = null;
       res.forEach(function (r) { if (r.error && !falha) falha = r.error; });
       if (falha) {
-        pnErro = /relation|does not exist|schema cache/i.test(String(falha.message || '')) ? 'As vistas do Painel ainda não existem no Supabase: falta correr supabase/painel.sql no SQL Editor.' : 'Não foi possível ler o Painel. Recarrega a página.';
+        pnFalta = /relation|does not exist|schema cache/i.test(String(falha.message || ''));
+        pnErro = pnFalta ? 'As vistas do Painel ainda não existem no Supabase: falta correr supabase/painel.sql no SQL Editor.' : 'Não foi possível ler o Painel. Recarrega a página.';
         pn = null;
       } else {
-        pnErro = ''; pn = {};
+        pnErro = ''; pnFalta = false; pn = {};
         VISTAS_PAINEL.forEach(function (v, i) { pn[v] = res[i].data || []; });
       }
-      renderPainel();
+      renderPainel(); setTab(tab);
     }).catch(function () { pnErro = 'Sem ligação: não foi possível ler o Painel.'; renderPainel(); });
   }
   var pnSoma = function (xs, k) { return xs.reduce(function (t, x) { return t + (Number(x[k]) || 0); }, 0); };
@@ -3642,13 +3684,13 @@ if (!Element.prototype.replaceChildren) {
       ]);
       const s = res[0];
       if (s.error) {
-        if (/relation|does not exist|schema cache|Could not find/i.test(s.error.message || '')) { segTabela = false; sg = null; renderSeg(); }
+        if (/relation|does not exist|schema cache|Could not find/i.test(s.error.message || '')) { segTabela = false; sg = null; renderSeg(); setTab(tab); }
         return;
       }
       segTabela = true;
       const grupo = lista => { const o = {}; (lista || []).forEach(x => { (o[x.pedido_id] = o[x.pedido_id] || []).push(x); }); return o; };
       sg = {todos: grupo(s.data), hoje: res[1].data || [], prox: grupo(res[2].data), viol: res[3].data || [], taxa: res[4].data || [], perd: res[5].data || [], pag: res[6].data || []};
-      renderSeg(); renderSegCfg(); renderInicio(enriquecidos());
+      renderSeg(); renderSegCfg(); renderInicio(enriquecidos()); setTab(tab);
       if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
       // Se a tarefa das 07:00 ainda não correu hoje (pg_cron desligado ou atrasado), a primeira página aberta corre-a.
       if (canWrite && !sgCorreu && new Date().getHours() >= 7 && (!segMotor || String(segMotor.dia || '') < today())) {
@@ -3872,7 +3914,7 @@ if (!Element.prototype.replaceChildren) {
         sb.from('v_por_marcar').select('*'),
       ]);
       if (res[0].error) {
-        if (/relation|does not exist|schema cache|Could not find/i.test(res[0].error.message || '')) { agTabela = false; renderAgenda(); renderAgCfg(); }
+        if (/relation|does not exist|schema cache|Could not find/i.test(res[0].error.message || '')) { agTabela = false; renderAgenda(); renderAgCfg(); setTab(tab); }
         return;
       }
       agTabela = true;
@@ -4304,6 +4346,92 @@ if (!Element.prototype.replaceChildren) {
   F('agHoje').addEventListener('click', () => { agSemana = agSeg(today()); agSel = null; agAcao = null; renderAgenda(); });
   F('agCfg').addEventListener('input', () => { agCfgSujo = true; });
   F('agCfg').addEventListener('change', () => { agCfgSujo = true; });
+
+
+  /* ---------- Quadro: arrastar um pedido para outro passo ----------
+     Só acendem os passos para onde o pedido pode ir (as mesmas mudanças da folha do pedido). Ao largar abre-se a folha
+     com o formulário dessa mudança já preenchido (dono, ação, data e o que o passo pede: data da visita, número da
+     fatura…): nenhuma regra fica por cumprir. Com a agenda, largar em «Visita marcada» abre as sugestões de horas.
+     Rato: arrastar. Toque (iPad, telemóvel): carregar meio segundo no cartão e arrastar. */
+  let kArr = null, kPendente = false, kSoltou = false;
+  function kAlvos(r) {
+    const alvos = {};
+    transicoes(r).forEach(t => { if (t.para && !alvos[t.para] && !t.reabrir) alvos[t.para] = t; });
+    if (agPronto() && (r.estado === 'novo' || r.estado === 'visita_por_marcar') && !r.porConfirmar) alvos.visita_marcada = {agenda: true, label: 'Marcar a visita'};
+    delete alvos[r.estado];
+    return alvos;
+  }
+  function kComeca(card, x, y) {
+    const r = rows.find(z => z.id === card.getAttribute('data-id'));
+    if (!r || !canWrite) return;
+    const alvos = kAlvos(r);
+    const rc = card.getBoundingClientRect();
+    const fant = card.cloneNode(true);
+    fant.classList.add('kfant'); fant.style.width = rc.width + 'px';
+    document.body.appendChild(fant);
+    kArr = {r, card, alvos, fant, dx: x - rc.left, dy: y - rc.top, sobre: null};
+    card.classList.add('karr');
+    document.body.classList.add('a-arrastar');
+    Array.prototype.forEach.call(document.querySelectorAll('#board .col'), c => {
+      const e = c.getAttribute('data-estado');
+      c.classList.add(alvos[e] ? 'alvo' : e === r.estado ? 'origem' : 'fora');
+    });
+    kMove(x, y);
+  }
+  function kMove(x, y) {
+    if (!kArr) return;
+    kArr.fant.style.transform = `translate(${x - kArr.dx}px, ${y - kArr.dy}px)`;
+    const el = document.elementFromPoint(x, y);
+    const col = el && el.closest ? el.closest('#board .col') : null;
+    if (kArr.sobre && kArr.sobre !== col) kArr.sobre.classList.remove('sobre');
+    kArr.sobre = col && col.classList.contains('alvo') ? col : null;
+    if (kArr.sobre) kArr.sobre.classList.add('sobre');
+    // perto da beira, o quadro anda sozinho
+    const b = F('board'), bb = b.getBoundingClientRect();
+    if (x < bb.left + 50) b.scrollLeft -= 18; else if (x > bb.right - 50) b.scrollLeft += 18;
+  }
+  function kFim(largou) {
+    if (!kArr) return;
+    const {r, alvos, sobre} = kArr;
+    kArr.fant.remove(); kArr.card.classList.remove('karr');
+    document.body.classList.remove('a-arrastar');
+    Array.prototype.forEach.call(document.querySelectorAll('#board .col'), c => c.classList.remove('alvo', 'fora', 'origem', 'sobre'));
+    kArr = null;
+    kSoltou = true; setTimeout(() => { kSoltou = false; }, 350);
+    if (kPendente) { kPendente = false; renderAll(); }
+    if (!largou || !sobre) return;
+    const a = alvos[sobre.getAttribute('data-estado')];
+    openSheet(r.id);
+    if (a.agenda) agAbrir('sheet', r.id, r.tipo === 'manutencao' || r.tipo === 'reparacao' ? r.tipo : 'visita', null, 'sug');
+    else abrirTrans(a);
+  }
+  (function () {
+    const board = F('board');
+    let ini = null, temp = null;
+    board.addEventListener('mousedown', ev => {
+      const c = ev.target.closest('.kcard'); if (!c || ev.button !== 0) return;
+      ini = {c, x: ev.clientX, y: ev.clientY};
+    });
+    document.addEventListener('mousemove', ev => {
+      if (kArr) { kMove(ev.clientX, ev.clientY); ev.preventDefault(); return; }
+      if (ini && Math.abs(ev.clientX - ini.x) + Math.abs(ev.clientY - ini.y) > 6) { kComeca(ini.c, ev.clientX, ev.clientY); ini = null; }
+    });
+    document.addEventListener('mouseup', () => { ini = null; if (kArr) kFim(true); });
+    board.addEventListener('touchstart', ev => {
+      const c = ev.target.closest('.kcard'); if (!c || ev.touches.length !== 1) return;
+      const t = ev.touches[0]; ini = {c, x: t.clientX, y: t.clientY};
+      clearTimeout(temp);
+      temp = setTimeout(() => { if (ini) { kComeca(ini.c, ini.x, ini.y); ini = null; } }, 450);
+    }, {passive: true});
+    document.addEventListener('touchmove', ev => {
+      const t = ev.touches[0];
+      if (kArr) { ev.preventDefault(); kMove(t.clientX, t.clientY); return; }
+      if (ini && Math.abs(t.clientX - ini.x) + Math.abs(t.clientY - ini.y) > 10) { clearTimeout(temp); ini = null; }
+    }, {passive: false});
+    document.addEventListener('touchend', ev => { clearTimeout(temp); ini = null; if (kArr) { ev.preventDefault(); kFim(true); } });
+    document.addEventListener('touchcancel', () => { clearTimeout(temp); ini = null; if (kArr) kFim(false); });
+    document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && kArr) kFim(false); });
+  })();
 
   /* ---------- Hoje: o que enviar, as visitas e os alertas, em três listas curtas ---------- */
   const DIA_LONGO = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
