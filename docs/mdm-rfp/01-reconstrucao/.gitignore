@@ -1,0 +1,8 @@
+entrada/
+entrada-demo/
+saida/
+saida-demo/
+*.mbox
+*.xml
+*.csv
+!exportar-supabase.sql
