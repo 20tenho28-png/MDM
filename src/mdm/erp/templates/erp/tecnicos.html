@@ -1,0 +1,47 @@
+{% extends "erp/base.html" %}
+{% block titulo %}Técnicos{% endblock %}
+{% block corpo %}
+<div class="cab"><div><div class="eyebrow">Equipa</div><h1>Técnicos</h1>
+<p class="meta">Para atribuir visitas e filtrar a agenda. Com o ID do calendário Google, as visitas marcadas de cada técnico aparecem no telemóvel dele, no Google Calendar.</p></div>
+{% if google_ativo %}<form method="post" action="/erp/tecnicos/sincronizar"><button class="bt sec">Sincronizar o Google Calendar agora</button></form>{% endif %}</div>
+<div class="tw" style="margin-top:14px"><table><thead><tr><th>Técnico</th><th>Calendário Google</th><th>Estado</th><th></th></tr></thead><tbody>
+{% for t in tecnicos %}<tr>
+<td colspan="2"><form method="post" action="/erp/tecnicos/{{ t.id }}" class="campos" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));align-items:end">
+  <label>Nome<input name="nome" value="{{ t.nome }}" required maxlength="120"></label>
+  <label>Telemóvel<input name="telefone" type="tel" value="{{ t.telefone }}"></label>
+  <label style="grid-column:span 2">ID do calendário<input name="calendario_id" value="{{ t.calendario_id }}" placeholder="…@group.calendar.google.com"></label>
+  <div><button class="bt peq">Guardar</button></div>
+</form></td>
+<td>{{ 'Ativo' if t.ativo else 'Inativo' }}<span class="sub bl">{% if t.calendario_id %}{{ 'no calendário' if google_ativo else 'calendário por ligar' }}{% else %}sem calendário{% endif %}</span></td>
+<td class="n"><a class="bt peq sec" href="/erp/agenda?tecnico={{ t.id }}">Agenda</a>
+<form class="inline" method="post" action="/erp/tecnicos/{{ t.id }}/ativo"><button class="bt peq sec">{{ 'Desativar' if t.ativo else 'Ativar' }}</button></form></td></tr>
+{% else %}<tr><td colspan="4" class="vazio">Ainda não há técnicos.</td></tr>{% endfor %}
+</tbody></table></div>
+
+{% if com_erro %}<h2>Visitas que não chegaram ao Google Calendar</h2>
+<div class="tw"><table><thead><tr><th>Visita</th><th>Erro</th></tr></thead><tbody>
+{% for v in com_erro %}<tr><td><a href="/erp/visitas/{{ v.id }}">{{ ref_visita(v) }}</a> · {{ v.cliente.nome }}</td><td>{{ v.google_erro }}</td></tr>{% endfor %}
+</tbody></table></div>
+<p class="sub">Depois de corrigir (partilha do calendário, ID), carrega em «Sincronizar o Google Calendar agora».</p>{% endif %}
+
+<h2>Acrescentar técnico</h2>
+<form class="ficha" method="post" action="/erp/tecnicos"><fieldset><legend>Técnico</legend><div class="campos">
+  <label>Nome *<input name="nome" required maxlength="120"></label>
+  <label>Telemóvel<input name="telefone" type="tel" inputmode="tel"></label>
+</div></fieldset><div class="acoes"><button class="bt">Acrescentar</button></div></form>
+
+<h2 id="google">Google Calendar</h2>
+<section class="cartao">
+{% if google_ativo %}
+  <p class="msg ok" style="margin-top:0">Ligado. {% if conta_servico %}Conta do ERP: <b>{{ conta_servico }}</b>{% endif %}</p>
+{% else %}
+  <p class="msg aviso" style="margin-top:0">Ainda não está ligado. O ERP funciona na mesma; só não põe as visitas no Google Calendar.</p>
+{% endif %}
+<ol class="passos">
+  <li><b>Uma vez, no escritório:</b> em console.cloud.google.com, cria um projeto, ativa a «Google Calendar API», cria uma conta de serviço e descarrega a chave JSON. Põe o ficheiro no servidor do ERP e o caminho em <code>GOOGLE_CREDENCIAIS</code>; põe em <code>ERP_URL</code> o endereço do ERP visto dos telemóveis.</li>
+  <li><b>Por técnico:</b> no Google Calendar da MDM, cria um calendário «MDM · nome do técnico». Em «Partilhar com pessoas específicas», junta a conta do ERP{% if conta_servico %} ({{ conta_servico }}){% endif %} com «Fazer alterações a eventos» e o Gmail do técnico com «Ver todos os detalhes do evento».</li>
+  <li>Em «Integrar calendário», copia o «ID do calendário» para a linha do técnico aqui em cima e guarda. As visitas marcadas dele, de hoje em diante, aparecem no telemóvel.</li>
+</ol>
+<p class="sub">Cada visita marcada ou feita é um evento com a morada (abre o mapa), o telefone e a ligação «Fazer o relatório», que abre a app já com a visita. Remarcar muda o evento; cancelar, desmarcar ou mudar de técnico tira-o do calendário. As alterações feitas no Google Calendar não voltam ao ERP: marca sempre no ERP.</p>
+</section>
+{% endblock %}

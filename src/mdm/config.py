@@ -24,6 +24,22 @@ class Settings(BaseSettings):
     closed_strip_days: int = 7
     wall_refresh_seconds: int = 30
 
+    # ERP (agenda e relatórios de intervenção). Com utilizador definido, /erp pede utilizador e palavra-passe.
+    erp_utilizador: str = ""
+    erp_palavra_passe: str = ""
+    # Endereço do ERP visto dos telemóveis (ex.: https://erp.mdmassist.pt), para as ligações nos eventos do calendário.
+    erp_url: str = ""
+    # Google Calendar: caminho do ficheiro JSON da conta de serviço. Vazio = não sincroniza.
+    google_credenciais: str = ""
+    # Cabeçalho dos relatórios de intervenção.
+    empresa_nome: str = "MDM Assistência Técnica"
+    empresa_nome_legal: str = "M.D.M. - Manuel Domingos Melancia, Lda"
+    empresa_nif: str = "502 644 761"
+    empresa_morada: str = "Alameda dos Oceanos 108 A, Edifício Vila do Oriente, 1990-426 Lisboa"
+    empresa_telefone: str = "218 935 050"
+    empresa_email: str = "mdmassistencia@gmail.com"
+    empresa_alvara: str = ""
+
 
 @lru_cache
 def get_settings() -> Settings:

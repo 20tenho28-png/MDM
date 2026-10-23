@@ -1,0 +1,63 @@
+# Copia este ficheiro para config.toml, na pasta do projeto, e altera o que precisares.
+# Só precisas de escrever o que muda; tudo o resto vem de funil/padrao.toml (que explica cada opção).
+
+[empresa]
+emails = ["mdmassistencia@gmail.com"]
+# Telefones da MDM e dos técnicos (fixo e telemóveis), em qualquer formato. Nos grupos de WhatsApp escrevem pela MDM.
+telefones = []
+# Como a MDM aparece nas conversas de WhatsApp exportadas (o teu nome ou o nome da conta).
+nomes_whatsapp = ["MDM", "MDM Climatização", "Bernardo"]
+
+[whatsapp]
+# Conversas que não são com clientes (técnicos, fornecedores, família): nome ou número, como no nome do ficheiro.
+conversas_ignorar = []
+# Início das mensagens automáticas do WhatsApp Business (saudação e ausência), para não contarem como resposta.
+mensagens_automaticas = []
+
+[email]
+# Fornecedores, bancos e serviços. Corre `python -m funil remetentes` para os encontrar.
+dominios_ignorar = []
+# Se o formulário do site envia notificações por email, põe aqui o remetente dessas notificações.
+remetentes_formulario = []
+
+[chamadas]
+# Números a ignorar (família, fornecedores...). Também valem para o WhatsApp. Os técnicos vão em [empresa] telefones.
+ignorar = []
+# Para a fatura detalhada do operador (normalmente só tem as chamadas efetuadas), descomenta:
+# direcao_fixa = "saida"
+# e ajusta os nomes das colunas:
+# coluna_data = "Data"
+# coluna_hora = "Hora"
+# coluna_numero = "Número destino"
+# coluna_duracao = "Duração"
+
+[faturas]
+# Nomes das colunas na exportação do programa de faturação (maiúsculas e acentos não importam).
+coluna_data = "data"
+coluna_numero = "numero"
+coluna_cliente = "cliente"
+coluna_nif = "nif"
+coluna_valor = "valor"
+coluna_descricao = "descricao"
+valor_com_iva = false
+
+[pedidos]
+# Contactos que o relatório tratou como partilhados (técnico, parceiro) mas que são de um só cliente.
+nunca_partilhados = []
+
+[semanal]
+objetivo_resposta_horas = 4
+# Dia em que mudaram o processo (AAAA-MM-DD). Deixa vazio até lá.
+data_mudanca = ""
+
+[prazos]
+# Prazos validados com o chefe (copia de saida/prazos_propostos.toml e muda o que quiseres). Vazio = o modo sombra
+# propõe a partir do histórico. Unidades: novo em horas úteis; espera_cliente em dias; os outros em dias úteis.
+# novo = { P1 = 4, P2 = 9, P3 = 18 }
+# orcamento_por_fazer = { P1 = 2, P2 = 3, P3 = 6 }
+# espera_cliente = { P1 = 7, P2 = 14, P3 = 21 }
+# em_execucao = { P1 = 5, P2 = 20, P3 = 30 }
+# Com a agenda do ERP em dados/agenda/ (dias úteis):
+# visita_por_marcar = { P1 = 1, P2 = 2, P3 = 5 }
+# visita_marcada = { P1 = 2, P2 = 5, P3 = 10 }
+# espera_fornecedor = { P1 = 5, P2 = 10, P3 = 15 }

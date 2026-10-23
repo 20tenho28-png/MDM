@@ -1,0 +1,11 @@
+{% macro prio(p) %}{% if p %}<span class="p {{ p|lower }}">{{ p }}</span>{% endif %}{% endmacro %}
+{% macro estado(v) %}<span class="et {{ v.estado }}">{{ v.nome_estado }}</span>{% endmacro %}
+{% macro visita_linha(v, mostrar_dia=false) %}
+<li>
+  <span class="hora">{% if v.inicio %}{% if mostrar_dia %}{{ v.inicio.strftime('%d/%m') }} {% endif %}{{ v.inicio|hora }}{% else %}—{% endif %}</span>
+  <span class="princ"><a href="/erp/visitas/{{ v.id }}"><b>{{ v.cliente.nome }}</b></a> {{ prio(v.prioridade) }}
+    <span class="sub bl">{{ v.nome_tipo }}{% if v.referencia %} · {{ v.referencia }}{% endif %}{% if v.tecnico %} · {{ v.tecnico.nome }}{% endif %}{% if v.morada %} · {{ v.morada }}{% endif %}</span>
+    {% if v.descricao %}<span class="sub bl">{{ v.descricao|truncate(140) }}</span>{% endif %}</span>
+  {{ estado(v) }}
+</li>
+{% endmacro %}
