@@ -4,7 +4,7 @@
       <a href="{{ root }}index.html">Início</a><span aria-hidden="true">›</span><a href="{{ root }}obras.html">Obras</a><span aria-hidden="true">›</span><span aria-current="page">{{ obra.title }}</span>
     </nav>
     <div class="sec-head">
-      <span class="eyebrow">{{ obra.catLabel }} · {{ obra.code }}</span>
+      <span class="eyebrow">{{ obra.servico.nome }} · {{ obra.code }}</span>
       <h1 id="obraT">{{ obra.title }}</h1>
       <p>{{ obra.resumo }}</p>
     </div>
@@ -22,8 +22,7 @@
       <h2 class="ficha-t" id="fichaT">Ficha da obra</h2>
       <dl aria-labelledby="fichaT">
         <div><dt>Código</dt><dd>{{ obra.code }}</dd></div>
-        <div><dt>Categoria</dt><dd><a href="{{ root }}{{ obra.relHref }}">{{ obra.catNome }}</a></dd></div>
-        <div><dt>Trabalho</dt><dd>{{ obra.catLabel }}</dd></div>
+        <div><dt>Serviço</dt><dd><a href="{{ root }}{{ obra.catAnchor }}">{{ obra.servico.nome }}</a></dd></div>
         {{#se obra.factos.data}}<div><dt>Data</dt><dd>{{ obra.factos.data }}</dd></div>{{/se}}
         {{#se obra.factos.localExato}}<div><dt>Local</dt><dd>{{ obra.factos.localExato }}</dd></div>{{/se}}
         {{#se obra.factos.duracao}}<div><dt>Duração</dt><dd>{{ obra.factos.duracao }}</dd></div>{{/se}}
@@ -41,7 +40,7 @@
       <p>Peça o orçamento com o tipo de obra já escolhido, ou envie fotografias do seu espaço por WhatsApp.</p>
     </div>
     <div class="cta-faixa-acoes">
-      <a class="btn" href="{{ obra.orcamentoHref }}">Pedir Orçamento</a>
+      <a class="btn" href="{{ obra.contactoHref }}">Pedir Orçamento</a>
       <a class="btn btn-ghost-paper" href="{{ obra.waHref }}" target="_blank" rel="noopener">Enviar Fotografias por WhatsApp</a>
     </div>
   </div>

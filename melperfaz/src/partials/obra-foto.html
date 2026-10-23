@@ -1,4 +1,4 @@
 <figure class="pg reveal" data-cat="{{ obra.cat }}">
   {{foto {{ obra.foto }} sizes="{{ cartaoSizes }}" loading="{{ loading }}" prioridade="{{ prioridade }}" foco="{{ obra.foco }}"}}
-  <figcaption><span class="cat">{{ obra.catLabel }}</span><h3><a href="{{ root }}obras/{{ obra.slug }}.html">{{ obra.title }}</a></h3><span class="pg-ver" aria-hidden="true">Ver obra →</span></figcaption>
+  <figcaption><span class="cat">{{ obra.servico.nome }}</span><h{{ cartaoH }}><a href="{{ root }}obras/{{ obra.slug }}.html">{{ obra.title }}</a></h{{ cartaoH }}><span class="pg-ver" aria-hidden="true">Ver obra →</span></figcaption>
 </figure>

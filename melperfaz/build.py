@@ -18,8 +18,9 @@ Sintaxe dos modelos (src/):
                                          (data/fotos.json; tamanhos feitos por gerar_fotos.py)
     {{wa chave}}                         ligação de WhatsApp com a mensagem site.wa.chave já escrita
     {{li obra.detalhes}}                 um <li> por texto de uma lista
-    {{each parcial all}} / {{each parcial 01,02}} / {{each parcial cat=fachadas}} / {{each parcial ctx:related}}
-                                         repete um parcial por obra (… eagerN no fim: as N primeiras imagens sem lazy)
+    {{each parcial all}} / {{each parcial destaque}} / {{each parcial 01,02}} / {{each parcial cat=fachadas}} /
+    {{each parcial ctx:related}}         repete um parcial por obra (… eagerN no fim: as N primeiras imagens sem lazy);
+                                         «destaque» são as obras com "destaque": true em data/obras.json
     {{#se caminho}}…{{/se}}              só aparece se o valor existir e não estiver vazio
     {{#sem caminho}}…{{/sem}}            só aparece se o valor estiver vazio
     {{#cada caminho}}…{{/cada}}          repete o bloco por cada elemento da lista, com o elemento em {{ item }}
@@ -60,7 +61,6 @@ SITE["anos"] = ANO - int(SITE["founded"])
 FOTOS = {k: v for k, v in json.loads((DATA / "fotos.json").read_text(encoding="utf-8")).items() if not k.startswith("_")}
 OBRAS_DATA = json.loads((DATA / "obras.json").read_text(encoding="utf-8"))
 OBRAS = OBRAS_DATA["obras"]
-CATEGORIAS = OBRAS_DATA["categorias"]
 OBRA_BY_N = {o["n"]: o for o in OBRAS}
 DADOS_DOC = json.loads((DATA / "dados-melperfaz.json").read_text(encoding="utf-8"))
 DADOS = {k: v["valor"] for k, v in DADOS_DOC.items() if not k.startswith("_")}
@@ -71,10 +71,15 @@ FOTO_LADOS = (400, 600, 800, 1000, 1200, 1600)
 # ecrã de telemóvel de 3x: pede-se a imagem de 2x (à vista é igual e pesa metade); vai antes do sizes de cada fotografia
 FOTO_3X = "(max-width: 599px) and (min-resolution: 2.5dppx)"
 LQIP = json.loads((DATA / "lqip.json").read_text(encoding="utf-8")) if (DATA / "lqip.json").exists() else {}
-# os tipos de obra do formulário (site.json «tiposDeObra»): os cartões de serviço e as obras pré-escolhem um deles
-TIPOS_DE_OBRA = SITE["tiposDeObra"]
-# o tipo de obra que cada categoria de obras pré-escolhe no formulário (ligação «Pedir Orçamento» da ficha)
-CAT_TIPO = {"reabilitacao": "Reabilitação de Edifício", "fachadas": "Fachadas / Impermeabilização", "acabamentos": "Acabamentos"}
+# o vocabulário do site (site.json «servicos»): os serviços da página inicial, as opções do formulário (mais «Outro»), as
+# etiquetas e os grupos das obras, o rodapé e o ?tipo= das ligações de orçamento usam todos o mesmo id e o mesmo nome
+SERVICOS = SITE["servicos"]
+SERVICO_BY_ID = {s["id"]: s for s in SERVICOS}
+# as categorias das obras são os serviços com «cat»: o «cat» de cada obra diz a que serviço pertence
+CATEGORIAS = {s["cat"]: s["nome"] for s in SERVICOS if s["cat"]}
+SERVICO_BY_CAT = {s["cat"]: s for s in SERVICOS if s["cat"]}
+# as opções do «Tipo de obra» do formulário: os nomes dos serviços e «Outro»
+TIPOS_DE_OBRA = [s["nome"] for s in SERVICOS] + ["Outro"]
 
 
 def lados(n):
@@ -88,18 +93,25 @@ def campos_obra(o):
     f = FOTOS[o["foto"]]
     o["orient"] = "landscape" if f["w"] >= f["h"] else "portrait"
     o["alt"] = f["alt"]
-    o["catNome"] = CATEGORIAS[o["cat"]]
-    tipo = CAT_TIPO.get(o["cat"], "Outro")
-    if tipo not in TIPOS_DE_OBRA:
-        raise SystemExit(f"build.py: CAT_TIPO «{tipo}» não é um dos «tiposDeObra» de data/site.json")
-    o["tipoDeObra"] = tipo
-    o["orcamentoHref"] = f"../index.html?tipo={quote(tipo)}#contacto"
+    s = SERVICO_BY_CAT[o["cat"]]
+    o["servico"] = s
+    o["catNome"] = s["nome"]
+    o["tipoDeObra"] = s["nome"]
+    # o pedido com o tipo já escolhido e a obra de onde veio (campo escondido «pagina»): orcamento.html (fase 4 do plano)
+    o["orcamentoHref"] = f"../orcamento.html?tipo={s['id']}&de=obras/{o['slug']}"
+    # enquanto orcamento.html não existe, a ficha leva ao formulário da página inicial com o mesmo ?tipo=<id>
+    o["contactoHref"] = f"../index.html?tipo={s['id']}#contacto"
+    # a âncora do grupo da obra em obras.html (relativa à raiz: {{ root }}{{ obra.catAnchor }})
+    o["catAnchor"] = f"obras.html#{o['cat']}"
+    o.setdefault("destaque", False)
+    o.setdefault("fotosExtra", [])
+    # a ficha (Local, Data, Duração, Resultado) só aparece quando a Melperfaz deu pelo menos um destes factos
+    o["temFactos"] = any(tem(o["factos"].get(k, "")) for k in FACTOS_FICHA)
     msg = SITE["wa"]["obra"].replace("{code}", o["code"]).replace("{title}", o["title"])
     o["waHref"] = SITE["whatsappBase"] + quote(msg)
     # «Outras obras de fachadas» só quando há outras da mesma categoria que cheguem; senão, «Outras obras»
     mesma = sum(1 for x in OBRAS if x is not o and x["cat"] == o["cat"])
     o["relTitulo"] = f"Outras obras de {o['catNome'].lower()}" if mesma >= 2 else "Outras obras"
-    o["relHref"] = f"obras.html?cat={o['cat']}"
     # a fotografia da ficha ocupa a largura do contentor (1240px) e no máximo 78% da altura do ecrã, na sua proporção
     o["fotoSizes"] = f"min(1240px, 100vw, calc(78vh * {f['w']} / {f['h']}))"
     # sem comparador, a chave existe vazia: os modelos perguntam {{#se obra.antesDepois}} (uma chave em falta é erro)
@@ -112,13 +124,41 @@ def campos_obra(o):
         o["antesSrc"], o["depoisSrc"] = f"foto-{ad['antes']}.jpg", f"foto-{ad['depois']}.jpg"
 
 
+def tem(v):
+    return bool(v.strip()) if isinstance(v, str) else bool(v)
+
+
+# os factos de cada obra que a ficha mostra; «problema» e «trabalho» entram no texto da obra («Na obra»)
+FACTOS_FICHA = ("localExato", "data", "duracao", "resultado")
+FACTOS_OBRA = {"problema": "O problema que havia (uma ou duas frases)", "trabalho": "O que a Melperfaz fez (uma ou duas frases)",
+               "data": "Data da obra", "localExato": "Local (bairro ou concelho, sem o nome do cliente)",
+               "duracao": "Duração", "resultado": "Resultado da obra numa frase"}
+
+for _s in SERVICOS:
+    if not (_s.get("id") and _s.get("nome") and _s.get("texto")) or "cat" not in _s:
+        raise SystemExit(f"site.json «servicos»: cada serviço tem id, nome, cat (vazio se não tiver obras) e texto → {_s}")
+    if _s["cat"] and _s["cat"] != _s["id"]:
+        raise SystemExit(f"site.json «servicos» {_s['id']}: «cat» é o próprio id ou vazio → «{_s['cat']}»")
+if len(SERVICO_BY_ID) != len(SERVICOS):
+    raise SystemExit("site.json «servicos»: id repetido")
 for _o in OBRAS:
     if _o["foto"] not in FOTOS:
         raise SystemExit(f"obras.json {_o['code']}: «foto» {_o['foto']} não existe em data/fotos.json")
     if _o["cat"] not in CATEGORIAS:
-        raise SystemExit(f"obras.json {_o['code']}: categoria «{_o['cat']}» não existe em «categorias»")
+        raise SystemExit(f"obras.json {_o['code']}: «cat» «{_o['cat']}» não é o «cat» de nenhum serviço de site.json")
     campos_obra(_o)
 CAT_N = {**{c: sum(1 for o in OBRAS if o["cat"] == c) for c in CATEGORIAS}, "todas": len(OBRAS)}
+
+
+def servicos_ctx(root):
+    """Os serviços para os modelos: n (01…), obrasN, a primeira fotografia das suas obras, a âncora e o pedido."""
+    out = []
+    for i, s in enumerate(SERVICOS):
+        obras = [o for o in OBRAS if s["cat"] and o["cat"] == s["cat"]]
+        out.append({**s, "n": f"{i + 1:02d}", "obrasN": len(obras), "primeiraFoto": obras[0]["foto"] if obras else "",
+                    "catAnchor": f"obras.html#{s['cat']}" if obras else "",
+                    "orcamentoHref": f"{root}orcamento.html?tipo={s['id']}"})
+    return out
 
 
 def relacionadas(o, n=2):
@@ -201,6 +241,8 @@ def each(ctx, args):
         sel = sel[: m.start()].strip()
     if sel == "all":
         items = OBRAS
+    elif sel == "destaque":
+        items = [o for o in OBRAS if o["destaque"]]
     elif sel.startswith("cat="):
         items = [o for o in OBRAS if o["cat"] == sel[4:]]
     elif sel.startswith("ctx:"):
@@ -218,10 +260,6 @@ def each(ctx, args):
 
 
 ABRE_RE = re.compile(r"\{\{#(se|sem|cada)\s+([\w.]+)\s*\}\}")
-
-
-def tem(v):
-    return bool(v.strip()) if isinstance(v, str) else bool(v)
 
 
 def valor(ctx, caminho):
@@ -350,6 +388,9 @@ def page_ctx(meta, file):
     root = "/" if file == "404.html" else "../" * depth
     return {"site": SITE, "page": meta, "root": root, "_file": file, "dados": DADOS, "categorias": CATEGORIAS,
             "cat_n": CAT_N, "year": str(ANO), "anos": str(SITE["anos"]), "tipos": TIPOS_DE_OBRA,
+            "servicos": servicos_ctx(root), "provas": SITE["provas"], "menu": SITE["menu"],
+            # cartaoH: o nível do título dos cartões de obra (obra-foto.html); obras.html agrupa-os sob um h2 por serviço
+            "cartaoH": str(meta.get("cartaoH", 3)),
             # ficha: «1» nas fichas de obra (o comparador perde o cabeçalho, que repetiria o h1, e carrega as fotos já)
             "ficha": "", "baLoading": "lazy"}
 
@@ -449,8 +490,10 @@ def build():
         prev_o, next_o = OBRAS[i - 1], OBRAS[(i + 1) % len(OBRAS)]
         file = f"obras/{o['slug']}.html"
         desc = f"{o['title']}, {o['catNome'].lower()}: {o['resumo']}"
-        if len(desc) > 160:   # a descrição corta-se na última frase inteira que cabe
-            desc = re.sub(r"\s[^.]*$", "", desc[:158]).rstrip(".,;:") + "."
+        if len(desc) > 160:   # a descrição corta-se na última frase inteira que cabe; sem nenhuma, na última palavra
+            corte = desc[:160]
+            fim = corte.rfind(". ")
+            desc = corte[:fim + 1] if fim >= 60 else re.sub(r"\s+\S*$", "", corte[:159]).rstrip(".,;:") + "…"
         meta = {"file": file, "nav": "obras", "css": ["pag-obras.css"],
                 "title": f"{o['title']} · Obras Melperfaz",
                 "description": desc,
@@ -490,7 +533,8 @@ REF_RE = re.compile(r'(?:href|src|action)="([^"#?]+)|srcset="([^"]+)"|url\(([^)]
 FORM_RE = re.compile(r'<form\b[^>]*\bid="quoteForm"[^>]*>.*?</form>', re.S)
 FORM_EXIGE = [' name="orcamento"', ' method="POST"', ' data-netlify="true"', ' netlify-honeypot="bot-field"',
               ' action="/obrigado.html"']
-FORM_CAMPOS = {"form-name", "subject", "pagina", "nome", "telefone", "email", "tipo_de_obra", "mensagem", "bot-field"}
+FORM_CAMPOS = {"form-name", "subject", "pagina", "nome", "telefone", "localidade", "email", "tipo_de_obra", "mensagem",
+               "bot-field"}
 TAG_TEXTO_RE = re.compile(r"</?(?:a|abbr|b|br|cite|code|em|i|small|span|strong|sub|sup|time|u|wbr)\b[^<>]*>", re.I)
 LD_RE = re.compile(r'<script type="application/ld\+json">(.*?)</script>', re.S)
 
@@ -574,8 +618,8 @@ def check_formulario(f, text):
         out.append(f"{f}: falta o campo escondido form-name=orcamento")
     opcoes = [html.unescape(x) for x in re.findall(r"<option value=\"([^\"]*)\"", form)]
     if [o for o in opcoes if o] != TIPOS_DE_OBRA:
-        out.append(f"{f}: as opções de «Tipo de Obra» não são as de site.json «tiposDeObra» → {opcoes}")
-    for nome in ("nome", "telefone", "email", "mensagem"):
+        out.append(f"{f}: as opções de «Tipo de Obra» não são os nomes de site.json «servicos» e «Outro» → {opcoes}")
+    for nome in ("nome", "telefone", "localidade", "email", "mensagem"):
         el = re.search(r'<(?:input|textarea)\b[^>]*\bname="%s"[^>]*>' % nome, form)
         if el and not re.search(r'\bmaxlength="\d+"', el.group(0)):
             out.append(f"{f}: o campo «{nome}» não tem maxlength")
@@ -688,9 +732,16 @@ def check_obras():
     out = []
     slugs, codes = set(), set()
     for o in OBRAS:
-        for campo in ("n", "code", "slug", "cat", "catLabel", "title", "foto", "resumo", "detalhes", "factos"):
+        for campo in ("n", "code", "slug", "cat", "title", "foto", "resumo", "detalhes", "factos", "fotosExtra"):
             if campo not in o:
                 out.append(f"obras.json {o.get('code', '?')}: falta «{campo}»")
+        if "catLabel" in o:
+            out.append(f"obras.json {o['code']}: «catLabel» já não existe: o nome vem do serviço («cat», site.json «servicos»)")
+        if not isinstance(o.get("destaque", False), bool):
+            out.append(f"obras.json {o['code']}: «destaque» é true ou false")
+        extra = o.get("fotosExtra", [])
+        if not (isinstance(extra, list) and all(x in FOTOS for x in extra)):
+            out.append(f"obras.json {o['code']}: «fotosExtra» é uma lista de fotografias de data/fotos.json → {extra}")
         if o["slug"] in slugs:
             out.append(f"obras.json: slug repetido «{o['slug']}»")
         if o["code"] in codes:
@@ -700,10 +751,12 @@ def check_obras():
             out.append(f"obras.json {o['code']}: slug só com letras minúsculas sem acentos, algarismos e hífens → «{o['slug']}»")
         if not (isinstance(o["detalhes"], list) and o["detalhes"] and all(isinstance(x, str) and x.strip() for x in o["detalhes"])):
             out.append(f"obras.json {o['code']}: «detalhes» tem de ser uma lista de frases")
-        if set(o["factos"]) != {"data", "localExato", "duracao", "resultado"}:
-            out.append(f"obras.json {o['code']}: «factos» tem de ter data, localExato, duracao e resultado (vazios ou não)")
+        if set(o["factos"]) != set(FACTOS_OBRA):
+            out.append(f"obras.json {o['code']}: «factos» tem de ter {', '.join(FACTOS_OBRA)} (vazios ou não)")
         if not re.fullmatch(r"\d{1,3}% \d{1,3}%", str(o.get("foco", ""))):
             out.append(f"obras.json {o['code']}: «foco» é obrigatório, «X% Y%» (o ponto da fotografia que fica à vista) → «{o.get('foco', '')}»")
+    if not any(o["destaque"] for o in OBRAS):
+        out.append("obras.json: nenhuma obra com «destaque»: true (a página inicial ficava sem obras)")
     return out
 
 
@@ -749,10 +802,6 @@ def check(files):
     return 0
 
 
-FACTOS_OBRA = {"data": "Data da obra", "localExato": "Local (bairro ou concelho, sem o nome do cliente)",
-               "duracao": "Duração", "resultado": "Resultado da obra numa frase"}
-
-
 def em_falta():
     for k, v in DADOS_DOC.items():
         if k.startswith("_") or tem(v["valor"]):
@@ -763,7 +812,7 @@ def em_falta():
     for campo, nome in FACTOS_OBRA.items():
         sem = [o["code"] for o in OBRAS if not tem(o["factos"].get(campo, ""))]
         if sem:
-            yield ("Obras (data/obras.json, «factos» de cada obra; a linha só aparece na ficha quando existe)",
+            yield ("Obras (data/obras.json, «factos» de cada obra; cada um só aparece no site quando existe)",
                    f"{nome}: falta em {len(sem)} de {len(OBRAS)} obras" + ("" if len(sem) == len(OBRAS) else f" ({', '.join(sem)})"))
 
 

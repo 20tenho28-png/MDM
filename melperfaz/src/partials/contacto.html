@@ -28,6 +28,10 @@
           <p class="field-erro" id="eTel"></p>
         </div>
         <div class="field">
+          <label for="qLocal">Localidade <span class="opcional">(opcional)</span></label>
+          <input id="qLocal" name="localidade" type="text" maxlength="120" autocomplete="address-level2" placeholder="Onde é a obra">
+        </div>
+        <div class="field">
           <label for="qEmail">Email</label>
           <input id="qEmail" name="email" type="email" maxlength="254" inputmode="email" autocomplete="email" placeholder="o.seu@email.pt" aria-describedby="eEmail">
           <p class="field-erro" id="eEmail"></p>
@@ -35,8 +39,9 @@
         <div class="field">
           <label for="qTipo">Tipo de Obra</label>
           <select id="qTipo" name="tipo_de_obra">
-            <option value="">Escolha uma opção</option>{{#cada tipos}}
-            <option value="{{ item }}">{{ item }}</option>{{/cada}}
+            <option value="">Escolha uma opção</option>{{#cada servicos}}
+            <option value="{{ item.nome }}" data-tipo="{{ item.id }}">{{ item.nome }}</option>{{/cada}}
+            <option value="Outro" data-tipo="outro">Outro</option>
           </select>
         </div>
         <div class="field">

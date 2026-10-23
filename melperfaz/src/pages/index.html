@@ -35,14 +35,10 @@
       <h2 id="servicosT">Construção e reabilitação, do alicerce ao acabamento</h2>
       <p>Da estrutura ao acabamento, com uma equipa responsável do início ao fim. Escolha o trabalho e peça o orçamento.</p>
     </div>
-    <!-- cada cartão leva ao formulário com o tipo de obra já escolhido (data-preselect, site.js); sem JavaScript vai só a #contacto -->
-    <div class="svc-grid">
-      <a class="svc reveal" href="#contacto" data-preselect="Reabilitação de Edifício"><span class="num">01</span><h3>Reabilitação de Edifícios</h3><p>A nossa especialidade. Recuperamos edifícios degradados de raiz (estrutura, fachadas e interiores), devolvendo-lhes solidez e valor.</p><span class="arrow" aria-hidden="true">→</span></a>
-      <a class="svc reveal" href="#contacto" data-preselect="Espaço Comercial"><span class="num">02</span><h3>Espaços Comerciais</h3><p>Lojas, escritórios e espaços de trabalho construídos ou renovados para abrir portas a horas, com mínima perturbação ao negócio.</p><span class="arrow" aria-hidden="true">→</span></a>
-      <a class="svc reveal" href="#contacto" data-preselect="Apartamento"><span class="num">03</span><h3>Apartamentos</h3><p>Remodelação completa de apartamentos, do desmonte aos acabamentos. Obra limpa, prazos cumpridos e atenção ao detalhe.</p><span class="arrow" aria-hidden="true">→</span></a>
-      <a class="svc reveal" href="#contacto" data-preselect="Trabalhos de Estrutura"><span class="num">04</span><h3>Trabalhos de Estrutura</h3><p>Fundações, pilares, lajes e alvenaria executados dentro das normas. A base de toda a obra bem feita.</p><span class="arrow" aria-hidden="true">→</span></a>
-      <a class="svc reveal" href="#contacto" data-preselect="Fachadas / Impermeabilização"><span class="num">05</span><h3>Fachadas &amp; Impermeabilização</h3><p>Recuperação e pintura de fachadas, isolamento e impermeabilização, incluindo trabalhos em altura com acesso por corda.</p><span class="arrow" aria-hidden="true">→</span></a>
-      <a class="svc reveal" href="#contacto" data-preselect="Acabamentos"><span class="num">06</span><h3>Acabamentos</h3><p>Revestimentos, pinturas, carpintaria e remates finais. O cuidado que distingue uma obra entregue de uma obra bem entregue.</p><span class="arrow" aria-hidden="true">→</span></a>
+    <!-- os serviços vêm de data/site.json «servicos»; cada cartão leva ao formulário com o tipo de obra já escolhido
+         (data-preselect com o id do serviço, site.js); sem JavaScript vai só a #contacto -->
+    <div class="svc-grid">{{#cada servicos}}
+      <a class="svc reveal" href="#contacto" data-preselect="{{ item.id }}"><span class="num">{{ item.n }}</span><h3>{{ item.nome }}</h3><p>{{ item.texto }}</p><span class="arrow" aria-hidden="true">→</span></a>{{/cada}}
     </div>
   </div>
 </section>

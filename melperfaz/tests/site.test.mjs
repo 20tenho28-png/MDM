@@ -15,6 +15,10 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'melperfaz-site-'));
 const PUB = path.join(tmp, 'public');
 const SITE = JSON.parse(fs.readFileSync(path.join(W, 'data/site.json'), 'utf8'));
 const OBRAS = JSON.parse(fs.readFileSync(path.join(W, 'data/obras.json'), 'utf8')).obras;
+// o vocabulário: o serviço de cada obra é o de site.json «servicos» com o mesmo «cat»
+const SERVICOS = SITE.servicos;
+const servicoDe = o => SERVICOS.find(s => s.cat && s.cat === o.cat);
+const TIPOS = [...SERVICOS.map(s => s.nome), 'Outro'];
 const FOTOS = Object.entries(JSON.parse(fs.readFileSync(path.join(W, 'data/fotos.json'), 'utf8'))).filter(([k]) => !k.startsWith('_'));
 const le = f => fs.readFileSync(path.join(PUB, f), 'utf8');
 // o texto como o HTML gerado o escreve (html.escape do build.py), pronto para entrar numa RegExp
@@ -93,7 +97,10 @@ test('a página inicial: secções pela ordem do sistema de desenho, cartões, p
   const anos = new Date().getFullYear() - Number(SITE.founded);
   assert.match(t, new RegExp(`${anos} anos de ofício`));
   assert.match(t, new RegExp(`<span class="big">${anos}</span><span class="lbl">Anos de Atividade</span>`));
-  for (const s of t.matchAll(/data-preselect="([^"]+)"/g)) assert.ok(SITE.tiposDeObra.includes(s[1]), `pré-escolha ${s[1]} existe no formulário`);
+  const pre = [...t.matchAll(/data-preselect="([^"]+)"/g)].map(m => m[1]);
+  assert.deepEqual(pre, SERVICOS.map(s => s.id), 'um cartão por serviço, com o id de site.json «servicos»');
+  const nomes = [...t.matchAll(/<a class="svc reveal"[^>]*><span class="num">\d\d<\/span><h3>([^<]+)<\/h3>/g)].map(m => m[1]);
+  assert.deepEqual(nomes, SERVICOS.map(s => esc(s.nome).replace(/\\/g, '')), 'os nomes dos cartões são os dos serviços');
 });
 
 test('o formulário Netlify: atributos, campos, opções, isco e página de agradecimento', () => {
@@ -102,11 +109,15 @@ test('o formulário Netlify: atributos, campos, opções, isco e página de agra
   const abre = form.slice(0, form.indexOf('>') + 1);
   for (const a of [' name="orcamento"', ' method="POST"', ' data-netlify="true"', ' netlify-honeypot="bot-field"', ' action="/obrigado.html"']) assert.ok(abre.includes(a), a);
   const nomes = [...form.matchAll(/<(?:input|select|textarea)\b[^>]*\bname="([^"]+)"/g)].map(m => m[1]).sort();
-  assert.deepEqual(nomes, ['bot-field', 'email', 'form-name', 'mensagem', 'nome', 'pagina', 'subject', 'telefone', 'tipo_de_obra']);
+  assert.deepEqual(nomes, ['bot-field', 'email', 'form-name', 'localidade', 'mensagem', 'nome', 'pagina', 'subject', 'telefone', 'tipo_de_obra']);
   assert.match(form, /<input type="hidden" name="form-name" value="orcamento">/);
   assert.match(form, /<input type="hidden" name="pagina" value="index.html">/);
   const opcoes = [...form.matchAll(/<option value="([^"]*)"/g)].map(m => m[1]).filter(Boolean);
-  assert.deepEqual(opcoes, SITE.tiposDeObra);
+  assert.deepEqual(opcoes, TIPOS, 'as opções são os nomes dos serviços e «Outro»');
+  const ids = [...form.matchAll(/<option value="[^"]+" data-tipo="([^"]+)"/g)].map(m => m[1]);
+  assert.deepEqual(ids, [...SERVICOS.map(s => s.id), 'outro'], 'cada opção leva o id do serviço (?tipo=)');
+  assert.doesNotMatch(form, /name="localidade"[^>]*\brequired\b/);
+  assert.match(form, /<label for="qLocal">Localidade <span class="opcional">\(opcional\)<\/span><\/label>/);
   assert.match(form, /name="nome"[^>]*\brequired\b/);
   assert.match(form, /name="telefone"[^>]*\brequired\b/);
   assert.doesNotMatch(form, /name="email"[^>]*\brequired\b/);
@@ -118,18 +129,21 @@ test('o formulário Netlify: atributos, campos, opções, isco e página de agra
   assert.match(obg, /prazo de um dia útil/);
 });
 
-test('as fichas de obra: migalhas, ficha, orçamento pré-escolhido, WhatsApp com o código, anterior e seguinte', () => {
+test('as fichas de obra: migalhas, serviço, orçamento pré-escolhido, WhatsApp com o código, anterior e seguinte', () => {
   OBRAS.forEach((o, i) => {
     const f = `obras/${o.slug}.html`;
     const t = le(f);
     assert.match(t, new RegExp(`<h1 id="obraT">${esc(o.title)}</h1>`), f);
-    assert.match(t, new RegExp(`${esc(o.catLabel)} · ${esc(o.code)}`), f);
+    const s = servicoDe(o);
+    assert.ok(s, `${f}: o «cat» ${o.cat} é o de um serviço`);
+    assert.match(t, new RegExp(`${esc(s.nome)} · ${esc(o.code)}`), f);
+    assert.match(t, new RegExp(`<dt>Serviço</dt><dd><a href="\\.\\./obras\\.html#${s.cat}">${esc(s.nome)}</a>`), `${f}: o serviço liga ao grupo em obras.html`);
     const lds = [...t.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)].map(m => JSON.parse(m[1]));
     const bc = lds.find(l => l['@type'] === 'BreadcrumbList');
     assert.ok(bc && bc.itemListElement.length === 3 && bc.itemListElement[2].item === `${SITE.baseUrl}/${f}`, `${f}: migalhas`);
     const orc = /class="cta-faixa-acoes">\s*<a class="btn" href="([^"]+)">Pedir Orçamento<\/a>/.exec(t)[1];
-    const tipo = decodeURIComponent(/\?tipo=([^#]+)#contacto$/.exec(orc)[1]);
-    assert.ok(SITE.tiposDeObra.includes(tipo), `${f}: tipo pré-escolhido «${tipo}»`);
+    const tipo = /\?tipo=([^#]+)#contacto$/.exec(orc)[1];
+    assert.equal(tipo, s.id, `${f}: tipo pré-escolhido «${tipo}» é o id do serviço`);
     const wa = /href="(https:\/\/wa\.me\/351961245288\?text=[^"]+)"[^>]*>Enviar Fotografias por WhatsApp/.exec(t)[1];
     assert.ok(decodeURIComponent(wa).includes(o.code), `${f}: mensagem de WhatsApp com o código`);
     const prev = OBRAS[(i - 1 + OBRAS.length) % OBRAS.length], next = OBRAS[(i + 1) % OBRAS.length];
@@ -143,6 +157,37 @@ test('as fichas de obra: migalhas, ficha, orçamento pré-escolhido, WhatsApp co
   for (const o of OBRAS) assert.ok(obras.includes(`href="obras/${o.slug}.html"`), `obras.html liga a ${o.slug}`);
   assert.match(obras, /<button class="chip" type="button" data-filtro="reabilitacao" aria-pressed="false">Reabilitação <span class="chip-n">2<\/span><\/button>/);
   assert.equal((obras.match(/<figure class="pg reveal" data-cat="/g) || []).length, OBRAS.length, 'obras.html mostra todas as obras');
+});
+
+test('os dados: vocabulário dos serviços, obras em destaque, factos e o --faltam', () => {
+  assert.ok(!('tiposDeObra' in SITE), 'tiposDeObra deu lugar a servicos');
+  assert.deepEqual(SERVICOS.map(s => s.id), ['reabilitacao', 'comercial', 'apartamentos', 'estrutura', 'fachadas', 'acabamentos']);
+  for (const s of SERVICOS) {
+    assert.ok(s.nome && s.texto, `${s.id}: nome e texto`);
+    assert.ok(s.cat === '' || s.cat === s.id, `${s.id}: cat é o id ou vazio`);
+  }
+  assert.ok(Array.isArray(SITE.provas) && SITE.provas.length === 3, 'três provas');
+  assert.deepEqual(SITE.menu.map(m => m.nome), ['Início', 'Obras']);
+  assert.match(SITE.wa.erro, /\{nome\}/);
+  assert.match(SITE.wa.erro, /\{tipo\}/);
+  for (const o of OBRAS) {
+    assert.ok(!('catLabel' in o), `${o.code}: sem catLabel`);
+    assert.ok(servicoDe(o), `${o.code}: cat de um serviço`);
+    assert.deepEqual(Object.keys(o.factos).sort(), ['data', 'duracao', 'localExato', 'problema', 'resultado', 'trabalho'], `${o.code}: factos`);
+    assert.ok(Array.isArray(o.fotosExtra), `${o.code}: fotosExtra`);
+  }
+  assert.deepEqual(OBRAS.filter(o => o.destaque).map(o => o.code), ['M01', 'M04', 'M05']);
+  const r = spawnSync('python3', ['build.py', '--faltam'], { cwd: W, encoding: 'utf8', env: { ...process.env, MELPERFAZ_OUT: path.join(tmp, 'faltam') } });
+  assert.equal(r.status, 0);
+  const doc = JSON.parse(fs.readFileSync(path.join(W, 'data/dados-melperfaz.json'), 'utf8'));
+  for (const k of ['zona', 'horario', 'alvara', 'seguro', 'nif', 'morada', 'email', 'googleMaps']) {
+    if (!doc[k].valor) assert.ok(r.stdout.includes(`chave «${k}»`), `--faltam lista ${k}`);
+  }
+  const FACTOS = { problema: 'O problema que havia', trabalho: 'O que a Melperfaz fez', data: 'Data da obra', localExato: 'Local (bairro',
+    duracao: 'Duração:', resultado: 'Resultado da obra' };
+  for (const [k, nome] of Object.entries(FACTOS)) {
+    if (OBRAS.some(o => !o.factos[k])) assert.ok(r.stdout.includes(nome), `--faltam lista «${nome}»`);
+  }
 });
 
 test('a 404 só usa caminhos absolutos', () => {

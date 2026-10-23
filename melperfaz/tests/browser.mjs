@@ -53,7 +53,8 @@ const preenche = async (page, d = {}) => {
   await page.fill('#qNome', d.nome ?? 'Ana Teste');
   await page.fill('#qTel', d.telefone ?? '912 345 678');
   await page.fill('#qEmail', d.email ?? 'ana@teste.pt');
-  if (d.tipo !== null) await page.selectOption('#qTipo', d.tipo ?? 'Apartamento');
+  if (d.localidade !== null) await page.fill('#qLocal', d.localidade ?? 'Lisboa');
+  if (d.tipo !== null) await page.selectOption('#qTipo', d.tipo ?? 'Apartamentos');
   await page.fill('#qMsg', d.mensagem ?? 'Remodelação de um T2 em Lisboa, com casa de banho nova.');
 };
 
@@ -68,7 +69,7 @@ try {
     const p = srv.pedidos.at(-1);
     ok(p && p.caminho === '/' && p.tipo.includes('application/x-www-form-urlencoded'), 'A: POST para / em urlencoded', p);
     ok(p && p.campos['form-name'] === 'orcamento' && p.campos.nome === 'Ana Teste' && p.campos.telefone === '912 345 678'
-      && p.campos.email === 'ana@teste.pt' && p.campos.tipo_de_obra === 'Apartamento' && p.campos.mensagem.startsWith('Remodelação')
+      && p.campos.email === 'ana@teste.pt' && p.campos.tipo_de_obra === 'Apartamentos' && p.campos.localidade === 'Lisboa' && p.campos.mensagem.startsWith('Remodelação')
       && p.campos.pagina === 'index.html' && p.campos['bot-field'] === '' && p.campos.subject, 'A: os campos do pedido', p && p.campos);
     ok(await page.isHidden('#quoteForm'), 'A: o formulário esconde-se');
     ok(await page.evaluate(() => document.activeElement === document.querySelector('[data-form-ok]')), 'A: o foco vai para «Pedido enviado!»');
@@ -131,11 +132,11 @@ try {
     ok(await page.isVisible('#quoteForm'), 'D: o formulário aparece sem JavaScript');
     ok(await page.evaluate(() => Array.from(document.querySelectorAll('.reveal')).every(e => getComputedStyle(e).opacity === '1')), 'D: sem JavaScript nada fica invisível (reveal)');
     ok(await page.isHidden('#menu-movel') && await page.evaluate(() => { const s = document.querySelector('[data-ba-before]'); return s && getComputedStyle(s).width !== '0px'; }), 'D: o comparador fica a meio, sem rebentar');
-    await preenche(page, { nome: 'Sem JS', tipo: 'Fachadas / Impermeabilização' });
+    await preenche(page, { nome: 'Sem JS', tipo: 'Fachadas e Impermeabilização' });
     /* espera-se pelo endereço e pelo DOM, não pelo «load»: num runner lento o load da página seguinte passava os 30 s */
     await Promise.all([page.waitForURL(/\/obrigado\.html$/, { waitUntil: 'domcontentloaded' }), page.click('#sendBtn')]);
     const p = srv.pedidos.at(-1);
-    ok(p && p.caminho === '/obrigado.html' && p.campos['form-name'] === 'orcamento' && p.campos.nome === 'Sem JS' && p.campos.tipo_de_obra === 'Fachadas / Impermeabilização', 'D: o POST normal chega a /obrigado.html com os campos', p);
+    ok(p && p.caminho === '/obrigado.html' && p.campos['form-name'] === 'orcamento' && p.campos.nome === 'Sem JS' && p.campos.tipo_de_obra === 'Fachadas e Impermeabilização', 'D: o POST normal chega a /obrigado.html com os campos', p);
     ok((await page.textContent('h1')).includes('Obrigado'), 'D: a página de agradecimento');
     await ctx.close();
   }
@@ -144,16 +145,18 @@ try {
   {
     const { ctx, page } = await pagina();
     await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
-    await page.click('a.svc[data-preselect="Apartamento"]');
+    await page.click('a.svc[data-preselect="apartamentos"]');
     await page.waitForTimeout(300);
-    ok(await page.inputValue('#qTipo') === 'Apartamento', 'E: o cartão de serviço escolhe o tipo');
+    ok(await page.inputValue('#qTipo') === 'Apartamentos', 'E: o cartão de serviço escolhe o tipo');
     ok(await page.evaluate(() => location.hash === '#contacto'), 'E: e leva ao formulário');
     const obra = OBRAS[0];
     await page.goto(`${srv.base}/obras/${obra.slug}.html`, { waitUntil: 'networkidle' });
     await Promise.all([page.waitForURL(/index\.html\?tipo=/, { waitUntil: 'domcontentloaded' }), page.click('.cta-faixa-acoes a.btn:has-text("Pedir Orçamento")')]);
     ok(/\?tipo=.*#contacto$/.test(page.url()), 'E: a ficha leva a index.html?tipo=…#contacto', page.url());
     await page.waitForTimeout(300);
-    ok(await page.inputValue('#qTipo') === 'Reabilitação de Edifício', 'E: o tipo vem do endereço');
+    ok(await page.inputValue('#qTipo') === 'Reabilitação de Edifícios', 'E: o tipo vem do endereço (?tipo=reabilitacao)');
+    await page.goto(srv.base + '/?tipo=fachadas#contacto', { waitUntil: 'networkidle' });
+    ok(await page.inputValue('#qTipo') === 'Fachadas e Impermeabilização', 'E: ?tipo=fachadas escolhe «Fachadas e Impermeabilização»');
     await page.goto(srv.base + '/?tipo=Inventado#contacto', { waitUntil: 'networkidle' });
     ok(await page.inputValue('#qTipo') === '', 'E: um tipo que não existe fica em «Escolha uma opção»');
     ok(page.erros.length === 0, 'E: sem erros', page.erros);

@@ -27,9 +27,9 @@ Pré-visualizar: `python3 -m http.server -d public 8000` e abrir `http://localho
 
 | Pasta ou ficheiro | O que é |
 | --- | --- |
-| `data/site.json` | A empresa: nome, telefone, WhatsApp e as mensagens já escritas, o endereço do site (`baseUrl`), `preview`, os tipos de obra do formulário |
+| `data/site.json` | A empresa: nome, telefone, WhatsApp e as mensagens já escritas, o endereço do site (`baseUrl`), `preview`; `servicos` (o vocabulário: os serviços da página inicial, as opções do formulário, as etiquetas e os grupos das obras e o `?tipo=`), `provas` (a linha de prova junto dos botões) e `menu` |
 | `data/dados-melperfaz.json` | O que só a Melperfaz pode dar (email, NIF, morada, alvará, seguro, zona, horário, Google Maps). Vazio = a frase ou a linha não aparece |
-| `data/obras.json` | As obras: categoria, título, fotografia, o que se vê, os factos (vazios até a empresa os dar) |
+| `data/obras.json` | As obras: serviço (`cat`, o de `site.json › servicos`), `destaque` (na página inicial), título, fotografia, o que se vê, os factos (vazios até a empresa os dar), `fotosExtra` |
 | `data/fotos.json` | As fotografias: tamanho do original, origem e texto alternativo. `data/lqip.json` são as prévias (gerado) |
 | `src/templates/` | `layout.html` (a cabeça, o cabeçalho, o rodapé e o botão WhatsApp de todas as páginas) e `obra.html` (a ficha de cada obra) |
 | `src/partials/` | Cabeçalho, rodapé, WhatsApp, faixa de contacto com o formulário, cartão de obra, comparador antes/depois |
@@ -42,7 +42,7 @@ Pré-visualizar: `python3 -m http.server -d public 8000` e abrir `http://localho
 | `netlify.toml` | A publicação: `python3 build.py`, pasta `public`, cache de um ano para o que leva versão |
 
 A sintaxe dos modelos está no topo de `build.py`: `{{ site.phone }}`, `{{> parcial }}`, `{{foto 01 sizes="…"}}`,
-`{{wa geral}}`, `{{each obra-foto all}}`, `{{#se dados.email}}…{{/se}}`, `{{#cada tipos}}…{{/cada}}`.
+`{{wa geral}}`, `{{each obra-foto all}}`, `{{#se dados.email}}…{{/se}}`, `{{#cada servicos}}…{{/cada}}`.
 
 ## Regras do texto
 

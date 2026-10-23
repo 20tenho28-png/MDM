@@ -97,13 +97,14 @@
     if ('ResizeObserver' in window) new ResizeObserver(largura).observe(slider);
   });
 
-  /* ═══ Tipo de obra pré-escolhido: ?tipo=… no endereço ou data-preselect numa ligação da própria página ═══ */
+  /* ═══ Tipo de obra pré-escolhido: ?tipo=<id do serviço> no endereço ou data-preselect numa ligação da própria página.
+     O id é o de data/site.json «servicos» (data-tipo de cada opção); o nome da opção também serve ═══ */
   var tipoSel = qs('#qTipo');
   function escolheTipo(v) {
     if (!tipoSel || !v) return false;
-    var ok = qsa('option', tipoSel).some(function (o) { return o.value === v; });
-    if (ok) tipoSel.value = v;
-    return ok;
+    var op = qsa('option', tipoSel).filter(function (o) { return o.value && (o.getAttribute('data-tipo') === v || o.value === v); })[0];
+    if (op) tipoSel.value = op.value;
+    return !!op;
   }
   (function () {
     var m = /[?&]tipo=([^&#]*)/.exec(location.search);

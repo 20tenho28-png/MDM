@@ -1,17 +1,12 @@
 {
-  "_nota": "As obras do site: a grelha da página inicial, a página Obras e uma ficha por obra (obras/<slug>.html). Os textos descrevem só o que se vê nas fotografias; «factos» (data, local, duração, resultado) ficam vazios até a Melperfaz os dar, e a linha só aparece na ficha quando existe. Uma obra nova: juntar a fotografia (data/fotos.json e gerar_fotos.py) e uma entrada aqui; python3 build.py --check confirma.",
-  "categorias": {
-    "reabilitacao": "Reabilitação",
-    "fachadas": "Fachadas",
-    "acabamentos": "Acabamentos"
-  },
+  "_nota": "As obras do site: a grelha da página inicial, a página Obras e uma ficha por obra (obras/<slug>.html). Os textos descrevem só o que se vê nas fotografias; «factos» (o problema, o trabalho feito, data, local, duração, resultado) ficam vazios até a Melperfaz os dar, e a linha só aparece na ficha quando existe. O «cat» de cada obra é o «cat» de um serviço de data/site.json («servicos»), que dá o nome, a âncora em obras.html e o tipo de obra do formulário; «destaque»: true põe a obra na página inicial; «fotosExtra» são mais fotografias de data/fotos.json. Uma obra nova: juntar a fotografia (data/fotos.json e gerar_fotos.py) e uma entrada aqui; python3 build.py --check confirma.",
   "obras": [
     {
       "n": "01",
       "code": "M01",
+      "destaque": true,
       "slug": "recuperacao-integral-de-fachada-e-estrutura",
       "cat": "reabilitacao",
-      "catLabel": "Reabilitação de Edifício",
       "title": "Recuperação integral de fachada e estrutura",
       "foto": "03",
       "foco": "50% 60%",
@@ -22,14 +17,14 @@
         "Vedação de obra com a placa da Melperfaz e o telefone 961 245 288",
         "Sinalização de segurança e barreiras à entrada"
       ],
-      "factos": {"data": "", "localExato": "", "duracao": "", "resultado": ""}
+      "factos": {"problema": "", "trabalho": "", "data": "", "localExato": "", "duracao": "", "resultado": ""},
+      "fotosExtra": []
     },
     {
       "n": "02",
       "code": "M02",
       "slug": "espaco-interior-pronto-a-entregar",
       "cat": "acabamentos",
-      "catLabel": "Acabamentos",
       "title": "Espaço interior pronto a entregar",
       "foto": "05",
       "foco": "50% 40%",
@@ -40,14 +35,14 @@
         "Caixas elétricas abertas na parede, para os remates finais",
         "Escadote e um balde de tinta ainda na divisão"
       ],
-      "factos": {"data": "", "localExato": "", "duracao": "", "resultado": ""}
+      "factos": {"problema": "", "trabalho": "", "data": "", "localExato": "", "duracao": "", "resultado": ""},
+      "fotosExtra": []
     },
     {
       "n": "03",
       "code": "M03",
       "slug": "edificios-e-apartamentos",
       "cat": "reabilitacao",
-      "catLabel": "Reabilitação",
       "title": "Edifícios e apartamentos",
       "foto": "02",
       "foco": "50% 55%",
@@ -58,14 +53,15 @@
         "Trabalhador junto ao rés-do-chão, entre os materiais",
         "Paredes exteriores do rés-do-chão em trabalhos de alvenaria"
       ],
-      "factos": {"data": "", "localExato": "", "duracao": "", "resultado": ""}
+      "factos": {"problema": "", "trabalho": "", "data": "", "localExato": "", "duracao": "", "resultado": ""},
+      "fotosExtra": []
     },
     {
       "n": "04",
       "code": "M04",
+      "destaque": true,
       "slug": "reboco-e-tratamento-de-fachada",
       "cat": "fachadas",
-      "catLabel": "Fachadas",
       "title": "Reboco e tratamento de fachada",
       "foto": "04",
       "foco": "50% 45%",
@@ -76,14 +72,15 @@
         "Balde de material pendurado no arnês",
         "Telhados e o mar ao fundo"
       ],
-      "factos": {"data": "", "localExato": "", "duracao": "", "resultado": ""}
+      "factos": {"problema": "", "trabalho": "", "data": "", "localExato": "", "duracao": "", "resultado": ""},
+      "fotosExtra": []
     },
     {
       "n": "05",
       "code": "M05",
+      "destaque": true,
       "slug": "da-remocao-ao-revestimento-novo",
       "cat": "acabamentos",
-      "catLabel": "Demolição & Acabamento",
       "title": "Da remoção ao revestimento novo",
       "foto": "07",
       "foco": "50% 60%",
@@ -95,7 +92,8 @@
         "Paredes novas revestidas a cerâmico de imitação de mármore",
         "Rodapé antigo ainda à vista na zona por acabar"
       ],
-      "factos": {"data": "", "localExato": "", "duracao": "", "resultado": ""}
+      "factos": {"problema": "", "trabalho": "", "data": "", "localExato": "", "duracao": "", "resultado": ""},
+      "fotosExtra": []
     }
   ]
 }
