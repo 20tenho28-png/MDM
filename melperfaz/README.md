@@ -35,7 +35,7 @@ Pré-visualizar: `python3 -m http.server -d public 8000` e abrir `http://localho
 | `src/partials/` | Os componentes: `header` (menu de `site.json`, telefone, WhatsApp, «Pedir Orçamento»; variante `reduzido`), `barra-acoes` (Ligar, WhatsApp e Orçamento, fixa em baixo abaixo de 980 px), `footer`, `page-head` (migalhas, eyebrow, h1, introdução), `cta` (a faixa clay), `prova` (a linha de garantias), `orcamento-form` (o único formulário), `obra-foto` (cartão de obra) e `antes-depois` |
 | `src/pages/` | Página inicial, Obras, Pedir Orçamento (`orcamento.html`, com o formulário), obrigado, 404 e privacidade, cada uma com o seu `<!--meta {...} -->` |
 | `assets/css/` | `site.css` (o sistema de desenho), `pag-obras.css`, `pag-paginas.css`, `pag-orcamento.css` (formulário e lateral) |
-| `assets/js/site.js` | Menu nos ecrãs estreitos (com fundo escurecido), entrada ao fazer scroll, comparador, tipo de obra pré-escolhido pelo `?tipo=`, envio do formulário sem sair da página |
+| `assets/js/site.js` | Menu nos ecrãs estreitos (fundo escurecido, página sem deslizar, Esc), entrada ao fazer scroll, comparador (arrasta-se só a partir da pega; setas do teclado), em `orcamento.html` o `?tipo=` (tipo escolhido e «Pedido para: X · alterar») e o `?de=` (campo `pagina`), e o envio do formulário: validação em português, `obrigado.html` se correu bem, e se falhar um aviso com o telefone e o WhatsApp (`wa.erro`, com o nome e o tipo escritos) |
 | `assets/fonts/` | Fraunces (normal e itálico) e Archivo, variáveis, só latim, com as licenças (SIL OFL). Nada vem de terceiros |
 | `assets/img/` | Logótipos, favicons, imagem de partilha e `fotos/` (o original `foto-NN.jpg` e os tamanhos em AVIF e WebP) |
 | `tests/` | `site.test.mjs` (o site gerado, sem browser) e `browser.mjs` (Playwright) |
@@ -101,9 +101,11 @@ NODE_PATH=/caminho/para/node_modules node tests/browser.mjs  # no browser; preci
 ```
 
 Os do browser geram o site numa pasta temporária e servem-no num servidor local que guarda cada envio do formulário
-como o Netlify o receberia (e pode falhar de propósito): o pedido que segue, a validação, o aviso de falha com o que se
-escreveu a ficar, o envio sem JavaScript, o tipo de obra pré-escolhido, o isco para robôs, nenhuma página a deslizar
-para o lado a 390 e 320 px, o menu dos ecrãs estreitos, o comparador com rato e teclado, o foco e as imagens,
+como o Netlify o receberia (e pode falhar de propósito): o pedido que segue e abre `obrigado.html`, a validação, o aviso
+de falha (foco, telefone, WhatsApp com o nome e o tipo) com o que se escreveu a ficar, o envio sem JavaScript, o tipo de
+obra pré-escolhido com «Pedido para:» e o `?de=` no campo `pagina`, o isco para robôs, nenhuma página a deslizar para o
+lado a 390 e 320 px, o menu dos ecrãs estreitos, o comparador com rato (só a partir da pega) e teclado, o foco e as
+imagens, nenhuma fotografia ampliada para lá do original (o hero a 375 px, os cartões, a ficha na sua proporção),
 nenhuma animação sem fim, e o sistema visual: o h1 do hero e os cabeçalhos de secção no x do logótipo, contraste de
 4,5:1 nos botões e na faixa clay, o anel de foco da cor de cada superfície, campos de 16 px e etiquetas de 13 px. O CI
 (`.github/workflows/ci.yml`) corre o `--check`, o `npm test` e os testes do browser em cada pull request.
@@ -115,6 +117,13 @@ e o texto alternativo. `python3 gerar_fotos.py` faz os tamanhos em AVIF e WebP (
 e as prévias de 16 px de `data/lqip.json`; só faz o que falta, `--todas` refaz tudo. Uma obra nova: juntar a fotografia
 (sem dados de localização na EXIF; `obra5.jpg` foi cortada para tirar um contador de gostos), registá-la em `fotos.json`,
 correr o `gerar_fotos.py`, juntar a obra a `obras.json` e correr `python3 build.py --check`.
+
+Cada `{{foto}}` leva um `sizes` com a largura a que a fotografia aparece: os cartões pedem 579 px em computador (duas
+colunas) e, no telemóvel, mais do que a largura do cartão quando a moldura 4:3 ou 4:5 corta os lados (o `build.py`
+calcula-o de cada fotografia); a fotografia da ficha aparece na sua proporção, até 78% da altura do ecrã, sem corte. O
+`foco` de cada obra (`obras.json`) é o ponto que fica à vista nos cortes (na M04, a cabeça do trabalhador).
+A `foto-05` tem uma faixa preta de 8 px no topo, que já vem no original do sistema de desenho (`obra5.jpg`): fica à
+espera da resposta do dono antes de se cortar.
 
 As fotografias, os logótipos, os favicons e a imagem de partilha vêm do sistema de desenho (pasta `assets/` do pacote
 «melperfaz-design-system»). Os logótipos foram recortados às linhas de recorte que os PNG traziam e reduzidos a 400 px de

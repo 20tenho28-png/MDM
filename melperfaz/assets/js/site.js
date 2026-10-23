@@ -1,6 +1,7 @@
 /* Melperfaz: comportamento do site. Sem dependências. O site funciona sem este ficheiro (o formulário envia pelo Netlify
-   para obrigado.html, o comparador fica a meio, a página atual já vem marcada no HTML e, nos ecrãs estreitos, a barra de
-   ações e o rodapé levam aos mesmos sítios que o menu). */
+   para obrigado.html, o comparador fica a meio e mexe-se em toda a fotografia, a página atual já vem marcada no HTML e,
+   nos ecrãs estreitos, a barra de ações e o rodapé levam aos mesmos sítios que o menu). Só o «Pedido para:», o ?de= no
+   campo «pagina» e o reencaminhamento dos endereços antigos (no topo de index.html) dependem dele. */
 (function () {
   'use strict';
   var d = document;
@@ -68,7 +69,12 @@
     setTimeout(function () { els.forEach(function (e) { var r = e.getBoundingClientRect(); if (r.top < innerHeight && r.bottom > 0) e.classList.add('in'); }); }, 900);
   })();
 
-  /* ═══ Comparador antes/depois ═══ */
+  /* ═══ Comparador antes/depois ═══
+     Sem JavaScript, o range invisível cobre a fotografia toda. Com ele, o range deixa de apanhar o rato e o toque
+     (.ba-js) e só se arrasta a partir da pega (a 32 px da linha, para cada lado): um toque noutro sítio da fotografia
+     não salta a linha e o deslize vertical continua a mexer a página (touch-action: pan-y). O range continua a ser o
+     controlo do teclado (setas) e do leitor de ecrã, com o anel de foco desenhado à volta da pega. */
+  var BA_PEGA = 32;
   qsa('[data-ba]').forEach(function (slider) {
     var before = qs('[data-ba-before]', slider), handle = qs('[data-ba-handle]', slider), range = qs('[data-ba-range]', slider);
     if (!before || !handle || !range) return;
@@ -78,11 +84,47 @@
     range.addEventListener('input', function () { move(range.value); });
     window.addEventListener('resize', largura);
     if ('ResizeObserver' in window) new ResizeObserver(largura).observe(slider);
+    if (!window.PointerEvent) return;   /* sem Pointer Events fica o range a cobrir tudo, como sem JavaScript */
+    slider.classList.add('ba-js');
+    var arrasto = null;
+    function valorEm(x) {
+      var r = slider.getBoundingClientRect();
+      return Math.max(0, Math.min(100, Math.round((x - r.left) / r.width * 100)));
+    }
+    function poe(v) {
+      if (String(v) === range.value) return;
+      range.value = v;
+      move(v);
+      range.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    slider.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return;
+      var r = slider.getBoundingClientRect(), linha = r.left + r.width * range.value / 100;
+      if (Math.abs(e.clientX - linha) > BA_PEGA) return;
+      arrasto = e.pointerId;
+      slider.classList.add('ba-a-arrastar');
+      if (slider.setPointerCapture) slider.setPointerCapture(e.pointerId);
+      e.preventDefault();   /* sem seleção de texto nem arrasto da imagem */
+    });
+    slider.addEventListener('pointermove', function (e) { if (e.pointerId === arrasto) poe(valorEm(e.clientX)); });
+    function larga(e) {
+      if (e.pointerId !== arrasto) return;
+      arrasto = null;
+      slider.classList.remove('ba-a-arrastar');
+    }
+    slider.addEventListener('pointerup', larga);
+    slider.addEventListener('pointercancel', larga);   /* o browser ficou com o gesto (deslize vertical): larga-se */
   });
 
-  /* ═══ Tipo de obra pré-escolhido em orcamento.html: ?tipo=<id do serviço> no endereço. O id é o de data/site.json
+  /* ═══ orcamento.html: ?tipo=<id do serviço> escolhe o tipo de obra e mostra «Pedido para: X · alterar»; ?de=<página>
+     vai para o campo escondido «pagina» (de onde veio o pedido, por exemplo obras/<slug>). O id é o de data/site.json
      «servicos» (data-tipo de cada opção); o nome da opção também serve ═══ */
   var tipoSel = qs('#qTipo');
+  function param(nome) {
+    var m = new RegExp('[?&]' + nome + '=([^&#]*)').exec(location.search);
+    if (!m) return '';
+    try { return decodeURIComponent(m[1].replace(/\+/g, ' ')).trim(); } catch (e) { return ''; }   /* endereço estranho: ignora-se */
+  }
   function escolheTipo(v) {
     if (!tipoSel || !v) return false;
     var op = qsa('option', tipoSel).filter(function (o) { return o.value && (o.getAttribute('data-tipo') === v || o.value === v); })[0];
@@ -90,22 +132,35 @@
     return !!op;
   }
   (function () {
-    var m = /[?&]tipo=([^&#]*)/.exec(location.search);
-    if (m) {
-      try { escolheTipo(decodeURIComponent(m[1].replace(/\+/g, ' '))); } catch (e) { /* endereço estranho: ignora-se */ }
+    if (!tipoSel) return;
+    var linha = qs('[data-pedido-para]'), nome = qs('[data-pedido-nome]'), alterar = qs('[data-pedido-alterar]');
+    if (escolheTipo(param('tipo')) && linha && nome) {
+      nome.textContent = tipoSel.value;
+      linha.hidden = false;
+      /* a linha acompanha a lista: outro tipo muda o nome, «Escolha uma opção» esconde-a */
+      tipoSel.addEventListener('change', function () {
+        nome.textContent = tipoSel.value;
+        linha.hidden = !tipoSel.value;
+      });
+      if (alterar) alterar.addEventListener('click', function () { tipoSel.focus(); });
     }
+    /* só um caminho de página do próprio site (letras, algarismos, -, / e .html), nunca um endereço de fora */
+    var de = param('de'), pagina = qs('#quoteForm [name="pagina"]');
+    if (pagina && /^[a-z0-9][a-z0-9\-\/]{0,119}(\.html)?$/.test(de) && de.indexOf('//') < 0) pagina.value = de;
   })();
 
-  /* ═══ Formulário de pedido (Netlify Forms, sem sair da página) ═══ */
+  /* ═══ Formulário de pedido (Netlify Forms): valida em português, envia por fetch e, se correu bem, abre obrigado.html
+     (a mesma página do envio sem JavaScript). Se falhar, o que se escreveu fica, e o alerta recebe o foco com o
+     telefone e o WhatsApp (site.json «wa.erro», com o nome e o tipo escritos) ═══ */
   (function () {
     var form = qs('#quoteForm');
     if (!form) return;
     /* um browser sem estas APIs faz o envio normal (para /obrigado.html, pelo Netlify) */
     if (!window.fetch || !window.URLSearchParams || !window.FormData || !FormData.prototype.forEach) return;
-    var ok = qs('[data-form-ok]'), alerta = qs('#formAlerta'), voz = qs('[data-form-voz]'), btn = qs('#sendBtn');
+    var alerta = qs('#formAlerta'), voz = qs('[data-form-voz]'), btn = qs('#sendBtn');
     var campos = { nome: qs('#qNome'), telefone: qs('#qTel'), email: qs('#qEmail') };
     var erros = { nome: qs('#eNome'), telefone: qs('#eTel'), email: qs('#eEmail') };
-    var aEnviar = false;
+    var aEnviar = false, rotulo = btn.textContent;
     form.noValidate = true;   /* a validação do browser só serve sem JavaScript; aqui fala-se português */
 
     function diz(t) { if (voz) { voz.textContent = ''; setTimeout(function () { voz.textContent = t; }, 50); } }
@@ -128,9 +183,21 @@
       if (!emailOk) falhas.push('email');
       return falhas;
     }
-    function mostraAlerta(html) {
+    /* a ligação de WhatsApp do alerta: «Olá! Sou {nome} e queria um orçamento para {tipo}. …» */
+    function waErro() {
+      var base = form.getAttribute('data-wa'), msg = form.getAttribute('data-wa-erro');
+      if (!base || !msg) return '';
+      var tipo = tipoSel && tipoSel.value && tipoSel.value !== 'Outro' ? tipoSel.value : 'uma obra';
+      msg = msg.replace('{nome}', campos.nome.value.trim()).replace('{tipo}', tipo);
+      return base + encodeURIComponent(msg);
+    }
+    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function mostraAlerta() {
       if (!alerta) return;
-      alerta.innerHTML = html;
+      var wa = waErro();
+      alerta.innerHTML = 'O pedido não seguiu. Tente outra vez, ligue <a href="tel:+351961245288">' + TEL + '</a>' +
+        (wa ? ' ou <a href="' + esc(wa) + '" target="_blank" rel="noopener" data-wa-erro>envie por WhatsApp</a>.' : '.') +
+        ' O que escreveu fica aqui.';
       alerta.hidden = false;
       alerta.focus();   /* o botão ficou desativado com o foco: sem isto o foco caía no body */
     }
@@ -151,11 +218,10 @@
       }
       /* a armadilha para robôs: um humano não a vê nem a preenche; se vier cheia, o pedido não segue */
       var isco = qs('[name="bot-field"]', form);
-      if (isco && isco.value) { mostraAlerta('Ups, algo correu mal. Ligue ' + TEL + '.'); return; }
+      if (isco && isco.value) { mostraAlerta(); return; }
       ['nome', 'telefone', 'email'].forEach(function (n) { if (campos[n]) campos[n].value = campos[n].value.trim(); });
       aEnviar = true;
       btn.disabled = true;
-      var rotulo = btn.textContent;
       btn.textContent = 'A enviar…';
       diz('A enviar o pedido.');
       var dados = new URLSearchParams();
@@ -165,31 +231,23 @@
       fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: dados.toString(), signal: ctl ? ctl.signal : undefined })
         .then(function (r) {
           if (!r.ok) throw new Error('HTTP ' + r.status);
-          form.hidden = true;
-          if (ok) { ok.hidden = false; ok.focus(); }
-          diz('Pedido enviado. Obrigado.');
+          if (tempo) clearTimeout(tempo);
+          location.assign('obrigado.html');   /* o botão fica em «A enviar…» até a página mudar */
         })
         .catch(function () {
-          mostraAlerta('Ups, algo correu mal e o pedido não seguiu. Tente outra vez ou ligue <a href="tel:+351961245288">' + TEL + '</a>. O que escreveu fica aqui.');
-          diz('O pedido não seguiu. Tente outra vez ou ligue ' + TEL + '.');
-        })
-        .then(function () {
           if (tempo) clearTimeout(tempo);
           aEnviar = false;
           btn.disabled = false;
           btn.textContent = rotulo;
-          if (alerta && !alerta.hidden) alerta.focus();
+          mostraAlerta();
         });
     });
-
-    var novo = qs('[data-form-novo]');
-    if (novo) novo.addEventListener('click', function () {
-      form.reset();
-      ['nome', 'telefone', 'email'].forEach(function (n) { erro(n, ''); });
-      escondeAlerta();
-      if (ok) ok.hidden = true;
-      form.hidden = false;
-      campos.nome.focus();
+    /* de volta de obrigado.html pelo botão «Voltar» (página guardada pelo browser): o botão volta a enviar */
+    window.addEventListener('pageshow', function (e) {
+      if (!e.persisted || !aEnviar) return;
+      aEnviar = false;
+      btn.disabled = false;
+      btn.textContent = rotulo;
     });
   })();
 })();

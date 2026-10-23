@@ -1,22 +1,26 @@
 /* O site no browser (Playwright): gera numa pasta temporária (MELPERFAZ_OUT) e serve-a num servidor local que guarda cada
    envio do formulário como o Netlify Forms o receberia e pode falhar de propósito. Casos:
-   A. o pedido (orcamento.html, o único formulário) segue com os campos certos e aparece «Pedido enviado!», com o foco lá;
+   A. o pedido (orcamento.html, o único formulário) segue com os campos certos e abre obrigado.html (um só sucesso);
    B. a validação em português: sem nome e telefone não segue; telefone curto; email estranho; corrigido, segue;
-   C. o servidor falha: aviso com o telefone, o que se escreveu fica, e a segunda tentativa segue;
+   C. o servidor falha: o alerta recebe o foco, com o telefone e o WhatsApp (nome e tipo escritos), o que se escreveu
+      fica, e a segunda tentativa segue;
    D. sem JavaScript: o envio normal chega a /obrigado.html com os campos;
-   E. o tipo de obra pré-escolhido: pela lista de serviços e pelo ?tipo= (e ?de=) da ficha de obra, em orcamento.html; os
-      endereços antigos da página inicial (#contacto, ?tipo=) vão para orcamento.html;
+   E. o tipo de obra pré-escolhido: pela lista de serviços e pelo ?tipo= (e ?de=) da ficha de obra, em orcamento.html, com
+      «Pedido para: X · alterar» e o ?de= no campo «pagina»; os endereços antigos da página inicial (#contacto, ?tipo=)
+      vão para orcamento.html;
    F. o isco para robôs: preenchido, não segue;
    G. nenhuma página desliza para o lado a 390 e 320 px, sem erros de JavaScript; a barra de ações (menos em obrigado.html)
       não tapa o rodapé nem o botão de envio;
    H. o menu dos ecrãs estreitos: abre sobre um fundo escurecido, a página não desliza, foca, fecha com Escape e devolve o foco;
-   I. o comparador antes/depois com o rato e com o teclado;
+   I. o comparador antes/depois: com o teclado, e com o rato só a partir da pega (um clique noutro sítio não o mexe);
    J. teclado: a primeira tabulação é «Saltar para o conteúdo»; a entrada ao fazer scroll acaba toda visível;
       todas as imagens carregam; o menu marca a página atual; obras.html mostra todas as obras, sem filtros, agrupadas
       por serviço (o índice leva a cada grupo; H1 › H2 › H3);
    K. movimento reduzido; nenhuma animação sem fim;
    L. o sistema visual: uma margem esquerda (h1 do hero, logótipo e cabeçalhos de secção no mesmo x), contraste de 4,5:1
-      nos botões, na barra e no texto da faixa clay, o anel de foco da cor da superfície, campos com 16 px e etiquetas com 13 px.
+      nos botões, na barra e no texto da faixa clay, o anel de foco da cor da superfície, campos com 16 px e etiquetas com 13 px;
+   M. as fotografias sem ampliação: a 375 px a do hero tem pelo menos tantos píxeis como a moldura, e nenhuma fotografia é
+      mostrada maior do que o ficheiro escolhido, salvo quando o próprio original é mais pequeno do que a moldura.
    Precisa do Playwright, fora das dependências (localmente, NODE_PATH para onde ele está). Uso, a partir de melperfaz/:
      NODE_PATH=/caminho/para/node_modules node tests/browser.mjs */
 import { createRequire } from 'node:module';
@@ -70,19 +74,19 @@ try {
     const { ctx, page } = await pagina();
     await page.goto(srv.base + '/orcamento.html', { waitUntil: 'networkidle' });
     await preenche(page);
-    await page.click('#sendBtn');
-    await page.waitForSelector('[data-form-ok]:not([hidden])');
+    await Promise.all([page.waitForURL(/\/obrigado\.html$/, { waitUntil: 'domcontentloaded' }), page.click('#sendBtn')]);
     const p = srv.pedidos.at(-1);
     ok(p && p.caminho === '/' && p.tipo.includes('application/x-www-form-urlencoded'), 'A: POST para / em urlencoded', p);
     ok(p && p.campos['form-name'] === 'orcamento' && p.campos.nome === 'Ana Teste' && p.campos.telefone === '912 345 678'
       && p.campos.email === 'ana@teste.pt' && p.campos.tipo_de_obra === 'Apartamentos' && p.campos.localidade === 'Lisboa' && p.campos.mensagem.startsWith('Remodelação')
       && p.campos.pagina === 'orcamento.html' && p.campos['bot-field'] === '' && p.campos.subject, 'A: os campos do pedido', p && p.campos);
-    ok(await page.isHidden('#quoteForm'), 'A: o formulário esconde-se');
-    ok(await page.evaluate(() => document.activeElement === document.querySelector('[data-form-ok]')), 'A: o foco vai para «Pedido enviado!»');
-    ok((await page.textContent('[data-form-ok]')).includes('961 245 288'), 'A: o painel tem o telefone');
-    await page.click('[data-form-novo]');
-    ok(await page.isVisible('#quoteForm') && (await page.inputValue('#qNome')) === '', 'A: «Enviar outro pedido» limpa e mostra o formulário');
-    ok(await page.evaluate(() => document.activeElement.id === 'qNome'), 'A: o foco volta ao nome');
+    ok(p && p.caminho === '/', 'A: o pedido foi pelo fetch (POST para /), não pelo envio normal', p && p.caminho);
+    ok((await page.textContent('h1')).includes('Obrigado') && await page.isVisible('a.btn:has-text("Enviar fotografias por WhatsApp")'), 'A: abre obrigado.html, com «Enviar fotografias por WhatsApp»');
+    ok(await page.locator('text=Pedir Orçamento').count() === 0, 'A: obrigado.html não volta a pedir orçamento');
+    // de volta pelo botão «Voltar»: o formulário pode enviar de novo
+    await page.goBack({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(300);
+    ok(/\/orcamento\.html$/.test(page.url()) && await page.isEnabled('#sendBtn') && (await page.textContent('#sendBtn')).trim() === 'Enviar pedido de orçamento', 'A: ao voltar, o botão volta a «Enviar pedido de orçamento»', page.url());
     ok(page.erros.length === 0, 'A: sem erros de JavaScript', page.erros);
     await ctx.close();
   }
@@ -106,8 +110,7 @@ try {
     ok(await page.getAttribute('#qNome', 'aria-invalid') === null, 'B: o nome corrigido já não tem erro');
     await page.fill('#qTel', '+351 912 345 678');
     await page.fill('#qEmail', '');
-    await page.click('#sendBtn');
-    await page.waitForSelector('[data-form-ok]:not([hidden])');
+    await Promise.all([page.waitForURL(/\/obrigado\.html$/, { waitUntil: 'domcontentloaded' }), page.click('#sendBtn')]);
     ok(srv.pedidos.length === antes + 1 && srv.pedidos.at(-1).campos.telefone === '+351 912 345 678' && srv.pedidos.at(-1).campos.email === '', 'B: corrigido, segue (telefone com +351, sem email)');
     await ctx.close();
   }
@@ -120,14 +123,24 @@ try {
     srv.falhar(true);
     await page.click('#sendBtn');
     await page.waitForSelector('#formAlerta:not([hidden])');
-    ok((await page.textContent('#formAlerta')).includes('961 245 288'), 'C: o aviso tem o telefone');
+    const alerta = await page.textContent('#formAlerta');
+    ok(alerta.startsWith('O pedido não seguiu. Tente outra vez, ligue 961 245 288 ou envie por WhatsApp.'), 'C: a mensagem nova do aviso', alerta);
+    ok(await page.evaluate(() => document.activeElement.id === 'formAlerta'), 'C: o foco vai para o aviso');
+    ok(await page.getAttribute('#formAlerta a[href^="tel:"]', 'href') === 'tel:+351961245288', 'C: o aviso liga para o telefone');
+    const waErro = await page.getAttribute('#formAlerta a[href^="https://wa.me/"]', 'href');
+    ok(waErro && decodeURIComponent(waErro.split('?text=')[1]) === SITE.wa.erro.replace('{nome}', 'Rui Falha').replace('{tipo}', 'Apartamentos'), 'C: o WhatsApp do aviso leva o nome e o tipo escritos', waErro);
+    ok(await page.getAttribute('#formAlerta a[href^="https://wa.me/"]', 'target') === '_blank', 'C: o WhatsApp abre noutra janela');
     ok(await page.isVisible('#quoteForm') && (await page.inputValue('#qNome')) === 'Rui Falha' && (await page.inputValue('#qMsg')).startsWith('Remodelação'), 'C: o que se escreveu fica');
     ok(await page.isEnabled('#sendBtn') && (await page.textContent('#sendBtn')).trim() === 'Enviar pedido de orçamento', 'C: o botão volta a «Enviar pedido de orçamento»');
-    srv.falhar(false);
+    // sem tipo escolhido (ou «Outro»), a mensagem diz «uma obra»
+    srv.falhar(true);
+    await page.selectOption('#qTipo', 'Outro');
     await page.click('#sendBtn');
-    await page.waitForSelector('[data-form-ok]:not([hidden])');
-    ok(srv.pedidos.at(-1).campos.nome === 'Rui Falha', 'C: a segunda tentativa segue');
-    ok(await page.isHidden('#formAlerta'), 'C: o aviso desaparece');
+    await page.waitForFunction(() => { const a = document.querySelector('#formAlerta a[href^="https://wa.me/"]'); return a && decodeURIComponent(a.href).includes('para uma obra.'); });
+    ok(true, 'C: com «Outro», o WhatsApp do aviso diz «uma obra»');
+    srv.falhar(false);
+    await Promise.all([page.waitForURL(/\/obrigado\.html$/, { waitUntil: 'domcontentloaded' }), page.click('#sendBtn')]);
+    ok(srv.pedidos.at(-1).campos.nome === 'Rui Falha', 'C: a segunda tentativa segue e abre obrigado.html');
     await ctx.close();
   }
 
@@ -172,10 +185,29 @@ try {
     ok(page.url().endsWith(`/orcamento.html?tipo=reabilitacao&de=obras/${obra.slug}`), 'E: a ficha leva a orcamento.html?tipo=…&de=…', page.url());
     await page.waitForTimeout(300);
     ok(await page.inputValue('#qTipo') === 'Reabilitação de Edifícios', 'E: o tipo vem do endereço (?tipo=reabilitacao)');
+    ok(await page.inputValue('#quoteForm [name="pagina"]') === `obras/${obra.slug}`, 'E: o ?de= vai para o campo «pagina»');
+    await preenche(page, { tipo: null });
+    await Promise.all([page.waitForURL(/\/obrigado\.html$/, { waitUntil: 'domcontentloaded' }), page.click('#sendBtn')]);
+    ok(srv.pedidos.at(-1).campos.pagina === `obras/${obra.slug}` && srv.pedidos.at(-1).campos.tipo_de_obra === 'Reabilitação de Edifícios', 'E: o pedido regista a obra de origem e o tipo', srv.pedidos.at(-1).campos);
     await page.goto(srv.base + '/orcamento.html?tipo=fachadas', { waitUntil: 'networkidle' });
     ok(await page.inputValue('#qTipo') === 'Fachadas e Impermeabilização', 'E: ?tipo=fachadas escolhe «Fachadas e Impermeabilização»');
+    ok(await page.isVisible('[data-pedido-para]') && (await page.textContent('[data-pedido-para]')).replace(/\s+/g, ' ').trim() === 'Pedido para: Fachadas e Impermeabilização · alterar', 'E: «Pedido para: Fachadas e Impermeabilização · alterar»', await page.textContent('[data-pedido-para]'));
+    ok(await page.inputValue('#quoteForm [name="pagina"]') === 'orcamento.html', 'E: sem ?de=, o campo «pagina» fica orcamento.html');
+    await page.click('[data-pedido-alterar]');
+    ok(await page.evaluate(() => document.activeElement.id === 'qTipo'), 'E: «alterar» dá o foco à lista do tipo de obra');
+    await page.selectOption('#qTipo', 'Acabamentos');
+    ok((await page.textContent('[data-pedido-nome]')) === 'Acabamentos', 'E: a linha acompanha a lista');
+    await page.selectOption('#qTipo', '');
+    ok(await page.isHidden('[data-pedido-para]'), 'E: sem tipo, a linha esconde-se');
+    await page.goto(srv.base + '/orcamento.html', { waitUntil: 'networkidle' });
+    ok(await page.isHidden('[data-pedido-para]'), 'E: sem ?tipo=, sem «Pedido para:»');
+    // o ?de= só aceita um caminho do próprio site
+    for (const de of ['https://exemplo.com/x', '//exemplo.com', '<b>x</b>', 'obras/../../x"']) {
+      await page.goto(srv.base + '/orcamento.html?de=' + encodeURIComponent(de), { waitUntil: 'networkidle' });
+      ok(await page.inputValue('#quoteForm [name="pagina"]') === 'orcamento.html', `E: ?de=${de} é ignorado`);
+    }
     await page.goto(srv.base + '/orcamento.html?tipo=Inventado', { waitUntil: 'networkidle' });
-    ok(await page.inputValue('#qTipo') === '', 'E: um tipo que não existe fica em «Escolha uma opção»');
+    ok(await page.inputValue('#qTipo') === '' && await page.isHidden('[data-pedido-para]'), 'E: um tipo que não existe fica em «Escolha uma opção», sem «Pedido para:»');
     ok(page.erros.length === 0, 'E: sem erros', page.erros);
     await ctx.close();
   }
@@ -189,7 +221,7 @@ try {
     const antes = srv.pedidos.length;
     await page.click('#sendBtn');
     await page.waitForTimeout(400);
-    ok(srv.pedidos.length === antes && await page.isVisible('#formAlerta'), 'F: com o isco preenchido não segue e avisa');
+    ok(srv.pedidos.length === antes && await page.isVisible('#formAlerta') && /\/orcamento\.html$/.test(page.url()), 'F: com o isco preenchido não segue e avisa');
     ok(await page.evaluate(() => { const i = document.querySelector('#qGotcha'); const r = i.getBoundingClientRect(); return i.tabIndex === -1 && (r.right < 0 || r.width <= 1); }), 'F: o isco está fora do ecrã e do Tab');
     await ctx.close();
   }
@@ -256,6 +288,20 @@ try {
     ok(await page.inputValue('[data-ba-range]') === '21' && await page.evaluate(() => document.querySelector('[data-ba-before]').style.width === '21%'), 'I: as setas do teclado também');
     const l = await page.evaluate(() => { const s = document.querySelector('[data-ba]'); const f = document.querySelector('[data-ba-before] .foto'); return { w: s.clientWidth, fw: f.getBoundingClientRect().width }; });
     ok(Math.abs(l.w - l.fw) < 2, 'I: o antes tem a largura do comparador', l);
+    // o rato: um clique longe da pega não mexe a linha; arrastar a partir da pega (até 32 px dela) sim
+    await page.locator('[data-ba-range]').fill('50');
+    const s = await page.evaluate(() => { const r = document.querySelector('[data-ba]').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
+    await page.mouse.click(s.x + s.w * 0.85, s.y + s.h / 2);
+    ok(await page.inputValue('[data-ba-range]') === '50', 'I: um clique longe da pega não mexe a linha');
+    await page.mouse.move(s.x + s.w * 0.5 + 25, s.y + s.h / 2);
+    await page.mouse.down();
+    await page.mouse.move(s.x + s.w * 0.3, s.y + s.h / 2, { steps: 6 });
+    await page.mouse.up();
+    ok(await page.inputValue('[data-ba-range]') === '30' && await page.evaluate(() => document.querySelector('[data-ba-before]').style.width === '30%'), 'I: arrastar a partir da pega move a linha', await page.inputValue('[data-ba-range]'));
+    await page.mouse.move(s.x + s.w * 0.8, s.y + s.h / 2);
+    ok(await page.inputValue('[data-ba-range]') === '30', 'I: largado, o rato já não a mexe');
+    ok(await page.evaluate(() => getComputedStyle(document.querySelector('[data-ba]')).touchAction === 'pan-y' && getComputedStyle(document.querySelector('[data-ba-handle]')).touchAction === 'pan-y'), 'I: o deslize vertical continua a mexer a página (pan-y)');
+    ok(page.erros.length === 0, 'I: sem erros', page.erros);
     await ctx.close();
   }
 
@@ -366,6 +412,38 @@ try {
     const btn = await page.evaluate(() => { const b = getComputedStyle(document.querySelector('.hero .btn')), g = document.querySelector('.hero .btn-ghost'); return { bg: b.backgroundColor, cor: b.color, alturas: [document.querySelector('.hero .btn').offsetHeight, g.offsetHeight] }; });
     ok(btn.bg === 'rgb(224, 138, 30)' && btn.cor === 'rgb(27, 37, 64)' && btn.alturas[0] === btn.alturas[1], 'L: «Pedir Orçamento» ink sobre clay e o ghost com a mesma altura', btn);
     await ctx.close();
+  }
+  /* M. as fotografias sem ampliação (fase 6) */
+  {
+    // quanto a fotografia está ampliada: a caixa a dividir pelo ficheiro escolhido (com object-fit: cover, o lado que
+    // corta menos); «limite» é a ampliação mínima possível, a do maior ficheiro (o original), para as que o original não chega
+    const ampliacoes = () => Array.from(document.images).filter(i => i.closest('picture') && i.getBoundingClientRect().width > 0).map(i => {
+      const r = i.getBoundingClientRect(), srcs = i.closest('picture').querySelector('source[type="image/avif"]').srcset.split(',').map(s => s.trim().split(' '));
+      const nome = i.currentSrc.split('/').pop(), esc = srcs.find(([u]) => u.endsWith(nome)), cw = esc ? parseInt(esc[1]) : i.naturalWidth;
+      const ch = cw * i.naturalHeight / i.naturalWidth, maxW = Math.max(...srcs.map(([, w]) => parseInt(w))), maxH = maxW * i.naturalHeight / i.naturalWidth;
+      return { f: nome, amp: Math.max(r.width / cw, r.height / ch), limite: Math.max(1, r.width / maxW, r.height / maxH) };
+    });
+    const OBRA_GRANDE = OBRAS.find(o => !o.antesDepois && o.foto === '04') || OBRAS.find(o => !o.antesDepois);
+    for (const largura of [375, 1280]) {
+      const { ctx, page } = await pagina({ viewport: { width: largura, height: 900 } });
+      for (const f of ['/', '/obras.html', `/obras/${OBRA_GRANDE.slug}.html`, '/orcamento.html']) {
+        await page.goto(srv.base + f, { waitUntil: 'networkidle' });
+        await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 400) { scrollTo(0, y); await new Promise(r => setTimeout(r, 40)); } });
+        await page.waitForTimeout(400);
+        if (f === '/' && largura === 375) {
+          const h = await page.evaluate(() => { const i = document.querySelector('.hero-photo img'), r = i.getBoundingClientRect(); return { nat: i.naturalHeight, vista: Math.round(r.height), natW: i.naturalWidth, vistaW: Math.round(r.width) }; });
+          ok(h.nat / h.vista >= 1 && h.natW / h.vistaW >= 1, 'M: a 375 px a fotografia do hero não está ampliada', h);
+        }
+        const amp = await page.evaluate(ampliacoes);
+        const maus = amp.filter(a => a.amp > Math.max(1.02, a.limite + 0.02));
+        ok(amp.length > 0 && maus.length === 0, `M: ${f} a ${largura} px sem fotografias ampliadas para lá do original`, maus);
+      }
+      // a ficha: a fotografia na sua proporção, sem corte, no máximo 78% do ecrã de altura
+      await page.goto(`${srv.base}/obras/${OBRA_GRANDE.slug}.html`, { waitUntil: 'networkidle' });
+      const fo = await page.evaluate(() => { const i = document.querySelector('.obra-foto img'), r = i.getBoundingClientRect(); return { prop: Math.abs(r.width / r.height - i.naturalWidth / i.naturalHeight), h: r.height, max: innerHeight * 0.78 + 1 }; });
+      ok(fo.prop < 0.01 && fo.h <= fo.max, `M: a ${largura} px a fotografia da ficha na sua proporção, até 78% da altura`, fo);
+      await ctx.close();
+    }
   }
 } finally {
   await browser.close();

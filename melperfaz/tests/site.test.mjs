@@ -209,7 +209,7 @@ test('a página inicial: Hero › Obras em destaque › Serviços › Porquê N�
   for (const f of paginas()) if (f !== 'index.html') assert.doesNotMatch(le(f), /l\.replace\('orcamento\.html'/, `${f}: sem reencaminhamento`);
 });
 
-test('o formulário Netlify: só em orcamento.html, atributos, campos pela ordem, opções, isco e agradecimento', () => {
+test('o formulário Netlify: só em orcamento.html, atributos, campos pela ordem, opções, isco, «Pedido para:» e o WhatsApp do erro', () => {
   for (const f of paginas()) if (f !== 'orcamento.html') assert.doesNotMatch(le(f), /id="quoteForm"/, `${f}: sem formulário`);
   const t = le('orcamento.html');
   const form = /<form\b[^>]*\bid="quoteForm"[^>]*>.*?<\/form>/s.exec(t)[0];
@@ -226,7 +226,11 @@ test('o formulário Netlify: só em orcamento.html, atributos, campos pela ordem
   assert.match(form, /aria-describedby="hTel eTel"/);
   assert.match(form, /placeholder="Descreva a obra: o que quer fazer, onde e para quando\."/);
   assert.match(form, /<button class="btn" type="submit" id="sendBtn">Enviar pedido de orçamento<\/button>/);
-  assert.match(t, /<p class="pedido-para" data-pedido-para hidden><\/p>/);
+  // «Pedido para: X · alterar» já escrito no HTML (site.js põe o nome e mostra-o quando há ?tipo=)
+  assert.match(t, /<p class="pedido-para" data-pedido-para hidden>Pedido para: <strong data-pedido-nome><\/strong> · <button class="pedido-alterar" type="button" data-pedido-alterar aria-label="Alterar o tipo de obra">alterar<\/button><\/p>/);
+  // o WhatsApp do erro: a base e a mensagem site.json «wa.erro» (com {nome} e {tipo}) vão no próprio formulário
+  assert.ok(abre.includes(` data-wa="${SITE.whatsappBase}"`), 'data-wa');
+  assert.ok(abre.includes(` data-wa-erro="${SITE.wa.erro}"`), 'data-wa-erro');
   assert.match(form, /<div class="form-alerta" id="formAlerta" tabindex="-1" hidden><\/div>/);
   assert.match(t, /<meta name="description" content="[^"]+">/);
   assert.ok(le('sitemap.xml').includes(`${SITE.baseUrl}/orcamento.html`), 'orcamento.html no mapa do site');
@@ -241,8 +245,11 @@ test('o formulário Netlify: só em orcamento.html, atributos, campos pela ordem
   assert.match(form, /name="telefone"[^>]*\brequired\b/);
   assert.doesNotMatch(form, /name="email"[^>]*\brequired\b/);
   assert.match(form, /<input id="qGotcha" name="bot-field" type="text" tabindex="-1" autocomplete="off">/);
-  assert.match(t, /<div class="form-ok" data-form-ok hidden tabindex="-1">/);
-  assert.match(t, /Pedido enviado!/);
+  // um só sucesso: site.js abre obrigado.html, sem painel «Pedido enviado!» nem «Enviar outro pedido» na página
+  assert.doesNotMatch(t, /data-form-ok|data-form-novo|Pedido enviado!|Enviar outro pedido/);
+  const js = fs.readFileSync(path.join(W, 'assets/js/site.js'), 'utf8');
+  assert.match(js, /location\.assign\('obrigado\.html'\)/, 'site.js: o envio que correu bem abre obrigado.html');
+  assert.doesNotMatch(js, /data-form-novo|data-form-ok|data-preselect|data-filtro|Ups/, 'site.js sem os handlers retirados nem o «Ups»');
   const obg = le('obrigado.html');
   assert.match(obg, /<meta name="robots" content="noindex">/);
   assert.match(obg, /prazo de um dia útil/);
@@ -375,6 +382,26 @@ test('as fotografias: original, tamanhos, prévias e texto alternativo', () => {
   assert.match(pic, /<source type="image\/avif" srcset="assets\/img\/fotos\/foto-01-400\.avif 400w, [^"]*foto-01-1080\.avif 1080w"/);
   assert.match(pic, /sizes="[^"]*\(max-width: 980px\) calc\(100vw - 32px\), 520px"/, 'hero: sizes da moldura (sem ampliação)');
   assert.match(pic, new RegExp(`<img src="assets/img/fotos/foto-01\\.jpg" alt="${esc(Object.fromEntries(FOTOS)['01'].alt)}" width="1080" height="810" style="object-position: 50% 60%" loading="eager" decoding="async" fetchpriority="high">`));
+  // a foto-02 (4:3) na moldura 4:5 de Porquê Nós é cortada nos lados: pede 5/3 da largura da moldura
+  assert.match(/<picture class="foto"[^>]*><source type="image\/avif" srcset="[^"]*foto-02-[^"]*" sizes="([^"]*)"/.exec(t)[1], /\(max-width: 980px\) calc\(\(100vw - 32px\) \* 5 \/ 3\), 914px$/, 'Porquê Nós: sizes da moldura 4:5');
+  // os cartões: 579 px (duas colunas a partir de 981), uma coluna até lá; no telemóvel a moldura 4:3 ou 4:5 corta as
+  // fotografias mais largas do que ela, que pedem proporcionalmente mais (foto-05, 1080 × 620: × 1,31)
+  const F = Object.fromEntries(FOTOS);
+  const obras = le('obras.html');
+  for (const o of OBRAS) {
+    const fig = new RegExp(`<figure class="pg reveal" data-cat="${o.cat}" data-orient="(\\w+)">\\s*<picture[^>]*><source type="image/avif" srcset="[^"]*foto-${o.foto}-[^"]*" sizes="([^"]*)"`).exec(obras);
+    assert.ok(fig, `cartão ${o.code}`);
+    const r = F[o.foto].w / F[o.foto].h, moldura = fig[1] === 'landscape' ? 4 / 3 : 4 / 5, fator = Math.max(1, r / moldura);
+    const movel = fator < 1.02 ? 'calc(100vw - 32px)' : `calc((100vw - 32px) * ${fator.toFixed(2)})`;
+    assert.ok(fig[2].endsWith(`(min-width: 981px) min(calc(50vw - 41px), 579px), (min-width: 641px) calc(100vw - 64px), ${movel}`), `cartão ${o.code}: sizes → ${fig[2]}`);
+    // a ficha: a fotografia na sua proporção (--foto-r), no máximo 78% do ecrã de altura, sem corte
+    if (!o.antesDepois) {
+      const ficha = le(`obras/${o.slug}.html`);
+      assert.match(ficha, new RegExp(`<div class="obra-foto" style="--foto-r: ${(F[o.foto].w / F[o.foto].h).toFixed(4)}">`), `${o.code}: proporção da fotografia`);
+      assert.ok(ficha.includes(`(min-width: 641px) min(1176px, calc(100vw - 64px), calc(78vh * ${F[o.foto].w} / ${F[o.foto].h})), min(calc(100vw - 32px), calc(78vh * ${F[o.foto].w} / ${F[o.foto].h}))`), `${o.code}: sizes da fotografia da ficha`);
+    }
+  }
+  assert.ok(OBRAS.some(o => o.foto === '05'), 'a foto-05 é a de uma obra (o caso do corte nos lados)');
 });
 
 function copiaFontes() {

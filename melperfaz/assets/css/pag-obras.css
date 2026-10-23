@@ -8,8 +8,10 @@
 .grupo-t { font-size: var(--fs-card); }
 .grupo-n { margin-top: var(--space-6); font-size: var(--fs-label); color: var(--fg-2); }
 
-/* ficha: a fotografia à largura do contentor, até 78% do ecrã de altura, logo por baixo do PageHead */
-.obra-foto .foto { width: 100%; height: min(78vh, 75vw); background: var(--ink-raised); }
+/* ficha: a fotografia na sua proporção (--foto-r, largura/altura, posto pelo build), à largura do contentor e no máximo
+   78% do ecrã de altura (um retrato fica mais estreito, encostado à esquerda), logo por baixo do PageHead. Sem corte e
+   sem ampliar: o sizes da fotografia (obra.fotoSizes) diz a mesma largura */
+.obra-foto .foto { width: min(100%, calc(78vh * var(--foto-r))); aspect-ratio: var(--foto-r); background-color: var(--ink-raised); }
 .obra-foto img { width: 100%; height: 100%; object-fit: cover; }
 /* o trabalho: grelha 7/5, com os títulos das duas colunas alinhados no topo */
 .obra-corpo .duas { display: grid; grid-template-columns: 7fr 5fr; gap: var(--space-80); align-items: start; }

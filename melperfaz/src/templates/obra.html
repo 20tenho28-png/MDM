@@ -3,7 +3,7 @@
 <!-- a fotografia (ou, na M05, o comparador) à largura do contentor, na mesma superfície do cabeçalho -->
 <section class="sec s-paper sec-junta obra-media" aria-label="Fotografia da obra">
   <div class="wrap">
-    {{#sem obra.antesDepois}}<div class="obra-foto">{{foto {{ obra.foto }} loading="eager" sizes="{{ obra.fotoSizes }}" class="obra-foto-img" foco="{{ obra.foco }}"}}</div>{{/sem}}{{#se obra.antesDepois}}{{> antes-depois }}{{/se}}
+    {{#sem obra.antesDepois}}<div class="obra-foto" style="--foto-r: {{ obra.fotoR }}">{{foto {{ obra.foto }} loading="eager" sizes="{{ obra.fotoSizes }}" class="obra-foto-img" foco="{{ obra.foco }}"}}</div>{{/sem}}{{#se obra.antesDepois}}{{> antes-depois }}{{/se}}
   </div>
 </section>
 

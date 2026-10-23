@@ -116,8 +116,18 @@ def campos_obra(o):
     # «Outras obras de fachadas» só quando há outras da mesma categoria que cheguem; senão, «Outras obras»
     mesma = sum(1 for x in OBRAS if x is not o and x["cat"] == o["cat"])
     o["relTitulo"] = f"Outras obras de {o['catNome'].lower()}" if mesma >= 2 else "Outras obras"
-    # a fotografia da ficha ocupa a largura do contentor (1240px) e no máximo 78% da altura do ecrã, na sua proporção
-    o["fotoSizes"] = f"min(1240px, 100vw, calc(78vh * {f['w']} / {f['h']}))"
+    # a fotografia da ficha: na sua proporção (fotoR, largura/altura), à largura do contentor (1176 px por dentro da .wrap,
+    # menos 32 px de margens até 640 px, menos 64 acima) e no máximo 78% da altura do ecrã; o sizes diz o mesmo
+    r = f"calc(78vh * {f['w']} / {f['h']})"
+    o["fotoR"] = f"{f['w'] / f['h']:.4f}"
+    o["fotoSizes"] = f"(min-width: 641px) min(1176px, calc(100vw - 64px), {r}), min(calc(100vw - 32px), {r})"
+    # o cartão (obra-foto.html): duas colunas de 579 px a partir de 981 px (a .wrap de 1176 px menos 18 de intervalo),
+    # uma coluna até lá. Abaixo de 640 px a moldura é 4:3 (paisagem) ou 4:5 (retrato): uma fotografia mais larga do que a
+    # moldura é cortada nos lados e precisa de mais píxeis do que a largura do cartão (foto-05, 1080 × 620: × 1,31)
+    moldura = 4 / 3 if o["orient"] == "landscape" else 4 / 5
+    fator = max(1.0, (f["w"] / f["h"]) / moldura)
+    movel = "calc(100vw - 32px)" if fator < 1.02 else f"calc((100vw - 32px) * {fator:.2f})"
+    o["cartaoSizes"] = f"(min-width: 981px) min(calc(50vw - 41px), 579px), (min-width: 641px) calc(100vw - 64px), {movel}"
     # sem comparador, a chave existe vazia: os modelos perguntam {{#se obra.antesDepois}} (uma chave em falta é erro)
     ad = o.setdefault("antesDepois", "")
     if ad:
@@ -259,10 +269,10 @@ def each(ctx, args):
     else:
         items = [OBRA_BY_N[x.strip().zfill(2)] for x in sel.split(",")]
     tpl = (SRC / "partials" / f"{name}.html").read_text(encoding="utf-8")
-    sizes = ctx["page"].get("cartaoSizes") or "(min-width: 981px) min(calc(50vw - 41px), 611px), calc(100vw - 44px)"
+    sizes = ctx["page"].get("cartaoSizes")   # uma página pode dar o seu; senão, o de cada obra (campos_obra)
     out = []
     for i, o in enumerate(items):
-        c = dict(ctx, obra=o, index=i, pos=i + 1, total=len(items), cartaoSizes=sizes,
+        c = dict(ctx, obra=o, index=i, pos=i + 1, total=len(items), cartaoSizes=sizes or o["cartaoSizes"],
                  loading="eager" if i < eager else "lazy", prioridade="alta" if i == 0 and eager else "normal")
         out.append(render(tpl, c))
     return "".join(out)

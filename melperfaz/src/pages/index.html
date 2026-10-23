@@ -88,8 +88,9 @@
     </div>
     <!-- uma fotografia real em vez de números: a obra M03, com ligação para a ficha; o perfil do Google quando existir
          (as avaliações nunca são citadas no site) -->
+    <!-- a foto-02 (4:3) numa moldura 4:5 é cortada nos lados: precisa de 5/3 da largura da moldura (548 px › 914) -->
     <figure class="trust-foto reveal">
-      <div class="frame">{{foto 02 sizes="(max-width: 980px) calc(100vw - 32px), 580px" foco="50% 40%"}}</div>
+      <div class="frame">{{foto 02 sizes="(max-width: 980px) calc((100vw - 32px) * 5 / 3), 914px" foco="50% 40%"}}</div>
       <figcaption class="links">
         <a class="link-seta" href="{{ root }}obras/edificios-e-apartamentos.html">Ver a obra<span aria-hidden="true"> →</span></a>{{#se dados.googleMaps}}
         <a class="link-seta" href="{{ dados.googleMaps }}" target="_blank" rel="noopener">Ver o perfil e as avaliações no Google<span aria-hidden="true"> →</span></a>{{/se}}
