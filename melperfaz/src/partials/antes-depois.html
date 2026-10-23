@@ -7,7 +7,7 @@
   <div class="ba-slider" data-ba>
     {{foto {{ obra.antesDepois.depois }} class="ba-after-img" sizes="min(100vw - 32px, 1176px)" foco="{{ obra.foco }}" loading="eager"}}
     <div class="ba-before-img" data-ba-before>{{foto {{ obra.antesDepois.antes }} class="ba-before" sizes="min(100vw - 32px, 1176px)" loading="eager" prioridade="normal"}}</div>
-    <div class="ba-handle" data-ba-handle aria-hidden="true"><span class="ba-arrows">‹ ›</span></div>
+    <div class="ba-handle" data-ba-handle aria-hidden="true"><span class="ba-arrows">{{icone seta-esq}}{{icone seta-dir}}</span></div>
     <span class="ba-tag tag-before" aria-hidden="true">Demolição</span>
     <span class="ba-tag tag-after" aria-hidden="true">Acabamento</span>
     <input type="range" min="0" max="100" value="50" class="ba-range" data-ba-range aria-label="Comparar demolição e acabamento">

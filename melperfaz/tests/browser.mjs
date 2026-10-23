@@ -11,7 +11,8 @@
    F. o isco para robôs: preenchido, não segue;
    G. nenhuma página desliza para o lado a 390 e 320 px, sem erros de JavaScript; a barra de ações (menos em obrigado.html)
       não tapa o rodapé nem o botão de envio;
-   H. o menu dos ecrãs estreitos: abre sobre um fundo escurecido, a página não desliza, foca, fecha com Escape e devolve o foco;
+   H. o menu dos ecrãs estreitos: abre sobre um fundo escurecido (com fade), as barras viram X, a página não desliza,
+      foca, fecha com Escape (escondido no fim da transição) e devolve o foco;
    I. o comparador antes/depois: com o teclado, e com o rato só a partir da pega (um clique noutro sítio não o mexe);
    J. teclado: a primeira tabulação é «Saltar para o conteúdo»; a entrada ao fazer scroll acaba toda visível;
       todas as imagens carregam; o menu marca a página atual; obras.html mostra todas as obras, sem filtros, agrupadas
@@ -20,7 +21,11 @@
    L. o sistema visual: uma margem esquerda (h1 do hero, logótipo e cabeçalhos de secção no mesmo x), contraste de 4,5:1
       nos botões, na barra e no texto da faixa clay, o anel de foco da cor da superfície, campos com 16 px e etiquetas com 13 px;
    M. as fotografias sem ampliação: a 375 px a do hero tem pelo menos tantos píxeis como a moldura, e nenhuma fotografia é
-      mostrada maior do que o ficheiro escolhido, salvo quando o próprio original é mais pequeno do que a moldura.
+      mostrada maior do que o ficheiro escolhido, salvo quando o próprio original é mais pequeno do que a moldura;
+   N. o movimento (Fase 5b): o cabeçalho compacto depois de 80 px, sem mudar de altura; CLS abaixo de 0,05; a seta
+      avança com o rato; os vistos desenham-se ao entrar no ecrã; as fotografias em lazy load entram num fade; o
+      WhatsApp pulsa duas vezes e pára; o indicador de carga do envio; o visto de obrigado.html; e, com movimento
+      reduzido, nada se desloca nem anima (o menu abre e fecha logo, já com o X).
    Precisa do Playwright, fora das dependências (localmente, NODE_PATH para onde ele está). Uso, a partir de melperfaz/:
      NODE_PATH=/caminho/para/node_modules node tests/browser.mjs */
 import { createRequire } from 'node:module';
@@ -258,19 +263,35 @@ try {
   {
     const { ctx, page } = await pagina({ viewport: { width: 390, height: 800 }, isMobile: true, hasTouch: true });
     await page.goto(srv.base + '/obras.html', { waitUntil: 'networkidle' });
-    ok(await page.isVisible('[data-menu]') && await page.isHidden('.navlinks'), 'H: o botão ≡ aparece e o menu normal não');
+    ok(await page.isVisible('[data-menu]') && await page.isHidden('.navlinks'), 'H: o botão do menu aparece e o menu normal não');
+    // as três barras do ícone «menu»: direitas com o menu fechado, um X com ele aberto (250 ms)
+    const barras = () => page.evaluate(() => Array.from(document.querySelectorAll('[data-menu] .i-menu path')).map(b => { const s = getComputedStyle(b); return { t: s.transform, o: s.opacity }; }));
+    const fechado = await barras();
+    ok(fechado.length === 3 && fechado.every(b => b.t === 'none' && b.o === '1'), 'H: fechado, três barras', fechado);
     await page.click('[data-menu]');
     ok(await page.isVisible('#menu-movel') && await page.getAttribute('[data-menu]', 'aria-expanded') === 'true', 'H: abre');
+    ok(await page.evaluate(() => /0\.25s/.test(getComputedStyle(document.querySelector('#menu-movel')).transitionDuration)), 'H: o painel entra com uma transição de 250 ms');
+    await page.waitForTimeout(400);
+    const x = await barras();
+    // rotate(45deg) dá matrix(0.707…, 0.707…, -0.707…, 0.707…, …); a do meio desaparece
+    const rot = t => { const m = /matrix\(([^,]+), ([^,]+)/.exec(t); return m ? Math.round(Math.atan2(parseFloat(m[2]), parseFloat(m[1])) * 180 / Math.PI) : 0; };
+    ok(rot(x[0].t) === 45 && x[1].o === '0' && rot(x[2].t) === -45, 'H: aberto, as barras viram X', x);
+    ok(await page.evaluate(() => { const s = getComputedStyle(document.querySelector('#menu-movel')); return s.opacity === '1' && s.transform === 'none'; }), 'H: o painel acaba no sítio, opaco');
     ok(await page.isVisible('[data-menu-fundo]') && await page.evaluate(() => document.documentElement.classList.contains('menu-aberto') && getComputedStyle(document.documentElement).overflow === 'hidden'), 'H: fundo escurecido e a página não desliza');
     const itens = await page.evaluate(() => Array.from(document.querySelectorAll('#menu-movel a')).map(a => Math.round(a.getBoundingClientRect().height)));
     ok(itens.length === 5 && itens.every(h => h >= 48), 'H: cinco itens com 48 px', itens);
     ok(await page.evaluate(() => document.activeElement.closest('#menu-movel') !== null), 'H: o foco entra no menu');
     await page.keyboard.press('Escape');
-    ok(await page.isHidden('#menu-movel') && await page.evaluate(() => document.activeElement.hasAttribute('data-menu')), 'H: Escape fecha e devolve o foco ao botão');
-    ok(await page.isHidden('[data-menu-fundo]') && await page.evaluate(() => !document.documentElement.classList.contains('menu-aberto')), 'H: fechado, sem fundo e a página volta a deslizar');
+    ok(await page.evaluate(() => document.activeElement.hasAttribute('data-menu') && !document.documentElement.classList.contains('menu-aberto')), 'H: Escape fecha logo (a página volta a deslizar) e devolve o foco ao botão');
+    // o painel e o fundo saem com fade e só no fim ficam hidden (no máximo 500 ms)
+    const t0 = Date.now();
+    await page.waitForSelector('#menu-movel', { state: 'hidden', timeout: 2000 });
+    await page.waitForSelector('[data-menu-fundo]', { state: 'hidden', timeout: 2000 });
+    ok(Date.now() - t0 <= 600, 'H: fechado, o painel e o fundo escondem-se no fim da transição', Date.now() - t0);
+    ok((await barras()).every(b => b.t === 'none' && b.o === '1'), 'H: fechado, as barras voltam');
     await page.click('[data-menu]');
     await Promise.all([page.waitForURL(/index\.html$/, { waitUntil: 'domcontentloaded' }), page.click('#menu-movel a[href$="index.html"]')]);
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(500);
     ok(await page.isHidden('#menu-movel') && /index\.html$/.test(page.url()), 'H: uma ligação do menu fecha-o e navega', page.url());
     await ctx.close();
   }
@@ -346,10 +367,13 @@ try {
   }
   {
     const { ctx, page } = await pagina();
-    for (const f of ['/', '/obras.html', `/obras/${OBRAS[0].slug}.html`, '/privacidade.html', '/404.html']) {
+    for (const f of ['/', '/obras.html', `/obras/${OBRAS[0].slug}.html`, `/obras/${(OBRAS.find(o => o.antesDepois) || OBRAS[0]).slug}.html`, '/orcamento.html', '/obrigado.html', '/privacidade.html', '/404.html']) {
       await page.goto(srv.base + f, { waitUntil: 'networkidle' });
-      const sem = await page.evaluate(() => document.getAnimations().filter(a => a.effect && a.effect.getTiming().iterations === Infinity).length);
-      ok(sem === 0, `K: ${f} sem animações infinitas`, sem);
+      // também as dos estados: o telefone a abanar (hover) e a pega agarrada; nenhuma passa de 500 ms por volta
+      if (await page.isVisible('.topo-tel')) await page.hover('.topo-tel');
+      const an = await page.evaluate(() => document.getAnimations().filter(a => a.effect).map(a => { const t = a.effect.getTiming(); return { n: a.animationName || '', it: t.iterations, d: t.duration }; }));
+      ok(an.every(a => a.it !== Infinity), `K: ${f} sem animações infinitas`, an);
+      ok(an.every(a => a.d === 'auto' || a.d <= 500), `K: ${f} nenhuma animação passa de 500 ms por volta`, an);
     }
     await ctx.close();
   }
@@ -444,6 +468,109 @@ try {
       ok(fo.prop < 0.01 && fo.h <= fo.max, `M: a ${largura} px a fotografia da ficha na sua proporção, até 78% da altura`, fo);
       await ctx.close();
     }
+  }
+
+  /* N. o movimento (Fase 5b) */
+  {
+    // o cabeçalho: compacto e com sombra depois de 80 px de scroll, com a mesma altura (o conteúdo não salta)
+    const { ctx, page } = await pagina();
+    await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
+    const topo = () => page.evaluate(() => { const h = document.querySelector('[data-topo]'); return { c: h.classList.contains('topo-compacto'), s: getComputedStyle(h).boxShadow, alt: h.offsetHeight }; });
+    const t0 = await topo();
+    await page.evaluate(() => window.scrollTo(0, 60)); await page.waitForTimeout(300);
+    const t60 = await topo();
+    await page.evaluate(() => window.scrollTo(0, 400)); await page.waitForTimeout(400);
+    const t400 = await topo();
+    ok(!t0.c && t0.s === 'none' && !t60.c && t400.c && t400.s !== 'none' && t400.alt === t0.alt, 'N: o cabeçalho fica compacto, com sombra, depois de 80 px, sem mudar de altura', [t0, t60, t400]);
+    await page.evaluate(() => window.scrollTo(0, 0)); await page.waitForTimeout(400);
+    ok(!(await topo()).c, 'N: de volta ao topo, o cabeçalho volta ao normal');
+    // os vistos de «Porquê Nós»: por desenhar antes de entrar no ecrã, desenhados depois, em cascata de 80 ms
+    const vistos = () => page.evaluate(() => Array.from(document.querySelectorAll('.trust-list .tick path')).map(p => parseFloat(getComputedStyle(p).strokeDashoffset)));
+    const antes = await vistos();
+    await page.locator('.trust-list').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(1500);
+    const depois = await vistos();
+    const atrasos = await page.evaluate(() => Array.from(document.querySelectorAll('.trust-list .tick path')).map(p => getComputedStyle(p).transitionDelay));
+    ok(antes.length === 4 && antes.every(v => v >= 1) && depois.every(v => v === 0), 'N: os vistos desenham-se ao entrar no ecrã', { antes, depois });
+    ok(atrasos.join() === '0.25s,0.33s,0.41s,0.49s', 'N: em cascata de 80 ms', atrasos);
+    // a seta avança com o rato (150 ms)
+    await page.hover('#servicos .link-seta');
+    await page.waitForTimeout(300);
+    ok(await page.evaluate(() => getComputedStyle(document.querySelector('#servicos .link-seta .i-seta')).transform) === 'matrix(1, 0, 0, 1, 5, 0)', 'N: a seta avança 5 px com o rato');
+    // as fotografias em lazy load: no fim todas visíveis (.carregada), sem nenhuma presa transparente
+    await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 400) { scrollTo(0, y); await new Promise(r => setTimeout(r, 40)); } });
+    await page.waitForTimeout(800);
+    const lazy = await page.evaluate(() => Array.from(document.querySelectorAll('.foto img[loading="lazy"]')).map(i => ({ f: i.currentSrc.split('/').pop(), c: i.classList.contains('carregada'), o: getComputedStyle(i).opacity })));
+    ok(lazy.length > 0 && lazy.every(i => i.c && i.o === '1'), 'N: as fotografias em lazy load entram e ficam opacas', lazy.filter(i => !i.c || i.o !== '1'));
+    ok(await page.evaluate(() => getComputedStyle(document.querySelector('.foto img[loading="lazy"]')).transitionDuration.startsWith('0.5s')), 'N: com um fade de 500 ms');
+    // o WhatsApp do cabeçalho pulsa duas vezes ao carregar e pára
+    await page.goto(srv.base + '/obras.html', { waitUntil: 'domcontentloaded' });
+    const wa = await page.evaluate(() => document.getAnimations().filter(a => a.animationName === 'acena').map(a => a.effect.getTiming().iterations));
+    ok(wa.length >= 1 && wa.every(n => n === 2), 'N: o WhatsApp pulsa duas vezes', wa);
+    await page.waitForTimeout(1800);
+    ok(await page.evaluate(() => document.getAnimations().filter(a => a.animationName === 'acena' && a.playState === 'running').length) === 0, 'N: e pára');
+    // o indicador de carga do envio: um anel que gira um número finito de voltas e sai com a resposta
+    await page.goto(srv.base + '/orcamento.html', { waitUntil: 'networkidle' });
+    await preenche(page);
+    let solta;
+    const espera = new Promise(r => { solta = r; });
+    await page.route(srv.base + '/', async route => { if (route.request().method() === 'POST') { await espera; await route.fulfill({ status: 500, body: 'erro' }); } else await route.continue(); });
+    await page.click('#sendBtn');
+    await page.waitForTimeout(200);
+    const roda = await page.evaluate(() => { const b = document.querySelector('#sendBtn'), s = getComputedStyle(b, '::before'); return { cl: b.classList.contains('a-enviar'), txt: b.textContent, an: s.animationName, it: s.animationIterationCount, d: s.animationDuration }; });
+    ok(roda.cl && roda.txt === 'A enviar…' && roda.an === 'gira' && roda.it === '40' && roda.d === '0.5s', 'N: «A enviar…» com o indicador de carga (40 voltas de 500 ms)', roda);
+    solta();
+    await page.waitForSelector('#formAlerta:not([hidden])');
+    ok(await page.evaluate(() => { const b = document.querySelector('#sendBtn'); return !b.classList.contains('a-enviar') && getComputedStyle(b, '::before').content === 'none'; }), 'N: com a resposta, o indicador sai');
+    await page.unroute(srv.base + '/');
+    // obrigado.html: o visto desenha-se num círculo, uma vez
+    await page.goto(srv.base + '/obrigado.html', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1300);
+    const env = await page.evaluate(() => Array.from(document.querySelectorAll('.pag-icone circle, .pag-icone path')).map(e => parseFloat(getComputedStyle(e).strokeDashoffset)));
+    ok(env.length === 2 && env.every(v => v === 0), 'N: obrigado.html desenha o visto no círculo', env);
+    // (o 500 do envio é o do teste do indicador: o browser regista-o na consola)
+    ok(page.erros.filter(e => !/status of 500/.test(e)).length === 0, 'N: sem erros', page.erros);
+    await ctx.close();
+  }
+  {
+    // CLS abaixo de 0,05, ao carregar e ao percorrer a página (com as fotografias a entrar)
+    for (const largura of [390, 1280]) {
+      const { ctx, page } = await pagina({ viewport: { width: largura, height: 850 } });
+      await page.addInitScript(() => { window.__cls = 0; new PerformanceObserver(l => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; }).observe({ type: 'layout-shift', buffered: true }); });
+      for (const f of ['/', '/obras.html', `/obras/${OBRAS[0].slug}.html`, '/orcamento.html']) {
+        await page.goto(srv.base + f, { waitUntil: 'networkidle' });
+        await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 300) { scrollTo(0, y); await new Promise(r => setTimeout(r, 50)); } });
+        await page.waitForTimeout(600);
+        const cls = await page.evaluate(() => window.__cls);
+        ok(cls < 0.05, `N: ${f} a ${largura} px com CLS abaixo de 0,05`, cls);
+      }
+      await ctx.close();
+    }
+  }
+  {
+    // movimento reduzido: nada anima nem se desloca; as mudanças de estado ficam (o X do menu), sem transição
+    const { ctx, page } = await pagina({ viewport: { width: 390, height: 800 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
+    for (const f of ['/', '/obrigado.html', `/obras/${(OBRAS.find(o => o.antesDepois) || OBRAS[0]).slug}.html`]) {
+      await page.goto(srv.base + f, { waitUntil: 'networkidle' });
+      const r = await page.evaluate(() => ({
+        anima: document.getAnimations().filter(a => a.playState === 'running' && a.effect && a.effect.getComputedTiming().duration > 0).map(a => a.animationName),
+        transicoes: Array.from(document.querySelectorAll('*')).filter(e => getComputedStyle(e).transitionDuration.split(',').some(v => parseFloat(v) > 0)).map(e => e.className.baseVal ?? e.className).slice(0, 5),
+        reveal: Array.from(document.querySelectorAll('.reveal')).every(e => { const s = getComputedStyle(e); return s.opacity === '1' && s.transform === 'none'; }),
+        vistos: Array.from(document.querySelectorAll('.tick path, .pag-icone circle, .pag-icone path')).every(p => parseFloat(getComputedStyle(p).strokeDashoffset) === 0),
+      }));
+      ok(r.anima.length === 0 && r.transicoes.length === 0, `N: ${f} com movimento reduzido sem animações nem transições`, r);
+      ok(r.reveal && r.vistos, `N: ${f} com movimento reduzido tudo à vista e no sítio, vistos desenhados`, r);
+    }
+    await page.goto(srv.base + '/obras.html', { waitUntil: 'networkidle' });
+    await page.click('[data-menu]');
+    const m = await page.evaluate(() => { const s = getComputedStyle(document.querySelector('#menu-movel')), b1 = getComputedStyle(document.querySelector('[data-menu] .b1')); return { o: s.opacity, t: s.transform, x: b1.transform }; });
+    ok(m.o === '1' && m.t === 'none' && m.x !== 'none', 'N: com movimento reduzido o menu abre logo, sem deslizar, já com o X', m);
+    await page.keyboard.press('Escape');
+    ok(await page.isHidden('#menu-movel') && await page.isHidden('[data-menu-fundo]'), 'N: e fecha logo');
+    await page.evaluate(() => window.scrollTo(0, 400)); await page.waitForTimeout(300);
+    ok(await page.evaluate(() => { const h = document.querySelector('[data-topo]'); return h.classList.contains('topo-compacto') && getComputedStyle(h.querySelector('.logo-img')).transform === 'none'; }), 'N: com movimento reduzido o cabeçalho compacto ganha a sombra, mas o logótipo não encolhe');
+    ok(page.erros.length === 0, 'N: sem erros com movimento reduzido', page.erros);
+    await ctx.close();
   }
 } finally {
   await browser.close();

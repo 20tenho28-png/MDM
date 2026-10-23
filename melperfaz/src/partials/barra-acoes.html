@@ -3,8 +3,8 @@
      (meta barra «sem-orcamento») a terceira célula é «Enviar fotografias»; em obrigado.html (barra «nao») não há barra.
      O body leva .com-barra, que lhe dá um padding-bottom da altura da barra (nada fica tapado). -->
 <nav class="barra" aria-label="Contactos rápidos">
-  <a class="barra-cel" href="{{ site.phoneHref }}" aria-label="Ligar {{ site.phone }}">Ligar</a>
-  <a class="barra-cel" href="{{wa {{ page.wa }}}}" target="_blank" rel="noopener" aria-label="Falar por WhatsApp"><svg aria-hidden="true" focusable="false"><use href="#i-wa"></use></svg>WhatsApp</a>{{#se barra.orcamento}}
+  <a class="barra-cel" href="{{ site.phoneHref }}" aria-label="Ligar {{ site.phone }}">{{icone telefone}}Ligar</a>
+  <a class="barra-cel" href="{{wa {{ page.wa }}}}" target="_blank" rel="noopener" aria-label="Falar por WhatsApp">{{icone whatsapp}}WhatsApp</a>{{#se barra.orcamento}}
   <a class="barra-cel barra-orc" href="{{ pedidoHref }}" aria-label="Pedir Orçamento">Orçamento</a>{{/se}}{{#sem barra.orcamento}}
   <a class="barra-cel barra-orc" href="{{wa {{ page.wa }}}}" target="_blank" rel="noopener" aria-label="Enviar fotografias por WhatsApp">Enviar fotografias</a>{{/sem}}
 </nav>

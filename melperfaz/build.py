@@ -24,6 +24,9 @@ Sintaxe dos modelos (src/):
                                          (data/fotos.json; tamanhos feitos por gerar_fotos.py)
     {{wa chave}}                         ligação de WhatsApp com a mensagem site.wa.chave já escrita
     {{li obra.detalhes}}                 um <li> por texto de uma lista
+    {{li obra.detalhes visto}}           o mesmo, com o ícone «visto» numa caixa (<span class="tick">) antes do texto
+    {{icone nome}}                       o ícone nome de src/partials/icones.svg, em linha e escondido do leitor de ecrã
+                                         (<svg class="icone i-nome" aria-hidden="true">); um nome que não existe é erro
     {{each parcial all}} / {{each parcial destaque}} / {{each parcial 01,02}} / {{each parcial cat=fachadas}} /
     {{each parcial ctx:related}}         repete um parcial por obra (… eagerN no fim: as N primeiras imagens sem lazy);
                                          «destaque» são as obras com "destaque": true em data/obras.json
@@ -245,6 +248,28 @@ def foto(ctx, args):
             f'loading="{loading}" decoding="async"{extra}></picture>')
 
 
+# Os ícones (src/partials/icones.svg, Fase 5b): cada <symbol id="nome" viewBox="…"> desenha-se uma vez lá; {{icone nome}}
+# copia-o para a página em linha (não com <use>), para o CSS chegar às partes: as barras do menu viram X, os vistos e o
+# círculo de obrigado.html desenham-se. Traço de 1,75 em currentColor, sem preenchimento (o WhatsApp traz o seu fill).
+ICONE_RE = re.compile(r'<symbol\s+id="([\w-]+)"\s+viewBox="([^"]+)"\s*>(.*?)</symbol>', re.S)
+
+
+def carrega_icones():
+    texto = re.sub(r"<!--.*?-->", "", (SRC / "partials" / "icones.svg").read_text(encoding="utf-8"), flags=re.S)
+    return {nome: (vb, corpo.strip()) for nome, vb, corpo in ICONE_RE.findall(texto)}
+
+
+ICONES = carrega_icones()
+
+
+def icone(ctx, nome):
+    if nome not in ICONES:
+        raise KeyError(f"{{{{icone {nome}}}}}: não existe em src/partials/icones.svg ({ctx.get('_file', '?')})")
+    vb, corpo = ICONES[nome]
+    return (f'<svg class="icone i-{nome}" viewBox="{vb}" fill="none" stroke="currentColor" stroke-width="1.75" '
+            f'aria-hidden="true" focusable="false">{corpo}</svg>')
+
+
 def wa(ctx, key):
     if key not in SITE["wa"]:
         raise KeyError(f"{{{{wa {key}}}}}: não existe em site.json «wa» ({ctx.get('_file', '?')})")
@@ -364,8 +389,12 @@ def render(text, ctx, depth=0):
             return html.escape(wa(ctx, expr[3:].strip()), quote=True)
         if expr.startswith("each "):
             return each(ctx, expr[5:])
+        if expr.startswith("icone "):
+            return icone(ctx, expr[6:].strip())
         if expr.startswith("li "):
-            return "".join(f"<li>{html.escape(str(x))}</li>" for x in lookup(ctx, expr[3:].strip()))
+            caminho, _, nome = expr[3:].strip().partition(" ")
+            antes = f'<span class="tick" aria-hidden="true">{icone(ctx, nome.strip())}</span>' if nome.strip() else ""
+            return "".join(f"<li>{antes}{html.escape(str(x))}</li>" for x in lookup(ctx, caminho))
         raw = expr.startswith("{") or expr.startswith("&")
         key = expr.lstrip("{&").strip()
         if key.startswith("dados."):
@@ -590,8 +619,10 @@ PLACEHOLDER_RE = re.compile(r"\[[^\[\]<>\"']*?[A-ZÀ-Ý]{3}[^\[\]<>\"']*\]|\[\[[
 PROIBIDO = [
     (re.compile("\u2014"), "travessão (—): usar vírgulas ou parênteses"),
     (re.compile(r"\b(?:961245288|961\u00a0245\u00a0288|961-245-288)\b"), f"telefone escrito de outra forma: «{SITE['phone']}»"),
-    # os glifos do sistema (✓ ✦ → ‹ ›) ficam fora da regra: só os blocos de emoji e os símbolos diversos (☎ ☀ …)
+    # só os blocos de emoji e os símbolos diversos (☎ ☀ …); a seta, o menu, o visto e as setas do comparador são ícones
     (re.compile("[\U0001F300-\U0001FAFF\u2600-\u26FF]"), "emoji ou símbolo: o site não usa"),
+    # os glifos que os ícones substituíram (Fase 5b): → ≡ ✓ ‹ (o › das migalhas fica, é o separador do texto)
+    (re.compile("[\u2192\u2261\u2713\u2714\u2039]"), "glifo que passou a ícone: usar {{icone seta|menu|visto|seta-esq}}"),
 ]
 REF_RE = re.compile(r'(?:href|src|action)="([^"#?]+)|srcset="([^"]+)"|url\(([^)]+)\)')
 # Netlify Forms: o formulário de orçamento tem de chegar ao HTML gerado com o nome, os atributos do Netlify, a armadilha
@@ -882,12 +913,22 @@ def check_obras():
 # @media a 980 ou 640 px (e as de preferência, como prefers-reduced-motion e hover), nada «infinite», e nunca texto paper
 # ou branco num seletor de .s-clay ou .btn sem fundo ink na mesma regra. Exceções, curtas e de propósito: 1px (hairline,
 # como o margin:-1px do texto só para leitores de ecrã) e env(safe-area-inset-*), que não é px.
+# O movimento (Fase 5b): durações e curvas só pelos tokens --dur-* e --ease-* (com 0s como exceção: «já»), cada
+# duração com a sua curva, nenhum --dur-* acima de 500 ms, e só se anima transform, opacity, as cores e o traço dos
+# ícones (stroke-dashoffset): nada de width, height, top, left ou «all», que mexem no layout.
 CSS_ESPACO = re.compile(r"^(?:margin|padding)(?:-(?:top|right|bottom|left|inline|block)(?:-(?:start|end))?)?$"
                         r"|^(?:gap|row-gap|column-gap|inset|top|right|bottom|left|scroll-padding(?:-[a-z-]+)?)$")
 CSS_PX = re.compile(r"(?<![\w.-])-?(\d*\.?\d+)px\b")
 CSS_PX_OK = {"1"}   # hairline
 CSS_FS_OK = re.compile(r"^(?:var\(--fs-[a-z0-9-]+\)|inherit)$")
 CSS_MEDIA_OK = {"(max-width: 980px)", "(min-width: 981px)", "(max-width: 640px)", "(min-width: 641px)"}
+CSS_MOV = {"transition", "transition-duration", "transition-delay", "transition-timing-function", "transition-property",
+           "animation", "animation-duration", "animation-delay", "animation-timing-function"}
+CSS_TEMPO = re.compile(r"(?<![\w.-])(\d*\.?\d+)(ms|s)\b")
+CSS_CURVA = re.compile(r"(?<![\w-])(?:ease(?:-in|-out|-in-out)?|linear|step-start|step-end)(?![\w-])|cubic-bezier\(|steps\(")
+CSS_VAR = re.compile(r"var\(--[\w-]+(?:,[^()]*)?\)")
+CSS_ANIMA_OK = {"transform", "opacity", "color", "background", "background-color", "border-color", "box-shadow",
+                "outline-color", "stroke-dashoffset", "none"}
 CSS_COR_CLARA = re.compile(r"var\(--(?:paper|white|bone)\)|#fff\b|#ffffff\b|\bwhite\b", re.I)
 
 
@@ -910,9 +951,43 @@ def css_regras(texto):
     return regras
 
 
+def partes(valor):
+    """As partes de uma lista separada por vírgulas, sem partir dentro de parênteses (calc(), var(--x, 0))."""
+    out, nivel, ini = [], 0, 0
+    for i, c in enumerate(valor):
+        nivel += (c == "(") - (c == ")")
+        if c == "," and nivel == 0:
+            out.append(valor[ini:i].strip())
+            ini = i + 1
+    return out + [valor[ini:].strip()]
+
+
+def check_movimento(nome, sel, prop, val):
+    """Uma declaração de transition/animation: tokens de duração e de curva, e só propriedades que não mexem no layout."""
+    out, onde = [], f"{nome}: «{sel} {{ {prop}: {val} }}»"
+    for parte in partes(val.replace("!important", "")):
+        sem_var = CSS_VAR.sub(" ", parte)
+        tempos = [m.group(0) for m in CSS_TEMPO.finditer(sem_var) if float(m.group(1)) != 0]
+        if tempos:
+            out.append(f"{onde}: duração solta ({', '.join(tempos)}): usar --dur-1, --dur-2 ou --dur-3")
+        if CSS_CURVA.search(sem_var):
+            out.append(f"{onde}: curva solta: usar --ease-out ou --ease-in-out")
+        if prop in ("transition", "animation") and "var(--dur-" in parte and "var(--ease-" not in parte:
+            out.append(f"{onde}: duração sem curva: juntar var(--ease-out) ou var(--ease-in-out)")
+        if prop in ("transition", "transition-property"):
+            anima = sem_var.split()[0] if sem_var.split() else ""
+            if anima not in CSS_ANIMA_OK:
+                out.append(f"{onde}: anima «{anima}»: só transform, opacity, as cores e stroke-dashoffset (nada que mexa no layout)")
+    return out
+
+
 def check_css(nome, texto):
     out = []
     sem_comentarios = re.sub(r"/\*.*?\*/", "", texto, flags=re.S)
+    for tok, v in re.findall(r"(--dur-[\w-]+)\s*:\s*([^;}]+)", sem_comentarios):
+        m = CSS_TEMPO.fullmatch(v.strip())
+        if not m or float(m.group(1)) * (1 if m.group(2) == "ms" else 1000) > 500:
+            out.append(f"{nome}: {tok}: {v.strip()} (nenhuma duração passa de 500 ms)")
     if re.search(r"\binfinite\b", sem_comentarios):
         out.append(f"{nome}: animação «infinite» (nenhuma animação sem fim)")
     for m in re.finditer(r"@media\s+([^{]+)\{", sem_comentarios):
@@ -934,6 +1009,8 @@ def check_css(nome, texto):
                 out.append(f"{nome}: «{sel} {{ font-size: {val} }}»: só os estilos de texto (--fs-*)")
             elif prop == "font" and val != "inherit":
                 out.append(f"{nome}: «{sel} {{ font: {val} }}»: o atalho font só como inherit (tamanhos em --fs-*)")
+            elif prop in CSS_MOV:
+                out += check_movimento(nome, sel, prop, val)
         cor = props.get("color", "")
         fundo = props.get("background", props.get("background-color", ""))
         if (re.search(r"\.s-clay\b|\.btn(?![\w-])", sel) and CSS_COR_CLARA.search(cor)

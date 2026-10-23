@@ -19,8 +19,9 @@
 .lista-visto { list-style: none; }
 .lista-visto li { position: relative; padding: var(--space-12) 0 var(--space-12) var(--space-44); color: var(--fg-2); border-bottom: var(--border-hairline) solid var(--rule); }
 .lista-visto li:last-child { border-bottom: none; }
-/* a caixa de visto do TrustList (28 px, borda de 2 px, ✓ a 800); o / "" esconde o glifo ao leitor de ecrã */
-.lista-visto li::before { content: "\2713" / ""; position: absolute; left: 0; top: var(--space-12); width: 28px; height: 28px; border: var(--border-rule) solid var(--clay); color: var(--clay-deep); font-weight: 800; font-size: var(--fs-body); display: grid; place-items: center; }
+/* a caixa de visto do TrustList (.tick de site.css, com o ícone «visto»), à esquerda de cada linha; desenha-se ao
+   entrar no ecrã, em cascata, como na página inicial ({{li obra.detalhes visto}} no modelo obra.html) */
+.lista-visto .tick { position: absolute; left: 0; top: var(--space-12); }
 
 /* obras semelhantes */
 .obra-rel .sec-head { margin-bottom: var(--space-32); }

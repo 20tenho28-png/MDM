@@ -201,7 +201,7 @@ test('a página inicial: Hero › Obras em destaque › Serviços › Porquê N�
   }
   assert.doesNotMatch(t, /<a class="svc|class="arrow"/, 'a linha do serviço não é uma ligação e não tem seta');
   // Porquê Nós: a lista de confiança, «Quem somos» e a fotografia da M03 com «Ver a obra»
-  assert.equal((t.match(/<span class="tick" aria-hidden="true">✓<\/span>/g) || []).length, 4);
+  assert.equal((t.match(/<span class="tick" aria-hidden="true"><svg class="icone i-visto" viewBox="0 0 24 24"[^>]*><path pathLength="1" [^>]*\/><\/svg><\/span>/g) || []).length, 4, 'os quatro vistos são o ícone «visto»');
   assert.match(t, /<h3>Quem somos<\/h3>\s*<p>A Melperfaz, Construção Civil, Lda\. trabalha desde 2001 com equipa própria\.<\/p>/);
   assert.match(t, /<a class="link-seta" href="obras\/edificios-e-apartamentos\.html">Ver a obra/);
   // os endereços antigos (#contacto, ?tipo=) vão para orcamento.html: o script é o primeiro elemento do <body>
@@ -265,7 +265,7 @@ test('as fichas de obra: migalhas, serviço, «Na obra», ficha só com factos, 
     assert.match(t, new RegExp(`<span class="eyebrow"><a href="\\.\\./obras\\.html#${s.cat}">${esc(s.nome)}</a></span>`), `${f}: eyebrow com o serviço, sem código`);
     // o trabalho: «Na obra» com os detalhes; «O problema» e «O que fizemos» só com os factos; a ficha só com Local, Data,
     // Duração ou Resultado (sem «Código» nem «Serviço»: o eyebrow já liga ao serviço)
-    assert.match(t, /<div class="prosa">[\s\S]*?<h2>Na obra<\/h2>\s*<ul class="lista-visto">/, `${f}: «Na obra»`);
+    assert.match(t, /<div class="prosa">[\s\S]*?<h2>Na obra<\/h2>\s*<ul class="lista-visto reveal">/, `${f}: «Na obra», com os vistos a entrar no ecrã`);
     assert.doesNotMatch(t, /O que se vê na fotografia|<dt>Código<\/dt>|<dt>Serviço<\/dt>/, `${f}: sem a descrição da fotografia nem o código`);
     assert.equal(t.includes('<h2>O problema</h2>'), Boolean(o.factos.problema), `${f}: «O problema» só com o facto`);
     assert.equal(t.includes('<h2>O que fizemos</h2>'), Boolean(o.factos.trabalho), `${f}: «O que fizemos» só com o facto`);
@@ -285,7 +285,7 @@ test('as fichas de obra: migalhas, serviço, «Na obra», ficha só com factos, 
     // sem anterior/seguinte (as migalhas e «Outras obras» já levam às outras obras)
     assert.doesNotMatch(t, /rel="(?:prev|next)"|class="obra-nav"/, `${f}: sem navegação anterior/seguinte`);
     assert.equal((t.match(/<figure class="pg reveal"/g) || []).length, 2, `${f}: duas outras obras`);
-    for (const d of o.detalhes) assert.ok(t.includes(`<li>${d.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;')}</li>`), `${f}: detalhe «${d}»`);
+    for (const d of o.detalhes) assert.match(t, new RegExp(`<li><span class="tick" aria-hidden="true"><svg class="icone i-visto"[^>]*>.*?</svg></span>${esc(d)}</li>`), `${f}: detalhe «${d}», com o visto`);
     assert.ok(!t.includes('<dt>Data</dt>') || o.factos.data, `${f}: a data só com facto`);
     if (o.antesDepois) {
       assert.match(t, /data-ba-range/, `${f}: comparador`);
@@ -415,6 +415,47 @@ function copiaFontes() {
   return d;
 }
 
+test('os ícones: icones.svg em linha com {{icone nome}}, sem os glifos → ≡ ✓ ‹, e um nome desconhecido é erro', () => {
+  const sprite = fs.readFileSync(path.join(W, 'src/partials/icones.svg'), 'utf8');
+  const nomes = new Set([...sprite.matchAll(/<symbol id="([\w-]+)"/g)].map(m => m[1]));
+  for (const n of ['seta', 'menu', 'telefone', 'whatsapp', 'visto', 'seta-esq', 'seta-dir', 'enviado']) assert.ok(nomes.has(n), `icones.svg tem «${n}»`);
+  for (const f of paginas()) {
+    const t = leV(f);
+    const visivel = t.replace(/<script[\s\S]*?<\/script>/g, '');
+    assert.doesNotMatch(visivel, /[→≡✓‹]/, `${f}: sem os glifos que passaram a ícone`);
+    assert.doesNotMatch(t, /<use\b|menu-barras/, `${f}: os ícones vêm em linha, sem <use> nem as barras em <span>`);
+    for (const [svg, nome] of t.matchAll(/<svg class="icone i-([\w-]+)"[^>]*>/g)) {
+      assert.ok(nomes.has(nome), `${f}: o ícone «${nome}» existe em icones.svg`);
+      assert.match(svg, /fill="none" stroke="currentColor" stroke-width="1\.75" aria-hidden="true" focusable="false"/, `${f}: ${nome} com traço de 1,75 e escondido do leitor`);
+    }
+  }
+  const casa = le('index.html');
+  assert.match(casa, /<button class="menu-toggle"[^>]*><svg class="icone i-menu" viewBox="0 0 24 24"[^>]*><path class="b1" [^>]*\/><path class="b2" [^>]*\/><path class="b3" [^>]*\/><\/svg><\/button>/, 'o botão do menu com as três barras');
+  assert.match(casa, /<a class="topo-tel" href="tel:\+351961245288"><svg class="icone i-telefone"/, 'o telefone do cabeçalho com o ícone');
+  assert.match(casa, /<a class="topo-wa"[^>]*><svg class="icone i-whatsapp"/, 'o WhatsApp do cabeçalho');
+  assert.match(casa, /<a class="barra-cel" href="tel:[^"]+" aria-label="Ligar 961 245 288"><svg class="icone i-telefone"[\s\S]*?<\/svg>Ligar<\/a>/, 'a barra: Ligar com o telefone');
+  assert.equal((casa.match(/<a class="link-seta"[^>]*>[^<]*(?:<span class="so-leitor">[^<]*<\/span>)?<svg class="icone i-seta"/g) || []).length, (casa.match(/<a class="link-seta"/g) || []).length, 'todas as ligações com seta usam o ícone');
+  assert.match(casa, /<span class="pg-ver" aria-hidden="true">Ver obra<svg class="icone i-seta"/, 'o cartão: «Ver obra» com a seta');
+  const m05 = le(`obras/${(OBRAS.find(o => o.antesDepois) || OBRAS[0]).slug}.html`);
+  assert.match(m05, /<span class="ba-arrows"><svg class="icone i-seta-esq"[\s\S]*?<\/svg><svg class="icone i-seta-dir"/, 'o comparador com as duas setas');
+  assert.match(le('obrigado.html'), /<span class="pag-icone"><svg class="icone i-enviado" viewBox="0 0 48 48"[^>]*><circle pathLength="1"[^>]*\/><path class="enviado-visto" pathLength="1"/, 'obrigado.html: o visto num círculo');
+  for (const f of paginas()) if (f !== 'obrigado.html') assert.doesNotMatch(le(f), /class="pag-icone"/, `${f}: o ícone do PageHead só em obrigado.html`);
+  // um ícone que não existe pára o build; um glifo antigo faz o --check falhar
+  const d = copiaFontes();
+  try {
+    const p = path.join(d, 'src/pages/404.html');
+    const orig = fs.readFileSync(p, 'utf8');
+    fs.writeFileSync(p, orig.replace('{{icone seta}}', '{{icone martelo}}'));
+    let r = spawnSync('python3', ['build.py'], { cwd: d, encoding: 'utf8', env: { ...process.env, MELPERFAZ_OUT: path.join(d, 'public') } });
+    assert.notEqual(r.status, 0, 'ícone desconhecido: o build pára');
+    assert.match(r.stderr, /\{\{icone martelo\}\}: não existe em src\/partials\/icones\.svg/);
+    fs.writeFileSync(p, orig.replace('{{icone seta}}', '<span aria-hidden="true"> →</span>'));
+    r = spawnSync('python3', ['build.py', '--check'], { cwd: d, encoding: 'utf8', env: { ...process.env, MELPERFAZ_OUT: path.join(d, 'public') } });
+    assert.equal(r.status, 1, 'glifo antigo: sai com 1');
+    assert.match(r.stdout, /404\.html: glifo que passou a ícone/);
+  } finally { fs.rmSync(d, { recursive: true, force: true }); }
+});
+
 test('o --check falha com uma ligação partida e com um travessão', () => {
   const d = copiaFontes();
   try {
@@ -532,6 +573,12 @@ test('as folhas de estilo: superfícies, um só .btn-ghost, estilos de texto e n
   assert.match(css, /\.barra \{ display: none; \}/);
   assert.match(css, /body\.com-barra \{ padding-bottom: calc\(var\(--barra-height\) \+ env\(safe-area-inset-bottom\)\); \}/);
   assert.match(css, /html\.menu-aberto \{ overflow: hidden; \}/);
+  // o movimento (Fase 5b): os tokens, o deslize suave só sem movimento reduzido, e com movimento reduzido tudo acaba já
+  for (const v of ['--dur-1: 150ms', '--dur-2: 250ms', '--dur-3: 500ms', '--ease-out: cubic-bezier(.2,.7,.3,1)', '--ease-in-out: cubic-bezier(.65,0,.35,1)', '--cascata: 80ms']) assert.ok(css.includes(v), `token ${v}`);
+  assert.match(css, /@media \(prefers-reduced-motion: no-preference\) \{\s*html:focus-within \{ scroll-behavior: smooth; \}/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\) \{\s*\*, \*::before, \*::after \{ animation-duration: 0s !important;[^}]*transition-duration: 0s !important;/);
+  assert.match(css, /\.js \.reveal \{ opacity: 0; transform: translateY\(var\(--space-16\)\); transition: opacity var\(--dur-3\)/, 'a entrada: 16 px em 500 ms');
+  assert.doesNotMatch(todas, /(?:transition|animation)[\w-]*:[^;{}]*(?:\b[1-9]\d*(?:\.\d+)?|\B\.\d+)m?s\b/, 'sem durações soltas nas folhas de estilo');
   assert.deepEqual([...new Set([...todas.matchAll(/@media \((?:max|min)-width: (\d+)px\)/g)].map(m => m[1]))].sort(), ['640', '980']);
 });
 
@@ -541,7 +588,10 @@ test('o lint do --check: falha com px solto, tamanho de letra fora dos estilos, 
     const p = path.join(d, 'assets/css/pag-paginas.css');
     fs.appendFileSync(p, '\n.x { margin: 10px 0; gap: 14px; }\n.y { font-size: .9rem; }\n@media (max-width: 760px) { .z { color: red; } }\n'
       + '.s-clay .w { color: var(--paper); }\n.btn.v { color: var(--white); }\n@keyframes q { to { opacity: 0; } }\n.q { animation: q 1s infinite; }\n'
-      + '.so-ok { margin: -1px; padding: env(safe-area-inset-bottom); }\n.s-clay .btn-ok { background: var(--ink); color: var(--paper); }\n');
+      + '.so-ok { margin: -1px; padding: env(safe-area-inset-bottom); }\n.s-clay .btn-ok { background: var(--ink); color: var(--paper); }\n'
+      + '.t1 { transition: width .3s ease; }\n.t2 { transition: opacity var(--dur-2); }\n.t3 { animation: q 900ms cubic-bezier(.1,.2,.3,.4); }\n'
+      + '.t4 { transition: all var(--dur-1) var(--ease-out); }\n:root { --dur-9: 700ms; }\n'
+      + '.mov-ok { transition: transform var(--dur-1) var(--ease-out), color var(--dur-2) var(--ease-in-out); transition-delay: calc(var(--i, 0) * var(--cascata)); animation: q 0s var(--espera-js) forwards; }\n');
     const r = spawnSync('python3', ['build.py', '--check'], { cwd: d, encoding: 'utf8', env: { ...process.env, MELPERFAZ_OUT: path.join(d, 'public') } });
     assert.equal(r.status, 1, 'sai com 1');
     assert.match(r.stdout, /pag-paginas\.css: «\.x \{ margin: 10px 0 \}»: espaço em px solto \(10px\)/);
@@ -552,6 +602,15 @@ test('o lint do --check: falha com px solto, tamanho de letra fora dos estilos, 
     assert.match(r.stdout, /«\.btn\.v \{ color: var\(--white\) \}»: texto claro sobre clay/);
     assert.match(r.stdout, /pag-paginas\.css: animação «infinite»/);
     assert.doesNotMatch(r.stdout, /so-ok|btn-ok/, 'as exceções: hairline, env() e texto paper sobre fundo ink');
+    // o movimento: só tokens de duração e de curva, cada duração com curva, nada acima de 500 ms, nada que mexa no layout
+    assert.match(r.stdout, /«\.t1 \{ transition: width \.3s ease \}»: duração solta \(\.3s\)/);
+    assert.match(r.stdout, /«\.t1 \{ transition: width \.3s ease \}»: curva solta/);
+    assert.match(r.stdout, /«\.t1 \{ transition: width \.3s ease \}»: anima «width»/);
+    assert.match(r.stdout, /«\.t2 \{ transition: opacity var\(--dur-2\) \}»: duração sem curva/);
+    assert.match(r.stdout, /«\.t3 \{ animation: q 900ms cubic-bezier\(\.1,\.2,\.3,\.4\) \}»: duração solta \(900ms\)/);
+    assert.match(r.stdout, /«\.t4 \{ transition: all var\(--dur-1\) var\(--ease-out\) \}»: anima «all»/);
+    assert.match(r.stdout, /pag-paginas\.css: --dur-9: 700ms \(nenhuma duração passa de 500 ms\)/);
+    assert.doesNotMatch(r.stdout, /mov-ok/, 'os tokens, a cascata e o 0s passam');
   } finally { fs.rmSync(d, { recursive: true, force: true }); }
 });
 

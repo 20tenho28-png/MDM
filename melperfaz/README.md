@@ -43,7 +43,8 @@ Pré-visualizar: `python3 -m http.server -d public 8000` e abrir `http://localho
 
 A sintaxe dos modelos está no topo de `build.py`: `{{ site.phone }}`, `{{> parcial }}`, `{{> cta titulo="…" texto="…"}}`
 (parâmetros declarados no topo do parcial com `<!--parametros {...} -->`), `{{foto 01 sizes="…"}}`, `{{wa geral}}`,
-`{{each obra-foto all}}`, `{{#se dados.email}}…{{/se}}`, `{{#cada servicos}}…{{/cada}}`. No `<!--meta {...} -->`,
+`{{each obra-foto all}}`, `{{#se dados.email}}…{{/se}}`, `{{#cada servicos}}…{{/cada}}`, `{{icone seta}}` (um ícone de
+`src/partials/icones.svg`) e `{{li obra.detalhes visto}}` (uma lista com o visto). No `<!--meta {...} -->`,
 `"header": "reduzido"` e `"barra": "sem-orcamento"` ou `"nao"` mudam o cabeçalho e a barra de ações.
 
 ## Regras do texto
@@ -72,13 +73,17 @@ Ligações, imagens e `srcset` que existem; `?v=` nos CSS e JS; sem sintaxe de m
 emoji ou o telefone escrito de outra forma; `lang`, um só `h1`, título e descrição com tamanho certo, canonical e
 `og:image` no domínio; JSON-LD válido com a empresa; o formulário Netlify só em `orcamento.html`, com os atributos, os
 campos e as opções de `site.json`; todos os «Pedir Orçamento» (texto ou `aria-label`) a levar a `orcamento.html`; nenhuma ligação para `#contacto` e nenhum dos rótulos retirados («Pedir Orçamento Gratuito», «Chamar no WhatsApp», «Orçamento Gratuito» como nome de ligação); `robots.txt`, `_headers` e `netlify.toml` de acordo com `preview`; todas as fotografias com os tamanhos e a
-prévia; os dados de `dados-melperfaz.json` com o formato certo (email, NIF, ligação do Google Maps).
+prévia; os dados de `dados-melperfaz.json` com o formato certo (email, NIF, ligação do Google Maps); nenhum dos glifos
+que passaram a ícone (→, ≡, ✓, ‹).
 
 E o lint das folhas de estilo, para o sistema visual não voltar a derivar. Fora do bloco `:root` (os tokens), falha com:
 espaços (`margin`, `padding`, `gap`, `inset`, `top`/`right`/`bottom`/`left`) em px soltos em vez de `--space-*`;
 `font-size` fora dos estilos de texto `--fs-*`; `@media` que não seja a 980 ou a 640 px (as de preferência, como
 `prefers-reduced-motion`, passam); texto paper ou branco num seletor de `.s-clay` ou `.btn` sem fundo ink na mesma regra;
-e qualquer animação `infinite`. As exceções são só `1px` (hairline) e `env(safe-area-inset-*)`.
+qualquer animação `infinite`; e o movimento: durações e curvas que não sejam os tokens `--dur-1`/`--dur-2`/`--dur-3` e
+`--ease-out`/`--ease-in-out`, uma duração sem curva, um `--dur-*` acima de 500 ms, ou uma transição de algo que não seja
+`transform`, `opacity`, as cores ou `stroke-dashoffset` (nada de `width`, `top` ou `all`). As exceções são só `1px`
+(hairline), `env(safe-area-inset-*)` e `0s`.
 
 ## Sistema visual (`assets/css/site.css`)
 
@@ -91,6 +96,17 @@ e qualquer animação `infinite`. As exceções são só `1px` (hairline) e `env
   `--fs-lead`, `--fs-body`, `--fs-category` de 13 px, `--fs-phone`) e `--fs-label` para as etiquetas de formulário.
   Os campos têm 16 px.
 - **Grelha**: `.wrap` com 32 px de margem (16 px até 640 px); só duas quebras, 980 e 640 px.
+- **Ícones**: `src/partials/icones.svg` (seta, menu, telefone, WhatsApp, visto, as setas do comparador e o visto num
+  círculo de `obrigado.html`), traço de 1,75 em `currentColor`, cantos vivos. `{{icone nome}}` copia o símbolo para a
+  página em linha (para o CSS animar as partes) e um nome que não existe pára o build.
+- **Movimento**: `--dur-1` 150 ms, `--dur-2` 250 ms, `--dur-3` 500 ms, `--ease-out`, `--ease-in-out` e `--cascata` de
+  80 ms. As barras do menu viram X; o painel e o fundo entram com fade; o cabeçalho ganha sombra e um logótipo menor
+  depois de 80 px (sem mudar de altura); a entrada ao fazer scroll sobe 16 px em 500 ms, em cascata; os vistos
+  desenham-se; as setas avançam 5 px; o telefone abana uma vez; o WhatsApp pulsa duas vezes; as setas do comparador
+  afastam-se ao agarrar; as fotografias em lazy load passam da prévia à imagem num fade; o envio mostra um indicador de
+  carga (40 voltas de 500 ms, o tempo máximo de espera). Com `prefers-reduced-motion: reduce` as animações e as
+  transições acabam logo e nada se desloca; o deslize suave das âncoras só existe sem essa preferência. Sem JavaScript
+  tudo fica à vista.
 
 ## Testes
 
@@ -106,7 +122,9 @@ de falha (foco, telefone, WhatsApp com o nome e o tipo) com o que se escreveu a 
 obra pré-escolhido com «Pedido para:» e o `?de=` no campo `pagina`, o isco para robôs, nenhuma página a deslizar para o
 lado a 390 e 320 px, o menu dos ecrãs estreitos, o comparador com rato (só a partir da pega) e teclado, o foco e as
 imagens, nenhuma fotografia ampliada para lá do original (o hero a 375 px, os cartões, a ficha na sua proporção),
-nenhuma animação sem fim, e o sistema visual: o h1 do hero e os cabeçalhos de secção no x do logótipo, contraste de
+nenhuma animação sem fim nem acima de 500 ms, o movimento (o menu que vira X e sai no fim da transição, o
+cabeçalho compacto, os vistos em cascata, o fade das fotografias, o indicador de envio, o CLS abaixo de 0,05 e, com
+movimento reduzido, nada a animar nem a deslocar-se), e o sistema visual: o h1 do hero e os cabeçalhos de secção no x do logótipo, contraste de
 4,5:1 nos botões e na faixa clay, o anel de foco da cor de cada superfície, campos de 16 px e etiquetas de 13 px. O CI
 (`.github/workflows/ci.yml`) corre o `--check`, o `npm test` e os testes do browser em cada pull request.
 

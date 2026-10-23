@@ -1,7 +1,9 @@
 /* Melperfaz: comportamento do site. Sem dependências. O site funciona sem este ficheiro (o formulário envia pelo Netlify
    para obrigado.html, o comparador fica a meio e mexe-se em toda a fotografia, a página atual já vem marcada no HTML e,
    nos ecrãs estreitos, a barra de ações e o rodapé levam aos mesmos sítios que o menu). Só o «Pedido para:», o ?de= no
-   campo «pagina» e o reencaminhamento dos endereços antigos (no topo de index.html) dependem dele. */
+   campo «pagina» e o reencaminhamento dos endereços antigos (no topo de index.html) dependem dele. O movimento (painel
+   do menu, cabeçalho compacto, entrada ao fazer scroll, fade das fotografias, indicador de envio) é só acabamento: as
+   durações vêm do CSS (--dur-*) e, com movimento reduzido, o CSS põe-nas a 0. */
 (function () {
   'use strict';
   var d = document;
@@ -9,16 +11,28 @@
   var qsa = function (s, r) { return Array.prototype.slice.call((r || d).querySelectorAll(s)); };
   var reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   var TEL = '961 245 288';
+  /* o site.js está a correr: o CSS deixa de precisar da rede de segurança (.js sem .js-pronto mostra tudo ao fim de
+     --espera-js) e as fotografias em lazy load passam a entrar num fade */
+  d.documentElement.classList.add('js-pronto');
+  /* a duração mais longa das transições de um elemento, em ms (o CSS decide: 0 com movimento reduzido) */
+  function duracao(el) {
+    return Math.max.apply(null, getComputedStyle(el).transitionDuration.split(',').map(function (v) {
+      return parseFloat(v) * (/ms$/.test(v.trim()) ? 1 : 1000) || 0;
+    }));
+  }
 
-  /* ═══ Menu nos ecrãs estreitos: o painel por cima de um fundo escurecido, sem a página deslizar por trás ═══ */
+  /* ═══ Menu nos ecrãs estreitos: o painel por cima de um fundo escurecido, sem a página deslizar por trás. Entra e sai
+     com fade (html.menu-aberto, 250 ms); ao fechar, o hidden só volta no fim da transição ═══ */
   (function () {
     var btn = qs('[data-menu]'), painel = qs('#menu-movel'), fundo = qs('[data-menu-fundo]');
     if (!btn || !painel) return;
-    var aberto = false;
+    var aberto = false, esconder = null;
     function abre() {
       aberto = true;
+      clearTimeout(esconder);
       painel.hidden = false;
       if (fundo) fundo.hidden = false;
+      void painel.offsetWidth;   /* o estado de partida (transparente, 12 px acima) é calculado antes: há transição */
       d.documentElement.classList.add('menu-aberto');
       btn.setAttribute('aria-expanded', 'true');
       btn.setAttribute('aria-label', 'Fechar menu');
@@ -28,9 +42,10 @@
     function fecha(foco) {
       if (!aberto) return;
       aberto = false;
-      painel.hidden = true;
-      if (fundo) fundo.hidden = true;
       d.documentElement.classList.remove('menu-aberto');
+      var fim = function () { if (!aberto) { painel.hidden = true; if (fundo) fundo.hidden = true; } };
+      var t = duracao(painel);
+      if (t) esconder = setTimeout(fim, t); else fim();
       btn.setAttribute('aria-expanded', 'false');
       btn.setAttribute('aria-label', 'Abrir menu');
       if (foco) btn.focus();
@@ -50,7 +65,29 @@
     if (mm && mm.addEventListener) mm.addEventListener('change', function (e) { if (e.matches) fecha(false); });
   })();
 
-  /* ═══ Entrada ao fazer scroll (.reveal → .in), em cascata de 70 ms ═══ */
+  /* ═══ Cabeçalho: compacto e com sombra depois de 80 px de scroll (.topo-compacto; a altura não muda) ═══ */
+  (function () {
+    var topo = qs('[data-topo]');
+    if (!topo) return;
+    var pedido = false;
+    function ve() {
+      pedido = false;
+      topo.classList.toggle('topo-compacto', (window.pageYOffset || d.documentElement.scrollTop) > 80);
+    }
+    window.addEventListener('scroll', function () { if (!pedido) { pedido = true; requestAnimationFrame(ve); } }, { passive: true });
+    ve();
+  })();
+
+  /* ═══ Fotografias: a prévia LQIP (o fundo da .foto) dá lugar à fotografia num fade quando ela chega (.carregada).
+     Só as de lazy load; as que já chegaram antes deste script aparecem logo ═══ */
+  qsa('.foto img[loading="lazy"]').forEach(function (img) {
+    function pronta() { img.classList.add('carregada'); }
+    if (img.complete) pronta();
+    else { img.addEventListener('load', pronta); img.addEventListener('error', pronta); }
+  });
+
+  /* ═══ Entrada ao fazer scroll (.reveal ganha .in). Os que entram juntos (uma grelha, uma lista) seguem-se em cascata:
+     --i é a posição no grupo e o CSS atrasa cada um --cascata (80 ms), até ao sexto ═══ */
   (function () {
     var els = qsa('.reveal');
     if (!els.length) return;
@@ -59,9 +96,9 @@
       var i = 0;
       entries.forEach(function (en) {
         if (!en.isIntersecting) return;
-        var el = en.target;
-        setTimeout(function () { el.classList.add('in'); }, 70 * i++);
-        io.unobserve(el);
+        en.target.style.setProperty('--i', String(Math.min(i++, 5)));
+        en.target.classList.add('in');
+        io.unobserve(en.target);
       });
     }, { threshold: 0.12, rootMargin: '0px 0px -5% 0px' });
     els.forEach(function (e) { io.observe(e); });
@@ -102,7 +139,7 @@
       var r = slider.getBoundingClientRect(), linha = r.left + r.width * range.value / 100;
       if (Math.abs(e.clientX - linha) > BA_PEGA) return;
       arrasto = e.pointerId;
-      slider.classList.add('ba-a-arrastar');
+      slider.classList.add('ba-a-arrastar');   /* as setas da pega afastam-se (CSS) */
       if (slider.setPointerCapture) slider.setPointerCapture(e.pointerId);
       e.preventDefault();   /* sem seleção de texto nem arrasto da imagem */
     });
@@ -161,6 +198,7 @@
     var campos = { nome: qs('#qNome'), telefone: qs('#qTel'), email: qs('#qEmail') };
     var erros = { nome: qs('#eNome'), telefone: qs('#eTel'), email: qs('#eEmail') };
     var aEnviar = false, rotulo = btn.textContent;
+    var ENVIO_MS = 20000;   /* sem resposta do Netlify em 20 s, desiste-se e mostra-se o alerta */
     form.noValidate = true;   /* a validação do browser só serve sem JavaScript; aqui fala-se português */
 
     function diz(t) { if (voz) { voz.textContent = ''; setTimeout(function () { voz.textContent = t; }, 50); } }
@@ -223,11 +261,12 @@
       aEnviar = true;
       btn.disabled = true;
       btn.textContent = 'A enviar…';
+      btn.classList.add('a-enviar');   /* o indicador de carga (CSS: 40 voltas de 500 ms, o tempo de ENVIO_MS) */
       diz('A enviar o pedido.');
       var dados = new URLSearchParams();
       new FormData(form).forEach(function (v, k) { dados.append(k, v); });
       var ctl = ('AbortController' in window) ? new AbortController() : null;
-      var tempo = ctl ? setTimeout(function () { ctl.abort(); }, 20000) : null;
+      var tempo = ctl ? setTimeout(function () { ctl.abort(); }, ENVIO_MS) : null;
       fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: dados.toString(), signal: ctl ? ctl.signal : undefined })
         .then(function (r) {
           if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -239,6 +278,7 @@
           aEnviar = false;
           btn.disabled = false;
           btn.textContent = rotulo;
+          btn.classList.remove('a-enviar');
           mostraAlerta();
         });
     });
@@ -248,6 +288,7 @@
       aEnviar = false;
       btn.disabled = false;
       btn.textContent = rotulo;
+      btn.classList.remove('a-enviar');
     });
   })();
 })();

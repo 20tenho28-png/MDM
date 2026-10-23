@@ -58,8 +58,8 @@
           <h3>{{ item.nome }}</h3>
           <p>{{ item.texto }}</p>
           <div class="svc-links">{{#se item.obrasN}}
-            <a class="link-seta" href="{{ root }}{{ item.catAnchor }}">Ver obras ({{ item.obrasN }})<span class="so-leitor"> de {{ item.nome }}</span><span aria-hidden="true"> →</span></a>{{/se}}
-            <a class="link-seta" href="{{ item.orcamentoHref }}" data-tipo="{{ item.id }}">Pedir orçamento<span class="so-leitor"> de {{ item.nome }}</span><span aria-hidden="true"> →</span></a>
+            <a class="link-seta" href="{{ root }}{{ item.catAnchor }}">Ver obras ({{ item.obrasN }})<span class="so-leitor"> de {{ item.nome }}</span>{{icone seta}}</a>{{/se}}
+            <a class="link-seta" href="{{ item.orcamentoHref }}" data-tipo="{{ item.id }}">Pedir orçamento<span class="so-leitor"> de {{ item.nome }}</span>{{icone seta}}</a>
           </div>
         </div>{{#se item.primeiraFoto}}
         <div class="svc-mini">{{foto {{ item.primeiraFoto }} sizes="64px" alt=""}}</div>{{/se}}
@@ -76,10 +76,10 @@
         <h2 id="trustT">Reputações constroem-se uma obra de cada vez</h2>
       </div>
       <ul class="trust-list">
-        <li><span class="tick" aria-hidden="true">✓</span><div><h3>Orçamentos a preço fixo</h3><p>O valor que lhe damos é o valor que paga. Alterações só acontecem com a sua aprovação por escrito.</p></div></li>
-        <li><span class="tick" aria-hidden="true">✓</span><div><h3>Equipa própria</h3><p>Os nossos próprios profissionais em obra, não um conjunto rotativo de subcontratados desconhecidos.</p></div></li>
-        <li><span class="tick" aria-hidden="true">✓</span><div><h3>Licenciada &amp; segurada</h3><p>Empresa licenciada, segurada e em conformidade com as normas em todas as obras com licença.{{#se dados.alvara}} Alvará n.º {{ dados.alvara }}.{{/se}}{{#se dados.seguro}} {{ dados.seguro }}{{/se}}</p></div></li>
-        <li><span class="tick" aria-hidden="true">✓</span><div><h3>Garantia de execução</h3><p>Respondemos pelo nosso trabalho durante dois anos além das garantias de materiais dos fabricantes.</p></div></li>
+        <li><span class="tick" aria-hidden="true">{{icone visto}}</span><div><h3>Orçamentos a preço fixo</h3><p>O valor que lhe damos é o valor que paga. Alterações só acontecem com a sua aprovação por escrito.</p></div></li>
+        <li><span class="tick" aria-hidden="true">{{icone visto}}</span><div><h3>Equipa própria</h3><p>Os nossos próprios profissionais em obra, não um conjunto rotativo de subcontratados desconhecidos.</p></div></li>
+        <li><span class="tick" aria-hidden="true">{{icone visto}}</span><div><h3>Licenciada &amp; segurada</h3><p>Empresa licenciada, segurada e em conformidade com as normas em todas as obras com licença.{{#se dados.alvara}} Alvará n.º {{ dados.alvara }}.{{/se}}{{#se dados.seguro}} {{ dados.seguro }}{{/se}}</p></div></li>
+        <li><span class="tick" aria-hidden="true">{{icone visto}}</span><div><h3>Garantia de execução</h3><p>Respondemos pelo nosso trabalho durante dois anos além das garantias de materiais dos fabricantes.</p></div></li>
       </ul>
       <div class="quem-somos">
         <h3>Quem somos</h3>
@@ -92,8 +92,8 @@
     <figure class="trust-foto reveal">
       <div class="frame">{{foto 02 sizes="(max-width: 980px) calc((100vw - 32px) * 5 / 3), 914px" foco="50% 40%"}}</div>
       <figcaption class="links">
-        <a class="link-seta" href="{{ root }}obras/edificios-e-apartamentos.html">Ver a obra<span aria-hidden="true"> →</span></a>{{#se dados.googleMaps}}
-        <a class="link-seta" href="{{ dados.googleMaps }}" target="_blank" rel="noopener">Ver o perfil e as avaliações no Google<span aria-hidden="true"> →</span></a>{{/se}}
+        <a class="link-seta" href="{{ root }}obras/edificios-e-apartamentos.html">Ver a obra{{icone seta}}</a>{{#se dados.googleMaps}}
+        <a class="link-seta" href="{{ dados.googleMaps }}" target="_blank" rel="noopener">Ver o perfil e as avaliações no Google{{icone seta}}</a>{{/se}}
       </figcaption>
     </figure>
   </div>
