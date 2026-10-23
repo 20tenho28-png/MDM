@@ -21,21 +21,24 @@
       "nome": "Reabilitação de Edifícios",
       "cat": "reabilitacao",
       "texto": "A nossa especialidade. Recuperamos edifícios degradados de raiz (estrutura, fachadas e interiores), devolvendo-lhes solidez e valor.",
-      "frase": "Recuperamos edifícios degradados de raiz (estrutura, fachadas e interiores), devolvendo-lhes solidez e valor."
+      "frase": "Recuperamos edifícios degradados de raiz (estrutura, fachadas e interiores), devolvendo-lhes solidez e valor.",
+      "antigos": ["Reabilitação de Edifício"]
     },
     {
       "id": "comercial",
       "nome": "Espaços Comerciais",
       "cat": "",
       "texto": "Lojas, escritórios e espaços de trabalho construídos ou renovados para abrir portas a horas, com mínima perturbação ao negócio.",
-      "frase": "Lojas, escritórios e espaços de trabalho construídos ou renovados para abrir portas a horas, com mínima perturbação ao negócio."
+      "frase": "Lojas, escritórios e espaços de trabalho construídos ou renovados para abrir portas a horas, com mínima perturbação ao negócio.",
+      "antigos": ["Espaço Comercial"]
     },
     {
       "id": "apartamentos",
       "nome": "Apartamentos",
       "cat": "",
       "texto": "Remodelação completa de apartamentos, do desmonte aos acabamentos. Obra limpa, prazos cumpridos e atenção ao detalhe.",
-      "frase": "Remodelação completa de apartamentos, do desmonte aos acabamentos."
+      "frase": "Remodelação completa de apartamentos, do desmonte aos acabamentos.",
+      "antigos": ["Apartamento"]
     },
     {
       "id": "estrutura",
@@ -49,7 +52,8 @@
       "nome": "Fachadas e Impermeabilização",
       "cat": "fachadas",
       "texto": "Recuperação e pintura de fachadas, isolamento e impermeabilização, incluindo trabalhos em altura com acesso por corda.",
-      "frase": "Recuperação e pintura de fachadas, isolamento e impermeabilização, incluindo trabalhos em altura com acesso por corda."
+      "frase": "Recuperação e pintura de fachadas, isolamento e impermeabilização, incluindo trabalhos em altura com acesso por corda.",
+      "antigos": ["Fachadas / Impermeabilização"]
     },
     {
       "id": "acabamentos",

@@ -7,9 +7,13 @@
 /* ── QuoteForm ── */
 .form-cartao { background: var(--white); border: var(--border-hairline) solid var(--line); padding: var(--space-38); }
 .form-t { font-size: var(--fs-card); margin-bottom: var(--space-12); }
+/* «Pedido para: X · alterar» em texto corrido, com a altura de linha do texto: num telemóvel o nome parte onde tiver de
+   partir e o «·» fica agarrado a ele (&nbsp;), com «alterar» no fim da mesma linha */
 .pedido-para { font-size: var(--fs-body); margin-bottom: var(--space-16); }
-/* «alterar» leva o foco à lista do tipo de obra: parece uma ligação, com 44 px de alvo */
-.pedido-alterar { display: inline-flex; align-items: center; min-height: var(--alvo); padding: 0; border: 0; background: none; font: inherit; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+/* «alterar» leva o foco à lista do tipo de obra: parece uma ligação. O alvo de 44 px desenha-se por fora (::after,
+   centrado no texto), sem engordar a linha (como inline-flex de 44 px, que afastava as linhas do nome) */
+.pedido-alterar { position: relative; display: inline; padding: 0; border: 0; background: none; font: inherit; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; white-space: nowrap; }
+.pedido-alterar::after { content: ""; position: absolute; left: calc(-1 * var(--space-6)); right: calc(-1 * var(--space-6)); top: 50%; height: var(--alvo); transform: translateY(-50%); }
 .form-legenda { font-size: var(--fs-label); color: var(--muted); margin-bottom: var(--space-16); }
 .obrig { color: var(--erro); font-weight: 700; }
 .field { margin-bottom: var(--space-18); }

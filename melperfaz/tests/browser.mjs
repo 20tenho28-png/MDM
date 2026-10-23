@@ -7,7 +7,7 @@
    D. sem JavaScript: o envio normal chega a /obrigado.html com os campos;
    E. o tipo de obra pré-escolhido: pela lista de serviços e pelo ?tipo= (e ?de=) da ficha de obra, em orcamento.html, com
       «Pedido para: X · alterar» e o ?de= no campo «pagina»; os endereços antigos da página inicial (#contacto, ?tipo=)
-      vão para orcamento.html;
+      vão para orcamento.html, e os tipos de antes do redesenho («Fachadas / Impermeabilização») escolhem o de hoje;
    F. o isco para robôs: preenchido, não segue;
    G. nenhuma página desliza para o lado a 390 e 320 px, sem erros de JavaScript; a barra de ações (menos em obrigado.html)
       não tapa o rodapé nem o botão de envio;
@@ -20,6 +20,9 @@
    K. movimento reduzido; nenhuma animação sem fim;
    L. o sistema visual: uma margem esquerda (h1 do hero, logótipo e cabeçalhos de secção no mesmo x), contraste de 4,5:1
       nos botões, na barra e no texto da faixa clay, o anel de foco da cor da superfície, campos com 16 px e etiquetas com 13 px;
+      a legenda dos cartões sobre a fotografia (também a 390 px, cartões de 280 px); a página inicial em menos de 6.000 px
+      a 390 e até 4.400 a 1440, com as miniaturas dos serviços sem acrescentar linhas, «Ver as N obras» ao lado do título
+      e Porquê Nós em duas colunas; «Pedido para: X · alterar» em linhas de texto a 320 e 390 px;
    M. as fotografias sem ampliação: a 375 px a do hero tem pelo menos tantos píxeis como a moldura, e nenhuma fotografia é
       mostrada maior do que o ficheiro escolhido, salvo quando o próprio original é mais pequeno do que a moldura;
    N. o movimento (Fase 5b): o cabeçalho compacto depois de 80 px, sem mudar de altura; CLS abaixo de 0,05; a seta
@@ -213,6 +216,22 @@ try {
     }
     await page.goto(srv.base + '/orcamento.html?tipo=Inventado', { waitUntil: 'networkidle' });
     ok(await page.inputValue('#qTipo') === '' && await page.isHidden('[data-pedido-para]'), 'E: um tipo que não existe fica em «Escolha uma opção», sem «Pedido para:»');
+    // os endereços de antes do redesenho: o ?tipo= levava o valor antigo do «Tipo de obra» (quote() do build antigo, com
+    // o «/» por codificar), a partir da página inicial (…/index.html?tipo=…#contacto) e das fichas; continua a escolher o
+    // serviço de hoje, com «Pedido para:». Os que não mudaram de nome («Trabalhos de Estrutura», «Acabamentos», «Outro»)
+    // são o próprio valor da opção
+    const ANTIGOS = SITE.servicos.flatMap(s => (s.antigos || []).map(a => [a, s.nome]));
+    ok(ANTIGOS.length === 4, 'E: quatro tipos antigos com outro nome hoje', ANTIGOS);
+    for (const [antigo, nome] of [...ANTIGOS, ['Trabalhos de Estrutura', 'Trabalhos de Estrutura'], ['Acabamentos', 'Acabamentos'], ['Outro', 'Outro']]) {
+      const q = encodeURIComponent(antigo).replace(/%2F/g, '/');
+      await page.goto(`${srv.base}/index.html?tipo=${q}#contacto`, { waitUntil: 'networkidle' });
+      const linha = (await page.textContent('[data-pedido-para]')).replace(/\s+/g, ' ').trim();
+      ok(page.url().endsWith(`/orcamento.html?tipo=${q}`) && await page.inputValue('#qTipo') === nome && await page.isVisible('[data-pedido-para]') && linha === `Pedido para: ${nome} · alterar`,
+        `E: o endereço antigo ?tipo=${antigo} escolhe «${nome}»`, { url: page.url(), tipo: await page.inputValue('#qTipo'), linha });
+    }
+    // e com «+» no lugar dos espaços (como um formulário GET os escreve)
+    await page.goto(`${srv.base}/orcamento.html?tipo=Espa%C3%A7o+Comercial`, { waitUntil: 'networkidle' });
+    ok(await page.inputValue('#qTipo') === 'Espaços Comerciais', 'E: ?tipo=Espaço+Comercial escolhe «Espaços Comerciais»');
     ok(page.erros.length === 0, 'E: sem erros', page.erros);
     await ctx.close();
   }
@@ -444,8 +463,9 @@ try {
     await page.goto(srv.base + '/obras.html', { waitUntil: 'networkidle' });
     await page.keyboard.press('Tab'); await page.keyboard.press('Shift+Tab');
     ok(await anelCartao('section.s-bone .pg h3 a') === 'solid 3px rgb(27, 37, 64)', 'L: foco ink no cartão de obra num grupo bone de obras.html', await anelCartao('section.s-bone .pg h3 a'));
-    // a legenda do cartão sobre a fotografia (acima de 640 px): o .cat amber e o título bone com 4,5:1 ou mais mesmo no
-    // pior caso, a faixa da legenda por cima de uma fotografia toda branca (a cor composta da faixa sobre branco)
+    // a legenda do cartão sobre a fotografia (a todas as larguras: aqui a 1280 e, mais abaixo, a 390): o .cat amber e o
+    // título bone com 4,5:1 ou mais mesmo no pior caso, a faixa da legenda por cima de uma fotografia toda branca (a cor
+    // composta da faixa sobre branco)
     const legendas = () => {
       const rgb = s => { const m = s.match(/[\d.]+/g).map(Number); return { r: m[0], g: m[1], b: m[2], a: m.length > 3 ? m[3] : 1 }; };
       const lum = c => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
@@ -462,10 +482,33 @@ try {
       const l = await page.evaluate(legendas);
       ok(l.length > 0 && l.every(c => c.cat >= 4.5 && c.titulo >= 4.5), `L: ${f} .cat e título dos cartões com 4,5:1 ou mais sobre uma fotografia branca`, l);
     }
+    {
+      // no telemóvel o cartão é o mesmo: 280 px de altura, a fotografia a toda a caixa e a legenda por cima, na faixa
+      // escura, encostada ao fundo (com o mesmo contraste no pior caso)
+      const m = await pagina({ viewport: { width: 390, height: 800 } });
+      for (const f of ['/', '/obras.html', `/obras/${OBRAS[0].slug}.html`]) {
+        await m.page.goto(srv.base + f, { waitUntil: 'networkidle' });
+        const l = await m.page.evaluate(legendas);
+        ok(l.length > 0 && l.every(c => c.cat >= 4.5 && c.titulo >= 4.5), `L: a 390 px ${f} .cat e título dos cartões com 4,5:1 ou mais sobre uma fotografia branca`, l);
+        const cartoes = await m.page.evaluate(() => Array.from(document.querySelectorAll('.pg')).map(c => {
+          const r = c.getBoundingClientRect(), fo = c.querySelector('.foto').getBoundingClientRect(), le = c.querySelector('figcaption').getBoundingClientRect();
+          return { h: Math.round(r.height), foto: Math.round(fo.height) === Math.round(r.height) && Math.round(fo.top) === Math.round(r.top), leg: Math.round(le.bottom) === Math.round(r.bottom) && le.top > r.top, pos: getComputedStyle(c.querySelector('figcaption')).position };
+        }));
+        ok(cartoes.length > 0 && cartoes.every(c => c.h === 280 && c.foto && c.leg && c.pos === 'absolute'), `L: a 390 px ${f} os cartões com a legenda sobre a fotografia, 280 px`, cartoes);
+      }
+      await m.ctx.close();
+    }
     // a lista «Na obra» começa na margem esquerda, como o h2 (sem o recuo de uma ul)
     await page.goto(`${srv.base}/obras/${OBRAS[0].slug}.html`, { waitUntil: 'networkidle' });
     const visto = await page.evaluate(() => { const l = e => Math.round(e.getBoundingClientRect().left), ul = document.querySelector('.lista-visto'); return { h2: l(ul.previousElementSibling), ul: l(ul), tick: l(ul.querySelector('.tick')) }; });
     ok(visto.h2 === visto.ul && visto.ul === visto.tick, 'L: «Na obra»: os vistos alinhados com o h2', visto);
+    {
+      const m = await pagina({ viewport: { width: 390, height: 800 } });
+      await m.page.goto(`${srv.base}/obras/${OBRAS[0].slug}.html`, { waitUntil: 'networkidle' });
+      const v = await m.page.evaluate(() => { const l = e => Math.round(e.getBoundingClientRect().left), ul = document.querySelector('.lista-visto'); return { h2: l(ul.previousElementSibling), ul: l(ul), tick: l(ul.querySelector('.tick')), logo: l(document.querySelector('.topo .logo')) }; });
+      ok(v.h2 === v.ul && v.ul === v.tick && v.tick === v.logo, 'L: a 390 px «Na obra»: os vistos alinhados com o h2 e o logótipo', v);
+      await m.ctx.close();
+    }
     // o cabeçalho fica paper opaco por cima das secções ink (sem vidro translúcido)
     await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
     await page.evaluate(() => scrollTo(0, document.querySelector('#obras').offsetTop + 200));
@@ -475,14 +518,66 @@ try {
     await ctx.close();
   }
   {
-    // a altura da página inicial (Fase 7, assertiva 2). O plano aponta para menos de 6.000 px a 390 e cerca de 4.300 a
-    // 1440; sem tirar conteúdo, a página está hoje em cerca de 6.500 e 4.930 (era 8.469 e 4.955). Estes tetos impedem
-    // que volte a crescer; descer até ao alvo do plano é uma decisão de conteúdo (ver o relatório da revisão)
-    for (const [largura, teto] of [[390, 6600], [1440, 5000]]) {
+    // a altura da página inicial (Fase 7, assertiva 2): menos de 6.000 px a 390 e no máximo 4.400 a 1440 (o plano diz
+    // cerca de 4.300), sem tirar nenhum facto, serviço, obra ou ação (era 8.469 e 4.955 antes do redesenho, 6.486 e
+    // 4.930 antes do acerto: a legenda sobre a fotografia também no telemóvel, um passo de token a menos nas secções,
+    // Porquê Nós em duas colunas, as miniaturas só onde não acrescentam linhas, «Ver as N obras» ao lado do título)
+    for (const [largura, cabe] of [[390, h => h < 6000], [1440, h => h <= 4400]]) {
       const { ctx, page } = await pagina({ viewport: { width: largura, height: 900 } });
       await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
       const h = await page.evaluate(() => document.documentElement.scrollHeight);
-      ok(h < teto, `L: a ${largura} px a página inicial tem menos de ${teto} px de altura`, h);
+      ok(cabe(h), `L: a ${largura} px a página inicial cabe no alvo do plano (${largura === 390 ? 'menos de 6.000' : 'até 4.400'} px)`, h);
+      await ctx.close();
+    }
+  }
+  {
+    // a página inicial compacta: as miniaturas dos serviços só onde não acrescentam linhas (acima de 980 px; a mesma
+    // altura de cada linha com e sem elas), «Ver as N obras» à direita do título das obras (por baixo dos cartões até
+    // 980 px), Porquê Nós com as garantias em duas colunas e a fotografia na coluna das ações da faixa clay
+    for (const largura of [390, 700, 1280, 1440]) {
+      const { ctx, page } = await pagina({ viewport: { width: largura, height: 900 } });
+      await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
+      const alturas = () => page.evaluate(() => Array.from(document.querySelectorAll('.svc')).map(s => Math.round(s.getBoundingClientRect().height)));
+      const com = await alturas(), vistas = await page.evaluate(() => Array.from(document.querySelectorAll('.svc-mini')).filter(e => e.getClientRects().length).length);
+      const estilo = await page.addStyleTag({ content: '.svc-mini { display: none !important; }' });
+      const sem = await alturas();
+      await estilo.evaluate(e => e.remove());
+      if (largura > 980) ok(vistas === 3 && com.join() === sem.join(), `L: a ${largura} px as miniaturas dos serviços não acrescentam linhas`, { com, sem });
+      else ok(vistas === 0, `L: a ${largura} px sem miniaturas nos serviços`, vistas);
+      await page.evaluate(() => document.querySelectorAll('.reveal').forEach(e => e.classList.add('in')));
+      await page.waitForTimeout(800);
+      const g = await page.evaluate(() => {
+        const r = s => document.querySelector(s).getBoundingClientRect();
+        const btn = r('#obras .obras-mais .btn'), p = r('#obras .sec-head p'), grelha = r('#obras .photo-grid'), wrap = document.querySelector('#obras .wrap'), dentro = wrap.getBoundingClientRect().right - parseFloat(getComputedStyle(wrap).paddingRight);
+        const lis = Array.from(document.querySelectorAll('.trust-list li')).map(li => li.getBoundingClientRect());
+        const foto = document.querySelector('.trust-foto'), fr = foto.getBoundingClientRect(), acoes = r('#contacto .cta-acoes');
+        return { btnBase: Math.round(btn.bottom - p.bottom), btnDir: Math.round(dentro - btn.right), btnAbaixo: btn.top > grelha.bottom,
+          colunas: new Set(lis.map(l => Math.round(l.left))).size, foto: foto.getClientRects().length > 0, fotoX: Math.round(fr.left - acoes.left), fotoW: Math.round(fr.width - acoes.width) };
+      });
+      if (largura > 980) ok(Math.abs(g.btnBase) <= 1 && Math.abs(g.btnDir) <= 1 && !g.btnAbaixo, `L: a ${largura} px «Ver as N obras» à direita do título, pela base do texto`, g);
+      else ok(g.btnAbaixo, `L: a ${largura} px «Ver as N obras» por baixo dos cartões`, g);
+      ok(g.colunas === (largura > 640 ? 2 : 1), `L: a ${largura} px as garantias em ${largura > 640 ? 'duas colunas' : 'uma coluna'}`, g);
+      if (largura > 980) ok(g.foto && g.fotoX === 0 && g.fotoW === 0, `L: a ${largura} px a fotografia do Porquê Nós na coluna das ações da faixa clay`, g);
+      if (largura <= 640) ok(!g.foto, `L: a ${largura} px sem a fotografia do Porquê Nós`, g);
+      await ctx.close();
+    }
+    // «Pedido para: X · alterar» lê-se de seguida a 320 e a 390 px: linhas com a altura do texto (o alvo de 44 px do
+    // «alterar» desenha-se por fora), o «·» e «alterar» na mesma linha do fim do nome
+    for (const largura of [320, 390]) {
+      const { ctx, page } = await pagina({ viewport: { width: largura, height: 800 } });
+      await page.goto(srv.base + '/orcamento.html?tipo=fachadas', { waitUntil: 'networkidle' });
+      const pp = await page.evaluate(() => {
+        const p = document.querySelector('[data-pedido-para]'), lh = parseFloat(getComputedStyle(p).lineHeight), h = p.getBoundingClientRect().height;
+        const nome = [...document.querySelector('[data-pedido-nome]').getClientRects()].pop();
+        const no = [...p.childNodes].find(n => n.nodeType === 3 && n.textContent.includes('·')), rg = document.createRange(), i = no.textContent.indexOf('·');
+        rg.setStart(no, i); rg.setEnd(no, i + 1);
+        const ponto = rg.getBoundingClientRect(), b = document.querySelector('[data-pedido-alterar]'), br = b.getBoundingClientRect();
+        const centro = br.top + br.height / 2, x = br.left + br.width / 2;
+        const meio = r => (r.top + r.bottom) / 2;
+        return { linhas: h / lh, mesma: Math.abs(meio(nome) - meio(ponto)) < 2 && Math.abs(meio(ponto) - meio(br)) < 2,
+          alvo: document.elementFromPoint(x, centro - 21) === b && document.elementFromPoint(x, centro + 21) === b, larga: p.scrollWidth <= p.clientWidth };
+      });
+      ok(Math.abs(pp.linhas - Math.round(pp.linhas)) < 0.05 && pp.linhas <= 2 && pp.mesma && pp.alvo && pp.larga, `L: a ${largura} px «Pedido para: X · alterar» em linhas de texto, com «alterar» no fim do nome e 44 px de alvo`, pp);
       await ctx.close();
     }
   }

@@ -155,7 +155,8 @@
 
   /* ═══ orcamento.html: ?tipo=<id do serviço> escolhe o tipo de obra e mostra «Pedido para: X · alterar»; ?de=<página>
      vai para o campo escondido «pagina» (de onde veio o pedido, por exemplo obras/<slug>). O id é o de data/site.json
-     «servicos» (data-tipo de cada opção); o nome da opção também serve ═══ */
+     «servicos» (data-tipo de cada opção); o nome da opção também serve, e os nomes de antes do redesenho que os endereços
+     antigos trazem (data-antigos, separados por «|»: ?tipo=Fachadas%20/%20Impermeabiliza%C3%A7%C3%A3o) ═══ */
   var tipoSel = qs('#qTipo');
   function param(nome) {
     var m = new RegExp('[?&]' + nome + '=([^&#]*)').exec(location.search);
@@ -164,7 +165,9 @@
   }
   function escolheTipo(v) {
     if (!tipoSel || !v) return false;
-    var op = qsa('option', tipoSel).filter(function (o) { return o.value && (o.getAttribute('data-tipo') === v || o.value === v); })[0];
+    var op = qsa('option', tipoSel).filter(function (o) {
+      return o.value && (o.getAttribute('data-tipo') === v || o.value === v || (o.getAttribute('data-antigos') || '').split('|').indexOf(v) >= 0);
+    })[0];
     if (op) tipoSel.value = op.value;
     return !!op;
   }

@@ -45,8 +45,8 @@
   --space-80: 80px; --space-90: 90px; --space-110: 110px;
   --radius-none: 0; --radius-round: 50%;
   --border-hairline: 1px; --border-control: 1.5px; --border-rule: 2px; --border-step: 3px; --border-accent: 4px;
-  --container: 1240px; --sec-head-width: 640px; --nav-height: 78px; --logo-height: 52px; --logo-height-footer: 64px;
-  --photo-row: 300px; --alvo: 44px; --alvo-menu: 48px; --barra-height: 56px; --wa-icon: 22px;
+  --container: 1240px; --sec-head-width: 640px; --col-acoes: 360px; --nav-height: 78px; --logo-height: 52px; --logo-height-footer: 64px;
+  --photo-row: 300px; --photo-row-1col: 280px; --mini: 48px; --alvo: 44px; --alvo-menu: 48px; --barra-height: 56px; --wa-icon: 22px;
   --z-header: 100; --z-menu-fundo: 95; --z-barra: 90; --z-skip: 200; --z-grain: 9999;
   --font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
   --font-sans: 'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -209,7 +209,7 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
 .cat { display: block; font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--fg-cat); }
 
 /* ── Hero (split do design system) ── */
-.hero { position: relative; padding: var(--space-90) 0 var(--space-110); }
+.hero { position: relative; padding: var(--space-80) 0 var(--space-90); }
 .hero-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: var(--space-60); align-items: center; }
 /* os filhos da grelha ocupam a coluna inteira: o h1 começa na borda da .wrap, como o logótipo */
 .hero-grid > * { width: 100%; min-width: 0; }
@@ -227,32 +227,45 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
 .tag-card .n { display: block; font-family: var(--font-serif); font-size: var(--fs-phone); font-weight: 700; line-height: 1; }
 .tag-card .l { display: block; font-size: var(--fs-category); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-top: var(--space-6); }
 
-/* ── Secções ── */
-.sec { padding: var(--space-90) 0; }
-.sec-head { max-width: var(--sec-head-width); margin-bottom: var(--space-50); }
+/* ── Secções: 80 px em cima e em baixo (50 até 640 px) e 44 px do SectionHead ao conteúdo (38 até 640 px), um passo
+   de token abaixo dos 90 e 50 de antes (o design system tem 110 e 64), para a página inicial caber nos 4.400 px a 1440
+   e nos 6.000 a 390 ── */
+.sec { padding: var(--space-80) 0; }
+.sec-head { max-width: var(--sec-head-width); margin-bottom: var(--space-44); }
 .sec-head .eyebrow { margin-bottom: var(--space-18); }
 .sec-head h1, .sec-head h2 { font-size: var(--fs-section); }
 .sec-head p { color: var(--fg-2); font-size: var(--fs-lead); margin-top: var(--space-18); }
 .lead { font-size: var(--fs-lead); }
 
 /* ── Serviços (ServiceList): linhas em 2 colunas (1 abaixo de 640 px), separadas por uma linha de 1 px, sem caixas nem
-   setas. A linha não é uma ligação: as ligações ficam em baixo (margin-top: auto), alinhadas entre linhas vizinhas ── */
+   setas. A linha não é uma ligação: as ligações ficam em baixo (margin-top: auto), alinhadas entre linhas vizinhas.
+   Em baixo a linha só tem 6 px: as ligações já trazem 12 px de alvo por baixo do texto, e assim o texto fica à mesma
+   distância das linhas de cima e de baixo ── */
 .svc-lista { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--space-60); list-style: none; }
-.svc { display: flex; gap: var(--space-18); padding: var(--space-26) 0; border-top: var(--border-hairline) solid var(--rule); }
-.svc-num { flex-shrink: 0; font-family: var(--font-serif); font-size: var(--fs-body); font-weight: 600; color: var(--fg-2); line-height: 1.9; }
+.svc { display: flex; gap: var(--space-18); padding: var(--space-22) 0 var(--space-6); border-top: var(--border-hairline) solid var(--rule); }
+/* o número com uma largura fixa (o Fraunces não traz algarismos tabulares): os títulos de todas as linhas começam no
+   mesmo x, do 01 ao 06 */
+.svc-num { flex-shrink: 0; min-width: 1.3em; font-family: var(--font-serif); font-size: var(--fs-body); font-weight: 600; color: var(--fg-2); line-height: 1.9; }
 .svc-corpo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .svc h3 { font-size: var(--fs-list); margin-bottom: var(--space-6); }
 .svc p { color: var(--fg-2); font-size: var(--fs-body); }
-/* a miniatura (64 × 64) flutua à direita do título e o texto contorna-a: o texto fica com a largura toda da linha e
-   as duas ligações cabem numa só linha, também a 375 px */
+/* a miniatura (48 × 48, --mini) flutua à direita do título e o texto contorna-a: só estreita o título e a primeira
+   linha da frase, e assim não acrescenta linhas (um teste do browser confirma a 1280 e a 1440 px). Até 980 px, com as
+   colunas mais estreitas, acrescentava: sai (as fotografias das obras estão logo acima). As duas ligações cabem numa
+   só linha, também a 375 px */
 .svc-txt { display: flow-root; }
 .svc-links { margin-top: auto; padding-top: var(--space-6); display: flex; flex-wrap: wrap; gap: 0 var(--space-22); }
-.svc-mini { float: right; margin: 0 0 var(--space-6) var(--space-16); width: var(--space-64); height: var(--space-64); overflow: hidden; background: var(--ink-raised); }
+.svc-mini { float: right; margin-left: var(--space-16); width: var(--mini); height: var(--mini); overflow: hidden; background: var(--ink-raised); }
 .svc-mini .foto { width: 100%; height: 100%; }
 
 /* ── Grelha de obras (ProjectGrid / ProjectCard): 2 colunas, gap 18, linhas de 300 px ── */
-/* o cartão (obra-foto.html): a legenda por cima da fotografia; abaixo de 640 px passa para baixo (ver as quebras) */
-.obras-mais { margin-top: var(--space-44); }
+/* as obras em destaque: «Ver as N obras» à direita do SectionHead, alinhado pela base do texto (o h2 só ocupa 640 px);
+   no HTML vem depois dos cartões, e até 980 px fica lá, por baixo deles */
+.obras-wrap { display: grid; grid-template-columns: 1fr auto; column-gap: var(--space-60); align-items: end; }
+.obras-wrap > .photo-grid { grid-column: 1 / -1; grid-row: 2; }
+.obras-wrap > .obras-mais { grid-column: 2; grid-row: 1; margin-bottom: var(--space-44); }
+/* o cartão (obra-foto.html): a legenda por cima da fotografia, na faixa escura, a todas as larguras (um só cartão); até
+   980 px numa coluna, com linhas de 280 px (--photo-row-1col, como o design system) */
 .photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: var(--photo-row); gap: var(--space-18); }
 /* o anel de foco do cartão desenha-se por fora, sobre a superfície à volta: usa o --focus-c dela (ink no paper e no
    bone, amber no ink), não o do interior escuro do cartão */
@@ -308,11 +321,15 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
 .ba-js .ba-handle::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 64px; transform: translateX(-50%); }
 .ba-js.ba-a-arrastar { cursor: ew-resize; }
 
-/* ── Porquê Nós ── */
-.trust-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-80); align-items: center; }
-.trust-list { list-style: none; }
+/* ── Porquê Nós: o SectionHead à largura da .wrap; por baixo, as garantias (em duas colunas, uma até 640 px) e «Quem
+   somos» à esquerda, e a fotografia 4:3 à direita, com o topo na primeira garantia e na coluna das ações da faixa clay
+   logo abaixo (360 px, --col-acoes; um terço da .wrap nos ecrãs mais estreitos) ── */
+.trust-grid { display: grid; grid-template-columns: minmax(0, 1fr) min(var(--col-acoes), 33%); gap: var(--space-80); align-items: start; }
+.trust-grid > * { width: 100%; min-width: 0; }
+.trust-list { list-style: none; display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--space-38); }
 .trust-list li { display: flex; gap: var(--space-18); padding: var(--space-22) 0; border-bottom: var(--border-hairline) solid var(--rule); }
-.trust-list li:last-child { border-bottom: none; }
+/* a última fila (uma ou duas garantias) sem linha por baixo: a linha seguinte é a de «Quem somos» */
+.trust-list li:last-child, .trust-list li:nth-last-child(2):nth-child(odd) { border-bottom: none; }
 /* a caixa de visto (28 px, borda clay de 2 px) com o ícone «visto» em clay-deep; também na lista «Na obra» das fichas */
 .tick { flex-shrink: 0; width: 28px; height: 28px; border: var(--border-rule) solid var(--clay); display: grid; place-items: center; color: var(--clay-deep); }
 .tick .icone { width: 20px; height: 20px; }
@@ -331,10 +348,12 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
 .js .reveal.in .tick path { stroke-dashoffset: 0; transition: stroke-dashoffset var(--dur-3) var(--ease-out); transition-delay: calc(var(--dur-2) + var(--i) * var(--cascata)); }
 .trust-list h3 { font-size: var(--fs-list); margin-bottom: var(--space-6); }
 .trust-list p { color: var(--fg-2); font-size: var(--fs-body); }
-.quem-somos { margin-top: var(--space-32); padding-top: var(--space-22); border-top: var(--border-hairline) solid var(--rule); }
+.quem-somos { padding-top: var(--space-22); border-top: var(--border-hairline) solid var(--rule); }
 .quem-somos h3 { font-size: var(--fs-list); margin-bottom: var(--space-6); }
 .quem-somos p { color: var(--fg-2); }
-.trust-foto .frame { aspect-ratio: 4 / 5; }
+/* a foto-02 é 4:3: a moldura tem a mesma proporção, sem corte; o topo alinha com a primeira garantia */
+.trust-foto { margin-top: var(--space-22); }
+.trust-foto .frame { aspect-ratio: 4 / 3; }
 .trust-foto figcaption { margin-top: var(--space-6); }
 
 /* ── Faixa de contacto (CtaBand, clay: texto, traços e foco ink) ── */
@@ -348,7 +367,7 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
 .cta-phone:hover { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; }
 .cta-phone-l { display: block; font-size: var(--fs-category); text-transform: uppercase; letter-spacing: .1em; margin-top: var(--space-6); color: var(--fg-2); }
 /* a coluna das ações: botões, referência e ProofLine com a mesma largura (até 360 px), encostada à direita */
-.cta-grid > .cta-acoes { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-18); justify-self: end; max-width: 360px; }
+.cta-grid > .cta-acoes { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-18); justify-self: end; max-width: var(--col-acoes); }
 /* os botões empilhados, com a mesma largura (no mínimo 280 px; toda a largura no telemóvel) */
 .acoes-pilha { flex-direction: column; align-items: stretch; min-width: 280px; }
 .cta-ref { font-size: var(--fs-label); }
@@ -403,8 +422,8 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
 .prosa .ficha { margin: var(--space-16) 0; }
 
 /* ── Rodapé (ink), 3 colunas; todas as ligações com 44 px de altura ── */
-.rodape { padding: var(--space-80) 0 var(--space-44); }
-.foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: var(--space-50); margin-bottom: var(--space-50); }
+.rodape { padding: var(--space-64) 0 var(--space-44); }
+.foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: var(--space-50); margin-bottom: var(--space-44); }
 .foot-brand .logo { margin-bottom: var(--space-18); }
 .foot-brand .logo-img { height: var(--logo-height-footer); margin-bottom: var(--space-6); }
 .foot-brand p { color: var(--fg-2); max-width: 360px; font-size: var(--fs-body); }
@@ -445,11 +464,14 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
   .navlinks, .topo-nav, .topo-contactos { display: none; }
   .menu-toggle { display: inline-flex; }
   .hero-grid, .trust-grid, .cta-grid { grid-template-columns: 1fr; }
-  /* empilhada, a foto do Porquê Nós passa a 4:3 (a proporção da foto-02, sem corte): menos 180 px a 390 px */
+  /* empilhada, a foto do Porquê Nós fica por baixo de «Quem somos», à largura toda */
   .trust-grid { gap: var(--space-44); }
-  .trust-foto .frame { aspect-ratio: 4 / 3; }
+  .trust-foto { margin-top: 0; }
+  .svc-mini { display: none; }
   .cta-grid > .cta-acoes { justify-self: start; }
-  .photo-grid { grid-template-columns: 1fr; }
+  .obras-wrap { display: block; }
+  .obras-wrap > .obras-mais { margin: var(--space-44) 0 0; }
+  .photo-grid { grid-template-columns: 1fr; grid-auto-rows: var(--photo-row-1col); }
   .destaques .pg:nth-child(2):nth-last-child(2) { grid-row: span 1; }
   .foot-grid { grid-template-columns: 1fr 1fr; }
   .foot-brand { grid-column: 1 / -1; }
@@ -463,12 +485,17 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
 }
 @media (max-width: 640px) {
   .wrap { padding: 0 var(--space-16); }
-  .sec { padding: var(--space-60) 0; }
-  .hero { padding: var(--space-60) 0; }
+  .sec { padding: var(--space-50) 0; }
+  .sec-head { margin-bottom: var(--space-38); }
+  .hero { padding: var(--space-50) 0; }
   .page-head { padding-top: var(--space-26); padding-bottom: var(--space-44); }
   .svc-lista { grid-template-columns: 1fr; }
-  .svc { padding: var(--space-18) 0; gap: var(--space-12); }
+  .svc { padding: var(--space-18) 0 var(--space-6); gap: var(--space-12); }
+  .trust-list { grid-template-columns: 1fr; }
   .trust-list li { padding: var(--space-18) 0; }
+  .trust-list li:nth-last-child(2):nth-child(odd) { border-bottom: var(--border-hairline) solid var(--rule); }
+  .trust-list li:last-child { border-bottom: none; }
+  .quem-somos { padding-top: var(--space-18); }
   .ficha dl { grid-template-columns: 1fr; }
   .acoes { flex-direction: column; align-items: stretch; }
   .acoes .btn { width: 100%; }
@@ -477,20 +504,12 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
   /* a marca a toda a largura; «Site» e «Contactos» lado a lado */
   .foot-grid { gap: var(--space-32) var(--space-22); }
   .foot-col a { overflow-wrap: anywhere; }
-  .hero-grid { gap: var(--space-38); }
+  .hero-grid, .cta-grid { gap: var(--space-38); }
+  .obras-wrap > .obras-mais { margin-top: var(--space-32); }
   /* a foto do Porquê Nós sai no telemóvel (a prova fotográfica já está nas obras logo acima) */
   .trust-foto { display: none; }
   .foot-bottom { flex-direction: column; align-items: flex-start; }
-  /* ProjectCard no telemóvel: a legenda passa para baixo da fotografia (4/5 ao alto, 4/3 deitada), na cor da superfície */
-  .photo-grid { grid-auto-rows: auto; gap: var(--space-32); }
-  .pg { overflow: visible; background: none; color: var(--fg); --fg-cat: var(--fg-2); }
-  .pg::after { content: none; }
-  .pg .foto { position: relative; inset: auto; aspect-ratio: 4 / 3; overflow: hidden; background-color: var(--ink-raised); }
-  .pg[data-orient="portrait"] .foto { aspect-ratio: 4 / 5; }
-  /* na página inicial as três obras em destaque ficam deitadas (4:3, mesmo as fotografias ao alto, cortadas a partir
-     do «foco») em 16:9, para a página encurtar; o catálogo (obras.html) mantém o 4:3 e o 4:5 */
-  .destaques .pg .foto, .destaques .pg[data-orient="portrait"] .foto { aspect-ratio: 16 / 9; }
-  .pg figcaption { position: static; padding: var(--space-12) 0 0; background: none; }
-  .pg figcaption::before { content: none; }
-  .pg-ver { color: var(--fg); }
+  /* ProjectCard no telemóvel: o mesmo cartão, com a legenda na faixa escura por cima da fotografia (cortada a partir do
+     «foco»), um passo de token mais junta à borda, como a .wrap */
+  .pg figcaption { padding: var(--space-22); }
 }

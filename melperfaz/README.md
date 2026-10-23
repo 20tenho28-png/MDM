@@ -27,7 +27,7 @@ Pré-visualizar: `python3 -m http.server -d public 8000` e abrir `http://localho
 
 | Pasta ou ficheiro | O que é |
 | --- | --- |
-| `data/site.json` | A empresa: nome, telefone, WhatsApp e as mensagens já escritas, o endereço do site (`baseUrl`), `preview`; `servicos` (o vocabulário: os serviços da página inicial, as opções do formulário, as etiquetas e os grupos das obras e o `?tipo=`), `provas` (a linha de prova junto dos botões) e `menu` |
+| `data/site.json` | A empresa: nome, telefone, WhatsApp e as mensagens já escritas, o endereço do site (`baseUrl`), `preview`; `servicos` (o vocabulário: os serviços da página inicial, as opções do formulário, as etiquetas e os grupos das obras e o `?tipo=`; `antigos` são os nomes do «Tipo de obra» de antes do redesenho, para os endereços antigos com `?tipo=` continuarem a escolher o serviço), `provas` (a linha de prova junto dos botões) e `menu` |
 | `data/dados-melperfaz.json` | O que só a Melperfaz pode dar (email, NIF, morada, alvará, seguro, zona, horário, Google Maps). Vazio = a frase ou a linha não aparece |
 | `data/obras.json` | As obras: serviço (`cat`, o de `site.json › servicos`), `destaque` (na página inicial), título, fotografia, o que se vê, os factos (vazios até a empresa os dar), `fotosExtra` |
 | `data/fotos.json` | As fotografias: tamanho do original, origem e texto alternativo. `data/lqip.json` são as prévias (gerado) |
@@ -95,7 +95,11 @@ qualquer animação `infinite`; e o movimento: durações e curvas que não seja
 - **Texto**: 10 estilos (`--fs-display-hero`, `--fs-section`, `--fs-cta`, `--fs-card`, `--fs-step`, `--fs-list`,
   `--fs-lead`, `--fs-body`, `--fs-category` de 13 px, `--fs-phone`) e `--fs-label` para as etiquetas de formulário.
   Os campos têm 16 px.
-- **Grelha**: `.wrap` com 32 px de margem (16 px até 640 px); só duas quebras, 980 e 640 px.
+- **Grelha**: `.wrap` com 32 px de margem (16 px até 640 px); só duas quebras, 980 e 640 px. Secções com 80 px em cima e
+  em baixo (50 até 640 px) e 44 px do SectionHead ao conteúdo (38 até 640 px), um passo de token abaixo do design system,
+  para a página inicial ficar em menos de 6.000 px a 390 e até 4.400 a 1440.
+- **Cartão de obra** (`obra-foto.html`): a legenda na faixa escura por cima da fotografia a todas as larguras; linhas de
+  300 px em duas colunas e, até 980 px, uma coluna com linhas de 280 px (`--photo-row-1col`).
 - **Ícones**: `src/partials/icones.svg` (seta, menu, telefone, WhatsApp, visto, as setas do comparador e o visto num
   círculo de `obrigado.html`), traço de 1,75 em `currentColor`, cantos vivos. `{{icone nome}}` copia o símbolo para a
   página em linha (para o CSS animar as partes) e um nome que não existe pára o build.
@@ -120,12 +124,13 @@ Os do browser geram o site numa pasta temporária e servem-no num servidor local
 como o Netlify o receberia (e pode falhar de propósito): o pedido que segue e abre `obrigado.html`, a validação, o aviso
 de falha (foco, telefone, WhatsApp com o nome e o tipo) com o que se escreveu a ficar, o envio sem JavaScript, o tipo de
 obra pré-escolhido com «Pedido para:» e o `?de=` no campo `pagina`, o isco para robôs, nenhuma página a deslizar para o
-lado a 390 e 320 px, o menu dos ecrãs estreitos, o comparador com rato (só a partir da pega) e teclado, o foco e as
+lado a 390 e 320 px, os endereços antigos com `?tipo=` (os nomes de antes do redesenho), o menu dos ecrãs estreitos, o comparador com rato (só a partir da pega) e teclado, o foco e as
 imagens, nenhuma fotografia ampliada para lá do original (o hero a 375 px, os cartões, a ficha na sua proporção),
 nenhuma animação sem fim nem acima de 500 ms, o movimento (o menu que vira X e sai no fim da transição, o
 cabeçalho compacto, os vistos em cascata, o fade das fotografias, o indicador de envio, o CLS abaixo de 0,05 e, com
 movimento reduzido, nada a animar nem a deslocar-se), e o sistema visual: o h1 do hero e os cabeçalhos de secção no x do logótipo, contraste de
-4,5:1 nos botões e na faixa clay, o anel de foco da cor de cada superfície, campos de 16 px e etiquetas de 13 px. O CI
+4,5:1 nos botões e na faixa clay, o anel de foco da cor de cada superfície, campos de 16 px e etiquetas de 13 px, a altura da página inicial (menos de 6.000 px a 390, até 4.400 a 1440), a
+legenda dos cartões sobre a fotografia também a 390 px e as miniaturas dos serviços sem acrescentar linhas. O CI
 (`.github/workflows/ci.yml`) corre o `--check`, o `npm test` e os testes do browser em cada pull request.
 
 ## Fotografias
@@ -137,9 +142,11 @@ e as prévias de 16 px de `data/lqip.json`; só faz o que falta, `--todas` refaz
 correr o `gerar_fotos.py`, juntar a obra a `obras.json` e correr `python3 build.py --check`.
 
 Cada `{{foto}}` leva um `sizes` com a largura a que a fotografia aparece: os cartões pedem 579 px em computador (duas
-colunas) e, no telemóvel, mais do que a largura do cartão quando a moldura 4:3 ou 4:5 corta os lados (o `build.py`
-calcula-o de cada fotografia); a fotografia da ficha aparece na sua proporção, até 78% da altura do ecrã, sem corte. O
-`foco` de cada obra (`obras.json`) é o ponto que fica à vista nos cortes (na M04, a cabeça do trabalhador).
+colunas) e, no telemóvel, mais do que a largura do cartão quando o cartão de 280 px de altura corta os lados de uma
+fotografia mais deitada do que ele (o `build.py` calcula-o de cada fotografia: 280 px × a proporção); a fotografia da ficha aparece na sua proporção, até 78% da altura do ecrã, sem corte. O
+`foco` de cada obra (`obras.json`) é o ponto que fica à vista nos cortes (na M04, a cabeça do trabalhador), também na
+miniatura de 48 px dos serviços, que mostra a primeira obra em destaque de cada serviço (nos Acabamentos a M05, o
+assentamento do pavimento, e não o teto branco da M02).
 A `foto-05` tem uma faixa preta de 8 px no topo, que já vem no original do sistema de desenho (`obra5.jpg`): fica à
 espera da resposta do dono antes de se cortar.
 

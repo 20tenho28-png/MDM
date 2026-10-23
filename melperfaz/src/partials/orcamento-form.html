@@ -4,11 +4,13 @@
      obrigado.html (um só sucesso). Se falhar, o que se escreveu fica e #formAlerta oferece o telefone e o WhatsApp, com a
      mensagem site.json «wa.erro» preenchida com o nome e o tipo escritos (data-wa e data-wa-erro).
      [data-pedido-para] mostra «Pedido para: … · alterar» quando o endereço traz ?tipo= (site.js); o campo escondido
-     «pagina» diz de onde veio o pedido (?de=, por exemplo obras/<slug>). Quem mudar os campos daqui muda também
+     «pagina» diz de onde veio o pedido (?de=, por exemplo obras/<slug>). O ?tipo= é o id do serviço (data-tipo), o nome
+     ou um nome de antes do redesenho (data-antigos, site.json «antigos»: «Fachadas / Impermeabilização»), para os
+     endereços antigos continuarem a escolher o tipo. Quem mudar os campos daqui muda também
      FORM_CAMPOS no build.py. -->
 <div class="form-cartao s-paper" id="pedido">
   <h2 class="form-t" id="quoteTitle">Pedido de orçamento</h2>
-  <p class="pedido-para" data-pedido-para hidden>Pedido para: <strong data-pedido-nome></strong> · <button class="pedido-alterar" type="button" data-pedido-alterar aria-label="Alterar o tipo de obra">alterar</button></p>
+  <p class="pedido-para" data-pedido-para hidden>Pedido para: <strong data-pedido-nome></strong>&nbsp;· <button class="pedido-alterar" type="button" data-pedido-alterar aria-label="Alterar o tipo de obra">alterar</button></p>
   <form id="quoteForm" name="orcamento" method="POST" action="/obrigado.html" data-netlify="true" netlify-honeypot="bot-field" aria-labelledby="quoteTitle" data-wa="{{ site.whatsappBase }}" data-wa-erro="{{ site.wa.erro }}">
     <input type="hidden" name="form-name" value="orcamento">
     <input type="hidden" name="subject" value="Pedido de orçamento pelo site Melperfaz">
@@ -18,7 +20,7 @@
       <label for="qTipo">Tipo de obra</label>
       <select id="qTipo" name="tipo_de_obra">
         <option value="">Escolha uma opção</option>{{#cada servicos}}
-        <option value="{{ item.nome }}" data-tipo="{{ item.id }}">{{ item.nome }}</option>{{/cada}}
+        <option value="{{ item.nome }}" data-tipo="{{ item.id }}"{{#se item.antigosAttr}} data-antigos="{{ item.antigosAttr }}"{{/se}}>{{ item.nome }}</option>{{/cada}}
         <option value="Outro" data-tipo="outro">Outro</option>
       </select>
     </div>

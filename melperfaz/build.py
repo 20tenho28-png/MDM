@@ -89,6 +89,8 @@ CATEGORIAS = {s["cat"]: s["nome"] for s in SERVICOS if s["cat"]}
 SERVICO_BY_CAT = {s["cat"]: s for s in SERVICOS if s["cat"]}
 # as opções do «Tipo de obra» do formulário: os nomes dos serviços e «Outro»
 TIPOS_DE_OBRA = [s["nome"] for s in SERVICOS] + ["Outro"]
+# a altura do cartão de obra até 980 px (--photo-row-1col em site.css): o sizes das fotografias dos cartões conta com ela
+CARTAO_MOVEL_H = 280
 
 
 def lados(n):
@@ -125,11 +127,11 @@ def campos_obra(o):
     o["fotoR"] = f"{f['w'] / f['h']:.4f}"
     o["fotoSizes"] = f"(min-width: 641px) min(1176px, calc(100vw - 64px), {r}), min(calc(100vw - 32px), {r})"
     # o cartão (obra-foto.html): duas colunas de 579 px a partir de 981 px (a .wrap de 1176 px menos 18 de intervalo),
-    # uma coluna até lá. Abaixo de 640 px a moldura é 4:3 (paisagem) ou 4:5 (retrato): uma fotografia mais larga do que a
-    # moldura é cortada nos lados e precisa de mais píxeis do que a largura do cartão (foto-05, 1080 × 620: × 1,31)
-    moldura = 4 / 3 if o["orient"] == "landscape" else 4 / 5
-    fator = max(1.0, (f["w"] / f["h"]) / moldura)
-    movel = "calc(100vw - 32px)" if fator < 1.02 else f"calc((100vw - 32px) * {fator:.2f})"
+    # uma coluna até lá. Até 640 px o cartão tem a largura do ecrã menos 32 px e 280 px de altura (--photo-row-1col): uma
+    # fotografia mais deitada do que isso é cortada nos lados e precisa de 280 px × a sua proporção de largura, mais do
+    # que a largura do cartão nos telemóveis estreitos (foto-05, 1080 × 620: 488 px)
+    larga = round(CARTAO_MOVEL_H * f["w"] / f["h"])
+    movel = "calc(100vw - 32px)" if larga <= 288 else f"max(calc(100vw - 32px), {larga}px)"
     o["cartaoSizes"] = f"(min-width: 981px) min(calc(50vw - 41px), 579px), (min-width: 641px) calc(100vw - 64px), {movel}"
     # sem comparador, a chave existe vazia: os modelos perguntam {{#se obra.antesDepois}} (uma chave em falta é erro)
     ad = o.setdefault("antesDepois", "")
@@ -161,6 +163,14 @@ for _s in SERVICOS:
         raise SystemExit(f"site.json «servicos» {_s['id']}: «frase» é uma frase inteira do «texto», copiada tal qual → «{_s.get('frase', '')}»")
 if len(SERVICO_BY_ID) != len(SERVICOS):
     raise SystemExit("site.json «servicos»: id repetido")
+# «antigos»: os valores do «Tipo de obra» de antes do redesenho («Fachadas / Impermeabilização»…), que os endereços
+# antigos ainda trazem no ?tipo=; orcamento.html escolhe com eles o serviço de hoje (data-antigos de cada opção, site.js)
+_vistos = {x for s in SERVICOS for x in (s["id"], s["nome"])} | {"outro", "Outro"}
+for _s in SERVICOS:
+    for _a in _s.setdefault("antigos", []):
+        if not isinstance(_a, str) or not _a.strip() or "|" in _a or _a in _vistos:
+            raise SystemExit(f"site.json «servicos» {_s['id']}: «antigos» são nomes antigos, sem «|», que não são o id nem o nome de outro serviço → «{_a}»")
+        _vistos.add(_a)
 for _o in OBRAS:
     if _o["foto"] not in FOTOS:
         raise SystemExit(f"obras.json {_o['code']}: «foto» {_o['foto']} não existe em data/fotos.json")
@@ -171,13 +181,18 @@ CAT_N = {**{c: sum(1 for o in OBRAS if o["cat"] == c) for c in CATEGORIAS}, "tod
 
 
 def servicos_ctx(root):
-    """Os serviços para os modelos: n (01…), obrasN e «N obras», a primeira fotografia das suas obras, a âncora e o pedido.
+    """Os serviços para os modelos: n (01…), obrasN e «N obras», a miniatura, a âncora e o pedido. A miniatura é a
+    fotografia da primeira obra em destaque do serviço (ou, sem nenhuma, da primeira obra), com o «foco» dessa obra: a M05
+    nos Acabamentos (o assentamento do pavimento), não a M02 (um teto branco quase sem nada no quadrado da miniatura).
     Os que têm obras são os grupos de obras.html: «sup» alterna ink e bone (a começar em ink, depois do PageHead paper) e
-    «eager» é «1» só no primeiro grupo (a primeira fotografia da página carrega já)."""
+    «eager» é «1» só no primeiro grupo (a primeira fotografia da página carrega já). «antigosAttr» junta os «antigos»
+    com «|» (o data-antigos das opções do formulário)."""
     out, grupo = [], 0
     for i, s in enumerate(SERVICOS):
         obras = [o for o in OBRAS if s["cat"] and o["cat"] == s["cat"]]
-        out.append({**s, "n": f"{i + 1:02d}", "obrasN": len(obras), "primeiraFoto": obras[0]["foto"] if obras else "",
+        mini = next((o for o in obras if o["destaque"]), obras[0] if obras else None)
+        out.append({**s, "n": f"{i + 1:02d}", "obrasN": len(obras), "miniFoto": mini["foto"] if mini else "",
+                    "miniFoco": mini["foco"] if mini else "", "antigosAttr": "|".join(s["antigos"]),
                     "obrasTexto": f"{len(obras)} {'obra' if len(obras) == 1 else 'obras'}",
                     "catAnchor": f"obras.html#{s['cat']}" if obras else "",
                     "sup": ("s-ink", "s-bone")[grupo % 2] if obras else "", "eager": "1" if obras and grupo == 0 else "0",

@@ -197,6 +197,10 @@ test('a página inicial: Hero › Obras em destaque › Serviços › Porquê N�
     if (n) {
       assert.match(corpo, new RegExp(`<a class="link-seta" href="obras\\.html#${s.cat}">Ver obras \\(${n}\\)`), `${id}: ver as ${n} obras`);
       assert.match(corpo, /<div class="svc-mini"><picture class="foto"[\s\S]*?alt=""/, `${id}: miniatura decorativa`);
+      // a miniatura é a fotografia da primeira obra em destaque do serviço (ou da primeira obra), com o foco dela: nos
+      // Acabamentos a M05 (o assentamento do pavimento), não o teto branco da M02
+      const obrasS = OBRAS.filter(o => o.cat === s.cat), mini = obrasS.find(o => o.destaque) || obrasS[0];
+      assert.match(corpo, new RegExp(`<div class="svc-mini"><picture class="foto" style="--lqip: [^"]*; --lqip-pos: ${mini.foco}"><source type="image/avif" srcset="[^"]*foto-${mini.foto}-400\\.avif[^"]*" sizes="[^"]*48px"[\\s\\S]*?alt="" width="\\d+" height="\\d+" style="object-position: ${mini.foco}"`), `${id}: miniatura da ${mini.code}, com o foco`);
     } else assert.doesNotMatch(corpo, /Ver obras|svc-mini/, `${id}: sem obras, sem promessas vazias`);
   }
   assert.doesNotMatch(t, /<a class="svc|class="arrow"/, 'a linha do serviço não é uma ligação e não tem seta');
@@ -226,8 +230,9 @@ test('o formulário Netlify: só em orcamento.html, atributos, campos pela ordem
   assert.match(form, /aria-describedby="hTel eTel"/);
   assert.match(form, /placeholder="Descreva a obra: o que quer fazer, onde e para quando\."/);
   assert.match(form, /<button class="btn" type="submit" id="sendBtn">Enviar pedido de orçamento<\/button>/);
-  // «Pedido para: X · alterar» já escrito no HTML (site.js põe o nome e mostra-o quando há ?tipo=)
-  assert.match(t, /<p class="pedido-para" data-pedido-para hidden>Pedido para: <strong data-pedido-nome><\/strong> · <button class="pedido-alterar" type="button" data-pedido-alterar aria-label="Alterar o tipo de obra">alterar<\/button><\/p>/);
+  // «Pedido para: X · alterar» já escrito no HTML (site.js põe o nome e mostra-o quando há ?tipo=); o «·» fica agarrado
+  // ao nome (&nbsp;), para uma linha nunca começar por ele
+  assert.match(t, /<p class="pedido-para" data-pedido-para hidden>Pedido para: <strong data-pedido-nome><\/strong>&nbsp;· <button class="pedido-alterar" type="button" data-pedido-alterar aria-label="Alterar o tipo de obra">alterar<\/button><\/p>/);
   // o WhatsApp do erro: a base e a mensagem site.json «wa.erro» (com {nome} e {tipo}) vão no próprio formulário
   assert.ok(abre.includes(` data-wa="${SITE.whatsappBase}"`), 'data-wa');
   assert.ok(abre.includes(` data-wa-erro="${SITE.wa.erro}"`), 'data-wa-erro');
@@ -239,6 +244,13 @@ test('o formulário Netlify: só em orcamento.html, atributos, campos pela ordem
   assert.deepEqual(opcoes, TIPOS, 'as opções são os nomes dos serviços e «Outro»');
   const ids = [...form.matchAll(/<option value="[^"]+" data-tipo="([^"]+)"/g)].map(m => m[1]);
   assert.deepEqual(ids, [...SERVICOS.map(s => s.id), 'outro'], 'cada opção leva o id do serviço (?tipo=)');
+  // os valores de antes do redesenho (site.json «antigos»: «Fachadas / Impermeabilização»…) seguem na opção do serviço
+  // de hoje (data-antigos), para os endereços antigos com ?tipo= continuarem a escolher o tipo
+  const antigos = Object.fromEntries([...form.matchAll(/<option value="[^"]+" data-tipo="([^"]+)"(?: data-antigos="([^"]*)")?>/g)].map(m => [m[1], m[2] || '']));
+  for (const s of SERVICOS) assert.equal(antigos[s.id], (s.antigos || []).join('|'), `${s.id}: data-antigos`);
+  assert.deepEqual(Object.fromEntries(SERVICOS.filter(s => s.antigos).flatMap(s => s.antigos.map(a => [a, s.id]))),
+    { 'Reabilitação de Edifício': 'reabilitacao', 'Espaço Comercial': 'comercial', 'Apartamento': 'apartamentos', 'Fachadas / Impermeabilização': 'fachadas' },
+    'os tipos antigos que mudaram de nome (os outros, «Trabalhos de Estrutura», «Acabamentos» e «Outro», são o próprio nome)');
   assert.doesNotMatch(form, /name="localidade"[^>]*\brequired\b/);
   assert.match(form, /<label for="qLocal">Localidade <span class="opcional">\(opcional\)<\/span><\/label>/);
   assert.match(form, /name="nome"[^>]*\brequired\b/);
@@ -341,6 +353,16 @@ test('os dados: vocabulário dos serviços, obras em destaque, factos e o --falt
     assert.ok(Array.isArray(o.fotosExtra), `${o.code}: fotosExtra`);
   }
   assert.deepEqual(OBRAS.filter(o => o.destaque).map(o => o.code), ['M01', 'M04', 'M05']);
+  // «antigos» (os nomes do «Tipo de obra» de antes do redesenho): um que seja o nome de outro serviço pára o build
+  const d = copiaFontes();
+  try {
+    const p = path.join(d, 'data/site.json'), s = JSON.parse(fs.readFileSync(p, 'utf8'));
+    s.servicos.find(x => x.id === 'comercial').antigos = ['Apartamentos'];
+    fs.writeFileSync(p, JSON.stringify(s, null, 2));
+    const rr = spawnSync('python3', ['build.py'], { cwd: d, encoding: 'utf8', env: { ...process.env, MELPERFAZ_OUT: path.join(d, 'public') } });
+    assert.equal(rr.status, 1, '«antigos» repetido: sai com 1');
+    assert.match(rr.stderr, /site\.json «servicos» comercial: «antigos»[^\n]*«Apartamentos»/);
+  } finally { fs.rmSync(d, { recursive: true, force: true }); }
   const r = spawnSync('python3', ['build.py', '--faltam'], { cwd: W, encoding: 'utf8', env: { ...process.env, MELPERFAZ_OUT: path.join(tmp, 'faltam') } });
   assert.equal(r.status, 0);
   const doc = JSON.parse(fs.readFileSync(path.join(W, 'data/dados-melperfaz.json'), 'utf8'));
@@ -383,18 +405,18 @@ test('as fotografias: original, tamanhos, prévias e texto alternativo', () => {
   assert.match(pic, /<source type="image\/avif" srcset="assets\/img\/fotos\/foto-01-400\.avif 400w, [^"]*foto-01-1080\.avif 1080w"/);
   assert.match(pic, /sizes="[^"]*\(max-width: 980px\) calc\(100vw - 32px\), 520px"/, 'hero: sizes da moldura (sem ampliação)');
   assert.match(pic, new RegExp(`<img src="assets/img/fotos/foto-01\\.jpg" alt="${esc(Object.fromEntries(FOTOS)['01'].alt)}" width="1080" height="810" style="object-position: 50% 60%" loading="eager" decoding="async" fetchpriority="high">`));
-  // a foto-02 (4:3) na moldura 4:5 de Porquê Nós é cortada nos lados: pede 5/3 da largura da moldura (914 px); até
-  // 980 px a moldura é 4:3, como a fotografia, e basta a largura da coluna
-  assert.match(/<picture class="foto"[^>]*><source type="image\/avif" srcset="[^"]*foto-02-[^"]*" sizes="([^"]*)"/.exec(t)[1], /\(max-width: 980px\) calc\(100vw - 32px\), 914px$/, 'Porquê Nós: sizes da moldura (4:5; 4:3 até 980 px)');
-  // os cartões: 579 px (duas colunas a partir de 981), uma coluna até lá; no telemóvel a moldura 4:3 ou 4:5 corta as
-  // fotografias mais largas do que ela, que pedem proporcionalmente mais (foto-05, 1080 × 620: × 1,31)
+  // a foto-02 (4:3) na moldura 4:3 de Porquê Nós, sem corte: a coluna de 360 px (um terço da .wrap nos ecrãs mais
+  // estreitos) a partir de 981 px, a largura da .wrap até lá (no telemóvel a fotografia sai)
+  assert.match(/<picture class="foto"[^>]*><source type="image\/avif" srcset="[^"]*foto-02-[^"]*" sizes="([^"]*)"/.exec(t)[1], /\(min-width: 981px\) min\(360px, calc\(\(100vw - 64px\) \* \.33\)\), calc\(100vw - 64px\)$/, 'Porquê Nós: sizes da moldura (4:3)');
+  // os cartões: 579 px (duas colunas a partir de 981), uma coluna até lá; no telemóvel o cartão tem 280 px de altura e
+  // corta as fotografias mais deitadas do que ele, que pedem 280 px × a sua proporção (foto-05, 1080 × 620: 488 px)
   const F = Object.fromEntries(FOTOS);
   const obras = le('obras.html');
   for (const o of OBRAS) {
     const fig = new RegExp(`<figure class="pg reveal" data-cat="${o.cat}" data-orient="(\\w+)">\\s*<picture[^>]*><source type="image/avif" srcset="[^"]*foto-${o.foto}-[^"]*" sizes="([^"]*)"`).exec(obras);
     assert.ok(fig, `cartão ${o.code}`);
-    const r = F[o.foto].w / F[o.foto].h, moldura = fig[1] === 'landscape' ? 4 / 3 : 4 / 5, fator = Math.max(1, r / moldura);
-    const movel = fator < 1.02 ? 'calc(100vw - 32px)' : `calc((100vw - 32px) * ${fator.toFixed(2)})`;
+    const larga = Math.round(280 * F[o.foto].w / F[o.foto].h);
+    const movel = larga <= 288 ? 'calc(100vw - 32px)' : `max(calc(100vw - 32px), ${larga}px)`;
     assert.ok(fig[2].endsWith(`(min-width: 981px) min(calc(50vw - 41px), 579px), (min-width: 641px) calc(100vw - 64px), ${movel}`), `cartão ${o.code}: sizes → ${fig[2]}`);
     // a ficha: a fotografia na sua proporção (--foto-r), no máximo 78% do ecrã de altura, sem corte
     if (!o.antesDepois) {
