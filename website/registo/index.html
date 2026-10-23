@@ -622,6 +622,49 @@ body.a-redimensionar,body.a-redimensionar *{cursor:col-resize!important;-webkit-
 .tb tbody.tb-g.alvo .tb-gh td{background:color-mix(in srgb,var(--accent) 8%,var(--surface));outline:2px dashed var(--accent);outline-offset:-3px}
 .tb tbody.tb-g.sobre .tb-gh td{outline-style:solid;background:color-mix(in srgb,var(--accent) 16%,var(--surface))}
 .tb tbody.tb-g.fora{opacity:.45}
+/* Números: widgets */
+.dash{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:22px}
+.dw{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.dw.largo{grid-column:span 2}
+@media (max-width:1100px){.dash{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.dash{grid-template-columns:minmax(0,1fr)}.dw.largo{grid-column:auto}}
+.dw-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.dw-h h3{margin:0;font-size:15px;font-weight:600}
+.dw-ed{font:inherit;font-size:12.5px;font-weight:600;color:var(--accent);background:none;border:0;cursor:pointer;padding:0;white-space:nowrap}
+.dw-gwrap{display:flex;flex-direction:column;gap:6px}
+.dw-gauge{width:100%;max-width:250px;margin:0 auto;display:block}
+.g-fundo{fill:none;stroke:var(--sunk);stroke-width:22}
+.g-valor{fill:none;stroke:var(--accent);stroke-width:22}
+.g-ponteiro{stroke:var(--ink);stroke-width:4;stroke-linecap:round}
+.g-centro{fill:var(--ink)}
+.g-pct{font-size:22px;font-weight:600;fill:var(--ink)}
+.dw-par{display:flex;justify-content:space-between;gap:10px}
+.dw-par > div:last-child{text-align:right}
+.dw-par small{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2)}
+.dw-par b{font-family:var(--font-display);font-size:22px;font-weight:600}
+.dw-mes{display:flex;flex-direction:column;gap:16px;justify-content:center;flex:1}
+.dw-bar{height:34px;border-radius:6px;background:var(--sunk);overflow:hidden}
+.dw-bar i{display:block;height:100%;background:var(--accent)}
+.dw-num{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:4px;font:inherit;color:inherit;background:none;border:0;padding:12px 0;text-align:center}
+button.dw-num{cursor:pointer;border-radius:8px}
+button.dw-num:hover{background:var(--sunk)}
+.dw-num b{font-family:var(--font-display);font-size:34px;font-weight:600;line-height:1.1}
+.dw-num small{color:var(--ink-2);font-size:13px}
+.dw-pie{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.dw-donut{width:140px;height:140px;flex:none}
+.d-fatia{cursor:pointer;stroke:var(--surface);stroke-width:1.5}
+.d-n{font-size:22px;font-weight:600;fill:var(--ink)}
+.d-l{font-size:10px;fill:var(--ink-2)}
+.dw-leg{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;font-size:13px;flex:1;min-width:150px}
+.dw-leg button{font:inherit;background:none;border:0;padding:3px 0;cursor:pointer;color:var(--ink);display:flex;gap:8px;align-items:center;width:100%;text-align:left}
+.dw-leg i{width:10px;height:10px;border-radius:3px;flex:none}
+.dw-leg b{margin-left:auto;font-weight:600;color:var(--ink-2)}
+.dw-barras{width:100%;height:auto;display:block}
+.b-barra{fill:var(--info)}
+.b-atual .b-barra{fill:var(--accent)}
+.b-v,.b-m{font-size:11px;fill:var(--ink-2)}
+.b-eixo{stroke:var(--line)}
+.dw-fonte{font-size:12px;color:var(--ink-2);margin:4px 0 0}
 /* Quadro: arrastar */
 .kcard{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .kcard.karr{opacity:.35}
@@ -805,6 +848,8 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
 
   <div id="v-painel" role="tabpanel" aria-labelledby="tab-painel" hidden>
     <p class="hint alert" id="pnAviso" hidden></p>
+    <div class="dash" id="dash" aria-label="Números"></div>
+    <div id="pnVistas">
     <section aria-labelledby="h-pn-fila">
       <div class="sec-h"><h2 id="h-pn-fila">A tua fila</h2><span class="count"><span id="pnFilaCount"></span> <button class="link-add" type="button" id="pnFilaModo" style="font-size:15px;padding:0 0 0 8px"></button></span></div>
       <div class="panel lista-p" id="pnFila"></div>
@@ -847,6 +892,7 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
         <div class="panel" id="pnTend"></div>
       </section>
     </div>
+    </div>
     <details class="sec-d"><summary><h2>Resumo e números do mês</h2></summary>
     <section class="kpis oito" id="kpis" aria-label="Resumo"></section>
     <div class="grid-p">
@@ -887,7 +933,7 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
       </section>
     </div>
     </details>
-    <details class="sec-d"><summary><h2>Cobertura dos dados</h2></summary>
+    <details class="sec-d" id="pnCobSec"><summary><h2>Cobertura dos dados</h2></summary>
       <p class="note vis" id="pnCobertura"></p>
     </details>
   </div>
@@ -1192,6 +1238,11 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
         </section>
       </div>
     </div>
+    <section aria-labelledby="h-obj" style="margin-top:22px">
+      <div class="sec-h"><h2 id="h-obj">Objetivos de faturação</h2></div>
+      <div class="panel sgc" id="objCfg"></div>
+      <p class="note">Os objetivos aparecem em Hoje › Números (conta-quilómetros do ano e barra do mês). O faturado vem dos SAF-T carregados em Faturação; nos meses sem SAF-T, das faturas registadas nos pedidos. Valores sem IVA.</p>
+    </section>
     <section aria-labelledby="h-prob" style="margin-top:22px">
       <div class="sec-h"><h2 id="h-prob">Probabilidade de fecho por passo</h2></div>
       <div class="panel sgc" id="probCfg"></div>
@@ -1581,7 +1632,6 @@ if (!Element.prototype.replaceChildren) {
     try {
       if (t === 'seguimentos') return segTabela !== false;
       if (t === 'agenda') return agTabela !== false;
-      if (t === 'painel') return !pnFalta;
     } catch (e) { return true; }
     return true;
   }
@@ -2439,6 +2489,144 @@ if (!Element.prototype.replaceChildren) {
   })();
 
 
+  /* ---------- Números: painel de widgets (ao estilo do dashboard do monday) ----------
+     Tudo calculado na página, com os dados que já existem: a faturação vem dos SAF-T (Faturação) ou, sem eles, das
+     faturas registadas nos pedidos; os objetivos estão em config, chave «objetivos» (mudam-se em Definições ou no próprio
+     widget). Não precisa de painel.sql. */
+  let cfgObjetivos = null;
+  const DASH_NS = 'http://www.w3.org/2000/svg';
+  const sv = (t, a, txt) => { const e = document.createElementNS(DASH_NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+  const kEur = v => Math.abs(v) >= 1000 ? `${(v / 1000).toLocaleString('pt-PT', {maximumFractionDigits: 1})} k€` : `${Math.round(v)} €`;
+  // Faturado sem IVA por mês (AAAA-MM): os SAF-T quando existem para esse mês, senão as faturas registadas nos pedidos.
+  function faturadoMes(ym) {
+    if (faturacao[ym]) return {v: liquidoMes(ym), fonte: 'saft'};
+    const v = rows.filter(r => String(r.dataFatura || '').slice(0, 7) === ym).reduce((t, r) => t + (Number(r.valorFatura) || 0), 0);
+    return {v, fonte: 'pedidos'};
+  }
+  function dashCartao(titulo, corpo, extra, largo) {
+    return h('section',{class:'dw' + (largo ? ' largo' : '')}, h('div',{class:'dw-h'}, h('h3',null, titulo), extra || null), corpo);
+  }
+  // Mudar um objetivo no próprio widget (fica em config, chave «objetivos»)
+  function dashObjetivo(botao, chave, nome) {
+    const atual = (cfgObjetivos || {})[chave];
+    const input = h('input',{type:'text', inputmode:'decimal', value: atual ? String(atual).replace('.', ',') : '', placeholder:'por exemplo 150 000'});
+    tbEditor(botao, nome + ' (sem IVA)', input, () => {
+      const v = input.value.trim() ? parseValor(input.value) : null;
+      if (v != null && (Number.isNaN(v) || v < 0)) return 'Escreve um valor em euros.';
+      dashGuardaObj(Object.assign({}, cfgObjetivos || {}, {[chave]: v}));
+      return null;
+    }, chave === 'mensal' ? 'Vazio: o objetivo anual a dividir por 12.' : null);
+  }
+  async function dashGuardaObj(novo) {
+    fechaPop();
+    const {error} = await sb.from('config').upsert({chave:'objetivos', valor: novo, atualizado_por: eu.email}, {onConflict:'chave'});
+    if (error) { toast(/permiss|row-level/.test(String(error.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar o objetivo.'); return; }
+    cfgObjetivos = novo; toast('Objetivo guardado'); renderAll();
+  }
+  // Conta-quilómetros: meia circunferência, arco do valor e ponteiro.
+  function dashGauge(v, alvo) {
+    const W = 240, H = 140, cx = 120, cy = 120, r = 92, f = alvo ? Math.max(0, Math.min(1, v / alvo)) : 0;
+    const pt = a => [cx + r * Math.cos(Math.PI * (1 - a)), cy - r * Math.sin(Math.PI * (1 - a))];
+    const arco = (a0, a1) => { const [x0, y0] = pt(a0), [x1, y1] = pt(a1); return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`; };
+    const s = sv('svg', {viewBox:`0 0 ${W} ${H}`, class:'dw-gauge', role:'img', 'aria-label': alvo ? `${Math.round(f * 100)}% do objetivo` : 'Sem objetivo'});
+    s.appendChild(sv('path', {d: arco(0, 1), class:'g-fundo'}));
+    if (f > 0) s.appendChild(sv('path', {d: arco(0, Math.max(f, 0.005)), class:'g-valor'}));
+    const [nx, ny] = [cx + (r - 18) * Math.cos(Math.PI * (1 - f)), cy - (r - 18) * Math.sin(Math.PI * (1 - f))];
+    s.appendChild(sv('line', {x1: cx, y1: cy, x2: nx.toFixed(1), y2: ny.toFixed(1), class:'g-ponteiro'}));
+    s.appendChild(sv('circle', {cx, cy, r: 6, class:'g-centro'}));
+    s.appendChild(sv('text', {x: cx, y: cy - 34, 'text-anchor':'middle', class:'g-pct'}, alvo ? `${Math.round(v / alvo * 100)}%` : ''));
+    return s;
+  }
+  // Uma cor por passo, pela ordem do processo (tomEstado repete cores entre passos vizinhos).
+  const DASH_CORES = ['#579BFC','#F2A33A','#A25DDC','#00A86B','#E2445C','#66CCFF','#0D6788','#9CD326','#7F8C8D'];
+  function dashDonut(partes, total) {
+    const s = sv('svg', {viewBox:'0 0 120 120', class:'dw-donut', role:'img', 'aria-label':'Pedidos abertos por passo'});
+    let a = -Math.PI / 2;
+    const R = 52, r = 32;
+    partes.forEach(pp => {
+      const ang = 2 * Math.PI * pp.n / total, a1 = a + Math.min(ang, 2 * Math.PI - 0.0001);
+      const g = (rad, t) => [60 + rad * Math.cos(t), 60 + rad * Math.sin(t)];
+      const [x0, y0] = g(R, a), [x1, y1] = g(R, a1), [x2, y2] = g(r, a1), [x3, y3] = g(r, a), big = ang > Math.PI ? 1 : 0;
+      const p = sv('path', {d:`M${x0} ${y0} A${R} ${R} 0 ${big} 1 ${x1} ${y1} L${x2} ${y2} A${r} ${r} 0 ${big} 0 ${x3} ${y3} Z`, style:`fill:${pp.cor}`, class:'d-fatia'});
+      p.appendChild(sv('title', {}, `${pp.nome}: ${pp.n}`));
+      p.addEventListener('click', () => irPara(pp.k));
+      s.appendChild(p); a = a1;
+    });
+    s.appendChild(sv('text', {x: 60, y: 58, 'text-anchor':'middle', class:'d-n'}, String(total)));
+    s.appendChild(sv('text', {x: 60, y: 74, 'text-anchor':'middle', class:'d-l'}, 'abertos'));
+    return s;
+  }
+  function dashBarras(dados, destaque) {
+    const W = 520, H = 200, L = 8, R = 8, T = 22, B = 24, pw = W - L - R, ph = H - T - B, gw = pw / dados.length, bw = Math.min(34, gw * 0.62);
+    const max = Math.max(1, ...dados.map(d => d.v));
+    const s = sv('svg', {viewBox:`0 0 ${W} ${H}`, class:'dw-barras', role:'img', 'aria-label':'Faturado por mês'});
+    s.appendChild(sv('line', {x1: L, x2: W - R, y1: T + ph, y2: T + ph, class:'b-eixo'}));
+    dados.forEach((d, i) => {
+      const x = L + gw * i + (gw - bw) / 2, hh = ph * Math.max(0, d.v) / max;
+      const g = sv('g', {class: d.ym === destaque ? 'b-atual' : ''});
+      g.appendChild(sv('title', {}, `${mesTxt(d.ym)}: ${eur(d.v)}${d.fonte === 'pedidos' ? ' (faturas dos pedidos)' : ''}`));
+      g.appendChild(sv('rect', {x: x.toFixed(1), y: (T + ph - hh).toFixed(1), width: bw.toFixed(1), height: Math.max(0, hh).toFixed(1), rx: 3, class:'b-barra'}));
+      if (d.v > 0) g.appendChild(sv('text', {x: (x + bw / 2).toFixed(1), y: (T + ph - hh - 5).toFixed(1), 'text-anchor':'middle', class:'b-v'}, kEur(d.v)));
+      g.appendChild(sv('text', {x: (x + bw / 2).toFixed(1), y: H - 6, 'text-anchor':'middle', class:'b-m'}, MES[Number(d.ym.slice(5)) - 1]));
+      s.appendChild(g);
+    });
+    return s;
+  }
+  function renderDash() {
+    const box = F('dash'); if (!box) return;
+    if (status !== 'ok') { fill(box, stateMsg()); return; }
+    const hoje = today(), ano = hoje.slice(0, 4), mesAtual = hoje.slice(0, 7);
+    const obj = cfgObjetivos || {}, anual = Number(obj.anual) || 0, mensal = Number(obj.mensal) || (anual ? anual / 12 : 0);
+    // 12 meses até este
+    const meses = [];
+    for (let i = 11; i >= 0; i--) { const d = new Date(Number(ano), Number(hoje.slice(5, 7)) - 1 - i, 1); meses.push(`${d.getFullYear()}-${pad(d.getMonth() + 1)}`); }
+    const porMes = meses.map(ym => Object.assign({ym}, faturadoMes(ym)));
+    const temSaft = porMes.some(d => d.fonte === 'saft');
+    const noAno = meses.filter(ym => ym.slice(0, 4) === ano).reduce((t, ym) => t + faturadoMes(ym).v, 0);
+    const noMes = faturadoMes(mesAtual).v;
+    const fonte = temSaft ? 'SAF-T' + (porMes.some(d => d.fonte === 'pedidos' && d.v) ? ' e faturas dos pedidos' : '') : 'faturas registadas nos pedidos';
+    const ed = (chave, nome) => canWrite ? h('button',{class:'dw-ed', type:'button', onclick: ev => { ev.stopPropagation(); dashObjetivo(ev.currentTarget, chave, nome); }}, (chave === 'anual' ? anual : obj.mensal) ? 'Mudar' : 'Definir objetivo') : null;
+    // 1. objetivo anual
+    const w1 = dashCartao(`Objetivo anual ${ano}`, h('div',{class:'dw-gwrap'}, dashGauge(noAno, anual),
+      h('div',{class:'dw-par'}, h('div',null, h('small',null,'Faturado'), h('b',null, kEur(noAno))), h('div',null, h('small',null,'Objetivo'), h('b',null, anual ? kEur(anual) : 'por definir')))), ed('anual', 'Objetivo anual'));
+    // 2. objetivo do mês
+    const fm = mensal ? Math.min(1, noMes / mensal) : 0;
+    const w2 = dashCartao('Objetivo do mês', h('div',{class:'dw-mes'},
+      h('div',{class:'dw-bar'}, h('i',{style:`width:${(fm * 100).toFixed(1)}%`})),
+      h('div',{class:'dw-par'}, h('div',null, h('small',null, mesTxt(mesAtual)), h('b',null, kEur(noMes))), h('div',null, h('small',null,'Objetivo'), h('b',null, mensal ? kEur(mensal) : 'por definir')))), ed('mensal', 'Objetivo mensal'));
+    // 3. valor médio dos orçamentos (12 meses)
+    const d365 = addDays(hoje, -365);
+    const orcs = rows.filter(r => r.num && valorN(r) > 0 && String(r.dataEnvio || r.dataPedido || '').slice(0, 10) >= d365);
+    const media = orcs.length ? orcs.reduce((t, r) => t + valorN(r), 0) / orcs.length : 0;
+    const w3 = dashCartao('Valor médio dos orçamentos', h('div',{class:'dw-num'}, h('b',null, orcs.length ? eur(media) : 'sem dados'), h('small',null, orcs.length ? `${orcs.length} orçamentos nos últimos 12 meses` : 'Ainda sem orçamentos com valor')));
+    // 4. previsão dos pedidos abertos
+    const ab = rows.filter(r => ABERTOS.includes(r.estado));
+    const prev = ab.reduce((t, r) => t + previsaoDe(r), 0), emJogo = ab.reduce((t, r) => t + valorN(r), 0);
+    const w4 = dashCartao('Previsão em aberto', h('button',{class:'dw-num', type:'button', onclick:() => { setTab('gerir'); tbAgrupar('estado'); }},
+      h('b',null, eur(prev)), h('small',null, emJogo ? `de ${eur(emJogo)} em pedidos abertos (valor × probabilidade)` : 'Sem valores nos pedidos abertos')));
+    // 5. pedidos abertos por passo
+    const porEstado = ABERTOS.map((k, i) => ({k, nome: ESTADOS[k].l, cor: DASH_CORES[i % DASH_CORES.length], n: ab.filter(r => r.estado === k).length})).filter(x => x.n);
+    const w5 = dashCartao('Pedidos abertos por passo', ab.length ? h('div',{class:'dw-pie'}, dashDonut(porEstado, ab.length),
+      h('ul',{class:'dw-leg'}, porEstado.map(x => h('li',null, h('button',{type:'button', onclick:() => irPara(x.k)}, h('i',{style:`background:${x.cor}`}), x.nome, h('b',null, `${Math.round(100 * x.n / ab.length)}%`)))))) : h('p',{class:'empty'}, 'Nenhum pedido aberto.'));
+    // 6. faturado por mês
+    const w6 = dashCartao('Faturado por mês', h('div',null, dashBarras(porMes, mesAtual), h('p',{class:'dw-fonte'}, `Sem IVA. Fonte: ${fonte}.`)), null, true);
+    fill(box, w1, w2, w3, w4, w5, w6);
+  }
+
+  // Definições: objetivos de faturação
+  function renderObjCfg() {
+    const box = F('objCfg'); if (!box) return;
+    const o = cfgObjetivos || {};
+    fill(box, h('div',{class:'fields'},
+      campo('obj-anual', 'Objetivo anual (sem IVA)', inp('obj-anual', o.anual ? String(o.anual).replace('.', ',') : '', {inputmode:'decimal', placeholder:'por exemplo 150 000'})),
+      campo('obj-mensal', 'Objetivo mensal (sem IVA)', inp('obj-mensal', o.mensal ? String(o.mensal).replace('.', ',') : '', {inputmode:'decimal', placeholder:'vazio: anual a dividir por 12'}))),
+      canWrite ? h('div',{class:'row-end', style:'margin-top:10px'}, h('button',{class:'btn', type:'button', onclick:() => {
+        const a = val('obj-anual') ? parseValor(val('obj-anual')) : null, m = val('obj-mensal') ? parseValor(val('obj-mensal')) : null;
+        if ((a != null && (Number.isNaN(a) || a < 0)) || (m != null && (Number.isNaN(m) || m < 0))) { toast('Os objetivos são valores em euros.'); return; }
+        dashGuardaObj({anual: a, mensal: m});
+      }}, 'Guardar objetivos')) : null);
+  }
+
   /* ---------- Faturação (SAF-T) ---------- */
   // faturacao: {mes: {mes, periodo:{de, ate}, ficheiro, gerado, docs:[...], recibos:[...], por}}. Lido do Supabase (tabela faturacao)
   // e dos ficheiros que a equipa junta nesta página; cada ficheiro é um mês e substitui o que lá estava desse mês.
@@ -3100,7 +3288,9 @@ if (!Element.prototype.replaceChildren) {
 
   function renderPainel() {
     var aviso = F('pnAviso');
-    aviso.hidden = !pnErro; aviso.textContent = pnErro;
+    // Sem painel.sql, os widgets de cima chegam; as partes que vêm das vistas não aparecem.
+    F('pnVistas').hidden = pnFalta; F('pnCobSec').hidden = pnFalta;
+    aviso.hidden = !pnErro || pnFalta; aviso.textContent = pnErro;
     var ids = ['pnFila','pnPassos','pnAtrasos','pnFollow','pnCarga','pnBloq','pnTempos','pnFunil','pnPerdas','pnTend'];
     if (!pn) {
       ids.forEach(function (id) { F(id).replaceChildren(h('p',{class:'empty'}, pnErro ? 'Sem dados.' : 'A carregar o Painel…')); });
@@ -3391,7 +3581,7 @@ if (!Element.prototype.replaceChildren) {
     F('nextNum').textContent = status === 'ok' ? nextNumber() : 'ORC…';
     const verm = all.filter(x => x.sem === 'vermelho').length;
     F('redBadge').textContent = verm ? String(verm) : '';
-    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderExport(); renderEquipa(); renderFaturacao(); renderClientes(); renderPipeline(all); renderSeg(); renderSegCfg(); renderAgenda(); renderAgCfg(); renderInicio(all); renderProb();
+    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderExport(); renderEquipa(); renderFaturacao(); renderClientes(); renderPipeline(all); renderSeg(); renderSegCfg(); renderAgenda(); renderAgCfg(); renderInicio(all); renderProb(); renderDash(); renderObjCfg();
     F('btnNovoTop').hidden = F('railNovo').hidden = F('btnNovoCliente').hidden = !(canWrite && status === 'ok');
     // Não redesenha a folha aberta enquanto há um formulário a meio.
     if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
@@ -5190,7 +5380,7 @@ if (!Element.prototype.replaceChildren) {
       ]);
       if (p.error) throw p.error;
       rows = p.data.map(r => ({id: r.id, ...r.dados, _versao: r.versao}));
-      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') cfgColunas = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; }
+      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') cfgColunas = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
       if (ft.error) { if (/relation|does not exist|schema cache/i.test(ft.error.message || '')) fatTabela = false; }
       else { fatTabela = true; const novo = {}; for (const x of ft.data) if (x.dados && x.dados.mes) novo[x.dados.mes] = x.dados; faturacao = novo; if (!faturacao[fatMes]) fatMes = ''; }
       if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) fichaTabela = false; }
