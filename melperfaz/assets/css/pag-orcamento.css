@@ -30,6 +30,10 @@
 .form-nota { font-size: var(--fs-label); color: var(--muted); margin-top: var(--space-16); }
 .form-alerta { margin-bottom: var(--space-16); padding: var(--space-12); border: var(--border-control) solid var(--erro); color: var(--erro); font-size: var(--fs-label); font-weight: 600; background: var(--white); }
 .form-alerta a { color: inherit; text-underline-offset: 3px; }
+/* o erro lê-se como erro e não como a marca: o vermelho dos botões é um fundo cheio de cantos vivos; o erro é texto e
+   contorno --erro, mais escuro, com um «!» branco num círculo antes da mensagem. O sinal é só visual (o texto
+   alternativo vazio: o leitor de ecrã lê a mensagem); os browsers sem esse texto alternativo usam o primeiro content */
+.field-erro:not(:empty)::before, .form-alerta::before { content: "!"; content: "!" / ""; display: inline-grid; place-items: center; width: 1.3em; height: 1.3em; margin-right: var(--space-6); border-radius: var(--radius-round); background: var(--erro); color: var(--white); font-weight: 700; line-height: 1; vertical-align: -.25em; }
 .form-cartao .btn[type="submit"] { width: 100%; }
 
 /* ── Lateral (bone) ── */

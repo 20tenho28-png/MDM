@@ -2,9 +2,10 @@
 
 Site estático em português de Portugal para a Melperfaz (reabilitação de edifícios, espaços comerciais e apartamentos,
 desde 2001): página inicial, galeria de obras com uma ficha por obra, pedido de orçamento pelo Netlify Forms, política
-de privacidade. O visual é o do sistema de desenho «Melperfaz» (azul-marinho `ink` e laranja de obra `clay`, cantos
-vivos, títulos em Fraunces, texto em Archivo, fotografias reais das obras), e a arquitetura é a do site da MDM
-(`website/`): um gerador em Python sem dependências, dados em JSON, verificações antes de publicar e testes.
+de privacidade. O visual é o do sistema de desenho «Melperfaz», agora em verde e vermelho a pedido do dono (verde-floresta
+`ink` e vermelho `clay`, cantos vivos, títulos em Fraunces, texto em Archivo, fotografias reais das obras), e a
+arquitetura é a do site da MDM (`website/`): um gerador em Python sem dependências, dados em JSON, verificações antes de
+publicar e testes.
 
 ## Gerar
 
@@ -79,7 +80,10 @@ que passaram a ícone (→, ≡, ✓, ‹).
 E o lint das folhas de estilo, para o sistema visual não voltar a derivar. Fora do bloco `:root` (os tokens), falha com:
 espaços (`margin`, `padding`, `gap`, `inset`, `top`/`right`/`bottom`/`left`) em px soltos em vez de `--space-*`;
 `font-size` fora dos estilos de texto `--fs-*`; `@media` que não seja a 980 ou a 640 px (as de preferência, como
-`prefers-reduced-motion`, passam); texto paper ou branco num seletor de `.s-clay` ou `.btn` sem fundo ink na mesma regra;
+`prefers-reduced-motion`, passam); texto escuro (ink, ink-deep, ink-raised, sage, muted, clay-deep, erro ou preto) sobre
+o vermelho: um `color` escuro numa regra com fundo clay ou num seletor de `.s-clay` ou `.btn` sem fundo claro (paper,
+white, bone) na mesma regra, um `--btn-fg`/`--btn-fg-h` escuro com `--btn-bg`/`--btn-bg-h` clay (também no `:root`) e um
+`--fg`, `--fg-2` ou `--fg-cat` escuro em `.s-clay`;
 qualquer animação `infinite`; e o movimento: durações e curvas que não sejam os tokens `--dur-1`/`--dur-2`/`--dur-3` e
 `--ease-out`/`--ease-in-out`, uma duração sem curva, um `--dur-*` acima de 500 ms, ou uma transição de algo que não seja
 `transform`, `opacity`, as cores ou `stroke-dashoffset` (nada de `width`, `top` ou `all`). As exceções são só `1px`
@@ -87,11 +91,18 @@ qualquer animação `infinite`; e o movimento: durações e curvas que não seja
 
 ## Sistema visual (`assets/css/site.css`)
 
+- **Cores**: verde e vermelho, a pedido do dono. Os papéis guardam o nome: `ink` (#12392b) é o verde-floresta, o escuro
+  principal (texto no claro, superfícies escuras, cabeçalho), com `ink-deep` e `ink-raised`; `clay` (#c8102e) é o
+  vermelho do acento (botões, traços do eyebrow, faixa de contacto) e `clay-deep` (#9b0d24) o vermelho do texto sobre o
+  claro; `amber` (#ff8a7a) é um vermelho claro, só para texto de acento e foco sobre o verde. Os neutros (`paper`,
+  `bone`, `line`, `muted`) puxam ao verde. O erro (`--erro`, #a3161a) não é o vermelho da marca: só texto e contorno,
+  sempre com um «!» num círculo antes da mensagem. O logótipo, os favicons e a imagem de partilha estão no mesmo verde.
 - **Superfícies**: cada secção tem `.s-paper`, `.s-bone`, `.s-ink` ou `.s-clay`, que definem `--fg`, `--fg-2`, `--fg-cat`,
-  `--rule`, `--eyebrow-rule`, `--focus-c` e as cores do botão. Os componentes só leem estas variáveis. No clay o texto é
-  ink (5,65:1), nunca paper.
-- **Botões**: `.btn` (clay com texto ink; ink com texto paper na faixa clay) e um só secundário, `.btn-ghost`, com a
-  mesma altura. Grupo `.acoes` (no telemóvel, todos a toda a largura). Ligações: `.link` e `.link-seta`.
+  `--rule`, `--eyebrow-rule`, `--focus-c` e as cores do botão. Os componentes só leem estas variáveis. No clay (vermelho)
+  o texto é branco (5,9:1), nunca ink (2,2:1). O anel de foco é ink no claro, amber no ink e branco no clay.
+- **Botões**: `.btn` (clay com texto branco; na faixa clay, paper com texto ink) e um só secundário, `.btn-ghost` (na
+  faixa clay, com contorno branco), com a mesma altura. Grupo `.acoes` (no telemóvel, todos a toda a largura).
+  Ligações: `.link` e `.link-seta`.
 - **Texto**: 10 estilos (`--fs-display-hero`, `--fs-section`, `--fs-cta`, `--fs-card`, `--fs-step`, `--fs-list`,
   `--fs-lead`, `--fs-body`, `--fs-category` de 13 px, `--fs-phone`) e `--fs-label` para as etiquetas de formulário.
   Os campos têm 16 px.
@@ -131,7 +142,7 @@ imagens, nenhuma fotografia ampliada para lá do original (o hero a 375 px, os c
 nenhuma animação sem fim nem acima de 500 ms, o movimento (o menu que vira X e sai no fim da transição, o
 cabeçalho compacto, os vistos em cascata, o fade das fotografias, o indicador de envio, o CLS abaixo de 0,05 e, com
 movimento reduzido, nada a animar nem a deslocar-se), e o sistema visual: o h1 do hero e os cabeçalhos de secção no x do logótipo, contraste de
-4,5:1 nos botões e na faixa clay, o anel de foco da cor de cada superfície, campos de 16 px e etiquetas de 13 px, a altura da página inicial (menos de 6.000 px a 390, até 4.400 a 1440, medida numa cópia com os dados da Melperfaz
+4,5:1 nos botões e na faixa clay (branco sobre o vermelho), o anel de foco da cor de cada superfície, o erro com o seu «!» (não se confunde com o vermelho dos botões), campos de 16 px e etiquetas de 13 px, a altura da página inicial (menos de 6.000 px a 390, até 4.400 a 1440, medida numa cópia com os dados da Melperfaz
 vazios: preenchidos, acrescentam linhas que não são o desenho), a legenda dos cartões (sobre a fotografia; a 390 px por baixo, menos nas obras em destaque), o cartão inteiro como
 ligação, as miniaturas dos serviços com 64 px, os títulos sem uma palavra sozinha na última linha, os botões de cada
 grupo com a mesma altura e a barra de ações em terços, sem nada fora do ecrã. O CI

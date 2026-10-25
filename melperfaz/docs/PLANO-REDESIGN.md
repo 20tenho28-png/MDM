@@ -246,7 +246,7 @@ Cabeçalho reduzido, sem ActionBar e sem "Pedir Orçamento" no rodapé.
 
 ### Tokens (de `tokens.css`, sem valores novos inventados)
 
-- **Cor**: `--ink #1b2540`, `--clay #e08a1e`, `--clay-deep`, `--amber #f0a838`, `--paper`, `--bone`, `--white`, `--muted #5c6479`, `--line`, `--ink-deep`, `--ink-raised`, `--bone-70/-15`, `--overlay`, `--whatsapp`. O foco usa `--focus` (ink) e `--focus-on-ink` (amber).
+- **Cor**: `--ink #1b2540`, `--clay #e08a1e`, `--clay-deep`, `--amber #f0a838`, `--paper`, `--bone`, `--white`, `--muted #5c6479`, `--line`, `--ink-deep`, `--ink-raised`, `--bone-70/-15`, `--overlay`, `--whatsapp`. O foco usa `--focus` (ink) e `--focus-on-ink` (amber). *Mudado a pedido do dono:* os valores são agora verde e vermelho, com os mesmos nomes (ver «Onde o site construído difere do plano», ponto 13).
 - **Espaço** (só estes): `--space-2, 6, 12, 16, 18, 22, 26, 32, 36, 38, 44, 50, 60, 64, 80, 90, 110`.
 - **Bordas e raios**: hairline 1, control 1.5, rule 2. Raio 0 em todo o lado (o pill deixa de ser usado).
 - **Layout**: `--container 1240px`, `--sec-head-width 640px`, `--nav-height 78px`, `--photo-row 300px`.
@@ -267,6 +267,9 @@ Cabeçalho reduzido, sem ActionBar e sem "Pedir Orçamento" no rodapé.
 | paper / bone | ink | muted | clay | ink |
 | ink | bone | bone-70 | amber | amber |
 | clay | **ink** | ink (sem opacidade) | **ink** | ink |
+
+*Mudado a pedido do dono* (ponto 13 de «Onde o site construído difere do plano»): com o clay vermelho, a linha do clay
+passa a branco em tudo (texto, secundário, traço e foco), e o botão na faixa a paper com texto ink.
 
 - Duas secções ink nunca se tocam. A CtaBand clay é a última antes do rodapé ink (exceto em `orcamento`; nas obras vem a seguir uma secção bone).
 
@@ -294,6 +297,9 @@ As etiquetas de formulário ficam em 0.875rem, sem maiúsculas. Apagar o `.prosa
 - Nunca usar clay como cor de texto sobre superfícies claras: o eyebrow é ink e só o traço de 34px é clay.
 - Foco: `:focus-visible { outline: 3px solid var(--focus-c); outline-offset: 3px }`.
 - Atualizar o DESIGN.md: "paper sobre clay" passa a ser proibido.
+- *Mudado a pedido do dono* (ponto 13 de «Onde o site construído difere do plano»): com o clay vermelho, é o contrário.
+  O `.btn` é clay com texto branco (5,9:1), na faixa clay é paper com texto ink, e o proibido é texto escuro sobre o
+  vermelho (ink sobre clay dá 2,2:1).
 
 ### Componentes permitidos (e mais nenhum)
 
@@ -559,6 +565,19 @@ testes (`tests/site.test.mjs` e `tests/browser.mjs`) conferem o que está constr
 12. **Por fazer, de propósito**: com 400% de zoom (320x256) o cabeçalho fixo e a ActionBar ocupam quase metade do ecrã.
     O foco já nunca fica tapado (o scroll reserva a altura da barra), mas soltar o cabeçalho em ecrãs muito baixos
     precisava de um `@media (max-height: …)`, que a regra das quebras (só 980 e 640px) não deixa. Fica para decidir.
+13. **Verde e vermelho, a pedido do dono** (depois do redesenho). O azul-marinho e o laranja deram lugar ao verde e ao
+    vermelho. Os nomes dos papéis ficam, para o código continuar legível: `ink` é o verde-floresta #12392b (`ink-deep`
+    #0a2a1f, `ink-raised` #194634, `sage` #3b5a4a), `clay` o vermelho #c8102e (`clay-deep` #9b0d24, o vermelho do texto
+    sobre o claro) e `amber` um vermelho claro, #ff8a7a, só para texto de acento e foco sobre o verde. Os neutros puxam
+    ao verde (`paper` #f7f9f5, `bone` #edf2ec, `line` #d3ddd4, `muted` #56645b) e os `rgba()` saem dos verdes novos.
+    As regras de cor viram-se com o vermelho: no clay o texto é branco (5,9:1), nunca ink (2,2:1); na faixa clay o botão
+    é paper com texto ink, o ghost tem contorno branco e o foco é branco (ink no claro, amber no ink). O `--check`
+    passou a recusar texto escuro sobre o vermelho. Dois acertos à paleta proposta, medidos: o `ink-raised` ficou um
+    passo mais escuro do que o #1f5640 (o `.cat` amber da legenda dos cartões no telemóvel ficava a 3,7:1; agora 4,66:1)
+    e a faixa da legenda passou de 85% para 90% de `ink-deep` (o `.cat` amber sobre uma fotografia branca ficava a
+    4,2:1; agora 5:1). O erro (`--erro` #a3161a) não usa o vermelho da marca: é só texto e contorno, com um «!» branco
+    num círculo antes da mensagem. O logótipo, os favicons e a imagem de partilha foram recoloridos para o verde (o
+    logótipo branco fica igual); as fotografias não mudam.
 
 ---
 

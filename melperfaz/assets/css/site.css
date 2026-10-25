@@ -1,5 +1,5 @@
 /* Melperfaz, Construção Civil, Lda.: sistema visual (design system «Melperfaz», tokens.css + components/bundle.css).
-   Azul-marinho (ink) e laranja de obra (clay), cantos vivos, títulos em Fraunces, texto em Archivo, fotografias reais.
+   Verde-floresta (ink) e vermelho (clay), cantos vivos, títulos em Fraunces, texto em Archivo, fotografias reais.
    Tipos de letra alojados com o site (sem pedidos a terceiros); Fraunces e Archivo em ficheiros variáveis, só latim. */
 
 @font-face { font-family: 'Fraunces'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(../fonts/fraunces-latin-400-700-normal.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
@@ -11,36 +11,47 @@
    --space-*, tamanhos de letra em --fs-*, @media a 980 e 640 px, durações e curvas em --dur-* e --ease-* e nada
    «infinite». Exceções: 1px (hairline), env() e 0s. */
 :root {
-  --ink: #1b2540;
-  --bone: #eef1f6;
-  --paper: #f7f8fb;
-  --clay: #e08a1e;
-  --clay-deep: #bd6f10;
-  --sage: #3a4763;
-  --line: #d4d9e3;
-  --muted: #5c6479;
-  --shadow: rgba(27,37,64,0.14);
+  /* verde e vermelho (a pedido do dono): ink é agora verde-floresta e clay é vermelho. Os nomes dos papéis ficam (ink, o
+     escuro principal: texto no claro, superfícies escuras, cabeçalho; clay, o acento: botões, traços, faixa de contacto)
+     e os neutros (paper, bone, line, muted) puxam ao verde. No vermelho o texto é branco (5,9:1), nunca ink (2,2:1) */
+  --ink: #12392b;
+  --bone: #edf2ec;
+  --paper: #f7f9f5;
+  --clay: #c8102e;
+  /* o vermelho do texto sobre o claro (8:1 sobre paper) */
+  --clay-deep: #9b0d24;
+  --sage: #3b5a4a;
+  --line: #d3ddd4;
+  --muted: #56645b;
+  --shadow: rgba(18,57,43,0.14);
   --white: #ffffff;
-  --amber: #f0a838;
-  --ink-deep: #0f1628;
-  --ink-raised: #2c3a5e;
-  --bone-70: rgba(238,241,246,0.7);
-  --bone-60: rgba(238,241,246,0.6);
-  --bone-50: rgba(238,241,246,0.5);
-  --bone-15: rgba(238,241,246,0.15);
-  --bone-07: rgba(238,241,246,0.07);
-  --bone-05: rgba(238,241,246,0.05);
-  --overlay: rgba(15,22,40,0.85);
-  --overlay-soft: rgba(15,22,40,0.1);
-  --overlay-menu: rgba(15,22,40,0.5);
+  /* vermelho claro: só texto de acento e foco sobre o verde (5,6:1 sobre ink); nunca sobre o claro (2,2:1) */
+  --amber: #ff8a7a;
+  --ink-deep: #0a2a1f;
+  /* um passo mais escuro do que o #1f5640 da paleta: a legenda dos cartões no telemóvel assenta nele, e o .cat amber
+     ficava a 3,7:1 (agora 4,66:1) */
+  --ink-raised: #194634;
+  --bone-70: rgba(237,242,236,0.7);
+  --bone-60: rgba(237,242,236,0.6);
+  --bone-50: rgba(237,242,236,0.5);
+  --bone-15: rgba(237,242,236,0.15);
+  --bone-07: rgba(237,242,236,0.07);
+  --bone-05: rgba(237,242,236,0.05);
+  /* a faixa da legenda dos cartões: ink-deep a 90% (a 85% o .cat amber sobre uma fotografia branca ficava a 4,2:1) */
+  --overlay: rgba(10,42,31,0.9);
+  --overlay-soft: rgba(10,42,31,0.1);
+  --overlay-menu: rgba(10,42,31,0.5);
   /* o escurecer do cartão de obra com o rato, por cima do degradê do design system (os dois juntos dão o de antes) */
-  --overlay-hover: linear-gradient(to top, transparent 0%, rgba(15,22,40,0.47) 45%, rgba(15,22,40,0.35) 70%, rgba(15,22,40,0.15) 100%);
+  --overlay-hover: linear-gradient(to top, transparent 0%, rgba(10,42,31,0.47) 45%, rgba(10,42,31,0.35) 70%, rgba(10,42,31,0.15) 100%);
   --whatsapp: #25d366;
-  --erro: #b3261e;
+  /* o erro não é o vermelho da marca: mais escuro, só em texto e contorno (nunca um fundo cheio, como os botões) e
+     sempre com o sinal «!» num círculo antes da mensagem (pag-orcamento.css) */
+  --erro: #a3161a;
   --focus: var(--ink);
   --focus-on-ink: var(--amber);
-  --shadow-tag: 0 20px 50px rgba(27,37,64,0.14);
-  --shadow-badge: 0 14px 36px rgba(27,37,64,0.14);
+  --focus-on-clay: var(--white);
+  --shadow-tag: 0 20px 50px rgba(18,57,43,0.14);
+  --shadow-badge: 0 14px 36px rgba(18,57,43,0.14);
   --shadow-knob: 0 4px 14px rgba(0,0,0,0.3);
   --space-2: 2px; --space-6: 6px; --space-12: 12px; --space-16: 16px; --space-18: 18px; --space-22: 22px; --space-26: 26px;
   --space-32: 32px; --space-36: 36px; --space-38: 38px; --space-44: 44px; --space-50: 50px; --space-60: 60px; --space-64: 64px;
@@ -69,7 +80,7 @@
   /* superfície por omissão (paper): cada .s-* redefine estas variáveis e os componentes só leem estas */
   --bg: var(--paper); --fg: var(--ink); --fg-2: var(--muted); --fg-cat: var(--muted); --rule: var(--line);
   --eyebrow-rule: var(--clay); --focus-c: var(--focus);
-  --btn-bg: var(--clay); --btn-fg: var(--ink); --btn-bg-h: var(--ink); --btn-fg-h: var(--paper);
+  --btn-bg: var(--clay); --btn-fg: var(--white); --btn-bg-h: var(--ink); --btn-fg-h: var(--paper);
   /* movimento: três durações (nenhuma passa de 500 ms) e duas curvas; só se anima transform, opacity, as cores e o
      traço dos ícones. --cascata separa os elementos de uma grelha ou de uma lista que entram juntos; --espera-js é
      quanto a página espera pelo site.js antes de mostrar tudo sem animação (rede lenta, bloqueador) */
@@ -79,16 +90,18 @@
 }
 
 /* ── Superfícies: a superfície decide a cor do texto, do traço do eyebrow, do botão e do foco ──
-   paper e bone: texto ink, foco ink; ink: texto bone, traço e foco amber; clay: texto ink (5,65:1), nunca paper */
+   paper e bone: texto ink (verde), foco ink, botão clay (vermelho) com texto branco; ink: texto bone, traço e foco
+   amber (vermelho claro), botão clay com texto branco; clay: texto, traço e foco brancos (5,9:1), nunca ink (2,2:1), e
+   o botão paper com texto ink (o ghost com contorno branco) */
 .s-paper, .s-bone { --fg: var(--ink); --fg-2: var(--muted); --fg-cat: var(--muted); --rule: var(--line); --eyebrow-rule: var(--clay); --focus-c: var(--focus);
-  --btn-bg: var(--clay); --btn-fg: var(--ink); --btn-bg-h: var(--ink); --btn-fg-h: var(--paper); color: var(--fg); }
+  --btn-bg: var(--clay); --btn-fg: var(--white); --btn-bg-h: var(--ink); --btn-fg-h: var(--paper); color: var(--fg); }
 .s-paper { --bg: var(--paper); background: var(--paper); }
 .s-bone { --bg: var(--bone); background: var(--bone); }
 .s-ink { --bg: var(--ink); --fg: var(--bone); --fg-2: var(--bone-70); --fg-cat: var(--amber); --rule: var(--bone-15); --eyebrow-rule: var(--amber);
-  --focus-c: var(--focus-on-ink); --btn-bg: var(--clay); --btn-fg: var(--ink); --btn-bg-h: var(--amber); --btn-fg-h: var(--ink);
+  --focus-c: var(--focus-on-ink); --btn-bg: var(--clay); --btn-fg: var(--white); --btn-bg-h: var(--amber); --btn-fg-h: var(--ink);
   background: var(--ink); color: var(--fg); }
-.s-clay { --bg: var(--clay); --fg: var(--ink); --fg-2: var(--ink); --fg-cat: var(--ink); --rule: var(--ink); --eyebrow-rule: var(--ink);
-  --focus-c: var(--focus); --btn-bg: var(--ink); --btn-fg: var(--paper); --btn-bg-h: var(--ink-deep); --btn-fg-h: var(--paper);
+.s-clay { --bg: var(--clay); --fg: var(--white); --fg-2: var(--white); --fg-cat: var(--white); --rule: var(--white); --eyebrow-rule: var(--white);
+  --focus-c: var(--focus-on-clay); --btn-bg: var(--paper); --btn-fg: var(--ink); --btn-bg-h: var(--ink); --btn-fg-h: var(--paper);
   background: var(--clay); color: var(--fg); }
 
 /* ── Base ── */
@@ -113,7 +126,9 @@ a { color: inherit; }
 button, input, select, textarea { font: inherit; color: inherit; }
 input, select, textarea { font-size: var(--fs-body); }
 main:focus { outline: none; }
-::selection { background: var(--clay); color: var(--ink); }
+::selection { background: var(--clay); color: var(--white); }
+/* na faixa clay a seleção vermelha não se via: lá é ink */
+.s-clay ::selection { background: var(--ink); color: var(--white); }
 /* grão de ruído sobre a página inteira, a 4% (sem eventos de rato) */
 body.grain::before { content: ""; position: fixed; inset: 0; z-index: var(--z-grain); pointer-events: none; opacity: .04; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 /* uma margem esquerda: todo o conteúdo começa na borda da .wrap (32 px; 16 px até 640 px) */
@@ -136,7 +151,7 @@ body.grain::before { content: ""; position: fixed; inset: 0; z-index: var(--z-gr
 /* ── Ícones (src/partials/icones.svg, {{icone nome}}): traço de 1,75 em currentColor, ao tamanho do texto ── */
 .icone { display: block; width: 1.25em; height: 1.25em; flex-shrink: 0; }
 
-/* ── Foco de teclado: um anel por superfície (ink no claro e no clay, amber no ink) ── */
+/* ── Foco de teclado: um anel por superfície (ink no claro, amber no ink, branco no clay) ── */
 :focus-visible { outline: 3px solid var(--focus-c); outline-offset: 3px; }
 
 /* ── Cabeçalho: logo, menu (Início, Obras), telefone, WhatsApp e «Pedir Orçamento»; abaixo de 980 px, logo e menu ──
@@ -153,8 +168,8 @@ body.grain::before { content: ""; position: fixed; inset: 0; z-index: var(--z-gr
 .topo-compacto .logo-img { transform: scale(.85); }
 .navlinks { display: flex; gap: var(--space-38); list-style: none; align-items: center; }
 .navlinks a { color: var(--ink); text-decoration: none; font-size: var(--fs-category); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; position: relative; white-space: nowrap; display: inline-flex; align-items: center; min-height: var(--alvo); }
-/* o traço clay por baixo é decoração ao passar o rato; o texto fica sempre ink (clay sobre paper não chega a 4,5:1). Na
-   página atual o traço é o único sinal do estado: fica clay-deep (3,6:1 sobre paper, acima dos 3:1 de um elemento) */
+/* o traço clay por baixo é decoração ao passar o rato; o texto fica sempre ink. Na página atual o traço é o único
+   sinal do estado: fica clay-deep (8:1 sobre paper, acima dos 3:1 de um elemento) */
 .navlinks a::after { content: ""; position: absolute; left: 0; bottom: var(--space-6); width: 100%; height: var(--border-rule); background: var(--clay); transform: scaleX(0); transform-origin: left; transition: transform var(--dur-2) var(--ease-out); }
 .navlinks a:hover::after { transform: none; }
 .navlinks a[aria-current="page"]::after { transform: none; background: var(--clay-deep); }
@@ -223,7 +238,7 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
 .link-seta:hover .i-seta, .link-seta:focus-visible .i-seta, .pg:hover .pg-ver .i-seta, .pg:has(a:focus-visible) .pg-ver .i-seta { transform: translateX(5px); }
 .links { display: flex; flex-direction: column; align-items: flex-start; }
 
-/* ── Eyebrow: texto da cor da superfície e traço de 34 px (clay no claro, amber no ink, ink no clay) ── */
+/* ── Eyebrow: texto da cor da superfície e traço de 34 px (clay no claro, amber no ink, branco no clay) ── */
 .eyebrow { display: inline-flex; align-items: center; gap: var(--space-12); font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .16em; color: var(--fg); margin-bottom: var(--space-26); }
 .eyebrow::before { content: ""; width: 34px; height: var(--border-rule); background: var(--eyebrow-rule); flex-shrink: 0; }
 .cat { display: block; font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--fg-cat); }
@@ -234,7 +249,7 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
 /* os filhos da grelha ocupam a coluna inteira: o h1 começa na borda da .wrap, como o logótipo */
 .hero-grid > * { width: 100%; min-width: 0; }
 .hero h1 { font-size: var(--fs-display-hero); margin-bottom: var(--space-26); }
-/* o itálico fica em clay-deep (3,6:1, texto grande): clay puro sobre paper não chega a 3:1 */
+/* o itálico fica em clay-deep, o vermelho do texto sobre o claro (8:1) */
 .hero h1 em { font-style: italic; color: var(--clay-deep); }
 .hero .lead { font-size: var(--fs-lead); color: var(--fg-2); max-width: 480px; margin-bottom: var(--space-38); }
 .hero-apoio { margin-top: var(--space-18); font-size: var(--fs-label); color: var(--fg-2); }
@@ -306,14 +321,14 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
 .pg::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--overlay-hover); opacity: 0; pointer-events: none; transition: opacity var(--dur-2) var(--ease-out); }
 .pg:hover::before { opacity: 1; }
 .pg:hover img { transform: scale(1.05); }
-/* a legenda assenta numa faixa --overlay (85% de ink-deep) que sobe 22 px em degradê acima do texto: mesmo sobre a
-   parte mais clara de uma fotografia (branco), o .cat amber fica acima de 5:1 e o título bone acima de 10:1. O
+/* a legenda assenta numa faixa --overlay (90% de ink-deep) que sobe 22 px em degradê acima do texto: mesmo sobre a
+   parte mais clara de uma fotografia (branco), o .cat amber fica a 5:1 e o título bone a 10:1. O
    degradê é um ::before em fluxo, puxado para cima pelas margens (a legenda não é posicionada: assim a ligação do
    título cobre o cartão inteiro, e não só a legenda) */
 .pg figcaption { padding: var(--pg-pad); background-color: var(--overlay); }
 .pg figcaption::before { content: ""; display: block; height: var(--space-22); margin: calc(-1 * (var(--space-22) + var(--pg-pad))) calc(-1 * var(--pg-pad)) var(--pg-pad); background: linear-gradient(to top, var(--overlay), transparent); pointer-events: none; }
 /* «Antes e depois» na obra que tem o comparador */
-.pg-tag { display: inline-block; margin-bottom: var(--space-6); padding: var(--space-2) var(--space-6); background: var(--clay); color: var(--ink); font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
+.pg-tag { display: inline-block; margin-bottom: var(--space-6); padding: var(--space-2) var(--space-6); background: var(--clay); color: var(--white); font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
 .pg figcaption h2, .pg figcaption h3 { font-size: var(--fs-card); margin-top: var(--space-6); color: inherit; line-height: 1.15; }
 .pg-ver { display: flex; align-items: center; gap: var(--space-6); margin-top: var(--space-12); font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--amber); opacity: 0; transform: translateY(6px); transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out); }
 .pg:hover .pg-ver, .pg:has(a:focus-visible) .pg-ver { opacity: 1; transform: none; }
@@ -351,7 +366,7 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
    da pega (3) fica sempre por cima das duas */
 .ba-tag { position: absolute; bottom: var(--space-16); font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; padding: var(--space-6) var(--space-12); pointer-events: none; white-space: nowrap; }
 .tag-before { left: var(--space-16); background: var(--ink); color: var(--paper); }
-.tag-after { right: var(--space-16); z-index: 1; background: var(--clay); color: var(--ink); }
+.tag-after { right: var(--space-16); z-index: 1; background: var(--clay); color: var(--white); }
 /* o range cobre o comparador mas deixa passar o deslize vertical (pan-y); o foco desenha-se à volta da pega. O anel
    fica sobre uma fotografia, não sobre uma superfície: ink encostado à pega branca e um halo branco por fora, para se
    ver sobre a parte escura e sobre a clara (a sombra da pega fica) */
@@ -406,7 +421,7 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
 .trust-foto .frame { aspect-ratio: 4 / 3; }
 .trust-foto figcaption { margin-top: var(--space-6); }
 
-/* ── Faixa de contacto (CtaBand, clay: texto, traços e foco ink) ── */
+/* ── Faixa de contacto (CtaBand, clay: texto, traços e foco brancos; botão paper com texto ink, ghost com contorno branco) ── */
 .cta { position: relative; overflow: hidden; }
 .cta::before { content: ""; position: absolute; top: -50%; right: -10%; width: 600px; height: 600px; border: 60px solid var(--bone-07); border-radius: var(--radius-round); pointer-events: none; }
 .cta-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: var(--space-60); align-items: center; position: relative; z-index: 2; }
@@ -497,7 +512,7 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
 /* o NIF (nove algarismos) não parte a meio */
 .sem-quebra { white-space: nowrap; }
 
-/* ── Barra de ações (ActionBar): só abaixo de 980 px, fixa em baixo; Ligar e WhatsApp ink, Orçamento clay com texto ink ── */
+/* ── Barra de ações (ActionBar): só abaixo de 980 px, fixa em baixo; Ligar e WhatsApp ink, Orçamento clay com texto branco ── */
 .barra { display: none; }
 
 /* ── Entrada ao fazer scroll (site.js põe .in): sobe 16 px em 500 ms; numa grelha, os que entram juntos seguem-se
@@ -544,7 +559,7 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
   .barra { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-barra); background: var(--ink); padding-bottom: env(safe-area-inset-bottom); border-top: var(--border-hairline) solid var(--bone-15); }
   .barra-cel { display: flex; flex-wrap: wrap; align-items: center; align-content: center; justify-content: center; gap: 0 min(var(--space-6), 1.25vw); min-width: 0; min-height: var(--barra-height); padding: 0 var(--space-2); color: var(--bone); text-decoration: none; font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: clamp(.02em, calc(.02em + (100vw - 320px) * .01625), .07em); overflow-wrap: anywhere; text-align: center; --focus-c: var(--focus-on-ink); }
   .barra-cel + .barra-cel { border-left: var(--border-hairline) solid var(--bone-15); }
-  .barra-orc { background: var(--clay); color: var(--ink); --focus-c: var(--focus); }
+  .barra-orc { background: var(--clay); color: var(--white); --focus-c: var(--focus-on-clay); }
   .barra-cel:focus-visible { outline-offset: -4px; }
   body.com-barra { padding-bottom: calc(var(--barra-height) + env(safe-area-inset-bottom)); }
   /* a barra fixa não tapa o foco: ao tabular (e nas âncoras) o browser para o elemento acima dela, como faz com o

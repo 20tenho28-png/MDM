@@ -1,9 +1,10 @@
 /* O site no browser (Playwright): gera numa pasta temporária (MELPERFAZ_OUT) e serve-a num servidor local que guarda cada
    envio do formulário como o Netlify Forms o receberia e pode falhar de propósito. Casos:
    A. o pedido (orcamento.html, o único formulário) segue com os campos certos e abre obrigado.html (um só sucesso);
-   B. a validação em português: sem nome e telefone não segue; telefone curto; email estranho; corrigido, segue;
-   C. o servidor falha: o alerta recebe o foco, com o telefone e o WhatsApp (nome e tipo escritos), o que se escreveu
-      fica, e a segunda tentativa segue;
+   B. a validação em português: sem nome e telefone não segue; telefone curto; email estranho; corrigido, segue; o erro
+      em --erro com o «!» num círculo (não se confunde com o vermelho dos botões);
+   C. o servidor falha: o alerta recebe o foco, com o telefone e o WhatsApp (nome e tipo escritos) e o «!», o que se
+      escreveu fica, e a segunda tentativa segue;
    D. sem JavaScript: o envio normal chega a /obrigado.html com os campos;
    E. o tipo de obra pré-escolhido: pela lista de serviços e pelo ?tipo= (e ?de=) da ficha de obra, em orcamento.html, com
       «Pedido para: X · alterar» e o ?de= no campo «pagina»; os endereços antigos da página inicial (#contacto, ?tipo=)
@@ -21,8 +22,9 @@
       todas as imagens carregam; o menu marca a página atual; obras.html mostra todas as obras, sem filtros, agrupadas
       por serviço (o índice leva a cada grupo; H1 › H2 › H3);
    K. movimento reduzido; nenhuma animação sem fim;
-   L. o sistema visual: uma margem esquerda (h1 do hero, logótipo e cabeçalhos de secção no mesmo x), contraste de 4,5:1
-      nos botões, na barra e no texto da faixa clay, o anel de foco da cor da superfície, campos com 16 px e etiquetas com 13 px;
+   L. o sistema visual (verde e vermelho): uma margem esquerda (h1 do hero, logótipo e cabeçalhos de secção no mesmo x),
+      contraste de 4,5:1 nos botões, na barra e no texto da faixa clay (branco sobre o vermelho), o anel de foco da cor
+      da superfície (ink no claro, amber no ink, branco no clay), campos com 16 px e etiquetas com 13 px;
       a legenda dos cartões sobre a fotografia (a 390 px só nas obras em destaque, com cartões de 280 px; nas outras por
       baixo, em 4/3 ou 4/5), o cartão inteiro é a ligação e a legenda cresce com o texto; a página inicial (o desenho, sem os
       dados da Melperfaz) em menos de 6.000 px a 390 e até 4.400 a 1440, com as miniaturas dos serviços de 64 px a todas as
@@ -116,6 +118,15 @@ try {
     ok((await page.textContent('#eNome')).includes('nome') && (await page.textContent('#eTel')).includes('telefone'), 'B: erros em português no nome e no telefone');
     ok(await page.evaluate(() => document.activeElement.id === 'qNome'), 'B: o foco vai ao primeiro campo com erro');
     ok(await page.getAttribute('#qNome', 'aria-invalid') === 'true', 'B: aria-invalid no nome');
+    // o erro lê-se como erro, não como o vermelho da marca: texto --erro (mais escuro do que o clay) com o «!» branco num
+    // círculo antes da mensagem (só visual: o texto alternativo é vazio); uma mensagem vazia não tem sinal
+    const sinal = await page.evaluate(() => {
+      const s = getComputedStyle(document.querySelector('#eNome'), '::before'), raiz = getComputedStyle(document.documentElement);
+      return { content: s.content, fundo: s.backgroundColor, cor: s.color, raio: s.borderRadius, texto: getComputedStyle(document.querySelector('#eNome')).color,
+        clay: raiz.getPropertyValue('--clay').trim(), vazio: getComputedStyle(document.querySelector('#eEmail'), '::before').content };
+    });
+    ok(sinal.content === '"!" / ""' && sinal.fundo === 'rgb(163, 22, 26)' && sinal.cor === 'rgb(255, 255, 255)' && sinal.raio === '50%'
+      && sinal.texto === 'rgb(163, 22, 26)' && sinal.clay === '#c8102e' && sinal.vazio === 'none', 'B: o erro com o «!» num círculo, em --erro e não no clay dos botões', sinal);
     await preenche(page, { telefone: '1234', email: 'ana@' });
     await page.click('#sendBtn');
     await page.waitForTimeout(200);
@@ -140,6 +151,8 @@ try {
     const alerta = await page.textContent('#formAlerta');
     ok(alerta.startsWith('O pedido não seguiu. Tente outra vez, ligue 961 245 288 ou envie por WhatsApp.'), 'C: a mensagem nova do aviso', alerta);
     ok(await page.evaluate(() => document.activeElement.id === 'formAlerta'), 'C: o foco vai para o aviso');
+    const sinalAviso = await page.evaluate(() => { const a = document.querySelector('#formAlerta'), s = getComputedStyle(a, '::before'); return { content: s.content, fundo: s.backgroundColor, borda: getComputedStyle(a).borderTopColor, fundoAviso: getComputedStyle(a).backgroundColor }; });
+    ok(sinalAviso.content === '"!" / ""' && sinalAviso.fundo === 'rgb(163, 22, 26)' && sinalAviso.borda === 'rgb(163, 22, 26)' && sinalAviso.fundoAviso === 'rgb(255, 255, 255)', 'C: o aviso com o «!» e contorno --erro sobre branco (não um fundo vermelho cheio, como um botão)', sinalAviso);
     ok(await page.getAttribute('#formAlerta a[href^="tel:"]', 'href') === 'tel:+351961245288', 'C: o aviso liga para o telefone');
     const waErro = await page.getAttribute('#formAlerta a[href^="https://wa.me/"]', 'href');
     ok(waErro && decodeURIComponent(waErro.split('?text=')[1]) === SITE.wa.erro.replace('{nome}', 'Rui Falha').replace('{tipo}', 'Apartamentos'), 'C: o WhatsApp do aviso leva o nome e o tipo escritos', waErro);
@@ -402,7 +415,7 @@ try {
     ok(await page.getAttribute('[data-ba-range]', 'aria-valuetext') === 'Demolição 21%, acabamento 79%', 'I: o leitor de ecrã ouve quanto se vê de cada fotografia (aria-valuetext)', await page.getAttribute('[data-ba-range]', 'aria-valuetext'));
     // o anel de foco sobre a fotografia: ink encostado à pega branca e um halo branco por fora (WCAG 1.4.11)
     const anelBa = await page.evaluate(() => { const s = getComputedStyle(document.querySelector('.ba-arrows')); return { c: s.outlineColor, o: s.outlineOffset, w: s.outlineWidth, sombra: s.boxShadow }; });
-    ok(anelBa.c === 'rgb(27, 37, 64)' && anelBa.o === '0px' && anelBa.w === '3px' && anelBa.sombra.includes('rgb(255, 255, 255) 0px 0px 0px 6px'), 'I: o anel de foco da pega: ink sobre o branco da pega, com halo branco', anelBa);
+    ok(anelBa.c === 'rgb(18, 57, 43)' && anelBa.o === '0px' && anelBa.w === '3px' && anelBa.sombra.includes('rgb(255, 255, 255) 0px 0px 0px 6px'), 'I: o anel de foco da pega: ink sobre o branco da pega, com halo branco', anelBa);
     // o rato: um clique na fotografia põe a linha nesse sítio (sem arrastar, WCAG 2.5.7); arrastar a partir da pega (até
     // 32 px dela) também a mexe
     await page.locator('[data-ba-range]').fill('50');
@@ -467,7 +480,7 @@ try {
     await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
     await page.keyboard.press('Tab');
     ok(await page.evaluate(() => document.activeElement.className === 'skip'), 'J: a primeira tabulação é «Saltar para o conteúdo»');
-    ok(await page.evaluate(() => getComputedStyle(document.activeElement).outlineColor) === 'rgb(27, 37, 64)', 'J: o anel do «Saltar» é ink, sobre o cabeçalho paper (o amber ficava a 1,9:1)');
+    ok(await page.evaluate(() => getComputedStyle(document.activeElement).outlineColor) === 'rgb(18, 57, 43)', 'J: o anel do «Saltar» é ink, sobre o cabeçalho paper (o amber ficava a 2,2:1)');
     await page.keyboard.press('Enter');
     await page.waitForTimeout(200);
     ok(await page.evaluate(() => document.activeElement.id === 'conteudo' || location.hash === '#conteudo'), 'J: saltar para o conteúdo');
@@ -554,7 +567,7 @@ try {
       ok(fracos.length === 0, `L: ${f} botões e faixa clay com 4,5:1 ou mais`, fracos);
     }
     {
-      // a barra de ações (só abaixo de 980 px): Ligar e WhatsApp bone sobre ink, Orçamento ink sobre clay
+      // a barra de ações (só abaixo de 980 px): Ligar e WhatsApp bone sobre ink, Orçamento branco sobre clay (vermelho)
       const m = await pagina({ viewport: { width: 390, height: 800 } });
       await m.page.goto(srv.base + '/obras.html', { waitUntil: 'networkidle' });
       const cels = await m.page.evaluate(contrastes.toString().replace("[...document.querySelectorAll('.btn'),", "[...document.querySelectorAll('.btn, .barra-cel'),").replace(/^\(\) =>/, '(() =>') + ')()');
@@ -562,24 +575,32 @@ try {
       ok(barra.length === 3 && barra.every(c => c.c >= 4.5), 'L: a barra de ações com 4,5:1 ou mais', barra);
       await m.ctx.close();
     }
-    // o anel de foco: ink sobre paper (hero) e sobre clay (faixa de contacto), amber sobre ink (obras)
+    // o anel de foco: ink sobre paper (hero), amber sobre ink (obras) e branco sobre clay (a faixa de contacto vermelha)
     await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
     const anel = async sel => { await page.focus(sel); return page.evaluate(() => { const s = getComputedStyle(document.activeElement); return s.outlineStyle + ' ' + s.outlineWidth + ' ' + s.outlineColor; }); };
     await page.keyboard.press('Tab'); await page.keyboard.press('Shift+Tab');
-    ok(await anel('.hero .acoes .btn') === 'solid 3px rgb(27, 37, 64)', 'L: foco ink no hero (paper)', await anel('.hero .acoes .btn'));
-    ok(await anel('#obras .obras-mais .btn') === 'solid 3px rgb(240, 168, 56)', 'L: foco amber nas obras (ink)', await anel('#obras .obras-mais .btn'));
-    ok(await anel('#contacto .cta-phone') === 'solid 3px rgb(27, 37, 64)', 'L: foco ink na faixa clay', await anel('#contacto .cta-phone'));
+    ok(await anel('.hero .acoes .btn') === 'solid 3px rgb(18, 57, 43)', 'L: foco ink no hero (paper)', await anel('.hero .acoes .btn'));
+    ok(await anel('#obras .obras-mais .btn') === 'solid 3px rgb(255, 138, 122)', 'L: foco amber nas obras (ink)', await anel('#obras .obras-mais .btn'));
+    ok(await anel('#contacto .cta-phone') === 'solid 3px rgb(255, 255, 255)', 'L: foco branco na faixa clay (vermelha)', await anel('#contacto .cta-phone'));
+    ok(await anel('#contacto .btn:not(.btn-ghost)') === 'solid 3px rgb(255, 255, 255)', 'L: foco branco no botão da faixa clay', await anel('#contacto .btn:not(.btn-ghost)'));
+    // na faixa vermelha: o botão paper com texto ink, o ghost com texto e contorno brancos, o texto branco (5,9:1)
+    const faixa = await page.evaluate(() => {
+      const c = s => getComputedStyle(document.querySelector(s)), b = c('#contacto .btn:not(.btn-ghost)'), g = c('#contacto .btn-ghost');
+      return { fundo: c('#contacto').backgroundColor, h2: c('#contacto h2').color, btn: [b.backgroundColor, b.color], ghost: [g.backgroundColor, g.color, g.boxShadow] };
+    });
+    ok(faixa.fundo === 'rgb(200, 16, 46)' && faixa.h2 === 'rgb(255, 255, 255)' && faixa.btn[0] === 'rgb(247, 249, 245)' && faixa.btn[1] === 'rgb(18, 57, 43)'
+      && faixa.ghost[0] === 'rgba(0, 0, 0, 0)' && faixa.ghost[1] === 'rgb(255, 255, 255)' && faixa.ghost[2].startsWith('rgb(255, 255, 255) 0px 0px 0px 1.5px inset'), 'L: a faixa vermelha com texto branco, o botão paper com texto ink e o ghost com contorno branco', faixa);
     const btn = await page.evaluate(() => { const b = getComputedStyle(document.querySelector('.hero .btn')), g = document.querySelector('.hero .btn-ghost'); return { bg: b.backgroundColor, cor: b.color, alturas: [document.querySelector('.hero .btn').offsetHeight, g.offsetHeight] }; });
-    ok(btn.bg === 'rgb(224, 138, 30)' && btn.cor === 'rgb(27, 37, 64)' && btn.alturas[0] === btn.alturas[1], 'L: «Pedir Orçamento» ink sobre clay e o ghost com a mesma altura', btn);
+    ok(btn.bg === 'rgb(200, 16, 46)' && btn.cor === 'rgb(255, 255, 255)' && btn.alturas[0] === btn.alturas[1], 'L: «Pedir Orçamento» branco sobre clay (vermelho) e o ghost com a mesma altura', btn);
     // o cartão de obra: o anel desenha-se por fora, na cor da superfície à volta (amber no ink, ink no bone e no paper)
     const anelCartao = async (sel) => { await page.focus(sel); return page.evaluate(s => { const c = document.querySelector(s).closest('.pg'), st = getComputedStyle(c); return st.outlineStyle + ' ' + st.outlineWidth + ' ' + st.outlineColor; }, sel); };
-    ok(await anelCartao('#obras .pg h3 a') === 'solid 3px rgb(240, 168, 56)', 'L: foco amber no cartão de obra sobre ink', await anelCartao('#obras .pg h3 a'));
+    ok(await anelCartao('#obras .pg h3 a') === 'solid 3px rgb(255, 138, 122)', 'L: foco amber no cartão de obra sobre ink', await anelCartao('#obras .pg h3 a'));
     await page.goto(`${srv.base}/obras/${OBRAS[0].slug}.html`, { waitUntil: 'networkidle' });
     await page.keyboard.press('Tab'); await page.keyboard.press('Shift+Tab');
-    ok(await anelCartao('.obra-rel .pg h3 a') === 'solid 3px rgb(27, 37, 64)', 'L: foco ink no cartão de obra sobre bone («Outras obras»)', await anelCartao('.obra-rel .pg h3 a'));
+    ok(await anelCartao('.obra-rel .pg h3 a') === 'solid 3px rgb(18, 57, 43)', 'L: foco ink no cartão de obra sobre bone («Outras obras»)', await anelCartao('.obra-rel .pg h3 a'));
     await page.goto(srv.base + '/obras.html', { waitUntil: 'networkidle' });
     await page.keyboard.press('Tab'); await page.keyboard.press('Shift+Tab');
-    ok(await anelCartao('section.s-bone .pg h3 a') === 'solid 3px rgb(27, 37, 64)', 'L: foco ink no cartão de obra num grupo bone de obras.html', await anelCartao('section.s-bone .pg h3 a'));
+    ok(await anelCartao('section.s-bone .pg h3 a') === 'solid 3px rgb(18, 57, 43)', 'L: foco ink no cartão de obra num grupo bone de obras.html', await anelCartao('section.s-bone .pg h3 a'));
     // a legenda do cartão sobre a fotografia (a todas as larguras: aqui a 1280 e, mais abaixo, a 390): o .cat amber e o
     // título bone com 4,5:1 ou mais mesmo no pior caso, a faixa da legenda por cima de uma fotografia toda branca (a cor
     // composta da faixa sobre branco)
@@ -664,7 +685,7 @@ try {
     await page.evaluate(() => scrollTo(0, document.querySelector('#obras').offsetTop + 200));
     await page.waitForTimeout(400);
     const topo = await page.evaluate(() => { const s = getComputedStyle(document.querySelector('.topo')); return { bg: s.backgroundColor, filtro: s.backdropFilter || 'none' }; });
-    ok(topo.bg === 'rgb(247, 248, 251)' && topo.filtro === 'none', 'L: o cabeçalho é paper opaco por cima das obras (ink)', topo);
+    ok(topo.bg === 'rgb(247, 249, 245)' && topo.filtro === 'none', 'L: o cabeçalho é paper opaco por cima das obras (ink)', topo);
     await ctx.close();
   }
   {
@@ -822,7 +843,7 @@ try {
     const { ctx, page } = await pagina();
     await page.goto(srv.base + '/obras.html', { waitUntil: 'networkidle' });
     const traco = await page.evaluate(() => getComputedStyle(document.querySelector('.navlinks a[aria-current="page"]'), '::after').backgroundColor);
-    ok(traco === 'rgb(189, 111, 16)', 'L: o traço da página atual no menu em clay-deep (3,6:1 sobre paper)', traco);
+    ok(traco === 'rgb(155, 13, 36)', 'L: o traço da página atual no menu em clay-deep (8:1 sobre paper)', traco);
     await page.emulateMedia({ forcedColors: 'active' });
     const bordas = await page.evaluate(() => Array.from(document.querySelectorAll('.btn, .topo-wa')).filter(e => e.getClientRects().length).map(e => getComputedStyle(e).borderTopStyle));
     ok(bordas.length > 1 && bordas.every(b => b === 'solid'), 'L: em contraste forçado os botões e o WhatsApp do cabeçalho com borda', bordas);

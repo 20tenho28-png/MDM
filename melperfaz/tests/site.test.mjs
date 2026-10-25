@@ -758,11 +758,30 @@ test('os parâmetros dos parciais: os declarados, os obrigatórios e nenhum a ma
 test('as folhas de estilo: superfícies, um só .btn-ghost, estilos de texto e nada retirado', () => {
   const css = le('assets/css/site.css');
   for (const s of ['s-paper', 's-bone', 's-ink', 's-clay']) assert.match(css, new RegExp(`\\.${s}\\b[^{]*\\{[^}]*--focus-c:`), `superfície ${s} com foco`);
-  // na faixa clay o texto, o traço do eyebrow e o foco são ink; o botão é ink com texto paper
+  // verde e vermelho: ink é o verde-floresta e clay o vermelho (os nomes dos papéis ficam), e o :root diz isso
+  const raiz = /:root \{([\s\S]*?)\n\}/.exec(css)[1];
+  for (const v of ['--ink: #12392b;', '--ink-deep: #0a2a1f;', '--sage: #3b5a4a;', '--clay: #c8102e;', '--clay-deep: #9b0d24;', '--amber: #ff8a7a;',
+    '--paper: #f7f9f5;', '--bone: #edf2ec;', '--line: #d3ddd4;', '--muted: #56645b;', '--whatsapp: #25d366;', '--erro: #a3161a;']) assert.ok(raiz.includes(v), `token ${v}`);
+  const raizFonte = /:root \{([\s\S]*?)\n\}/.exec(fs.readFileSync(path.join(W, 'assets/css/site.css'), 'utf8'))[1];
+  assert.match(raizFonte, /ink é agora verde-floresta e clay é vermelho/, 'o :root (na fonte) diz que ink é verde e clay vermelho');
+  // nenhuma cor do azul-marinho e do laranja de antes, nem um rgba() derivado deles
+  const todasCss = ['site.css', 'pag-obras.css', 'pag-paginas.css', 'pag-orcamento.css'].map(f => fs.readFileSync(path.join(W, 'assets/css', f), 'utf8')).join('\n');
+  for (const velha of ['#1b2540', '#0f1628', '#2c3a5e', '#3a4763', '#e08a1e', '#bd6f10', '#f0a838', '#eef1f6', '#f7f8fb', '#d4d9e3', '#5c6479', '#b3261e',
+    '27,37,64', '15,22,40', '238,241,246']) assert.ok(!todasCss.includes(velha), `sem a cor antiga ${velha}`);
+  // na faixa clay (vermelha) o texto, o traço do eyebrow e o foco são brancos; o botão é paper com texto ink
   const clay = /\.s-clay \{([^}]*)\}/.exec(css)[1];
-  for (const v of ['--fg: var(--ink)', '--eyebrow-rule: var(--ink)', '--focus-c: var(--focus)', '--btn-bg: var(--ink)']) assert.ok(clay.includes(v), `s-clay: ${v}`);
-  // o botão primário é ink sobre clay por omissão (5,65:1)
-  assert.match(css, /--btn-bg: var\(--clay\); --btn-fg: var\(--ink\);/);
+  for (const v of ['--fg: var(--white)', '--fg-2: var(--white)', '--eyebrow-rule: var(--white)', '--focus-c: var(--focus-on-clay)', '--btn-bg: var(--paper); --btn-fg: var(--ink)']) assert.ok(clay.includes(v), `s-clay: ${v}`);
+  assert.match(css, /--focus-on-clay: var\(--white\);/);
+  // o botão primário é branco sobre clay por omissão (5,9:1), e também nas secções ink
+  assert.match(css, /--btn-bg: var\(--clay\); --btn-fg: var\(--white\);/);
+  assert.match(/\.s-ink \{([^}]*)\}/.exec(css)[1], /--btn-bg: var\(--clay\); --btn-fg: var\(--white\);/);
+  // nada de texto ink sobre o vermelho: as etiquetas, a seleção e a célula «Orçamento» da barra são brancas
+  for (const sel of ['::selection', '.pg-tag', '.tag-after', '.barra-orc']) {
+    const r = new RegExp(`(?:^|\\n)\\s*${sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} \\{([^}]*)\\}`).exec(css)[1];
+    assert.match(r, /background: var\(--clay\); color: var\(--white\)/, `${sel}: branco sobre clay`);
+  }
+  // o erro distingue-se do vermelho da marca: o «!» num círculo antes da mensagem e do aviso
+  assert.match(le('assets/css/pag-orcamento.css'), /\.field-erro:not\(:empty\)::before, \.form-alerta::before \{ content: "!"; content: "!" \/ "";[^}]*border-radius: var\(--radius-round\); background: var\(--erro\); color: var\(--white\);/);
   assert.match(css, /\.btn-ghost \{[^}]*box-shadow: inset 0 0 0 var\(--border-control\) currentColor/);
   assert.match(css, /:focus-visible \{ outline: 3px solid var\(--focus-c\); outline-offset: 3px; \}/);
   assert.match(css, /input, select, textarea \{ font-size: var\(--fs-body\); \}/);
@@ -797,7 +816,7 @@ test('as folhas de estilo: superfícies, um só .btn-ghost, estilos de texto e n
   assert.doesNotMatch(/\.cta-phone-l \{([^}]*)\}/.exec(css)[1], /text-transform/, 'o horário fica como a Melperfaz o escreve («8h–18h»)');
   assert.doesNotMatch(/\.skip \{([^}]*)\}/.exec(css)[1], /--focus-c/, 'o «Saltar» com o anel ink');
   assert.match(css, /@media \(forced-colors: active\) \{ \.btn, \.topo-wa \{ border: var\(--border-control\) solid ButtonText; \} \}/);
-  assert.match(css, /\.navlinks a\[aria-current="page"\]::after \{ transform: none; background: var\(--clay-deep\); \}/, 'a página atual com o traço clay-deep (3,6:1)');
+  assert.match(css, /\.navlinks a\[aria-current="page"\]::after \{ transform: none; background: var\(--clay-deep\); \}/, 'a página atual com o traço clay-deep (8:1)');
   // o CSS e o JS publicados sem comentários (ficam nas fontes); as páginas também
   for (const f of ['site.css', 'pag-obras.css', 'pag-paginas.css', 'pag-orcamento.css']) assert.ok(!le(`assets/css/${f}`).includes('/*'), `${f} sem comentários`);
   assert.ok(!le('assets/js/site.js').includes('/*') && fs.readFileSync(path.join(W, 'assets/js/site.js'), 'utf8').includes('/*'), 'site.js sem comentários (as fontes com eles)');
@@ -811,13 +830,16 @@ test('as folhas de estilo: superfícies, um só .btn-ghost, estilos de texto e n
   assert.deepEqual([...new Set([...todas.matchAll(/@media \((?:max|min)-width: (\d+)px\)/g)].map(m => m[1]))].sort(), ['640', '980']);
 });
 
-test('o lint do --check: falha com px solto, tamanho de letra fora dos estilos, @media, texto claro no clay e infinite', () => {
+test('o lint do --check: falha com px solto, tamanho de letra fora dos estilos, @media, texto escuro no vermelho e infinite', () => {
   const d = copiaFontes();
   try {
     const p = path.join(d, 'assets/css/pag-paginas.css');
     fs.appendFileSync(p, '\n.x { margin: 10px 0; gap: 14px; }\n.y { font-size: .9rem; }\n@media (max-width: 760px) { .z { color: red; } }\n'
-      + '.s-clay .w { color: var(--paper); }\n.btn.v { color: var(--white); }\n@keyframes q { to { opacity: 0; } }\n.q { animation: q 1s infinite; }\n'
-      + '.so-ok { margin: -1px; padding: env(safe-area-inset-bottom); }\n.s-clay .btn-ok { background: var(--ink); color: var(--paper); }\n'
+      + '.s-clay .w { color: var(--ink); }\n.btn.v { color: var(--ink-deep); }\n@keyframes q { to { opacity: 0; } }\n.q { animation: q 1s infinite; }\n'
+      + '.etiqueta-v { background: var(--clay); color: var(--sage); }\n.s-clay.u { --fg: var(--ink); --fg-cat: var(--muted); }\n'
+      + '.s-bone.k { --btn-bg: var(--clay); --btn-fg: var(--ink); --btn-bg-h: var(--clay); --btn-fg-h: var(--ink-deep); }\n:root { --btn-bg: var(--clay); --btn-fg: black; }\n'
+      + '.so-ok { margin: -1px; padding: env(safe-area-inset-bottom); }\n.s-clay .btn-ok { background: var(--paper); color: var(--ink); }\n'
+      + '.vermelho-ok { background: var(--clay); color: var(--white); }\n.s-clay.claro-ok { --fg: var(--white); --btn-bg: var(--paper); --btn-fg: var(--ink); }\n'
       + '.t1 { transition: width .3s ease; }\n.t2 { transition: opacity var(--dur-2); }\n.t3 { animation: q 900ms cubic-bezier(.1,.2,.3,.4); }\n'
       + '.t4 { transition: all var(--dur-1) var(--ease-out); }\n:root { --dur-9: 700ms; }\n'
       + '.mov-ok { transition: transform var(--dur-1) var(--ease-out), color var(--dur-2) var(--ease-in-out); transition-delay: calc(var(--i, 0) * var(--cascata)); animation: q 0s var(--espera-js) forwards; }\n');
@@ -827,10 +849,16 @@ test('o lint do --check: falha com px solto, tamanho de letra fora dos estilos, 
     assert.match(r.stdout, /pag-paginas\.css: «\.x \{ gap: 14px \}»/);
     assert.match(r.stdout, /pag-paginas\.css: «\.y \{ font-size: \.9rem \}»: só os estilos de texto/);
     assert.match(r.stdout, /pag-paginas\.css: @media \(max-width: 760px\) \(só 980 e 640 px\)/);
-    assert.match(r.stdout, /«\.s-clay \.w \{ color: var\(--paper\) \}»: texto claro sobre clay/);
-    assert.match(r.stdout, /«\.btn\.v \{ color: var\(--white\) \}»: texto claro sobre clay/);
+    assert.match(r.stdout, /«\.s-clay \.w \{ color: var\(--ink\) \}»: texto escuro sobre vermelho/);
+    assert.match(r.stdout, /«\.btn\.v \{ color: var\(--ink-deep\) \}»: texto escuro sobre vermelho/);
+    assert.match(r.stdout, /«\.etiqueta-v \{ color: var\(--sage\) \}»: texto escuro sobre vermelho/, 'um fundo clay em qualquer regra');
+    assert.match(r.stdout, /«\.s-clay\.u \{ --fg: var\(--ink\) \}»: texto escuro sobre vermelho na faixa clay/);
+    assert.match(r.stdout, /«\.s-clay\.u \{ --fg-cat: var\(--muted\) \}»: texto escuro sobre vermelho na faixa clay/);
+    assert.match(r.stdout, /«\.s-bone\.k \{ --btn-fg: var\(--ink\) \}»: texto escuro num botão vermelho/);
+    assert.match(r.stdout, /«\.s-bone\.k \{ --btn-fg-h: var\(--ink-deep\) \}»: texto escuro num botão vermelho/);
+    assert.match(r.stdout, /«:root \{ --btn-fg: black \}»: texto escuro num botão vermelho/, 'também no :root');
     assert.match(r.stdout, /pag-paginas\.css: animação «infinite»/);
-    assert.doesNotMatch(r.stdout, /so-ok|btn-ok/, 'as exceções: hairline, env() e texto paper sobre fundo ink');
+    assert.doesNotMatch(r.stdout, /so-ok|btn-ok|vermelho-ok|claro-ok/, 'as exceções: hairline, env(), texto ink sobre um botão paper na faixa e branco sobre clay');
     // o movimento: só tokens de duração e de curva, cada duração com curva, nada acima de 500 ms, nada que mexa no layout
     assert.match(r.stdout, /«\.t1 \{ transition: width \.3s ease \}»: duração solta \(\.3s\)/);
     assert.match(r.stdout, /«\.t1 \{ transition: width \.3s ease \}»: curva solta/);

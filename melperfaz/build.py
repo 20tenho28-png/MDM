@@ -470,8 +470,8 @@ PREVIEW = bool(SITE.get("preview"))
 # páginas sempre fora do Google, também depois do lançamento; --check confirma
 NOINDEX_SEMPRE = {"404.html", "obrigado.html"}
 NOINDEX_RE = re.compile(r"\b(?:noindex|none)\b", re.I)
-# imagem de partilha: o logótipo branco sobre azul-marinho (do sistema de desenho, assets/Partilha)
-OG_IMG = {"src": "og-melperfaz.jpg", "w": 1200, "h": 630, "alt": "Logótipo da Melperfaz, Construção Civil, Lda., a branco sobre azul-marinho"}
+# imagem de partilha: o logótipo branco sobre o verde ink (do sistema de desenho, assets/Partilha, com o fundo recolorido)
+OG_IMG = {"src": "og-melperfaz.jpg", "w": 1200, "h": 630, "alt": "Logótipo da Melperfaz, Construção Civil, Lda., a branco sobre verde-escuro"}
 
 
 def business_ld():
@@ -985,9 +985,13 @@ def check_obras():
 
 # ── O sistema visual não volta a derivar: o lint das folhas de estilo (--check) ─────────────────────────────────────
 # Fora do bloco :root (onde vivem os tokens) só se aceitam: espaços em tokens --space-*, tamanhos de letra em --fs-*,
-# @media a 980 ou 640 px (e as de preferência, como prefers-reduced-motion e hover), nada «infinite», e nunca texto paper
-# ou branco num seletor de .s-clay ou .btn sem fundo ink na mesma regra. Exceções, curtas e de propósito: 1px (hairline,
-# como o margin:-1px do texto só para leitores de ecrã) e env(safe-area-inset-*), que não é px.
+# @media a 980 ou 640 px (e as de preferência, como prefers-reduced-motion e hover) e nada «infinite». Exceções, curtas e
+# de propósito: 1px (hairline, como o margin:-1px do texto só para leitores de ecrã) e env(safe-area-inset-*), que não é px.
+# A cor (o clay é vermelho e o ink verde-escuro: ink sobre clay dá 2,2:1): nunca texto escuro sobre o vermelho, em
+# todas as regras, também no :root. Escuro é ink, ink-deep, ink-raised, sage, muted, clay-deep, erro ou preto. Falha
+# um color escuro numa regra com fundo clay, ou num seletor de .s-clay ou .btn sem fundo claro (paper, white, bone) na
+# mesma regra; um --btn-fg (ou --btn-fg-h) escuro com --btn-bg (ou --btn-bg-h) clay; e um --fg, --fg-2 ou --fg-cat
+# escuro num seletor de .s-clay.
 # O movimento (Fase 5b): durações e curvas só pelos tokens --dur-* e --ease-* (com 0s como exceção: «já»), cada
 # duração com a sua curva, nenhum --dur-* acima de 500 ms, e só se anima transform, opacity, as cores e o traço dos
 # ícones (stroke-dashoffset): nada de width, height, top, left ou «all», que mexem no layout.
@@ -1004,7 +1008,27 @@ CSS_CURVA = re.compile(r"(?<![\w-])(?:ease(?:-in|-out|-in-out)?|linear|step-star
 CSS_VAR = re.compile(r"var\(--[\w-]+(?:,[^()]*)?\)")
 CSS_ANIMA_OK = {"transform", "opacity", "color", "background", "background-color", "border-color", "box-shadow",
                 "outline-color", "stroke-dashoffset", "none"}
+CSS_COR_ESCURA = re.compile(r"var\(--(?:ink(?:-deep|-raised)?|sage|muted|clay-deep|erro)\)|#000\b|#000000\b|\bblack\b", re.I)
 CSS_COR_CLARA = re.compile(r"var\(--(?:paper|white|bone)\)|#fff\b|#ffffff\b|\bwhite\b", re.I)
+CSS_VERMELHO = re.compile(r"var\(--clay\)")
+CSS_SEL_VERMELHO = re.compile(r"\.s-clay\b|\.btn(?![\w-])")
+
+
+def check_vermelho(nome, sel, props):
+    """Nunca texto escuro sobre o vermelho (clay): no vermelho o texto é branco (5,9:1; ink dá 2,2:1)."""
+    out, escuro = [], lambda v: bool(CSS_COR_ESCURA.search(v))
+    cor = props.get("color", "")
+    fundo = props.get("background", props.get("background-color", ""))
+    if escuro(cor) and (CSS_VERMELHO.search(fundo) or (CSS_SEL_VERMELHO.search(sel) and not CSS_COR_CLARA.search(fundo))):
+        out.append(f"{nome}: «{sel} {{ color: {cor} }}»: texto escuro sobre vermelho (ink sobre clay dá 2,2:1); no vermelho o texto é branco")
+    for fundo_v, texto_v in (("--btn-bg", "--btn-fg"), ("--btn-bg-h", "--btn-fg-h")):
+        if CSS_VERMELHO.search(props.get(fundo_v, "")) and escuro(props.get(texto_v, "")):
+            out.append(f"{nome}: «{sel} {{ {texto_v}: {props[texto_v]} }}»: texto escuro num botão vermelho ({fundo_v}: {props[fundo_v]}); no vermelho o texto é branco")
+    if re.search(r"\.s-clay\b", sel):
+        for v in ("--fg", "--fg-2", "--fg-cat"):
+            if escuro(props.get(v, "")):
+                out.append(f"{nome}: «{sel} {{ {v}: {props[v]} }}»: texto escuro sobre vermelho na faixa clay; no vermelho o texto é branco")
+    return out
 
 
 def css_regras(texto):
@@ -1070,9 +1094,10 @@ def check_css(nome, texto):
             if re.sub(r"\s+", " ", q.replace(": ", ":").replace(":", ": ")) not in CSS_MEDIA_OK:
                 out.append(f"{nome}: @media {q} (só 980 e 640 px)")
     for sel, decls, _ in css_regras(texto):
+        props = dict(decls)
+        out += check_vermelho(nome, sel, props)
         if sel == ":root" or sel.startswith("@font-face") or sel in ("from", "to") or sel.endswith("%"):
             continue
-        props = dict(decls)
         for prop, val in decls:
             if prop.startswith("--"):
                 continue
@@ -1086,11 +1111,6 @@ def check_css(nome, texto):
                 out.append(f"{nome}: «{sel} {{ font: {val} }}»: o atalho font só como inherit (tamanhos em --fs-*)")
             elif prop in CSS_MOV:
                 out += check_movimento(nome, sel, prop, val)
-        cor = props.get("color", "")
-        fundo = props.get("background", props.get("background-color", ""))
-        if (re.search(r"\.s-clay\b|\.btn(?![\w-])", sel) and CSS_COR_CLARA.search(cor)
-                and not re.search(r"var\(--ink(?:-deep)?\)", fundo)):
-            out.append(f"{nome}: «{sel} {{ color: {cor} }}»: texto claro sobre clay (2,5:1); na faixa clay e nos botões o texto é ink")
     return out
 
 
