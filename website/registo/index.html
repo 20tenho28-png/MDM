@@ -2042,93 +2042,69 @@ if (!Element.prototype.replaceChildren) {
     {id:'prob', nome:'Prob.'}, {id:'previsao', nome:'Previsão'}, {id:'dataFechoPrevista', nome:'Fecho previsto'}, {id:'tipo', nome:'Tipo'},
     {id:'origem', nome:'Origem'}, {id:'localidade', nome:'Localidade'}, {id:'contacto', nome:'Contacto'}, {id:'notas', nome:'Notas'}];
   const TB_OCULTAS_PADRAO = ['origem','localidade','contacto','notas'];
-  let cfgColunas = null, cfgProb = null, tbGrupo = 'estado', tbFechados = {};
-  try { tbGrupo = localStorage.getItem('registo-agrupar') || 'estado'; tbFechados = JSON.parse(localStorage.getItem('registo-grupos-fechados') || '{}') || {}; } catch (e) {}
-  const tbCfg = () => ({ocultas: (cfgColunas && cfgColunas.ocultas) || TB_OCULTAS_PADRAO, extra: (cfgColunas && cfgColunas.extra) || []});
+  let cfgProb = null;
+  // Um quadro (tabela ao estilo do monday) é descrito por um objeto q: onde se desenha, que colunas tem, como agrupa, lê e
+  // grava. As funções tb* servem os dois quadros (Pedidos e Contactos). Cada quadro guarda o seu estado: configuração
+  // partilhada (config), agrupamento, grupos recolhidos e larguras (localStorage de cada pessoa).
+  function tbQuadro(q) {
+    q.cfg = null; q.pendente = false; q.mapa = {}; q.grupo = q.grupoPadrao; q.fechados = {}; q.larg = {};
+    try { q.grupo = localStorage.getItem(q.ls.grupo) || q.grupoPadrao; q.fechados = JSON.parse(localStorage.getItem(q.ls.fechados) || '{}') || {}; } catch (e) {}
+    try { q.larg = JSON.parse(localStorage.getItem(q.ls.larg) || '{}') || {}; } catch (e) {}
+    return q;
+  }
+  const tbCfg = (q = TB_PED) => ({ocultas: (q.cfg && q.cfg.ocultas) || q.ocultasPadrao, extra: (q.cfg && q.cfg.extra) || []});
   const probDe = r => r.probabilidade != null && r.probabilidade !== '' ? Number(r.probabilidade) : Number(((cfgProb || {})[r.estado] != null ? cfgProb : PROB_PADRAO)[r.estado] || 0);
   const previsaoDe = r => valorN(r) * probDe(r) / 100;
   const tomEstado = k => ({info:'var(--info)', muted:'var(--muted)', accent:'var(--accent)', good:'var(--good)', bad:'var(--bad)'})[(ESTADOS[k] || {}).t] || 'var(--info)';
   const TOM_P = {P1:'var(--bad)', P2:'var(--warn)', P3:'var(--good)'};
   const iniciais = n => String(n || '?').trim().split(/\s+/).map(x => x[0]).slice(0, 2).join('').toUpperCase();
-  function tbColunas() {
-    const c = tbCfg(), ordem = (cfgColunas && cfgColunas.ordem) || [];
-    const todas = TB_BASE.map(x => Object.assign({}, x, {oculta: !x.fixa && c.ocultas.indexOf(x.id) >= 0}))
+  function tbColunas(q) {
+    const c = tbCfg(q), ordem = (q.cfg && q.cfg.ordem) || [];
+    const todas = q.base.map(x => Object.assign({}, x, {oculta: !x.fixa && c.ocultas.indexOf(x.id) >= 0}))
       .concat(c.extra.map(x => Object.assign({}, x, {extra: true, oculta: !!x.oculta})));
-    const pos = x => { const i = ordem.indexOf(x.id); return x.fixa ? -100 + TB_BASE.indexOf(x) : i < 0 ? 1000 + todas.indexOf(x) : i; };
+    const pos = x => { const i = ordem.indexOf(x.id); return x.fixa ? -100 + q.base.findIndex(z => z.id === x.id) : i < 0 ? 1000 + todas.indexOf(x) : i; };
     return todas.slice().sort((a, b) => pos(a) - pos(b));
   }
   // Larguras de cada pessoa (localStorage): uma regra de CSS por coluna, para o cabeçalho, as linhas e os totais.
-  let tbLarg = {};
-  try { tbLarg = JSON.parse(localStorage.getItem('registo-larguras') || '{}') || {}; } catch (e) {}
-  function tbAplicaLarguras() {
-    let st = F('tbLarg');
-    if (!st) { st = document.createElement('style'); st.id = 'tbLarg'; document.head.appendChild(st); }
-    st.textContent = Object.keys(tbLarg).map(k => `.tb .k-${k}{width:${tbLarg[k]}px;min-width:${tbLarg[k]}px;max-width:${tbLarg[k]}px}`).join('\n');
+  function tbAplicaLarguras(q) {
+    let st = F(q.estilo);
+    if (!st) { st = document.createElement('style'); st.id = q.estilo; document.head.appendChild(st); }
+    st.textContent = Object.keys(q.larg).map(k => `.tb .${q.pre}${k}{width:${q.larg[k]}px;min-width:${q.larg[k]}px;max-width:${q.larg[k]}px}`).join('\n');
   }
-  function tbGuardaLarguras() { try { localStorage.setItem('registo-larguras', JSON.stringify(tbLarg)); } catch (e) {} }
+  function tbGuardaLarguras(q) { try { localStorage.setItem(q.ls.larg, JSON.stringify(q.larg)); } catch (e) {} }
   function trimestre(r) { const d = dataPedidoDe(r); if (!d) return 'Sem data'; return `T${Math.floor((Number(d.slice(5, 7)) - 1) / 3) + 1} ${d.slice(0, 4)}`; }
-  function tbAgrupadores() {
-    const base = [['estado','Passo'], ['dono','Dono'], ['prioridade','Prioridade'], ['tipo','Tipo'], ['trimestre','Trimestre'], ['nenhum','Sem grupos']];
-    return base.concat(tbCfg().extra.filter(c => c.tipo === 'estado' || c.tipo === 'lista').map(c => ['x:' + c.id, c.nome]));
+  function tbAgrupadores(q) {
+    return q.agrupadoresBase.concat(tbCfg(q).extra.filter(c => c.tipo === 'estado' || c.tipo === 'lista').map(c => ['x:' + c.id, c.nome]));
   }
-  function tbGrupoDe(x) {
-    const r = x.r;
-    if (tbGrupo === 'estado') return {k: r.estado, nome: (ESTADOS[r.estado] || {}).l || r.estado, cor: tomEstado(r.estado), ordem: Object.keys(ESTADOS).indexOf(r.estado)};
-    if (tbGrupo === 'dono') return {k: r.dono || '', nome: r.dono || 'Sem dono', cor: 'var(--accent)', ordem: r.dono ? 0 : 1};
-    if (tbGrupo === 'prioridade') return {k: x.pe.p, nome: PRIO_NOME[x.pe.p], cor: TOM_P[x.pe.p], ordem: PRIOS.indexOf(x.pe.p)};
-    if (tbGrupo === 'tipo') return {k: r.tipo || '', nome: TIPOS[r.tipo] || 'Sem tipo', cor: 'var(--copper)', ordem: r.tipo ? Object.keys(TIPOS).indexOf(r.tipo) : 99};
-    if (tbGrupo === 'trimestre') { const t = trimestre(r); return {k: t, nome: t, cor: 'var(--info)', ordem: t === 'Sem data' ? '0' : t.slice(3) + t.slice(1, 2), desc: true}; }
-    if (tbGrupo.indexOf('x:') === 0) {
-      const c = tbCfg().extra.find(z => z.id === tbGrupo.slice(2));
-      const v = r.extra && c ? r.extra[c.id] : '';
+  function tbGrupoDe(q, x) {
+    if (q.grupo.indexOf('x:') === 0) {
+      const c = tbCfg(q).extra.find(z => z.id === q.grupo.slice(2)), ex = q.extraDe(x);
+      const v = ex && c ? ex[c.id] : '';
       const o = c && (c.opcoes || []).find(z => z.nome === v);
       return {k: v || '', nome: v || 'Sem valor', cor: o ? o.cor : 'var(--muted)', ordem: c && o ? c.opcoes.indexOf(o) : 99};
     }
-    return {k: '', nome: 'Todos os pedidos', cor: 'var(--accent)', ordem: 0};
+    return q.grupoDe(x);
   }
 
   // Uma célula: o que se vê e, se for editável, o que acontece ao tocar.
-  function tbCelula(x, c) {
-    const r = x.r, aberto = ABERTOS.includes(r.estado);
-    const ed = (conteudo, fn, classe) => h('td',{class:'tb-c' + (classe ? ' ' + classe : '') + (canWrite && fn ? ' tb-ed' : ''), onclick: canWrite && fn ? ev => fn(ev.currentTarget) : null}, conteudo);
-    const pill = (txt, cor, extra) => h('span',{class:'tb-pill' + (extra ? ' ' + extra : ''), style:`--c:${cor}`}, txt);
+  const tbTd = (conteudo, fn, classe) => h('td',{class:'tb-c' + (classe ? ' ' + classe : '') + (canWrite && fn ? ' tb-ed' : ''), onclick: canWrite && fn ? ev => fn(ev.currentTarget) : null}, conteudo);
+  const tbPill = (txt, cor, extra) => h('span',{class:'tb-pill' + (extra ? ' ' + extra : ''), style:`--c:${cor}`}, txt);
+  function tbCelula(q, x, c) {
     if (c.extra) {
-      const v = r.extra ? r.extra[c.id] : null;
+      const ex = q.extraDe(x), v = ex ? ex[c.id] : null;
       const vazio = v == null || v === '';
-      if (c.tipo === 'caixa') return ed(h('span',{class:'tb-caixa' + (v ? ' on' : ''), 'aria-label': v ? 'sim' : 'não'}, v ? '✓' : ''), () => tbGuardar(r, {extra: c.id}, !v, c.nome, v ? 'sim' : 'não', !v ? 'sim' : 'não'));
+      if (c.tipo === 'caixa') return tbTd(h('span',{class:'tb-caixa' + (v ? ' on' : ''), 'aria-label': v ? 'sim' : 'não'}, v ? '✓' : ''), () => q.guardar(x, {extra: c.id}, !v, c.nome, v ? 'sim' : 'não', !v ? 'sim' : 'não'));
       if (c.tipo === 'estado' || c.tipo === 'lista') {
         const o = (c.opcoes || []).find(z => z.nome === v);
-        return ed(vazio ? '' : c.tipo === 'estado' ? pill(v, o ? o.cor : 'var(--muted)', 'cheia') : pill(v, o ? o.cor : 'var(--muted)'), td => tbEscolher(td, r, c, (c.opcoes || []).map(z => [z.nome, z.nome, z.cor]).concat([['', 'Limpar']])), c.tipo === 'estado' ? 'tb-estado' : '');
+        return tbTd(vazio ? '' : c.tipo === 'estado' ? tbPill(v, o ? o.cor : 'var(--muted)', 'cheia') : tbPill(v, o ? o.cor : 'var(--muted)'), td => tbEscolher(q, td, x, c, (c.opcoes || []).map(z => [z.nome, z.nome, z.cor]).concat([['', 'Limpar']])), c.tipo === 'estado' ? 'tb-estado' : '');
       }
       const txt = vazio ? '' : c.tipo === 'numero' ? String(v).replace('.', ',') : c.tipo === 'data' ? ddmm(v) : String(v);
-      return ed(txt, td => tbEditarTexto(td, r, c, c.tipo === 'numero' ? 'number' : c.tipo === 'data' ? 'date' : 'text'), c.tipo === 'numero' ? 'num' : '');
+      return tbTd(txt, td => tbEditarTexto(q, td, x, c, c.tipo === 'numero' ? 'number' : c.tipo === 'data' ? 'date' : 'text'), c.tipo === 'numero' ? 'num' : '');
     }
-    switch (c.id) {
-      case 'cliente': return h('td',{class:'tb-c tb-cli'}, canWrite && tbArrastavel() ? h('span',{class:'tb-pega', title:'Arrastar para outro grupo', 'aria-hidden':'true'}, '⠿') : null,
-        h('button',{type:'button', onclick:() => openSheet(r.id)}, r.cliente || 'Sem nome'),
-        r.porConfirmar ? h('span',{class:'tag-conf'}, 'por confirmar') : null);
-      case 'estado': return ed(pill((ESTADOS[r.estado] || {}).l || r.estado, tomEstado(r.estado), 'cheia'), td => tbPasso(td, x), 'tb-estado');
-      case 'prioridade': return ed(pill(x.pe.p, TOM_P[x.pe.p], 'cheia'), aberto ? td => tbPrioridade(td, r) : null, 'tb-estado tb-p');
-      case 'dono': return ed(r.dono ? h('span',{class:'tb-dono'}, h('i',null, iniciais(r.dono)), r.dono) : h('span',{class:'tb-vazio'}, 'Sem dono'),
-        td => tbEscolher(td, r, {id:'dono', nome:'Dono'}, donosConhecidos().map(d => [d, d])));
-      case 'proximaAcao': return ed(r.proximaAcao || '', td => tbEditarTexto(td, r, {id:'proximaAcao', nome:'Próxima ação'}, 'text'));
-      case 'dataProximaAcao': return ed(r.dataProximaAcao ? ddmm(r.dataProximaAcao) : '', td => tbEditarTexto(td, r, {id:'dataProximaAcao', nome:'Data da próxima ação'}, 'date'),
-        aberto && r.dataProximaAcao && r.dataProximaAcao < today() ? 'tb-late' : '');
-      case 'prazo': return h('td',{class:'tb-c tb-prazo'}, aberto && !r.porConfirmar ? [h('i',{class:'tb-dot', style:`--c:var(--${semTone(x.sem)})`}), tempoTxt(r, x.rel)] : '');
-      case 'valor': return ed(r.valor ? eur(valorN(r)) : '', td => tbEditarTexto(td, r, {id:'valor', nome:'Valor s/IVA'}, 'number'), 'num');
-      case 'prob': return ed(h('span',{class: r.probabilidade != null && r.probabilidade !== '' ? '' : 'tb-padrao'}, probDe(r) + '%'), td => tbEditarTexto(td, r, {id:'probabilidade', nome:'Probabilidade (%)'}, 'number'), 'num');
-      case 'previsao': return h('td',{class:'tb-c num'}, valorN(r) ? eur(previsaoDe(r)) : '');
-      case 'dataFechoPrevista': return ed(r.dataFechoPrevista ? ddmm(r.dataFechoPrevista) : '', td => tbEditarTexto(td, r, {id:'dataFechoPrevista', nome:'Fecho previsto'}, 'date'));
-      case 'tipo': return ed(r.tipo ? pill(TIPOS[r.tipo], 'var(--copper)') : '', td => tbEscolher(td, r, {id:'tipo', nome:'Tipo'}, Object.entries(TIPOS)));
-      case 'origem': return ed(ORIGENS[r.origem] || '', td => tbEscolher(td, r, {id:'origem', nome:'Origem'}, Object.entries(ORIGENS)));
-      case 'localidade': return ed(String(r.localidade || '').split('\n')[0], td => tbEditarTexto(td, r, {id:'localidade', nome:'Localidade'}, 'text'));
-      case 'contacto': return ed(r.contacto || '', td => tbEditarTexto(td, r, {id:'contacto', nome:'Contacto'}, 'text'));
-      case 'notas': return ed(r.notas || '', td => tbEditarTexto(td, r, {id:'notas', nome:'Notas'}, 'text'), 'tb-notas');
-    }
-    return h('td',{class:'tb-c'});
+    return q.celula(x, c) || h('td',{class:'tb-c'});
   }
 
-  // Guardar um campo: cópia do pedido, histórico, versão (guardar_pedido) e «Desfazer».
+  // Pedidos: guardar um campo: cópia do pedido, histórico, versão (guardar_pedido) e «Desfazer».
   const tbTexto = (campo, v) => v == null || v === '' ? 'vazio' : campo === 'valor' ? eur(Number(v)) : /^data/.test(campo) ? ddmm(v) : campo === 'probabilidade' ? v + '%' : campo === 'tipo' ? TIPOS[v] : campo === 'origem' ? ORIGENS[v] : String(v);
   // Parte sempre da cópia mais recente do pedido (o tempo real pode tê-la trocado desde que a célula foi desenhada) e
   // recusa se alguém mudou este mesmo campo entretanto, para não apagar a mudança de um colega sem aviso.
@@ -2164,34 +2140,34 @@ if (!Element.prototype.replaceChildren) {
       h('div',{class:'sg-b'}, h('button',{class:'btn btn-sm', type:'button', onclick: ok}, 'Guardar'), h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick: fechaPop}, 'Cancelar'))), 'tb-ed');
     setTimeout(() => { try { input.focus(); if (input.select) input.select(); } catch (e) {} }, 30);
   }
-  function tbEditarTexto(td, r, c, tipo) {
-    const campo = c.extra ? c.id : c.id;
-    const atual = c.extra ? (r.extra || {})[c.id] : r[c.id];
+  // Editar texto, número ou data numa célula. q.obrigatorio diz se não pode ficar vazio; q.validar verifica o valor.
+  function tbEditarTexto(q, td, x, c, tipo) {
+    const atual = q.ler(x, c);
     // Números em texto com teclado decimal: aceita «1 250,50» como se escreve em Portugal.
     const input = h('input',{type: tipo === 'number' ? 'text' : tipo, value: atual == null ? '' : tipo === 'number' ? String(atual).replace('.', ',') : String(atual), inputmode: tipo === 'number' ? 'decimal' : null});
     tbEditor(td, c.nome, input, () => {
       let v = input.value.trim();
       if (/[—–]/.test(v)) return 'Sem travessões: usa vírgulas ou parênteses.';
-      if (!v && !c.extra && tbObrigatorio(r, campo)) return 'Um pedido aberto tem sempre dono, próxima ação e data.';
+      if (!v) { const m = q.obrigatorio(x, c); if (m) return m; }
       if (tipo === 'number' && v) {
-        const n = c.id === 'valor' ? parseValor(v) : parseNumero(v);
+        const n = q.dinheiro.indexOf(c.id) >= 0 ? parseValor(v) : parseNumero(v);
         if (Number.isNaN(n)) return 'Não é um número.';
-        if (c.id === 'probabilidade' && (n < 0 || n > 100)) return 'A probabilidade vai de 0 a 100.';
         v = n;
       }
+      if (v !== '') { const m = q.validar(x, c, v); if (m) return m; }
       if (String(v) === String(atual == null ? '' : atual)) { fechaPop(); return null; }
-      tbGuardar(r, c.extra ? {extra: c.id} : c.id, v, c.nome, c.extra ? (atual == null || atual === '' ? 'vazio' : String(atual)) : tbTexto(c.id, atual), c.extra ? (v === '' ? 'vazio' : String(v)) : tbTexto(c.id, v));
+      q.guardar(x, c.extra ? {extra: c.id} : c.id, v, c.nome, c.extra ? (atual == null || atual === '' ? 'vazio' : String(atual)) : q.texto(c.id, atual), c.extra ? (v === '' ? 'vazio' : String(v)) : q.texto(c.id, v));
       return null;
-    }, c.id === 'probabilidade' ? `Vazio volta ao valor do passo (${Number(((cfgProb || {})[r.estado] != null ? cfgProb : PROB_PADRAO)[r.estado] || 0)}%).` : null);
+    }, q.aviso(x, c));
   }
-  function tbEscolher(td, r, c, opcoes) {
-    const atual = c.extra ? (r.extra || {})[c.id] : r[c.id];
+  function tbEscolher(q, td, x, c, opcoes) {
+    const atual = q.ler(x, c);
     abrePop(td, opcoes.map(([v, l, cor]) => {
       const b = h('button',{type:'button', role:'menuitem', onclick: () => {
         fechaPop();
         if (String(v) === String(atual == null ? '' : atual)) return;
-        if (!v && !c.extra && tbObrigatorio(r, c.id)) { toast('Um pedido aberto tem sempre dono.'); return; }
-        tbGuardar(r, c.extra ? {extra: c.id} : c.id, v, c.nome, c.extra ? (atual || 'vazio') : tbTexto(c.id, atual), c.extra ? (v || 'vazio') : tbTexto(c.id, v));
+        if (!v) { const m = q.obrigatorio(x, c, true); if (m) { toast(m); return; } }
+        q.guardar(x, c.extra ? {extra: c.id} : c.id, v, c.nome, c.extra ? (atual || 'vazio') : q.texto(c.id, atual), c.extra ? (v || 'vazio') : q.texto(c.id, v));
       }}, cor ? h('i',{class:'tb-cor', style:`background:${cor}`}) : null, l, String(v) === String(atual == null ? '' : atual) ? ' ✓' : '');
       return b;
     }), 'menu');
@@ -2223,37 +2199,26 @@ if (!Element.prototype.replaceChildren) {
     abrePop(td, itens.map(([l, fn, ic]) => { const b = h('button',{type:'button', role:'menuitem', onclick:() => { fechaPop(); fn(); }}); b.innerHTML = IC[ic] || ''; b.appendChild(document.createTextNode(l)); return b; }), 'menu');
   }
 
-  // Colunas: mostrar, esconder, juntar, mudar o nome e apagar (config «colunas», partilhada pela equipa).
-  // A configuração é da equipa: lê a atual, aplica a mudança (uma função da configuração atual) e grava só se a versão
-  // ainda for a mesma, para não apagar a coluna que um colega criou entretanto com a cópia velha desta página.
-  const tbCfgDe = v => ({ocultas: (v && v.ocultas) || TB_OCULTAS_PADRAO, extra: (v && v.extra) || [], ordem: (v && v.ordem) || []});
-  async function tbGuardarCfg(muda, msg) {
+  // Colunas: mostrar, esconder, juntar, mudar o nome e apagar (config q.chaveCfg, partilhada pela equipa).
+  async function tbGuardarCfg(q, novo, msg) {
+    const c = Object.assign({ocultas: tbCfg(q).ocultas, extra: tbCfg(q).extra, ordem: (q.cfg && q.cfg.ordem) || []}, novo);
     try {
-      for (let tent = 0; tent < 3; tent++) {
-        const r1 = await sb.from('config').select('valor,versao').eq('chave', 'colunas').maybeSingle();
-        if (r1.error) throw r1.error;
-        const atual = r1.data, base = tbCfgDe(atual && atual.valor), c = Object.assign({}, base, muda(base));
-        const r2 = atual
-          ? await sb.from('config').update({valor: c, versao: atual.versao + 1, atualizado_por: eu.email}).eq('chave', 'colunas').eq('versao', atual.versao).select('versao')
-          : await sb.from('config').insert({chave: 'colunas', valor: c, atualizado_por: eu.email}).select('versao');
-        if (r2.error) { if (!atual && /duplicate|unique|23505/i.test(r2.error.message || '')) continue; throw r2.error; }
-        if (!r2.data || !r2.data.length) continue;
-        cfgColunas = c; toast(msg); renderAll(); return;
-      }
-      toast('Outra pessoa mudou as colunas ao mesmo tempo. Tenta outra vez.'); carregar();
+      const {error} = await sb.from('config').upsert({chave: q.chaveCfg, valor: c, atualizado_por: eu.email}, {onConflict:'chave'});
+      if (error) throw error;
+      q.cfg = c; toast(msg); renderAll();
     } catch (e) { toast(/permiss|row-level/.test(String(e.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar as colunas.'); }
   }
-  function tbMenuColunas(botao) {
-    const cols = tbColunas();
+  function tbMenuColunas(q, botao) {
+    const cols = tbColunas(q);
     const lista = h('div',{class:'tb-cols'}, h('b',null, 'Colunas'),
       cols.filter(c => !c.fixa).map(c => h('label',{class:'check'}, h('input',{type:'checkbox', checked: c.oculta ? null : true, disabled: canWrite ? null : true, onchange: ev => {
-        if (c.extra) tbGuardarCfg(cf => ({extra: cf.extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: !ev.target.checked}) : z)}), ev.target.checked ? `«${c.nome}» à vista` : `«${c.nome}» escondida`);
-        else tbGuardarCfg(cf => { const o = cf.ocultas.filter(z => z !== c.id); if (!ev.target.checked) o.push(c.id); return {ocultas: o}; }, ev.target.checked ? `«${c.nome}» à vista` : `«${c.nome}» escondida`);
+        if (c.extra) tbGuardarCfg(q, {extra: tbCfg(q).extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: !ev.target.checked}) : z)}, ev.target.checked ? `«${c.nome}» à vista` : `«${c.nome}» escondida`);
+        else { const o = tbCfg(q).ocultas.filter(z => z !== c.id); if (!ev.target.checked) o.push(c.id); tbGuardarCfg(q, {ocultas: o}, ev.target.checked ? `«${c.nome}» à vista` : `«${c.nome}» escondida`); }
       }}), c.nome, c.extra ? h('small',null, ' · ' + (TB_TIPOS_COL.find(t => t[0] === c.tipo) || [0, ''])[1]) : null)),
-      canWrite ? h('button',{class:'btn btn-sm', type:'button', onclick:() => { fechaPop(); tbNovaColuna(botao); }}, '+ Nova coluna') : null);
+      canWrite ? h('button',{class:'btn btn-sm', type:'button', onclick:() => { fechaPop(); tbNovaColuna(q, botao); }}, '+ Nova coluna') : null);
     abrePop(botao, lista, 'tb-ed');
   }
-  function tbNovaColuna(botao, editar) {
+  function tbNovaColuna(q, botao, editar) {
     const nome = h('input',{type:'text', placeholder:'Nome da coluna', value: editar ? editar.nome : ''});
     const tipo = h('select',{disabled: editar ? true : null}, TB_TIPOS_COL.map(([v, l]) => h('option',{value:v}, l)));
     if (editar) tipo.value = editar.tipo;
@@ -2266,74 +2231,164 @@ if (!Element.prototype.replaceChildren) {
       const n = nome.value.trim();
       if (!n) return 'Dá um nome à coluna.';
       if (/[—–]/.test(n + ops.value)) return 'Sem travessões: usa vírgulas ou parênteses.';
-      if (tbColunas().some(c => c.nome.toLowerCase() === n.toLowerCase() && (!editar || c.id !== editar.id))) return 'Já há uma coluna com esse nome.';
+      if (tbColunas(q).some(c => c.nome.toLowerCase() === n.toLowerCase() && (!editar || c.id !== editar.id))) return 'Já há uma coluna com esse nome.';
       const opcoes = ops.value.split('\n').map(z => z.trim()).filter(Boolean).filter((z, i, a) => a.indexOf(z) === i).map((z, i) => {
         const velha = editar && (editar.opcoes || []).find(o => o.nome === z);
         return {nome: z, cor: velha ? velha.cor : TB_CORES[i % TB_CORES.length]};
       });
       if ((tipo.value === 'lista' || tipo.value === 'estado') && !opcoes.length) return 'Escreve pelo menos uma opção.';
       fechaPop();
-      if (editar) tbGuardarCfg(cf => ({extra: cf.extra.map(z => z.id === editar.id ? Object.assign({}, z, {nome: n, opcoes}) : z)}), 'Coluna mudada');
-      else { const nova = {id: 'c' + Date.now().toString(36), nome: n, tipo: tipo.value, opcoes}; tbGuardarCfg(cf => ({extra: cf.extra.concat([nova])}), `Coluna «${n}» criada`); }
+      if (editar) tbGuardarCfg(q, {extra: tbCfg(q).extra.map(z => z.id === editar.id ? Object.assign({}, z, {nome: n, opcoes}) : z)}, 'Coluna mudada');
+      else tbGuardarCfg(q, {extra: tbCfg(q).extra.concat([{id: 'c' + Date.now().toString(36), nome: n, tipo: tipo.value, opcoes}])}, `Coluna «${n}» criada`);
       return null;
     });
     setTimeout(() => nome.focus(), 40);
   }
-  function tbMenuCabecalho(th, c) {
+  function tbMenuCabecalho(q, th, c) {
     const itens = [];
-    if (tbLarg[c.id]) itens.push(['Largura normal', () => { delete tbLarg[c.id]; tbGuardaLarguras(); tbAplicaLarguras(); }, 'seta']);
-    itens.push(['Esconder', () => { if (c.extra) tbGuardarCfg(cf => ({extra: cf.extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: true}) : z)}), `«${c.nome}» escondida`); else tbGuardarCfg(cf => ({ocultas: cf.ocultas.filter(z => z !== c.id).concat([c.id])}), `«${c.nome}» escondida`); }, 'x']);
+    if (q.larg[c.id]) itens.push(['Largura normal', () => { delete q.larg[c.id]; tbGuardaLarguras(q); tbAplicaLarguras(q); }, 'seta']);
+    itens.push(['Esconder', () => { if (c.extra) tbGuardarCfg(q, {extra: tbCfg(q).extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: true}) : z)}, `«${c.nome}» escondida`); else tbGuardarCfg(q, {ocultas: tbCfg(q).ocultas.concat([c.id])}, `«${c.nome}» escondida`); }, 'x']);
     if (c.extra) {
-      itens.unshift(['Mudar o nome ou as opções', () => tbNovaColuna(th, c), 'lapis']);
-      itens.push(['Apagar a coluna', () => { if (window.confirm(`Apagar a coluna «${c.nome}»? Os valores ficam guardados nos pedidos mas deixam de se ver.`)) tbGuardarCfg(cf => ({extra: cf.extra.filter(z => z.id !== c.id)}), `Coluna «${c.nome}» apagada`); }, 'x']);
+      itens.unshift(['Mudar o nome ou as opções', () => tbNovaColuna(q, th, c), 'lapis']);
+      itens.push(['Apagar a coluna', () => { if (window.confirm(`Apagar a coluna «${c.nome}»? ${q.textos.apagar}`)) tbGuardarCfg(q, {extra: tbCfg(q).extra.filter(z => z.id !== c.id)}, `Coluna «${c.nome}» apagada`); }, 'x']);
     }
-    if (c.tipo === 'estado' || c.tipo === 'lista' || ['dono','prioridade','tipo','estado'].indexOf(c.id) >= 0) itens.unshift(['Agrupar por esta coluna', () => tbAgrupar(c.extra ? 'x:' + c.id : c.id), 'seta']);
+    if (c.tipo === 'estado' || c.tipo === 'lista' || q.agrupaveis.indexOf(c.id) >= 0) itens.unshift(['Agrupar por esta coluna', () => tbAgruparEm(q, c.extra ? 'x:' + c.id : c.id), 'seta']);
     abrePop(th.closest('th') || th, itens.map(([l, fn, ic]) => { const b = h('button',{type:'button', role:'menuitem', class: l === 'Apagar a coluna' ? 'perigo' : null, onclick:() => { fechaPop(); fn(); }}); b.innerHTML = IC[ic] || ''; b.appendChild(document.createTextNode(l)); return b; }), 'menu');
   }
-  function tbAgrupar(g) { tbGrupo = g; try { localStorage.setItem('registo-agrupar', g); } catch (e) {} renderAll(); }
+  function tbAgruparEm(q, g) { q.grupo = g; try { localStorage.setItem(q.ls.grupo, g); } catch (e) {} renderAll(); }
+  function tbAgrupar(g) { tbAgruparEm(TB_PED, g); }
 
-  // A tabela: um <tbody> por grupo (cabeçalho com cor, linhas, «+ Adicionar pedido» e totais com a barra de cores).
-  function renderTabela(lista) {
-    const box = F('tabela'); if (!box) return;
+  // A tabela: um <tbody> por grupo (cabeçalho com cor, linhas, «+ Adicionar» e totais).
+  function tbRender(q, lista) {
+    const box = F(q.box); if (!box) return;
     if (status !== 'ok') { fill(box, stateMsg()); return; }
-    if (!tbAgrupadores().some(a => a[0] === tbGrupo)) tbGrupo = 'estado';
-    F('tbAgrupar').replaceChildren(...tbAgrupadores().map(([v, l]) => h('option',{value:v}, 'Agrupar: ' + l)));
-    F('tbAgrupar').value = tbGrupo;
-    const cols = tbColunas().filter(c => !c.oculta);
+    if (!tbAgrupadores(q).some(a => a[0] === q.grupo)) q.grupo = q.grupoPadrao;
+    F(q.agrupar).replaceChildren(...tbAgrupadores(q).map(([v, l]) => h('option',{value:v}, 'Agrupar: ' + l)));
+    F(q.agrupar).value = q.grupo;
+    const cols = tbColunas(q).filter(c => !c.oculta), prim = q.base[0].id;
     const grupos = {}, ordemG = [];
-    lista.forEach(x => { const g = tbGrupoDe(x); if (!grupos[g.k]) { grupos[g.k] = Object.assign(g, {xs: []}); ordemG.push(g.k); } grupos[g.k].xs.push(x); });
+    lista.forEach(x => { const g = tbGrupoDe(q, x); if (!grupos[g.k]) { grupos[g.k] = Object.assign(g, {xs: []}); ordemG.push(g.k); } grupos[g.k].xs.push(x); });
     ordemG.sort((a, b) => { const A = grupos[a], B = grupos[b]; return A.desc ? String(B.ordem).localeCompare(String(A.ordem)) : (A.ordem - B.ordem) || String(A.nome).localeCompare(String(B.nome), 'pt'); });
-    if (tbArr || tbCol) { tbPendente = true; return; }
-    tbAplicaLarguras();
-    const thead = h('thead',null, h('tr',null, cols.map(c => h('th',{class: 'k-' + c.id + (c.id === 'cliente' ? ' tb-cli' : '') + (['valor','prob','previsao'].indexOf(c.id) >= 0 || c.tipo === 'numero' ? ' num' : '') + (c.fixa || !canWrite ? '' : ' tb-mov'), 'data-col': c.id},
-      h('span',null, c.nome), c.fixa || !canWrite ? null : h('button',{class:'tb-hm', type:'button', 'aria-label':'Opções da coluna ' + c.nome, onclick: ev => { ev.stopPropagation(); tbMenuCabecalho(ev.currentTarget, c); }}, '⋯'),
+    if ((tbArr && tbArr.q === q) || (tbCol && tbCol.q === q)) { q.pendente = true; return; }
+    tbAplicaLarguras(q);
+    q.mapa = {}; lista.forEach(x => { q.mapa[q.id(x)] = x; });
+    const thead = h('thead',null, h('tr',null, cols.map(c => h('th',{class: q.pre + c.id + (c.id === prim ? ' tb-cli' : '') + (q.num.indexOf(c.id) >= 0 || c.tipo === 'numero' ? ' num' : '') + (c.fixa || !canWrite ? '' : ' tb-mov'), 'data-col': c.id},
+      h('span',null, c.nome), c.fixa || !canWrite ? null : h('button',{class:'tb-hm', type:'button', 'aria-label':'Opções da coluna ' + c.nome, onclick: ev => { ev.stopPropagation(); tbMenuCabecalho(q, ev.currentTarget, c); }}, '⋯'),
       h('span',{class:'tb-rz', 'aria-hidden':'true', title:'Arrastar para mudar a largura'}))),
-      h('th',{class:'tb-mais'}, canWrite ? h('button',{type:'button', 'aria-label':'Juntar ou esconder colunas', title:'Colunas', onclick: ev => tbMenuColunas(ev.currentTarget)}, '+') : null)));
+      h('th',{class:'tb-mais'}, canWrite ? h('button',{type:'button', 'aria-label':'Juntar ou esconder colunas', title:'Colunas', onclick: ev => tbMenuColunas(q, ev.currentTarget)}, '+') : null)));
     const corpos = ordemG.map(k => {
-      const g = grupos[k], fechado = !!tbFechados[tbGrupo + '|' + k];
-      const soma = g.xs.reduce((t, x) => t + valorN(x.r), 0), prev = g.xs.reduce((t, x) => t + previsaoDe(x.r), 0);
+      const g = grupos[k], fk = q.grupo + '|' + k;
+      const fechado = fk in q.fechados ? !!q.fechados[fk] : !!(q.fechadoPadrao && q.fechadoPadrao(q, k));
+      const t = q.totais(g);
       const cab = h('tr',{class:'tb-gh', style:`--g:${g.cor}`}, h('td',{colspan: String(cols.length + 1)},
-        h('button',{type:'button', class:'tb-gt', 'aria-expanded': String(!fechado), onclick:() => { tbFechados[tbGrupo + '|' + k] = !fechado; try { localStorage.setItem('registo-grupos-fechados', JSON.stringify(tbFechados)); } catch (e) {} renderAll(); }},
-          h('span',{class:'tb-chev'}, fechado ? '▸' : '▾'), g.nome), h('span',{class:'tb-gn'}, ` ${g.xs.length} ${g.xs.length === 1 ? 'pedido' : 'pedidos'}${soma ? ' · ' + eur(soma) : ''}`)));
+        h('button',{type:'button', class:'tb-gt', 'aria-expanded': String(!fechado), onclick:() => { q.fechados[fk] = !fechado; try { localStorage.setItem(q.ls.fechados, JSON.stringify(q.fechados)); } catch (e) {} renderAll(); }},
+          h('span',{class:'tb-chev'}, fechado ? '▸' : '▾'), g.nome), h('span',{class:'tb-gn'}, ` ${g.xs.length} ${g.xs.length === 1 ? q.textos.um : q.textos.varios}${t.resumo}`)));
       if (fechado) return h('tbody',{class:'tb-g', style:`--g:${g.cor}`, 'data-k': k}, cab);
-      const linhas = g.xs.map(x => h('tr',{class:'tb-r' + (ABERTOS.includes(x.r.estado) ? '' : ' fechado'), 'data-id': x.r.id}, cols.map(c => { const td = tbCelula(x, c); td.classList.add('k-' + c.id); return td; }), h('td',{class:'tb-c'})));
-      const pode = canWrite && (tbGrupo !== 'estado' || k === 'novo') && tbGrupo !== 'trimestre' && tbGrupo.indexOf('x:') !== 0;
-      const add = pode ? h('tr',{class:'tb-add'}, h('td',{colspan: String(cols.length + 1)}, h('button',{type:'button', onclick:() => {
-        novoBase = tbGrupo === 'prioridade' ? {prioridade: k} : tbGrupo === 'tipo' && k ? {tipo: k} : {};
-        abrirNovo();
-        if (tbGrupo === 'dono' && k && F('n-dono')) F('n-dono').value = k;
-      }}, '+ Adicionar pedido'))) : null;
-      // Totais: barra de cores dos passos (como a «bateria» do monday), soma do valor e da previsão
+      const linhas = g.xs.map(x => h('tr',{class:'tb-r' + q.classeLinha(x), 'data-id': q.id(x)}, cols.map(c => { const td = tbCelula(q, x, c); td.classList.add(q.pre + c.id); return td; }), h('td',{class:'tb-c'})));
+      const add = canWrite && q.podeAdicionar(k) ? h('tr',{class:'tb-add'}, h('td',{colspan: String(cols.length + 1)}, h('button',{type:'button', onclick:() => q.adicionar(k)}, q.textos.add))) : null;
+      const tot = h('tr',{class:'tb-tot'}, cols.map(c => h('td',{class: q.pre + c.id + (c.id === prim ? ' tb-cli' : q.num.indexOf(c.id) >= 0 ? ' num' : '')}, t.celula(c))), h('td'));
+      return h('tbody',{class:'tb-g', style:`--g:${g.cor}`, 'data-k': k}, cab, linhas, add, tot);
+    });
+    fill(box, lista.length ? h('table',{class:'tb'}, thead, corpos) : h('p',{class:'t-vazio'}, q.vazio()));
+  }
+
+  // O quadro dos Pedidos: uma linha por pedido (x = {r, rel, sem, pe} da lista).
+  const TB_PED = tbQuadro({
+    box: 'tabela', agrupar: 'tbAgrupar', estilo: 'tbLarg', pre: 'k-', chaveCfg: 'colunas',
+    ls: {larg: 'registo-larguras', grupo: 'registo-agrupar', fechados: 'registo-grupos-fechados'},
+    base: TB_BASE, ocultasPadrao: TB_OCULTAS_PADRAO, grupoPadrao: 'estado',
+    agrupadoresBase: [['estado','Passo'], ['dono','Dono'], ['prioridade','Prioridade'], ['tipo','Tipo'], ['trimestre','Trimestre'], ['nenhum','Sem grupos']],
+    agrupaveis: ['dono','prioridade','tipo','estado'], num: ['valor','prob','previsao'], dinheiro: ['valor'],
+    textos: {um: 'pedido', varios: 'pedidos', add: '+ Adicionar pedido', apagar: 'Os valores ficam guardados nos pedidos mas deixam de se ver.'},
+    id: x => x.r.id,
+    nomeDe: x => x.r.cliente || x.r.id,
+    extraDe: x => x.r.extra,
+    ler: (x, c) => c.extra ? (x.r.extra || {})[c.id] : x.r[c.id],
+    guardar: (x, alvo, valor, rotulo, antesTxt, depoisTxt, motivo) => tbGuardar(x.r, alvo, valor, rotulo, antesTxt, depoisTxt, motivo),
+    texto: (campo, v) => tbTexto(campo, v),
+    obrigatorio: (x, c, curto) => !c.extra && tbObrigatorio(x.r, c.id) ? (curto ? 'Um pedido aberto tem sempre dono.' : 'Um pedido aberto tem sempre dono, próxima ação e data.') : null,
+    validar: (x, c, v) => c.id === 'probabilidade' && (v < 0 || v > 100) ? 'A probabilidade vai de 0 a 100.' : null,
+    aviso: (x, c) => c.id === 'probabilidade' ? `Vazio volta ao valor do passo (${Number(((cfgProb || {})[x.r.estado] != null ? cfgProb : PROB_PADRAO)[x.r.estado] || 0)}%).` : null,
+    vazio: () => rows.length ? 'Nenhum pedido com estes filtros.' : 'Ainda não há pedidos.',
+    classeLinha: x => ABERTOS.includes(x.r.estado) ? '' : ' fechado',
+    grupoDe: x => {
+      const r = x.r, g = TB_PED.grupo;
+      if (g === 'estado') return {k: r.estado, nome: (ESTADOS[r.estado] || {}).l || r.estado, cor: tomEstado(r.estado), ordem: Object.keys(ESTADOS).indexOf(r.estado)};
+      if (g === 'dono') return {k: r.dono || '', nome: r.dono || 'Sem dono', cor: 'var(--accent)', ordem: r.dono ? 0 : 1};
+      if (g === 'prioridade') return {k: x.pe.p, nome: PRIO_NOME[x.pe.p], cor: TOM_P[x.pe.p], ordem: PRIOS.indexOf(x.pe.p)};
+      if (g === 'tipo') return {k: r.tipo || '', nome: TIPOS[r.tipo] || 'Sem tipo', cor: 'var(--copper)', ordem: r.tipo ? Object.keys(TIPOS).indexOf(r.tipo) : 99};
+      if (g === 'trimestre') { const t = trimestre(r); return {k: t, nome: t, cor: 'var(--info)', ordem: t === 'Sem data' ? '0' : t.slice(3) + t.slice(1, 2), desc: true}; }
+      return {k: '', nome: 'Todos os pedidos', cor: 'var(--accent)', ordem: 0};
+    },
+    celula: (x, c) => {
+      const r = x.r, aberto = ABERTOS.includes(r.estado), Q = TB_PED;
+      switch (c.id) {
+        case 'cliente': return h('td',{class:'tb-c tb-cli'}, canWrite && Q.arrastavel() ? h('span',{class:'tb-pega', title:'Arrastar para outro grupo', 'aria-hidden':'true'}, '⠿') : null,
+          h('button',{type:'button', onclick:() => openSheet(r.id)}, r.cliente || 'Sem nome'),
+          r.porConfirmar ? h('span',{class:'tag-conf'}, 'por confirmar') : null);
+        case 'estado': return tbTd(tbPill((ESTADOS[r.estado] || {}).l || r.estado, tomEstado(r.estado), 'cheia'), td => tbPasso(td, x), 'tb-estado');
+        case 'prioridade': return tbTd(tbPill(x.pe.p, TOM_P[x.pe.p], 'cheia'), aberto ? td => tbPrioridade(td, r) : null, 'tb-estado tb-p');
+        case 'dono': return tbTd(r.dono ? h('span',{class:'tb-dono'}, h('i',null, iniciais(r.dono)), r.dono) : h('span',{class:'tb-vazio'}, 'Sem dono'),
+          td => tbEscolher(Q, td, x, {id:'dono', nome:'Dono'}, donosConhecidos().map(d => [d, d])));
+        case 'proximaAcao': return tbTd(r.proximaAcao || '', td => tbEditarTexto(Q, td, x, {id:'proximaAcao', nome:'Próxima ação'}, 'text'));
+        case 'dataProximaAcao': return tbTd(r.dataProximaAcao ? ddmm(r.dataProximaAcao) : '', td => tbEditarTexto(Q, td, x, {id:'dataProximaAcao', nome:'Data da próxima ação'}, 'date'),
+          aberto && r.dataProximaAcao && r.dataProximaAcao < today() ? 'tb-late' : '');
+        case 'prazo': return h('td',{class:'tb-c tb-prazo'}, aberto && !r.porConfirmar ? [h('i',{class:'tb-dot', style:`--c:var(--${semTone(x.sem)})`}), tempoTxt(r, x.rel)] : '');
+        case 'valor': return tbTd(r.valor ? eur(valorN(r)) : '', td => tbEditarTexto(Q, td, x, {id:'valor', nome:'Valor s/IVA'}, 'number'), 'num');
+        case 'prob': return tbTd(h('span',{class: r.probabilidade != null && r.probabilidade !== '' ? '' : 'tb-padrao'}, probDe(r) + '%'), td => tbEditarTexto(Q, td, x, {id:'probabilidade', nome:'Probabilidade (%)'}, 'number'), 'num');
+        case 'previsao': return h('td',{class:'tb-c num'}, valorN(r) ? eur(previsaoDe(r)) : '');
+        case 'dataFechoPrevista': return tbTd(r.dataFechoPrevista ? ddmm(r.dataFechoPrevista) : '', td => tbEditarTexto(Q, td, x, {id:'dataFechoPrevista', nome:'Fecho previsto'}, 'date'));
+        case 'tipo': return tbTd(r.tipo ? tbPill(TIPOS[r.tipo], 'var(--copper)') : '', td => tbEscolher(Q, td, x, {id:'tipo', nome:'Tipo'}, Object.entries(TIPOS)));
+        case 'origem': return tbTd(ORIGENS[r.origem] || '', td => tbEscolher(Q, td, x, {id:'origem', nome:'Origem'}, Object.entries(ORIGENS)));
+        case 'localidade': return tbTd(String(r.localidade || '').split('\n')[0], td => tbEditarTexto(Q, td, x, {id:'localidade', nome:'Localidade'}, 'text'));
+        case 'contacto': return tbTd(r.contacto || '', td => tbEditarTexto(Q, td, x, {id:'contacto', nome:'Contacto'}, 'text'));
+        case 'notas': return tbTd(r.notas || '', td => tbEditarTexto(Q, td, x, {id:'notas', nome:'Notas'}, 'text'), 'tb-notas');
+      }
+      return null;
+    },
+    // Totais: barra de cores dos passos (como a «bateria» do monday), soma do valor e da previsão, probabilidade média
+    totais: g => {
+      const soma = g.xs.reduce((t, x) => t + valorN(x.r), 0), prev = g.xs.reduce((t, x) => t + previsaoDe(x.r), 0);
       const porEstado = {}; g.xs.forEach(x => { porEstado[x.r.estado] = (porEstado[x.r.estado] || 0) + 1; });
       const bateria = h('span',{class:'tb-bat', title: Object.keys(porEstado).map(e => `${(ESTADOS[e] || {}).l || e}: ${porEstado[e]}`).join('\n')},
         Object.keys(porEstado).map(e => h('i',{style:`background:${tomEstado(e)};width:${(100 * porEstado[e] / g.xs.length).toFixed(1)}%`})));
       const pm = g.xs.length ? Math.round(g.xs.reduce((t, x) => t + probDe(x.r), 0) / g.xs.length) : 0;
-      const tot = h('tr',{class:'tb-tot'}, cols.map(c => h('td',{class: 'k-' + c.id + (c.id === 'cliente' ? ' tb-cli' : ['valor','previsao','prob'].indexOf(c.id) >= 0 ? ' num' : '')},
-        c.id === 'estado' ? bateria : c.id === 'valor' ? (soma ? eur(soma) : '') : c.id === 'previsao' ? (prev ? eur(prev) : '') : c.id === 'prob' ? `${pm}% méd.` : '')), h('td'));
-      return h('tbody',{class:'tb-g', style:`--g:${g.cor}`, 'data-k': k}, cab, linhas, add, tot);
-    });
-    fill(box, lista.length ? h('table',{class:'tb'}, thead, corpos) : h('p',{class:'t-vazio'}, rows.length ? 'Nenhum pedido com estes filtros.' : 'Ainda não há pedidos.'));
-  }
+      return {resumo: soma ? ' · ' + eur(soma) : '',
+        celula: c => c.id === 'estado' ? bateria : c.id === 'valor' ? (soma ? eur(soma) : '') : c.id === 'previsao' ? (prev ? eur(prev) : '') : c.id === 'prob' ? `${pm}% méd.` : ''};
+    },
+    podeAdicionar: k => { const g = TB_PED.grupo; return (g !== 'estado' || k === 'novo') && g !== 'trimestre' && g.indexOf('x:') !== 0; },
+    adicionar: k => {
+      const g = TB_PED.grupo;
+      novoBase = g === 'prioridade' ? {prioridade: k} : g === 'tipo' && k ? {tipo: k} : {};
+      abrirNovo();
+      if (g === 'dono' && k && F('n-dono')) F('n-dono').value = k;
+    },
+    // Arrastar linhas: por Passo abre a mudança curta (as regras do processo); por Prioridade pede o motivo; por Dono, Tipo
+    // ou coluna da equipa muda logo, com histórico e «Desfazer».
+    arrastavel: () => { const g = TB_PED.grupo; return ['estado', 'dono', 'prioridade', 'tipo'].indexOf(g) >= 0 || g.indexOf('x:') === 0; },
+    alvosLinha: (x, chaves) => {
+      const r = x.r, g = TB_PED.grupo, ok = {};
+      if (g === 'estado') { const a = kAlvos(r); chaves.forEach(k => { if (a[k]) ok[k] = a[k]; }); return ok; }
+      const atual = tbGrupoDe(TB_PED, x).k;
+      chaves.forEach(k => { if (k === atual) return; if (g === 'dono' && !k && ABERTOS.includes(r.estado)) return; ok[k] = true; });
+      return ok;
+    },
+    largou: (x, k, alvo, linha) => {
+      const r = x.r, g = TB_PED.grupo;
+      if (g === 'estado') {
+        openSheet(r.id);
+        if (alvo.agenda) agAbrir('sheet', r.id, r.tipo === 'manutencao' || r.tipo === 'reparacao' ? r.tipo : 'visita', null, 'sug'); else abrirTrans(alvo);
+      } else if (g === 'dono') tbGuardar(r, 'dono', k, 'Dono', r.dono || 'vazio', k || 'vazio');
+      else if (g === 'prioridade') { const td = linha && linha.querySelector('.k-prioridade'); tbPrioridade(td || linha, r, k); }
+      else if (g === 'tipo') tbGuardar(r, 'tipo', k, 'Tipo', tbTexto('tipo', r.tipo), tbTexto('tipo', k));
+      else if (g.indexOf('x:') === 0) {
+        const c = tbCfg(TB_PED).extra.find(z => z.id === g.slice(2)); if (!c) return;
+        const antes = (r.extra || {})[c.id];
+        tbGuardar(r, {extra: c.id}, k, c.nome, antes || 'vazio', k || 'vazio');
+      }
+    },
+  });
+  function renderTabela(lista) { tbRender(TB_PED, lista); }
 
   // Definições: a probabilidade de fecho de cada passo (o «win probability» da folha de Excel do pipeline).
   function renderProb() {
@@ -2349,51 +2404,28 @@ if (!Element.prototype.replaceChildren) {
       }}, 'Guardar probabilidades')) : null);
   }
 
-  F('tbAgrupar').addEventListener('change', ev => tbAgrupar(ev.target.value));
-
   /* ---------- Tabela: arrastar ----------
-     Colunas: arrastar o cabeçalho muda a ordem (para a equipa, config «colunas».ordem); a beira direita muda a largura
-     (de cada pessoa). Linhas: a pega «⠿» leva o pedido para outro grupo; só acendem os grupos permitidos. Por Passo abre
-     a mudança curta (as regras do processo); por Prioridade pede o motivo; por Dono, Tipo ou coluna da equipa muda logo,
-     com histórico e «Desfazer». Rato: arrastar. Toque: carregar meio segundo e arrastar. */
-  let tbArr = null, tbCol = null, tbPendente = false;
+     Colunas: arrastar o cabeçalho muda a ordem (para a equipa, config do quadro, .ordem); a beira direita muda a largura
+     (de cada pessoa). Linhas: a pega «⠿» leva a linha para outro grupo; só acendem os grupos permitidos (q.alvosLinha) e
+     o largar faz o que o quadro diz (q.largou). Rato: arrastar. Toque: carregar meio segundo e arrastar. Só um arrastar de
+     cada vez, por isso o estado é um só e leva o seu quadro (q). */
+  let tbArr = null, tbCol = null;
   // O clique que o browser dispara ao largar não conta (não fecha o editor que o largar abriu nem recolhe um grupo).
   document.addEventListener('click', ev => { if (kSoltou) { ev.stopPropagation(); ev.preventDefault(); } }, true);
-  const tbArrastavel = () => ['estado', 'dono', 'prioridade', 'tipo'].indexOf(tbGrupo) >= 0 || tbGrupo.indexOf('x:') === 0;
-  function tbAlvosLinha(r, chaves) {
-    const ok = {};
-    if (tbGrupo === 'estado') { const a = kAlvos(r); chaves.forEach(k => { if (a[k]) ok[k] = a[k]; }); return ok; }
-    const atual = tbGrupoDe({r, pe: pEfetiva(r, relogio(r))}).k;
-    chaves.forEach(k => { if (k === atual) return; if (tbGrupo === 'dono' && !k && ABERTOS.includes(r.estado)) return; ok[k] = true; });
-    return ok;
-  }
-  function tbFimSujo() { if (tbPendente) { tbPendente = false; renderAll(); } }
-  function tbLargou(r, k, alvo, linha) {
-    if (tbGrupo === 'estado') {
-      openSheet(r.id);
-      if (alvo.agenda) agAbrir('sheet', r.id, r.tipo === 'manutencao' || r.tipo === 'reparacao' ? r.tipo : 'visita', null, 'sug'); else abrirTrans(alvo);
-    } else if (tbGrupo === 'dono') tbGuardar(r, 'dono', k, 'Dono', r.dono || 'vazio', k || 'vazio');
-    else if (tbGrupo === 'prioridade') { const td = linha && linha.querySelector('.k-prioridade'); tbPrioridade(td || linha, r, k); }
-    else if (tbGrupo === 'tipo') tbGuardar(r, 'tipo', k, 'Tipo', tbTexto('tipo', r.tipo), tbTexto('tipo', k));
-    else if (tbGrupo.indexOf('x:') === 0) {
-      const c = tbCfg().extra.find(z => z.id === tbGrupo.slice(2)); if (!c) return;
-      const antes = (r.extra || {})[c.id];
-      tbGuardar(r, {extra: c.id}, k, c.nome, antes || 'vazio', k || 'vazio');
-    }
-  }
-  function tbComecaLinha(tr, x, y) {
-    const r = rows.find(z => z.id === tr.getAttribute('data-id')); if (!r) return;
-    const corpos = Array.prototype.slice.call(document.querySelectorAll('#tabela tbody.tb-g'));
-    const alvos = tbAlvosLinha(r, corpos.map(c => c.getAttribute('data-k')));
-    const fant = h('div',{class:'tb-fant'}, r.cliente || r.id);
+  function tbFimSujo(q) { if (q.pendente) { q.pendente = false; renderAll(); } }
+  function tbComecaLinha(q, tr, x, y) {
+    const it = q.mapa[tr.getAttribute('data-id')]; if (!it) return;
+    const corpos = Array.prototype.slice.call(F(q.box).querySelectorAll('tbody.tb-g'));
+    const alvos = q.alvosLinha(it, corpos.map(c => c.getAttribute('data-k')));
+    const fant = h('div',{class:'tb-fant'}, q.nomeDe(it));
     document.body.appendChild(fant);
-    tbArr = {r, tr, alvos, fant, sobre: null};
+    tbArr = {q, it, tr, alvos, fant, sobre: null};
     tr.classList.add('karr'); document.body.classList.add('a-arrastar');
     corpos.forEach(c => c.classList.add(alvos[c.getAttribute('data-k')] ? 'alvo' : c.contains(tr) ? 'origem' : 'fora'));
     tbMoveLinha(x, y);
   }
-  function tbAutoScroll(x, y) {
-    const w = document.querySelector('.tb-wrap'); if (!w) return;
+  function tbAutoScroll(q, x, y) {
+    const w = F(q.box) && F(q.box).parentNode; if (!w) return;
     // a parte da tabela que se vê (pode passar do fundo do ecrã); quando a tabela já não desce, desce a página
     const b = w.getBoundingClientRect(), cima = Math.max(b.top, 0), baixo = Math.min(b.bottom, window.innerHeight);
     if (y < cima + 40) { if (w.scrollTop > 0) w.scrollTop -= 16; else window.scrollBy(0, -16); }
@@ -2404,30 +2436,31 @@ if (!Element.prototype.replaceChildren) {
     if (!tbArr) return;
     tbArr.fant.style.transform = `translate(${x + 12}px, ${y - 14}px)`;
     const el = document.elementFromPoint(x, y);
-    const c = el && el.closest ? el.closest('#tabela tbody.tb-g') : null;
+    let c = el && el.closest ? el.closest('tbody.tb-g') : null;
+    if (c && !F(tbArr.q.box).contains(c)) c = null;
     if (tbArr.sobre && tbArr.sobre !== c) tbArr.sobre.classList.remove('sobre');
     tbArr.sobre = c && c.classList.contains('alvo') ? c : null;
     if (tbArr.sobre) tbArr.sobre.classList.add('sobre');
-    tbAutoScroll(x, y);
+    tbAutoScroll(tbArr.q, x, y);
   }
   function tbFimLinha(largou) {
     if (!tbArr) return;
-    const {r, tr, alvos, sobre} = tbArr;
+    const {q, it, tr, alvos, sobre} = tbArr;
     tbArr.fant.remove(); tr.classList.remove('karr'); document.body.classList.remove('a-arrastar');
-    Array.prototype.forEach.call(document.querySelectorAll('#tabela tbody.tb-g'), c => c.classList.remove('alvo', 'fora', 'origem', 'sobre'));
+    Array.prototype.forEach.call(F(q.box).querySelectorAll('tbody.tb-g'), c => c.classList.remove('alvo', 'fora', 'origem', 'sobre'));
     tbArr = null;
     kSoltou = true; setTimeout(() => { kSoltou = false; }, 350);
-    tbFimSujo();
+    tbFimSujo(q);
     if (!largou || !sobre) return;
     const k = sobre.getAttribute('data-k');
-    tbLargou(r, k, alvos[k], document.querySelector(`#tabela tr[data-id="${r.id}"]`));
+    q.largou(q.mapa[q.id(it)] || it, k, alvos[k], F(q.box).querySelector(`tr[data-id="${q.id(it)}"]`));
   }
   // Colunas: mudar a ordem
-  function tbComecaCol(th, x) {
+  function tbComecaCol(q, th, x) {
     const ths = Array.prototype.slice.call(th.parentNode.children).filter(t => t.getAttribute('data-col'));
     const guia = h('div',{class:'tb-guia'});
     document.body.appendChild(guia);
-    tbCol = {th, id: th.getAttribute('data-col'), ths, guia, antes: null};
+    tbCol = {q, th, id: th.getAttribute('data-col'), ths, guia, antes: null};
     th.classList.add('karr'); document.body.classList.add('a-arrastar');
     tbMoveCol(x);
   }
@@ -2440,77 +2473,82 @@ if (!Element.prototype.replaceChildren) {
     tbCol.antes = antes;
     const ref = antes ? antes.getBoundingClientRect() : movs[movs.length - 1].getBoundingClientRect();
     const xl = antes ? ref.left : ref.right;
-    const t = document.querySelector('#tabela table').getBoundingClientRect(), w = document.querySelector('.tb-wrap').getBoundingClientRect();
+    const box = F(tbCol.q.box), t = box.querySelector('table').getBoundingClientRect(), w = box.parentNode.getBoundingClientRect();
     tbCol.guia.style.left = (xl - 1) + 'px'; tbCol.guia.style.top = Math.max(t.top, w.top) + 'px'; tbCol.guia.style.height = (Math.min(t.bottom, w.bottom) - Math.max(t.top, w.top)) + 'px';
-    tbAutoScroll(x, (w.top + w.bottom) / 2);
+    tbAutoScroll(tbCol.q, x, (w.top + w.bottom) / 2);
   }
   function tbFimCol(largou) {
     if (!tbCol) return;
-    const {th, id, guia, antes} = tbCol;
+    const {q, th, id, guia, antes} = tbCol;
     guia.remove(); th.classList.remove('karr'); document.body.classList.remove('a-arrastar');
     tbCol = null;
     kSoltou = true; setTimeout(() => { kSoltou = false; }, 350);
-    if (!largou) { tbFimSujo(); return; }
-    const ids = tbColunas().filter(c => !c.fixa).map(c => c.id).filter(z => z !== id);
+    if (!largou) { tbFimSujo(q); return; }
+    const ids = tbColunas(q).filter(c => !c.fixa).map(c => c.id).filter(z => z !== id);
     const i = antes ? ids.indexOf(antes.getAttribute('data-col')) : -1;
     if (i < 0) ids.push(id); else ids.splice(i, 0, id);
-    const atual = tbColunas().filter(c => !c.fixa).map(c => c.id);
-    if (ids.join() === atual.join()) { tbFimSujo(); return; }
-    tbPendente = false;
-    tbGuardarCfg(() => ({ordem: ids}), 'Ordem das colunas guardada');
+    const atual = tbColunas(q).filter(c => !c.fixa).map(c => c.id);
+    if (ids.join() === atual.join()) { tbFimSujo(q); return; }
+    q.pendente = false;
+    tbGuardarCfg(q, {ordem: ids}, 'Ordem das colunas guardada');
   }
   // Colunas: mudar a largura
   let tbRz = null;
-  function tbMoveRz(x) { if (!tbRz) return; const w = Math.max(60, Math.min(480, Math.round(tbRz.w + x - tbRz.x))); tbLarg[tbRz.id] = w; tbAplicaLarguras(); }
-  function tbFimRz() { if (!tbRz) return; tbRz = null; document.body.classList.remove('a-redimensionar'); tbGuardaLarguras(); kSoltou = true; setTimeout(() => { kSoltou = false; }, 350); }
-  (function () {
-    const box = F('tabela');
-    let ini = null, temp = null;
-    const inicio = (ev, x, y) => {
-      if (!canWrite) return null;
-      const rz = ev.target.closest('.tb-rz');
-      if (rz) { const th = rz.closest('th'); tbRz = {id: th.getAttribute('data-col'), x, w: th.getBoundingClientRect().width}; document.body.classList.add('a-redimensionar'); return 'rz'; }
-      const pega = ev.target.closest('.tb-pega');
-      if (pega) return {tipo: 'linha', el: pega.closest('tr'), x, y};
-      const th = ev.target.closest('th.tb-mov');
-      if (th && !ev.target.closest('button')) return {tipo: 'col', el: th, x, y};
-      return null;
-    };
-    const arranca = (i, x, y) => { if (i.tipo === 'linha') tbComecaLinha(i.el, x, y); else tbComecaCol(i.el, x); };
+  function tbMoveRz(x) { if (!tbRz) return; const w = Math.max(60, Math.min(480, Math.round(tbRz.w + x - tbRz.x))); tbRz.q.larg[tbRz.id] = w; tbAplicaLarguras(tbRz.q); }
+  function tbFimRz() { if (!tbRz) return; const q = tbRz.q; tbRz = null; document.body.classList.remove('a-redimensionar'); tbGuardaLarguras(q); kSoltou = true; setTimeout(() => { kSoltou = false; }, 350); }
+  // Os ouvintes do documento são um só conjunto; cada quadro liga os seus (tbLigar) à sua caixa.
+  let tbIni = null, tbTemp = null;
+  function tbInicio(q, ev, x, y) {
+    if (!canWrite) return null;
+    const rz = ev.target.closest('.tb-rz');
+    if (rz) { const th = rz.closest('th'); tbRz = {q, id: th.getAttribute('data-col'), x, w: th.getBoundingClientRect().width}; document.body.classList.add('a-redimensionar'); return 'rz'; }
+    const pega = ev.target.closest('.tb-pega');
+    if (pega) return {q, tipo: 'linha', el: pega.closest('tr'), x, y};
+    const th = ev.target.closest('th.tb-mov');
+    if (th && !ev.target.closest('button')) return {q, tipo: 'col', el: th, x, y};
+    return null;
+  }
+  const tbArranca = (i, x, y) => { if (i.tipo === 'linha') tbComecaLinha(i.q, i.el, x, y); else tbComecaCol(i.q, i.el, x); };
+  function tbLigar(q) {
+    const box = F(q.box);
+    F(q.agrupar).addEventListener('change', ev => tbAgruparEm(q, ev.target.value));
     box.addEventListener('mousedown', ev => {
       if (ev.button !== 0) return;
-      const i = inicio(ev, ev.clientX, ev.clientY);
+      const i = tbInicio(q, ev, ev.clientX, ev.clientY);
       if (i === 'rz') { ev.preventDefault(); return; }
-      if (i) { ini = i; if (i.tipo === 'linha') ev.preventDefault(); }
+      if (i) { tbIni = i; if (i.tipo === 'linha') ev.preventDefault(); }
     });
+    box.addEventListener('touchstart', ev => {
+      if (ev.touches.length !== 1) return;
+      const t = ev.touches[0], i = tbInicio(q, ev, t.clientX, t.clientY);
+      if (i === 'rz') return;
+      if (!i) return;
+      tbIni = i; clearTimeout(tbTemp);
+      // a pega da linha arranca logo; o cabeçalho espera meio segundo (para o dedo poder deslizar a tabela)
+      if (i.tipo === 'linha') { tbArranca(i, i.x, i.y); tbIni = null; }
+      else tbTemp = setTimeout(() => { if (tbIni) { tbArranca(tbIni, tbIni.x, tbIni.y); tbIni = null; } }, 450);
+    }, {passive: true});
+  }
+  (function () {
     document.addEventListener('mousemove', ev => {
       if (tbRz) { tbMoveRz(ev.clientX); ev.preventDefault(); return; }
       if (tbArr) { tbMoveLinha(ev.clientX, ev.clientY); ev.preventDefault(); return; }
       if (tbCol) { tbMoveCol(ev.clientX); ev.preventDefault(); return; }
-      if (ini && Math.abs(ev.clientX - ini.x) + Math.abs(ev.clientY - ini.y) > 6) { arranca(ini, ev.clientX, ev.clientY); ini = null; }
+      if (tbIni && Math.abs(ev.clientX - tbIni.x) + Math.abs(ev.clientY - tbIni.y) > 6) { tbArranca(tbIni, ev.clientX, ev.clientY); tbIni = null; }
     });
-    document.addEventListener('mouseup', () => { ini = null; if (tbRz) tbFimRz(); if (tbArr) tbFimLinha(true); if (tbCol) tbFimCol(true); });
-    box.addEventListener('touchstart', ev => {
-      if (ev.touches.length !== 1) return;
-      const t = ev.touches[0], i = inicio(ev, t.clientX, t.clientY);
-      if (i === 'rz') return;
-      if (!i) return;
-      ini = i; clearTimeout(temp);
-      // a pega da linha arranca logo; o cabeçalho espera meio segundo (para o dedo poder deslizar a tabela)
-      if (i.tipo === 'linha') { arranca(i, i.x, i.y); ini = null; }
-      else temp = setTimeout(() => { if (ini) { arranca(ini, ini.x, ini.y); ini = null; } }, 450);
-    }, {passive: true});
+    document.addEventListener('mouseup', () => { tbIni = null; if (tbRz) tbFimRz(); if (tbArr) tbFimLinha(true); if (tbCol) tbFimCol(true); });
     document.addEventListener('touchmove', ev => {
       const t = ev.touches[0];
       if (tbRz) { ev.preventDefault(); tbMoveRz(t.clientX); return; }
       if (tbArr) { ev.preventDefault(); tbMoveLinha(t.clientX, t.clientY); return; }
       if (tbCol) { ev.preventDefault(); tbMoveCol(t.clientX); return; }
-      if (ini && Math.abs(t.clientX - ini.x) + Math.abs(t.clientY - ini.y) > 10) { clearTimeout(temp); ini = null; }
+      if (tbIni && Math.abs(t.clientX - tbIni.x) + Math.abs(t.clientY - tbIni.y) > 10) { clearTimeout(tbTemp); tbIni = null; }
     }, {passive: false});
-    document.addEventListener('touchend', ev => { clearTimeout(temp); ini = null; if (tbRz) tbFimRz(); if (tbArr) { ev.preventDefault(); tbFimLinha(true); } if (tbCol) { ev.preventDefault(); tbFimCol(true); } });
-    document.addEventListener('touchcancel', () => { clearTimeout(temp); ini = null; tbFimRz(); tbFimLinha(false); tbFimCol(false); });
+    document.addEventListener('touchend', ev => { clearTimeout(tbTemp); tbIni = null; if (tbRz) tbFimRz(); if (tbArr) { ev.preventDefault(); tbFimLinha(true); } if (tbCol) { ev.preventDefault(); tbFimCol(true); } });
+    document.addEventListener('touchcancel', () => { clearTimeout(tbTemp); tbIni = null; tbFimRz(); tbFimLinha(false); tbFimCol(false); });
     document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { tbFimLinha(false); tbFimCol(false); } });
   })();
+  tbLigar(TB_PED);
 
 
   /* ---------- Números: painel de widgets (ao estilo do dashboard do monday) ----------
@@ -5469,7 +5507,7 @@ if (!Element.prototype.replaceChildren) {
       ]);
       if (p.error) throw p.error;
       rows = p.data.map(r => ({id: r.id, ...r.dados, _versao: r.versao}));
-      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') cfgColunas = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
+      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') TB_PED.cfg = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
       if (ft.error) { if (/relation|does not exist|schema cache/i.test(ft.error.message || '')) fatTabela = false; }
       else { fatTabela = true; const novo = {}; for (const x of ft.data) if (x.dados && x.dados.mes) novo[x.dados.mes] = x.dados; faturacao = novo; if (!faturacao[fatMes]) fatMes = ''; }
       if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) fichaTabela = false; }
