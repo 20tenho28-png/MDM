@@ -609,7 +609,7 @@ table.tb{border-collapse:separate;border-spacing:0;min-width:100%;font-size:13.5
 .fbox.agrupar select{border:0;background:transparent;font:inherit;color:inherit;width:100%}
 @media (min-width:768px){#lista,#v-gerir #mosLeg,#v-gerir #mosaico{display:none}}
 @media (max-width:767px){.tb-wrap,.fbox.agrupar{display:none}}
-.tb th.tb-mov{cursor:grab}
+.tb th.tb-mov{cursor:grab;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 
 .tb .tb-rz{position:absolute;top:0;right:-3px;width:7px;height:100%;cursor:col-resize;z-index:4}
 .tb .tb-rz:hover,body.a-redimensionar .tb-rz{background:var(--accent);opacity:.5}
@@ -2130,8 +2130,15 @@ if (!Element.prototype.replaceChildren) {
 
   // Guardar um campo: cópia do pedido, histórico, versão (guardar_pedido) e «Desfazer».
   const tbTexto = (campo, v) => v == null || v === '' ? 'vazio' : campo === 'valor' ? eur(Number(v)) : /^data/.test(campo) ? ddmm(v) : campo === 'probabilidade' ? v + '%' : campo === 'tipo' ? TIPOS[v] : campo === 'origem' ? ORIGENS[v] : String(v);
+  // Parte sempre da cópia mais recente do pedido (o tempo real pode tê-la trocado desde que a célula foi desenhada) e
+  // recusa se alguém mudou este mesmo campo entretanto, para não apagar a mudança de um colega sem aviso.
+  const tbValorDe = (r, alvo) => { const v = alvo.extra ? (r.extra || {})[alvo.extra] : r[alvo]; return v == null || v === '' ? null : JSON.stringify(v); };
   async function tbGuardar(r, alvo, valor, rotulo, antesTxt, depoisTxt, motivo) {
-    const novo = JSON.parse(JSON.stringify(r)); delete novo.id; delete novo._versao;
+    const atual = rows.find(z => z.id === r.id);
+    if (!atual || tbValorDe(atual, alvo) !== tbValorDe(r, alvo)) {
+      fechaPop(); toast('Alguém mudou este campo entretanto. Vê o valor novo e repete.'); carregar(); return false;
+    }
+    const novo = JSON.parse(JSON.stringify(atual)); delete novo.id; delete novo._versao;
     let antes;
     if (alvo.extra) { novo.extra = Object.assign({}, novo.extra || {}); antes = novo.extra[alvo.extra]; if (valor === '' || valor == null) delete novo.extra[alvo.extra]; else novo.extra[alvo.extra] = valor; }
     else { antes = novo[alvo]; if (valor === '' || valor == null) delete novo[alvo]; else novo[alvo] = valor; }
@@ -2139,7 +2146,7 @@ if (!Element.prototype.replaceChildren) {
     novo.historico.push(nota(`${rotulo}: ${antesTxt} → ${depoisTxt}${motivo ? ' (' + motivo + ')' : ''}`));
     fechaPop();
     const ok = await gravar(r.id, novo, `${rotulo} guardado`);
-    if (ok) toast(`${rotulo}: ${depoisTxt}`, {label:'Desfazer', fn: () => { const atual = rows.find(z => z.id === r.id); if (atual) tbGuardar(atual, alvo, antes, rotulo, depoisTxt, antesTxt, 'desfeito'); }});
+    if (ok) toast(`${rotulo}: ${depoisTxt}`, {label:'Desfazer', fn: () => { const agora = rows.find(z => z.id === r.id); if (agora) tbGuardar(agora, alvo, antes, rotulo, depoisTxt, antesTxt, 'desfeito'); }});
     return ok;
   }
   const tbObrigatorio = (r, campo) => ABERTOS.includes(r.estado) && ['dono', 'proximaAcao', 'dataProximaAcao'].indexOf(campo) >= 0;
@@ -2161,7 +2168,7 @@ if (!Element.prototype.replaceChildren) {
       if (/[—–]/.test(v)) return 'Sem travessões: usa vírgulas ou parênteses.';
       if (!v && !c.extra && tbObrigatorio(r, campo)) return 'Um pedido aberto tem sempre dono, próxima ação e data.';
       if (tipo === 'number' && v) {
-        const n = c.id === 'valor' ? parseValor(v) : Number(v.replace(',', '.'));
+        const n = c.id === 'valor' ? parseValor(v) : parseNumero(v);
         if (Number.isNaN(n)) return 'Não é um número.';
         if (c.id === 'probabilidade' && (n < 0 || n > 100)) return 'A probabilidade vai de 0 a 100.';
         v = n;
@@ -2212,7 +2219,7 @@ if (!Element.prototype.replaceChildren) {
 
   // Colunas: mostrar, esconder, juntar, mudar o nome e apagar (config «colunas», partilhada pela equipa).
   async function tbGuardarCfg(novo, msg) {
-    const c = Object.assign({ocultas: tbCfg().ocultas, extra: tbCfg().extra}, novo);
+    const c = Object.assign({ocultas: tbCfg().ocultas, extra: tbCfg().extra, ordem: (cfgColunas && cfgColunas.ordem) || []}, novo);
     try {
       const {error} = await sb.from('config').upsert({chave:'colunas', valor: c, atualizado_por: eu.email}, {onConflict:'chave'});
       if (error) throw error;
@@ -3572,7 +3579,7 @@ if (!Element.prototype.replaceChildren) {
       (ESTADOS[r.estado] || {}).bola || '', r.entrouNoEstado && !r.porConfirmar ? iso(new Date(r.entrouNoEstado)) : '', r.dono, r.proximaAcao, r.dataProximaAcao,
       sem || '', sem ? tempoTxt(r, rel) : '', dec(r.valor), r.dataPedido, r.dataVisita, r.dataEnvio,
       [r.enviadoPor, POR_ONDE[r.enviadoPorOnde]].filter(Boolean).join(', '), r.seguimentos || 0, r.motivo, r.porConfirmar ? 'Sim' : '', r.notas,
-      probDe(r) + '%', dec(previsaoDe(r)), r.dataFechoPrevista, ...tbCfg().extra.map(c => { const v = (r.extra || {})[c.id]; return c.tipo === 'caixa' ? (v ? 'Sim' : '') : v; }),
+      probDe(r) + '%', dec(previsaoDe(r)), r.dataFechoPrevista, ...tbCfg().extra.map(c => { const v = (r.extra || {})[c.id]; return c.tipo === 'caixa' ? (v ? 'Sim' : '') : c.tipo === 'numero' && v != null && v !== '' ? String(v).replace('.', ',') : v; }),
     ].map(v => typeof v === 'number' ? `"${v}"` : csvCell(v)).join(','));
     return [cab.map(csvCell).join(','), ...linhas].join('\n') + '\n';
   }
@@ -3827,6 +3834,14 @@ if (!Element.prototype.replaceChildren) {
     if (!s) return null;
     if (s.includes(',')) s = s.replace(/\./g,'').replace(',','.');
     const v = Number(s); return Number.isFinite(v) ? Math.round(v * 100) / 100 : NaN;
+  }
+  // Números das colunas da equipa: como parseValor, sem arredondar ao cêntimo; «1.250» sem vírgula conta como mil.
+  function parseNumero(s) {
+    s = String(s || '').replace(/\s|€/g,'');
+    if (!s) return null;
+    if (s.includes(',')) s = s.replace(/\./g,'').replace(',','.');
+    else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g,'');
+    const v = Number(s); return Number.isFinite(v) ? v : NaN;
   }
   const nota = (texto) => ({em: new Date().toISOString(), texto});
 
