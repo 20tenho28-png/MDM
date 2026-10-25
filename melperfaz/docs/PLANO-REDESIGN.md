@@ -186,7 +186,7 @@ O ritmo de fundos é paper › ink › paper › bone › clay › rodapé ink.
 | 4 | `[bone]` Porquê Nós `#porque-nos` | Confiança verificável | Esquerda: SectionHead "Porque nos escolhem" / "Reputações constroem-se uma obra de cada vez"; **TrustList** com os 4 itens atuais (o item "Licenciada" acrescenta ", alvará n.º X" e o seguro quando existirem); parágrafo "Quem somos": "A Melperfaz, Construção Civil, Lda. trabalha desde 2001 com equipa própria." mais zona e morada (*dados do dono*).<br>Direita: foto-02 numa moldura 4:5 (substitui o stat card), com o link "Ver a obra"; "Ver o perfil e as avaliações no Google" só se `googleMaps` existir (as avaliações nunca são citadas no site). |
 | 5 | `[clay]` **CtaBand** `#contacto` | Fechar | Esquerda: Eyebrow "Vamos conversar" (texto e traço ink); h2 "Peça o orçamento. A visita é gratuita."; p "Respondemos no prazo de um dia útil e marcamos uma visita sem compromisso."; `.cta-phone` "961 245 288" com o horário por baixo (*dado do dono*, substitui "Mãos à obra").<br>Direita: botões empilhados com a mesma largura (mín. 280px, 100% no telemóvel): "Pedir Orçamento" (fundo ink, texto paper) e "Falar por WhatsApp" (ghost); ProofLine em ink. |
 
-O processo (4 passos) passa para `orcamento.html`, onde responde a "o que acontece depois de enviar". Alvo de altura da home: cerca de 4.300px a 1440px e menos de 6.000px a 390px.
+O processo (4 passos) passa para `orcamento.html`, onde responde a "o que acontece depois de enviar". Alvo de altura da home: cerca de 4.300px a 1440px e menos de 6.000px a 390px, medido sem os dados do dono (com todos preenchidos cresce cerca de 380px a 390px; ver «Onde o site construído difere do plano»).
 
 ### obras.html
 
@@ -491,7 +491,7 @@ Tudo em `/home/user/MDM/melperfaz`. O build continua a ser `python3 build.py`. O
 ### Fase 7: verificação visual e de acessibilidade (Playwright, 375, 768, 1280, 1440)
 - Assertivas automáticas:
   1. o x do h1 do hero é igual ao x do logótipo e ao x do SectionHead em todas as larguras
-  2. a altura da home é menor que 6.000px a 390px e cerca de 4.300px a 1440px
+  2. a altura da home é menor que 6.000px a 390px e cerca de 4.300px a 1440px (sem os dados do dono; ver «Onde o site construído difere do plano», ponto 4)
   3. contraste de 4,5:1 ou mais em `.btn` e `.s-clay`
   4. anel de foco visível nos botões do hero e da CTA
   5. nenhum elemento fixo se sobrepõe a campos ou a botões (com a ActionBar e o `padding-bottom` corretos)
@@ -514,6 +514,51 @@ Tudo em `/home/user/MDM/melperfaz`. O build continua a ser `python3 build.py`. O
   - Marquee, StatCard, tag-cards e hero full-bleed como retirados do site
   - 10 estilos de texto
   - retirar "abaixo de AA, mantidos por fidelidade"
+
+---
+
+## Onde o site construído difere do plano (de propósito)
+
+O que a revisão mudou em relação ao plano acima, e porquê. Cada ponto está também na secção a que diz respeito; os
+testes (`tests/site.test.mjs` e `tests/browser.mjs`) conferem o que está construído, não o texto original.
+
+1. **Legenda sobre a fotografia nas obras em destaque da página inicial, também no telemóvel** (*exceção a aprovar pelo
+   dono*, ver ProjectGrid). Em `obras.html` e nas outras obras de cada ficha a legenda passa para baixo da fotografia
+   abaixo de 640px, como o plano pede; na página inicial fica por cima, num cartão de 280px com a faixa só à medida do
+   texto, porque com ela por baixo a página passa os 6.000px a 390px. Se o dono preferir a legenda por baixo também aí,
+   o alvo de altura da página inicial tem de subir.
+2. **Ritmo de secções um passo de token abaixo** (ver «Ritmo de secções»): `.sec` 80/50 em vez de 90/60, SectionHead
+   44/38 em vez de 50, hero 80/90 (50/50 no telemóvel) em vez de 90/110 e rodapé 64/44. Com os valores do plano a
+   página inicial passava os 6.000px a 390px.
+3. **ServiceList**: as miniaturas são as do plano (64x64, a todas as larguras), mas a secção mede cerca de 930px em
+   desktop e não 640px; o alvo que vale é o da página inteira (cerca de 4.300px a 1440px), e esse cumpre-se.
+4. **Os alvos de altura da página inicial medem o desenho, sem os dados do dono.** Com todos os dados de
+   `dados-melperfaz.json` preenchidos (zona no eyebrow e em «Quem somos», sede, alvará na ProofLine, alvará e seguro em
+   «Licenciada & segurada», perfil do Google, horário junto ao telefone, email, morada, horário e mapa no rodapé) a
+   página cresce cerca de 380px a 390px e 250px a 1440px (6.360px e 4.590px, medidos com valores de exemplo). O teste
+   do browser mede uma cópia com os dados vazios, para o CI não ficar vermelho quando a Melperfaz os der; não se
+   tiram dados do dono para caber no alvo.
+5. **Os cartões de `obras.html` não repetem o nome do serviço** (o `.cat` por cima do título): o h2 de cada grupo já é
+   esse nome (princípio 4, cada facto uma vez por página). A página inicial e as outras obras de cada ficha, que
+   misturam serviços, mantêm-no.
+6. **O primeiro grupo de `obras.html` não entra ao fazer scroll** (sem `.reveal`): tem a imagem LCP, e o fade atrasava-a
+   cerca de meio segundo (ou escondia-a se o JavaScript não corresse). Os outros grupos entram como o plano descreve.
+7. **«fotosExtra»** (o plano só dizia que ficam escondidas até existirem): aparecem na ficha da obra, em duas colunas
+   por baixo de «Na obra», cada uma na sua proporção e em lazy load.
+8. **Os dados do dono nas frases**: «Quem somos» acrescenta «Trabalhamos em {zona}.» e «Sede: {morada}.» (cabe
+   qualquer morada, sem artigo); «Licenciada & segurada» acrescenta «Alvará n.º X.» e «Seguro de responsabilidade
+   civil: {seguro}.», cada um com o seu rótulo; o `--check` recusa um ponto final no fim destes valores. O rótulo
+   «Alvará n.º» fica, e o pedido do `--faltam` pede só o alvará: se a empresa tiver outro título do IMPIC, o rótulo
+   muda antes de o número entrar.
+9. **As migalhas das fichas de obra ficam numa linha**: o título da obra, o último elemento, acaba em «…» quando não
+   cabe (o h1 logo abaixo repete-o inteiro), para o h1 começar à mesma altura que nas outras páginas.
+10. **A ligação para a página inicial é a pasta** (`./`, `../` ou `/` na 404), como o canonical e o mapa do site, e
+    não `index.html`.
+11. **Em `orcamento.html`, «Enviar fotografias»** (a terceira célula da ActionBar e o botão da lateral) abre o WhatsApp
+    com a mensagem das fotografias (`site.json › wa.fotos`), diferente da de «WhatsApp» ao lado.
+12. **Por fazer, de propósito**: com 400% de zoom (320x256) o cabeçalho fixo e a ActionBar ocupam quase metade do ecrã.
+    O foco já nunca fica tapado (o scroll reserva a altura da barra), mas soltar o cabeçalho em ecrãs muito baixos
+    precisava de um `@media (max-height: …)`, que a regra das quebras (só 980 e 640px) não deixa. Fica para decidir.
 
 ---
 
@@ -543,6 +588,7 @@ Tudo em `/home/user/MDM/melperfaz`. O build continua a ser `python3 build.py`. O
 7. Aceita o campo opcional "Localidade" no formulário?
 8. A foto-05 (espaço interior) tem a faixa preta no original?
 9. Usa os valores atuais do "tipo de obra" em algum filtro de email ou folha de cálculo?
+10. Aprova a legenda por cima da fotografia nas obras em destaque da página inicial, no telemóvel (ver «Onde o site construído difere do plano», ponto 1)?
 
 ---
 

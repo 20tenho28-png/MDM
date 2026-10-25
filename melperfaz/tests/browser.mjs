@@ -24,9 +24,10 @@
    L. o sistema visual: uma margem esquerda (h1 do hero, logótipo e cabeçalhos de secção no mesmo x), contraste de 4,5:1
       nos botões, na barra e no texto da faixa clay, o anel de foco da cor da superfície, campos com 16 px e etiquetas com 13 px;
       a legenda dos cartões sobre a fotografia (a 390 px só nas obras em destaque, com cartões de 280 px; nas outras por
-      baixo, em 4/3 ou 4/5), o cartão inteiro é a ligação e a legenda cresce com o texto; a página inicial em menos de 6.000 px
-      a 390 e até 4.400 a 1440, com as miniaturas dos serviços sem acrescentar linhas, «Ver as N obras» ao lado do título
-      e Porquê Nós em duas colunas; «Pedido para: X · alterar» em linhas de texto a 320 e 390 px;
+      baixo, em 4/3 ou 4/5), o cartão inteiro é a ligação e a legenda cresce com o texto; a página inicial (o desenho, sem os
+      dados da Melperfaz) em menos de 6.000 px a 390 e até 4.400 a 1440, com as miniaturas dos serviços de 64 px a todas as
+      larguras, «Ver as N obras» ao lado do título e Porquê Nós em duas colunas; «Pedido para: X · alterar» em linhas de
+      texto a 320 e 390 px;
    M. as fotografias sem ampliação: a 375 px a do hero tem pelo menos tantos píxeis como a moldura, e nenhuma fotografia é
       mostrada maior do que o ficheiro escolhido, salvo quando o próprio original é mais pequeno do que a moldura; num
       telemóvel de 3x, a de 2x;
@@ -670,14 +671,27 @@ try {
     // a altura da página inicial (Fase 7, assertiva 2): menos de 6.000 px a 390 e no máximo 4.400 a 1440 (o plano diz
     // cerca de 4.300), sem tirar nenhum facto, serviço, obra ou ação (era 8.469 e 4.955 antes do redesenho, 6.486 e
     // 4.930 antes do acerto: a legenda sobre a fotografia também no telemóvel, um passo de token a menos nas secções,
-    // Porquê Nós em duas colunas, as miniaturas só onde não acrescentam linhas, «Ver as N obras» ao lado do título)
-    for (const [largura, cabe] of [[390, h => h < 6000], [1440, h => h <= 4400]]) {
-      const { ctx, page } = await pagina({ viewport: { width: largura, height: 900 } });
-      await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
-      const h = await page.evaluate(() => document.documentElement.scrollHeight);
-      ok(cabe(h), `L: a ${largura} px a página inicial cabe no alvo do plano (${largura === 390 ? 'menos de 6.000' : 'até 4.400'} px)`, h);
-      await ctx.close();
-    }
+    // Porquê Nós em duas colunas, as miniaturas só onde não acrescentam linhas, «Ver as N obras» ao lado do título).
+    // Mede-se o desenho: uma cópia das fontes com data/dados-melperfaz.json em branco. Os dados da Melperfaz, quando
+    // chegarem, acrescentam linhas que o desenho não controla (o rodapé com email, morada, horário e mapa, a zona e a sede
+    // em «Quem somos», o alvará e o seguro: cerca de 380 px a 390 e 250 a 1440 com todos), e o CI não pode ficar
+    // vermelho por a Melperfaz os dar. Com os dados ainda vazios, a cópia é igual ao site.
+    const vazio = path.join(tmp, 'sem-dados');
+    for (const x of ['build.py', 'src', 'data', 'assets']) fs.cpSync(path.join(W, x), path.join(vazio, x), { recursive: true });
+    const pd = path.join(vazio, 'data/dados-melperfaz.json'), dd = JSON.parse(fs.readFileSync(pd, 'utf8'));
+    for (const [k, v] of Object.entries(dd)) if (!k.startsWith('_')) v.valor = '';
+    fs.writeFileSync(pd, JSON.stringify(dd, null, 2));
+    execFileSync('python3', ['build.py'], { cwd: vazio, stdio: ['ignore', 'ignore', 'inherit'], env: { ...process.env, MELPERFAZ_OUT: path.join(vazio, 'public') } });
+    const srvVazio = await serve(path.join(vazio, 'public'));
+    try {
+      for (const [largura, cabe] of [[390, h => h < 6000], [1440, h => h <= 4400]]) {
+        const { ctx, page } = await pagina({ viewport: { width: largura, height: 900 } });
+        await page.goto(srvVazio.base + '/', { waitUntil: 'networkidle' });
+        const h = await page.evaluate(() => document.documentElement.scrollHeight);
+        ok(cabe(h), `L: a ${largura} px a página inicial (sem os dados da Melperfaz) cabe no alvo do plano (${largura === 390 ? 'menos de 6.000' : 'até 4.400'} px)`, h);
+        await ctx.close();
+      }
+    } finally { await srvVazio.close(); }
   }
   {
     // a página inicial compacta: as miniaturas dos serviços com 64 × 64 a todas as larguras (o plano; as alturas da página

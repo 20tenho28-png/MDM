@@ -521,7 +521,7 @@ const FACTOS_EX = { problema: 'Paredes com humidade.', trabalho: 'Picámos e reb
 test('com os dados da Melperfaz preenchidos: os ramos escondidos aparecem, nos sítios certos e com o texto certo', () => {
   const { d, r, le: lc } = geraCopia(d => {
     mudaJson(d, 'data/dados-melperfaz.json', j => { for (const [k, v] of Object.entries(EXEMPLO)) j[k].valor = v; });
-    mudaJson(d, 'data/obras.json', j => { for (const o of j.obras) o.factos = { ...FACTOS_EX }; j.obras.find(o => o.code === 'M02').fotosExtra = ['01', '06']; });
+    mudaJson(d, 'data/obras.json', j => { for (const o of j.obras) { o.factos = { ...FACTOS_EX }; o.fotosExtra = o.code === 'M02' ? ['01', '06'] : []; } });
   });
   try {
     assert.equal(r.status, 0, r.stdout + r.stderr);
@@ -547,7 +547,14 @@ test('com os dados da Melperfaz preenchidos: os ramos escondidos aparecem, nos s
     assert.match(orc, new RegExp(`<h3>Licenciada &amp; segurada</h3><p>Alvará n\\.º&nbsp;${esc(EXEMPLO.alvara)}</p><p>Seguro de responsabilidade civil: ${esc(EXEMPLO.seguro)}</p>`), 'orcamento.html: o alvará e o seguro na TrustList condensada');
     const priv = lc('privacidade.html');
     for (const dt of ['NIF', 'Morada', 'Email']) assert.match(priv, new RegExp(`<dt>${dt}</dt>`), `privacidade: ${dt} na Ficha`);
-    assert.match(priv, new RegExp(`ligue <a href="tel:\\+351961245288">961 245 288</a> \\(${esc(EXEMPLO.horario)}\\), escreva para <a href="mailto:${esc(EXEMPLO.email)}">${esc(EXEMPLO.email)}</a> ou escreva para a morada acima\\.`), 'privacidade: os três canais, o último com «ou»');
+    assert.match(priv, new RegExp(`ligue <a href="tel:\\+351961245288">961 245 288</a> \\(${esc(EXEMPLO.horario)}\\), escreva para <a href="mailto:${esc(EXEMPLO.email)}">${esc(EXEMPLO.email)}</a> ou para a morada acima\\.`), 'privacidade: os três canais, o último com «ou» (sem repetir «escreva»)');
+    // os pedidos do --faltam apontam para sítios que existem: cada «rótulo» citado num «pedido» aparece numa página
+    const doc = JSON.parse(fs.readFileSync(path.join(d, 'data/dados-melperfaz.json'), 'utf8'));
+    const texto = ['index.html', 'orcamento.html', 'obras.html', 'privacidade.html'].map(f => lc(f)).join('\n').replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ');
+    for (const [k, v] of Object.entries(doc)) {
+      if (k.startsWith('_')) continue;
+      for (const [, rotulo] of v.pedido.matchAll(/«([^»]+)»/g)) assert.ok(texto.includes(rotulo), `«pedido» de ${k}: «${rotulo}» não aparece no site`);
+    }
     for (const o of OBRAS) {
       const t = lc(`obras/${o.slug}.html`);
       assert.match(t, new RegExp(`<h2>O problema</h2>\\s*<p>${esc(FACTOS_EX.problema)}</p>\\s*<h2>O que fizemos</h2>\\s*<p>${esc(FACTOS_EX.trabalho)}</p>`), `${o.code}: «O problema» e «O que fizemos»`);
@@ -563,11 +570,24 @@ test('com os dados da Melperfaz preenchidos: os ramos escondidos aparecem, nos s
 });
 
 test('com os dados a meio: a frase da privacidade com «ou», ponto final repetido e uma fotografia repetida em «fotosExtra»', () => {
-  // só o email (o mais provável de chegar primeiro): «ligue X ou escreva para Y», sem a vírgula solta
-  let c = geraCopia(d => mudaJson(d, 'data/dados-melperfaz.json', j => { j.email.valor = EXEMPLO.email; }));
+  // só o email (o mais provável de chegar primeiro): «ligue X ou escreva para Y», sem a vírgula solta. Os outros dados
+  // esvaziam-se na cópia, para o caso valer também depois de a Melperfaz preencher o ficheiro verdadeiro
+  let c = geraCopia(d => mudaJson(d, 'data/dados-melperfaz.json', j => {
+    for (const k of Object.keys(j)) if (!k.startsWith('_')) j[k].valor = '';
+    j.email.valor = EXEMPLO.email;
+  }));
   try {
     assert.equal(c.r.status, 0, c.r.stdout);
     assert.match(c.le('privacidade.html'), new RegExp(`ligue <a href="tel:\\+351961245288">961 245 288</a> ou escreva para <a href="mailto:${esc(EXEMPLO.email)}">${esc(EXEMPLO.email)}</a>\\. A Melperfaz`), 'só o email: «ligue X ou escreva para Y»');
+  } finally { fs.rmSync(c.d, { recursive: true, force: true }); }
+  // só a morada: «ligue X ou escreva para a morada acima»
+  c = geraCopia(d => mudaJson(d, 'data/dados-melperfaz.json', j => {
+    for (const k of Object.keys(j)) if (!k.startsWith('_')) j[k].valor = '';
+    j.morada.valor = EXEMPLO.morada;
+  }));
+  try {
+    assert.equal(c.r.status, 0, c.r.stdout);
+    assert.match(c.le('privacidade.html'), /ligue <a href="tel:\+351961245288">961 245 288<\/a> ou escreva para a morada acima\. A Melperfaz/, 'só a morada: «ligue X ou escreva para a morada acima»');
   } finally { fs.rmSync(c.d, { recursive: true, force: true }); }
   // um ponto final no fim da morada ficava «Sede: Rua….» : o --check recusa; e uma fotografia repetida em «fotosExtra»
   c = geraCopia(d => {

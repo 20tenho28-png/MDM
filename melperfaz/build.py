@@ -125,7 +125,6 @@ def campos_obra(o):
     o["orient"] = "landscape" if f["w"] >= f["h"] else "portrait"
     s = SERVICO_BY_CAT[o["cat"]]
     o["servico"] = s
-    o["catNome"] = s["nome"]
     # o pedido com o tipo já escolhido e a obra de onde veio (campo escondido «pagina»): orcamento.html
     o["orcamentoHref"] = f"../orcamento.html?tipo={s['id']}&de=obras/{o['slug']}"
     # a âncora do grupo da obra em obras.html (relativa à raiz: {{ root }}{{ obra.catAnchor }})
@@ -143,7 +142,7 @@ def campos_obra(o):
     # «Outras obras de fachadas» só quando há outras da mesma categoria que cheguem; senão, «Outras obras». O eyebrow
     # segue a mesma regra: «Obras semelhantes» só quando as duas são mesmo do mesmo serviço; senão, «Obras»
     mesma = sum(1 for x in OBRAS if x is not o and x["cat"] == o["cat"])
-    o["relTitulo"] = f"Outras obras de {o['catNome'].lower()}" if mesma >= 2 else "Outras obras"
+    o["relTitulo"] = f"Outras obras de {s['nome'].lower()}" if mesma >= 2 else "Outras obras"
     o["relEyebrow"] = "Obras semelhantes" if mesma >= 2 else "Obras"
     # a fotografia da ficha: na sua proporção (fotoR, largura/altura), à largura do contentor (1176 px por dentro da .wrap,
     # menos 32 px de margens até 640 px, menos 64 acima) e no máximo 78% da altura do ecrã; o sizes diz o mesmo

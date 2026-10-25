@@ -34,7 +34,7 @@
           <div><dt>Email</dt><dd><a href="mailto:{{ dados.email }}">{{ dados.email }}</a></dd></div>{{/se}}
         </dl>
       </div>
-      <p>Para qualquer questão sobre os seus dados, incluindo os direitos descritos <a href="#direitos">mais abaixo</a>, ligue <a href="{{ site.phoneHref }}">{{ site.phone }}</a>{{#se dados.horario}} ({{ dados.horario }}){{/se}}{{#se dados.email}}{{#se dados.morada}},{{/se}}{{#sem dados.morada}} ou{{/sem}} escreva para <a href="mailto:{{ dados.email }}">{{ dados.email }}</a>{{/se}}{{#se dados.morada}} ou escreva para a morada acima{{/se}}. A Melperfaz não designou um encarregado de proteção de dados.</p>
+      <p>Para qualquer questão sobre os seus dados, incluindo os direitos descritos <a href="#direitos">mais abaixo</a>, ligue <a href="{{ site.phoneHref }}">{{ site.phone }}</a>{{#se dados.horario}} ({{ dados.horario }}){{/se}}{{#se dados.email}}{{#se dados.morada}},{{/se}}{{#sem dados.morada}} ou{{/sem}} escreva para <a href="mailto:{{ dados.email }}">{{ dados.email }}</a>{{/se}}{{#se dados.morada}} ou {{#sem dados.email}}escreva {{/sem}}para a morada acima{{/se}}. A Melperfaz não designou um encarregado de proteção de dados.</p>
 
       <h2 id="dados">Que dados tratamos e porquê</h2>
       <p>Tratamos apenas os dados de que precisamos em cada situação. As alíneas indicadas são do artigo 6.º, n.º 1, do Regulamento Geral sobre a Proteção de Dados (RGPD).</p>
