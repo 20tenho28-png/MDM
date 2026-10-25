@@ -180,9 +180,9 @@ O ritmo de fundos é paper › ink › paper › bone › clay › rodapé ink.
 
 | # | Secção | Função | Componente e conteúdo |
 |---|---|---|---|
-| 1 | `[paper]` Hero | Quem, o quê, ação | **Hero (variante split do DS)**, grelha 1.15fr/.85fr, padding 90/110.<br>Esquerda: Eyebrow "Reabilitação e construção" (+ " · {zona}", *dado do dono*); h1 "Reabilitamos *de raiz.*" com o estilo `display-hero`, `clamp(2.6rem,9vw,5rem)`; lead (muted, máx. 480px) "Reabilitação de edifícios, espaços comerciais e apartamentos. Da estrutura ao acabamento, com uma equipa responsável do início ao fim."; botões `.btn` "Pedir Orçamento" e `.btn-ghost` "Ligar 961 245 288", ambos com a mesma altura; texto de apoio "Visita e orçamento gratuitos, sem compromisso."; ProofLine.<br>Direita: foto-01 (a carrinha) em moldura 4:3, `sizes="(max-width:980px) calc(100vw - 32px), 520px"`; um único cartão "25 / anos, desde 2001", sem rotação; legenda em texto simples, sem link.<br>No telemóvel: texto, botões, ProofLine e depois a foto. |
+| 1 | `[paper]` Hero | Quem, o quê, ação | **Hero (variante split do DS)**, grelha 1.15fr/.85fr, padding 80/90 (50/50 abaixo de 640px; ver «Ritmo de secções»).<br>Esquerda: Eyebrow "Reabilitação e construção" (+ " · {zona}", *dado do dono*); h1 "Reabilitamos *de raiz.*" com o estilo `display-hero`, `clamp(2.6rem,9vw,5rem)`; lead (muted, máx. 480px) "Reabilitação de edifícios, espaços comerciais e apartamentos. Da estrutura ao acabamento, com uma equipa responsável do início ao fim."; botões `.btn` "Pedir Orçamento" e `.btn-ghost` "Ligar 961 245 288", ambos com a mesma altura; texto de apoio "Visita e orçamento gratuitos, sem compromisso."; ProofLine.<br>Direita: foto-01 (a carrinha) em moldura 4:3, `sizes="(max-width:980px) calc(100vw - 32px), 520px"`; um único cartão "25 / anos, desde 2001", sem rotação, no canto de baixo (abaixo de 640px sobe para o canto de cima e encolhe, para não tapar a carrinha); legenda em texto simples, sem link.<br>No telemóvel: texto, botões, ProofLine e depois a foto. |
 | 2 | `[ink]` Obras em destaque `#obras` | Prova primeiro | SectionHead: "Obras" / "Obras nossas, fotografadas no local" / "Fotografias tiradas durante e no fim de cada trabalho."<br>**ProjectGrid** com as 3 obras `destaque` (M01 reabilitação, M04 fachadas em `p-tall`, M05 acabamentos com a etiqueta "Antes e depois").<br>Por baixo, alinhado à esquerda: `.btn-ghost` "Ver as 5 obras" (o número vem dos dados). |
-| 3 | `[paper]` Serviços `#servicos` | O que fazem e onde está a prova | SectionHead: "O que fazemos" / "Construção e reabilitação, do alicerce ao acabamento".<br>**ServiceList** com 6 linhas, 2 colunas (1 abaixo de 640px), separadas por uma linha de 1px e sem caixas. Cada linha: número, h3, uma frase do texto atual, miniatura 64x64 se o serviço tiver obras, e as ligações "Ver obras (N)" (`obras.html#cat`, só se N>0) e "Pedir orçamento" (`orcamento.html?tipo=id`). A linha em si não é um link e não tem seta.<br>Alvo de altura: cerca de 640px em desktop e 1.500px a 390px (hoje 2.542px). |
+| 3 | `[paper]` Serviços `#servicos` | O que fazem e onde está a prova | SectionHead: "O que fazemos" / "Construção e reabilitação, do alicerce ao acabamento".<br>**ServiceList** com 6 linhas, 2 colunas (1 abaixo de 640px), separadas por uma linha de 1px e sem caixas. Cada linha: número (na linha de base do h3), h3, uma frase do texto atual, miniatura 64x64 se o serviço tiver obras (a todas as larguras), e as ligações "Ver obras (N)" (`obras.html#cat`, só se N>0) e "Pedir orçamento" (`orcamento.html?tipo=id`). A linha em si não é um link e não tem seta.<br>Alvo de altura: cerca de 1.500px a 390px (hoje 2.542px). *Corrigido na revisão:* com o ritmo de secções e as miniaturas de 64px a secção mede cerca de 930px em desktop (os 640px eram uma estimativa que o próprio ritmo do plano não deixa cumprir); o alvo que vale é o da página inteira (cerca de 4.300px a 1440px). |
 | 4 | `[bone]` Porquê Nós `#porque-nos` | Confiança verificável | Esquerda: SectionHead "Porque nos escolhem" / "Reputações constroem-se uma obra de cada vez"; **TrustList** com os 4 itens atuais (o item "Licenciada" acrescenta ", alvará n.º X" e o seguro quando existirem); parágrafo "Quem somos": "A Melperfaz, Construção Civil, Lda. trabalha desde 2001 com equipa própria." mais zona e morada (*dados do dono*).<br>Direita: foto-02 numa moldura 4:5 (substitui o stat card), com o link "Ver a obra"; "Ver o perfil e as avaliações no Google" só se `googleMaps` existir (as avaliações nunca são citadas no site). |
 | 5 | `[clay]` **CtaBand** `#contacto` | Fechar | Esquerda: Eyebrow "Vamos conversar" (texto e traço ink); h2 "Peça o orçamento. A visita é gratuita."; p "Respondemos no prazo de um dia útil e marcamos uma visita sem compromisso."; `.cta-phone` "961 245 288" com o horário por baixo (*dado do dono*, substitui "Mãos à obra").<br>Direita: botões empilhados com a mesma largura (mín. 280px, 100% no telemóvel): "Pedir Orçamento" (fundo ink, texto paper) e "Falar por WhatsApp" (ghost); ProofLine em ink. |
 
@@ -206,7 +206,7 @@ Se a última secção de categoria for ink, sai clay e depois o rodapé ink, sem
 | 2 | `[paper]` Media | A foto à largura do contentor, na proporção natural, máximo 78vh. Só na M05: o **BeforeAfter** à largura do contentor, com `margin:0` e alinhado com o h1. |
 | 3 | `[paper]` O trabalho | Grelha 7/5, com os dois títulos alinhados no topo.<br>Esquerda: h2 "Na obra" com a lista `detalhes`. Quando o dono preencher os factos, aparecem antes "O problema" e "O que fizemos".<br>Direita: **Ficha** só se `obra.temFactos` (Local, Data, Duração, Resultado). Saem "Código" e o "Trabalho" duplicado. |
 | 4 | `[clay]` CtaBand | Eyebrow "Vamos conversar"; h2 "Quer uma obra assim?"; p "Peça o orçamento com o tipo de obra já escolhido, ou envie fotografias do seu espaço por WhatsApp."; botões "Pedir Orçamento" (`?tipo=` e `?de=`) e "Enviar fotografias por WhatsApp" (mensagem `wa.obra` com o código); linha pequena "Referência da obra: M04"; telefone; ProofLine. |
-| 5 | `[bone]` Outras obras | Eyebrow e h2 iguais (`relTitulo`); 2 cartões. Sem anterior/seguinte e sem "Ver todas" (as migalhas já fazem esse papel). |
+| 5 | `[bone]` Outras obras | Eyebrow e h2 com a mesma regra (`relEyebrow` e `relTitulo`): "Obras semelhantes" / "Outras obras de {serviço}" só quando as duas são do mesmo serviço; senão "Obras" / "Outras obras" (o eyebrow não diz "semelhantes" de obras de outro serviço); 2 cartões. Sem anterior/seguinte e sem "Ver todas" (as migalhas já fazem esse papel). |
 
 Ritmo: paper › clay › bone › rodapé ink. Ink já não encosta a ink.
 
@@ -259,7 +259,7 @@ Cabeçalho reduzido, sem ActionBar e sem "Pedir Orçamento" no rodapé.
 
 ### Ritmo de secções
 
-- `.sec`: padding `--space-90` em cima e em baixo (`--space-60` abaixo de 640px). SectionHead com `--space-50` até ao conteúdo.
+- `.sec`: padding `--space-80` em cima e em baixo (`--space-50` abaixo de 640px). SectionHead com `--space-44` até ao conteúdo (`--space-38` abaixo de 640px). *Corrigido na revisão:* um passo de token abaixo dos 90/60 e 50 de antes (o design system tem 110 e 64), para a página inicial caber nos alvos de altura da Fase 7 (menos de 6.000px a 390px e cerca de 4.300px a 1440px); com os 90/60/50 passava os 6.000px a 390px. Hero 80/90 (50/50 abaixo de 640px); rodapé 64/44.
 - Superfícies (ideia da proposta Portfólio): cada secção tem uma classe `.s-paper`, `.s-bone`, `.s-ink` ou `.s-clay`, que define `--fg`, `--fg-2`, `--rule`, `--eyebrow-rule` e `--focus-c`. Os componentes só leem estas variáveis.
 
 | Superfície | Texto | Secundário | Traço do eyebrow | Foco |
@@ -309,7 +309,7 @@ As etiquetas de formulário ficam em 0.875rem, sem maiúsculas. Apagar o `.prosa
 | Button (`.btn`, `.btn-ghost`) | CSS | Grupo `.acoes`: gap 12, no telemóvel todos com 100% e a mesma largura |
 | Links | CSS | Só dois: `.link` (sublinhado, offset 3px) e `.link-seta` ("Texto →", Archivo 600, padding 10px 0) |
 | ProofLine | `partials/prova.html` | `site.json › provas` mais alvará se existir |
-| ProjectGrid / ProjectCard | `partials/obra-foto.html` | `.photo-grid` do DS: 2 colunas, gap 18, linhas de 300px, `.p-tall` opcional. A legenda passa para baixo da imagem abaixo de 640px, com proporção 4/5 (retrato) ou 4/3 (paisagem) e `object-position` a partir de `foco`. O nível de título é um parâmetro (`cartaoH`). Sem `.mosaico`. |
+| ProjectGrid / ProjectCard | `partials/obra-foto.html` | `.photo-grid` do DS: 2 colunas, gap 18, linhas de 300px, `.p-tall` opcional. A legenda passa para baixo da imagem abaixo de 640px, com proporção 4/5 (retrato) ou 4/3 (paisagem) e `object-position` a partir de `foco`. *Exceção, a aprovar pelo dono:* as obras em destaque da página inicial ficam com a legenda por cima da fotografia também abaixo de 640px (cartão de 280px, faixa só à medida do texto, sem "Ver obra"), porque com a legenda por baixo (em 4:3, e mesmo em 16:9) a página inicial passa os 6.000px a 390px. A legenda está em fluxo (a linha cresce com o texto maior) e o cartão inteiro é a ligação. O nível de título é um parâmetro (`cartaoH`). Sem `.mosaico`. |
 | ServiceList | bloco em `index.html` (`{{#cada servicos}}`) | Linhas sem caixa e sem seta; ligações alinhadas com `margin-top:auto` |
 | TrustList | DS | `tick` de 1rem |
 | BeforeAfter | `partials/antes-depois.html` | Só no template de obra (M05); `touch-action: pan-y`; arrasto só a 32px da pega; range para teclado com foco desenhado na pega; etiquetas de 13px |
@@ -367,12 +367,12 @@ Cada serviço tem também `texto`, copiado tal qual dos cartões atuais. O formu
 
 **Imagens**
 - Hero em moldura 4:3 com `sizes` correto: acaba a ampliação de 3,7x. `fetchpriority="high"` só na imagem LCP.
-- Cartões com `sizes="(min-width:981px) 600px, calc(100vw - 32px)"` e proporção 4/5 ou 4/3 no telemóvel.
+- Cartões com `sizes="(min-width:981px) 600px, calc(100vw - 32px)"` e proporção 4/5 ou 4/3 no telemóvel (o `sizes` do telemóvel conta com o corte de uma fotografia mais deitada do que a moldura). Num telemóvel de 3x pede-se a imagem de 2x da largura do telemóvel, seja qual for a ordem das entradas do `sizes`.
 - Miniaturas de serviço com o AVIF de 400w.
 - Recortar a faixa preta da foto-05 com `gerar_fotos.py` se estiver nos derivados. Se estiver no original, perguntar ao dono.
 
 **Peso e velocidade**
-- `<link rel="prefetch" href="orcamento.html">` em todas as páginas.
+- `<link rel="prefetch">` da página do pedido em todas as páginas que levam a ela, com o endereço dos botões da página (nas fichas de obra, com `?tipo=` e `?de=`, para o prefetch servir). Não em `orcamento.html` (é ela) nem em `obrigado.html` (não leva lá).
 - `orcamento.html` sem imagem de topo; uma única foto em lazy load na lateral.
 - Logótipo do rodapé com carregamento imediato (é pequeno).
 - O CLS mantém-se em 0 (`width` e `height` em todas as imagens).
@@ -432,14 +432,14 @@ Tudo em `/home/user/MDM/melperfaz`. O build continua a ser `python3 build.py`. O
 - **Reescritos**:
   - `header.html`: uma lista, tel, WhatsApp, botão, painel com fundo escurecido, variante `reduzido`
   - `footer.html`
-  - `obra-foto.html`: ProjectCard com nível de título parametrizado e legenda abaixo da imagem no telemóvel
+  - `obra-foto.html`: ProjectCard com nível de título parametrizado e legenda abaixo da imagem no telemóvel (menos nas obras em destaque da página inicial, ver ProjectGrid)
   - `antes-depois.html`: `margin:0`, touch, foco
 - **Apagados**: `contacto.html` e `whatsapp.html`. Em `src/templates/layout.html`, incluir `barra-acoes.html` exceto quando `page.barra == "nao"`.
 - Se `{{> partial}}` não aceitar parâmetros, passá-los por chaves de meta ou de `ctx`, com o mesmo mecanismo já usado para `ficha` e `baLoading`.
 - **Teste:** o `--check` confirma que não há links partidos e que todos os `href` de "Pedir Orçamento" apontam para `orcamento.html`.
 
 ### Fase 4: páginas (`src/pages/`, `src/templates/obra.html`)
-- `index.html`: Hero split › Obras em destaque › ServiceList › Porquê Nós › CtaBand `#contacto`. Script de reencaminhamento de `#contacto` e `?tipo=` como primeiro elemento do `<body>`.
+- `index.html`: Hero split › Obras em destaque › ServiceList › Porquê Nós › CtaBand `#contacto`. Script de reencaminhamento de `#contacto` e `?tipo=` no topo do `<head>`, antes das letras, do CSS e do prefetch (um script depois de uma folha de estilo espera por ela).
 - `obras.html`: PageHead, secções por serviço (só as que têm obras) com `cartaoH` 3, CtaBand.
 - `templates/obra.html`: PageHead › Media (foto, ou BeforeAfter na M05) › "Na obra" com a Ficha condicional › CtaBand com "Referência da obra" › Outras obras em bone.
 - `orcamento.html` (nova): meta `nav: orcamento`, `barra: sem-orcamento`, css `pag-orcamento.css`, JSON-LD breadcrumb, indexável e incluída no sitemap.

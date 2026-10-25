@@ -37,7 +37,8 @@
       btn.setAttribute('aria-expanded', 'true');
       btn.setAttribute('aria-label', 'Fechar menu');
       var primeiro = qs('a', painel);
-      if (primeiro) primeiro.focus();
+      /* preventScroll: o painel e o botão estão no cabeçalho, já à vista; sem isto a página saltava para o topo */
+      if (primeiro) primeiro.focus({ preventScroll: true });
     }
     function fecha(foco) {
       if (!aberto) return;
@@ -48,7 +49,7 @@
       if (t) esconder = setTimeout(fim, t); else fim();
       btn.setAttribute('aria-expanded', 'false');
       btn.setAttribute('aria-label', 'Abrir menu');
-      if (foco) btn.focus();
+      if (foco) btn.focus({ preventScroll: true });
     }
     btn.addEventListener('click', function () { if (aberto) fecha(true); else abre(); });
     d.addEventListener('keydown', function (e) { if (e.key === 'Escape' && aberto) fecha(true); });
@@ -108,22 +109,28 @@
 
   /* ═══ Comparador antes/depois ═══
      Sem JavaScript, o range invisível cobre a fotografia toda. Com ele, o range deixa de apanhar o rato e o toque
-     (.ba-js) e só se arrasta a partir da pega (a 32 px da linha, para cada lado): um toque noutro sítio da fotografia
-     não salta a linha e o deslize vertical continua a mexer a página (touch-action: pan-y). O range continua a ser o
-     controlo do teclado (setas) e do leitor de ecrã, com o anel de foco desenhado à volta da pega. */
-  var BA_PEGA = 32;
+     (.ba-js): um toque ou um clique na fotografia põe a linha nesse sítio (WCAG 2.5.7: mexe-se sem arrastar), e só o
+     arrasto fica limitado à pega (a 32 px da linha, para cada lado). O clique só chega quando o gesto não foi um
+     deslize: o deslize vertical continua a mexer a página (touch-action: pan-y) e não salta a linha. O range continua
+     a ser o controlo do teclado (setas) e do leitor de ecrã, com o anel de foco desenhado à volta da pega; o
+     aria-valuetext diz quanto se vê de cada fotografia. */
+  var BA_PEGA = 32, BA_TOQUE = 4;
   qsa('[data-ba]').forEach(function (slider) {
     var before = qs('[data-ba-before]', slider), handle = qs('[data-ba-handle]', slider), range = qs('[data-ba-range]', slider);
     if (!before || !handle || !range) return;
     function largura() { slider.style.setProperty('--ba-w', slider.clientWidth + 'px'); }
-    function move(v) { before.style.width = v + '%'; handle.style.left = v + '%'; }
+    function move(v) {
+      before.style.width = v + '%';
+      handle.style.left = v + '%';
+      range.setAttribute('aria-valuetext', 'Demolição ' + v + '%, acabamento ' + (100 - v) + '%');
+    }
     largura(); move(range.value);
     range.addEventListener('input', function () { move(range.value); });
     window.addEventListener('resize', largura);
     if ('ResizeObserver' in window) new ResizeObserver(largura).observe(slider);
     if (!window.PointerEvent) return;   /* sem Pointer Events fica o range a cobrir tudo, como sem JavaScript */
     slider.classList.add('ba-js');
-    var arrasto = null;
+    var arrasto = null, x0 = null, arrastou = false;
     function valorEm(x) {
       var r = slider.getBoundingClientRect();
       return Math.max(0, Math.min(100, Math.round((x - r.left) / r.width * 100)));
@@ -136,6 +143,7 @@
     }
     slider.addEventListener('pointerdown', function (e) {
       if (e.button !== 0) return;
+      x0 = e.clientX; arrastou = false;   /* para distinguir um toque (põe a linha) de um arrasto */
       var r = slider.getBoundingClientRect(), linha = r.left + r.width * range.value / 100;
       if (Math.abs(e.clientX - linha) > BA_PEGA) return;
       arrasto = e.pointerId;
@@ -143,14 +151,22 @@
       if (slider.setPointerCapture) slider.setPointerCapture(e.pointerId);
       e.preventDefault();   /* sem seleção de texto nem arrasto da imagem */
     });
-    slider.addEventListener('pointermove', function (e) { if (e.pointerId === arrasto) poe(valorEm(e.clientX)); });
+    slider.addEventListener('pointermove', function (e) {
+      if (x0 !== null && Math.abs(e.clientX - x0) > BA_TOQUE) arrastou = true;
+      if (e.pointerId === arrasto) poe(valorEm(e.clientX));
+    });
     function larga(e) {
+      if (e.type === 'pointercancel') arrastou = true;   /* o browser ficou com o gesto (deslize): não é um toque */
+      x0 = null;
       if (e.pointerId !== arrasto) return;
       arrasto = null;
       slider.classList.remove('ba-a-arrastar');
     }
     slider.addEventListener('pointerup', larga);
-    slider.addEventListener('pointercancel', larga);   /* o browser ficou com o gesto (deslize vertical): larga-se */
+    slider.addEventListener('pointercancel', larga);
+    /* o clique (o browser não o manda depois de um deslize nem de um toque que parou a página a deslizar) põe a linha
+       onde se tocou; depois de um arrasto, não */
+    slider.addEventListener('click', function (e) { if (!arrastou && e.detail) poe(valorEm(e.clientX)); });
   });
 
   /* ═══ orcamento.html: ?tipo=<id do serviço> escolhe o tipo de obra e mostra «Pedido para: X · alterar»; ?de=<página>

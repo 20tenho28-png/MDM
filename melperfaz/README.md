@@ -29,17 +29,17 @@ Pré-visualizar: `python3 -m http.server -d public 8000` e abrir `http://localho
 | --- | --- |
 | `data/site.json` | A empresa: nome, telefone, WhatsApp e as mensagens já escritas, o endereço do site (`baseUrl`), `preview`; `servicos` (o vocabulário: os serviços da página inicial, as opções do formulário, as etiquetas e os grupos das obras e o `?tipo=`; `antigos` são os nomes do «Tipo de obra» de antes do redesenho, para os endereços antigos com `?tipo=` continuarem a escolher o serviço), `provas` (a linha de prova junto dos botões) e `menu` |
 | `data/dados-melperfaz.json` | O que só a Melperfaz pode dar (email, NIF, morada, alvará, seguro, zona, horário, Google Maps). Vazio = a frase ou a linha não aparece |
-| `data/obras.json` | As obras: serviço (`cat`, o de `site.json › servicos`), `destaque` (na página inicial), título, fotografia, o que se vê, os factos (vazios até a empresa os dar), `fotosExtra` |
+| `data/obras.json` | As obras: serviço (`cat`, o de `site.json › servicos`), `destaque` (na página inicial), título, fotografia, o que se vê, os factos (vazios até a empresa os dar), `fotosExtra` (mais fotografias, por baixo de «Na obra» na ficha) |
 | `data/fotos.json` | As fotografias: tamanho do original, origem e texto alternativo. `data/lqip.json` são as prévias (gerado) |
 | `src/templates/` | `layout.html` (a cabeça, o cabeçalho e o rodapé de todas as páginas) e `obra.html` (a ficha de cada obra) |
-| `src/partials/` | Os componentes: `header` (menu de `site.json`, telefone, WhatsApp, «Pedir Orçamento»; variante `reduzido`), `barra-acoes` (Ligar, WhatsApp e Orçamento, fixa em baixo abaixo de 980 px), `footer`, `page-head` (migalhas, eyebrow, h1, introdução), `cta` (a faixa clay), `prova` (a linha de garantias), `orcamento-form` (o único formulário), `obra-foto` (cartão de obra) e `antes-depois` |
+| `src/partials/` | Os componentes: `header` (menu de `site.json`, telefone, WhatsApp, «Pedir Orçamento»; variante `reduzido`), `barra-acoes` (Ligar, WhatsApp e Orçamento, fixa em baixo abaixo de 980 px), `footer`, `page-head` (migalhas, eyebrow, h1, introdução), `cta` (a faixa clay), `prova` (a linha de garantias), `orcamento-form` (o único formulário), `garantias` (a TrustList, inteira na página inicial e condensada em `orcamento.html`), `obra-foto` (cartão de obra) e `antes-depois` |
 | `src/pages/` | Página inicial, Obras, Pedir Orçamento (`orcamento.html`, com o formulário), obrigado, 404 e privacidade, cada uma com o seu `<!--meta {...} -->` |
 | `assets/css/` | `site.css` (o sistema de desenho), `pag-obras.css`, `pag-paginas.css`, `pag-orcamento.css` (formulário e lateral) |
-| `assets/js/site.js` | Menu nos ecrãs estreitos (fundo escurecido, página sem deslizar, Esc), entrada ao fazer scroll, comparador (arrasta-se só a partir da pega; setas do teclado), em `orcamento.html` o `?tipo=` (tipo escolhido e «Pedido para: X · alterar») e o `?de=` (campo `pagina`), e o envio do formulário: validação em português, `obrigado.html` se correu bem, e se falhar um aviso com o telefone e o WhatsApp (`wa.erro`, com o nome e o tipo escritos) |
+| `assets/js/site.js` | Menu nos ecrãs estreitos (fundo escurecido, página sem deslizar, Esc), entrada ao fazer scroll, comparador (um toque ou um clique põe a linha, arrasta-se a partir da pega; setas do teclado), em `orcamento.html` o `?tipo=` (tipo escolhido e «Pedido para: X · alterar») e o `?de=` (campo `pagina`), e o envio do formulário: validação em português, `obrigado.html` se correu bem, e se falhar um aviso com o telefone e o WhatsApp (`wa.erro`, com o nome e o tipo escritos) |
 | `assets/fonts/` | Fraunces (normal e itálico) e Archivo, variáveis, só latim, com as licenças (SIL OFL). Nada vem de terceiros |
 | `assets/img/` | Logótipos, favicons, imagem de partilha e `fotos/` (o original `foto-NN.jpg` e os tamanhos em AVIF e WebP) |
 | `tests/` | `site.test.mjs` (o site gerado, sem browser) e `browser.mjs` (Playwright) |
-| `netlify.toml` | A publicação: `python3 build.py`, pasta `public`, cache de um ano para o que leva versão |
+| `netlify.toml` | A publicação: `python3 build.py --check` (um erro pára a publicação e fica a versão anterior), pasta `public`; cache de um ano para o CSS e o JS (levam versão) e as letras, de um dia para as imagens (mudam no mesmo nome); nenhuma página dentro de outro site (`frame-ancestors`) |
 
 A sintaxe dos modelos está no topo de `build.py`: `{{ site.phone }}`, `{{> parcial }}`, `{{> cta titulo="…" texto="…"}}`
 (parâmetros declarados no topo do parcial com `<!--parametros {...} -->`), `{{foto 01 sizes="…"}}`, `{{wa geral}}`,
@@ -72,8 +72,8 @@ publicação; se o site ficar um ano sem mudanças, publicar de novo em janeiro 
 Ligações, imagens e `srcset` que existem; `?v=` nos CSS e JS; sem sintaxe de modelo nem placeholders; sem travessões,
 emoji ou o telefone escrito de outra forma; `lang`, um só `h1`, título e descrição com tamanho certo, canonical e
 `og:image` no domínio; JSON-LD válido com a empresa; o formulário Netlify só em `orcamento.html`, com os atributos, os
-campos e as opções de `site.json`; todos os «Pedir Orçamento» (texto ou `aria-label`) a levar a `orcamento.html`; nenhuma ligação para `#contacto` e nenhum dos rótulos retirados («Pedir Orçamento Gratuito», «Chamar no WhatsApp», «Orçamento Gratuito» como nome de ligação); `robots.txt`, `_headers` e `netlify.toml` de acordo com `preview`; todas as fotografias com os tamanhos e a
-prévia; os dados de `dados-melperfaz.json` com o formato certo (email, NIF, ligação do Google Maps); nenhum dos glifos
+campos e as opções de `site.json`; todos os «Pedir Orçamento» (texto ou `aria-label`) a levar a `orcamento.html`; nenhuma ligação para `#contacto` nem para `…index.html` (a página inicial é `./`) e nenhum dos rótulos retirados («Pedir Orçamento Gratuito», «Chamar no WhatsApp», «Orçamento Gratuito» como nome de ligação); `robots.txt`, `_headers` e `netlify.toml` de acordo com `preview`, com o `--check` no comando de publicação e `frame-ancestors`; os comentários tirados ao CSS e ao JS publicados sem partir nada; todas as fotografias com os tamanhos e a
+prévia; os dados de `dados-melperfaz.json` com o formato certo (email, NIF, ligação do Google Maps, sem ponto final no alvará, seguro, zona e morada); `fotosExtra` sem repetidas; nenhum dos glifos
 que passaram a ícone (→, ≡, ✓, ‹).
 
 E o lint das folhas de estilo, para o sistema visual não voltar a derivar. Fora do bloco `:root` (os tokens), falha com:
@@ -98,8 +98,10 @@ qualquer animação `infinite`; e o movimento: durações e curvas que não seja
 - **Grelha**: `.wrap` com 32 px de margem (16 px até 640 px); só duas quebras, 980 e 640 px. Secções com 80 px em cima e
   em baixo (50 até 640 px) e 44 px do SectionHead ao conteúdo (38 até 640 px), um passo de token abaixo do design system,
   para a página inicial ficar em menos de 6.000 px a 390 e até 4.400 a 1440.
-- **Cartão de obra** (`obra-foto.html`): a legenda na faixa escura por cima da fotografia a todas as larguras; linhas de
-  300 px em duas colunas e, até 980 px, uma coluna com linhas de 280 px (`--photo-row-1col`).
+- **Cartão de obra** (`obra-foto.html`): a legenda na faixa escura por cima da fotografia, em fluxo (cresce com o texto);
+  linhas de 300 px no mínimo em duas colunas e, até 980 px, uma coluna com linhas de 280 px (`--photo-row-1col`). Até
+  640 px a legenda passa para baixo da fotografia (4/3 ou 4/5), menos nas obras em destaque da página inicial. O
+  cartão inteiro é a ligação.
 - **Ícones**: `src/partials/icones.svg` (seta, menu, telefone, WhatsApp, visto, as setas do comparador e o visto num
   círculo de `obrigado.html`), traço de 1,75 em `currentColor`, cantos vivos. `{{icone nome}}` copia o símbolo para a
   página em linha (para o CSS animar as partes) e um nome que não existe pára o build.
@@ -124,13 +126,15 @@ Os do browser geram o site numa pasta temporária e servem-no num servidor local
 como o Netlify o receberia (e pode falhar de propósito): o pedido que segue e abre `obrigado.html`, a validação, o aviso
 de falha (foco, telefone, WhatsApp com o nome e o tipo) com o que se escreveu a ficar, o envio sem JavaScript, o tipo de
 obra pré-escolhido com «Pedido para:» e o `?de=` no campo `pagina`, o isco para robôs, nenhuma página a deslizar para o
-lado a 390 e 320 px, os endereços antigos com `?tipo=` (os nomes de antes do redesenho), o menu dos ecrãs estreitos, o comparador com rato (só a partir da pega) e teclado, o foco e as
+lado a 390 e 320 px, os endereços antigos com `?tipo=` (os nomes de antes do redesenho), o menu dos ecrãs estreitos (também aberto a meio da página), a barra fixa sem tapar o foco ao tabular, o comparador com toque, clique, arrasto e teclado, o foco e as
 imagens, nenhuma fotografia ampliada para lá do original (o hero a 375 px, os cartões, a ficha na sua proporção),
 nenhuma animação sem fim nem acima de 500 ms, o movimento (o menu que vira X e sai no fim da transição, o
 cabeçalho compacto, os vistos em cascata, o fade das fotografias, o indicador de envio, o CLS abaixo de 0,05 e, com
 movimento reduzido, nada a animar nem a deslocar-se), e o sistema visual: o h1 do hero e os cabeçalhos de secção no x do logótipo, contraste de
 4,5:1 nos botões e na faixa clay, o anel de foco da cor de cada superfície, campos de 16 px e etiquetas de 13 px, a altura da página inicial (menos de 6.000 px a 390, até 4.400 a 1440), a
-legenda dos cartões sobre a fotografia também a 390 px e as miniaturas dos serviços sem acrescentar linhas. O CI
+legenda dos cartões (sobre a fotografia; a 390 px por baixo, menos nas obras em destaque), o cartão inteiro como
+ligação, as miniaturas dos serviços com 64 px, os títulos sem uma palavra sozinha na última linha, os botões de cada
+grupo com a mesma altura e a barra de ações em terços, sem nada fora do ecrã. O CI
 (`.github/workflows/ci.yml`) corre o `--check`, o `npm test` e os testes do browser em cada pull request.
 
 ## Fotografias
@@ -142,10 +146,11 @@ e as prévias de 16 px de `data/lqip.json`; só faz o que falta, `--todas` refaz
 correr o `gerar_fotos.py`, juntar a obra a `obras.json` e correr `python3 build.py --check`.
 
 Cada `{{foto}}` leva um `sizes` com a largura a que a fotografia aparece: os cartões pedem 579 px em computador (duas
-colunas) e, no telemóvel, mais do que a largura do cartão quando o cartão de 280 px de altura corta os lados de uma
-fotografia mais deitada do que ele (o `build.py` calcula-o de cada fotografia: 280 px × a proporção); a fotografia da ficha aparece na sua proporção, até 78% da altura do ecrã, sem corte. O
+colunas) e, no telemóvel, mais do que a largura do cartão quando a moldura (4/3 ou 4/5; nas obras em destaque da página
+inicial, o cartão de 280 px de altura) corta os lados de uma fotografia mais deitada do que ela (o `build.py` calcula-o
+de cada fotografia); num telemóvel de 3x pede-se a de 2x; a fotografia da ficha aparece na sua proporção, até 78% da altura do ecrã, sem corte. O
 `foco` de cada obra (`obras.json`) é o ponto que fica à vista nos cortes (na M04, a cabeça do trabalhador), também na
-miniatura de 48 px dos serviços, que mostra a primeira obra em destaque de cada serviço (nos Acabamentos a M05, o
+miniatura de 64 px dos serviços, que mostra a primeira obra em destaque de cada serviço (nos Acabamentos a M05, o
 assentamento do pavimento, e não o teto branco da M02).
 A `foto-05` tem uma faixa preta de 8 px no topo, que já vem no original do sistema de desenho (`obra5.jpg`): fica à
 espera da resposta do dono antes de se cortar.
@@ -157,7 +162,8 @@ largura.
 ## Publicar no Netlify
 
 1. No painel do site, ligar o repositório GitHub e pôr **Base directory** = `melperfaz`. O `netlify.toml` desta pasta
-   faz o resto: `python3 build.py` e a pasta `public`.
+   faz o resto: `python3 build.py --check` e a pasta `public`. Se o `--check` falhar (um travessão, um email mal
+   escrito, uma ligação partida), a publicação pára e fica no ar a versão anterior.
 2. **Forms**: ligar a deteção de formulários e, em «Form notifications», o email que recebe cada pedido do formulário
    «orcamento». O Netlify só regista o formulário depois da primeira publicação.
 3. **Domínio**: quando o site tiver domínio próprio, mudar `baseUrl` em `data/site.json` (canonical, `og:url`, mapa do

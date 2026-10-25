@@ -1,5 +1,5 @@
 {
-  "_nota": "As obras do site: a grelha da página inicial, a página Obras e uma ficha por obra (obras/<slug>.html). Os textos descrevem só o que se vê nas fotografias; «factos» (o problema, o trabalho feito, data, local, duração, resultado) ficam vazios até a Melperfaz os dar, e a linha só aparece na ficha quando existe. O «cat» de cada obra é o «cat» de um serviço de data/site.json («servicos»), que dá o nome, a âncora em obras.html e o tipo de obra do formulário; «destaque»: true põe a obra na página inicial; «fotosExtra» são mais fotografias de data/fotos.json. Uma obra nova: juntar a fotografia (data/fotos.json e gerar_fotos.py) e uma entrada aqui; python3 build.py --check confirma.",
+  "_nota": "As obras do site: a grelha da página inicial, a página Obras e uma ficha por obra (obras/<slug>.html). Os textos descrevem só o que se vê nas fotografias; «factos» (o problema, o trabalho feito, data, local, duração, resultado) ficam vazios até a Melperfaz os dar, e a linha só aparece na ficha quando existe. O «cat» de cada obra é o «cat» de um serviço de data/site.json («servicos»), que dá o nome, a âncora em obras.html e o tipo de obra do formulário; «destaque»: true põe a obra na página inicial; «fotosExtra» são mais fotografias de data/fotos.json, que aparecem na ficha por baixo de «Na obra». Uma obra nova: juntar a fotografia (data/fotos.json e gerar_fotos.py) e uma entrada aqui; python3 build.py --check confirma.",
   "obras": [
     {
       "n": "01",
@@ -83,7 +83,7 @@
       "cat": "acabamentos",
       "title": "Da remoção ao revestimento novo",
       "foto": "07",
-      "foco": "50% 60%",
+      "foco": "50% 50%",
       "antesDepois": {"antes": "06", "depois": "07"},
       "resumo": "O desmonte de revestimentos degradados e o assentamento de pavimento novo, numa casa de banho. Tratamos das duas fases.",
       "detalhes": [

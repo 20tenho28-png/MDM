@@ -10,21 +10,26 @@
       vão para orcamento.html, e os tipos de antes do redesenho («Fachadas / Impermeabilização») escolhem o de hoje;
    F. o isco para robôs: preenchido, não segue;
    G. nenhuma página desliza para o lado a 390 e 320 px, sem erros de JavaScript; a barra de ações (menos em obrigado.html)
-      não tapa o rodapé nem o botão de envio;
-   H. o menu dos ecrãs estreitos: abre sobre um fundo escurecido (com fade), as barras viram X, a página não desliza,
-      foca, fecha com Escape (escondido no fim da transição) e devolve o foco;
-   I. o comparador antes/depois: com o teclado, e com o rato só a partir da pega (um clique noutro sítio não o mexe);
+      não tapa o rodapé nem o botão de envio, nem o elemento focado ao tabular (também com 200% e 400% de zoom);
+   H. o menu dos ecrãs estreitos: abre sobre um fundo escurecido (com fade), as barras viram X, a página não desliza
+      nem salta para o topo (o cabeçalho fica no sítio), foca, fecha com Escape (escondido no fim da transição) e
+      devolve o foco;
+   I. o comparador antes/depois: com o teclado (e o aria-valuetext), com um clique ou um toque na fotografia (põe a linha
+      nesse sítio) e arrastando a partir da pega; o deslize vertical mexe a página; as etiquetas cortam-se com a sua
+      fotografia; o anel de foco com halo;
    J. teclado: a primeira tabulação é «Saltar para o conteúdo»; a entrada ao fazer scroll acaba toda visível;
       todas as imagens carregam; o menu marca a página atual; obras.html mostra todas as obras, sem filtros, agrupadas
       por serviço (o índice leva a cada grupo; H1 › H2 › H3);
    K. movimento reduzido; nenhuma animação sem fim;
    L. o sistema visual: uma margem esquerda (h1 do hero, logótipo e cabeçalhos de secção no mesmo x), contraste de 4,5:1
       nos botões, na barra e no texto da faixa clay, o anel de foco da cor da superfície, campos com 16 px e etiquetas com 13 px;
-      a legenda dos cartões sobre a fotografia (também a 390 px, cartões de 280 px); a página inicial em menos de 6.000 px
+      a legenda dos cartões sobre a fotografia (a 390 px só nas obras em destaque, com cartões de 280 px; nas outras por
+      baixo, em 4/3 ou 4/5), o cartão inteiro é a ligação e a legenda cresce com o texto; a página inicial em menos de 6.000 px
       a 390 e até 4.400 a 1440, com as miniaturas dos serviços sem acrescentar linhas, «Ver as N obras» ao lado do título
       e Porquê Nós em duas colunas; «Pedido para: X · alterar» em linhas de texto a 320 e 390 px;
    M. as fotografias sem ampliação: a 375 px a do hero tem pelo menos tantos píxeis como a moldura, e nenhuma fotografia é
-      mostrada maior do que o ficheiro escolhido, salvo quando o próprio original é mais pequeno do que a moldura;
+      mostrada maior do que o ficheiro escolhido, salvo quando o próprio original é mais pequeno do que a moldura; num
+      telemóvel de 3x, a de 2x;
    N. o movimento (Fase 5b): o cabeçalho compacto depois de 80 px, sem mudar de altura; CLS abaixo de 0,05; a seta
       avança com o rato; os vistos desenham-se ao entrar no ecrã; as fotografias em lazy load entram num fade; o
       WhatsApp pulsa duas vezes e pára; o indicador de carga do envio; o visto de obrigado.html; e, com movimento
@@ -271,10 +276,58 @@ try {
       if (f === '/obrigado.html') ok(b === null, `G: ${f} sem barra de ações`, b);
       else ok(b && b.fundo === b.alt && b.cels.every(h => h >= 56) && b.ultimo <= b.topo, `G: ${f} a ${largura} px barra fixa em baixo, células de 56 px, sem tapar o rodapé`, b);
     }
+    // a barra em terços: as células com a mesma largura, dentro do ecrã, e o ícone e o texto de cada uma dentro dela (o
+    // scrollWidth da página não vê a barra, que é fixa). Também com o espaçamento de texto da WCAG 1.4.12
+    const celulas = () => page.evaluate(() => Array.from(document.querySelectorAll('.barra-cel')).map(c => {
+      const r = c.getBoundingClientRect(), rg = document.createRange(); rg.selectNodeContents(c); const q = rg.getBoundingClientRect();
+      return { t: c.textContent.trim(), l: Math.round(r.left * 10) / 10, r: Math.round(r.right * 10) / 10, w: r.width, h: Math.round(r.height), dentro: q.left >= r.left - 0.5 && q.right <= r.right + 0.5, cabe: c.scrollWidth <= c.clientWidth + 1, ecra: r.right <= innerWidth + 0.5 };
+    }));
+    for (const f of ['/', '/orcamento.html']) {
+      await page.goto(srv.base + f, { waitUntil: 'networkidle' });
+      const c = await celulas();
+      ok(c.length === 3 && c.every(x => x.dentro && x.cabe && x.ecra && x.h === 56) && Math.max(...c.map(x => x.w)) - Math.min(...c.map(x => x.w)) < 1, `G: ${f} a ${largura} px a barra em terços, com tudo dentro de cada célula e do ecrã`, c);
+      if (largura === 320) {
+        await page.addStyleTag({ content: '* { line-height: 1.5 !important; letter-spacing: .12em !important; word-spacing: .16em !important; } p { margin-bottom: 2em !important; }' });
+        const e = await celulas();
+        ok(e.every(x => x.dentro && x.ecra), `G: ${f} a 320 px com o espaçamento de texto da WCAG 1.4.12, nada sai das células nem do ecrã`, e);
+      }
+    }
     await page.goto(srv.base + '/orcamento.html', { waitUntil: 'networkidle' });
     await page.locator('#sendBtn').scrollIntoViewIfNeeded();
     ok(await page.evaluate(() => { const r = document.querySelector('#sendBtn').getBoundingClientRect(); const el = document.elementFromPoint(r.left + r.width / 2, r.bottom - 2); return el && el.closest('#sendBtn') !== null; }), `G: a ${largura} px a barra não tapa o botão de envio`);
     ok(page.erros.length === 0, `G: sem erros a ${largura} px`, page.erros);
+    await ctx.close();
+  }
+
+  /* G. a barra fixa não tapa o elemento focado (WCAG 2.4.11): a tabular pela página inteira, a 390 × 844, a 640 × 450
+     (1280 × 900 com 200% de zoom) e a 320 × 256 (400% de zoom), com movimento reduzido (o scroll é imediato). Cada
+     elemento focado fora do cabeçalho e da barra fica à vista: inteiro acima da barra quando cabe no espaço entre o
+     cabeçalho e a barra (a caixa de texto da mensagem só em parte: o browser mostra o cursor, não a caixa toda) */
+  for (const [w, h] of [[390, 844], [640, 450], [320, 256]]) {
+    const { ctx, page } = await pagina({ viewport: { width: w, height: h }, reducedMotion: 'reduce' });
+    for (const f of ['/orcamento.html', '/', '/privacidade.html']) {
+      await page.goto(srv.base + f, { waitUntil: 'networkidle' });
+      const tapados = [];
+      let n = 0;
+      for (let i = 0; i < 160; i++) {
+        await page.keyboard.press('Tab');
+        const r = await page.evaluate(() => {
+          const a = document.activeElement;
+          if (!a || a === document.body) return { fim: true };
+          if (a.closest('.barra, .topo') || a.classList.contains('skip')) return { fora: true, fim: a.classList.contains('skip') && scrollY > 0 };
+          const barra = document.querySelector('.barra').getBoundingClientRect().top, topo = document.querySelector('.topo').getBoundingClientRect().bottom;
+          const q = a.getBoundingClientRect();
+          return { el: (a.id || a.textContent.trim()).slice(0, 30), top: Math.round(q.top), bottom: Math.round(q.bottom), barra: Math.round(barra), topo: Math.round(topo), area: a.tagName === 'TEXTAREA' };
+        });
+        if (r.fim) break;
+        if (r.fora) continue;
+        n++;
+        const cabe = !r.area && r.bottom - r.top <= r.barra - r.topo;
+        const visto = cabe ? r.bottom <= r.barra + 1 && r.top >= r.topo - 1 : r.top + 24 <= r.barra && r.bottom > r.topo;
+        if (!visto) tapados.push(r);
+      }
+      ok(n > 3 && tapados.length === 0, `G: ${f} a ${w} × ${h} a barra e o cabeçalho não tapam o elemento focado (${n} elementos)`, tapados);
+    }
     await ctx.close();
   }
 
@@ -283,6 +336,23 @@ try {
     const { ctx, page } = await pagina({ viewport: { width: 390, height: 800 }, isMobile: true, hasTouch: true });
     await page.goto(srv.base + '/obras.html', { waitUntil: 'networkidle' });
     ok(await page.isVisible('[data-menu]') && await page.isHidden('.navlinks'), 'H: o botão do menu aparece e o menu normal não');
+    // aberto a meio da página, o menu não a faz saltar para o topo e o cabeçalho fica no sítio (sticky); ao fechar com
+    // Escape a página continua onde estava. Abre-se com click() no próprio botão (um toque do Playwright deslizava até ele)
+    {
+      await page.evaluate(() => window.scrollTo(0, 1500));
+      await page.waitForTimeout(200);
+      const pos = () => page.evaluate(() => ({ y: Math.round(scrollY), topo: Math.round(document.querySelector('.topo').getBoundingClientRect().top) }));
+      const antes = await pos();
+      await page.evaluate(() => document.querySelector('[data-menu]').click());
+      await page.waitForTimeout(400);
+      const aberto = await pos();
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(400);
+      const fechado = await pos();
+      ok(antes.y === 1500 && aberto.y === 1500 && aberto.topo === 0 && fechado.y === 1500 && fechado.topo === 0, 'H: o menu aberto a meio da página não a faz saltar e o cabeçalho fica no topo', { antes, aberto, fechado });
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.waitForTimeout(200);
+    }
     // as três barras do ícone «menu»: direitas com o menu fechado, um X com ele aberto (250 ms)
     const barras = () => page.evaluate(() => Array.from(document.querySelectorAll('[data-menu] .i-menu path')).map(b => { const s = getComputedStyle(b); return { t: s.transform, o: s.opacity }; }));
     const fechado = await barras();
@@ -309,9 +379,9 @@ try {
     ok(Date.now() - t0 <= 600, 'H: fechado, o painel e o fundo escondem-se no fim da transição', Date.now() - t0);
     ok((await barras()).every(b => b.t === 'none' && b.o === '1'), 'H: fechado, as barras voltam');
     await page.click('[data-menu]');
-    await Promise.all([page.waitForURL(/index\.html$/, { waitUntil: 'domcontentloaded' }), page.click('#menu-movel a[href$="index.html"]')]);
+    await Promise.all([page.waitForURL(srv.base + '/', { waitUntil: 'domcontentloaded' }), page.click('#menu-movel a[href="./"]')]);
     await page.waitForTimeout(500);
-    ok(await page.isHidden('#menu-movel') && /index\.html$/.test(page.url()), 'H: uma ligação do menu fecha-o e navega', page.url());
+    ok(await page.isHidden('#menu-movel') && page.url() === srv.base + '/', 'H: uma ligação do menu fecha-o e navega (para a página inicial, «./»)', page.url());
     await ctx.close();
   }
 
@@ -328,11 +398,17 @@ try {
     ok(await page.inputValue('[data-ba-range]') === '21' && await page.evaluate(() => document.querySelector('[data-ba-before]').style.width === '21%'), 'I: as setas do teclado também');
     const l = await page.evaluate(() => { const s = document.querySelector('[data-ba]'); const f = document.querySelector('[data-ba-before] .foto'); return { w: s.clientWidth, fw: f.getBoundingClientRect().width }; });
     ok(Math.abs(l.w - l.fw) < 2, 'I: o antes tem a largura do comparador', l);
-    // o rato: um clique longe da pega não mexe a linha; arrastar a partir da pega (até 32 px dela) sim
+    ok(await page.getAttribute('[data-ba-range]', 'aria-valuetext') === 'Demolição 21%, acabamento 79%', 'I: o leitor de ecrã ouve quanto se vê de cada fotografia (aria-valuetext)', await page.getAttribute('[data-ba-range]', 'aria-valuetext'));
+    // o anel de foco sobre a fotografia: ink encostado à pega branca e um halo branco por fora (WCAG 1.4.11)
+    const anelBa = await page.evaluate(() => { const s = getComputedStyle(document.querySelector('.ba-arrows')); return { c: s.outlineColor, o: s.outlineOffset, w: s.outlineWidth, sombra: s.boxShadow }; });
+    ok(anelBa.c === 'rgb(27, 37, 64)' && anelBa.o === '0px' && anelBa.w === '3px' && anelBa.sombra.includes('rgb(255, 255, 255) 0px 0px 0px 6px'), 'I: o anel de foco da pega: ink sobre o branco da pega, com halo branco', anelBa);
+    // o rato: um clique na fotografia põe a linha nesse sítio (sem arrastar, WCAG 2.5.7); arrastar a partir da pega (até
+    // 32 px dela) também a mexe
     await page.locator('[data-ba-range]').fill('50');
     const s = await page.evaluate(() => { const r = document.querySelector('[data-ba]').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
     await page.mouse.click(s.x + s.w * 0.85, s.y + s.h / 2);
-    ok(await page.inputValue('[data-ba-range]') === '50', 'I: um clique longe da pega não mexe a linha');
+    ok(await page.inputValue('[data-ba-range]') === '85' && await page.evaluate(() => document.querySelector('[data-ba-before]').style.width === '85%'), 'I: um clique na fotografia põe a linha nesse sítio', await page.inputValue('[data-ba-range]'));
+    await page.locator('[data-ba-range]').fill('50');
     await page.mouse.move(s.x + s.w * 0.5 + 25, s.y + s.h / 2);
     await page.mouse.down();
     await page.mouse.move(s.x + s.w * 0.3, s.y + s.h / 2, { steps: 6 });
@@ -344,6 +420,45 @@ try {
     ok(page.erros.length === 0, 'I: sem erros', page.erros);
     await ctx.close();
   }
+  {
+    // no telemóvel: um toque põe a linha; um deslize vertical sobre a fotografia mexe a página e não a linha; as
+    // etiquetas cortam-se com a sua fotografia e, a meio, ficam afastadas da linha (a 320 e a 375 px)
+    const comparador = `${srv.base}/obras/${(OBRAS.find(o => o.antesDepois) || OBRAS[0]).slug}.html`;
+    for (const largura of [320, 375]) {
+      const { ctx, page } = await pagina({ viewport: { width: largura, height: 740 }, isMobile: true, hasTouch: true });
+      await page.goto(comparador, { waitUntil: 'networkidle' });
+      await page.evaluate(() => { const s = document.querySelector('[data-ba]'); scrollTo(0, s.getBoundingClientRect().top + scrollY - 100); });
+      await page.waitForTimeout(300);
+      const caixa = () => page.evaluate(() => { const r = document.querySelector('[data-ba]').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
+      let s = await caixa();
+      await page.touchscreen.tap(s.x + s.w * 0.2, s.y + s.h / 2);
+      await page.waitForTimeout(150);
+      ok(await page.inputValue('[data-ba-range]') === '20', `I: a ${largura} px um toque na fotografia põe a linha nesse sítio`, await page.inputValue('[data-ba-range]'));
+      const y0 = await page.evaluate(() => scrollY);
+      const cdp = await ctx.newCDPSession(page);
+      const tx = Math.round(s.x + s.w * 0.7), ty = Math.round(s.y + s.h * 0.6);
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: tx, y: ty }] });
+      for (let i = 1; i <= 10; i++) await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: tx, y: ty - i * 20 }] });
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      await page.waitForTimeout(400);
+      ok(await page.inputValue('[data-ba-range]') === '20' && await page.evaluate(() => scrollY) > y0 + 50, `I: a ${largura} px um deslize vertical mexe a página, não a linha`, { v: await page.inputValue('[data-ba-range]'), y0, y: await page.evaluate(() => scrollY) });
+      const tags = [];
+      for (const v of ['20', '50', '85']) {
+        await page.locator('[data-ba-range]').fill(v);
+        tags.push(await page.evaluate(v => {
+          const b = document.querySelector('[data-ba-before]'), tb = document.querySelector('.tag-before'), ta = document.querySelector('.tag-after'), h = document.querySelector('[data-ba-handle]').getBoundingClientRect();
+          const linha = h.left + h.width / 2, rb = tb.getBoundingClientRect(), ra = ta.getBoundingClientRect();
+          return { v, linha: Math.round(linha), antesVis: Math.round(Math.min(rb.right, b.getBoundingClientRect().right)), depoisVis: Math.round(Math.max(ra.left, linha)), antes: Math.round(rb.right), depois: Math.round(ra.left),
+            recorta: b.contains(tb) && getComputedStyle(b).overflow === 'hidden', tapa: Number(getComputedStyle(ta).zIndex) < Number(getComputedStyle(b).zIndex) };
+        }, v));
+      }
+      ok(tags.every(g => g.recorta && g.tapa && g.antesVis <= g.linha + 2 && g.depoisVis >= g.linha - 2), `I: a ${largura} px cada etiqueta só se vê na sua metade (a 20, 50 e 85%)`, tags);
+      const meio = tags.find(g => g.v === '50');
+      ok(meio.antes <= meio.linha - 6 && meio.depois >= meio.linha + 6, `I: a ${largura} px a meio, as etiquetas ficam afastadas da linha`, meio);
+      ok(page.erros.length === 0, `I: a ${largura} px sem erros`, page.erros);
+      await ctx.close();
+    }
+  }
 
   /* J. teclado, entrada ao fazer scroll, imagens, menu atual */
   {
@@ -351,6 +466,7 @@ try {
     await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
     await page.keyboard.press('Tab');
     ok(await page.evaluate(() => document.activeElement.className === 'skip'), 'J: a primeira tabulação é «Saltar para o conteúdo»');
+    ok(await page.evaluate(() => getComputedStyle(document.activeElement).outlineColor) === 'rgb(27, 37, 64)', 'J: o anel do «Saltar» é ink, sobre o cabeçalho paper (o amber ficava a 1,9:1)');
     await page.keyboard.press('Enter');
     await page.waitForTimeout(200);
     ok(await page.evaluate(() => document.activeElement.id === 'conteudo' || location.hash === '#conteudo'), 'J: saltar para o conteúdo');
@@ -459,7 +575,7 @@ try {
     ok(await anelCartao('#obras .pg h3 a') === 'solid 3px rgb(240, 168, 56)', 'L: foco amber no cartão de obra sobre ink', await anelCartao('#obras .pg h3 a'));
     await page.goto(`${srv.base}/obras/${OBRAS[0].slug}.html`, { waitUntil: 'networkidle' });
     await page.keyboard.press('Tab'); await page.keyboard.press('Shift+Tab');
-    ok(await anelCartao('.obra-rel .pg h3 a') === 'solid 3px rgb(27, 37, 64)', 'L: foco ink no cartão de obra sobre bone («Obras semelhantes»)', await anelCartao('.obra-rel .pg h3 a'));
+    ok(await anelCartao('.obra-rel .pg h3 a') === 'solid 3px rgb(27, 37, 64)', 'L: foco ink no cartão de obra sobre bone («Outras obras»)', await anelCartao('.obra-rel .pg h3 a'));
     await page.goto(srv.base + '/obras.html', { waitUntil: 'networkidle' });
     await page.keyboard.press('Tab'); await page.keyboard.press('Shift+Tab');
     ok(await anelCartao('section.s-bone .pg h3 a') === 'solid 3px rgb(27, 37, 64)', 'L: foco ink no cartão de obra num grupo bone de obras.html', await anelCartao('section.s-bone .pg h3 a'));
@@ -474,29 +590,62 @@ try {
         const fa = rgb(getComputedStyle(f).backgroundColor), sobre = k => fa[k] * fa.a + 255 * (1 - fa.a);
         const fundo = { r: sobre('r'), g: sobre('g'), b: sobre('b') };
         const t = el => Math.round(razao(rgb(getComputedStyle(el).color), fundo) * 100) / 100;
-        return { cat: t(f.querySelector('.cat')), titulo: t(f.querySelector('h2, h3')), alfa: fa.a };
+        // obras.html não repete o nome do serviço em cada cartão (o h2 do grupo já o diz): sem .cat, cat é null
+        const cat = f.querySelector('.cat');
+        return { cat: cat ? t(cat) : null, titulo: t(f.querySelector('h2, h3')), alfa: fa.a };
       });
     };
     for (const f of ['/', '/obras.html', `/obras/${OBRAS[0].slug}.html`]) {
       await page.goto(srv.base + f, { waitUntil: 'networkidle' });
       const l = await page.evaluate(legendas);
-      ok(l.length > 0 && l.every(c => c.cat >= 4.5 && c.titulo >= 4.5), `L: ${f} .cat e título dos cartões com 4,5:1 ou mais sobre uma fotografia branca`, l);
+      const comCat = f !== '/obras.html';
+      ok(l.length > 0 && l.every(c => (comCat ? c.cat >= 4.5 : c.cat === null) && c.titulo >= 4.5), `L: ${f} .cat e título dos cartões com 4,5:1 ou mais sobre uma fotografia branca${comCat ? '' : ' (sem .cat: o h2 do grupo diz o serviço)'}`, l);
+      // a ligação do título cobre o cartão inteiro (também a fotografia, em cima); em repouso, com rato, «Ver obra» não
+      // ocupa lugar na faixa (a faixa acaba o padding abaixo do título), e a faixa cobre menos de 60% do cartão
+      const c = await page.evaluate(() => Array.from(document.querySelectorAll('.pg')).map(c => {
+        const r = c.getBoundingClientRect(), a = c.querySelector('figcaption a'), fc = c.querySelector('figcaption').getBoundingClientRect(), h = c.querySelector('h2, h3').getBoundingClientRect();
+        scrollTo(0, r.top + scrollY - 200);
+        const q = c.getBoundingClientRect(), el = document.elementFromPoint(q.left + q.width / 2, q.top + 12);
+        return { topoLiga: !!el && el.closest('a') === a, folga: Math.round(fc.bottom - h.bottom), pad: Math.round(parseFloat(getComputedStyle(c.querySelector('figcaption')).paddingBottom)), banda: Math.round((r.bottom - fc.top) / r.height * 100) };
+      }));
+      ok(c.length > 0 && c.every(x => x.topoLiga && x.folga === x.pad && x.banda < 60), `L: ${f} a 1280 px o cartão inteiro é a ligação, sem espaço vazio por baixo do título, e a faixa abaixo de 60% do cartão`, c);
     }
     {
-      // no telemóvel o cartão é o mesmo: 280 px de altura, a fotografia a toda a caixa e a legenda por cima, na faixa
-      // escura, encostada ao fundo (com o mesmo contraste no pior caso)
+      // no telemóvel (até 640 px), nas obras e nas outras obras de cada ficha, a legenda passa para baixo da fotografia,
+      // numa moldura 4/3 (deitada) ou 4/5 (ao alto); as obras em destaque da página inicial ficam com o cartão de 280 px e
+      // a legenda por cima, encostada ao fundo. O contraste é o mesmo no pior caso
       const m = await pagina({ viewport: { width: 390, height: 800 } });
       for (const f of ['/', '/obras.html', `/obras/${OBRAS[0].slug}.html`]) {
         await m.page.goto(srv.base + f, { waitUntil: 'networkidle' });
         const l = await m.page.evaluate(legendas);
-        ok(l.length > 0 && l.every(c => c.cat >= 4.5 && c.titulo >= 4.5), `L: a 390 px ${f} .cat e título dos cartões com 4,5:1 ou mais sobre uma fotografia branca`, l);
+        ok(l.length > 0 && l.every(c => (c.cat === null || c.cat >= 4.5) && c.titulo >= 4.5), `L: a 390 px ${f} .cat e título dos cartões com 4,5:1 ou mais sobre uma fotografia branca`, l);
         const cartoes = await m.page.evaluate(() => Array.from(document.querySelectorAll('.pg')).map(c => {
           const r = c.getBoundingClientRect(), fo = c.querySelector('.foto').getBoundingClientRect(), le = c.querySelector('figcaption').getBoundingClientRect();
-          return { h: Math.round(r.height), foto: Math.round(fo.height) === Math.round(r.height) && Math.round(fo.top) === Math.round(r.top), leg: Math.round(le.bottom) === Math.round(r.bottom) && le.top > r.top, pos: getComputedStyle(c.querySelector('figcaption')).position };
+          const prop = c.dataset.orient === 'portrait' ? 5 / 4 : 3 / 4;
+          return { h: Math.round(r.height), cobre: Math.round(fo.height) === Math.round(r.height) && Math.round(fo.top) === Math.round(r.top) && le.top > r.top,
+            baixo: Math.round(fo.top) === Math.round(r.top) && Math.abs(fo.height - fo.width * prop) < 1.5 && le.top >= fo.bottom - 1,
+            fundo: Math.round(le.bottom) === Math.round(r.bottom) };
         }));
-        ok(cartoes.length > 0 && cartoes.every(c => c.h === 280 && c.foto && c.leg && c.pos === 'absolute'), `L: a 390 px ${f} os cartões com a legenda sobre a fotografia, 280 px`, cartoes);
+        const destaques = f === '/';
+        ok(cartoes.length > 0 && cartoes.every(c => c.fundo && (destaques ? c.h === 280 && c.cobre : c.baixo)), `L: a 390 px ${f} ${destaques ? 'os cartões com a legenda sobre a fotografia, 280 px' : 'a legenda por baixo da fotografia, em 4/3 ou 4/5'}`, cartoes);
       }
       await m.ctx.close();
+    }
+    {
+      // com o texto maior sem zoom (letra de 32 px: «zoom só do texto»), as linhas da grelha crescem e nenhuma legenda
+      // fica cortada no topo do cartão
+      for (const largura of [390, 1280]) {
+        const m = await pagina({ viewport: { width: largura, height: 900 } });
+        const cdp = await m.ctx.newCDPSession(m.page);
+        await cdp.send('Page.enable');
+        await cdp.send('Page.setFontSizes', { fontSizes: { standard: 32, fixed: 26 } });
+        for (const f of ['/', '/obras.html']) {
+          await m.page.goto(srv.base + f, { waitUntil: 'networkidle' });
+          const cortes = await m.page.evaluate(() => ({ rem: parseFloat(getComputedStyle(document.documentElement).fontSize), c: Array.from(document.querySelectorAll('.pg')).map(c => Math.round(c.querySelector('figcaption').getBoundingClientRect().top - c.getBoundingClientRect().top)) }));
+          ok(cortes.rem === 32 && cortes.c.every(v => v >= 0), `L: a ${largura} px ${f} com letra de 32 px nenhuma legenda é cortada`, cortes);
+        }
+        await m.ctx.close();
+      }
     }
     // a lista «Na obra» começa na margem esquerda, como o h2 (sem o recuo de uma ul)
     await page.goto(`${srv.base}/obras/${OBRAS[0].slug}.html`, { waitUntil: 'networkidle' });
@@ -531,19 +680,20 @@ try {
     }
   }
   {
-    // a página inicial compacta: as miniaturas dos serviços só onde não acrescentam linhas (acima de 980 px; a mesma
-    // altura de cada linha com e sem elas), «Ver as N obras» à direita do título das obras (por baixo dos cartões até
-    // 980 px), Porquê Nós com as garantias em duas colunas e a fotografia na coluna das ações da faixa clay
+    // a página inicial compacta: as miniaturas dos serviços com 64 × 64 a todas as larguras (o plano; as alturas da página
+    // ficam nos alvos, mais acima), «Ver as N obras» à direita do título das obras (por baixo dos cartões até 980 px),
+    // Porquê Nós com as garantias em duas colunas e a fotografia na coluna das ações da faixa clay; o número de cada
+    // serviço na linha de base do título
     for (const largura of [390, 700, 1280, 1440]) {
       const { ctx, page } = await pagina({ viewport: { width: largura, height: 900 } });
       await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
-      const alturas = () => page.evaluate(() => Array.from(document.querySelectorAll('.svc')).map(s => Math.round(s.getBoundingClientRect().height)));
-      const com = await alturas(), vistas = await page.evaluate(() => Array.from(document.querySelectorAll('.svc-mini')).filter(e => e.getClientRects().length).length);
-      const estilo = await page.addStyleTag({ content: '.svc-mini { display: none !important; }' });
-      const sem = await alturas();
-      await estilo.evaluate(e => e.remove());
-      if (largura > 980) ok(vistas === 3 && com.join() === sem.join(), `L: a ${largura} px as miniaturas dos serviços não acrescentam linhas`, { com, sem });
-      else ok(vistas === 0, `L: a ${largura} px sem miniaturas nos serviços`, vistas);
+      const minis = await page.evaluate(() => Array.from(document.querySelectorAll('.svc-mini')).filter(e => e.getClientRects().length).map(e => { const r = e.getBoundingClientRect(); return `${Math.round(r.width)}x${Math.round(r.height)}`; }));
+      ok(minis.length === 3 && minis.every(m => m === '64x64'), `L: a ${largura} px as três miniaturas dos serviços com 64 × 64`, minis);
+      const bases = await page.evaluate(() => Array.from(document.querySelectorAll('.svc')).map(s => {
+        const marca = el => { const m = document.createElement('span'); m.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline'; el.prepend(m); const y = m.getBoundingClientRect().top; m.remove(); return y; };
+        return Math.round((marca(s.querySelector('.svc-num')) - marca(s.querySelector('h3'))) * 10) / 10;
+      }));
+      ok(bases.every(v => Math.abs(v) <= 1), `L: a ${largura} px o número de cada serviço na linha de base do título`, bases);
       await page.evaluate(() => document.querySelectorAll('.reveal').forEach(e => e.classList.add('in')));
       await page.waitForTimeout(800);
       const g = await page.evaluate(() => {
@@ -581,6 +731,90 @@ try {
       await ctx.close();
     }
   }
+  {
+    // os títulos sem uma palavra sozinha na última linha (text-wrap: balance), a 768, 1024 e 1440 px
+    const ultimas = () => Array.from(document.querySelectorAll('main h1, main h2')).filter(h => h.getClientRects().length && !h.closest('.pg')).map(h => {
+      const palavras = [], w = document.createTreeWalker(h, NodeFilter.SHOW_TEXT);
+      for (let n; (n = w.nextNode());) for (const m of n.textContent.matchAll(/\S+/g)) { const r = document.createRange(); r.setStart(n, m.index); r.setEnd(n, m.index + m[0].length); palavras.push(Math.round(r.getBoundingClientRect().top)); }
+      const ultima = Math.max(...palavras);
+      return { t: h.textContent.trim().slice(0, 40), linhas: new Set(palavras).size, ultima: palavras.filter(y => Math.abs(y - ultima) < 4).length };
+    });
+    for (const largura of [768, 1024, 1440]) {
+      const { ctx, page } = await pagina({ viewport: { width: largura, height: 900 } });
+      const soltas = [];
+      for (const f of ['/', '/obras.html', '/obrigado.html', ...OBRAS.map(o => `/obras/${o.slug}.html`)]) {
+        await page.goto(srv.base + f, { waitUntil: 'networkidle' });
+        soltas.push(...(await page.evaluate(ultimas)).filter(h => h.linhas > 1 && h.ultima < 2).map(h => ({ f, ...h })));
+      }
+      ok(soltas.length === 0, `L: a ${largura} px nenhum título com uma palavra sozinha na última linha`, soltas);
+      await ctx.close();
+    }
+  }
+  {
+    // no telemóvel o cartão «25 anos» sobe para o canto de cima da fotografia e encolhe (em baixo tapava a carrinha);
+    // acima de 640 px fica em baixo, à esquerda
+    for (const largura of [320, 375, 1280]) {
+      const { ctx, page } = await pagina({ viewport: { width: largura, height: 800 } });
+      await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
+      const c = await page.evaluate(() => { const f = document.querySelector('.hero-moldura .frame').getBoundingClientRect(), c = document.querySelector('.tag-card').getBoundingClientRect();
+        return { topo: Math.round(c.top - f.top), fundo: Math.round(f.bottom - c.bottom), esq: Math.round(c.left - f.left), area: Math.round(c.width * c.height / (f.width * f.height) * 100) }; });
+      ok(c.esq === 0 && (largura > 640 ? c.fundo === 0 : c.topo === 0 && c.area <= 22), `L: a ${largura} px o cartão «25 anos» ${largura > 640 ? 'em baixo' : 'no canto de cima, pequeno'}`, c);
+      await ctx.close();
+    }
+  }
+  {
+    // os botões de um grupo com a mesma altura no telemóvel (mesmo quando um rótulo parte), e os rótulos longos numa linha
+    // a partir de 360 px: o envio do pedido e, a 1024, o da lateral de orcamento.html
+    const grupos = () => Array.from(document.querySelectorAll('main .acoes')).filter(a => a.getClientRects().length && a.querySelectorAll('.btn').length > 1).map(a => Array.from(a.querySelectorAll('.btn')).map(b => Math.round(b.getBoundingClientRect().height)));
+    for (const largura of [320, 360, 375]) {
+      const { ctx, page } = await pagina({ viewport: { width: largura, height: 800 } });
+      for (const f of ['/', '/obrigado.html', `/obras/${OBRAS[0].slug}.html`]) {
+        await page.goto(srv.base + f, { waitUntil: 'networkidle' });
+        const g = await page.evaluate(grupos);
+        ok(g.length > 0 && g.every(x => new Set(x).size === 1), `L: a ${largura} px ${f} os botões de cada grupo com a mesma altura`, g);
+      }
+      await page.goto(srv.base + '/orcamento.html', { waitUntil: 'networkidle' });
+      const envio = await page.evaluate(() => Math.round(document.querySelector('#sendBtn').getBoundingClientRect().height));
+      if (largura >= 360) ok(envio === 48, `L: a ${largura} px «Enviar pedido de orçamento» numa linha`, envio);
+      await ctx.close();
+    }
+    const { ctx, page } = await pagina({ viewport: { width: 1024, height: 800 } });
+    await page.goto(srv.base + '/orcamento.html', { waitUntil: 'networkidle' });
+    ok(await page.evaluate(() => Math.round(document.querySelector('.orc-lateral .btn').getBoundingClientRect().height)) === 48, 'L: a 1024 px «Enviar fotografias por WhatsApp» da lateral numa linha');
+    await ctx.close();
+  }
+  {
+    // o PageHead das fichas começa à mesma altura que o das outras páginas (o eyebrow com ligação não engorda: o alvo de
+    // 44 px desenha-se por fora); o de orcamento.html é compacto também no telemóvel; o telefone grande com 44 px
+    for (const largura of [390, 1440]) {
+      const { ctx, page } = await pagina({ viewport: { width: largura, height: 900 } });
+      const h1 = async f => { await page.goto(srv.base + f, { waitUntil: 'networkidle' }); return page.evaluate(() => Math.round(document.querySelector('h1').getBoundingClientRect().top + scrollY)); };
+      const ref = await h1('/obras.html'), fundo = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector('.page-head')).paddingBottom));
+      const ficha = await h1(`/obras/${OBRAS[0].slug}.html`);
+      const alvo = await page.evaluate(() => { const a = document.querySelector('.page-head .eyebrow a'), r = a.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2; return [-21, 0, 21].every(d => { const e = document.elementFromPoint(x, y + d); return e && (e === a || a.contains(e)); }); });
+      ok(ficha === ref && alvo, `L: a ${largura} px o h1 das fichas à altura do de obras.html, com 44 px de alvo no eyebrow`, { ref, ficha, alvo });
+      await page.goto(srv.base + '/orcamento.html', { waitUntil: 'networkidle' });
+      const compacto = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector('.page-head')).paddingBottom));
+      ok(compacto < fundo, `L: a ${largura} px o PageHead de orcamento.html mais compacto do que o de obras.html`, { compacto, fundo });
+      const tel = await page.evaluate(() => Math.round(document.querySelector('.cta-phone').getBoundingClientRect().height));
+      await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
+      const telCasa = await page.evaluate(() => Math.round(document.querySelector('#contacto .cta-phone').getBoundingClientRect().height));
+      ok(tel >= 44 && telCasa >= 44, `L: a ${largura} px o telefone grande com 44 px ou mais`, { tel, telCasa });
+      await ctx.close();
+    }
+  }
+  {
+    // a página atual no menu: o traço com 3:1 ou mais sobre o paper (clay-deep); em contraste forçado os botões têm borda
+    const { ctx, page } = await pagina();
+    await page.goto(srv.base + '/obras.html', { waitUntil: 'networkidle' });
+    const traco = await page.evaluate(() => getComputedStyle(document.querySelector('.navlinks a[aria-current="page"]'), '::after').backgroundColor);
+    ok(traco === 'rgb(189, 111, 16)', 'L: o traço da página atual no menu em clay-deep (3,6:1 sobre paper)', traco);
+    await page.emulateMedia({ forcedColors: 'active' });
+    const bordas = await page.evaluate(() => Array.from(document.querySelectorAll('.btn, .topo-wa')).filter(e => e.getClientRects().length).map(e => getComputedStyle(e).borderTopStyle));
+    ok(bordas.length > 1 && bordas.every(b => b === 'solid'), 'L: em contraste forçado os botões e o WhatsApp do cabeçalho com borda', bordas);
+    await ctx.close();
+  }
+
   /* M. as fotografias sem ampliação (fase 6) */
   {
     // quanto a fotografia está ampliada: a caixa a dividir pelo ficheiro escolhido (com object-fit: cover, o lado que
@@ -592,6 +826,22 @@ try {
       return { f: nome, amp: Math.max(r.width / cw, r.height / ch), limite: Math.max(1, r.width / maxW, r.height / maxH) };
     });
     const OBRA_GRANDE = OBRAS.find(o => !o.antesDepois && o.foto === '04') || OBRAS.find(o => !o.antesDepois);
+    {
+      // num telemóvel de 3x pede-se a imagem de 2x da largura do telemóvel: a do hero é a mesma que num de 2x (a de 800),
+      // e a de orcamento.html não é a maior
+      const srcs = {};
+      for (const dpr of [2, 3]) {
+        const { ctx, page } = await pagina({ viewport: { width: 390, height: 844 }, deviceScaleFactor: dpr, isMobile: true, hasTouch: true });
+        await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
+        srcs['hero' + dpr] = await page.evaluate(() => document.querySelector('.hero-photo img').currentSrc.split('/').pop());
+        await page.goto(srv.base + '/orcamento.html', { waitUntil: 'networkidle' });
+        await page.locator('.orc-foto').scrollIntoViewIfNeeded();
+        await page.waitForTimeout(500);
+        srcs['orc' + dpr] = await page.evaluate(() => document.querySelector('.orc-foto img').currentSrc.split('/').pop());
+        await ctx.close();
+      }
+      ok(srcs.hero3 === 'foto-01-800.avif' && srcs.hero3 === srcs.hero2 && !/1440|1080/.test(srcs.orc3), 'M: a 390 px e 3x as fotografias de 2x da largura do telemóvel', srcs);
+    }
     for (const largura of [375, 1280]) {
       const { ctx, page } = await pagina({ viewport: { width: largura, height: 900 } });
       for (const f of ['/', '/obras.html', `/obras/${OBRA_GRANDE.slug}.html`, '/orcamento.html']) {

@@ -1,5 +1,5 @@
 /* A página do pedido (orcamento.html): o QuoteForm (orcamento-form.html), um cartão branco com linha de 1 px, e a
-   lateral bone com o telefone, «O que acontece a seguir», a confiança e uma fotografia. Abaixo de 980 px o formulário
+   lateral bone com o telefone, «O que acontece a seguir», a TrustList condensada (site.css) e uma fotografia. Abaixo de 980 px o formulário
    vem primeiro. Campos com 16 px (sem zoom no iOS) e etiquetas com 14 px. */
 .orc-grelha { display: grid; grid-template-columns: 1.1fr .9fr; gap: var(--space-50); align-items: start; }
 .orc-grelha > * { width: 100%; min-width: 0; }
@@ -37,13 +37,13 @@
 .orc-t { font-size: var(--fs-step); margin-bottom: var(--space-12); }
 .orc-lateral .cta-phone { margin-top: 0; }
 .orc-lateral .acoes { margin-top: var(--space-18); }
+/* o botão da lateral com menos folga dos lados: «Enviar fotografias por WhatsApp» numa linha a 1024 px */
+.orc-lateral .btn { padding-left: var(--space-16); padding-right: var(--space-16); }
 .orc-passos { list-style: none; counter-reset: passo; }
 .orc-passos li { counter-increment: passo; position: relative; padding: var(--space-12) 0 var(--space-12) var(--space-44); border-top: var(--border-hairline) solid var(--rule); }
 .orc-passos li::before { content: counter(passo, decimal-leading-zero); position: absolute; left: 0; top: var(--space-12); font-family: var(--font-serif); font-size: var(--fs-step); font-weight: 700; color: var(--fg); }
 .orc-passos h3 { font-size: var(--fs-list); }
 .orc-passos p { color: var(--fg-2); margin-top: var(--space-2); }
-.orc-confianca { list-style: none; }
-.orc-confianca li { padding: var(--space-6) 0; border-top: var(--border-hairline) solid var(--rule); font-weight: 600; }
 .orc-foto .foto { aspect-ratio: 4 / 3; overflow: hidden; }
 .orc-foto figcaption { margin-top: var(--space-6); font-size: var(--fs-label); color: var(--fg-2); }
 

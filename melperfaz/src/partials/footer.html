@@ -1,11 +1,11 @@
-<!-- Rodapé (ink), 3 colunas: a marca, as páginas do site e os contactos. Os dados da Melperfaz (zona, email, morada,
+<!-- Rodapé (ink), 3 colunas: a marca, as páginas do site e os contactos (cada coluna nomeada pelo seu título). Os dados da Melperfaz (zona, email, morada,
      horário, Google Maps, NIF, alvará) só aparecem quando existem. Todas as ligações com 44 px de altura. Na variante
      «reduzido» (obrigado.html) sai «Pedir Orçamento». -->
 <footer class="rodape s-ink">
   <div class="wrap">
     <div class="foot-grid">
       <div class="foot-brand">
-        <a href="{{ root }}index.html" class="logo"><img src="{{ root }}assets/img/logo-melperfaz-branco.png" alt="Melperfaz, Construção Civil, Lda." class="logo-img" width="400" height="239" loading="eager"></a>
+        <a href="{{ inicio }}" class="logo"><img src="{{ root }}assets/img/logo-melperfaz-branco.png" alt="Melperfaz, Construção Civil, Lda." class="logo-img" width="400" height="239" loading="eager"></a>
         <p>{{ site.legalName }} Reabilitação de edifícios, espaços comerciais e apartamentos. Mãos à obra desde {{ site.founded }}.</p>{{#se dados.zona}}
         <p>Trabalhamos em {{ dados.zona }}.</p>{{/se}}
       </div>
@@ -15,7 +15,7 @@
         <a href="{{ pedidoHref }}">Pedir Orçamento</a>{{/sem}}
         <a href="{{ root }}privacidade.html">Política de privacidade</a>
       </nav>
-      <div class="foot-col">
+      <div class="foot-col" role="group" aria-labelledby="footContactos">
         <p class="foot-h" id="footContactos">Contactos</p>
         <a href="{{ site.phoneHref }}">Ligar {{ site.phone }}</a>
         <a href="{{wa {{ page.wa }}}}" target="_blank" rel="noopener">Falar por WhatsApp</a>{{#se dados.email}}
@@ -26,7 +26,7 @@
       </div>
     </div>
     <div class="foot-bottom">
-      <span>© {{ year }} {{ site.legalName }}{{#se dados.nif}} · NIF {{ dados.nif }}{{/se}}{{#se dados.alvara}} · Alvará n.º {{ dados.alvara }}{{/se}}</span>
+      <span>© {{ year }} {{ site.legalName }}{{#se dados.nif}} · <span class="sem-quebra">NIF {{ dados.nif }}</span>{{/se}}{{#se dados.alvara}} · Alvará n.º&nbsp;{{ dados.alvara }}{{/se}}</span>
       <a href="https://www.livroreclamacoes.pt/" target="_blank" rel="noopener">Livro de Reclamações</a>
     </div>
   </div>

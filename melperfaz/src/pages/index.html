@@ -47,8 +47,8 @@
 
 <!-- ServiceList: os serviços de data/site.json «servicos» (o nome e uma frase do texto, «frase»), em linhas sem caixa e sem seta. A linha não é uma ligação:
      «Ver obras (N)» só quando o serviço tem obras, e «Pedir orçamento» com o tipo já escolhido (?tipo=<id>). A miniatura
-     (a obra em destaque do serviço, com o seu foco) fica à direita do título e o texto contorna-a, só acima de 980 px,
-     onde não acrescenta linhas; as duas ligações seguem numa só linha, à largura toda da linha -->
+     (64 × 64, a obra em destaque do serviço, com o seu foco) fica à direita do título e o texto contorna-a, a todas as
+     larguras; as duas ligações seguem numa só linha, à largura toda da linha -->
 <section class="sec s-paper" id="servicos" aria-labelledby="servicosT">
   <div class="wrap">
     <div class="sec-head reveal">
@@ -60,7 +60,7 @@
         <span class="svc-num" aria-hidden="true">{{ item.n }}</span>
         <div class="svc-corpo">
           <div class="svc-txt">{{#se item.miniFoto}}
-            <div class="svc-mini">{{foto {{ item.miniFoto }} sizes="48px" alt="" foco="{{ item.miniFoco }}"}}</div>{{/se}}
+            <div class="svc-mini">{{foto {{ item.miniFoto }} sizes="64px" alt="" foco="{{ item.miniFoco }}"}}</div>{{/se}}
             <h3>{{ item.nome }}</h3>
             <p>{{ item.frase }}</p>
           </div>
@@ -85,15 +85,10 @@
     </div>
     <div class="trust-grid">
       <div class="reveal">
-        <ul class="trust-list">
-          <li><span class="tick" aria-hidden="true">{{icone visto}}</span><div><h3>Orçamentos a preço fixo</h3><p>O valor que lhe damos é o valor que paga. Alterações só acontecem com a sua aprovação por escrito.</p></div></li>
-          <li><span class="tick" aria-hidden="true">{{icone visto}}</span><div><h3>Equipa própria</h3><p>Os nossos próprios profissionais em obra, não um conjunto rotativo de subcontratados desconhecidos.</p></div></li>
-          <li><span class="tick" aria-hidden="true">{{icone visto}}</span><div><h3>Licenciada &amp; segurada</h3><p>Empresa licenciada, segurada e em conformidade com as normas em todas as obras com licença.{{#se dados.alvara}} Alvará n.º {{ dados.alvara }}.{{/se}}{{#se dados.seguro}} {{ dados.seguro }}{{/se}}</p></div></li>
-          <li><span class="tick" aria-hidden="true">{{icone visto}}</span><div><h3>Garantia de execução</h3><p>Respondemos pelo nosso trabalho durante dois anos além das garantias de materiais dos fabricantes.</p></div></li>
-        </ul>
+        {{> garantias }}
         <div class="quem-somos">
           <h3>Quem somos</h3>
-          <p>A {{ site.legalName }} trabalha desde {{ site.founded }} com equipa própria.{{#se dados.zona}} Trabalhamos em {{ dados.zona }}.{{/se}}{{#se dados.morada}} A sede é em {{ dados.morada }}.{{/se}}</p>
+          <p>A {{ site.legalName }} trabalha desde {{ site.founded }} com equipa própria.{{#se dados.zona}} Trabalhamos em {{ dados.zona }}.{{/se}}{{#se dados.morada}} Sede: {{ dados.morada }}.{{/se}}</p>
         </div>
       </div>
       <!-- uma fotografia real em vez de números: a obra M03, com ligação para a ficha; o perfil do Google quando existir
@@ -102,7 +97,7 @@
       <figure class="trust-foto reveal">
         <div class="frame">{{foto 02 sizes="(min-width: 981px) min(360px, calc((100vw - 64px) * .33)), calc(100vw - 64px)" foco="50% 40%"}}</div>
         <figcaption class="links">
-          <a class="link-seta" href="{{ root }}obras/edificios-e-apartamentos.html">Ver a obra{{icone seta}}</a>{{#se dados.googleMaps}}
+          <a class="link-seta" href="{{ root }}obras/{{ obrasPorN.03.slug }}.html">Ver a obra<span class="so-leitor">: {{ obrasPorN.03.title }}</span>{{icone seta}}</a>{{#se dados.googleMaps}}
           <a class="link-seta" href="{{ dados.googleMaps }}" target="_blank" rel="noopener">Ver o perfil e as avaliações no Google{{icone seta}}</a>{{/se}}
         </figcaption>
       </figure>

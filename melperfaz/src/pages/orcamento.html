@@ -13,7 +13,7 @@
         <a href="{{ site.phoneHref }}" class="cta-phone"><span class="so-leitor">Ligar </span>{{ site.phone }}</a>{{#se dados.horario}}
         <span class="cta-phone-l">{{ dados.horario }}</span>{{/se}}
         <div class="acoes">
-          <a class="btn btn-ghost" href="{{wa geral}}" target="_blank" rel="noopener">Enviar fotografias por WhatsApp</a>
+          <a class="btn btn-ghost" href="{{wa fotos}}" target="_blank" rel="noopener">Enviar fotografias por WhatsApp</a>
         </div>
       </div>
       <div class="orc-bloco">
@@ -27,12 +27,7 @@
       </div>
       <div class="orc-bloco">
         <h2 class="orc-t">Porque nos escolhem</h2>
-        <ul class="orc-confianca">
-          <li>Orçamentos a preço fixo</li>
-          <li>Equipa própria</li>
-          <li>Licenciada &amp; segurada{{#se dados.alvara}} · Alvará n.º {{ dados.alvara }}{{/se}}{{#se dados.seguro}} · {{ dados.seguro }}{{/se}}</li>
-          <li>Garantia de execução</li>
-        </ul>
+        {{> garantias curta="1"}}
       </div>
       <figure class="orc-foto">
         {{foto 03 sizes="(max-width: 980px) calc(100vw - 32px), 460px" foco="50% 40%"}}

@@ -70,8 +70,27 @@ SITE["anos"] = ANO - int(SITE["founded"])
 FOTOS = {k: v for k, v in json.loads((DATA / "fotos.json").read_text(encoding="utf-8")).items() if not k.startswith("_")}
 OBRAS_DATA = json.loads((DATA / "obras.json").read_text(encoding="utf-8"))
 OBRAS = OBRAS_DATA["obras"]
-OBRA_BY_N = {o["n"]: o for o in OBRAS}
 DADOS_DOC = json.loads((DATA / "dados-melperfaz.json").read_text(encoding="utf-8"))
+# a forma dos dados confere-se já, antes de alguém os usar: um campo em falta ou um valor que não é texto dá uma linha
+# clara para quem edita os ficheiros (e não um KeyError do Python). O formato de cada valor fica para o --check
+OBRA_CAMPOS = ("n", "code", "slug", "cat", "title", "foto", "foco", "resumo", "detalhes", "factos")
+_erros = []
+for _o in OBRAS:
+    _falta = [c for c in OBRA_CAMPOS if c not in _o]
+    if _falta:
+        _erros.append(f"obras.json {_o.get('code', '?')}: falta {', '.join(f'«{c}»' for c in _falta)}")
+    elif not isinstance(_o["factos"], dict):
+        _erros.append(f"obras.json {_o['code']}: «factos» tem de ser um objeto {{...}}")
+for _k, _v in DADOS_DOC.items():
+    if _k.startswith("_"):
+        continue
+    if not (isinstance(_v, dict) and all(x in _v for x in ("valor", "grupo", "pedido"))):
+        _erros.append(f"dados-melperfaz.json «{_k}»: tem de ter «valor», «grupo» e «pedido»")
+    elif not isinstance(_v["valor"], str):
+        _erros.append(f"dados-melperfaz.json «{_k}»: «valor» tem de ser texto, entre aspas → {_v['valor']!r}")
+if _erros:
+    raise SystemExit("\n".join(_erros))
+OBRA_BY_N = {o["n"]: o for o in OBRAS}
 DADOS = {k: v["valor"] for k, v in DADOS_DOC.items() if not k.startswith("_")}
 DADOS_USO = {}   # chave de dados-melperfaz.json → páginas onde entra (para --faltam)
 # lado maior de cada tamanho das fotografias: foto-NN-400.avif … e o mesmo em WebP, só os menores do que o original,
@@ -89,7 +108,8 @@ CATEGORIAS = {s["cat"]: s["nome"] for s in SERVICOS if s["cat"]}
 SERVICO_BY_CAT = {s["cat"]: s for s in SERVICOS if s["cat"]}
 # as opções do «Tipo de obra» do formulário: os nomes dos serviços e «Outro»
 TIPOS_DE_OBRA = [s["nome"] for s in SERVICOS] + ["Outro"]
-# a altura do cartão de obra até 980 px (--photo-row-1col em site.css): o sizes das fotografias dos cartões conta com ela
+# a altura do cartão de obra em destaque até 980 px (--photo-row-1col em site.css): o sizes das fotografias desses
+# cartões conta com ela
 CARTAO_MOVEL_H = 280
 
 
@@ -103,44 +123,52 @@ def campos_obra(o):
     """Campos calculados de cada obra (modelo obra.html e cartões). As fichas vivem em obras/: root «../»."""
     f = FOTOS[o["foto"]]
     o["orient"] = "landscape" if f["w"] >= f["h"] else "portrait"
-    o["alt"] = f["alt"]
     s = SERVICO_BY_CAT[o["cat"]]
     o["servico"] = s
     o["catNome"] = s["nome"]
-    o["tipoDeObra"] = s["nome"]
     # o pedido com o tipo já escolhido e a obra de onde veio (campo escondido «pagina»): orcamento.html
     o["orcamentoHref"] = f"../orcamento.html?tipo={s['id']}&de=obras/{o['slug']}"
     # a âncora do grupo da obra em obras.html (relativa à raiz: {{ root }}{{ obra.catAnchor }})
     o["catAnchor"] = f"obras.html#{o['cat']}"
     o.setdefault("destaque", False)
     o.setdefault("fotosExtra", [])
+    # mais fotografias da obra (obras.json «fotosExtra»), em duas colunas por baixo de «Na obra», cada uma na sua
+    # proporção: a coluna da prosa tem cerca de 640 px a partir de 981 px, e a .wrap toda até lá
+    o["extra"] = [{"n": n, "sizes": "(min-width: 981px) 320px, (min-width: 641px) calc(50vw - 41px), calc(50vw - 25px)"}
+                  for n in o["fotosExtra"] if isinstance(o["fotosExtra"], list) and n in FOTOS]
     # a ficha (Local, Data, Duração, Resultado) só aparece quando a Melperfaz deu pelo menos um destes factos
     o["temFactos"] = any(tem(o["factos"].get(k, "")) for k in FACTOS_FICHA)
     msg = SITE["wa"]["obra"].replace("{code}", o["code"]).replace("{title}", o["title"])
     o["waHref"] = SITE["whatsappBase"] + quote(msg)
-    # «Outras obras de fachadas» só quando há outras da mesma categoria que cheguem; senão, «Outras obras»
+    # «Outras obras de fachadas» só quando há outras da mesma categoria que cheguem; senão, «Outras obras». O eyebrow
+    # segue a mesma regra: «Obras semelhantes» só quando as duas são mesmo do mesmo serviço; senão, «Obras»
     mesma = sum(1 for x in OBRAS if x is not o and x["cat"] == o["cat"])
     o["relTitulo"] = f"Outras obras de {o['catNome'].lower()}" if mesma >= 2 else "Outras obras"
+    o["relEyebrow"] = "Obras semelhantes" if mesma >= 2 else "Obras"
     # a fotografia da ficha: na sua proporção (fotoR, largura/altura), à largura do contentor (1176 px por dentro da .wrap,
     # menos 32 px de margens até 640 px, menos 64 acima) e no máximo 78% da altura do ecrã; o sizes diz o mesmo
     r = f"calc(78vh * {f['w']} / {f['h']})"
     o["fotoR"] = f"{f['w'] / f['h']:.4f}"
     o["fotoSizes"] = f"(min-width: 641px) min(1176px, calc(100vw - 64px), {r}), min(calc(100vw - 32px), {r})"
     # o cartão (obra-foto.html): duas colunas de 579 px a partir de 981 px (a .wrap de 1176 px menos 18 de intervalo),
-    # uma coluna até lá. Até 640 px o cartão tem a largura do ecrã menos 32 px e 280 px de altura (--photo-row-1col): uma
-    # fotografia mais deitada do que isso é cortada nos lados e precisa de 280 px × a sua proporção de largura, mais do
-    # que a largura do cartão nos telemóveis estreitos (foto-05, 1080 × 620: 488 px)
+    # uma coluna até lá. Até 640 px o cartão tem a largura do ecrã menos 32 px e a fotografia fica numa moldura 4/3
+    # (deitada) ou 4/5 (ao alto), com a legenda por baixo: uma fotografia mais deitada do que a moldura é cortada nos
+    # lados e precisa da largura da moldura × (a sua proporção / a da moldura) (foto-05, 1080 × 620 em 4/3: × 1,306).
+    # As obras em destaque da página inicial ficam com a legenda por cima e 280 px de altura (--photo-row-1col): aí uma
+    # fotografia mais deitada do que o cartão precisa de 280 px × a sua proporção (cartaoSizesDestaque)
+    largas = "(min-width: 981px) min(calc(50vw - 41px), 579px), (min-width: 641px) calc(100vw - 64px)"
+    moldura = 4 / 3 if o["orient"] == "landscape" else 4 / 5
+    k = f["w"] / f["h"] / moldura
+    o["cartaoSizes"] = f"{largas}, " + ("calc(100vw - 32px)" if k <= 1 else f"calc((100vw - 32px) * {k:.3f})")
     larga = round(CARTAO_MOVEL_H * f["w"] / f["h"])
     movel = "calc(100vw - 32px)" if larga <= 288 else f"max(calc(100vw - 32px), {larga}px)"
-    o["cartaoSizes"] = f"(min-width: 981px) min(calc(50vw - 41px), 579px), (min-width: 641px) calc(100vw - 64px), {movel}"
+    o["cartaoSizesDestaque"] = f"{largas}, {movel}"
     # sem comparador, a chave existe vazia: os modelos perguntam {{#se obra.antesDepois}} (uma chave em falta é erro)
     ad = o.setdefault("antesDepois", "")
     if ad:
         for k in ("antes", "depois"):
             if ad.get(k) not in FOTOS:
                 raise SystemExit(f"obras.json {o['code']}: antesDepois.{k} tem de ser uma fotografia de data/fotos.json")
-        o["antesAlt"], o["depoisAlt"] = FOTOS[ad["antes"]]["alt"], FOTOS[ad["depois"]]["alt"]
-        o["antesSrc"], o["depoisSrc"] = f"foto-{ad['antes']}.jpg", f"foto-{ad['depois']}.jpg"
 
 
 def tem(v):
@@ -227,14 +255,16 @@ def lookup(ctx, path):
     return cur
 
 
-def ultima_entrada(sizes):
-    """Última entrada de um sizes (a dos ecrãs estreitos): a vírgula conta só fora de parênteses, como em min(a, b)."""
-    nivel, ini = 0, 0
-    for i, c in enumerate(sizes):
-        nivel += (c == "(") - (c == ")")
-        if c == "," and nivel == 0:
-            ini = i + 1
-    return sizes[ini:].strip()
+def slot_estreito(sizes):
+    """A largura de um sizes nos ecrãs estreitos (até 599 px, os do FOTO_3X), seja qual for a ordem das entradas: a da
+    primeira entrada «(max-width: N px) …» com N de 599 ou mais (o hero: «(max-width: 980px) calc(100vw - 32px), 520px»)
+    e, sem nenhuma, a última, a que não tem condição (os cartões: «(min-width: 981px) …, calc(100vw - 32px)»). A vírgula
+    conta só fora de parênteses, como em min(a, b)."""
+    for entrada in partes(sizes):
+        m = re.match(r"\(max-width:\s*(\d+)px\)\s*(.+)$", entrada)
+        if m and int(m.group(1)) >= 599:
+            return m.group(2).strip()
+    return partes(sizes)[-1]
 
 
 def foto(ctx, args):
@@ -249,7 +279,7 @@ def foto(ctx, args):
     maior = max(w, h)
     alt = attrs.get("alt", f["alt"])
     sizes = attrs.get("sizes", "100vw")
-    sizes = f"{FOTO_3X} calc({ultima_entrada(sizes)} * 2 / 3), {sizes}"
+    sizes = f"{FOTO_3X} calc({slot_estreito(sizes)} * 2 / 3), {sizes}"
     loading = attrs.get("loading", "lazy")
     cls = ("foto " + attrs.get("class", "")).strip()
     foco = attrs.get("foco", "")
@@ -312,11 +342,14 @@ def each(ctx, args):
     else:
         items = [OBRA_BY_N[x.strip().zfill(2)] for x in sel.split(",")]
     tpl = (SRC / "partials" / f"{name}.html").read_text(encoding="utf-8")
-    sizes = ctx["page"].get("cartaoSizes")   # uma página pode dar o seu; senão, o de cada obra (campos_obra)
     out = []
     for i, o in enumerate(items):
-        c = dict(ctx, obra=o, index=i, pos=i + 1, total=len(items), cartaoSizes=sizes or o["cartaoSizes"],
-                 loading="eager" if i < eager else "lazy", prioridade="alta" if i == 0 and eager else "normal")
+        # as obras em destaque (página inicial) ficam com a legenda por cima da fotografia também no telemóvel: o sizes
+        # delas conta com o cartão de 280 px (campos_obra). Um grupo com eagerN é o primeiro à vista: sem a entrada ao
+        # fazer scroll (.reveal), que atrasava o LCP meio segundo e o escondia se o site.js não corresse
+        c = dict(ctx, obra=o, cartaoSizes=o["cartaoSizesDestaque" if sel == "destaque" else "cartaoSizes"],
+                 loading="eager" if i < eager else "lazy", prioridade="alta" if i == 0 and eager else "normal",
+                 revelar="" if eager else " reveal")
         out.append(render(tpl, c))
     return "".join(out)
 
@@ -450,8 +483,8 @@ def business_ld():
           "name": SITE["legalName"], "legalName": SITE["legalName"], "url": b + "/",
           "logo": b + "/assets/img/logo-melperfaz.png", "image": [b + "/assets/img/" + OG_IMG["src"], b + "/assets/img/fotos/foto-01.jpg"],
           "slogan": SITE["slogan"], "telephone": SITE["phoneE164"], "foundingDate": SITE["founded"],
-          "knowsAbout": ["Reabilitação de edifícios", "Espaços comerciais", "Remodelação de apartamentos", "Trabalhos de estrutura",
-                         "Fachadas e impermeabilização", "Acabamentos"]}
+          # um vocabulário: os nomes dos serviços de site.json «servicos», os mesmos do menu, do formulário e do rodapé
+          "knowsAbout": [s["nome"] for s in SERVICOS]}
     if tem(DADOS["email"]):
         ld["email"] = DADOS["email"]
     if tem(DADOS["nif"]):
@@ -479,7 +512,7 @@ HEADERS = ("", "reduzido")
 
 
 def page_ctx(meta, file):
-    meta = {"nav": "", "robots": "index,follow", "og": "", "wa": "geral", "tipo": "", "italico": "", "header": "", "barra": "",
+    meta = {"nav": "", "robots": "index,follow", "og": "", "wa": "geral", "italico": "", "header": "", "barra": "",
             "atualizada": "", "reencaminha": "", **meta}
     if meta["barra"] not in BARRAS:
         raise SystemExit(f"{file}: «barra» é {' ou '.join(repr(b) for b in BARRAS)} → {meta['barra']!r}")
@@ -490,15 +523,20 @@ def page_ctx(meta, file):
     depth = file.count("/")
     # a 404 é servida em qualquer profundidade (/obras/xyz.html): precisa de caminhos absolutos
     root = "/" if file == "404.html" else "../" * depth
+    # a página inicial é a pasta («./», «../» ou «/»), como no canonical e no mapa do site: nunca …/index.html
+    inicio = root or "./"
+    href = lambda f: inicio if f in ("", "index.html") else root + f
     # as migalhas do PageHead (page-head.html): as de meta «breadcrumb»; a última é a página atual, sem ligação
     trilho = meta.get("breadcrumb") or []
-    migalhas = [{"nome": n, "href": "" if i == len(trilho) - 1 else root + (f or "index.html")} for i, (n, f) in enumerate(trilho)]
+    migalhas = [{"nome": n, "href": "" if i == len(trilho) - 1 else href(f)} for i, (n, f) in enumerate(trilho)]
     mostra_barra, barra_orcamento = BARRAS[meta["barra"]]
-    return {"site": SITE, "page": meta, "root": root, "_file": file, "dados": DADOS, "categorias": CATEGORIAS,
-            "cat_n": CAT_N, "year": str(ANO), "anos": str(SITE["anos"]), "tipos": TIPOS_DE_OBRA,
+    return {"site": SITE, "page": meta, "root": root, "inicio": inicio, "_file": file, "dados": DADOS,
+            "cat_n": CAT_N, "year": str(ANO), "anos": str(SITE["anos"]),
             "servicos": servicos_ctx(root), "provas": SITE["provas"],
+            # as obras pelo número (data/obras.json «n»): {{ obrasPorN.03.title }}
+            "obrasPorN": OBRA_BY_N,
             # o menu (site.json «menu»), igual no cabeçalho e no painel; «atual» dá aria-current sem JavaScript
-            "menu": [{**m, "href": root + m["href"], "atual": "1" if m["id"] == meta["nav"] else ""} for m in SITE["menu"]],
+            "menu": [{**m, "href": href(m["href"]), "atual": "1" if m["id"] == meta["nav"] else ""} for m in SITE["menu"]],
             "migalhas": migalhas,
             # em orcamento.html o botão do cabeçalho dá lugar a «Orçamento gratuito» (aria-current)
             "emOrcamento": "1" if meta["nav"] == "orcamento" else "",
@@ -506,8 +544,12 @@ def page_ctx(meta, file):
             # «Pedir Orçamento» do cabeçalho e da barra: com ?tipo= e ?de= quando a página os conhece (fichas de obra)
             "pedidoHref": root + "orcamento.html",
             # cartaoH: o nível do título dos cartões de obra (obra-foto.html): h3 debaixo do h2 da secção (na página
-            # inicial, nas outras obras de cada ficha e em cada grupo de obras.html)
-            "cartaoH": str(meta.get("cartaoH", 3))}
+            # inicial, nas outras obras de cada ficha e em cada grupo de obras.html); nenhuma página o muda hoje, mas o
+            # plano deixa-o como parâmetro (meta «cartaoH»)
+            "cartaoH": str(meta.get("cartaoH", 3)),
+            # cartaoCat: o nome do serviço (.cat) por cima do título do cartão; em obras.html (meta «cartaoCat»: false)
+            # sai, porque o h2 de cada grupo já é o nome do serviço (cada facto uma vez por página)
+            "cartaoCat": "" if meta.get("cartaoCat") is False else "1"}
 
 
 def build_page(meta, body_tpl, extra_ctx=None):
@@ -535,7 +577,8 @@ def build_page(meta, body_tpl, extra_ctx=None):
                 "og_alt": og_img["alt"], "content": body, "jsonld": ld_html, "page_css": css,
                 "canonical": SITE["baseUrl"] + "/" + ("" if file == "index.html" else file)})
     layout = (SRC / "templates" / "layout.html").read_text(encoding="utf-8")
-    out = versiona(render(layout, ctx))
+    # os comentários dos modelos explicam o código a quem o mantém: ficam em src/ e não seguem para o site
+    out = versiona(re.sub(r"<!--.*?-->", "", render(layout, ctx), flags=re.S))
     dest = OUT / file
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(out, encoding="utf-8")
@@ -556,6 +599,14 @@ def versao(nome):
 
 def versiona(texto):
     return VERSAO_RE.sub(lambda m: f'{m.group(1)}{m.group(2)}?v={versao(m.group(1).split("assets/", 1)[1] + m.group(2))}"', texto)
+
+
+COMENTARIO_CSS_JS = re.compile(r"/\*.*?\*/", re.S)
+
+
+def sem_comentarios(texto):
+    """CSS ou JS sem os comentários /* … */ (o --check confirma que não sobra nenhum «/*», por exemplo dentro de um texto)."""
+    return COMENTARIO_CSS_JS.sub("", texto)
 
 
 def limpa_saida():
@@ -590,6 +641,9 @@ def build():
     (OUT / MARCA_SAIDA).write_text("Pasta gerada pelo build.py do site da Melperfaz. Ao gerar de novo, o build.py só apaga "
                                    "uma pasta com este ficheiro.\n", encoding="utf-8")
     shutil.copytree(ASSETS, OUT / "assets", ignore=shutil.ignore_patterns(".*"))
+    # o mesmo para o CSS e o JS: os comentários ficam em assets/ (o ?v= continua a ser o do ficheiro de origem)
+    for f in [*(OUT / "assets" / "css").glob("*.css"), *(OUT / "assets" / "js").glob("*.js")]:
+        f.write_text(sem_comentarios(f.read_text(encoding="utf-8")), encoding="utf-8")
     files, fora_do_mapa = [], set()
     for p in sorted((SRC / "pages").rglob("*.html")):
         text = p.read_text(encoding="utf-8")
@@ -603,7 +657,8 @@ def build():
     tpl = (SRC / "templates" / "obra.html").read_text(encoding="utf-8")
     for o in OBRAS:
         file = f"obras/{o['slug']}.html"
-        desc = f"{o['title']}, {o['catNome'].lower()}: {o['resumo']}"
+        # a descrição é o resumo da obra (o título já está no <title>), cortado na última frase inteira que cabe
+        desc = o["resumo"]
         if len(desc) > 160:   # a descrição corta-se na última frase inteira que cabe; sem nenhuma, na última palavra
             corte = desc[:160]
             fim = corte.rfind(". ")
@@ -747,8 +802,9 @@ LIGACAO_FORA = re.compile(r"or[cç]amento gratuito", re.I)
 
 
 def check_rotulos(f, text):
-    """Sem os rótulos antigos (em todo o texto visível, e «Orçamento Gratuito» como nome de ligação) e sem ligações para
-    #contacto: o formulário vive em orcamento.html e a página inicial reencaminha os endereços antigos."""
+    """Sem os rótulos antigos (em todo o texto visível, e «Orçamento Gratuito» como nome de ligação), sem ligações para
+    #contacto (o formulário vive em orcamento.html e a página inicial reencaminha os endereços antigos) e sem ligações
+    para …index.html (a página inicial é «./», «../» ou «/», como no canonical e no mapa do site)."""
     out = []
     visivel = html.unescape(TAG_TEXTO_RE.sub(" ", re.sub(r"<!--.*?-->|<script.*?</script>", "", text, flags=re.S)))
     visivel = re.sub(r"\s+", " ", visivel)
@@ -763,6 +819,8 @@ def check_rotulos(f, text):
         href = re.search(r'\bhref="([^"]*)"', attrs)
         if href and href.group(1).endswith("#contacto"):
             out.append(f"{f}: ligação para #contacto → href=\"{href.group(1)}\" (o pedido é em {PAGINA_PEDIDO})")
+        if href and href.group(1).endswith("index.html"):
+            out.append(f"{f}: ligação para index.html → href=\"{href.group(1)}\" (a página inicial é a pasta: {{{{ inicio }}}})")
     return out
 
 
@@ -832,6 +890,11 @@ def check_preview():
             out.append(f"lançamento: netlify.toml pede noindex em {h.get('for', '?')}")
     if conf and conf.get("build", {}).get("publish") != "public":
         out.append("netlify.toml: [build] publish tem de ser «public» (a pasta que o build.py gera)")
+    if conf and "--check" not in conf.get("build", {}).get("command", ""):
+        out.append("netlify.toml: [build] command tem de correr o --check (python3 build.py --check): as mesmas regras que o CI")
+    tudo = [h.get("values", {}) for h in conf.get("headers", []) if h.get("for") == "/*"]
+    if conf and not any("frame-ancestors" in str(v.get("Content-Security-Policy", "")) for v in tudo):
+        out.append("netlify.toml: /* sem Content-Security-Policy frame-ancestors (o formulário não pode abrir dentro de outro site)")
     if not SITE["baseUrl"].startswith("https://"):
         out.append(f"lançamento: baseUrl tem de começar por https:// → {SITE['baseUrl']}")
     return out
@@ -870,15 +933,7 @@ EMAIL_RE = re.compile(r"[^@\s]+@[^@\s]+\.[a-z]{2,}", re.I)
 
 def check_dados():
     """Formato dos dados da Melperfaz: um engano apareceria tal e qual no site."""
-    out = []
-    for k, v in DADOS_DOC.items():
-        if k.startswith("_"):
-            continue
-        if not (isinstance(v, dict) and all(x in v for x in ("valor", "grupo", "pedido"))):
-            out.append(f"dados-melperfaz.json «{k}»: tem de ter «valor», «grupo» e «pedido»")
-            continue
-        if not isinstance(v["valor"], str):
-            out.append(f"dados-melperfaz.json «{k}»: «valor» tem de ser texto, entre aspas")
+    out = []   # a forma (um objeto com «valor» de texto) já se confere ao carregar: aqui é o formato de cada valor
     v = DADOS.get("email", "")
     if tem(v) and not EMAIL_RE.fullmatch(v.strip()):
         out.append(f"dados-melperfaz.json «email»: não parece um email → «{v}»")
@@ -891,16 +946,17 @@ def check_dados():
     for k in ("alvara", "seguro", "zona", "horario", "morada"):
         if "\u2014" in DADOS.get(k, ""):
             out.append(f"dados-melperfaz.json «{k}»: sem travessões (—)")
+    # estes entram no meio de uma frase que já leva o ponto final («Sede: {morada}.»): sem ponto no fim, senão ficavam dois
+    for k in ("alvara", "seguro", "zona", "morada"):
+        if DADOS.get(k, "").strip().endswith("."):
+            out.append(f"dados-melperfaz.json «{k}»: sem ponto final (o site já o põe) → «{DADOS[k]}»")
     return out
 
 
 def check_obras():
     out = []
     slugs, codes = set(), set()
-    for o in OBRAS:
-        for campo in ("n", "code", "slug", "cat", "title", "foto", "resumo", "detalhes", "factos", "fotosExtra"):
-            if campo not in o:
-                out.append(f"obras.json {o.get('code', '?')}: falta «{campo}»")
+    for o in OBRAS:   # os campos obrigatórios já se conferem ao carregar (OBRA_CAMPOS)
         if "catLabel" in o:
             out.append(f"obras.json {o['code']}: «catLabel» já não existe: o nome vem do serviço («cat», site.json «servicos»)")
         if not isinstance(o.get("destaque", False), bool):
@@ -908,6 +964,8 @@ def check_obras():
         extra = o.get("fotosExtra", [])
         if not (isinstance(extra, list) and all(x in FOTOS for x in extra)):
             out.append(f"obras.json {o['code']}: «fotosExtra» é uma lista de fotografias de data/fotos.json → {extra}")
+        elif o["foto"] in extra or len(set(extra)) != len(extra):
+            out.append(f"obras.json {o['code']}: «fotosExtra» não repete a fotografia da obra nem outra da lista → {extra}")
         if o["slug"] in slugs:
             out.append(f"obras.json: slug repetido «{o['slug']}»")
         if o["code"] in codes:
@@ -921,7 +979,7 @@ def check_obras():
             out.append(f"obras.json {o['code']}: «factos» tem de ter {', '.join(FACTOS_OBRA)} (vazios ou não)")
         if not re.fullmatch(r"\d{1,3}% \d{1,3}%", str(o.get("foco", ""))):
             out.append(f"obras.json {o['code']}: «foco» é obrigatório, «X% Y%» (o ponto da fotografia que fica à vista) → «{o.get('foco', '')}»")
-    if not any(o["destaque"] for o in OBRAS):
+    if not any(o.get("destaque") for o in OBRAS):
         out.append("obras.json: nenhuma obra com «destaque»: true (a página inicial ficava sem obras)")
     return out
 
@@ -1069,6 +1127,12 @@ def check(files):
                 problems.append(f"{css.name}: url partido → {c}")
     for extra in sorted((OUT / "assets" / "js").glob("*.js")):   # o que o visitante lê também vem dos scripts
         problems += texto_proibido(str(extra.relative_to(OUT)), extra.read_text(encoding="utf-8"))
+    # os comentários tirados ao CSS e ao JS (sem_comentarios): um «/*» ou «*/» dentro de um texto ou de uma expressão
+    # regular partia o ficheiro; nas fontes têm de vir aos pares e na saída não pode sobrar nenhum
+    for f in [*sorted((ASSETS / "css").glob("*.css")), *sorted((ASSETS / "js").glob("*.js"))]:
+        fonte, saida = f.read_text(encoding="utf-8"), (OUT / "assets" / f.parent.name / f.name).read_text(encoding="utf-8")
+        if fonte.count("/*") != fonte.count("*/") or "/*" in saida or "*/" in saida:
+            problems.append(f"assets/{f.parent.name}/{f.name}: «/*» ou «*/» fora de um comentário (tirar os comentários partia o ficheiro)")
     print(f"{len(files)} páginas geradas em {OUT}")
     if PREVIEW:
         print("Pré-visualização: noindex em todas as páginas. No lançamento: \"preview\": false em data/site.json.")

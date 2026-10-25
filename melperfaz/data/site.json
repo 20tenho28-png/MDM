@@ -12,6 +12,7 @@
   "wa": {
     "geral": "Olá! Gostaria de pedir um orçamento.",
     "pedido": "Olá! Acabei de enviar um pedido de orçamento pelo site e envio fotografias do local.",
+    "fotos": "Olá! Gostaria de pedir um orçamento e envio fotografias do local.",
     "obra": "Olá! Vi a obra {code} no site ({title}) e envio fotografias do meu espaço para pedir um orçamento para uma obra parecida.",
     "erro": "Olá! Sou {nome} e queria um orçamento para {tipo}. O formulário do site não enviou."
   },

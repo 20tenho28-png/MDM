@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- o site só tem tema claro: impede o browser do telemóvel de o escurecer sozinho -->
+{{#se page.reencaminha}}<!-- endereços antigos da página inicial: o formulário estava na âncora «contacto» e os cartões levavam ?tipo=; agora o
+     pedido é em orcamento.html (com o mesmo ?tipo=). No topo do <head>, antes das letras, do CSS e do prefetch: um script
+     depois de uma folha de estilo espera por ela, e o browser descarregava a página inicial antes de mudar. Sem
+     JavaScript fica a faixa clay com essa âncora e o botão do pedido -->
+<script>(function(){var l=location,m=/[?&]tipo=([^&#]*)/.exec(l.search);if(m||l.hash.slice(1)==='contacto')l.replace('orcamento.html'+(m?'?tipo='+m[1]:''));})();</script>
+{{/se}}<!-- o site só tem tema claro: impede o browser do telemóvel de o escurecer sozinho -->
 <meta name="color-scheme" content="only light">
 <script>document.documentElement.className += ' js';</script>
 <title>{{ page.title }}</title>
@@ -29,13 +34,11 @@
 <link rel="preload" href="{{ root }}assets/fonts/archivo-latin-variable.woff2" as="font" type="font/woff2" crossorigin>{{#se page.italico}}
 <link rel="preload" href="{{ root }}assets/fonts/fraunces-latin-400-700-italic.woff2" as="font" type="font/woff2" crossorigin>{{/se}}
 <link rel="stylesheet" href="{{ root }}assets/css/site.css">
-<!-- a página do pedido descarrega-se em segundo plano: «Pedir Orçamento» abre logo -->
-<link rel="prefetch" href="{{ root }}orcamento.html">
-{{& page_css }}{{& jsonld }}</head>
-<body class="grain{{#se barra.mostra}} com-barra{{/se}}" data-nav="{{ page.nav }}">{{#se page.reencaminha}}
-<!-- endereços antigos da página inicial: o formulário estava na âncora «contacto» e os cartões levavam ?tipo=; agora o
-     pedido é em orcamento.html (com o mesmo ?tipo=). Sem JavaScript fica a faixa clay com essa âncora e o botão do pedido -->
-<script>(function(){var l=location,m=/[?&]tipo=([^&#]*)/.exec(l.search);if(m||l.hash.slice(1)==='contacto')l.replace('orcamento.html'+(m?'?tipo='+m[1]:''));})();</script>{{/se}}
+{{#sem emOrcamento}}{{#se barra.mostra}}<!-- a página do pedido descarrega-se em segundo plano: «Pedir Orçamento» abre logo. O endereço é o dos botões
+     da página (nas fichas de obra, com ?tipo= e ?de=); não em orcamento.html (é ela) nem em obrigado.html (não leva lá) -->
+<link rel="prefetch" href="{{ pedidoHref }}">
+{{/se}}{{/sem}}{{& page_css }}{{& jsonld }}</head>
+<body class="grain{{#se barra.mostra}} com-barra{{/se}}" data-nav="{{ page.nav }}">
 <a class="skip" href="#conteudo">Saltar para o conteúdo</a>
 {{> header }}
 <main id="conteudo" tabindex="-1">

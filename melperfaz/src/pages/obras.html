@@ -1,7 +1,8 @@
-<!--meta {"file": "obras.html", "title": "Obras · Melperfaz, Construção Civil", "description": "As obras da Melperfaz fotografadas no local pela nossa equipa: reabilitação de edifícios, fachadas e acabamentos, do desmonte ao revestimento novo.", "nav": "obras", "css": ["pag-obras.css"], "jsonld": ["breadcrumb"], "breadcrumb": [["Início", ""], ["Obras", "obras.html"]]} -->
+<!--meta {"file": "obras.html", "title": "Obras · Melperfaz, Construção Civil", "description": "As obras da Melperfaz fotografadas no local pela nossa equipa: reabilitação de edifícios, fachadas e acabamentos, do desmonte ao revestimento novo.", "nav": "obras", "css": ["pag-obras.css"], "jsonld": ["breadcrumb"], "breadcrumb": [["Início", ""], ["Obras", "obras.html"]], "cartaoCat": false} -->
 <!-- O catálogo: as obras agrupadas por serviço (data/site.json «servicos»; só os serviços com obras), uma secção por grupo
      com a âncora do serviço (#reabilitacao, #fachadas, #acabamentos), a alternar ink e bone. H1 › H2 do grupo › H3 de cada
-     obra. Um grupo de uma obra fica com meio cartão encostado à esquerda. Funciona sem JavaScript; os filtros só voltam
+     obra (sem o nome do serviço por cima de cada título: o h2 do grupo já o diz, meta «cartaoCat»). Um grupo de uma obra fica
+     com meio cartão encostado à esquerda. Funciona sem JavaScript; os filtros só voltam
      com 8 ou mais obras. A última secção é a faixa clay, antes do rodapé ink. -->
 {{> page-head eyebrow="Obras" titulo="Cada fotografia é uma obra nossa" intro="Fotografias tiradas no local, durante e no fim de cada trabalho. Abra uma obra para ver o que se fez." indice="Obras por serviço"}}
 {{#cada servicos}}{{#se item.obrasN}}

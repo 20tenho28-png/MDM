@@ -1,7 +1,8 @@
 /* O site gerado, sem browser: gera numa pasta temporária (MELPERFAZ_OUT) com --check e confere as páginas, a cabeça de
    cada uma, o formulário Netlify, o mapa do site, as fichas de obra, as fotografias e as regras de texto. No fim, que o
    --check falha quando se parte uma ligação ou se escreve um travessão, e que o build.py se recusa a apagar a pasta
-   errada. Uso, a partir de melperfaz/:  node --test tests/ */
+   errada. Com os dados da Melperfaz preenchidos numa cópia, os ramos que hoje estão escondidos. Uso, a partir de
+   melperfaz/:  npm test  (ou node --test tests/site.test.mjs) */
 import test, { before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -20,6 +21,9 @@ const SERVICOS = SITE.servicos;
 const servicoDe = o => SERVICOS.find(s => s.cat && s.cat === o.cat);
 const TIPOS = [...SERVICOS.map(s => s.nome), 'Outro'];
 const FOTOS = Object.entries(JSON.parse(fs.readFileSync(path.join(W, 'data/fotos.json'), 'utf8'))).filter(([k]) => !k.startsWith('_'));
+// os dados da Melperfaz (data/dados-melperfaz.json): o que se espera das páginas segue-os, vazios ou preenchidos
+const DADOS = Object.fromEntries(Object.entries(JSON.parse(fs.readFileSync(path.join(W, 'data/dados-melperfaz.json'), 'utf8')))
+  .filter(([k]) => !k.startsWith('_')).map(([k, v]) => [k, String(v.valor).trim()]));
 const le = f => fs.readFileSync(path.join(PUB, f), 'utf8');
 // o HTML sem os comentários (os parciais explicam-se em comentários que falam dos nomes antigos e dos rótulos)
 const leV = f => le(f).replace(/<!--[\s\S]*?-->/g, '');
@@ -71,6 +75,7 @@ test('cada página: lang, um h1, título, descrição, canonical, og, JSON-LD, v
     assert.ok(fs.existsSync(path.join(PUB, og.slice(SITE.baseUrl.length + 1))), `${f}: og:image existe`);
     const lds = [...t.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)].map(m => JSON.parse(m[1]));
     assert.ok(lds.some(l => l['@type'] === 'GeneralContractor' && l.telephone === SITE.phoneE164), `${f}: JSON-LD da empresa`);
+    assert.deepEqual(lds.find(l => l['@type'] === 'GeneralContractor').knowsAbout, SERVICOS.map(s => s.nome), `${f}: knowsAbout são os nomes de site.json «servicos»`);
     for (const m of t.matchAll(/assets\/(css|js)\/([^"?]+)\?v=([0-9a-f]{8})"/g)) {
       assert.ok(fs.existsSync(path.join(PUB, 'assets', m[1], m[2])), `${f}: ${m[2]} existe`);
     }
@@ -82,7 +87,15 @@ test('cada página: lang, um h1, título, descrição, canonical, og, JSON-LD, v
     assert.match(t, /<footer class="rodape s-ink">[\s\S]*href="https:\/\/wa\.me\/351961245288\?text=/, `${f}: WhatsApp no rodapé`);
     assert.doesNotMatch(t, /class="wa-float"/, `${f}: sem a bolha de WhatsApp (sai do site)`);
     assert.match(t, /<main id="conteudo" tabindex="-1">/, f);
-    assert.match(t, /<link rel="prefetch" href="(?:\/|(?:\.\.\/)*)orcamento\.html">/, `${f}: prefetch de orcamento.html`);
+    // o prefetch da página do pedido: o endereço dos botões da página (nas fichas, com ?tipo= e ?de=); não em
+    // orcamento.html (é ela) nem em obrigado.html (não leva lá)
+    const prefetch = [...t.matchAll(/<link rel="prefetch" href="([^"]+)">/g)].map(m => m[1]);
+    if (f === 'orcamento.html' || f === 'obrigado.html') assert.deepEqual(prefetch, [], `${f}: sem prefetch`);
+    else {
+      const botao = /<a href="([^"]+)" class="btn topo-btn">/.exec(t)[1];
+      assert.deepEqual(prefetch, [botao], `${f}: prefetch do endereço do «Pedir Orçamento» da página`);
+      assert.match(botao, f.startsWith('obras/') ? /^\.\.\/orcamento\.html\?tipo=\w+&amp;de=obras\// : /^\/?orcamento\.html$/, `${f}: ${botao}`);
+    }
     // cada «Pedir Orçamento» (texto ou aria-label) leva a orcamento.html; já não há #contacto como destino
     for (const m of t.matchAll(/<a\b([^>]*)>(.*?)<\/a>/gs)) {
       const rotulo = (m[2].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() + ' ' + ((/aria-label="([^"]*)"/.exec(m[1]) || [])[1] || ''));
@@ -91,6 +104,10 @@ test('cada página: lang, um h1, título, descrição, canonical, og, JSON-LD, v
       assert.match(href, /^(?:\/|(?:\.\.\/)*)orcamento\.html(?:\?[^#]*)?$/, `${f}: «${rotulo.trim()}» → ${href}`);
     }
     assert.doesNotMatch(t, /href="[^"]*#contacto"/, `${f}: nenhuma ligação para #contacto`);
+    // a página inicial é a pasta («./», «../» ou «/»), como no canonical e no mapa do site: nenhuma ligação para …index.html
+    assert.doesNotMatch(t, /href="[^"#?]*index\.html"/, `${f}: nenhuma ligação para index.html`);
+    const inicio = f === '404.html' ? '/' : f.startsWith('obras/') ? '../' : './';
+    assert.match(t, new RegExp(`<a href="${inicio.replace(/[./]/g, '\\$&')}" class="logo">`), `${f}: o logótipo leva a ${inicio}`);
     // o cabeçalho: o telefone sempre; a barra de ações em todas as páginas menos obrigado.html
     assert.match(t, /<header class="topo[^"]*"[\s\S]*?<a class="topo-tel" href="tel:\+351961245288">/, `${f}: telefone no cabeçalho`);
     const barra = /<nav class="barra" aria-label="Contactos rápidos">([\s\S]*?)<\/nav>/.exec(t);
@@ -98,8 +115,17 @@ test('cada página: lang, um h1, título, descrição, canonical, og, JSON-LD, v
     else {
       assert.ok(barra, `${f}: barra de ações`);
       assert.match(t, /<body class="grain com-barra"/, `${f}: o body reserva o espaço da barra`);
-      const cels = [...barra[1].matchAll(/<a class="barra-cel[^"]*" href="([^"]+)"[^>]*>(?:<svg[\s\S]*?<\/svg>)?([^<]+)<\/a>/g)].map(m => m[2]);
+      const celulas = [...barra[1].matchAll(/<a class="barra-cel[^"]*" href="([^"]+)"[^>]*>(?:<svg[\s\S]*?<\/svg>)?([^<]+)<\/a>/g)];
+      const cels = celulas.map(m => m[2]);
       assert.deepEqual(cels, f === 'orcamento.html' ? ['Ligar', 'WhatsApp', 'Enviar fotografias'] : ['Ligar', 'WhatsApp', 'Orçamento'], `${f}: células da barra`);
+      // em orcamento.html as duas células de WhatsApp não fazem o mesmo: «Enviar fotografias» leva a mensagem das
+      // fotografias (site.json «wa.fotos»), a do lado a geral
+      if (f === 'orcamento.html') {
+        const msg = h => decodeURIComponent(h.replace(/&amp;/g, '&').split('?text=')[1]);
+        assert.equal(msg(celulas[2][1]), SITE.wa.fotos, `${f}: «Enviar fotografias» com a mensagem das fotografias`);
+        assert.notEqual(celulas[1][1], celulas[2][1], `${f}: as duas células de WhatsApp diferentes`);
+        assert.equal(msg(/<a class="btn btn-ghost" href="([^"]+)"[^>]*>Enviar fotografias por WhatsApp<\/a>/.exec(t)[1]), SITE.wa.fotos, `${f}: o botão da lateral com a mesma mensagem`);
+      }
     }
     assert.match(t, /<img src="[^"]*logo-melperfaz-branco\.png"[^>]*loading="eager">/, `${f}: logótipo do rodapé sem carregamento diferido`);
   }
@@ -123,6 +149,7 @@ test('o cabeçalho, o menu e o rodapé: uma só lista, página atual sem JavaScr
       assert.match(t, /<span class="topo-atual" aria-current="page">Orçamento gratuito<\/span>/);
     } else assert.match(t, /<a href="[^"]*orcamento\.html[^"]*" class="btn topo-btn">Pedir Orçamento<\/a>/, `${f}: «Pedir Orçamento» no cabeçalho`);
     const rodape = /<footer class="rodape s-ink">([\s\S]*?)<\/footer>/.exec(t)[1];
+    assert.match(rodape, /<div class="foot-col" role="group" aria-labelledby="footContactos">\s*<p class="foot-h" id="footContactos">Contactos<\/p>/, `${f}: a coluna «Contactos» nomeada pelo título`);
     const site = [.../<p class="foot-h" id="footSite">Site<\/p>([\s\S]*?)<\/nav>/.exec(rodape)[1].matchAll(/>([^<]+)<\/a>/g)].map(m => m[1]);
     assert.deepEqual(site, [...SITE.menu.map(m => m.nome), 'Pedir Orçamento', 'Política de privacidade'], `${f}: rodapé «Site»`);
     assert.match(rodape, /Livro de Reclamações/);
@@ -141,7 +168,7 @@ test('os parciais novos: PageHead, CtaBand e ProofLine', () => {
     assert.match(t, /<section class="sec s-paper page-head[^"]*" aria-labelledby="pagT">[\s\S]*?<h1 id="pagT">/, `${f}: PageHead`);
     assert.doesNotMatch(t, /pag-cab|obra-cab/, `${f}: sem os cabeçalhos antigos`);
   }
-  assert.match(le('obras.html'), /<nav class="migalhas" aria-label="Migalhas"><a href="index\.html">Início<\/a><span aria-hidden="true">›<\/span><span aria-current="page">Obras<\/span><\/nav>/);
+  assert.match(le('obras.html'), /<nav class="migalhas" aria-label="Migalhas"><a href="\.\/">Início<\/a><span aria-hidden="true">›<\/span><span aria-current="page">Obras<\/span><\/nav>/);
   assert.match(le('privacidade.html'), /Última atualização: <time datetime="\d{4}-\d\d-\d\d">/);
   assert.doesNotMatch(le('obrigado.html'), /class="migalhas"/, 'sem migalhas onde não há breadcrumb');
   assert.match(le('orcamento.html'), /<section class="sec s-paper page-head page-head-compacto"/);
@@ -150,8 +177,8 @@ test('os parciais novos: PageHead, CtaBand e ProofLine', () => {
     const cta = /<section class="sec cta s-clay"[^>]*>([\s\S]*?)<\/section>/.exec(le(f));
     assert.ok(cta, `${f}: CtaBand`);
     assert.match(cta[1], /<a href="tel:\+351961245288" class="cta-phone">/, `${f}: telefone na faixa`);
-    const provas = [.../<ul class="prova">(.*?)<\/ul>/.exec(cta[1])[1].matchAll(/<li>([^<]+)<\/li>/g)].map(m => m[1]);
-    assert.deepEqual(provas, SITE.provas, `${f}: ProofLine`);
+    const provas = [.../<ul class="prova">(.*?)<\/ul>/.exec(cta[1])[1].matchAll(/<li>([^<]+)<\/li>/g)].map(m => m[1].replace(/&amp;/g, '&').replace(/&#x27;/g, "'").replace(/&quot;/g, '"'));
+    assert.deepEqual(provas, [...SITE.provas, ...(DADOS.alvara ? [`Alvará n.º ${DADOS.alvara}`] : [])], `${f}: ProofLine (com o alvará quando existe)`);
   }
   assert.match(le('index.html'), /<section class="sec cta s-clay" id="contacto" aria-labelledby="ctaT">[\s\S]*?<h2 id="ctaT">Peça o orçamento\. A visita é gratuita\.<\/h2>/);
   for (const f of paginas()) assert.ok(!/class="cta-inner"|class="cta-form"|class="cta-faixa/.test(leV(f)), `${f}: sem as faixas antigas`);
@@ -167,7 +194,7 @@ test('a página inicial: Hero › Obras em destaque › Serviços › Porquê N�
   assert.deepEqual(sups, ['s-paper', 's-ink', 's-paper', 's-bone', 's-clay', 's-ink']);
   // hero «split»: eyebrow, h1, lead, «Pedir Orçamento» e «Ligar», o texto de apoio, a ProofLine e um só cartão
   assert.match(t, /<section class="hero s-paper" id="top"[^>]*>\s*<div class="wrap hero-grid">/);
-  assert.match(t, /<span class="eyebrow">Reabilitação e construção<\/span>/, 'eyebrow sem zona enquanto não houver');
+  assert.match(t, new RegExp(`<span class="eyebrow">Reabilitação e construção${DADOS.zona ? ' · ' + esc(DADOS.zona) : ''}</span>`), 'eyebrow com a zona só quando existe');
   assert.match(t, /<em>de raiz\.<\/em>/);
   assert.match(t, /<p class="lead">Reabilitação de edifícios, espaços comerciais e apartamentos\. Da estrutura ao acabamento, com uma equipa responsável do início ao fim\.<\/p>/);
   assert.match(t, /<div class="acoes">\s*<a href="orcamento\.html" class="btn">Pedir Orçamento<\/a>\s*<a href="tel:\+351961245288" class="btn btn-ghost">Ligar 961 245 288<\/a>\s*<\/div>\s*<p class="hero-apoio">Visita e orçamento gratuitos, sem compromisso\.<\/p>\s*(?:<!--[\s\S]*?-->\s*)?<ul class="prova">/);
@@ -200,16 +227,26 @@ test('a página inicial: Hero › Obras em destaque › Serviços › Porquê N�
       // a miniatura é a fotografia da primeira obra em destaque do serviço (ou da primeira obra), com o foco dela: nos
       // Acabamentos a M05 (o assentamento do pavimento), não o teto branco da M02
       const obrasS = OBRAS.filter(o => o.cat === s.cat), mini = obrasS.find(o => o.destaque) || obrasS[0];
-      assert.match(corpo, new RegExp(`<div class="svc-mini"><picture class="foto" style="--lqip: [^"]*; --lqip-pos: ${mini.foco}"><source type="image/avif" srcset="[^"]*foto-${mini.foto}-400\\.avif[^"]*" sizes="[^"]*48px"[\\s\\S]*?alt="" width="\\d+" height="\\d+" style="object-position: ${mini.foco}"`), `${id}: miniatura da ${mini.code}, com o foco`);
+      assert.match(corpo, new RegExp(`<div class="svc-mini"><picture class="foto" style="--lqip: [^"]*; --lqip-pos: ${mini.foco}"><source type="image/avif" srcset="[^"]*foto-${mini.foto}-400\\.avif[^"]*" sizes="[^"]*64px"[\\s\\S]*?alt="" width="\\d+" height="\\d+" style="object-position: ${mini.foco}"`), `${id}: miniatura da ${mini.code}, com o foco`);
     } else assert.doesNotMatch(corpo, /Ver obras|svc-mini/, `${id}: sem obras, sem promessas vazias`);
   }
   assert.doesNotMatch(t, /<a class="svc|class="arrow"/, 'a linha do serviço não é uma ligação e não tem seta');
   // Porquê Nós: a lista de confiança, «Quem somos» e a fotografia da M03 com «Ver a obra»
   assert.equal((t.match(/<span class="tick" aria-hidden="true"><svg class="icone i-visto" viewBox="0 0 24 24"[^>]*><path pathLength="1" [^>]*\/><\/svg><\/span>/g) || []).length, 4, 'os quatro vistos são o ícone «visto»');
-  assert.match(t, /<h3>Quem somos<\/h3>\s*<p>A Melperfaz, Construção Civil, Lda\. trabalha desde 2001 com equipa própria\.<\/p>/);
-  assert.match(t, /<a class="link-seta" href="obras\/edificios-e-apartamentos\.html">Ver a obra/);
-  // os endereços antigos (#contacto, ?tipo=) vão para orcamento.html: o script é o primeiro elemento do <body>
-  assert.match(t, /<body class="[^"]*" data-nav="inicio">\s*<!--[\s\S]*?-->\s*<script>\(function\(\)\{var l=location,m=\/\[\?&\]tipo=\(\[\^&#\]\*\)\/\.exec\(l\.search\);if\(m\|\|l\.hash\.slice\(1\)==='contacto'\)l\.replace\('orcamento\.html'\+\(m\?'\?tipo='\+m\[1\]:''\)\);\}\)\(\);<\/script>/);
+  assert.match(t, new RegExp(`<h3>Quem somos</h3>\\s*<p>A Melperfaz, Construção Civil, Lda\\. trabalha desde 2001 com equipa própria\\.${DADOS.zona ? ` Trabalhamos em ${esc(DADOS.zona)}\\.` : ''}${DADOS.morada ? ` Sede: ${esc(DADOS.morada)}\\.` : ''}</p>`));
+  // «Ver a obra» diz qual (para o leitor de ecrã), com o título da M03 de data/obras.json
+  const m03 = OBRAS.find(o => o.n === '03');
+  assert.match(t, new RegExp(`<a class="link-seta" href="obras/${m03.slug}\\.html">Ver a obra<span class="so-leitor">: ${esc(m03.title)}</span>`));
+  // as garantias (partials/garantias.html): os mesmos quatro títulos na página inicial e, condensados, em orcamento.html
+  const titulos = h => [.../<ul class="trust-list[^"]*">([\s\S]*?)<\/ul>/.exec(h)[1].matchAll(/<h3>([^<]+)<\/h3>/g)].map(m => m[1]);
+  assert.deepEqual(titulos(le('orcamento.html')), titulos(t), 'as garantias de orcamento.html são as da página inicial');
+  assert.equal(titulos(t).length, 4);
+  assert.match(le('orcamento.html'), /<ul class="trust-list trust-list-curta">/, 'orcamento.html: a TrustList condensada');
+  assert.doesNotMatch(le('orcamento.html'), /orc-confianca/);
+  // os endereços antigos (#contacto, ?tipo=) vão para orcamento.html: o script vem logo no topo do <head>, antes das
+  // letras, do CSS e do prefetch (não espera pelo CSS e o browser não descarrega a página inicial antes de mudar)
+  assert.match(t, /<meta name="viewport"[^>]*>\s*<script>\(function\(\)\{var l=location,m=\/\[\?&\]tipo=\(\[\^&#\]\*\)\/\.exec\(l\.search\);if\(m\|\|l\.hash\.slice\(1\)==='contacto'\)l\.replace\('orcamento\.html'\+\(m\?'\?tipo='\+m\[1\]:''\)\);\}\)\(\);<\/script>/);
+  assert.ok(t.indexOf("l.replace('orcamento.html'") < t.indexOf('<link rel="preload"'), 'o reencaminhamento antes das letras e do CSS');
   for (const f of paginas()) if (f !== 'index.html') assert.doesNotMatch(le(f), /l\.replace\('orcamento\.html'/, `${f}: sem reencaminhamento`);
 });
 
@@ -293,6 +330,14 @@ test('as fichas de obra: migalhas, serviço, «Na obra», ficha só com factos, 
     assert.match(t, new RegExp(`<p class="cta-ref">Referência da obra: ${o.code}</p>`), `${f}: referência da obra`);
     assert.match(t, /<nav class="barra"[\s\S]*?<a class="barra-cel barra-orc" href="\.\.\/orcamento\.html\?tipo=/, `${f}: a barra pede com o tipo`);
     assert.match(t, /<section class="sec s-bone obra-rel"/, `${f}: outras obras em bone`);
+    // o eyebrow das outras obras só diz «semelhantes» quando as duas são do mesmo serviço (o h2 segue a mesma regra)
+    const mesma = OBRAS.filter(x => x !== o && x.cat === o.cat).length;
+    assert.match(t, new RegExp(`<span class="eyebrow">${mesma >= 2 ? 'Obras semelhantes' : 'Obras'}</span>\\s*<h2 id="obraRelT">${mesma >= 2 ? `Outras obras de ${esc(s.nome.toLowerCase())}` : 'Outras obras'}</h2>`), `${f}: eyebrow e h2 das outras obras`);
+    // a descrição é o resumo da obra (o título já está no <title>), cortado numa frase inteira: sem «título, serviço:»
+    const desc = /<meta name="description" content="([^"]*)"/.exec(t)[1].replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+    let esperada = '';
+    for (const frase of o.resumo.match(/[^.]+\./g).map(x => x.trim())) { const junta = `${esperada} ${frase}`.trim(); if (junta.length > 160) break; esperada = junta; }
+    assert.equal(desc, esperada, `${f}: a descrição é o resumo, em frases inteiras`);
     assert.doesNotMatch(t, /Ver Todas as Obras/, `${f}: sem «Ver Todas as Obras»`);
     // sem anterior/seguinte (as migalhas e «Outras obras» já levam às outras obras)
     assert.doesNotMatch(t, /rel="(?:prev|next)"|class="obra-nav"/, `${f}: sem navegação anterior/seguinte`);
@@ -314,7 +359,12 @@ test('obras.html: o índice, uma secção por serviço com obras (ink e bone a a
   for (const o of OBRAS) assert.ok(obras.includes(`href="obras/${o.slug}.html"`), `obras.html liga a ${o.slug}`);
   assert.doesNotMatch(obras, /class="chip"|data-filtro|class="filtros"/, 'obras.html sem chips de filtro (voltam com 8 ou mais obras)');
   assert.doesNotMatch(obras, /mosaico|data-ba/, 'obras.html sem mosaico e sem comparador');
-  assert.equal((obras.match(/<figure class="pg reveal" data-cat="/g) || []).length, OBRAS.length, 'obras.html mostra todas as obras');
+  assert.equal((obras.match(/<figure class="pg(?: reveal)?" data-cat="/g) || []).length, OBRAS.length, 'obras.html mostra todas as obras');
+  // cada facto uma vez por página: o h2 de cada grupo já é o nome do serviço, os cartões de obras.html não o repetem
+  // (a página inicial e as outras obras de cada ficha, que misturam serviços, mantêm-no)
+  assert.doesNotMatch(obras, /class="cat"/, 'obras.html sem o nome do serviço em cada cartão');
+  assert.equal((le('index.html').match(/<span class="cat">/g) || []).length, OBRAS.filter(o => o.destaque).length, 'a página inicial com o nome do serviço em cada cartão');
+  assert.equal((le(`obras/${OBRAS[0].slug}.html`).match(/<span class="cat">/g) || []).length, 2, 'as outras obras de cada ficha com o nome do serviço');
   const comObras = SERVICOS.filter(s => s.cat && OBRAS.some(o => o.cat === s.cat));
   const indice = [.../<nav class="indice-grupos" aria-label="Obras por serviço">([\s\S]*?)<\/nav>/.exec(obras)[1].matchAll(/<a href="#([^"]+)">([^<]+)<\/a>/g)];
   assert.deepEqual(indice.map(m => [m[1], m[2]]), comObras.map(s => [s.cat, `${s.nome} (${OBRAS.filter(o => o.cat === s.cat).length})`]), 'o índice: os serviços com obras e quantas');
@@ -328,6 +378,12 @@ test('obras.html: o índice, uma secção por serviço com obras (ink e bone a a
   }
   // a primeira fotografia da página carrega já; as outras com carregamento diferido
   assert.equal((obras.match(/<figure class="pg[\s\S]*?loading="eager"/g) || []).length >= 1 && (obras.match(/fetchpriority="high"/g) || []).length, 1, 'só a primeira fotografia é prioritária');
+  // o primeiro grupo (o da imagem LCP) não entra ao fazer scroll (.reveal atrasava o LCP meio segundo e escondia-o sem o
+  // site.js); os outros grupos sim
+  const figs = [...obras.matchAll(/<figure class="(pg(?: reveal)?)" data-cat="([^"]+)"[^>]*>([\s\S]*?)<\/figure>/g)];
+  const lcp = figs.find(m => m[3].includes('fetchpriority="high"'));
+  assert.ok(lcp && lcp[1] === 'pg', 'a obra com a imagem LCP sem .reveal');
+  assert.deepEqual(figs.map(m => m[1] === 'pg'), figs.map(m => m[2] === lcp[2]), 'só o primeiro grupo sem .reveal');
   // a ordem das superfícies: paper (PageHead), grupos, clay e o rodapé ink; ink nunca encosta a ink
   const sups = [...obras.matchAll(/<(?:section|footer) class="[^"]*\b(s-(?:paper|bone|ink|clay))\b/g)].map(m => m[1]);
   assert.deepEqual(sups, ['s-paper', ...grupos.map(m => m[1]), 's-clay', 's-ink']);
@@ -404,20 +460,30 @@ test('as fotografias: original, tamanhos, prévias e texto alternativo', () => {
   const pic = /<picture class="foto hero-photo"[^>]*>(.*?)<\/picture>/s.exec(t)[1];
   assert.match(pic, /<source type="image\/avif" srcset="assets\/img\/fotos\/foto-01-400\.avif 400w, [^"]*foto-01-1080\.avif 1080w"/);
   assert.match(pic, /sizes="[^"]*\(max-width: 980px\) calc\(100vw - 32px\), 520px"/, 'hero: sizes da moldura (sem ampliação)');
+  // nos telemóveis de 3x pede-se a imagem de 2x da largura do telemóvel (não da do computador, a última entrada do sizes)
+  assert.match(pic, /sizes="\(max-width: 599px\) and \(min-resolution: 2\.5dppx\) calc\(calc\(100vw - 32px\) \* 2 \/ 3\), \(max-width: 980px\)/, 'hero: o tecto de 3x com a largura do telemóvel');
+  assert.match(le('orcamento.html'), /sizes="\(max-width: 599px\) and \(min-resolution: 2\.5dppx\) calc\(calc\(100vw - 32px\) \* 2 \/ 3\), \(max-width: 980px\) calc\(100vw - 32px\), 460px"/, 'orcamento.html: o tecto de 3x com a largura do telemóvel');
   assert.match(pic, new RegExp(`<img src="assets/img/fotos/foto-01\\.jpg" alt="${esc(Object.fromEntries(FOTOS)['01'].alt)}" width="1080" height="810" style="object-position: 50% 60%" loading="eager" decoding="async" fetchpriority="high">`));
   // a foto-02 (4:3) na moldura 4:3 de Porquê Nós, sem corte: a coluna de 360 px (um terço da .wrap nos ecrãs mais
   // estreitos) a partir de 981 px, a largura da .wrap até lá (no telemóvel a fotografia sai)
   assert.match(/<picture class="foto"[^>]*><source type="image\/avif" srcset="[^"]*foto-02-[^"]*" sizes="([^"]*)"/.exec(t)[1], /\(min-width: 981px\) min\(360px, calc\(\(100vw - 64px\) \* \.33\)\), calc\(100vw - 64px\)$/, 'Porquê Nós: sizes da moldura (4:3)');
-  // os cartões: 579 px (duas colunas a partir de 981), uma coluna até lá; no telemóvel o cartão tem 280 px de altura e
-  // corta as fotografias mais deitadas do que ele, que pedem 280 px × a sua proporção (foto-05, 1080 × 620: 488 px)
+  // os cartões: 579 px (duas colunas a partir de 981), uma coluna até lá. No telemóvel, em obras.html e nas outras obras,
+  // a fotografia fica numa moldura 4/3 (deitada) ou 4/5 (ao alto) e uma mais deitada do que a moldura pede a largura ×
+  // (a sua proporção / a da moldura) (foto-05, 1080 × 620 em 4/3: × 1,306); nas obras em destaque da página inicial o
+  // cartão tem 280 px de altura e as mais deitadas do que ele pedem 280 px × a sua proporção
   const F = Object.fromEntries(FOTOS);
-  const obras = le('obras.html');
+  const obras = le('obras.html'), casa = le('index.html');
+  const largas = '(min-width: 981px) min(calc(50vw - 41px), 579px), (min-width: 641px) calc(100vw - 64px)';
   for (const o of OBRAS) {
-    const fig = new RegExp(`<figure class="pg reveal" data-cat="${o.cat}" data-orient="(\\w+)">\\s*<picture[^>]*><source type="image/avif" srcset="[^"]*foto-${o.foto}-[^"]*" sizes="([^"]*)"`).exec(obras);
+    const sizesDe = html => (new RegExp(`<figure class="pg(?: reveal)?" data-cat="${o.cat}" data-orient="(\\w+)">\\s*<picture[^>]*><source type="image/avif" srcset="[^"]*foto-${o.foto}-[^"]*" sizes="([^"]*)"`).exec(html) || [])[2];
+    const fig = sizesDe(obras);
     assert.ok(fig, `cartão ${o.code}`);
-    const larga = Math.round(280 * F[o.foto].w / F[o.foto].h);
-    const movel = larga <= 288 ? 'calc(100vw - 32px)' : `max(calc(100vw - 32px), ${larga}px)`;
-    assert.ok(fig[2].endsWith(`(min-width: 981px) min(calc(50vw - 41px), 579px), (min-width: 641px) calc(100vw - 64px), ${movel}`), `cartão ${o.code}: sizes → ${fig[2]}`);
+    const r = F[o.foto].w / F[o.foto].h, k = r / (r >= 1 ? 4 / 3 : 4 / 5);
+    assert.ok(fig.endsWith(`${largas}, ${k <= 1 ? 'calc(100vw - 32px)' : `calc((100vw - 32px) * ${k.toFixed(3)})`}`), `cartão ${o.code}: sizes → ${fig}`);
+    if (o.destaque) {
+      const larga = Math.round(280 * r);
+      assert.ok(sizesDe(casa).endsWith(`${largas}, ${larga <= 288 ? 'calc(100vw - 32px)' : `max(calc(100vw - 32px), ${larga}px)`}`), `cartão em destaque ${o.code}: sizes`);
+    }
     // a ficha: a fotografia na sua proporção (--foto-r), no máximo 78% do ecrã de altura, sem corte
     if (!o.antesDepois) {
       const ficha = le(`obras/${o.slug}.html`);
@@ -438,6 +504,108 @@ function copiaFontes() {
   for (const x of fs.readdirSync(path.join(W, 'assets/img'))) fs.symlinkSync(path.join(W, 'assets/img', x), path.join(d, 'assets/img', x));
   return d;
 }
+
+// uma cópia das fontes com os dados mudados por muda(dir): gera com --check e devolve o resultado e um leitor das páginas
+function geraCopia(muda, args = ['--check']) {
+  const d = copiaFontes();
+  muda(d);
+  const r = spawnSync('python3', ['build.py', ...args], { cwd: d, encoding: 'utf8', env: { ...process.env, MELPERFAZ_OUT: path.join(d, 'public') } });
+  return { d, r, le: f => fs.readFileSync(path.join(d, 'public', f), 'utf8') };
+}
+const mudaJson = (d, f, fn) => { const p = path.join(d, f), j = JSON.parse(fs.readFileSync(p, 'utf8')); fn(j); fs.writeFileSync(p, JSON.stringify(j, null, 2)); };
+// dados de exemplo (só para o teste; nunca entram no site): o que a Melperfaz um dia preenche
+const EXEMPLO = { email: 'geral@exemplo.pt', nif: '123 456 789', morada: 'Rua do Exemplo, 1, 1000-001 Lisboa', alvara: '12345-PUB',
+  seguro: 'Seguradora Exemplo, apólice n.º 1', zona: 'Lisboa e Setúbal', horario: '2ª a 6ª, 8h–18h', googleMaps: 'https://maps.app.goo.gl/exemplo' };
+const FACTOS_EX = { problema: 'Paredes com humidade.', trabalho: 'Picámos e rebocámos.', data: 'Março de 2025', localExato: 'Almada', duracao: 'Três semanas', resultado: 'Paredes secas.' };
+
+test('com os dados da Melperfaz preenchidos: os ramos escondidos aparecem, nos sítios certos e com o texto certo', () => {
+  const { d, r, le: lc } = geraCopia(d => {
+    mudaJson(d, 'data/dados-melperfaz.json', j => { for (const [k, v] of Object.entries(EXEMPLO)) j[k].valor = v; });
+    mudaJson(d, 'data/obras.json', j => { for (const o of j.obras) o.factos = { ...FACTOS_EX }; j.obras.find(o => o.code === 'M02').fotosExtra = ['01', '06']; });
+  });
+  try {
+    assert.equal(r.status, 0, r.stdout + r.stderr);
+    const casa = lc('index.html');
+    assert.match(casa, new RegExp(`<span class="eyebrow">Reabilitação e construção · ${esc(EXEMPLO.zona)}</span>`), 'a zona no eyebrow');
+    assert.match(casa, new RegExp(`trabalha desde 2001 com equipa própria\\. Trabalhamos em ${esc(EXEMPLO.zona)}\\. Sede: ${esc(EXEMPLO.morada)}\\.</p>`), '«Quem somos» com a zona e a sede');
+    assert.match(casa, new RegExp(`em todas as obras com licença\\. Alvará n\\.º&nbsp;${esc(EXEMPLO.alvara)}\\. Seguro de responsabilidade civil: ${esc(EXEMPLO.seguro)}\\.</p>`), '«Licenciada & segurada» com o alvará e o seguro, cada um com o seu rótulo e ponto final');
+    assert.match(casa, new RegExp(`<ul class="prova">.*<li>Alvará n\\.º ${esc(EXEMPLO.alvara)}</li></ul>`), 'o alvará na ProofLine');
+    assert.match(casa, new RegExp(`<span class="topo-horario">${esc(EXEMPLO.horario)}</span>`), 'o horário no cabeçalho');
+    assert.match(casa, new RegExp(`<span class="cta-phone-l">${esc(EXEMPLO.horario)}</span>`), 'o horário na faixa clay');
+    assert.match(casa, new RegExp(`<a class="link-seta" href="${esc(EXEMPLO.googleMaps)}" target="_blank" rel="noopener">Ver o perfil e as avaliações no Google`), 'o perfil do Google em Porquê Nós');
+    const rod = /<footer[\s\S]*<\/footer>/.exec(casa)[0];
+    for (const x of [`<p>Trabalhamos em ${esc(EXEMPLO.zona)}\\.</p>`, `<a href="mailto:${esc(EXEMPLO.email)}">`, `<span class="foot-txt">${esc(EXEMPLO.morada)}</span>`,
+      `<span class="foot-txt">${esc(EXEMPLO.horario)}</span>`, `<a href="${esc(EXEMPLO.googleMaps)}" target="_blank" rel="noopener">Ver no Google Maps</a>`,
+      ` · <span class="sem-quebra">NIF ${esc(EXEMPLO.nif)}</span> · Alvará n\\.º&nbsp;${esc(EXEMPLO.alvara)}</span>`]) assert.match(rod, new RegExp(x), `rodapé: ${x}`);
+    const ld = [...casa.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)].map(m => JSON.parse(m[1])).find(l => l['@type'] === 'GeneralContractor');
+    assert.equal(ld.email, EXEMPLO.email);
+    assert.equal(ld.vatID, 'PT' + EXEMPLO.nif.replace(/\D/g, ''));
+    assert.deepEqual(ld.address, { '@type': 'PostalAddress', streetAddress: EXEMPLO.morada, addressCountry: 'PT' });
+    assert.equal(ld.areaServed, EXEMPLO.zona);
+    assert.equal(ld.hasMap, EXEMPLO.googleMaps);
+    const orc = lc('orcamento.html');
+    assert.match(orc, new RegExp(`<h3>Licenciada &amp; segurada</h3><p>Alvará n\\.º&nbsp;${esc(EXEMPLO.alvara)}</p><p>Seguro de responsabilidade civil: ${esc(EXEMPLO.seguro)}</p>`), 'orcamento.html: o alvará e o seguro na TrustList condensada');
+    const priv = lc('privacidade.html');
+    for (const dt of ['NIF', 'Morada', 'Email']) assert.match(priv, new RegExp(`<dt>${dt}</dt>`), `privacidade: ${dt} na Ficha`);
+    assert.match(priv, new RegExp(`ligue <a href="tel:\\+351961245288">961 245 288</a> \\(${esc(EXEMPLO.horario)}\\), escreva para <a href="mailto:${esc(EXEMPLO.email)}">${esc(EXEMPLO.email)}</a> ou escreva para a morada acima\\.`), 'privacidade: os três canais, o último com «ou»');
+    for (const o of OBRAS) {
+      const t = lc(`obras/${o.slug}.html`);
+      assert.match(t, new RegExp(`<h2>O problema</h2>\\s*<p>${esc(FACTOS_EX.problema)}</p>\\s*<h2>O que fizemos</h2>\\s*<p>${esc(FACTOS_EX.trabalho)}</p>`), `${o.code}: «O problema» e «O que fizemos»`);
+      for (const [dt, k] of [['Local', 'localExato'], ['Data', 'data'], ['Duração', 'duracao'], ['Resultado', 'resultado']]) assert.match(t, new RegExp(`<dt>${dt}</dt><dd>${esc(FACTOS_EX[k])}</dd>`), `${o.code}: ${dt} na ficha`);
+    }
+    // «fotosExtra»: as fotografias aparecem na ficha, por baixo de «Na obra» (antes desapareciam sem aviso)
+    const m02 = lc(`obras/${OBRAS.find(o => o.code === 'M02').slug}.html`);
+    const extra = /<div class="obra-extra">([\s\S]*?)<\/div>/.exec(m02);
+    assert.ok(extra, 'M02: as fotografias de «fotosExtra»');
+    assert.deepEqual([...extra[1].matchAll(/<img src="\.\.\/assets\/img\/fotos\/foto-(\d+)\.jpg"[^>]*loading="lazy"/g)].map(m => m[1]), ['01', '06'], 'M02: foto-01 e foto-06, em lazy load');
+    assert.doesNotMatch(lc(`obras/${OBRAS[0].slug}.html`), /class="obra-extra"/, 'sem «fotosExtra», sem a grelha');
+  } finally { fs.rmSync(d, { recursive: true, force: true }); }
+});
+
+test('com os dados a meio: a frase da privacidade com «ou», ponto final repetido e uma fotografia repetida em «fotosExtra»', () => {
+  // só o email (o mais provável de chegar primeiro): «ligue X ou escreva para Y», sem a vírgula solta
+  let c = geraCopia(d => mudaJson(d, 'data/dados-melperfaz.json', j => { j.email.valor = EXEMPLO.email; }));
+  try {
+    assert.equal(c.r.status, 0, c.r.stdout);
+    assert.match(c.le('privacidade.html'), new RegExp(`ligue <a href="tel:\\+351961245288">961 245 288</a> ou escreva para <a href="mailto:${esc(EXEMPLO.email)}">${esc(EXEMPLO.email)}</a>\\. A Melperfaz`), 'só o email: «ligue X ou escreva para Y»');
+  } finally { fs.rmSync(c.d, { recursive: true, force: true }); }
+  // um ponto final no fim da morada ficava «Sede: Rua….» : o --check recusa; e uma fotografia repetida em «fotosExtra»
+  c = geraCopia(d => {
+    mudaJson(d, 'data/dados-melperfaz.json', j => { j.morada.valor = 'Rua do Exemplo, 1.'; });
+    mudaJson(d, 'data/obras.json', j => { const o = j.obras.find(o => o.code === 'M02'); o.fotosExtra = [o.foto]; });
+  });
+  try {
+    assert.equal(c.r.status, 1);
+    assert.match(c.r.stdout, /dados-melperfaz\.json «morada»: sem ponto final/);
+    assert.match(c.r.stdout, /obras\.json M02: «fotosExtra» não repete a fotografia da obra/);
+  } finally { fs.rmSync(c.d, { recursive: true, force: true }); }
+});
+
+test('os dados com a forma errada dão uma linha clara (não um erro do Python), e o Netlify publica com o --check', () => {
+  for (const [muda, msg] of [
+    [d => mudaJson(d, 'data/obras.json', j => { delete j.obras.find(o => o.code === 'M02').resumo; }), /obras\.json M02: falta «resumo»/],
+    [d => mudaJson(d, 'data/obras.json', j => { delete j.obras.find(o => o.code === 'M02').factos; }), /obras\.json M02: falta «factos»/],
+    [d => mudaJson(d, 'data/dados-melperfaz.json', j => { j.nif.valor = 512345678; }), /dados-melperfaz\.json «nif»: «valor» tem de ser texto, entre aspas → 512345678/],
+  ]) {
+    const c = geraCopia(muda, []);
+    try {
+      assert.equal(c.r.status, 1, c.r.stderr);
+      assert.match(c.r.stderr, msg);
+      assert.doesNotMatch(c.r.stderr, /Traceback|KeyError|TypeError/, 'sem erro do Python');
+    } finally { fs.rmSync(c.d, { recursive: true, force: true }); }
+  }
+  // o netlify.toml publica com o --check e não deixa abrir o site dentro de outro (frame-ancestors)
+  const toml = fs.readFileSync(path.join(W, 'netlify.toml'), 'utf8');
+  assert.match(toml, /command = "python3 build\.py --check"/);
+  assert.match(toml, /Content-Security-Policy = "frame-ancestors 'none'"/);
+  assert.doesNotMatch(toml, /for = "\/assets\/img\/[^"]*"\s*\[headers\.values\]\s*Cache-Control = "[^"]*immutable/, 'as imagens (sem versão no endereço) sem cache immutable');
+  const c = geraCopia(d => { const p = path.join(d, 'netlify.toml'); fs.writeFileSync(p, fs.readFileSync(p, 'utf8').replace('command = "python3 build.py --check"', 'command = "python3 build.py"').replace(/\s*Content-Security-Policy = [^\n]*/, '')); });
+  try {
+    assert.equal(c.r.status, 1);
+    assert.match(c.r.stdout, /netlify\.toml: \[build\] command tem de correr o --check/);
+    assert.match(c.r.stdout, /netlify\.toml: \/\* sem Content-Security-Policy frame-ancestors/);
+  } finally { fs.rmSync(c.d, { recursive: true, force: true }); }
+});
 
 test('os ícones: icones.svg em linha com {{icone nome}}, sem os glifos → ≡ ✓ ‹, e um nome desconhecido é erro', () => {
   const sprite = fs.readFileSync(path.join(W, 'src/partials/icones.svg'), 'utf8');
@@ -532,7 +700,7 @@ test('as páginas curtas e a privacidade: 404 com três caminhos, obrigado sem p
   const e = leV('404.html');
   assert.match(e, /<h1 id="pagT">Esta página não existe<\/h1>/);
   assert.deepEqual([...e.matchAll(/<a class="(btn|link-seta)" href="([^"]+)">([^<]+)/g)].map(m => [m[1], m[2], m[3]]),
-    [['btn', '/orcamento.html', 'Pedir Orçamento'], ['link-seta', '/obras.html', 'Ver as obras'], ['link-seta', '/index.html', 'Voltar ao início']]);
+    [['btn', '/orcamento.html', 'Pedir Orçamento'], ['link-seta', '/obras.html', 'Ver as obras'], ['link-seta', '/', 'Voltar ao início']]);
   const o = leV('obrigado.html');
   assert.match(o, /<a class="btn" href="https:\/\/wa\.me\/[^"]+" target="_blank" rel="noopener">Enviar fotografias por WhatsApp<\/a>\s*<a class="btn btn-ghost" href="tel:\+351961245288">Ligar 961 245 288<\/a>/);
   assert.match(o, /<a class="link-seta" href="obras\.html">Ver as obras/);
@@ -597,6 +765,23 @@ test('as folhas de estilo: superfícies, um só .btn-ghost, estilos de texto e n
   assert.match(css, /\.barra \{ display: none; \}/);
   assert.match(css, /body\.com-barra \{ padding-bottom: calc\(var\(--barra-height\) \+ env\(safe-area-inset-bottom\)\); \}/);
   assert.match(css, /html\.menu-aberto \{ overflow: hidden; \}/);
+  // o body nunca vira contentor de scroll (com o menu aberto a página saltava para o topo e o cabeçalho deixava o sticky)
+  assert.match(css, /body \{[^}]*overflow-x: hidden; overflow-x: clip; \}/);
+  assert.match(css, /html\.menu-aberto body \{ overflow-x: visible; \}/);
+  // a barra fixa não tapa o foco (scroll-padding-bottom com a altura dela, só abaixo de 980 px, onde ela existe)
+  assert.match(css, /@media \(max-width: 980px\) \{[^@]*html \{ scroll-padding-bottom: calc\(var\(--barra-height\) \+ env\(safe-area-inset-bottom\) \+ var\(--space-16\)\); \}/);
+  // os títulos equilibrados; o horário sem maiúsculas; o anel do «Saltar» ink (a superfície à volta); a borda dos botões
+  // em contraste forçado
+  assert.match(css, /h1, h2 \{ text-wrap: balance; \}/);
+  assert.match(css, /\.sec-head p, \.lead \{ text-wrap: pretty; \}/);
+  assert.doesNotMatch(/\.cta-phone-l \{([^}]*)\}/.exec(css)[1], /text-transform/, 'o horário fica como a Melperfaz o escreve («8h–18h»)');
+  assert.doesNotMatch(/\.skip \{([^}]*)\}/.exec(css)[1], /--focus-c/, 'o «Saltar» com o anel ink');
+  assert.match(css, /@media \(forced-colors: active\) \{ \.btn, \.topo-wa \{ border: var\(--border-control\) solid ButtonText; \} \}/);
+  assert.match(css, /\.navlinks a\[aria-current="page"\]::after \{ transform: none; background: var\(--clay-deep\); \}/, 'a página atual com o traço clay-deep (3,6:1)');
+  // o CSS e o JS publicados sem comentários (ficam nas fontes); as páginas também
+  for (const f of ['site.css', 'pag-obras.css', 'pag-paginas.css', 'pag-orcamento.css']) assert.ok(!le(`assets/css/${f}`).includes('/*'), `${f} sem comentários`);
+  assert.ok(!le('assets/js/site.js').includes('/*') && fs.readFileSync(path.join(W, 'assets/js/site.js'), 'utf8').includes('/*'), 'site.js sem comentários (as fontes com eles)');
+  for (const f of paginas()) assert.ok(!le(f).includes('<!--'), `${f} sem comentários`);
   // o movimento (Fase 5b): os tokens, o deslize suave só sem movimento reduzido, e com movimento reduzido tudo acaba já
   for (const v of ['--dur-1: 150ms', '--dur-2: 250ms', '--dur-3: 500ms', '--ease-out: cubic-bezier(.2,.7,.3,1)', '--ease-in-out: cubic-bezier(.65,0,.35,1)', '--cascata: 80ms']) assert.ok(css.includes(v), `token ${v}`);
   assert.match(css, /@media \(prefers-reduced-motion: no-preference\) \{\s*html:focus-within \{ scroll-behavior: smooth; \}/);

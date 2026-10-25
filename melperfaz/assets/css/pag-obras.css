@@ -24,7 +24,12 @@
    entrar no ecrã, em cascata, como na página inicial ({{li obra.detalhes visto}} no modelo obra.html) */
 .lista-visto .tick { position: absolute; left: 0; top: var(--space-12); }
 
-/* obras semelhantes */
+/* mais fotografias da obra («fotosExtra»): em duas colunas por baixo de «Na obra», cada uma na sua proporção */
+.obra-extra { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-18); align-items: start; margin-top: var(--space-32); }
+.obra-extra .foto { background-color: var(--ink-raised); }
+.obra-extra .foto img { height: auto; }
+
+/* as outras obras */
 .obra-rel .sec-head { margin-bottom: var(--space-32); }
 
 @media (max-width: 980px) {
