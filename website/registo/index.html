@@ -2211,20 +2211,31 @@ if (!Element.prototype.replaceChildren) {
   }
 
   // Colunas: mostrar, esconder, juntar, mudar o nome e apagar (config q.chaveCfg, partilhada pela equipa).
-  async function tbGuardarCfg(q, novo, msg) {
-    const c = Object.assign({ocultas: tbCfg(q).ocultas, extra: tbCfg(q).extra, ordem: (q.cfg && q.cfg.ordem) || []}, novo);
+  // A configuração é da equipa: lê a atual, aplica a mudança (uma função da configuração atual) e grava só se a versão
+  // ainda for a mesma, para não apagar a coluna que um colega criou entretanto com a cópia velha desta página.
+  const tbCfgDe = (q, v) => ({ocultas: (v && v.ocultas) || q.ocultasPadrao, extra: (v && v.extra) || [], ordem: (v && v.ordem) || []});
+  async function tbGuardarCfg(q, muda, msg) {
     try {
-      const {error} = await sb.from('config').upsert({chave: q.chaveCfg, valor: c, atualizado_por: eu.email}, {onConflict:'chave'});
-      if (error) throw error;
-      q.cfg = c; toast(msg); renderAll();
+      for (let tent = 0; tent < 3; tent++) {
+        const r1 = await sb.from('config').select('valor,versao').eq('chave', q.chaveCfg).maybeSingle();
+        if (r1.error) throw r1.error;
+        const atual = r1.data, base = tbCfgDe(q, atual && atual.valor), c = Object.assign({}, base, muda(base));
+        const r2 = atual
+          ? await sb.from('config').update({valor: c, versao: atual.versao + 1, atualizado_por: eu.email}).eq('chave', q.chaveCfg).eq('versao', atual.versao).select('versao')
+          : await sb.from('config').insert({chave: q.chaveCfg, valor: c, atualizado_por: eu.email}).select('versao');
+        if (r2.error) { if (!atual && /duplicate|unique|23505/i.test(r2.error.message || '')) continue; throw r2.error; }
+        if (!r2.data || !r2.data.length) continue;
+        q.cfg = c; toast(msg); renderAll(); return;
+      }
+      toast('Outra pessoa mudou as colunas ao mesmo tempo. Tenta outra vez.'); carregar();
     } catch (e) { toast(/permiss|row-level/.test(String(e.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar as colunas.'); }
   }
   function tbMenuColunas(q, botao) {
     const cols = tbColunas(q);
     const lista = h('div',{class:'tb-cols'}, h('b',null, 'Colunas'),
       cols.filter(c => !c.fixa).map(c => h('label',{class:'check'}, h('input',{type:'checkbox', checked: c.oculta ? null : true, disabled: canWrite ? null : true, onchange: ev => {
-        if (c.extra) tbGuardarCfg(q, {extra: tbCfg(q).extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: !ev.target.checked}) : z)}, ev.target.checked ? `«${c.nome}» à vista` : `«${c.nome}» escondida`);
-        else { const o = tbCfg(q).ocultas.filter(z => z !== c.id); if (!ev.target.checked) o.push(c.id); tbGuardarCfg(q, {ocultas: o}, ev.target.checked ? `«${c.nome}» à vista` : `«${c.nome}» escondida`); }
+        if (c.extra) tbGuardarCfg(q, cf => ({extra: cf.extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: !ev.target.checked}) : z)}), ev.target.checked ? `«${c.nome}» à vista` : `«${c.nome}» escondida`);
+        else tbGuardarCfg(q, cf => { const o = cf.ocultas.filter(z => z !== c.id); if (!ev.target.checked) o.push(c.id); return {ocultas: o}; }, ev.target.checked ? `«${c.nome}» à vista` : `«${c.nome}» escondida`);
       }}), c.nome, c.extra ? h('small',null, ' · ' + (TB_TIPOS_COL.find(t => t[0] === c.tipo) || [0, ''])[1]) : null)),
       canWrite ? h('button',{class:'btn btn-sm', type:'button', onclick:() => { fechaPop(); tbNovaColuna(q, botao); }}, '+ Nova coluna') : null);
     abrePop(botao, lista, 'tb-ed');
@@ -2249,8 +2260,8 @@ if (!Element.prototype.replaceChildren) {
       });
       if ((tipo.value === 'lista' || tipo.value === 'estado') && !opcoes.length) return 'Escreve pelo menos uma opção.';
       fechaPop();
-      if (editar) tbGuardarCfg(q, {extra: tbCfg(q).extra.map(z => z.id === editar.id ? Object.assign({}, z, {nome: n, opcoes}) : z)}, 'Coluna mudada');
-      else tbGuardarCfg(q, {extra: tbCfg(q).extra.concat([{id: 'c' + Date.now().toString(36), nome: n, tipo: tipo.value, opcoes}])}, `Coluna «${n}» criada`);
+      if (editar) tbGuardarCfg(q, cf => ({extra: cf.extra.map(z => z.id === editar.id ? Object.assign({}, z, {nome: n, opcoes}) : z)}), 'Coluna mudada');
+      else { const nova = {id: 'c' + Date.now().toString(36), nome: n, tipo: tipo.value, opcoes}; tbGuardarCfg(q, cf => ({extra: cf.extra.concat([nova])}), `Coluna «${n}» criada`); }
       return null;
     });
     setTimeout(() => nome.focus(), 40);
@@ -2258,10 +2269,10 @@ if (!Element.prototype.replaceChildren) {
   function tbMenuCabecalho(q, th, c) {
     const itens = [];
     if (q.larg[c.id]) itens.push(['Largura normal', () => { delete q.larg[c.id]; tbGuardaLarguras(q); tbAplicaLarguras(q); }, 'seta']);
-    itens.push(['Esconder', () => { if (c.extra) tbGuardarCfg(q, {extra: tbCfg(q).extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: true}) : z)}, `«${c.nome}» escondida`); else tbGuardarCfg(q, {ocultas: tbCfg(q).ocultas.concat([c.id])}, `«${c.nome}» escondida`); }, 'x']);
+    itens.push(['Esconder', () => { if (c.extra) tbGuardarCfg(q, cf => ({extra: cf.extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: true}) : z)}), `«${c.nome}» escondida`); else tbGuardarCfg(q, cf => ({ocultas: cf.ocultas.filter(z => z !== c.id).concat([c.id])}), `«${c.nome}» escondida`); }, 'x']);
     if (c.extra) {
       itens.unshift(['Mudar o nome ou as opções', () => tbNovaColuna(q, th, c), 'lapis']);
-      itens.push(['Apagar a coluna', () => { if (window.confirm(`Apagar a coluna «${c.nome}»? ${q.textos.apagar}`)) tbGuardarCfg(q, {extra: tbCfg(q).extra.filter(z => z.id !== c.id)}, `Coluna «${c.nome}» apagada`); }, 'x']);
+      itens.push(['Apagar a coluna', () => { if (window.confirm(`Apagar a coluna «${c.nome}»? ${q.textos.apagar}`)) tbGuardarCfg(q, cf => ({extra: cf.extra.filter(z => z.id !== c.id)}), `Coluna «${c.nome}» apagada`); }, 'x']);
     }
     if (c.tipo === 'estado' || c.tipo === 'lista' || q.agrupaveis.indexOf(c.id) >= 0) itens.unshift(['Agrupar por esta coluna', () => tbAgruparEm(q, c.extra ? 'x:' + c.id : c.id), 'seta']);
     abrePop(th.closest('th') || th, itens.map(([l, fn, ic]) => { const b = h('button',{type:'button', role:'menuitem', class: l === 'Apagar a coluna' ? 'perigo' : null, onclick:() => { fechaPop(); fn(); }}); b.innerHTML = IC[ic] || ''; b.appendChild(document.createTextNode(l)); return b; }), 'menu');
@@ -2464,7 +2475,8 @@ if (!Element.prototype.replaceChildren) {
     tbFimSujo(q);
     if (!largou || !sobre) return;
     const k = sobre.getAttribute('data-k');
-    q.largou(q.mapa[q.id(it)] || it, k, alvos[k], F(q.box).querySelector(`tr[data-id="${q.id(it)}"]`));
+    // a linha como estava quando o arrastar começou: se um colega a mudou entretanto, a gravação recusa
+    q.largou(it, k, alvos[k], F(q.box).querySelector(`tr[data-id="${q.id(it)}"]`));
   }
   // Colunas: mudar a ordem
   function tbComecaCol(q, th, x) {
@@ -2501,7 +2513,7 @@ if (!Element.prototype.replaceChildren) {
     const atual = tbColunas(q).filter(c => !c.fixa).map(c => c.id);
     if (ids.join() === atual.join()) { tbFimSujo(q); return; }
     q.pendente = false;
-    tbGuardarCfg(q, {ordem: ids}, 'Ordem das colunas guardada');
+    tbGuardarCfg(q, () => ({ordem: ids}), 'Ordem das colunas guardada');
   }
   // Colunas: mudar a largura
   let tbRz = null;
@@ -3033,7 +3045,9 @@ if (!Element.prototype.replaceChildren) {
   // recusa se um campo que a pessoa estava a ver mudou entretanto, e grava só se a versão ainda for a mesma
   // (update ... where versao = v; zero linhas quer dizer que alguém gravou pelo meio, e volta a ler). Sem SQL novo.
   const CLI_CONFLITO = 'Alguém mudou esta ficha entretanto. Vê o valor novo e repete.';
-  const cliNorm = v => v == null || v === '' ? null : JSON.stringify(v);
+  // Compara valores sem depender da ordem das chaves (o jsonb da base de dados devolve-as noutra ordem).
+  const cliEst = v => Array.isArray(v) ? v.map(cliEst) : v && typeof v === 'object' ? Object.keys(v).sort().reduce((o, x) => { o[x] = cliEst(v[x]); return o; }, {}) : v;
+  const cliNorm = v => v == null || v === '' ? null : JSON.stringify(cliEst(v));
   const cliPega = (o, p) => { let v = o; for (const x of p.split('.')) { if (v == null) return null; v = v[x]; } return v; };
   function cliAplica(doc, patch) {
     for (const p of Object.keys(patch)) {
@@ -3051,6 +3065,8 @@ if (!Element.prototype.replaceChildren) {
       const p = typeof patch === 'function' ? patch(base) : patch;
       if (!p || !Object.keys(p).length) return null;
       const doc = cliAplica(JSON.parse(JSON.stringify(base)), p);
+      const velho = cfgClientes[k] || {};
+      Object.keys(p).forEach(x => { if (x.indexOf('.') < 0 && (p[x] === '' || p[x] == null) && velho[x] != null && velho[x] !== '') doc[x] = null; });
       delete doc._versao; delete doc._novo;
       if (!doc.nome) { const c = clientes().lista.find(x => x.k === k); doc.nome = (c && c.nome) || k; }
       if (linha) doc.historico = (doc.historico || []).slice(-59).concat([{em: new Date().toISOString(), texto: linha, por: eu.email}]);
@@ -3076,16 +3092,19 @@ if (!Element.prototype.replaceChildren) {
           return true;
         }
       }
-      // Sem a tabela clientes: guarda em config, chave clientes, como antes (sem controlo de versão).
-      const r3 = await sb.from('config').select('valor').eq('chave', 'clientes').maybeSingle();
+      // Sem a tabela clientes: guarda em config, chave clientes, também só se a versão ainda for a mesma.
+      const r3 = await sb.from('config').select('valor,versao').eq('chave', 'clientes').maybeSingle();
       if (r3.error) throw r3.error;
-      const todos = (r3.data && r3.data.valor) || {}, base = todos[k] || {};
+      const linhaCfg = r3.data, todos = (linhaCfg && linhaCfg.valor) || {}, base = todos[k] || {};
       if (mudou(base)) return 'conflito';
       const doc = monta(base); if (!doc) return true;
       const novo = Object.assign({}, todos, {[k]: doc});
-      const {error} = await sb.from('config').upsert({chave:'clientes', valor: novo, atualizado_por: eu.email}, {onConflict:'chave'});
-      if (error) throw error;
-      cfgClientes = novo; fichas[k] = Object.assign({}, doc, {_versao: ((fichas[k] || {})._versao || 0) + 1});
+      const r4 = linhaCfg
+        ? await sb.from('config').update({valor: novo, versao: linhaCfg.versao + 1, atualizado_por: eu.email}).eq('chave', 'clientes').eq('versao', linhaCfg.versao).select('versao')
+        : await sb.from('config').insert({chave: 'clientes', valor: novo, atualizado_por: eu.email}).select('versao');
+      if (r4.error) { if (!linhaCfg && /duplicate|unique|23505/i.test(r4.error.message || '')) continue; throw r4.error; }
+      if (!r4.data || !r4.data.length) continue;
+      cfgClientes = novo; if (fichas[k] && fichas[k]._novo) delete fichas[k];
       return true;
     }
     return 'conflito';
@@ -3095,7 +3114,7 @@ if (!Element.prototype.replaceChildren) {
     if (!sb || !canWrite) return false;
     try {
       const r = await gravarCliente(k, patch, vistos, linha);
-      if (r === 'conflito') { toast(CLI_CONFLITO); carregar(); return false; }
+      if (r === 'conflito') { toast(CLI_CONFLITO); await carregar(); if (modo === 'ficha' && fichaKey === k && !F('sheetWrap').hidden) renderFicha(); return false; }
       if (msg) toast(msg);
       renderClientes();
       if (modo === 'ficha' && fichaKey === k && !F('sheetWrap').hidden) renderFicha();
@@ -3177,13 +3196,14 @@ if (!Element.prototype.replaceChildren) {
   }
   function renderContactos() {
     if (tab !== 'contactos') return;
+    if (status !== 'ok') { F('cliListaCount').textContent = ''; F('btnCliCSV').hidden = true; tbRender(TB_CLI, []); F('cliLista').replaceChildren(stateMsg()); return; }
     if (!cliUltima) { renderClientes(); return; }
-    const xs = cliFiltrados(), ref = cliUltima.ref;
+    const xs = cliFiltrados(), ref = cliUltima.ref, largo = window.innerWidth >= 768;
     F('cliListaCount').textContent = `${xs.length} ${xs.length === 1 ? 'cliente' : 'clientes'}`;
-    F('btnCliCSV').hidden = status !== 'ok';
-    tbRender(TB_CLI, xs);
+    F('btnCliCSV').hidden = false;
     const box = F('cliLista');
-    if (window.innerWidth >= 768) { box.replaceChildren(); return; }
+    if (largo) { tbRender(TB_CLI, xs); box.replaceChildren(); return; }
+    F('cliTabela').replaceChildren();
     if (!xs.length) { box.replaceChildren(h('p',{class:'empty'}, 'Nenhum cliente com estes filtros.')); return; }
     const vis = xs.slice(0, 200);
     fill(box, vis.map(c => linhaCliente(c, ref)), xs.length > vis.length ? h('p',{class:'note vis', style:'padding:10px 12px'}, `A mostrar ${vis.length} de ${xs.length}. Pesquisa para ver os outros.`) : null);
@@ -3200,7 +3220,11 @@ if (!Element.prototype.replaceChildren) {
     catch (e) { toast(/permiss|row-level/.test(String(e && e.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar.'); return false; }
     if (r === 'conflito') { toast(CLI_CONFLITO); carregar(); return false; }
     renderClientes();
-    toast(`${rotulo}: ${depoisTxt}`, {label:'Desfazer', fn: () => { const agora = (cliUltima ? cliUltima.lista : []).find(z => z.k === x.k); if (agora) cliGuardar(agora, alvo, antes, rotulo, depoisTxt, antesTxt, 'desfeito'); }});
+    // «Desfazer» parte do valor que esta pessoa escreveu: se um colega o mudou entretanto, recusa.
+    toast(`${rotulo}: ${depoisTxt}`, {label:'Desfazer', fn: () => {
+      const agora = (cliUltima ? cliUltima.lista : []).find(z => z.k === x.k); if (!agora) return;
+      cliGuardar(Object.assign({}, agora, {cfg: cliAplica(JSON.parse(JSON.stringify(agora.cfg)), {[campo]: valor})}), alvo, antes, rotulo, depoisTxt, antesTxt, 'desfeito');
+    }});
     return true;
   }
   function cliMenuSituacao(td, c) {
@@ -3399,22 +3423,26 @@ if (!Element.prototype.replaceChildren) {
       const k = fichaKey || chaveCli(nome); if (!k) { toast('Nome inválido.'); return; }
       const per = val('ct-per'), valor = parseValor(val('ct-valor'));
       if (per && !/^\d+$/.test(per)) { toast('A periodicidade é um número de meses.'); return; }
+      // Cliente novo com o nome de um que já existe (do SAF-T, do registo ou de um colega): abre esse em vez de lhe escrever por cima.
+      if (novo && ((fichas[k] && !fichas[k]._novo) || cfgClientes[k] || (cliUltima || clientes()).lista.some(x => x.k === k))) { toast('Já existe um cliente com este nome: abri a ficha dele.'); openFicha(k); return; }
       const email = val('c-email'), nif = val('c-nif');
-      if (email && !/^\S+@\S+\.\S+$/.test(email)) { toast('O email não parece certo.'); return; }
-      if (nif && !/^\d{9}$/.test(nif.replace(/\s/g, ''))) { toast('O NIF tem 9 algarismos.'); return; }
-      if ([nome, val('c-contacto'), val('c-morada'), val('c-notas'), val('c-local')].some(x => /[—–]/.test(x || ''))) { toast('Sem travessões: usa vírgulas ou parênteses.'); return; }
       const ctDe = o => ({tipo: o.tipo || 'nenhum', periodicidade: o.periodicidade || null, inicio: o.inicio || null, fim: o.fim || null, valor: o.valor == null ? null : o.valor});
       const todos = {nome, nif: nif ? nif.replace(/\s/g, '') : null, tipoCliente: val('c-tipo') || null, telefone: val('c-tel') || null, email: email || null, contacto: val('c-contacto') || null, morada: val('c-morada') || null, notas: val('c-notas') || null,
         dono: val('c-dono') || null, prioridade: val('c-prio') || null, proximoContacto: val('c-prox') || null, localidade: val('c-local') || null,
         contrato: ctDe({tipo: val('ct-tipo'), periodicidade: per ? Number(per) : null, inicio: val('ct-ini') || null, fim: val('ct-fim') || null, valor: Number.isNaN(valor) ? null : valor})};
       // Só os campos que mudaram, com o valor que a ficha mostrava: assim não apaga o que um colega mudou noutro campo.
-      const antes = Object.assign({}, f, {contrato: ctDe(f.contrato || {})});
+      // Num cliente novo compara com uma ficha vazia, para os valores do grupo (dono, prioridade, tipo) também irem.
+      const antes = novo ? {contrato: ctDe({})} : Object.assign({}, f, {contrato: ctDe(f.contrato || {})});
       const patch = {}, vistos = {};
       for (const x of Object.keys(todos)) if (cliNorm(todos[x]) !== cliNorm(antes[x])) { patch[x] = todos[x]; vistos[x] = novo ? null : f[x]; }
       if (!novo && !Object.keys(patch).length) { toast('Nada mudou.'); return; }
+      // Só se verifica o que mudou: um valor antigo (do SAF-T, por exemplo) não impede de guardar outro campo.
+      if (patch.email && !/^\S+@\S+\.\S+$/.test(patch.email)) { toast('O email não parece certo.'); return; }
+      if (patch.nif && !/^\d{9}$/.test(patch.nif)) { toast('O NIF tem 9 algarismos.'); return; }
+      if (['nome', 'contacto', 'morada', 'notas', 'localidade'].some(x => /[—–]/.test(patch[x] || ''))) { toast('Sem travessões: usa vírgulas ou parênteses.'); return; }
       if (!fichaKey) fichaKey = k;
       const nomes = {nome:'Nome', nif:'NIF', tipoCliente:'Tipo', telefone:'Telefone', email:'Email', contacto:'Pessoa de contacto', morada:'Morada', notas:'Notas', contrato:'Contrato', dono:'Dono', prioridade:'Prioridade', proximoContacto:'Próximo contacto', localidade:'Localidade'};
-      await guardarCliente(k, patch, 'Ficha guardada', novo ? null : vistos, novo ? 'Ficha criada' : `Ficha: ${Object.keys(patch).map(x => nomes[x]).join(', ')}`);
+      await guardarCliente(k, patch, 'Ficha guardada', vistos, novo ? 'Ficha criada' : `Ficha: ${Object.keys(patch).map(x => nomes[x]).join(', ')}`);
     };
     fill(body, blocos,
       h('div',{class:'block'}, h('h3',null, 'Dados'), h('fieldset',{disabled: !canWrite}, dados)),
@@ -3430,6 +3458,9 @@ if (!Element.prototype.replaceChildren) {
   F('cliQ').addEventListener('input', e => { cliQ = e.target.value; renderContactos(); });
   F('btnCliCSV').addEventListener('click', () => baixarCSV(gerarCSVClientes(cliFiltrados()), `clientes-mdm-${today()}.csv`));
   tbLigar(TB_CLI);
+  // Ao rodar o aparelho ou mudar a largura (Split View do iPad): troca a tabela pelos cartões e vice-versa.
+  // (No iOS 12 a MediaQueryList só tem addListener.)
+  if (window.matchMedia) { const mq = window.matchMedia('(min-width:768px)'); if (mq.addListener) mq.addListener(() => { if (tab === 'contactos') renderContactos(); }); }
 
 
   /* ---------- Pipeline: fugas, os nove passos e o funil ---------- */
@@ -3836,15 +3867,18 @@ if (!Element.prototype.replaceChildren) {
     setTimeout(() => URL.revokeObjectURL(url), 2000);
     toast('CSV descarregado');
   }
+  // Texto que começa por + - = @ (telefones «+351…», notas «- …») seria lido como fórmula no Excel: leva uma plica antes.
+  const csvTxt = v => csvCell(v != null && /^[=+\-@]/.test(String(v)) ? "'" + v : v);
   function gerarCSVClientes(lista) {
     const ext = tbCfg(TB_CLI).extra;
     const cab = ['Cliente','Situação','Motivo','Tipo','Dono','Prioridade','Pessoa de contacto','Telefone','Email','NIF','Morada','Localidade','Próximo contacto','Contactado em','Contrato','Ritmo (meses)','Próxima visita','Faturas','Faturado 12 meses s/IVA','Última fatura','Por cobrar c/IVA','Pedidos','Pedidos abertos','Valor em aberto s/IVA','Notas', ...ext.map(c => c.nome)];
     const ref = cliUltima ? cliUltima.ref : dataRef();
+    const tx = v => ({tx: v});
     const linhas = lista.map(c => { const f = c.cfg; return [
-      c.nome, MOTIVO[c.estado], motivoTxt(c, ref), cliTexto('tipoCliente', f.tipoCliente).replace(/^vazio$/, ''), f.dono, cliTexto('prioridade', f.prioridade).replace(/^vazio$/, ''), f.contacto, f.telefone, f.email, f.nif, f.morada, c.localidade,
-      f.proximoContacto, c.contactado, c.contrato ? 'Sim' : '', c.cadencia || '', c.proxima, c.n, dec(c.total12), c.ultima, dec(c.porCobrar), c.pedidos.length, c.abertos.length, dec(c.valorAberto), f.notas,
-      ...ext.map(z => { const v = (f.extra || {})[z.id]; return z.tipo === 'caixa' ? (v ? 'Sim' : '') : z.tipo === 'numero' && v != null && v !== '' ? String(v).replace('.', ',') : v; }),
-    ].map(v => typeof v === 'number' ? `"${v}"` : csvCell(v)).join(','); });
+      tx(c.nome), MOTIVO[c.estado], motivoTxt(c, ref), cliTexto('tipoCliente', f.tipoCliente).replace(/^vazio$/, ''), tx(f.dono), cliTexto('prioridade', f.prioridade).replace(/^vazio$/, ''), tx(f.contacto), tx(f.telefone), tx(f.email), tx(f.nif), tx(f.morada), tx(c.localidade),
+      f.proximoContacto, c.contactado, c.contrato ? 'Sim' : '', c.cadencia || '', c.proxima, c.n, dec(c.total12), c.ultima, dec(c.porCobrar), c.pedidos.length, c.abertos.length, dec(c.valorAberto), tx(f.notas),
+      ...ext.map(z => { const v = (f.extra || {})[z.id]; return z.tipo === 'caixa' ? (v ? 'Sim' : '') : z.tipo === 'numero' && v != null && v !== '' ? String(v).replace('.', ',') : tx(v); }),
+    ].map(v => v && typeof v === 'object' && 'tx' in v ? csvTxt(v.tx) : typeof v === 'number' ? `"${v}"` : csvCell(v)).join(','); });
     return [cab.map(csvCell).join(','), ...linhas].join('\n') + '\n';
   }
 
@@ -5681,7 +5715,7 @@ if (!Element.prototype.replaceChildren) {
       if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') TB_PED.cfg = x.valor || null; if (x.chave === 'colunas_clientes') TB_CLI.cfg = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
       if (ft.error) { if (/relation|does not exist|schema cache/i.test(ft.error.message || '')) fatTabela = false; }
       else { fatTabela = true; const novo = {}; for (const x of ft.data) if (x.dados && x.dados.mes) novo[x.dados.mes] = x.dados; faturacao = novo; if (!faturacao[fatMes]) fatMes = ''; }
-      if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) fichaTabela = false; }
+      if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) { fichaTabela = false; const novo = {}; for (const id of Object.keys(fichas)) if (fichas[id]._novo) novo[id] = fichas[id]; fichas = novo; } }
       else { fichaTabela = true; const novo = {}; for (const x of fc.data) novo[x.id] = {...x.dados, _versao: x.versao}; fichas = novo; }
       if (!q.error) { equipa = q.data; const m = equipa.find(x => x.email === (eu && eu.email)); if (m && m.nome) eu.nome = m.nome; }
       status = 'ok'; renderAll();
