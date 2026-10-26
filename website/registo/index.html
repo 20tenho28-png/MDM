@@ -4287,7 +4287,7 @@ if (!Element.prototype.replaceChildren) {
       // A revisão que este passo mostra (0 sem PDF): se outra sair entretanto, o «Confirmar» recusa, de onde quer que se abra.
       if (t.revVista == null) t.revVista = pdf ? o.rev : 0;
       els.push(h('div',{class:'fields'},
-        campo('t-num','Nº do orçamento', inp('t-num', pdf ? o.num : r.num || (o && o.num) || nextNumber(), {spellcheck:'false', readonly: pdf ? true : null})),
+        campo('t-num','Nº do orçamento', inp('t-num', pdf ? o.num : r.num || nextNumber(), {spellcheck:'false', readonly: pdf ? true : null})),
         campo('t-valor','Valor s/IVA (€)', inp('t-valor', pdf ? orcTxtN(orcTotOp(c, orcRec(c)).base / 100) : r.valor != null ? String(r.valor).replace('.',',') : '', {inputmode:'decimal', placeholder:'0,00', readonly: pdf ? true : null}), pdf ? `Do PDF da revisão ${o.rev}${c.opcoes.length > 1 ? ' (opção recomendada; o cliente escolhe no aceite)' : ''}.` : null),
         campo('t-denv','Data de envio', inp('t-denv', today(), {type:'date'})),
         campo('t-ponde','Por onde', sel('t-ponde', Object.entries(POR_ONDE), t.porOnde || r.enviadoPorOnde || 'email')),
@@ -4465,7 +4465,7 @@ if (!Element.prototype.replaceChildren) {
   async function gravar(id, doc, msg, opts) {
     if (!sb || saving) return false;
     saving = true; const ok = F('t-ok'); if (ok) ok.disabled = true;
-    delete doc._versao; // a versão é da linha, não dos dados
+    delete doc._versao; delete doc._escrita; // a versão e a marca de escrita são desta página, não dos dados
     doc.atualizado = new Date().toISOString();
     doc.atualizadoPor = eu ? eu.email : null;
     const atual = rows.find(x => x.id === id);
@@ -5041,10 +5041,12 @@ if (!Element.prototype.replaceChildren) {
   const ORC_TITULOS = {instalacao:'Instalação de ar condicionado', manutencao:'Manutenção de ar condicionado', reparacao:'Reparação', obra:'Obra'};
   const ORC_TIPOS_CLI = [['particular','Particular (total com IVA)'], ['empresa','Empresa (total sem IVA)'], ['condominio','Condomínio (total com IVA)']];
   const ORC_GRUPOS_COM = [['mo','Mão de obra'], ['desl','Deslocação'], ['mat','Materiais'], ['div','Diversos']];
-  let orc = null, orcId = null, orcV = 0, orcSujo = false, orcVista = 'editar', orcPrevT = null, orcAGuardar = false, orcTituloAntes = '';
+  let orc = null, orcId = null, orcCriado = null, orcV = 0, orcSujo = false, orcVista = 'editar', orcPrevT = null, orcAGuardar = false, orcTituloAntes = '';
 
   const orcTxtN = n => n == null ? '' : typeof n === 'number' ? String(n).replace('.', ',') : String(n);
   const orcIvaPad = () => Number(orcCfg().iva) || 23;
+  // A mão de obra e a deslocação vêm da tabela de preços (Definições); sem elas lá, das tarifas da folha de obra.
+  const orcItemCat = (g, ref) => (orcCfg().itens || []).find(it => it.g === g && it.ref === ref) || null;
   // Uma linha do editor a partir de um item da tabela de preços (texto nos campos, como se tivesse sido escrito).
   const orcDeItem = (it, qtd) => ({ref: it.ref || '', desc: it.desc, qtd: orcTxtN(qtd == null ? 1 : qtd), un: it.un || 'un', preco: orcTxtN(it.preco), iva: Number(it.iva) || orcIvaPad()});
   const orcAutoliq = o => !!(o.autoliquidacao && o.cliente.tipo === 'empresa');
@@ -5096,9 +5098,8 @@ if (!Element.prototype.replaceChildren) {
     const morada = f.morada || r.localidade || '', zona = zonaDe(morada), t = tarifa('desl', zona);
     const nif = String(f.nif || '').replace(/\s/g, '');
     const tipo = f.tipoCliente || (/^(5|6|71|72|98|99)/.test(nif) ? 'empresa' : /^9[01]/.test(nif) ? 'condominio' : 'particular');
-    const cat = (g, ref) => (c.itens || []).find(it => it.g === g && it.ref === ref);
-    const mo = cat('mo', 'Hora_Técnico'), dz = cat('desl', zona);
-    const contacto = [f.contacto, f.telefone || r.contacto, f.email && String(r.contacto || '').indexOf(f.email) < 0 ? f.email : null].filter(Boolean).join(' · ');
+    const mo = orcItemCat('mo', 'Hora_Técnico'), dz = orcItemCat('desl', zona);
+    const tel = f.telefone || r.contacto || '', contacto = [f.contacto, tel, f.email && String(tel).indexOf(f.email) < 0 ? f.email : null].filter(Boolean).join(' · ');
     const ac = !r.tipo || r.tipo === 'instalacao';
     return {
       v: 0, num: r.num || null, rev: null,
@@ -5142,6 +5143,8 @@ if (!Element.prototype.replaceChildren) {
   // opções (o cartão não a mostra). Mudar e repor um campo, ou o grupo de uma linha, não faz outra revisão.
   // As divisões são as que a folha mostra (as que a potência aceita), o tipo de cliente conta só como «com IVA» ou não, a
   // morada como a folha a junta e as notas e condições linha a linha. Também é o conteúdo guardado de cada PDF.
+  // A morada na folha e na revisão: cada linha sem espaços a mais, linhas vazias fora, juntas com vírgulas.
+  const orcMoradaTxt = s => String(s || '').split(/\n+/).map(x => x.replace(/\s+/g, ' ').trim()).filter(Boolean).join(', ');
   const orcConteudo = o => {
     // Na folha os espaços e as mudanças de linha de um parágrafo contam como um espaço; com autoliquidação as taxas de
     // IVA não aparecem.
@@ -5150,7 +5153,7 @@ if (!Element.prototype.replaceChildren) {
     const linhas = s => String(s || '').split(/\n+/).map(esp).filter(Boolean);
     const P = n.divisoes.length ? ORC_POT.potencia(ORC_C, n.divisoes) : null;
     return cliNorm({titulo: esp(n.titulo), validadeDias: n.validadeDias, autoliquidacao: aq,
-      cliente: {nome: esp(n.cliente.nome), nif: esp(n.cliente.nif), contacto: esp(n.cliente.contacto), morada: linhas(n.cliente.morada).join(', '), tipo: orcComIva(n) ? 'particular' : 'empresa'},
+      cliente: {nome: esp(n.cliente.nome), nif: esp(n.cliente.nif), contacto: esp(n.cliente.contacto), morada: orcMoradaTxt(n.cliente.morada), tipo: orcComIva(n) ? 'particular' : 'empresa'},
       divisoes: P && P.divs ? P.divs.map(d => ({tipo: d.tipo, area: d.area, sol: d.sol, topo: d.topo})) : [],
       opcoes: n.opcoes.map(op => ({k: op.k, titulo: esp(op.titulo), marca: op.marca, linhas: op.linhas.map(l => lin(l, false))})), comuns: n.comuns.map(l => lin(l, true)),
       recomendada: n.opcoes.length > 1 ? n.recomendada : 'A', inclui: esp(n.inclui), notas: linhas(n.notas), pagamento: esp(n.pagamento), condicoes: linhas(n.condicoes)});
@@ -5177,7 +5180,7 @@ if (!Element.prototype.replaceChildren) {
   function abrirOrc(id) {
     const r = rows.find(x => x.id === id); if (!r) return;
     if (orcAGuardar) { toast('Ainda a guardar o orçamento. Espera um instante.'); return; }
-    orcId = id; orcV = orcVDe(r);
+    orcId = id; orcV = orcVDe(r); orcCriado = r.criado || null;
     orc = orcParaEditar(r.orcamento || orcNovo(r)); orcSujo = false; orcVista = 'editar'; orcEnvio = null;
     // Antes do primeiro PDF o número é o do pedido (enviado fora do registo), mesmo que tenha mudado depois do rascunho,
     // e a revisão de partida conta-se outra vez (a não ser que alguém a tenha escrito à mão).
@@ -5207,9 +5210,13 @@ if (!Element.prototype.replaceChildren) {
   // com alterações por guardar, fica como está e o «Guardar» avisa do conflito.
   function orcRecarrega(r) { fechaPop(); orcV = orcVDe(r); orc = orcParaEditar(r.orcamento); orcSujo = false; orcEnvio = null; document.title = orcTituloDoc(); renderOrc(); }
   // As versões só sobem: uma leitura atrasada (mais velha do que o editor) não o faz voltar atrás.
+  // O pedido do editor ainda existe e é o mesmo (um número apagado e reutilizado noutro aparelho é outro pedido)?
+  const orcMesmoPedido = r => !!r && (!orcCriado || !r.criado || r.criado === orcCriado);
   function orcSincroniza() {
-    if (!orc || orcAGuardar || orcSujo || F('orcWrap').hidden) return;
+    if (!orc || orcAGuardar || F('orcWrap').hidden) return;
     const r = rows.find(x => x.id === orcId);
+    if (!orcMesmoPedido(r)) { fecharOrc(true); toast('Este pedido foi apagado noutro aparelho: o orçamento fechou sem gravar.'); return; }
+    if (orcSujo) return;
     if (r && r.orcamento && orcVDe(r) > orcV) { orcRecarrega(r); toast('Um colega mudou este orçamento: está aqui a versão nova.'); }
   }
   // Antes de imprimir ou enviar: há na base de dados uma versão mais nova do que a do editor?
@@ -5405,8 +5412,8 @@ if (!Element.prototype.replaceChildren) {
     const comuns = h('section',{class:'oe-sec'}, h('h3',null, o.opcoes.length > 1 ? 'Trabalho e material (igual em todas as opções)' : 'Trabalho e material'),
       oeLinhas(o.comuns, true),
       ro ? null : h('div',{class:'oe-acoes'},
-        h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { const t = tarifa('mo', 'Hora_Técnico'); o.comuns.push({g:'mo', ref: t[0], desc: `Mão de obra (${t[1].toLowerCase()})`, qtd:'', un:'h', preco: orcTxtN(t[2]), iva: orcIvaPad()}); orcMuda(); renderOrc(); }}, '+ Mão de obra'),
-        h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { const z = zonaDe(o.cliente.morada), t = tarifa('desl', z); o.comuns.push({g:'desl', ref: z, desc: `Deslocação (${t[1]})`, qtd:'1', un:'un', preco: orcTxtN(t[2]), iva: orcIvaPad()}); orcMuda(); renderOrc(); }}, '+ Deslocação'),
+        h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { const it = orcItemCat('mo', 'Hora_Técnico'), t = tarifa('mo', 'Hora_Técnico'); o.comuns.push(it ? Object.assign(orcDeItem(it, ''), {g:'mo'}) : {g:'mo', ref: t[0], desc: `Mão de obra (${t[1].toLowerCase()})`, qtd:'', un:'h', preco: orcTxtN(t[2]), iva: orcIvaPad()}); orcMuda(); renderOrc(); }}, '+ Mão de obra'),
+        h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { const z = zonaDe(o.cliente.morada), it = orcItemCat('desl', z), t = tarifa('desl', z); o.comuns.push(it ? Object.assign(orcDeItem(it, 1), {g:'desl'}) : {g:'desl', ref: z, desc: `Deslocação (${t[1]})`, qtd:'1', un:'un', preco: orcTxtN(t[2]), iva: orcIvaPad()}); orcMuda(); renderOrc(); }}, '+ Deslocação'),
         h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { o.comuns.push({g:'mat', ref:'', desc:'', qtd:'1', un:'un', preco:'', iva: orcIvaPad()}); orcMuda(); renderOrc(); }}, '+ Material'),
         h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { o.comuns.push({g:'div', ref:'', desc:'Desconto', qtd:'1', un:'un', preco:'-', iva: orcIvaPad()}); orcMuda(); renderOrc(); }}, '+ Desconto'),
         h('button',{class:'btn btn-ghost btn-sm', type:'button', 'aria-haspopup':'menu', 'aria-expanded':'false', onclick: ev => orcEscolher(ev.currentTarget, ['mo', 'desl', 'mat', 'div'], '', it => { o.comuns.push(Object.assign(orcDeItem(it, it.g === 'mo' ? '' : 1), {g: it.g})); orcMuda(); renderOrc(); })}, 'Da tabela')));
@@ -5459,7 +5466,7 @@ if (!Element.prototype.replaceChildren) {
       .concat(o.pagamento ? ['Pagamento: ' + o.pagamento] : [])
       .concat(linhasPar(o.condicoes))
       .concat(['Este documento não serve de fatura.']);
-    const dados = [['Cliente', o.cliente.nome], ['NIF', o.cliente.nif], ['Contacto', o.cliente.contacto], ['Morada', o.cliente.morada.replace(/\n+/g, ', ')]].filter(x => x[1]);
+    const dados = [['Cliente', o.cliente.nome], ['NIF', o.cliente.nif], ['Contacto', o.cliente.contacto], ['Morada', orcMoradaTxt(o.cliente.morada)]].filter(x => x[1]);
     fill(box, h('table',{class:'od-pag'},
       h('thead',null, h('tr',null, h('td',{class:'od-esp'}))), h('tfoot',null, h('tr',null, h('td',{class:'od-esp'}))),
       h('tbody',null, h('tr',null, h('td',null,
@@ -5484,7 +5491,7 @@ if (!Element.prototype.replaceChildren) {
         linhasPar(o.notas).length ? [h('p',{class:'doc-sec'}, 'Notas'), h('ul',{class:'doc-notas'}, linhasPar(o.notas).map(x => h('li',null, x)))] : null,
         h('div',{class:'doc-cond'}, cond.map(x => h('p',null, x))),
         h('div',{class:'od-aceite'},
-          h('p',null, `Aceito o orçamento${numTxt ? ' n.º ' + numTxt : ''}${n > 1 ? ', opção ______' : ''}.`),
+          h('p',null, `Aceito o orçamento${numTxt ? ' n.º ' + numTxt : ''}${o.rev && o.rev > 1 ? ` (revisão ${o.rev})` : ''}${n > 1 ? ', opção ______' : ''}.`),
           h('p',{class:'od-assin'}, h('span',null, 'Nome'), h('span',null, 'Data'), h('span',null, 'Assinatura'))),
         h('footer',{class:'doc-pe'},
           h('span',null, h('strong',null, E.telefone), ` (${E.horario}) · WhatsApp ${E.whatsapp} · ${E.email}`),
@@ -5536,12 +5543,13 @@ if (!Element.prototype.replaceChildren) {
     for (let tent = 0; tent < 6; tent++) {
       const [c, p] = await Promise.all([
         sb.from('config').select('valor,versao').eq('chave', 'orcamento_numero').maybeSingle(),
-        sb.from('pedidos').select('id,num:dados->>num,onum:dados->orcamento->>num'),
+        sb.from('pedidos').select('id,num:dados->>num,onum:dados->orcamento->>num,orev:dados->orcamento->>rev'),
       ]);
       if (c.error) throw c.error;
       if (p.error) throw p.error;
       const atual = c.data, cont = atual && atual.valor && Number(atual.valor.ano) === ano ? Number(atual.valor.ultimo) || 0 : 0;
-      const max = p.data.concat(rows.map(r => ({num: r.num, onum: r.orcamento && r.orcamento.num}))).reduce((m, x) => Math.max(m, de(x.num), de(x.onum)), cont);
+      // um rascunho (sem revisão) não tem número seu: só contam os números dos pedidos e dos orçamentos com PDF
+      const max = p.data.concat(rows.map(r => ({num: r.num, onum: r.orcamento && r.orcamento.num, orev: r.orcamento && r.orcamento.rev}))).reduce((m, x) => Math.max(m, de(x.num), x.orev ? de(x.onum) : 0), cont);
       const valor = {ano, ultimo: max + 1};
       const w = atual
         ? await sb.from('config').update({valor, versao: atual.versao + 1, atualizado_por: eu.email}).eq('chave', 'orcamento_numero').eq('versao', atual.versao).select('versao')
@@ -5565,7 +5573,7 @@ if (!Element.prototype.replaceChildren) {
     const conflito = 'Um colega mudou este orçamento enquanto o tinhas aberto. Copia o que mudaste, fecha sem guardar e abre outra vez.';
     const atrasado = () => { orcErro('A página ainda não tem a tua última gravação. Tenta outra vez daqui a um instante.'); carregar(); };
     const fresco0 = rows.find(x => x.id === id);
-    if (!fresco0 || (!fresco0.orcamento && v0 > 0)) { orcErro(conflito); return; } // pedido apagado (ou outro com o mesmo número)
+    if (!orcMesmoPedido(fresco0) || (!fresco0.orcamento && v0 > 0)) { orcErro('Este pedido foi apagado ou mudou noutro aparelho. Copia o que precisares e fecha o orçamento.'); return; }
     if (orcVDe(fresco0) > v0) { orcAtual(); return; } // recarrega o editor (sem nada por guardar) ou avisa do conflito
     if (orcVDe(fresco0) < v0) { atrasado(); return; }
     // PDF sem mudanças desde o último: é só imprimir outra vez a mesma revisão.
@@ -5573,6 +5581,8 @@ if (!Element.prototype.replaceChildren) {
     orcAGuardar = true; F('orcBarEstado').textContent = 'A guardar…';
     try {
       const o = orcParaGuardar(orc);
+      // Antes do primeiro PDF, também um rascunho guarda o número do pedido (nunca um que ele já não tem).
+      if (!o.rev && (o.num || null) !== (fresco0.num || null)) { o.num = fresco0.num || null; o.revBaseFixo = false; }
       let nota1 = 'Orçamento guardado (rascunho)', novaRev = false;
       if (pdf) {
         // Antes do primeiro PDF, o número é o do pedido (enviado fora do registo); sem ele, reserva-se um.
@@ -5582,7 +5592,7 @@ if (!Element.prototype.replaceChildren) {
       }
       // Depois da espera do número, volta a ler o pedido: a gravação parte da cópia mais recente.
       const fresco = rows.find(x => x.id === id);
-      if (!fresco || orcVDe(fresco) > v0 || (!fresco.orcamento && v0 > 0)) { orcErro(conflito); return; }
+      if (!orcMesmoPedido(fresco) || orcVDe(fresco) > v0 || (!fresco.orcamento && v0 > 0)) { orcErro(conflito); return; }
       if (orcVDe(fresco) < v0) { atrasado(); return; }
       let avisoAceite = false;
       if (pdf) {
@@ -5606,8 +5616,12 @@ if (!Element.prototype.replaceChildren) {
       o.v = v0 + 1;
       const novo = JSON.parse(JSON.stringify(fresco)); delete novo.id; delete novo._versao;
       novo.orcamento = o;
-      // O valor do pedido: o da opção aceite, se o cliente já aceitou, senão o da recomendada.
-      if (novaRev) novo.valor = orcValorDe(o, o.ultimoPdf.conteudo, o.rev, fresco.valor);
+      // O valor do pedido: com aceite, o da opção aceite (se passou para este PDF); sem aceite, o da recomendada só enquanto
+      // o orçamento se está a fazer. Depois de enviado (por exemplo fora do registo) ou aceite, um PDF novo não o muda:
+      // muda no envio ou no aceite.
+      const aFazer = e => ['novo', 'visita_por_marcar', 'visita_marcada', 'orcamento_por_fazer'].indexOf(e) >= 0;
+      if (novaRev && (o.aceite || (aFazer(fresco.estado) || (fresco.esperaMotivo === 'pausa' && aFazer(fresco.esperaDe))) && !fresco.dataAceite))
+        novo.valor = orcValorDe(o, o.ultimoPdf.conteudo, o.rev, fresco.valor);
       novo.historico = (novo.historico || []).slice(-60);
       novo.historico.push(nota(nota1));
       const ok = await gravar(id, novo, novaRev ? `PDF da revisão ${o.rev} pronto` : 'Orçamento guardado', {manter: true, erro: m => { if (mesmo()) orcErro(m); else toast(m); }});
@@ -5649,7 +5663,8 @@ if (!Element.prototype.replaceChildren) {
     const valor = op => { const t = orcTotOp(o, op); return orcAutoliq(o) ? `${orcEur(t.base)} (IVA autoliquidado)` : orcComIva(o) ? `${orcEur(t.comIva)} com IVA` : `${orcEur(t.base)} mais IVA`; };
     const ops = o.opcoes.length > 1 ? o.opcoes.map(op => `Opção ${op.k}${op.titulo ? ', ' + op.titulo : ''}${op.marca ? ' (' + op.marca + ')' : ''}: ${valor(op)}`) : [`Total: ${valor(o.opcoes[0])}`];
     const rev = o.rev > 1 ? ` (revisão ${o.rev})` : '';
-    const linhas = [ola, '', `Segue o orçamento n.º ${numTxt}${rev}${o.titulo ? ', ' + o.titulo.charAt(0).toLowerCase() + o.titulo.slice(1) : ''}.`, ''].concat(ops, ['', `É válido até ${pontos(addDays(o.data || today(), o.validadeDias))}. Qualquer dúvida, estamos ao dispor.`]);
+    const tit = o.titulo && norm(o.titulo) !== 'orcamento' ? ', ' + o.titulo.charAt(0).toLowerCase() + o.titulo.slice(1) : '';
+    const linhas = [ola, '', `Segue o orçamento n.º ${numTxt}${rev}${tit}.`, ''].concat(ops, ['', `É válido até ${pontos(addDays(o.data || today(), o.validadeDias))}. Qualquer dúvida, estamos ao dispor.`]);
     const assin = String(segCfg().assinatura || ORC_EMPRESA.nome).trim();
     return {assunto: `Orçamento n.º ${numTxt}${rev}, ${ORC_EMPRESA.nome}`, whatsapp: linhas.join('\n'), email: linhas.concat(['', assin]).join('\n')};
   }
@@ -6878,7 +6893,7 @@ if (!Element.prototype.replaceChildren) {
       if (p.error) throw p.error;
       if (seq !== carregarSeq) return carregarUltima;
       const locais = new Map(rows.map(r => [r.id, r]));
-      rows = p.data.map(r => { const l = locais.get(r.id); return l && l._escrita > e0 && (l._versao || 0) > r.versao ? l : {id: r.id, ...r.dados, _versao: r.versao}; });
+      rows = p.data.map(r => { const l = locais.get(r.id); if (l && l._escrita > e0 && (l._versao || 0) > r.versao) return l; const x = {id: r.id, ...r.dados, _versao: r.versao}; delete x._escrita; return x; });
       if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') TB_PED.cfg = x.valor || null; if (x.chave === 'colunas_clientes') TB_CLI.cfg = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'orcamento' && x.versao >= cfgOrcVersao) { cfgOrc = x.valor || null; cfgOrcVersao = x.versao; } if (x.chave === 'orcamento_numero' && x.versao >= cfgOrcNumV) { cfgOrcNum = x.valor || null; cfgOrcNumV = x.versao; } if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
       if (ft.error) { if (/relation|does not exist|schema cache/i.test(ft.error.message || '')) fatTabela = false; }
       else { fatTabela = true; const novo = {}; for (const x of ft.data) if (x.dados && x.dados.mes) novo[x.dados.mes] = x.dados; faturacao = novo; if (!faturacao[fatMes]) fatMes = ''; }
