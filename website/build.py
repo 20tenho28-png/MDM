@@ -1312,7 +1312,8 @@ def precos_contagem():
 def check_registo():
     """Registo (registo/index.html): o bloco puro do orçamento tem de ficar igual às fontes. A potência copiada de
     netlify/lib/calculo.mjs (as mesmas funções, sem «export»), ORC_BTU igual ao «btu» de data/site.json, ORC_MARCAS e
-    ORC_PROIBIDAS iguais às de data/regras-marcas.json e ORC_EMPRESA com os dados de data/site.json."""
+    ORC_PROIBIDAS iguais às de data/regras-marcas.json, ORC_JUNTA igual ao JUNTA_MARCA de netlify/lib/proposta-modelo.mjs
+    e ORC_EMPRESA com os dados de data/site.json."""
     out = []
     reg = ROOT / "registo" / "index.html"
     if not reg.exists():
@@ -1352,6 +1353,10 @@ def check_registo():
             igual = False
         if not igual:
             out.append(f"registo/index.html: {nome} não é igual ao de data/ (site.json ou regras-marcas.json)")
+    # a junção das palavras das marcas proibidas («Saunier-Duval», «SaunierDuval») é a do assistente e da skill
+    pm = re.search(r"const JUNTA_MARCA = (.*?);\n", (ROOT / "netlify" / "lib" / "proposta-modelo.mjs").read_text(encoding="utf-8"))
+    if not pm or valor("ORC_JUNTA") != pm.group(1):
+        out.append("registo/index.html: ORC_JUNTA não é igual ao JUNTA_MARCA de netlify/lib/proposta-modelo.mjs")
     emp = valor("ORC_EMPRESA") or ""
     for chave in ("name", "legalName", "nif", "phone", "whatsapp", "email", "address1", "address2"):
         if json.dumps(site.get(chave, ""), ensure_ascii=False) not in emp:

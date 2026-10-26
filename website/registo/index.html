@@ -432,6 +432,7 @@ body.app-on .col{background:var(--sunk)}
 .oe-tab td.oe-lt{font-family:var(--font-mono);font-size:12.5px;white-space:nowrap;padding-left:6px}
 .oe-tab tr.oe-falta input[aria-label="Preço sem IVA"]{border-color:var(--warn);box-shadow:inset 0 0 0 1px var(--warn)}
 .oe-pot-r{font-size:13px;color:var(--ink-2)}
+.oe-tab label.oe-chk{display:flex;align-items:center;justify-content:center;min-height:40px;width:100%;cursor:pointer}
 p.oe-pot-r{margin:8px 0 0}
 .oe-op{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
 .oe-op:first-of-type{border-top:0;padding-top:0;margin-top:0}
@@ -4073,7 +4074,7 @@ if (!Element.prototype.replaceChildren) {
     F('nextNum').textContent = status === 'ok' ? nextNumber() : 'ORC…';
     const verm = all.filter(x => x.sem === 'vermelho').length;
     F('redBadge').textContent = verm ? String(verm) : '';
-    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderEquipa(); renderFaturacao(); renderClientes(); renderExport(); renderPipeline(all); renderSeg(); renderSegCfg(); renderAgenda(); renderAgCfg(); renderInicio(all); renderProb(); renderDash(); renderObjCfg(); renderOrcCfg();
+    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderEquipa(); renderFaturacao(); renderClientes(); renderExport(); renderPipeline(all); renderSeg(); renderSegCfg(); renderAgenda(); renderAgCfg(); renderInicio(all); renderProb(); renderDash(); renderObjCfg(); renderOrcCfg(); orcSincroniza();
     F('btnNovoTop').hidden = F('railNovo').hidden = F('btnNovoCliente').hidden = !(canWrite && status === 'ok');
     // Não redesenha a folha aberta enquanto há um formulário a meio.
     if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
@@ -4281,19 +4282,21 @@ if (!Element.prototype.replaceChildren) {
       campo('t-vis-h','Hora (opcional)', inp('t-vis-h', r.horaVisita || '', {type:'time'}))));
     if (t.envio) {
       // Com o orçamento do registo já em PDF, o número e o valor vêm de lá e não se escrevem aqui.
-      const o = r.orcamento, pdf = orcTemPdf(r);
+      const o = r.orcamento, pdf = orcTemPdf(r), c = orcDoPdf(o);
       els.push(h('div',{class:'fields'},
         campo('t-num','Nº do orçamento', inp('t-num', pdf ? o.num : r.num || (o && o.num) || nextNumber(), {spellcheck:'false', readonly: pdf ? true : null})),
-        campo('t-valor','Valor s/IVA (€)', inp('t-valor', pdf ? orcTxtN(orcTotOp(o, orcRec(o)).base / 100) : r.valor != null ? String(r.valor).replace('.',',') : '', {inputmode:'decimal', placeholder:'0,00', readonly: pdf ? true : null}), pdf ? `Do orçamento, revisão ${o.rev}${o.opcoes.length > 1 ? ' (opção recomendada)' : ''}.` : null),
+        campo('t-valor','Valor s/IVA (€)', inp('t-valor', pdf ? orcTxtN(orcTotOp(c, orcRec(c)).base / 100) : r.valor != null ? String(r.valor).replace('.',',') : '', {inputmode:'decimal', placeholder:'0,00', readonly: pdf ? true : null}), pdf ? `Do PDF da revisão ${o.rev}${c.opcoes.length > 1 ? ' (opção recomendada)' : ''}.` : null),
         campo('t-denv','Data de envio', inp('t-denv', today(), {type:'date'})),
         campo('t-ponde','Por onde', sel('t-ponde', Object.entries(POR_ONDE), t.porOnde || r.enviadoPorOnde || 'email')),
         campo('t-epor','Quem enviou', inp('t-epor', meuNome()), 'É a prova do envio: quem, quando e por onde.', true)));
       if (o && !pdf) els.push(h('p',{class:'hint alert'}, 'O orçamento do registo ainda não tem PDF: abre-o e carrega em «Guardar e imprimir» antes de o enviar.'));
       else if (pdf && orcHash(orcParaEditar(o)) !== o.hash) els.push(h('p',{class:'hint alert'}, 'O orçamento mudou depois do último PDF: abre-o e faz o PDF novo («Guardar e imprimir») antes de o enviar.'));
     }
-    if (t.ganho && orcTemPdf(r) && r.orcamento.opcoes.length > 1) {
-      const o = r.orcamento;
-      els.push(h('div',{class:'fields'}, campo('t-opcao','Que opção aceitou', sel('t-opcao', o.opcoes.map(op => [op.k, `Opção ${op.k}${op.titulo ? ': ' + op.titulo : ''}${op.marca ? ' (' + op.marca + ')' : ''}, ${orcEur(orcTotOp(o, op).base)} s/IVA`]), o.escolhida || o.recomendada), 'O valor do pedido passa a ser o desta opção.', true)));
+    if (t.ganho && orcTemPdf(r)) {
+      // As opções e os valores são os do PDF que o cliente tem, não os de um rascunho guardado depois.
+      const o = r.orcamento, c = orcDoPdf(o);
+      if (c.opcoes.length > 1) els.push(h('div',{class:'fields'}, campo('t-opcao','Que opção aceitou', sel('t-opcao', c.opcoes.map(op => [op.k, `Opção ${op.k}${op.titulo ? ': ' + op.titulo : ''}${op.marca ? ' (' + op.marca + ')' : ''}, ${orcEur(orcTotOp(c, op).base)} s/IVA`]), o.escolhida || c.recomendada), `O valor do pedido passa a ser o desta opção (PDF da revisão ${o.rev}).`, true)));
+      if (orcHash(orcParaEditar(o)) !== o.hash) els.push(h('p',{class:'hint'}, `O orçamento tem alterações depois do último PDF: conta o PDF da revisão ${o.rev}, que é o que o cliente tem.`));
     }
     if (fecho) els.push(h('div',{class:'fields'}, para === 'perdido'
       ? campo('t-motivo','Motivo', sel('t-motivo', MOTIVOS.map(m => [m,m]), t.motivo || '', 'Escolher…'), null, true)
@@ -4389,11 +4392,12 @@ if (!Element.prototype.replaceChildren) {
       novo.falta = falta;
     }
     if (t.envio) {
-      const o = novo.orcamento, pdf = orcTemPdf(novo);
+      const o = novo.orcamento, pdf = orcTemPdf(novo), c = orcDoPdf(o);
+      if (pdf && t.revVista && o.rev !== t.revVista) return erroT(`O orçamento passou à revisão ${o.rev} depois de o abrires: confere o PDF antes de o marcar como enviado.`);
       const n = pdf ? o.num : val('t-num').toUpperCase(), m = /^ORC(\d{4})_(\d{4})$/.exec(n);
       if (!m) return erroT('O número tem de seguir o formato ORC0073_2026.');
       if (numUsado(n, r.id)) return erroT(`O ${n} já está noutro pedido.`);
-      const v = pdf ? orcTotOp(o, orcRec(o)).base / 100 : parseValor(val('t-valor'));
+      const v = pdf ? orcTotOp(c, orcRec(c)).base / 100 : parseValor(val('t-valor'));
       if (v == null || Number.isNaN(v)) return erroT('Indica o valor s/IVA (por exemplo 1250,00).');
       if (!val('t-denv') || !val('t-epor')) return erroT('Indica a data de envio e quem enviou.');
       Object.assign(novo, {num:n, seq:Number(m[1]), ano:Number(m[2]), valor:v, dataEnvio:val('t-denv'), enviadoPor:val('t-epor'), enviadoPorOnde:val('t-ponde'), envioConfirmado:true, ultimoContacto: agora.toISOString()});
@@ -4424,10 +4428,10 @@ if (!Element.prototype.replaceChildren) {
     if (t.ganho) novo.dataAceite = today();
     if (t.ganho && orcTemPdf(novo)) {
       // A opção aceite dá o valor do pedido (o das contas e das previsões).
-      const o = novo.orcamento, k = o.opcoes.length > 1 ? val('t-opcao') || o.recomendada : o.opcoes[0].k, op = o.opcoes.find(x => x.k === k) || orcRec(o);
+      const o = novo.orcamento, c = orcDoPdf(o), k = c.opcoes.length > 1 ? val('t-opcao') || c.recomendada : c.opcoes[0].k, op = orcOpValor(c, k);
       Object.assign(o, {escolhida: op.k, v: (Number(o.v) || 0) + 1});
-      novo.valor = orcTotOp(o, op).base / 100;
-      if (o.opcoes.length > 1) hist.push(nota(`Aceitou a opção ${op.k}${op.titulo || op.marca ? ` (${[op.titulo, op.marca].filter(Boolean).join(', ')})` : ''}`));
+      novo.valor = orcTotOp(c, op).base / 100;
+      if (c.opcoes.length > 1) hist.push(nota(`Aceitou a opção ${op.k}${op.titulo || op.marca ? ` (${[op.titulo, op.marca].filter(Boolean).join(', ')})` : ''}`));
     }
     novo.estado = t.para; novo.entrouNoEstado = agora.toISOString();
     if (t.para === 'resolvido' || t.para === 'perdido') { novo.acumuladoH = 0; novo.esperaDe = null; novo.esperaMotivo = null; }
@@ -4607,7 +4611,10 @@ if (!Element.prototype.replaceChildren) {
   // Travessões (do U+2012 ao U+2015 e os duplos U+2E3A e U+2E3B), escritos em código para não os pôr no ficheiro.
   const ORC_TRAV = /[\u2012-\u2015\u2E3A\u2E3B]/;
   // Marcas proibidas em texto livre: a palavra inteira, sem «lookbehind» (o Safari do iOS 12 não o conhece).
-  const ORC_PROIB_RE = new RegExp('(^|[^0-9A-Za-z\u00C0-\u00FF])(' + ORC_PROIBIDAS.map(m => m.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+')).join('|') + ')(?=$|[^0-9A-Za-z\u00C0-\u00FF])', 'i');
+  // Entre as palavras de uma marca, espaços, um traço qualquer ou nada («Saunier-Duval», «SaunierDuval»): o JUNTA_MARCA
+  // de netlify/lib/proposta-modelo.mjs e do build.py (o check_registo confirma que é o mesmo). Os nomes mais compridos primeiro.
+  const ORC_JUNTA = '[\\s\\-\\u2010-\\u2015\\u2212\\ufe58\\ufe63\\uff0d]*';
+  const ORC_PROIB_RE = new RegExp('(^|[^0-9A-Za-z\u00C0-\u00FF])(' + ORC_PROIBIDAS.slice().sort((a, b) => b.length - a.length).map(m => m.trim().split(/\s+/).map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join(ORC_JUNTA)).join('|') + ')(?=$|[^0-9A-Za-z\u00C0-\u00FF])', 'i');
   // ORC-PURO-FIM
 
   /* ---------- Folha de obra: o Excel «Folha de Obra Nº» no registo (10 % pessoa, 80 % registo, 10 % revisão) ----------
@@ -4868,7 +4875,8 @@ if (!Element.prototype.replaceChildren) {
     if (!g) return [null, `grupo «${o.g || ''}» desconhecido (${ORC_GRUPOS.map(x => x[1]).join(', ')})`];
     const desc = orcSemTrav(o.desc).trim(), ref = orcSemTrav(o.ref).trim();
     if (!desc) return [null, 'falta a descrição'];
-    if (ORC_PROIB_RE.test(desc + ' ' + ref)) return [null, `«${desc}» tem uma marca que a MDM não trabalha (só ${ORC_MARCAS.join(', ')})`];
+    // a marca procura-se também no texto antes da limpeza: «Mitsubishi», travessão, «Heavy» passaria a «Mitsubishi, Heavy»
+    if (ORC_PROIB_RE.test(desc + ' ' + ref) || ORC_PROIB_RE.test(String(o.desc || '') + ' ' + String(o.ref || ''))) return [null, `«${desc}» tem uma marca que a MDM não trabalha (só ${ORC_MARCAS.join(', ')})`];
     const txt = v => String(v == null ? '' : v).trim();
     const c = orcCent(txt(o.preco));
     if (txt(o.preco) && c == null) return [null, `preço «${txt(o.preco)}» não é um número`];
@@ -4987,6 +4995,7 @@ if (!Element.prototype.replaceChildren) {
     const ordem = ORC_GRUPOS.map(x => x[0]);
     itens.sort((a, b) => ordem.indexOf(a.g) - ordem.indexOf(b.g));
     const valor = Object.assign({}, cfgOrc || {}, {iva: Number(ed.iva) || 23, validadeDias: dias, pagamento: ed.pagamento.trim(), condicoes: ed.condicoes.trim(), itens, atualizado: new Date().toISOString()});
+    const antes = JSON.stringify(ocEd);
     try {
       // Só grava sobre a versão que estava quando começaste a mexer: a tabela de um colega não se perde por cima.
       const r = ocBaseV
@@ -4995,7 +5004,12 @@ if (!Element.prototype.replaceChildren) {
       const conflito = r.error ? (!ocBaseV && /duplicate|unique|23505/i.test(r.error.message || '')) : !(r.data && r.data.length);
       if (r.error && !conflito) throw r.error;
       if (conflito) return erro('Outra pessoa mudou a tabela entretanto. Copia o que mudaste, carrega em «Desfazer» para ver a tabela atual e volta a fazer.');
-      cfgOrc = valor; cfgOrcVersao = r.data[0].versao; ocSujo = false; F('oc-err').hidden = true;
+      cfgOrc = valor; cfgOrcVersao = r.data[0].versao; F('oc-err').hidden = true;
+      if (JSON.stringify(ocEd) !== antes) {
+        // Mudaste a tabela durante a gravação: o que escreveste fica no ecrã, por guardar, sobre a versão acabada de gravar.
+        ocBaseV = cfgOrcVersao; toast('Tabela guardada; o que mudaste entretanto ainda está por guardar.'); return;
+      }
+      ocSujo = false;
       toast(`Tabela de preços guardada (${itens.length} ${itens.length === 1 ? 'item' : 'itens'})`); renderOrcCfg();
     } catch (e) { erro(/permiss|row-level/.test(String(e.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar a tabela.'); }
   }
@@ -5021,6 +5035,15 @@ if (!Element.prototype.replaceChildren) {
   const orcComIva = o => o.cliente.tipo !== 'empresa'; // particulares e condomínios veem o total com IVA em grande
   const orcTotOp = (o, op) => orcTotais(op.linhas.concat(o.comuns), orcAutoliq(o));
   const orcRec = o => o.opcoes.find(x => x.k === o.recomendada) || o.opcoes[0];
+  const orcVDe = r => r && r.orcamento ? Number(r.orcamento.v) || 0 : 0;
+  // O que o cliente tem na mão: o conteúdo do último PDF. O envio, o aceite e o card partem daqui, nunca de um rascunho
+  // guardado depois do PDF. Sem PDF guardado, o próprio orçamento.
+  const orcDoPdf = o => (o && o.ultimoPdf && o.ultimoPdf.conteudo) || o;
+  // A opção que dá o valor do pedido: a aceite (se ainda existe), senão a recomendada.
+  const orcOpValor = (c, k) => (k && c.opcoes.find(x => x.k === k)) || orcRec(c);
+  // Versões que o cliente já viu de um orçamento com número de fora do registo: cada «Pediu revisão» veio depois de uma
+  // versão enviada, por isso em «Orçamento por fazer» são as revisões pedidas; nos outros passos, mais a que foi enviada.
+  function orcRevBase(r) { const rv = Number(r.revisoes) || 0; return r.estado === 'orcamento_por_fazer' && rv ? rv : rv + (r.dataEnvio ? 1 : 0); }
   const orcDivCalc = d => { const a = parseNumero(d.area); return {tipo: d.tipo, area: a == null || Number.isNaN(a) ? '' : a, sol: !!d.sol, ultimoAndar: !!d.ultimoAndar}; };
 
   function orcNovo(r) {
@@ -5035,7 +5058,7 @@ if (!Element.prototype.replaceChildren) {
     return {
       v: 0, num: r.num || null, rev: null,
       // Um pedido com número de antes do registo: o PDF daqui é a revisão seguinte à que o cliente já tem.
-      revBase: r.num ? (Number(r.revisoes) || 0) + (r.dataEnvio ? 1 : 0) : 0,
+      revBase: r.num ? orcRevBase(r) : 0,
       data: null, emitidoEm: null, emitidoPor: null, hash: null, enviadoRev: null, enviadoEm: null, escolhida: null,
       titulo: ORC_TITULOS[r.tipo] || 'Orçamento', validadeDias: Number(c.validadeDias) || 30,
       cliente: {nome: f.nome || r.cliente || '', nif: f.nif || '', contacto, morada, tipo},
@@ -5070,7 +5093,14 @@ if (!Element.prototype.replaceChildren) {
     return n;
   }
   // O que vai para o PDF (sem datas, versões, envio nem escolha): é isto que decide se um PDF novo é outra revisão.
-  const orcConteudo = o => { const n = orcParaGuardar(o); return cliNorm({titulo: n.titulo, validadeDias: n.validadeDias, cliente: n.cliente, autoliquidacao: orcAutoliq(n), divisoes: n.divisoes, opcoes: n.opcoes, comuns: n.comuns, recomendada: n.recomendada, inclui: n.inclui, notas: n.notas, pagamento: n.pagamento, condicoes: n.condicoes}); };
+  // Só o que a folha mostra: sem a referência, o grupo e a marca interna «pot» das linhas, nem a unidade nas linhas das
+  // opções (o cartão não a mostra). Mudar e repor um campo, ou o grupo de uma linha, não faz outra revisão.
+  const orcConteudo = o => {
+    const n = orcParaGuardar(o), lin = (l, un) => Object.assign({desc: l.desc, qtd: l.qtd, preco: l.preco, iva: l.iva}, un ? {un: l.un} : {});
+    return cliNorm({titulo: n.titulo, validadeDias: n.validadeDias, cliente: n.cliente, autoliquidacao: orcAutoliq(n), divisoes: n.divisoes,
+      opcoes: n.opcoes.map(op => ({k: op.k, titulo: op.titulo, marca: op.marca, linhas: op.linhas.map(l => lin(l, false))})), comuns: n.comuns.map(l => lin(l, true)),
+      recomendada: n.recomendada, inclui: n.inclui, notas: n.notas, pagamento: n.pagamento, condicoes: n.condicoes});
+  };
   const orcHash = o => { const s = orcConteudo(o); let x = 2166136261; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619) >>> 0; } return x.toString(16) + '.' + s.length; };
   // Imprimir só o que já é PDF: com número, guardado e igual ao último PDF (senão sairia com o número de outra revisão).
   const orcPdfPronto = () => !!(orc && orc.num && orc.hash && !orcSujo && orcHash(orc) === orc.hash);
@@ -5080,7 +5110,8 @@ if (!Element.prototype.replaceChildren) {
   function blocoOrc(r) {
     if (!blocoOrcMostra(r) || (!r.orcamento && !canWrite)) return null;
     const o = r.orcamento, n = o ? o.opcoes.length : 0;
-    const linha = o && o.num && o.rev ? `${o.num} · rev. ${o.rev} · ${n} ${n === 1 ? 'opção' : 'opções'} · ${orcEur(orcTotOp(o, orcRec(o)).base)} s/IVA${o.enviadoRev === o.rev ? ' · enviado' : ''}`
+    const c = orcDoPdf(o), op = o ? orcOpValor(c, o.escolhida) : null;
+    const linha = o && o.num && o.rev ? `${o.num} · rev. ${o.rev} · ${n} ${n === 1 ? 'opção' : 'opções'} · ${orcEur(orcTotOp(c, op).base)} s/IVA${o.escolhida ? ` (aceite a ${op.k})` : ''}${o.enviadoRev === o.rev ? ' · enviado' : ''}`
       : o ? 'Rascunho, ainda sem PDF' : r.num ? `${r.num}, feito fora do registo` : 'Ainda por fazer';
     return h('div',{class:'acao', style:'--stripe:var(--accent)'},
       h('div',{style:'min-width:0'}, h('div',{class:'what'}, 'Orçamento'), h('div',{class:'who'}, linha)),
@@ -5089,8 +5120,11 @@ if (!Element.prototype.replaceChildren) {
 
   function abrirOrc(id) {
     const r = rows.find(x => x.id === id); if (!r) return;
-    orcId = id; orcV = r.orcamento ? Number(r.orcamento.v) || 0 : 0;
+    if (orcAGuardar) { toast('Ainda a guardar o orçamento. Espera um instante.'); return; }
+    orcId = id; orcV = orcVDe(r);
     orc = orcParaEditar(r.orcamento || orcNovo(r)); orcSujo = false; orcVista = 'editar'; orcEnvio = null;
+    // Um rascunho sem número num pedido que entretanto ganhou número (enviado fora do registo) fica com esse número.
+    if (!orc.num && r.num) { orc.num = r.num; orc.revBase = orcRevBase(r); }
     F('orcErr').hidden = true; F('orcWrap').hidden = false; document.body.style.overflow = 'hidden';
     // A classe de impressão fica posta enquanto o orçamento está aberto: Partilhar › Imprimir no iPad também só imprime a folha.
     document.body.classList.add('a-imprimir-orc');
@@ -5100,6 +5134,7 @@ if (!Element.prototype.replaceChildren) {
     F('orcEd').scrollTop = 0;
   }
   function fecharOrc(forcar) {
+    if (!forcar && orcAGuardar) { toast('Ainda a guardar o orçamento. Fecha daqui a um instante.'); return; }
     if (!forcar && orcSujo && canWrite && !confirm('O orçamento tem alterações por guardar. Fechar mesmo assim?')) return;
     fechaPop();
     F('orcWrap').hidden = true; document.body.classList.remove('a-imprimir-orc');
@@ -5107,6 +5142,22 @@ if (!Element.prototype.replaceChildren) {
     document.body.style.overflow = F('sheetWrap').hidden ? '' : 'hidden';
     orc = null; orcId = null; orcSujo = false; orcEnvio = null;
     if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
+  }
+  // Um colega gravou este orçamento (outro PDF, o envio, o aceite): sem nada por guardar, o editor passa à versão nova;
+  // com alterações por guardar, fica como está e o «Guardar» avisa do conflito.
+  function orcRecarrega(r) { orcV = orcVDe(r); orc = orcParaEditar(r.orcamento); orcSujo = false; orcEnvio = null; document.title = orcTituloDoc(); renderOrc(); }
+  function orcSincroniza() {
+    if (!orc || orcAGuardar || orcSujo || F('orcWrap').hidden) return;
+    const r = rows.find(x => x.id === orcId);
+    if (r && r.orcamento && orcVDe(r) !== orcV) { orcRecarrega(r); toast('Um colega mudou este orçamento: está aqui a versão nova.'); }
+  }
+  // Antes de imprimir ou enviar: o orçamento aberto ainda é o da base de dados?
+  function orcAtual() {
+    const r = rows.find(x => x.id === orcId);
+    if (r && orcVDe(r) === orcV) return true;
+    if (r && r.orcamento && !orcSujo) { orcRecarrega(r); orcErro('Um colega mudou este orçamento depois de o abrires: está aqui a versão nova. Confere antes de imprimir ou enviar.'); }
+    else orcErro('Um colega mudou este orçamento enquanto o tinhas aberto. Copia o que mudaste, fecha sem guardar e abre outra vez.');
+    return false;
   }
   function orcMuda() {
     if (orcEnvio) { orcEnvio = null; const s = F('orcEd').querySelector('.oe-envio'); if (s) s.remove(); } // o texto seria o do PDF anterior
@@ -5180,6 +5231,12 @@ if (!Element.prototype.replaceChildren) {
         h('span',null, it.desc, h('small',null, [it.marca, it.btu ? ORC_POT.btuh(it.btu) : null, it.preco != null ? orcEur(orcCent(it.preco)) + ' s/IVA' : 'sem preço'].filter(Boolean).join(' · '))))));
     mostra('');
     abrePop(botao, [h('input',{type:'search', class:'oe-pick-q', placeholder:'Procurar na tabela', 'aria-label':'Procurar na tabela', oninput: ev => mostra(ev.target.value)}), lista], 'menu oe-pick');
+    // A lista é comprida: fica do lado com mais espaço e nunca passa do fundo nem do topo do ecrã.
+    if (popEl) {
+      const r = botao.getBoundingClientRect(), abaixo = window.innerHeight - r.bottom - 18, acima = r.top - 18, embaixo = abaixo >= 260 || abaixo >= acima;
+      popEl.style.maxHeight = Math.max(160, embaixo ? abaixo : acima) + 'px';
+      popEl.style.top = (embaixo ? r.bottom + 6 : Math.max(12, r.top - 6 - popEl.offsetHeight)) + window.pageYOffset + 'px';
+    }
   }
 
   // Potência: as mesmas regras do site e da skill. Põe em cada opção o aparelho da tabela com a marca da opção (um
@@ -5247,8 +5304,8 @@ if (!Element.prototype.replaceChildren) {
           return h('tr',null,
             h('td',null, (() => { const s = h('select',{'aria-label':'Divisão', disabled: ro, onchange: ev => { d.tipo = ev.target.value; mudou(); }}, tipos.map(t => h('option',{value:t}, t))); s.value = d.tipo; return s; })()),
             h('td',null, h('input',{class:'num', value: orcTxtN(d.area), inputmode:'decimal', 'aria-label':'Área em m²', readonly: ro, oninput: ev => { d.area = ev.target.value; mudou(); }})),
-            h('td',null, h('input',{type:'checkbox', 'aria-label':'Muito sol', checked: d.sol ? true : null, disabled: ro, onchange: ev => { d.sol = ev.target.checked; mudou(); }})),
-            h('td',null, h('input',{type:'checkbox', 'aria-label':'Último andar', checked: d.ultimoAndar ? true : null, disabled: ro, onchange: ev => { d.ultimoAndar = ev.target.checked; mudou(); }})),
+            h('td',null, h('label',{class:'oe-chk'}, h('input',{type:'checkbox', 'aria-label':'Muito sol', checked: d.sol ? true : null, disabled: ro, onchange: ev => { d.sol = ev.target.checked; mudou(); }}))),
+            h('td',null, h('label',{class:'oe-chk'}, h('input',{type:'checkbox', 'aria-label':'Último andar', checked: d.ultimoAndar ? true : null, disabled: ro, onchange: ev => { d.ultimoAndar = ev.target.checked; mudou(); }}))),
             res,
             h('td',null, ro ? null : h('button',{class:'oc-x', type:'button', title:'Tirar a divisão', 'aria-label':'Tirar a divisão', onclick:() => { o.divisoes.splice(i, 1); orcMuda(); renderOrc(); }}, '×')));
         }) : h('tr',null, h('td',{colspan:'6', class:'oc-vazio'}, 'Sem divisões. Para um ar condicionado, põe cada divisão com a área: dá o tamanho de cada aparelho.'))))),
@@ -5264,7 +5321,8 @@ if (!Element.prototype.replaceChildren) {
           oeSel(op, 'marca', [['', 'Sem marca']].concat(ORC_MARCAS.map(m => [m, m])), null, {'aria-label': `Marca da opção ${op.k}`, class:'oe-op-m'}),
           o.opcoes.length > 1 ? h('label',{class:'check'}, h('input',{type:'radio', name:'oe-rec', checked: o.recomendada === op.k ? true : null, disabled: ro, onchange:() => { o.recomendada = op.k; orcMuda(); }}), 'Recomendada') : null,
           !ro && o.opcoes.length > 1 ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => {
-            o.opcoes.splice(i, 1); o.opcoes.forEach((z, j) => { if (o.recomendada === z.k) o.recomendada = ORC_LETRAS[j]; z.k = ORC_LETRAS[j]; });
+            if (o.escolhida === op.k) o.escolhida = null;
+            o.opcoes.splice(i, 1); o.opcoes.forEach((z, j) => { if (o.recomendada === z.k) o.recomendada = ORC_LETRAS[j]; else if (o.escolhida === z.k) o.escolhida = ORC_LETRAS[j]; z.k = ORC_LETRAS[j]; });
             if (!o.opcoes.some(z => z.k === o.recomendada)) o.recomendada = 'A';
             orcMuda(); renderOrc(); }}, 'Tirar a opção') : null),
         oeLinhas(op.linhas, false),
@@ -5331,7 +5389,7 @@ if (!Element.prototype.replaceChildren) {
             : [h('p',{class:'doc-gama-v'}, orcEur(t.base), h('small',null, ' + IVA')), h('p',{class:'doc-gama-sep'}, autoliq ? 'IVA autoliquidado pelo adquirente' : `${ivaTxt(t)} · total ${orcEur(t.comIva)}`)]));
     };
     const linhasPar = s => String(s || '').split(/\n+/).map(x => x.trim()).filter(Boolean);
-    const cond = ['Valores em euros. Os preços das linhas são sem IVA; o IVA é o da taxa indicada.']
+    const cond = [autoliq ? 'Valores em euros, sem IVA.' : 'Valores em euros. Os preços das linhas são sem IVA; o IVA, por taxa, está junto do total.']
       .concat(autoliq ? ['IVA autoliquidado pelo adquirente (CIVA, artigo 2.º, n.º 1, alínea j)).'] : [])
       .concat([`Válido até ${pontos(ate)} (${o.validadeDias} dias).`])
       .concat(o.pagamento ? ['Pagamento: ' + o.pagamento] : [])
@@ -5378,10 +5436,13 @@ if (!Element.prototype.replaceChildren) {
 
   // Validação: travessões e marcas proibidas sempre; para o PDF, cada linha com descrição, quantidade e preço.
   function orcValidar(o, pdf) {
-    const textos = [o.titulo, o.cliente.nome, o.cliente.nif, o.cliente.contacto, o.cliente.morada, o.inclui, o.notas, o.pagamento, o.condicoes]
+    // As marcas proibidas procuram-se só no que a MDM escreve: os dados do cliente (um «Lg.» de Largo na morada, um nome
+    // de empresa) não são texto da MDM. Os travessões procuram-se em tudo.
+    const escritos = [o.titulo, o.inclui, o.notas, o.pagamento, o.condicoes]
       .concat(...o.opcoes.map(op => [op.titulo].concat(...op.linhas.map(l => [l.desc, l.un, l.ref]))), ...o.comuns.map(l => [l.desc, l.un, l.ref]));
+    const textos = escritos.concat([o.cliente.nome, o.cliente.nif, o.cliente.contacto, o.cliente.morada]);
     if (textos.some(t => ORC_TRAV.test(String(t || '')))) return 'Sem travessões: usa vírgulas ou parênteses.';
-    const proib = textos.find(t => ORC_PROIB_RE.test(String(t || '')));
+    const proib = escritos.find(t => ORC_PROIB_RE.test(String(t || '')));
     if (proib) return `«${String(proib).slice(0, 60)}» fala de uma marca que a MDM não trabalha (só ${ORC_MARCAS.join(', ')}).`;
     if (o.opcoes.some(op => op.marca && ORC_MARCAS.indexOf(op.marca) < 0)) return 'Marca fora das marcas da MDM.';
     const dias = Number(o.validadeDias);
@@ -5433,19 +5494,24 @@ if (!Element.prototype.replaceChildren) {
     F('orcErr').hidden = true;
     if (saving || orcAGuardar) { orcErro('Ainda a guardar. Espera um instante e tenta outra vez.'); return; }
     const v = orcValidar(orc, pdf); if (v) { orcErro(v); return; }
-    const h1 = orcHash(orc);
+    // O editor desta gravação: depois de cada espera, se fechou ou passou a outro pedido, não se mexe em mais nada.
+    const id = orcId, v0 = orcV, alvo = orc, h1 = orcHash(orc), antes = JSON.stringify(orc);
+    const mesmo = () => orcId === id && orc === alvo;
+    const conflito = 'Um colega mudou este orçamento enquanto o tinhas aberto. Copia o que mudaste, fecha sem guardar e abre outra vez.';
+    const fresco0 = rows.find(x => x.id === id);
+    if (!fresco0) { orcErro(conflito); return; }
+    if (orcVDe(fresco0) !== v0) { orcAtual(); return; } // recarrega o editor (sem nada por guardar) ou avisa do conflito
     // PDF sem mudanças desde o último: é só imprimir outra vez a mesma revisão.
     if (pdf && !orcSujo && orc.num && orc.hash === h1) { imprimirOrc(); return; }
-    const fresco0 = rows.find(x => x.id === orcId);
-    const vDe = r => r && r.orcamento ? Number(r.orcamento.v) || 0 : 0;
-    const conflito = 'Um colega mudou este orçamento enquanto o tinhas aberto. Copia o que mudaste, fecha sem guardar e abre outra vez.';
-    if (!fresco0 || vDe(fresco0) !== orcV) { orcErro(conflito); return; }
-    orcAGuardar = true;
+    orcAGuardar = true; F('orcBarEstado').textContent = 'A guardar…';
     try {
       const o = orcParaGuardar(orc);
       let nota1 = 'Orçamento guardado (rascunho)', novaRev = false;
       if (pdf) {
+        // Um pedido que ganhou número fora do registo fica com ele: o PDF é a revisão seguinte à que o cliente tem.
+        if (!o.num && fresco0.num) { o.num = fresco0.num; o.revBase = orcRevBase(fresco0); }
         if (!o.num) o.num = await reservarNumero();
+        if (!mesmo()) return;
         if (o.hash !== h1) {
           novaRev = true;
           if (o.ultimoPdf) o.anteriores = (o.anteriores || []).concat([o.ultimoPdf]).slice(-3);
@@ -5456,27 +5522,39 @@ if (!Element.prototype.replaceChildren) {
         } else nota1 = 'Orçamento guardado';
       }
       // Depois da espera do número, volta a ler o pedido: a gravação parte da cópia mais recente.
-      const fresco = rows.find(x => x.id === orcId);
-      if (!fresco || vDe(fresco) !== orcV) { orcErro(conflito); return; }
-      o.v = orcV + 1;
+      const fresco = rows.find(x => x.id === id);
+      if (!fresco || orcVDe(fresco) !== v0) { orcErro(conflito); return; }
+      o.v = v0 + 1;
       const novo = JSON.parse(JSON.stringify(fresco)); delete novo.id; delete novo._versao;
       novo.orcamento = o;
-      if (novaRev) novo.valor = orcTotOp(o, orcRec(o)).base / 100;
+      // O valor do pedido: o da opção aceite, se o cliente já aceitou, senão o da recomendada.
+      if (novaRev) novo.valor = orcTotOp(o, orcOpValor(o, o.escolhida)).base / 100;
       novo.historico = (novo.historico || []).slice(-60);
       novo.historico.push(nota(nota1));
-      const ok = await gravar(orcId, novo, novaRev ? `PDF da revisão ${o.rev} pronto` : 'Orçamento guardado', {manter: true, erro: orcErro});
-      if (!ok) return;
-      orcV = o.v; orc = orcParaEditar(o); orcSujo = false; document.title = orcTituloDoc();
-      renderOrc();
-      if (pdf) setTimeout(imprimirOrc, 60);
+      const ok = await gravar(id, novo, novaRev ? `PDF da revisão ${o.rev} pronto` : 'Orçamento guardado', {manter: true, erro: m => { if (mesmo()) orcErro(m); else toast(m); }});
+      if (!ok || !mesmo()) return;
+      orcV = o.v;
+      if (JSON.stringify(orc) === antes) { orc = orcParaEditar(o); orcSujo = false; }
+      else {
+        // Escreveste durante a gravação: fica o que está no ecrã, com o número, a revisão e a versão que a gravação deu.
+        ['num', 'rev', 'revBase', 'hash', 'data', 'emitidoEm', 'emitidoPor', 'ultimoPdf', 'anteriores'].forEach(k => { if (o[k] !== undefined) orc[k] = JSON.parse(JSON.stringify(o[k])); });
+        orc.v = o.v; orcSujo = true;
+      }
+      document.title = orcTituloDoc(); renderOrc();
+      if (pdf) {
+        const agora = orc; // o editor já é o do orçamento gravado; imprime se continuar o mesmo
+        if (orcPdfPronto()) setTimeout(() => { if (orcId === id && orc === agora && orcPdfPronto()) imprimirOrc(); }, 60);
+        else toast('PDF gravado, mas mudaste o orçamento entretanto: carrega outra vez em «Guardar e imprimir».');
+      }
     } catch (e) {
       orcErro(String(e && e.message) === 'numero' ? 'Não foi possível dar o número (muita gente ao mesmo tempo). Tenta outra vez.'
         : /permiss|row-level/.test(String(e && e.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar. Tenta outra vez.');
-    } finally { orcAGuardar = false; }
+    } finally { orcAGuardar = false; if (orc) orcMarca(); }
   }
   // Imprimir no mesmo toque (o iPad pode ignorar um print() que chega depois de uma espera); a classe a-imprimir-orc já
   // está posta desde que o orçamento abriu, por isso a impressão só leva a folha.
   function imprimirOrc() {
+    if (!orcAtual()) return;
     if (!orcPdfPronto()) { orcErro('Primeiro «Guardar e imprimir»: o PDF leva o número e a revisão.'); return; }
     renderOrcDoc(); document.title = orcTituloDoc();
     window.print();
@@ -5511,9 +5589,16 @@ if (!Element.prototype.replaceChildren) {
     else velho();
   }
   function orcMarcarEnviado(canal) {
-    const id = orcId, r = rows.find(x => x.id === id); if (!r) return;
+    const id = orcId, r = rows.find(x => x.id === id); if (!r || !orcAtual()) return;
     const tr = transicoes(r).find(x => x.envio); if (!tr) return;
-    fecharOrc(true); openSheet(id); abrirTrans(Object.assign({}, tr, {porOnde: canal}));
+    // A revisão que se viu e enviou: se entretanto houver outra, o passo recusa (não fica registada uma que o cliente não tem).
+    const rev = orc.rev;
+    fecharOrc(true); openSheet(id); abrirTrans(Object.assign({}, tr, {porOnde: canal, revVista: rev}));
+  }
+  // O texto pode ser mudado à mão (no iPad, «--» passa a travessão): sem travessões, como nos seguimentos.
+  function orcEnvioOk(env) {
+    if (!ORC_TRAV.test(env.textos[env.canal] + ' ' + (env.canal === 'email' ? env.assunto : ''))) return true;
+    orcErro('Sem travessões na mensagem: usa vírgulas ou parênteses.'); return false;
   }
   function oeEnvio() {
     const r = rows.find(x => x.id === orcId) || {}, c = contactosDe(r), env = orcEnvio;
@@ -5527,8 +5612,8 @@ if (!Element.prototype.replaceChildren) {
         env.canal === 'email' ? oeCampo('Assunto', h('input',{id:'oe-env-ass', value: env.assunto, oninput: ev => { env.assunto = ev.target.value; }}), true) : null,
         oeCampo('Mensagem (podes mudar antes de abrir)', ta, true)),
       h('div',{class:'oe-acoes'},
-        h('button',{class:'btn btn-sm', type:'button', disabled: tem ? null : true, onclick:() => abrirLink(orcLinkEnvio(env, c))}, env.canal === 'whatsapp' ? 'Abrir no WhatsApp' : 'Abrir no email'),
-        h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => orcCopiar(env.textos[env.canal])}, 'Copiar o texto'),
+        h('button',{class:'btn btn-sm', type:'button', disabled: tem ? null : true, onclick:() => { if (orcEnvioOk(env)) abrirLink(orcLinkEnvio(env, c)); }}, env.canal === 'whatsapp' ? 'Abrir no WhatsApp' : 'Abrir no email'),
+        h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { if (orcEnvioOk(env)) orcCopiar(env.textos[env.canal]); }}, 'Copiar o texto'),
         canWrite ? h('button',{class:'btn btn-ghost btn-sm', type:'button', disabled: tr ? null : true, onclick:() => orcMarcarEnviado(env.canal)}, 'Marcar como enviado') : null,
         h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { orcEnvio = null; renderOrc(); }}, 'Fechar')),
       tem ? null : h('p',{class:'note'}, env.canal === 'whatsapp' ? 'Sem telemóvel no pedido nem na ficha do cliente: copia o texto.' : 'Sem email no pedido nem na ficha do cliente: copia o texto.'),
@@ -5541,7 +5626,7 @@ if (!Element.prototype.replaceChildren) {
   F('orcEmitir').addEventListener('click', () => guardarOrc(true));
   F('orcImprimir').addEventListener('click', imprimirOrc);
   F('orcEnviar').addEventListener('click', () => {
-    if (!orcPdfPronto()) return;
+    if (!orcAtual() || !orcPdfPronto()) return;
     const r = rows.find(x => x.id === orcId) || {}, c = contactosDe(r), m = orcMensagens(orc);
     orcEnvio = {canal: r.canal === 'email' || !c.tel ? 'email' : 'whatsapp', assunto: m.assunto, textos: {whatsapp: m.whatsapp, email: m.email}};
     orcVista = 'editar'; renderOrc(); F('orcEd').scrollTop = 0;
