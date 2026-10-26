@@ -470,7 +470,7 @@ PREVIEW = bool(SITE.get("preview"))
 # páginas sempre fora do Google, também depois do lançamento; --check confirma
 NOINDEX_SEMPRE = {"404.html", "obrigado.html"}
 NOINDEX_RE = re.compile(r"\b(?:noindex|none)\b", re.I)
-# imagem de partilha: o logótipo branco sobre o verde ink (do sistema de desenho, assets/Partilha, com o fundo recolorido)
+# imagem de partilha: o logótipo branco do rodapé ao centro, sobre o --ink do site.css (gerar_fotos.py --partilha)
 OG_IMG = {"src": "og-melperfaz.jpg", "w": 1200, "h": 630, "alt": "Logótipo da Melperfaz, Construção Civil, Lda., a branco sobre verde-escuro"}
 
 

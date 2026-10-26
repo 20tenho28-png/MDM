@@ -522,6 +522,8 @@ Tudo em `/home/user/MDM/melperfaz`. O build continua a ser `python3 build.py`. O
   - Marquee, StatCard, tag-cards e hero full-bleed como retirados do site
   - 10 estilos de texto
   - retirar "abaixo de AA, mantidos por fidelidade"
+- *Feito:* o DESIGN.md atualizado está em `docs/DESIGN.md` (com os contrastes medidos da paleta verde e vermelha) e a
+  lista para o dono em `docs/PERGUNTAS-DONO.md`.
 
 ---
 
@@ -624,6 +626,9 @@ testes (`tests/site.test.mjs` e `tests/browser.mjs`) conferem o que está constr
 - **Saem do site o marquee, o stat card e o processo na home.** O conteúdo do processo não se perde, passa para o lado do formulário. Explicar ao dono como "o mesmo conteúdo, posto onde ajuda o cliente a decidir".
 
 ### Perguntas para o dono (por ordem de importância)
+
+A versão para enviar ao dono, em linguagem simples, com o sítio onde cada resposta aparece, o campo que preenche e
+uma pergunta a mais (confirmar o verde e o vermelho e o logótipo recolorido), está em `docs/PERGUNTAS-DONO.md`.
 
 1. **Em que concelhos ou distritos trabalham?** (bloqueante)
 2. Qual o horário de atendimento do telefone e do WhatsApp?
