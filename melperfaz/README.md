@@ -33,7 +33,7 @@ Pré-visualizar: `python3 -m http.server -d public 8000` e abrir `http://localho
 | `data/obras.json` | As obras: serviço (`cat`, o de `site.json › servicos`), `destaque` (na página inicial), título, fotografia, o que se vê, os factos (vazios até a empresa os dar), `fotosExtra` (mais fotografias, por baixo de «Na obra» na ficha) |
 | `data/fotos.json` | As fotografias: tamanho do original, origem e texto alternativo. `data/lqip.json` são as prévias (gerado) |
 | `src/templates/` | `layout.html` (a cabeça, o cabeçalho e o rodapé de todas as páginas) e `obra.html` (a ficha de cada obra) |
-| `src/partials/` | Os componentes: `header` (menu de `site.json`, telefone, WhatsApp, «Pedir Orçamento»; variante `reduzido`), `barra-acoes` (Ligar, WhatsApp e Orçamento, fixa em baixo abaixo de 980 px), `footer`, `page-head` (migalhas, eyebrow, h1, introdução), `cta` (a faixa clay), `prova` (a linha de garantias), `orcamento-form` (o único formulário), `garantias` (a TrustList, inteira na página inicial e condensada em `orcamento.html`), `obra-foto` (cartão de obra) e `antes-depois` |
+| `src/partials/` | Os componentes: `header` (menu de `site.json`, telefone, WhatsApp, «Pedir Orçamento»; variante `reduzido`), `barra-acoes` (Ligar, WhatsApp e Orçamento, fixa em baixo abaixo de 980 px), `footer`, `page-head` (migalhas, eyebrow, h1, introdução), `cta` (a CtaBand: um painel clay dentro da `.wrap` de uma secção clara; `sup` é `s-paper` ou `s-bone` e `junta` continua a secção de cima), `prova` (a linha de garantias), `orcamento-form` (o único formulário), `garantias` (a TrustList, inteira na página inicial e condensada em `orcamento.html`), `obra-foto` (cartão de obra) e `antes-depois` |
 | `src/pages/` | Página inicial, Obras, Pedir Orçamento (`orcamento.html`, com o formulário), obrigado, 404 e privacidade, cada uma com o seu `<!--meta {...} -->` |
 | `assets/css/` | `site.css` (o sistema de desenho), `pag-obras.css`, `pag-paginas.css`, `pag-orcamento.css` (formulário e lateral) |
 | `assets/js/site.js` | Menu nos ecrãs estreitos (fundo escurecido, página sem deslizar, Esc), entrada ao fazer scroll, comparador (um toque ou um clique põe a linha, arrasta-se a partir da pega; setas do teclado), em `orcamento.html` o `?tipo=` (tipo escolhido e «Pedido para: X · alterar») e o `?de=` (campo `pagina`), e o envio do formulário: validação em português, `obrigado.html` se correu bem, e se falhar um aviso com o telefone e o WhatsApp (`wa.erro`, com o nome e o tipo escritos) |
@@ -73,7 +73,7 @@ publicação; se o site ficar um ano sem mudanças, publicar de novo em janeiro 
 Ligações, imagens e `srcset` que existem; `?v=` nos CSS e JS; sem sintaxe de modelo nem placeholders; sem travessões,
 emoji ou o telefone escrito de outra forma; `lang`, um só `h1`, título e descrição com tamanho certo, canonical e
 `og:image` no domínio; JSON-LD válido com a empresa; o formulário Netlify só em `orcamento.html`, com os atributos, os
-campos e as opções de `site.json`; todos os «Pedir Orçamento» (texto ou `aria-label`) a levar a `orcamento.html`; nenhuma ligação para `#contacto` nem para `…index.html` (a página inicial é `./`) e nenhum dos rótulos retirados («Pedir Orçamento Gratuito», «Chamar no WhatsApp», «Orçamento Gratuito» como nome de ligação); `robots.txt`, `_headers` e `netlify.toml` de acordo com `preview`, com o `--check` no comando de publicação e `frame-ancestors`; os comentários tirados ao CSS e ao JS publicados sem partir nada; todas as fotografias com os tamanhos e a
+campos e as opções de `site.json`; todos os «Pedir Orçamento» (texto ou `aria-label`) a levar a `orcamento.html`; nenhuma ligação para `#contacto` nem para `…index.html` (a página inicial é `./`) e nenhum dos rótulos retirados («Pedir Orçamento Gratuito», «Chamar no WhatsApp», «Orçamento Gratuito» como nome de ligação); o vermelho nunca a toda a largura (a superfície `s-clay` só no painel da CtaBand, e a CtaBand numa secção paper ou bone, para não encostar ao verde); `robots.txt`, `_headers` e `netlify.toml` de acordo com `preview`, com o `--check` no comando de publicação e `frame-ancestors`; os comentários tirados ao CSS e ao JS publicados sem partir nada; todas as fotografias com os tamanhos e a
 prévia; os dados de `dados-melperfaz.json` com o formato certo (email, NIF, ligação do Google Maps, sem ponto final no alvará, seguro, zona e morada); `fotosExtra` sem repetidas; nenhum dos glifos
 que passaram a ícone (→, ≡, ✓, ‹).
 
@@ -93,15 +93,18 @@ qualquer animação `infinite`; e o movimento: durações e curvas que não seja
 
 - **Cores**: verde e vermelho, a pedido do dono. Os papéis guardam o nome: `ink` (#12392b) é o verde-floresta, o escuro
   principal (texto no claro, superfícies escuras, cabeçalho), com `ink-deep` e `ink-raised`; `clay` (#c8102e) é o
-  vermelho do acento (botões, traços do eyebrow, faixa de contacto) e `clay-deep` (#9b0d24) o vermelho do texto sobre o
-  claro; `amber` (#ff8a7a) é um vermelho claro, só para texto de acento e foco sobre o verde. Os neutros (`paper`,
+  vermelho do acento (botões, traços do eyebrow, o painel da CtaBand) e `clay-deep` (#9b0d24) o vermelho do texto sobre
+  o claro; `amber` (#ff8a7a) é um vermelho claro, só para texto de acento e foco sobre o verde. Os neutros (`paper`,
   `bone`, `line`, `muted`) puxam ao verde. O erro (`--erro`, #a3161a) não é o vermelho da marca: só texto e contorno,
   sempre com um «!» num círculo antes da mensagem. O logótipo, os favicons e a imagem de partilha estão no mesmo verde.
 - **Superfícies**: cada secção tem `.s-paper`, `.s-bone`, `.s-ink` ou `.s-clay`, que definem `--fg`, `--fg-2`, `--fg-cat`,
   `--rule`, `--eyebrow-rule`, `--focus-c` e as cores do botão. Os componentes só leem estas variáveis. No clay (vermelho)
-  o texto é branco (5,9:1), nunca ink (2,2:1). O anel de foco é ink no claro, amber no ink e branco no clay.
-- **Botões**: `.btn` (clay com texto branco; na faixa clay, paper com texto ink) e um só secundário, `.btn-ghost` (na
-  faixa clay, com contorno branco), com a mesma altura. Grupo `.acoes` (no telemóvel, todos a toda a largura).
+  o texto é branco (5,9:1), nunca ink (2,2:1). O anel de foco é ink no claro, amber no ink e branco no clay. O vermelho
+  nunca encosta ao verde: o clay é só o painel da CtaBand, dentro da `.wrap` de uma secção paper ou bone (os bordos do
+  painel são os da `.wrap`), e nunca uma faixa a toda a largura.
+- **Botões**: `.btn` (clay com texto branco; no painel clay, paper com texto ink, e com o rato branco com texto
+  clay-deep, nunca verde no vermelho) e um só secundário, `.btn-ghost` (no painel clay, com contorno branco), com a
+  mesma altura. Grupo `.acoes` (no telemóvel, todos a toda a largura).
   Ligações: `.link` e `.link-seta`.
 - **Texto**: 10 estilos (`--fs-display-hero`, `--fs-section`, `--fs-cta`, `--fs-card`, `--fs-step`, `--fs-list`,
   `--fs-lead`, `--fs-body`, `--fs-category` de 13 px, `--fs-phone`) e `--fs-label` para as etiquetas de formulário.
@@ -137,12 +140,12 @@ Os do browser geram o site numa pasta temporária e servem-no num servidor local
 como o Netlify o receberia (e pode falhar de propósito): o pedido que segue e abre `obrigado.html`, a validação, o aviso
 de falha (foco, telefone, WhatsApp com o nome e o tipo) com o que se escreveu a ficar, o envio sem JavaScript, o tipo de
 obra pré-escolhido com «Pedido para:» e o `?de=` no campo `pagina`, o isco para robôs, nenhuma página a deslizar para o
-lado a 390 e 320 px, os endereços antigos com `?tipo=` (os nomes de antes do redesenho), o menu dos ecrãs estreitos (também aberto a meio da página), a barra fixa sem tapar o foco ao tabular, o comparador com toque, clique, arrasto e teclado, o foco e as
+lado a 390 e 320 px, os endereços antigos com `?tipo=` (os nomes de antes do redesenho), o menu dos ecrãs estreitos (também aberto a meio da página, e com o anel de foco da primeira e da última ligação inteiro dentro do painel), a barra fixa sem tapar o foco ao tabular, o comparador com toque, clique, arrasto e teclado, o foco e as
 imagens, nenhuma fotografia ampliada para lá do original (o hero a 375 px, os cartões, a ficha na sua proporção),
 nenhuma animação sem fim nem acima de 500 ms, o movimento (o menu que vira X e sai no fim da transição, o
 cabeçalho compacto, os vistos em cascata, o fade das fotografias, o indicador de envio, o CLS abaixo de 0,05 e, com
 movimento reduzido, nada a animar nem a deslocar-se), e o sistema visual: o h1 do hero e os cabeçalhos de secção no x do logótipo, contraste de
-4,5:1 nos botões e na faixa clay (branco sobre o vermelho), o anel de foco da cor de cada superfície, o erro com o seu «!» (não se confunde com o vermelho dos botões), campos de 16 px e etiquetas de 13 px, a altura da página inicial (menos de 6.000 px a 390, até 4.400 a 1440, medida numa cópia com os dados da Melperfaz
+4,5:1 nos botões e no painel clay (branco sobre o vermelho), o anel de foco da cor de cada superfície, o hover dos botões no vermelho sem verde, o painel vermelho dentro da `.wrap` e a 48 px ou mais de qualquer secção ink (o vermelho nunca encosta ao verde), o erro com o seu «!» (não se confunde com o vermelho dos botões), campos de 16 px e etiquetas de 13 px, a altura da página inicial (menos de 6.000 px a 390, até 4.400 a 1440, medida numa cópia com os dados da Melperfaz
 vazios: preenchidos, acrescentam linhas que não são o desenho), a legenda dos cartões (sobre a fotografia; a 390 px por baixo, menos nas obras em destaque), o cartão inteiro como
 ligação, as miniaturas dos serviços com 64 px, os títulos sem uma palavra sozinha na última linha, os botões de cada
 grupo com a mesma altura e a barra de ações em terços, sem nada fora do ecrã. O CI

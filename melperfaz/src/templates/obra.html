@@ -32,9 +32,10 @@
   </div>
 </section>
 
-{{> cta titulo="Quer uma obra assim?" texto="Peça o orçamento com o tipo de obra já escolhido, ou envie fotografias do seu espaço por WhatsApp." tipo="{{ obra.servico.id }}" de="obras/{{ obra.slug }}" waHref="{{ obra.waHref }}" waRotulo="Enviar fotografias por WhatsApp" ref="{{ obra.code }}"}}
+{{> cta junta="1" titulo="Quer uma obra assim?" texto="Peça o orçamento com o tipo de obra já escolhido, ou envie fotografias do seu espaço por WhatsApp." tipo="{{ obra.servico.id }}" de="obras/{{ obra.slug }}" waHref="{{ obra.waHref }}" waRotulo="Enviar fotografias por WhatsApp" ref="{{ obra.code }}"}}
 
-<!-- outras obras (bone, depois da faixa clay: ink nunca encosta a ink no rodapé); as migalhas já levam a todas -->
+<!-- outras obras (bone, depois da CtaBand, que continua o corpo paper com o painel vermelho lá dentro; ink nunca encosta
+     a ink no rodapé); as migalhas já levam a todas -->
 <section class="sec s-bone obra-rel" aria-labelledby="obraRelT">
   <div class="wrap">
     <div class="sec-head">

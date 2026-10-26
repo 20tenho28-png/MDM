@@ -823,6 +823,24 @@ def check_rotulos(f, text):
     return out
 
 
+# o vermelho nunca encosta ao verde: uma faixa clay a toda a largura entre secções ink lia-se como uma bandeira. O clay
+# (a superfície .s-clay) só existe no painel da CtaBand (.cta-painel), e a secção da CtaBand é clara (s-paper ou s-bone).
+# Os botões, a célula da barra e os traços vermelhos não são superfícies e ficam como estão.
+CLASSE_RE = re.compile(r'<(\w+)\b[^>]*?\bclass="([^"]*)"')
+
+
+def check_superficies(f, text):
+    """O clay só no painel da CtaBand, e a CtaBand numa secção clara."""
+    out = []
+    for tag, cls in CLASSE_RE.findall(re.sub(r"<!--.*?-->", "", text, flags=re.S)):
+        c = cls.split()
+        if "s-clay" in c and "cta-painel" not in c:
+            out.append(f"{f}: <{tag} class=\"{cls}\">: o vermelho (s-clay) só no painel da CtaBand, numa secção clara; a toda a largura encostava ao verde")
+        if tag == "section" and "cta" in c and not {"s-paper", "s-bone"} & set(c):
+            out.append(f"{f}: a CtaBand numa secção «{cls}»: o painel vermelho vive numa secção clara (sup=\"s-paper\" ou \"s-bone\")")
+    return out
+
+
 def check_formulario(f, text):
     """O formulário de orçamento existe só em orcamento.html e é o formulário Netlify «orcamento»."""
     m = FORM_RE.search(text)
@@ -1127,6 +1145,7 @@ def check(files):
         problems += check_formulario(f, text)
         problems += check_pedir(f, text)
         problems += check_rotulos(f, text)
+        problems += check_superficies(f, text)
         for a, b, c in REF_RE.findall(text):
             refs = [a] if a else ([s.strip().split()[0] for s in b.split(",")] if b else [c.strip("'\"")])
             for r in refs:

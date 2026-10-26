@@ -5,7 +5,7 @@
 1. O site tem o conteúdo certo e a marca certa, mas funciona como uma única página de 7.400px (11.700px no telemóvel), com o único formulário no fundo. Cada secção foi desenhada à parte, por isso nada partilha a mesma grelha, o mesmo ritmo ou os mesmos componentes.
 2. A base escolhida é a proposta **Conversão primeiro**. Acrescentam-se três ideias das outras duas: superfícies que definem a cor do texto e do foco (proposta Portfólio), o catálogo de obras agrupado por categoria com âncoras (Portfólio), e um "lint" no `build.py --check` que impede o sistema de voltar a derivar (Sistema).
 3. Cada página passa a ter uma função e uma ação principal: "Pedir Orçamento" leva a uma página nova, `orcamento.html`. "Ligar 961 245 288" e "Falar por WhatsApp" ficam sempre à mão: no cabeçalho em computador e numa barra fixa em baixo no telemóvel.
-4. A marca mantém-se tal como no design system do cliente (ink #1b2540, clay #e08a1e, Fraunces + Archivo, cantos retos, fotografias reais). Há uma única correção obrigatória: o texto sobre laranja passa a ink (5,65:1) em vez de branco (2,53:1).
+4. A marca mantém-se tal como no design system do cliente (ink #1b2540, clay #e08a1e, Fraunces + Archivo, cantos retos, fotografias reais). Há uma única correção obrigatória: o texto sobre laranja passa a ink (5,65:1) em vez de branco (2,53:1). *Mudado a pedido do dono* (ponto 13 de «Onde o site construído difere do plano»): as cores são agora verde (ink #12392b) e vermelho (clay #c8102e), com os mesmos nomes, e a correção vira-se: no vermelho o texto é branco (5,9:1), nunca ink (2,2:1).
 5. O que só o dono sabe (zona, horário, alvará, seguro, NIF, morada, factos de cada obra, mais fotografias) fica escondido até ser preenchido. Não se inventa nada. A falta da **zona de trabalho** é o problema de negócio mais grave e não se resolve com design.
 
 ---
@@ -64,7 +64,7 @@
 6. **Um vocabulário.** `data/site.json` › `servicos` gera os serviços, as opções do formulário, as etiquetas das obras, os grupos do catálogo e o rodapé.
 7. **Uma margem esquerda.** Todo o conteúdo começa na borda da `.wrap` (1240px). Não há colunas centradas mais estreitas.
 8. **Um componente por função, só do DS.** A lista fechada está mais abaixo. Espaços e tamanhos de letra vêm só de `tokens.css`, e o `--check` falha se não vierem.
-9. **A superfície decide a cor.** Clay leva texto ink. Ink leva texto bone e foco amber. Superfícies claras levam texto ink e foco ink. Nunca branco sobre laranja.
+9. **A superfície decide a cor.** Clay leva texto branco e foco branco. Ink leva texto bone e foco amber. Superfícies claras levam texto ink e foco ink. Nunca texto escuro sobre o vermelho, e o vermelho nunca a toda a largura junto ao verde: o clay é um painel dentro de uma secção clara. *Mudado a pedido do dono* (ponto 13 de «Onde o site construído difere do plano») e ponto 14: com o laranja de antes, a regra era «Clay leva texto ink. Nunca branco sobre laranja».
 10. **WCAG AA é o mínimo:**
     - contraste de 4,5:1
     - foco visível em todas as superfícies
@@ -142,7 +142,7 @@ Até lá, os serviços e o "Quem somos" vivem na home.
    - `obrigado.html` não tem "Pedir Orçamento" em lado nenhum. As saídas são WhatsApp com fotografias, Ligar e Ver as obras.
    - Sem JS, o Netlify serve a mesma página.
 8. **Teclado e leitor de ecrã**
-   - Ordem: skip link › cabeçalho › botões do hero (foco ink sobre paper) › cartões de obra (foco amber sobre ink) › CtaBand (foco ink sobre clay).
+   - Ordem: skip link › cabeçalho › botões do hero (foco ink sobre paper) › cartões de obra (foco amber sobre ink) › CtaBand (foco branco no painel clay; *Mudado a pedido do dono* (ponto 13 de «Onde o site construído difere do plano»): era ink sobre o laranja).
    - Os títulos seguem H1 › H2 › H3 sem saltos nem duplicados.
    - O menu fecha com Esc e devolve o foco ao botão.
    - O slider funciona com as setas do teclado.
@@ -157,12 +157,12 @@ Legenda: `[superfície] Componente`. Os textos são os já existentes, salvo qua
 
 - **Header** (`[paper]`, sticky, 78px; 64px abaixo de 980px)
   - Desktop: logo › nav "Início", "Obras" › link tel "961 245 288", com o horário por baixo quando existir › ícone WhatsApp 44x44 (`aria-label` "Falar por WhatsApp") › `.btn` "Pedir Orçamento".
-  - Abaixo de 980px: logo e botão de menu de 48x48 com 3 barras CSS que viram X. O painel é `[ink]` sobre um fundo escurecido `rgba(15,22,40,.5)`, com `html{overflow:hidden}` enquanto aberto e fecho com Esc ou clique fora.
+  - Abaixo de 980px: logo e botão de menu de 48x48 com 3 barras CSS que viram X. O painel é `[ink]` sobre um fundo escurecido `var(--overlay-menu)` (ink-deep a 50%; *Mudado a pedido do dono* (ponto 13 de «Onde o site construído difere do plano»)), com `html{overflow:hidden}` enquanto aberto e fecho com Esc ou clique fora.
   - Itens do painel: a mesma lista, mais Pedir Orçamento, Ligar e WhatsApp, cada um com 48px de altura.
   - Variante `reduzido` (só em `obrigado`): logo e telefone.
   - Em `orcamento.html`, o botão é substituído pelo texto "Orçamento gratuito" com `aria-current="page"`.
 - **ActionBar** (só abaixo de 980px)
-  - Fixa em baixo, 3 células de 56px mais `env(safe-area-inset-bottom)`: Ligar (ink), WhatsApp (ink), Orçamento (clay com texto ink, leva `?tipo=` quando a página o conhece).
+  - Fixa em baixo, 3 células de 56px mais `env(safe-area-inset-bottom)`: Ligar (ink), WhatsApp (ink), Orçamento (clay com texto branco, leva `?tipo=` quando a página o conhece; *Mudado a pedido do dono* (ponto 13 de «Onde o site construído difere do plano»): era texto ink sobre o laranja).
   - O `body` recebe `padding-bottom` igual à altura da barra.
   - Meta `barra: "sem-orcamento"` em `orcamento.html`: a terceira célula passa a "Enviar fotografias". Meta `barra: "nao"` em `obrigado.html`.
   - Não há bolha flutuante nenhuma: em desktop o cabeçalho já tem os três canais.
@@ -176,7 +176,7 @@ Legenda: `[superfície] Componente`. Os textos são os já existentes, salvo qua
 
 ### index.html
 
-O ritmo de fundos é paper › ink › paper › bone › clay › rodapé ink.
+O ritmo de fundos é paper › ink › paper › bone › bone (a CtaBand continua o Porquê Nós, com o painel clay lá dentro) › rodapé ink. *Mudado na revisão do tema* (ponto 14 de «Onde o site construído difere do plano»): era paper › ink › paper › bone › clay › rodapé ink, com a faixa clay a toda a largura.
 
 | # | Secção | Função | Componente e conteúdo |
 |---|---|---|---|
@@ -184,7 +184,7 @@ O ritmo de fundos é paper › ink › paper › bone › clay › rodapé ink.
 | 2 | `[ink]` Obras em destaque `#obras` | Prova primeiro | SectionHead: "Obras" / "Obras nossas, fotografadas no local" / "Fotografias tiradas durante e no fim de cada trabalho."<br>**ProjectGrid** com as 3 obras `destaque` (M01 reabilitação, M04 fachadas em `p-tall`, M05 acabamentos com a etiqueta "Antes e depois").<br>Por baixo, alinhado à esquerda: `.btn-ghost` "Ver as 5 obras" (o número vem dos dados). |
 | 3 | `[paper]` Serviços `#servicos` | O que fazem e onde está a prova | SectionHead: "O que fazemos" / "Construção e reabilitação, do alicerce ao acabamento".<br>**ServiceList** com 6 linhas, 2 colunas (1 abaixo de 640px), separadas por uma linha de 1px e sem caixas. Cada linha: número (na linha de base do h3), h3, uma frase do texto atual, miniatura 64x64 se o serviço tiver obras (a todas as larguras), e as ligações "Ver obras (N)" (`obras.html#cat`, só se N>0) e "Pedir orçamento" (`orcamento.html?tipo=id`). A linha em si não é um link e não tem seta.<br>Alvo de altura: cerca de 1.500px a 390px (hoje 2.542px). *Corrigido na revisão:* com o ritmo de secções e as miniaturas de 64px a secção mede cerca de 930px em desktop (os 640px eram uma estimativa que o próprio ritmo do plano não deixa cumprir); o alvo que vale é o da página inteira (cerca de 4.300px a 1440px). |
 | 4 | `[bone]` Porquê Nós `#porque-nos` | Confiança verificável | Esquerda: SectionHead "Porque nos escolhem" / "Reputações constroem-se uma obra de cada vez"; **TrustList** com os 4 itens atuais (o item "Licenciada" acrescenta ", alvará n.º X" e o seguro quando existirem); parágrafo "Quem somos": "A Melperfaz, Construção Civil, Lda. trabalha desde 2001 com equipa própria." mais zona e morada (*dados do dono*).<br>Direita: foto-02 numa moldura 4:5 (substitui o stat card), com o link "Ver a obra"; "Ver o perfil e as avaliações no Google" só se `googleMaps` existir (as avaliações nunca são citadas no site). |
-| 5 | `[clay]` **CtaBand** `#contacto` | Fechar | Esquerda: Eyebrow "Vamos conversar" (texto e traço ink); h2 "Peça o orçamento. A visita é gratuita."; p "Respondemos no prazo de um dia útil e marcamos uma visita sem compromisso."; `.cta-phone` "961 245 288" com o horário por baixo (*dado do dono*, substitui "Mãos à obra").<br>Direita: botões empilhados com a mesma largura (mín. 280px, 100% no telemóvel): "Pedir Orçamento" (fundo ink, texto paper) e "Falar por WhatsApp" (ghost); ProofLine em ink. |
+| 5 | `[bone]` **CtaBand** `#contacto`, com o painel `[clay]` | Fechar | *Mudado a pedido do dono* (ponto 13 de «Onde o site construído difere do plano») e ponto 14: a secção é bone, sem o espaço de cima (continua o Porquê Nós), e o vermelho é um painel dentro da `.wrap`; no painel o texto, o traço e a ProofLine são brancos, "Pedir Orçamento" é paper com texto ink (com o rato, branco com texto clay-deep) e o ghost tem contorno branco.<br>Esquerda: Eyebrow "Vamos conversar" (texto e traço ink); h2 "Peça o orçamento. A visita é gratuita."; p "Respondemos no prazo de um dia útil e marcamos uma visita sem compromisso."; `.cta-phone` "961 245 288" com o horário por baixo (*dado do dono*, substitui "Mãos à obra").<br>Direita: botões empilhados com a mesma largura (mín. 280px, 100% no telemóvel): "Pedir Orçamento" (fundo ink, texto paper) e "Falar por WhatsApp" (ghost); ProofLine em ink. |
 
 O processo (4 passos) passa para `orcamento.html`, onde responde a "o que acontece depois de enviar". Alvo de altura da home: cerca de 4.300px a 1440px e menos de 6.000px a 390px, medido sem os dados do dono (com todos preenchidos cresce cerca de 380px a 390px; ver «Onde o site construído difere do plano»).
 
@@ -194,9 +194,9 @@ O processo (4 passos) passa para `orcamento.html`, onde responde a "o que aconte
 |---|---|---|
 | 1 | `[paper]` PageHead | Migalhas "Início › Obras"; eyebrow "Obras"; h1 "Cada fotografia é uma obra nossa"; intro "Fotografias tiradas no local, durante e no fim de cada trabalho. Abra uma obra para ver o que se fez."; índice gerado "Reabilitação de Edifícios (2) · Fachadas e Impermeabilização (1) · Acabamentos (2)" (as categorias sem obras são omitidas). |
 | 2–4 | Uma secção por serviço com obras, alternando `[ink]`/`[bone]`/`[ink]`, `id=<cat>` | h2 com o nome do serviço e o número de obras, depois **ProjectGrid** (2 colunas, linhas de 300px). Os cartões são h3, o que dá H1 › H2 › H3. Um grupo de 1 obra fica com meio cartão alinhado à esquerda dentro da sua própria secção, por isso não parece um buraco. Funciona sem JS. Sem slider. |
-| 5 | `[clay]` CtaBand | h2 "Quer uma obra assim?". É a última secção antes do rodapé ink. |
+| 5 | `[paper]` CtaBand, com o painel `[clay]` | h2 "Quer uma obra assim?". É a última secção antes do rodapé ink. *Mudado na revisão do tema* (ponto 14 de «Onde o site construído difere do plano»): era `[clay]` a toda a largura. |
 
-Se a última secção de categoria for ink, sai clay e depois o rodapé ink, sem ink a encostar a ink. A alternância começa no paper do PageHead.
+A CtaBand é paper, com o painel clay dentro da `.wrap`, depois da última secção de categoria (ink ou bone) e antes do rodapé ink: ink nunca encosta a ink e o vermelho nunca encosta ao verde, seja qual for o número de grupos. A alternância começa no paper do PageHead. *Mudado na revisão do tema* (ponto 14 de «Onde o site construído difere do plano»): com 3 grupos (ink, bone, ink) a faixa clay a toda a largura ficava entre dois verdes.
 
 ### obras/<slug>.html (template `src/templates/obra.html`)
 
@@ -205,10 +205,10 @@ Se a última secção de categoria for ink, sai clay e depois o rodapé ink, sem
 | 1 | `[paper]` PageHead | Migalhas "Início › Obras › {title}"; eyebrow = nome do serviço (link para `obras.html#cat`, sem código); h1 com o título; intro com o resumo. |
 | 2 | `[paper]` Media | A foto à largura do contentor, na proporção natural, máximo 78vh. Só na M05: o **BeforeAfter** à largura do contentor, com `margin:0` e alinhado com o h1. |
 | 3 | `[paper]` O trabalho | Grelha 7/5, com os dois títulos alinhados no topo.<br>Esquerda: h2 "Na obra" com a lista `detalhes`. Quando o dono preencher os factos, aparecem antes "O problema" e "O que fizemos".<br>Direita: **Ficha** só se `obra.temFactos` (Local, Data, Duração, Resultado). Saem "Código" e o "Trabalho" duplicado. |
-| 4 | `[clay]` CtaBand | Eyebrow "Vamos conversar"; h2 "Quer uma obra assim?"; p "Peça o orçamento com o tipo de obra já escolhido, ou envie fotografias do seu espaço por WhatsApp."; botões "Pedir Orçamento" (`?tipo=` e `?de=`) e "Enviar fotografias por WhatsApp" (mensagem `wa.obra` com o código); linha pequena "Referência da obra: M04"; telefone; ProofLine. |
+| 4 | `[paper]` CtaBand, com o painel `[clay]` | *Mudado na revisão do tema* (ponto 14 de «Onde o site construído difere do plano»): a secção continua o corpo paper, sem o espaço de cima, e o vermelho é o painel.<br>Eyebrow "Vamos conversar"; h2 "Quer uma obra assim?"; p "Peça o orçamento com o tipo de obra já escolhido, ou envie fotografias do seu espaço por WhatsApp."; botões "Pedir Orçamento" (`?tipo=` e `?de=`) e "Enviar fotografias por WhatsApp" (mensagem `wa.obra` com o código); linha pequena "Referência da obra: M04"; telefone; ProofLine. |
 | 5 | `[bone]` Outras obras | Eyebrow e h2 com a mesma regra (`relEyebrow` e `relTitulo`): "Obras semelhantes" / "Outras obras de {serviço}" só quando as duas são do mesmo serviço; senão "Obras" / "Outras obras" (o eyebrow não diz "semelhantes" de obras de outro serviço); 2 cartões. Sem anterior/seguinte e sem "Ver todas" (as migalhas já fazem esse papel). |
 
-Ritmo: paper › clay › bone › rodapé ink. Ink já não encosta a ink.
+Ritmo: paper › paper (a CtaBand, com o painel clay) › bone › rodapé ink. Ink já não encosta a ink. *Mudado na revisão do tema* (ponto 14 de «Onde o site construído difere do plano»): era paper › clay › bone.
 
 ### orcamento.html (nova)
 
@@ -271,7 +271,8 @@ Cabeçalho reduzido, sem ActionBar e sem "Pedir Orçamento" no rodapé.
 *Mudado a pedido do dono* (ponto 13 de «Onde o site construído difere do plano»): com o clay vermelho, a linha do clay
 passa a branco em tudo (texto, secundário, traço e foco), e o botão na faixa a paper com texto ink.
 
-- Duas secções ink nunca se tocam. A CtaBand clay é a última antes do rodapé ink (exceto em `orcamento`; nas obras vem a seguir uma secção bone).
+- Duas secções ink nunca se tocam. A CtaBand é a última antes do rodapé ink (exceto em `orcamento`; nas obras vem a seguir uma secção bone).
+- *Mudado na revisão do tema* (ponto 14 de «Onde o site construído difere do plano»): a CtaBand é uma secção clara (paper, ou bone na página inicial) com um painel `.s-clay` dentro da `.wrap`; o clay nunca é uma secção a toda a largura e o vermelho nunca encosta ao verde (o `--check` recusa as duas coisas).
 
 ### Escala tipográfica (estilos do DS; tudo o resto é apagado, de 29 tamanhos para 10)
 
@@ -299,7 +300,8 @@ As etiquetas de formulário ficam em 0.875rem, sem maiúsculas. Apagar o `.prosa
 - Atualizar o DESIGN.md: "paper sobre clay" passa a ser proibido.
 - *Mudado a pedido do dono* (ponto 13 de «Onde o site construído difere do plano»): com o clay vermelho, é o contrário.
   O `.btn` é clay com texto branco (5,9:1), na faixa clay é paper com texto ink, e o proibido é texto escuro sobre o
-  vermelho (ink sobre clay dá 2,2:1).
+  vermelho (ink sobre clay dá 2,2:1). No painel clay da CtaBand (ponto 14), o hover do botão paper é branco com texto
+  clay-deep, nunca o bloco ink: um botão verde no vermelho lia-se como uma bandeira.
 
 ### Componentes permitidos (e mais nenhum)
 
@@ -320,7 +322,7 @@ As etiquetas de formulário ficam em 0.875rem, sem maiúsculas. Apagar o `.prosa
 | TrustList | DS | `tick` de 1rem |
 | BeforeAfter | `partials/antes-depois.html` | Só no template de obra (M05); `touch-action: pan-y`; arrasto só a 32px da pega; range para teclado com foco desenhado na pega; etiquetas de 13px |
 | Ficha | CSS único | Fundo bone, 1px de linha, padding 32, `dl` em 2 colunas; só aparece se tiver pelo menos 1 linha; substitui `.ficha` e `.priv-ficha` |
-| CtaBand | `partials/cta.html` (parâmetros: titulo, texto, tipo, wa) | Um só layout; apagar `.cta-faixa` e `.cta-inner` |
+| CtaBand | `partials/cta.html` (parâmetros: titulo, texto, tipo, wa; depois do ponto 14, também `sup` e `junta`) | Um só layout; apagar `.cta-faixa` e `.cta-inner`. Um painel clay dentro da `.wrap` de uma secção paper ou bone (ponto 14) |
 | QuoteForm | `partials/orcamento-form.html` | Só em `orcamento.html` |
 
 **Apagados:** Marquee (`.strip`), StatCard, `tag-card` rodado, `wa-float` e a sua pulsação, chips e `.filtros` (voltam automaticamente com 8 ou mais obras), `.obra-nav`, `.work-mais`, `.form-novo`, `.pag-links`, o link `.hero-foto-leg` e o `catLabel` em texto livre.
@@ -343,12 +345,12 @@ Cada serviço tem também `texto`, copiado tal qual dos cartões atuais. O formu
 ## Acessibilidade e desempenho
 
 **Contraste**
-- Ink sobre clay em todos os botões e em todo o texto da CtaBand.
+- Ink sobre clay em todos os botões e em todo o texto da CtaBand. *Mudado a pedido do dono* (ponto 13 de «Onde o site construído difere do plano»): com o vermelho é branco sobre clay (5,9:1).
 - Eyebrows em ink sobre fundos claros e em bone ou amber sobre ink.
 - Rótulos `.cat` em muted sobre claro e amber sobre ink.
 - A verificação automática mede todos os `.btn` e `.s-clay *` com `getComputedStyle` e exige 4,5:1 ou mais.
 
-**Foco**: anel por superfície (amber no ink, ink no claro e no clay). Os primeiros elementos depois do menu deixam de estar sobre foto escura.
+**Foco**: anel por superfície (amber no ink, ink no claro e no clay; *Mudado a pedido do dono* (ponto 13 de «Onde o site construído difere do plano»): branco no clay). Os primeiros elementos depois do menu deixam de estar sobre foto escura.
 
 **Alvos de toque**
 - 44px ou mais no rodapé, nas migalhas, no índice de privacidade e no menu (48px).
@@ -418,7 +420,7 @@ Tudo em `/home/user/MDM/melperfaz`. O build continua a ser `python3 build.py`. O
 
 ### Fase 2: fundações CSS (`assets/css/site.css`)
 - Bloco de superfícies `.s-paper/.s-bone/.s-ink/.s-clay` e foco por superfície.
-- `.btn` com ink sobre clay. Um único `.btn-ghost` com `inset box-shadow`.
+- `.btn` com ink sobre clay (*Mudado a pedido do dono* (ponto 13 de «Onde o site construído difere do plano»): branco sobre clay). Um único `.btn-ghost` com `inset box-shadow`.
 - Eyebrow por superfície, o que corrige o traço invisível na CTA.
 - `.wrap` com 16px até 640px. Os filhos flex e grid do hero com `width:100%`.
 - Mapear todos os `font-size` para os 10 estilos. Etiquetas com 13px de mínimo. `input, select, textarea { font-size: 1rem }`.
@@ -429,7 +431,7 @@ Tudo em `/home/user/MDM/melperfaz`. O build continua a ser `python3 build.py`. O
   - `px` em margin, padding, gap ou inset fora do `:root` (com uma pequena lista de exceções comentada: hairlines e `safe-area`)
   - `font-size` fora dos estilos
   - `@media` diferente de 980 e 640
-  - `color` paper ou white em seletores sob `.s-clay` ou `.btn`
+  - `color` paper ou white em seletores sob `.s-clay` ou `.btn` (*Mudado a pedido do dono* (ponto 13 de «Onde o site construído difere do plano»): o lint recusa agora o contrário, texto escuro sobre o vermelho)
   - `infinite`
 - **Teste:** `--check` passa com o lint ativo. O screenshot a 1280 mostra o x do h1 do hero igual ao x do logótipo.
 
@@ -516,7 +518,7 @@ Tudo em `/home/user/MDM/melperfaz`. O build continua a ser `python3 build.py`. O
 ### Fase 9: dados do dono e documentação
 - Enviar ao dono a lista do `--faltam` em linguagem simples (ver perguntas abaixo). Cada dado aparece sozinho quando é preenchido e não fica nenhum marcador visível.
 - Atualizar o DESIGN.md do cliente:
-  - regra de ink sobre clay
+  - regra de texto branco sobre clay e do clay só em painéis, nunca a toda a largura junto ao verde (*Mudado a pedido do dono* (ponto 13 de «Onde o site construído difere do plano») e ponto 14; era ink sobre clay)
   - Marquee, StatCard, tag-cards e hero full-bleed como retirados do site
   - 10 estilos de texto
   - retirar "abaixo de AA, mantidos por fidelidade"
@@ -578,6 +580,19 @@ testes (`tests/site.test.mjs` e `tests/browser.mjs`) conferem o que está constr
     4,2:1; agora 5:1). O erro (`--erro` #a3161a) não usa o vermelho da marca: é só texto e contorno, com um «!» branco
     num círculo antes da mensagem. O logótipo, os favicons e a imagem de partilha foram recoloridos para o verde (o
     logótipo branco fica igual); as fotografias não mudam.
+14. **O vermelho nunca encosta ao verde** (revisão do tema verde e vermelho). A CtaBand clay a toda a largura ficava
+    entre secções ink (em `obras.html`, com 3 grupos, entre o último grupo ink e o rodapé ink; na página inicial, por
+    cima do rodapé), e o ecrã lia-se como uma bandeira, em duas listas verde e vermelha. A CtaBand passou a ser uma
+    secção clara com um painel clay dentro da `.wrap`: bone na página inicial, a continuar o Porquê Nós sem o espaço de
+    cima; paper nas fichas de obra, a continuar o corpo sem o espaço de cima; paper com o seu espaço em `obras.html`,
+    seja qual for o número de grupos (parâmetros `sup` e `junta` do parcial). O painel tem 64/50px por dentro (22/16
+    abaixo de 640px, com o telefone e as ações um passo mais juntos, para a página inicial continuar abaixo dos 6.000px
+    a 390px: o texto fica 32px mais estreito); os bordos do painel são os da `.wrap` (a mesma margem esquerda) e a
+    fotografia do Porquê Nós acaba no bordo direito dele. Com o rato, o botão paper do painel fica branco com texto
+    clay-deep (era o bloco ink, verde no vermelho). O clay fica nos botões, na célula «Orçamento» da barra, nas
+    etiquetas, nos traços e no painel. O `--check` recusa a superfície `s-clay` fora do painel e uma CtaBand numa
+    secção que não seja paper ou bone; o teste do browser exige 48px ou mais de claro entre o painel e qualquer secção
+    ink, e 16px ou mais dos lados.
 
 ---
 
@@ -589,7 +604,7 @@ testes (`tests/site.test.mjs` e `tests/browser.mjs`) conferem o que está constr
 - **As afirmações de confiança não estão verificadas.** "Licenciada e segurada", "2 anos de garantia", "preço fixo" e "atualizações semanais" ficam porque já estão no site. Se o dono não confirmar alguma, sai do site; não se suaviza o texto.
 - **Mais uma página antes do formulário.** É compensado pelo prefetch, por uma página leve e por 4 pontos de entrada (cabeçalho, barra, CtaBand, obras). É preciso medir os pedidos depois do lançamento.
 - **Mudam os valores do select** (por exemplo "Fachadas / Impermeabilização" passa a "Fachadas e Impermeabilização") **e entra o campo `localidade`.** Filtros de email ou folhas que usem os valores antigos têm de ser atualizados. Os envios antigos mantêm os valores antigos.
-- **Ink sobre laranja muda o aspeto dos botões.** É obrigatório para cumprir AA. Mostrar ao dono o antes e o depois em screenshot, com as medições (2,53:1 contra 5,65:1).
+- **Ink sobre laranja muda o aspeto dos botões.** É obrigatório para cumprir AA. Mostrar ao dono o antes e o depois em screenshot, com as medições (2,53:1 contra 5,65:1). *Mudado a pedido do dono* (ponto 13 de «Onde o site construído difere do plano»): com o vermelho o risco é o contrário, texto escuro sobre o vermelho (ink sobre clay dá 2,2:1); o texto é branco (5,9:1) e o `--check` recusa o escuro.
 - **Um hero split é mais calmo que o full-bleed atual.** É o hero do próprio DS e resolve ao mesmo tempo o alinhamento, o contraste, o foco e a ampliação de 3,7x.
 - **Com 5 obras, o portfólio parece curto**, e tirar os duplicados torna isso mais visível. Só cresce com fotografias e factos reais do dono. Nunca usar imagens de banco nem geradas.
 - **A ActionBar ocupa 56px no telemóvel.** É preciso testar no iOS Safari, com a barra de endereço a recolher, que não tapa o botão de envio nem os links legais.
@@ -629,7 +644,7 @@ Escala de 1 a 10. Em "esforço para construir", 10 quer dizer mais fácil.
 **Enxertos:**
 - **Da 2:** superfícies que definem texto e foco; catálogo agrupado por serviço com âncoras (funciona sem JS, corrige a hierarquia de títulos e evita os buracos); legendas abaixo da imagem no telemóvel; o slider só na M05.
 - **Da 3:**
-  - o lint no `build.py --check` (px, tamanhos de letra, media queries, paper sobre clay, `infinite`, `#contacto`, rótulos proibidos)
+  - o lint no `build.py --check` (px, tamanhos de letra, media queries, paper sobre clay, `infinite`, `#contacto`, rótulos proibidos; depois do ponto 13 de «Onde o site construído difere do plano», texto escuro sobre o vermelho)
   - `?de=` para o campo `pagina`
   - um só caminho de sucesso (`obrigado.html`)
   - setas e ligações alinhadas com `margin-top:auto`

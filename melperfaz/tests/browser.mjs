@@ -14,7 +14,7 @@
       não tapa o rodapé nem o botão de envio, nem o elemento focado ao tabular (também com 200% e 400% de zoom);
    H. o menu dos ecrãs estreitos: abre sobre um fundo escurecido (com fade), as barras viram X, a página não desliza
       nem salta para o topo (o cabeçalho fica no sítio), foca, fecha com Escape (escondido no fim da transição) e
-      devolve o foco;
+      devolve o foco; o anel de foco da primeira e da última ligação desenha-se inteiro dentro do painel (390 e 640 px);
    I. o comparador antes/depois: com o teclado (e o aria-valuetext), com um clique ou um toque na fotografia (põe a linha
       nesse sítio) e arrastando a partir da pega; o deslize vertical mexe a página; as etiquetas cortam-se com a sua
       fotografia; o anel de foco com halo;
@@ -23,8 +23,10 @@
       por serviço (o índice leva a cada grupo; H1 › H2 › H3);
    K. movimento reduzido; nenhuma animação sem fim;
    L. o sistema visual (verde e vermelho): uma margem esquerda (h1 do hero, logótipo e cabeçalhos de secção no mesmo x),
-      contraste de 4,5:1 nos botões, na barra e no texto da faixa clay (branco sobre o vermelho), o anel de foco da cor
-      da superfície (ink no claro, amber no ink, branco no clay), campos com 16 px e etiquetas com 13 px;
+      contraste de 4,5:1 nos botões, na barra e no texto do painel clay (branco sobre o vermelho), o anel de foco da cor
+      da superfície (ink no claro, amber no ink, branco no clay), o hover dos botões no vermelho sem verde, o painel
+      vermelho da CtaBand dentro da .wrap de uma secção clara e a 48 px ou mais de qualquer secção ink (o vermelho nunca
+      encosta ao verde), campos com 16 px e etiquetas com 13 px;
       a legenda dos cartões sobre a fotografia (a 390 px só nas obras em destaque, com cartões de 280 px; nas outras por
       baixo, em 4/3 ou 4/5), o cartão inteiro é a ligação e a legenda cresce com o texto; a página inicial (o desenho, sem os
       dados da Melperfaz) em menos de 6.000 px a 390 e até 4.400 a 1440, com as miniaturas dos serviços de 64 px a todas as
@@ -398,6 +400,34 @@ try {
     ok(await page.isHidden('#menu-movel') && page.url() === srv.base + '/', 'H: uma ligação do menu fecha-o e navega (para a página inicial, «./»)', page.url());
     await ctx.close();
   }
+  {
+    // o anel de foco das ligações do menu desenha-se inteiro dentro do painel: o overflow-y do painel cortava o da primeira
+    // e o da última ligação a 640 px e abaixo, quando o padding da .wrap do telemóvel apagava o espaço de cima e de baixo
+    // do painel. Aberto pelo teclado, a primeira e a última ligação com o anel (3 px a 3 px de distância) cabem no
+    // #menu-movel, a 390 e a 640 px (a quebra inclui os 640)
+    for (const largura of [390, 640]) {
+      const { ctx, page } = await pagina({ viewport: { width: largura, height: 800 }, isMobile: true, hasTouch: true });
+      await page.goto(srv.base + '/obras.html', { waitUntil: 'networkidle' });
+      await page.focus('[data-menu]');
+      await page.keyboard.press('Enter');
+      await page.waitForTimeout(400);
+      const anel = () => page.evaluate(() => {
+        const a = document.activeElement, s = getComputedStyle(a), m = document.querySelector('#menu-movel').getBoundingClientRect(), r = a.getBoundingClientRect();
+        const fora = parseFloat(s.outlineWidth) + parseFloat(s.outlineOffset);
+        return { el: a.textContent.trim(), estilo: s.outlineStyle, fora, dentro: !!a.closest('#menu-movel'),
+          cabe: r.top - fora >= m.top && r.bottom + fora <= m.bottom && r.left - fora >= m.left && r.right + fora <= m.right,
+          a: [r.top, r.bottom, r.left, r.right].map(Math.round), m: [m.top, m.bottom, m.left, m.right].map(Math.round) };
+      });
+      const primeiro = await anel();
+      for (let i = 1; i < 5; i++) await page.keyboard.press('Tab');
+      const ultimo = await anel();
+      ok(primeiro.el === 'Início' && ultimo.el === 'Falar por WhatsApp' && [primeiro, ultimo].every(x => x.dentro && x.estilo === 'solid' && x.fora === 6 && x.cabe),
+        `H: a ${largura} px o anel de foco da primeira e da última ligação do menu inteiro dentro do painel`, { primeiro, ultimo });
+      const pad = await page.evaluate(() => { const s = getComputedStyle(document.querySelector('.menu-movel-in')); return [s.paddingTop, s.paddingBottom, s.paddingLeft]; });
+      ok(pad[0] === '12px' && pad[1] === '26px' && pad[2] === '16px', `H: a ${largura} px o painel do menu guarda os 12 px em cima e os 26 em baixo (e os 16 dos lados da .wrap)`, pad);
+      await ctx.close();
+    }
+  }
 
   /* I. o comparador */
   {
@@ -536,8 +566,10 @@ try {
       const fundo = el => { for (let e = el; e; e = e.parentElement) { const c = rgb(getComputedStyle(e).backgroundColor); if (c.a > 0.5) return c; } return { r: 255, g: 255, b: 255 }; };
       const razao = el => { const a = lum(rgb(getComputedStyle(el).color)), b = lum(fundo(el)); return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05); };
       const comTexto = el => Array.from(el.childNodes).some(n => n.nodeType === 3 && n.textContent.trim());
-      const alvos = [...document.querySelectorAll('.btn'), ...Array.from(document.querySelectorAll('.s-clay *')).filter(e => comTexto(e) && !e.closest('.s-paper, .so-leitor'))];
-      return alvos.filter(e => e.getClientRects().length).map(e => ({ t: e.textContent.trim().slice(0, 30), c: Math.round(razao(e) * 100) / 100 }));
+      // o texto do painel vermelho: a superfície mais próxima é o clay (o painel vive numa secção paper ou bone)
+      const noVermelho = e => { const s = e.closest('.s-paper, .s-bone, .s-ink, .s-clay'); return s && s.classList.contains('s-clay'); };
+      const alvos = [...document.querySelectorAll('.btn'), ...Array.from(document.querySelectorAll('.s-clay *')).filter(e => comTexto(e) && noVermelho(e) && !e.closest('.so-leitor'))];
+      return alvos.filter(e => e.getClientRects().length).map(e => ({ t: e.textContent.trim().slice(0, 30), c: Math.round(razao(e) * 100) / 100, painel: !!e.closest('.cta-painel') }));
     };
     for (const largura of [1280, 390]) {
       const { ctx, page } = await pagina({ viewport: { width: largura, height: 900 } });
@@ -563,8 +595,11 @@ try {
       await page.goto(srv.base + f, { waitUntil: 'networkidle' });
       await page.evaluate(() => document.querySelectorAll('.reveal').forEach(e => e.classList.add('in')));
       await page.waitForTimeout(800);
-      const fracos = (await page.evaluate(contrastes)).filter(c => c.c < 4.5);
-      ok(fracos.length === 0, `L: ${f} botões e faixa clay com 4,5:1 ou mais`, fracos);
+      const medidos = await page.evaluate(contrastes), fracos = medidos.filter(c => c.c < 4.5);
+      ok(fracos.length === 0, `L: ${f} botões e painel clay com 4,5:1 ou mais`, fracos);
+      // o texto do painel vermelho conta mesmo dentro de uma secção paper (obras.html e as fichas) ou bone (a inicial)
+      const doPainel = medidos.filter(c => c.painel && !c.t.startsWith('Pedir Orçamento') && !/WhatsApp$/.test(c.t)).map(c => c.t);
+      if (await page.$('.cta-painel')) ok(['Vamos conversar', 'Ligar 961 245 288', SITE.provas[0]].every(t => doPainel.includes(t)) && doPainel.length >= 6, `L: ${f} o texto do painel vermelho medido`, doPainel);
     }
     {
       // a barra de ações (só abaixo de 980 px): Ligar e WhatsApp bone sobre ink, Orçamento branco sobre clay (vermelho)
@@ -583,13 +618,20 @@ try {
     ok(await anel('#obras .obras-mais .btn') === 'solid 3px rgb(255, 138, 122)', 'L: foco amber nas obras (ink)', await anel('#obras .obras-mais .btn'));
     ok(await anel('#contacto .cta-phone') === 'solid 3px rgb(255, 255, 255)', 'L: foco branco na faixa clay (vermelha)', await anel('#contacto .cta-phone'));
     ok(await anel('#contacto .btn:not(.btn-ghost)') === 'solid 3px rgb(255, 255, 255)', 'L: foco branco no botão da faixa clay', await anel('#contacto .btn:not(.btn-ghost)'));
-    // na faixa vermelha: o botão paper com texto ink, o ghost com texto e contorno brancos, o texto branco (5,9:1)
+    // no painel vermelho (numa secção bone, a continuar o Porquê Nós): o botão paper com texto ink, o ghost com texto e
+    // contorno brancos, o texto branco (5,9:1)
     const faixa = await page.evaluate(() => {
       const c = s => getComputedStyle(document.querySelector(s)), b = c('#contacto .btn:not(.btn-ghost)'), g = c('#contacto .btn-ghost');
-      return { fundo: c('#contacto').backgroundColor, h2: c('#contacto h2').color, btn: [b.backgroundColor, b.color], ghost: [g.backgroundColor, g.color, g.boxShadow] };
+      return { sec: c('#contacto').backgroundColor, fundo: c('#contacto .cta-painel').backgroundColor, h2: c('#contacto h2').color, btn: [b.backgroundColor, b.color], ghost: [g.backgroundColor, g.color, g.boxShadow] };
     });
-    ok(faixa.fundo === 'rgb(200, 16, 46)' && faixa.h2 === 'rgb(255, 255, 255)' && faixa.btn[0] === 'rgb(247, 249, 245)' && faixa.btn[1] === 'rgb(18, 57, 43)'
-      && faixa.ghost[0] === 'rgba(0, 0, 0, 0)' && faixa.ghost[1] === 'rgb(255, 255, 255)' && faixa.ghost[2].startsWith('rgb(255, 255, 255) 0px 0px 0px 1.5px inset'), 'L: a faixa vermelha com texto branco, o botão paper com texto ink e o ghost com contorno branco', faixa);
+    ok(faixa.sec === 'rgb(237, 242, 236)' && faixa.fundo === 'rgb(200, 16, 46)' && faixa.h2 === 'rgb(255, 255, 255)' && faixa.btn[0] === 'rgb(247, 249, 245)' && faixa.btn[1] === 'rgb(18, 57, 43)'
+      && faixa.ghost[0] === 'rgba(0, 0, 0, 0)' && faixa.ghost[1] === 'rgb(255, 255, 255)' && faixa.ghost[2].startsWith('rgb(255, 255, 255) 0px 0px 0px 1.5px inset'), 'L: o painel vermelho (na secção bone) com texto branco, o botão paper com texto ink e o ghost com contorno branco', faixa);
+    // com o rato, o botão do painel fica branco com texto clay-deep (8:1), nunca o bloco ink (verde) sobre o vermelho, e o
+    // ghost branco com texto clay
+    const hover = async sel => { await page.hover(sel); await page.waitForTimeout(400); return page.evaluate(s => { const b = getComputedStyle(document.querySelector(s)); return [b.backgroundColor, b.color]; }, sel); };
+    const hb = await hover('#contacto .btn:not(.btn-ghost)'), hg = await hover('#contacto .btn-ghost');
+    await page.mouse.move(0, 0);
+    ok(hb[0] === 'rgb(255, 255, 255)' && hb[1] === 'rgb(155, 13, 36)' && hg[0] === 'rgb(255, 255, 255)' && hg[1] === 'rgb(200, 16, 46)', 'L: com o rato, os botões do painel vermelho ficam brancos com texto vermelho (sem verde no vermelho)', { hb, hg });
     const btn = await page.evaluate(() => { const b = getComputedStyle(document.querySelector('.hero .btn')), g = document.querySelector('.hero .btn-ghost'); return { bg: b.backgroundColor, cor: b.color, alturas: [document.querySelector('.hero .btn').offsetHeight, g.offsetHeight] }; });
     ok(btn.bg === 'rgb(200, 16, 46)' && btn.cor === 'rgb(255, 255, 255)' && btn.alturas[0] === btn.alturas[1], 'L: «Pedir Orçamento» branco sobre clay (vermelho) e o ghost com a mesma altura', btn);
     // o cartão de obra: o anel desenha-se por fora, na cor da superfície à volta (amber no ink, ink no bone e no paper)
@@ -689,6 +731,31 @@ try {
     await ctx.close();
   }
   {
+    // o vermelho nunca encosta ao verde (uma faixa vermelha a toda a largura entre um grupo de obras ink e o rodapé ink lia-se
+    // como uma bandeira): entre o painel vermelho da CtaBand e qualquer secção ink, por cima e por baixo, há pelo menos
+    // 48 px de claro (a secção paper ou bone à volta), e dos lados o painel fica dentro da .wrap, a 16 px ou mais do bordo
+    for (const largura of [390, 1440]) {
+      const { ctx, page } = await pagina({ viewport: { width: largura, height: 900 } });
+      for (const f of ['/', '/obras.html', `/obras/${OBRAS[0].slug}.html`]) {
+        await page.goto(srv.base + f, { waitUntil: 'networkidle' });
+        const g = await page.evaluate(() => {
+          const verde = getComputedStyle(document.querySelector('.rodape')).backgroundColor, y = e => { const r = e.getBoundingClientRect(); return { top: r.top + scrollY, bottom: r.bottom + scrollY }; };
+          const p = document.querySelector('.cta-painel');
+          if (!p) return { painel: false };
+          const pr = p.getBoundingClientRect(), py = y(p);
+          const inks = Array.from(document.querySelectorAll('main > section, main > div, footer')).filter(e => getComputedStyle(e).backgroundColor === verde).map(y);
+          const acima = inks.filter(r => r.bottom <= py.top + 1).map(r => py.top - r.bottom), abaixo = inks.filter(r => r.top >= py.bottom - 1).map(r => r.top - py.bottom);
+          return { verde, fundo: getComputedStyle(p).backgroundColor, inks: inks.length, sobrepoe: inks.some(r => r.top < py.bottom - 1 && r.bottom > py.top + 1),
+            acima: acima.length ? Math.round(Math.min(...acima)) : null, abaixo: abaixo.length ? Math.round(Math.min(...abaixo)) : null,
+            esq: Math.round(pr.left), dir: Math.round(document.documentElement.clientWidth - pr.right) };
+        });
+        ok(g.verde === 'rgb(18, 57, 43)' && g.fundo === 'rgb(200, 16, 46)' && g.inks >= 1 && !g.sobrepoe && (g.acima === null || g.acima >= 48) && g.abaixo !== null && g.abaixo >= 48 && g.esq >= 16 && g.dir >= 16,
+          `L: a ${largura} px ${f} o painel vermelho longe do verde (claro em cima, em baixo e dos lados)`, g);
+      }
+      await ctx.close();
+    }
+  }
+  {
     // a altura da página inicial (Fase 7, assertiva 2): menos de 6.000 px a 390 e no máximo 4.400 a 1440 (o plano diz
     // cerca de 4.300), sem tirar nenhum facto, serviço, obra ou ação (era 8.469 e 4.955 antes do redesenho, 6.486 e
     // 4.930 antes do acerto: a legenda sobre a fotografia também no telemóvel, um passo de token a menos nas secções,
@@ -735,14 +802,19 @@ try {
         const r = s => document.querySelector(s).getBoundingClientRect();
         const btn = r('#obras .obras-mais .btn'), p = r('#obras .sec-head p'), grelha = r('#obras .photo-grid'), wrap = document.querySelector('#obras .wrap'), dentro = wrap.getBoundingClientRect().right - parseFloat(getComputedStyle(wrap).paddingRight);
         const lis = Array.from(document.querySelectorAll('.trust-list li')).map(li => li.getBoundingClientRect());
-        const foto = document.querySelector('.trust-foto'), fr = foto.getBoundingClientRect(), acoes = r('#contacto .cta-acoes');
+        const foto = document.querySelector('.trust-foto'), fr = foto.getBoundingClientRect(), acoes = r('#contacto .cta-acoes'), painel = r('#contacto .cta-painel');
+        const cw = document.querySelector('#contacto .wrap'), cr = cw.getBoundingClientRect(), cs = getComputedStyle(cw), logo = r('.topo .logo');
         return { btnBase: Math.round(btn.bottom - p.bottom), btnDir: Math.round(dentro - btn.right), btnAbaixo: btn.top > grelha.bottom,
-          colunas: new Set(lis.map(l => Math.round(l.left))).size, foto: foto.getClientRects().length > 0, fotoX: Math.round(fr.left - acoes.left), fotoW: Math.round(fr.width - acoes.width) };
+          colunas: new Set(lis.map(l => Math.round(l.left))).size, foto: foto.getClientRects().length > 0, fotoDir: Math.round(fr.right - painel.right), fotoW: Math.round(fr.width - acoes.width),
+          painelX: Math.round(painel.left - logo.left), painelDir: Math.round(cr.right - parseFloat(cs.paddingRight) - painel.right) };
       });
       if (largura > 980) ok(Math.abs(g.btnBase) <= 1 && Math.abs(g.btnDir) <= 1 && !g.btnAbaixo, `L: a ${largura} px «Ver as N obras» à direita do título, pela base do texto`, g);
       else ok(g.btnAbaixo, `L: a ${largura} px «Ver as N obras» por baixo dos cartões`, g);
       ok(g.colunas === (largura > 640 ? 2 : 1), `L: a ${largura} px as garantias em ${largura > 640 ? 'duas colunas' : 'uma coluna'}`, g);
-      if (largura > 980) ok(g.foto && g.fotoX === 0 && g.fotoW === 0, `L: a ${largura} px a fotografia do Porquê Nós na coluna das ações da faixa clay`, g);
+      // o painel vermelho ocupa a .wrap (a mesma margem esquerda do logótipo, e a direita da .wrap); a fotografia do Porquê
+      // Nós acaba no mesmo x do painel e tem a largura da coluna das ações dele
+      ok(g.painelX === 0 && g.painelDir === 0, `L: a ${largura} px o painel vermelho com os bordos da .wrap`, g);
+      if (largura > 980) ok(g.foto && g.fotoDir === 0 && g.fotoW === 0, `L: a ${largura} px a fotografia do Porquê Nós acaba no bordo do painel vermelho, com a largura da coluna das ações`, g);
       if (largura <= 640) ok(!g.foto, `L: a ${largura} px sem a fotografia do Porquê Nós`, g);
       await ctx.close();
     }

@@ -6,7 +6,7 @@
 {{#se page.reencaminha}}<!-- endereços antigos da página inicial: o formulário estava na âncora «contacto» e os cartões levavam ?tipo=; agora o
      pedido é em orcamento.html (com o mesmo ?tipo=). No topo do <head>, antes das letras, do CSS e do prefetch: um script
      depois de uma folha de estilo espera por ela, e o browser descarregava a página inicial antes de mudar. Sem
-     JavaScript fica a faixa clay com essa âncora e o botão do pedido -->
+     JavaScript fica a CtaBand com essa âncora e o botão do pedido -->
 <script>(function(){var l=location,m=/[?&]tipo=([^&#]*)/.exec(l.search);if(m||l.hash.slice(1)==='contacto')l.replace('orcamento.html'+(m?'?tipo='+m[1]:''));})();</script>
 {{/se}}<!-- o site só tem tema claro: impede o browser do telemóvel de o escurecer sozinho -->
 <meta name="color-scheme" content="only light">

@@ -172,15 +172,25 @@ test('os parciais novos: PageHead, CtaBand e ProofLine', () => {
   assert.match(le('privacidade.html'), /Última atualização: <time datetime="\d{4}-\d\d-\d\d">/);
   assert.doesNotMatch(le('obrigado.html'), /class="migalhas"/, 'sem migalhas onde não há breadcrumb');
   assert.match(le('orcamento.html'), /<section class="sec s-paper page-head page-head-compacto"/);
-  // a CtaBand: o mesmo layout em todas as páginas que a têm; a ProofLine com as provas de site.json
+  // a CtaBand: o mesmo layout em todas as páginas que a têm, um painel vermelho (s-clay) dentro da .wrap de uma secção
+  // clara: bone a continuar o Porquê Nós na página inicial, paper a continuar o corpo da ficha de obra e paper com o seu
+  // espaço em obras.html (depois de um grupo ink ou bone); a ProofLine com as provas de site.json
+  const sups = { 'index.html': 's-bone sec-junta', 'obras.html': 's-paper', [`obras/${OBRAS[0].slug}.html`]: 's-paper sec-junta' };
   for (const f of ['index.html', 'obras.html', `obras/${OBRAS[0].slug}.html`]) {
-    const cta = /<section class="sec cta s-clay"[^>]*>([\s\S]*?)<\/section>/.exec(le(f));
-    assert.ok(cta, `${f}: CtaBand`);
-    assert.match(cta[1], /<a href="tel:\+351961245288" class="cta-phone">/, `${f}: telefone na faixa`);
-    const provas = [.../<ul class="prova">(.*?)<\/ul>/.exec(cta[1])[1].matchAll(/<li>([^<]+)<\/li>/g)].map(m => m[1].replace(/&amp;/g, '&').replace(/&#x27;/g, "'").replace(/&quot;/g, '"'));
+    const cta = /<section class="sec cta ([^"]*)"[^>]*>\s*<div class="wrap">\s*<div class="cta-painel s-clay">\s*<div class="cta-grid">([\s\S]*?)<\/section>/.exec(le(f));
+    assert.ok(cta, `${f}: CtaBand com o painel vermelho dentro da .wrap`);
+    assert.equal(cta[1], sups[f], `${f}: a secção da CtaBand é clara`);
+    const corpo = cta[2];
+    assert.match(corpo, /<a href="tel:\+351961245288" class="cta-phone">/, `${f}: telefone no painel`);
+    const provas = [.../<ul class="prova">(.*?)<\/ul>/.exec(corpo)[1].matchAll(/<li>([^<]+)<\/li>/g)].map(m => m[1].replace(/&amp;/g, '&').replace(/&#x27;/g, "'").replace(/&quot;/g, '"'));
     assert.deepEqual(provas, [...SITE.provas, ...(DADOS.alvara ? [`Alvará n.º ${DADOS.alvara}`] : [])], `${f}: ProofLine (com o alvará quando existe)`);
   }
-  assert.match(le('index.html'), /<section class="sec cta s-clay" id="contacto" aria-labelledby="ctaT">[\s\S]*?<h2 id="ctaT">Peça o orçamento\. A visita é gratuita\.<\/h2>/);
+  assert.match(le('index.html'), /<section class="sec cta s-bone sec-junta" id="contacto" aria-labelledby="ctaT">[\s\S]*?<h2 id="ctaT">Peça o orçamento\. A visita é gratuita\.<\/h2>/);
+  // o vermelho nunca a toda a largura: em nenhuma página há outro elemento com a superfície s-clay além do painel
+  for (const f of paginas()) {
+    const fora = [...leV(f).matchAll(/<(\w+)\b[^>]*?\bclass="([^"]*\bs-clay\b[^"]*)"/g)].filter(m => !m[2].split(' ').includes('cta-painel'));
+    assert.deepEqual(fora.map(m => `<${m[1]} class="${m[2]}">`), [], `${f}: o clay só no painel da CtaBand`);
+  }
   for (const f of paginas()) assert.ok(!/class="cta-inner"|class="cta-form"|class="cta-faixa/.test(leV(f)), `${f}: sem as faixas antigas`);
 });
 
@@ -189,9 +199,10 @@ test('a página inicial: Hero › Obras em destaque › Serviços › Porquê N�
   const ordem = ['id="top"', 'id="obras"', 'id="servicos"', 'id="porque-nos"', 'id="contacto"'];
   let pos = 0;
   for (const marca of ordem) { const i = t.indexOf(marca); assert.ok(i > pos, `ordem: ${marca}`); pos = i; }
-  // as superfícies, pela ordem da página: paper, ink, paper, bone, clay e o rodapé ink
+  // as superfícies, pela ordem da página: paper, ink, paper, bone, bone (a CtaBand continua o Porquê Nós, com o painel
+  // vermelho lá dentro) e o rodapé ink: o vermelho nunca encosta ao verde
   const sups = [...t.matchAll(/<(?:section|footer) class="[^"]*\b(s-(?:paper|bone|ink|clay))\b/g)].map(m => m[1]);
-  assert.deepEqual(sups, ['s-paper', 's-ink', 's-paper', 's-bone', 's-clay', 's-ink']);
+  assert.deepEqual(sups, ['s-paper', 's-ink', 's-paper', 's-bone', 's-bone', 's-ink']);
   // hero «split»: eyebrow, h1, lead, «Pedir Orçamento» e «Ligar», o texto de apoio, a ProofLine e um só cartão
   assert.match(t, /<section class="hero s-paper" id="top"[^>]*>\s*<div class="wrap hero-grid">/);
   assert.match(t, new RegExp(`<span class="eyebrow">Reabilitação e construção${DADOS.zona ? ' · ' + esc(DADOS.zona) : ''}</span>`), 'eyebrow com a zona só quando existe');
@@ -276,7 +287,7 @@ test('o formulário Netlify: só em orcamento.html, atributos, campos pela ordem
   assert.match(form, /<div class="form-alerta" id="formAlerta" tabindex="-1" hidden><\/div>/);
   assert.match(t, /<meta name="description" content="[^"]+">/);
   assert.ok(le('sitemap.xml').includes(`${SITE.baseUrl}/orcamento.html`), 'orcamento.html no mapa do site');
-  assert.doesNotMatch(t, /class="sec cta s-clay"/, 'orcamento.html sem faixa clay: é ela a ação');
+  assert.doesNotMatch(t, /class="sec cta |class="cta-painel/, 'orcamento.html sem CtaBand: é ela a ação');
   const opcoes = [...form.matchAll(/<option value="([^"]*)"/g)].map(m => m[1]).filter(Boolean);
   assert.deepEqual(opcoes, TIPOS, 'as opções são os nomes dos serviços e «Outro»');
   const ids = [...form.matchAll(/<option value="[^"]+" data-tipo="([^"]+)"/g)].map(m => m[1]);
@@ -323,7 +334,7 @@ test('as fichas de obra: migalhas, serviço, «Na obra», ficha só com factos, 
     const lds = [...t.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)].map(m => JSON.parse(m[1]));
     const bc = lds.find(l => l['@type'] === 'BreadcrumbList');
     assert.ok(bc && bc.itemListElement.length === 3 && bc.itemListElement[2].item === `${SITE.baseUrl}/${f}`, `${f}: migalhas`);
-    const orc = /<section class="sec cta s-clay"[\s\S]*?class="acoes acoes-pilha">\s*<a class="btn" href="([^"]+)">Pedir Orçamento<\/a>/.exec(t)[1];
+    const orc = /<section class="sec cta [^"]*"[\s\S]*?class="acoes acoes-pilha">\s*<a class="btn" href="([^"]+)">Pedir Orçamento<\/a>/.exec(t)[1];
     assert.equal(orc, `../orcamento.html?tipo=${s.id}&amp;de=obras/${o.slug}`, `${f}: o pedido leva o tipo (id do serviço) e a obra de origem`);
     const wa = /href="(https:\/\/wa\.me\/351961245288\?text=[^"]+)"[^>]*>Enviar fotografias por WhatsApp/.exec(t)[1];
     assert.ok(decodeURIComponent(wa).includes(o.code), `${f}: mensagem de WhatsApp com o código`);
@@ -384,9 +395,10 @@ test('obras.html: o índice, uma secção por serviço com obras (ink e bone a a
   const lcp = figs.find(m => m[3].includes('fetchpriority="high"'));
   assert.ok(lcp && lcp[1] === 'pg', 'a obra com a imagem LCP sem .reveal');
   assert.deepEqual(figs.map(m => m[1] === 'pg'), figs.map(m => m[2] === lcp[2]), 'só o primeiro grupo sem .reveal');
-  // a ordem das superfícies: paper (PageHead), grupos, clay e o rodapé ink; ink nunca encosta a ink
+  // a ordem das superfícies: paper (PageHead), grupos, a CtaBand paper (com o painel vermelho lá dentro) e o rodapé ink;
+  // ink nunca encosta a ink, e o vermelho nunca encosta ao verde, seja qual for o número de grupos
   const sups = [...obras.matchAll(/<(?:section|footer) class="[^"]*\b(s-(?:paper|bone|ink|clay))\b/g)].map(m => m[1]);
-  assert.deepEqual(sups, ['s-paper', ...grupos.map(m => m[1]), 's-clay', 's-ink']);
+  assert.deepEqual(sups, ['s-paper', ...grupos.map(m => m[1]), 's-paper', 's-ink']);
   for (let i = 1; i < sups.length; i++) assert.ok(!(sups[i] === 's-ink' && sups[i - 1] === 's-ink'), 'duas secções ink nunca se tocam');
 });
 
@@ -531,7 +543,7 @@ test('com os dados da Melperfaz preenchidos: os ramos escondidos aparecem, nos s
     assert.match(casa, new RegExp(`em todas as obras com licença\\. Alvará n\\.º&nbsp;${esc(EXEMPLO.alvara)}\\. Seguro de responsabilidade civil: ${esc(EXEMPLO.seguro)}\\.</p>`), '«Licenciada & segurada» com o alvará e o seguro, cada um com o seu rótulo e ponto final');
     assert.match(casa, new RegExp(`<ul class="prova">.*<li>Alvará n\\.º ${esc(EXEMPLO.alvara)}</li></ul>`), 'o alvará na ProofLine');
     assert.match(casa, new RegExp(`<span class="topo-horario">${esc(EXEMPLO.horario)}</span>`), 'o horário no cabeçalho');
-    assert.match(casa, new RegExp(`<span class="cta-phone-l">${esc(EXEMPLO.horario)}</span>`), 'o horário na faixa clay');
+    assert.match(casa, new RegExp(`<span class="cta-phone-l">${esc(EXEMPLO.horario)}</span>`), 'o horário no painel vermelho da CtaBand');
     assert.match(casa, new RegExp(`<a class="link-seta" href="${esc(EXEMPLO.googleMaps)}" target="_blank" rel="noopener">Ver o perfil e as avaliações no Google`), 'o perfil do Google em Porquê Nós');
     const rod = /<footer[\s\S]*<\/footer>/.exec(casa)[0];
     for (const x of [`<p>Trabalhamos em ${esc(EXEMPLO.zona)}\\.</p>`, `<a href="mailto:${esc(EXEMPLO.email)}">`, `<span class="foot-txt">${esc(EXEMPLO.morada)}</span>`,
@@ -768,9 +780,15 @@ test('as folhas de estilo: superfícies, um só .btn-ghost, estilos de texto e n
   const todasCss = ['site.css', 'pag-obras.css', 'pag-paginas.css', 'pag-orcamento.css'].map(f => fs.readFileSync(path.join(W, 'assets/css', f), 'utf8')).join('\n');
   for (const velha of ['#1b2540', '#0f1628', '#2c3a5e', '#3a4763', '#e08a1e', '#bd6f10', '#f0a838', '#eef1f6', '#f7f8fb', '#d4d9e3', '#5c6479', '#b3261e',
     '27,37,64', '15,22,40', '238,241,246']) assert.ok(!todasCss.includes(velha), `sem a cor antiga ${velha}`);
-  // na faixa clay (vermelha) o texto, o traço do eyebrow e o foco são brancos; o botão é paper com texto ink
+  // no painel clay (vermelho) o texto, o traço do eyebrow e o foco são brancos; o botão é paper com texto ink e, com o
+  // rato, branco com texto clay-deep (nunca o bloco ink, verde, sobre o vermelho)
   const clay = /\.s-clay \{([^}]*)\}/.exec(css)[1];
-  for (const v of ['--fg: var(--white)', '--fg-2: var(--white)', '--eyebrow-rule: var(--white)', '--focus-c: var(--focus-on-clay)', '--btn-bg: var(--paper); --btn-fg: var(--ink)']) assert.ok(clay.includes(v), `s-clay: ${v}`);
+  for (const v of ['--fg: var(--white)', '--fg-2: var(--white)', '--eyebrow-rule: var(--white)', '--focus-c: var(--focus-on-clay)', '--btn-bg: var(--paper); --btn-fg: var(--ink)',
+    '--btn-bg-h: var(--white); --btn-fg-h: var(--clay-deep)']) assert.ok(clay.includes(v), `s-clay: ${v}`);
+  assert.doesNotMatch(clay, /--btn-bg-h: var\(--ink/, 's-clay: o hover do botão não é verde');
+  // o painel da CtaBand: os bordos são os da .wrap e o texto fica para dentro (64/50 px; 22/16 no telemóvel)
+  assert.match(css, /\.cta-painel \{ position: relative; overflow: hidden; padding: var\(--space-64\) var\(--space-50\); \}/);
+  assert.match(css, /\.cta-painel \{ padding: var\(--space-22\) var\(--space-16\); \}/);
   assert.match(css, /--focus-on-clay: var\(--white\);/);
   // o botão primário é branco sobre clay por omissão (5,9:1), e também nas secções ink
   assert.match(css, /--btn-bg: var\(--clay\); --btn-fg: var\(--white\);/);
@@ -828,6 +846,21 @@ test('as folhas de estilo: superfícies, um só .btn-ghost, estilos de texto e n
   assert.match(css, /\.js \.reveal \{ opacity: 0; transform: translateY\(var\(--space-16\)\); transition: opacity var\(--dur-3\)/, 'a entrada: 16 px em 500 ms');
   assert.doesNotMatch(todas, /(?:transition|animation)[\w-]*:[^;{}]*(?:\b[1-9]\d*(?:\.\d+)?|\B\.\d+)m?s\b/, 'sem durações soltas nas folhas de estilo');
   assert.deepEqual([...new Set([...todas.matchAll(/@media \((?:max|min)-width: (\d+)px\)/g)].map(m => m[1]))].sort(), ['640', '980']);
+});
+
+test('o --check: o vermelho nunca a toda a largura nem a encostar ao verde (o clay só no painel da CtaBand, numa secção clara)', () => {
+  const d = copiaFontes();
+  try {
+    const p = path.join(d, 'src/pages/obras.html');
+    const original = fs.readFileSync(p, 'utf8');
+    fs.writeFileSync(p, original.replace('{{> cta titulo=', '{{> cta sup="s-ink" titulo=') + '\n<section class="sec s-clay faixa-v"><div class="wrap"><p>x</p></div></section>\n');
+    const r = spawnSync('python3', ['build.py', '--check'], { cwd: d, encoding: 'utf8', env: { ...process.env, MELPERFAZ_OUT: path.join(d, 'public') } });
+    assert.equal(r.status, 1, 'sai com 1');
+    assert.match(r.stdout, /obras\.html: a CtaBand numa secção «sec cta s-ink»: o painel vermelho vive numa secção clara/);
+    assert.match(r.stdout, /obras\.html: <section class="sec s-clay faixa-v">: o vermelho \(s-clay\) só no painel da CtaBand/);
+    assert.doesNotMatch(r.stdout, /cta-painel s-clay/, 'o painel da CtaBand passa');
+    assert.doesNotMatch(r.stdout, /index\.html: a CtaBand|obras\/[^:]+: a CtaBand/, 'as CtaBand em bone e paper passam');
+  } finally { fs.rmSync(d, { recursive: true, force: true }); }
 });
 
 test('o lint do --check: falha com px solto, tamanho de letra fora dos estilos, @media, texto escuro no vermelho e infinite', () => {

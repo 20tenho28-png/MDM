@@ -12,7 +12,7 @@
    «infinite». Exceções: 1px (hairline), env() e 0s. */
 :root {
   /* verde e vermelho (a pedido do dono): ink é agora verde-floresta e clay é vermelho. Os nomes dos papéis ficam (ink, o
-     escuro principal: texto no claro, superfícies escuras, cabeçalho; clay, o acento: botões, traços, faixa de contacto)
+     escuro principal: texto no claro, superfícies escuras, cabeçalho; clay, o acento: botões, traços, o painel de contacto)
      e os neutros (paper, bone, line, muted) puxam ao verde. No vermelho o texto é branco (5,9:1), nunca ink (2,2:1) */
   --ink: #12392b;
   --bone: #edf2ec;
@@ -92,7 +92,8 @@
 /* ── Superfícies: a superfície decide a cor do texto, do traço do eyebrow, do botão e do foco ──
    paper e bone: texto ink (verde), foco ink, botão clay (vermelho) com texto branco; ink: texto bone, traço e foco
    amber (vermelho claro), botão clay com texto branco; clay: texto, traço e foco brancos (5,9:1), nunca ink (2,2:1), e
-   o botão paper com texto ink (o ghost com contorno branco) */
+   o botão paper com texto ink (o ghost com contorno branco), que com o rato fica branco com texto clay-deep (nunca um
+   bloco verde no vermelho). O clay só existe no painel da CtaBand, numa secção clara: nunca a toda a largura (--check) */
 .s-paper, .s-bone { --fg: var(--ink); --fg-2: var(--muted); --fg-cat: var(--muted); --rule: var(--line); --eyebrow-rule: var(--clay); --focus-c: var(--focus);
   --btn-bg: var(--clay); --btn-fg: var(--white); --btn-bg-h: var(--ink); --btn-fg-h: var(--paper); color: var(--fg); }
 .s-paper { --bg: var(--paper); background: var(--paper); }
@@ -101,7 +102,7 @@
   --focus-c: var(--focus-on-ink); --btn-bg: var(--clay); --btn-fg: var(--white); --btn-bg-h: var(--amber); --btn-fg-h: var(--ink);
   background: var(--ink); color: var(--fg); }
 .s-clay { --bg: var(--clay); --fg: var(--white); --fg-2: var(--white); --fg-cat: var(--white); --rule: var(--white); --eyebrow-rule: var(--white);
-  --focus-c: var(--focus-on-clay); --btn-bg: var(--paper); --btn-fg: var(--ink); --btn-bg-h: var(--ink); --btn-fg-h: var(--paper);
+  --focus-c: var(--focus-on-clay); --btn-bg: var(--paper); --btn-fg: var(--ink); --btn-bg-h: var(--white); --btn-fg-h: var(--clay-deep);
   background: var(--clay); color: var(--fg); }
 
 /* ── Base ── */
@@ -127,7 +128,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 input, select, textarea { font-size: var(--fs-body); }
 main:focus { outline: none; }
 ::selection { background: var(--clay); color: var(--white); }
-/* na faixa clay a seleção vermelha não se via: lá é ink */
+/* no painel clay a seleção vermelha não se via: lá é ink */
 .s-clay ::selection { background: var(--ink); color: var(--white); }
 /* grão de ruído sobre a página inteira, a 4% (sem eventos de rato) */
 body.grain::before { content: ""; position: fixed; inset: 0; z-index: var(--z-grain); pointer-events: none; opacity: .04; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
@@ -380,8 +381,9 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
 .ba-js.ba-a-arrastar { cursor: ew-resize; }
 
 /* ── Porquê Nós: o SectionHead à largura da .wrap; por baixo, as garantias (em duas colunas, uma até 640 px) e «Quem
-   somos» à esquerda, e a fotografia 4:3 à direita, com o topo na primeira garantia e na coluna das ações da faixa clay
-   logo abaixo (360 px, --col-acoes; um terço da .wrap nos ecrãs mais estreitos) ── */
+   somos» à esquerda, e a fotografia 4:3 à direita, com o topo na primeira garantia, a acabar no bordo direito do painel
+   clay logo abaixo e com a largura da coluna das ações dele (360 px, --col-acoes; um terço da .wrap nos ecrãs mais
+   estreitos) ── */
 .trust-grid { display: grid; grid-template-columns: minmax(0, 1fr) min(var(--col-acoes), 33%); gap: var(--space-80); align-items: start; }
 .trust-grid > * { width: 100%; min-width: 0; }
 .trust-list { list-style: none; display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--space-38); }
@@ -421,9 +423,12 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
 .trust-foto .frame { aspect-ratio: 4 / 3; }
 .trust-foto figcaption { margin-top: var(--space-6); }
 
-/* ── Faixa de contacto (CtaBand, clay: texto, traços e foco brancos; botão paper com texto ink, ghost com contorno branco) ── */
-.cta { position: relative; overflow: hidden; }
-.cta::before { content: ""; position: absolute; top: -50%; right: -10%; width: 600px; height: 600px; border: 60px solid var(--bone-07); border-radius: var(--radius-round); pointer-events: none; }
+/* ── Faixa de contacto (CtaBand): um painel vermelho (clay: texto, traços e foco brancos; botão paper com texto ink, ghost
+   com contorno branco) dentro da .wrap, numa secção clara (paper ou bone). O vermelho nunca encosta ao verde: com a
+   faixa a toda a largura entre um grupo de obras ink e o rodapé ink, o ecrã ficava em listas verde e vermelha. Os
+   bordos do painel são os da .wrap (a mesma margem esquerda), o texto fica para dentro ── */
+.cta-painel { position: relative; overflow: hidden; padding: var(--space-64) var(--space-50); }
+.cta-painel::before { content: ""; position: absolute; top: -50%; right: -10%; width: 600px; height: 600px; border: 60px solid var(--bone-07); border-radius: var(--radius-round); pointer-events: none; }
 .cta-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: var(--space-60); align-items: center; position: relative; z-index: 2; }
 .cta-grid > * { width: 100%; min-width: 0; }
 .cta h2 { font-size: var(--fs-cta); }
@@ -567,7 +572,9 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
   html { scroll-padding-bottom: calc(var(--barra-height) + env(safe-area-inset-bottom) + var(--space-16)); }
 }
 @media (max-width: 640px) {
-  .wrap { padding: 0 var(--space-16); }
+  /* só os lados: o painel do menu (.menu-movel-in, também uma .wrap) guarda os 12 px em cima e os 26 px em baixo, e o
+     anel de foco da primeira e da última ligação desenha-se inteiro dentro dele (o overflow-y do painel cortava-o) */
+  .wrap { padding-left: var(--space-16); padding-right: var(--space-16); }
   .sec { padding: var(--space-50) 0; }
   .sec-head { margin-bottom: var(--space-38); }
   .hero { padding: var(--space-50) 0; }
@@ -590,11 +597,17 @@ html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transfo
   .tag-card { top: 0; bottom: auto; padding: var(--space-12) var(--space-16); }
   .tag-card .n { font-size: var(--fs-card); }
   .cta-grid > .cta-acoes { max-width: none; }
+  /* o painel vermelho no telemóvel: 16 px por dentro dos lados, como a .wrap por fora, 22 em cima e em baixo (com a
+     entrelinha do eyebrow e da ProofLine, cerca de 28 à vista), e o telefone e as ações um passo mais juntos (dentro do
+     painel o vermelho já separa): a página inicial fica abaixo dos 6.000 px a 390 com o texto um pouco mais estreito */
+  .cta-painel { padding: var(--space-22) var(--space-16); }
+  .cta-painel .cta-phone { margin-top: var(--space-22); }
   .acoes-pilha { min-width: 0; }
   /* a marca a toda a largura; «Site» e «Contactos» lado a lado */
   .foot-grid { gap: var(--space-32) var(--space-22); }
   .foot-col a { overflow-wrap: anywhere; }
-  .hero-grid, .cta-grid { gap: var(--space-38); }
+  .hero-grid { gap: var(--space-38); }
+  .cta-grid { gap: var(--space-26); }
   .obras-wrap > .obras-mais { margin-top: var(--space-32); }
   /* a foto do Porquê Nós sai no telemóvel (a prova fotográfica já está nas obras logo acima) */
   .trust-foto { display: none; }
