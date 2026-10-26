@@ -452,6 +452,16 @@ body.app-on .col{background:var(--sunk)}
 @media (min-width:720px){.sgc .sgc-g{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .sgc label{font-size:12.5px;color:var(--ink-2);display:block;margin-bottom:3px}
 .sgc textarea{min-height:76px}
+/* Orçamento: tabela de preços (Definições) */
+.oc-tab{border-collapse:collapse;width:100%;min-width:960px;table-layout:fixed;font-size:13.5px}
+.oc-tab th{font-size:12px;font-weight:600;color:var(--ink-2);text-align:left;padding:4px 4px 6px;border-bottom:1px solid var(--line)}
+.oc-tab td{padding:3px 4px;border-bottom:1px solid var(--line);vertical-align:middle}
+.sgc .oc-tab input,.sgc .oc-tab select{font-size:13.5px;padding:5px 6px;border-radius:6px}
+.oc-tab .num{text-align:right}
+.oc-tab .oc-vazio{color:var(--ink-2);padding:14px 4px}
+.oc-x{border:0;background:transparent;color:var(--ink-2);font-size:20px;line-height:1;cursor:pointer;padding:4px 8px}
+.oc-x:hover{color:var(--bad)}
+.oc-colar textarea{min-height:110px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
 .sg-faltas{display:flex;flex-wrap:wrap;gap:6px 14px}
 .toast button{font:inherit;font-weight:600;background:none;border:0;color:var(--bg);text-decoration:underline;margin-left:12px;padding:0;cursor:pointer}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;z-index:60;max-width:calc(100% - 32px);box-sizing:border-box}
@@ -1254,6 +1264,10 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
       <div class="sec-h"><h2 id="h-prob">Probabilidade de fecho por passo</h2></div>
       <div class="panel sgc" id="probCfg"></div>
       <p class="note">A probabilidade de cada passo dá a coluna «Previsão» da tabela de pedidos (valor × probabilidade). Num pedido, escrever outra probabilidade na célula sobrepõe-se a esta; apagar volta a esta.</p>
+    </section>
+    <section aria-labelledby="h-orccfg" style="margin-top:22px">
+      <div class="sec-h"><h2 id="h-orccfg">Orçamento: tabela de preços</h2></div>
+      <div class="panel sgc" id="orcCfg"></div>
     </section>
     <section aria-labelledby="h-agcfg" id="agCfgSec" style="margin-top:22px" hidden>
       <div class="sec-h"><h2 id="h-agcfg">Agenda</h2></div>
@@ -3909,7 +3923,7 @@ if (!Element.prototype.replaceChildren) {
     F('nextNum').textContent = status === 'ok' ? nextNumber() : 'ORC…';
     const verm = all.filter(x => x.sem === 'vermelho').length;
     F('redBadge').textContent = verm ? String(verm) : '';
-    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderEquipa(); renderFaturacao(); renderClientes(); renderExport(); renderPipeline(all); renderSeg(); renderSegCfg(); renderAgenda(); renderAgCfg(); renderInicio(all); renderProb(); renderDash(); renderObjCfg();
+    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderEquipa(); renderFaturacao(); renderClientes(); renderExport(); renderPipeline(all); renderSeg(); renderSegCfg(); renderAgenda(); renderAgCfg(); renderInicio(all); renderProb(); renderDash(); renderObjCfg(); renderOrcCfg();
     F('btnNovoTop').hidden = F('railNovo').hidden = F('btnNovoCliente').hidden = !(canWrite && status === 'ok');
     // Não redesenha a folha aberta enquanto há um formulário a meio.
     if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
@@ -4393,7 +4407,8 @@ if (!Element.prototype.replaceChildren) {
   const ORC_C = ORC_POT.configPotencia(ORC_BTU);
   // Dinheiro em cêntimos inteiros: o preço em cêntimos, a quantidade em milésimos; a linha arredonda ao cêntimo, a meio
   // para longe do zero (as linhas de desconto são negativas). O IVA conta-se por taxa, sobre a soma das linhas dessa taxa.
-  const orcCent = v => { if (v == null || v === '') return null; const n = typeof v === 'number' ? v : parseValor(String(v)); return n == null || Number.isNaN(n) ? null : Math.round(n * 100); };
+  // Euros para cêntimos, metade para longe do zero (descontos negativos); «1.250» sem vírgula conta como mil, como nas colunas.
+  const orcCent = v => { if (v == null || v === '') return null; const n = typeof v === 'number' ? v : parseNumero(String(v)); return n == null || Number.isNaN(n) ? null : (n < 0 ? -1 : 1) * Math.round(Math.abs(n) * 100); };
   const orcMil = v => { if (v == null || v === '') return null; const n = typeof v === 'number' ? v : parseNumero(String(v)); return n == null || Number.isNaN(n) ? null : Math.round(n * 1000); };
   function orcLinha(l) {
     const c = orcCent(l.preco), q = orcMil(l.qtd);
@@ -4655,6 +4670,161 @@ if (!Element.prototype.replaceChildren) {
   F('folhaModoCustos').addEventListener('click', () => { folModo = 'custos'; renderFolha(); });
   F('folhaModoDebito').addEventListener('click', () => { folModo = 'debito'; renderFolha(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !F('folhaWrap').hidden) { e.stopImmediatePropagation(); fecharFolha(); } }, true);
+
+  /* ---------- Orçamento: a tabela de preços (Definições, config «orcamento») ----------
+     Privada da equipa (RLS autorizado()), preços sem IVA colados da folha de cálculo; nunca vai para o git. O
+     data/precos.json continua a ser só do site e da skill. As tarifas da folha de obra são preços de venda e entram como
+     linhas de partida. O equipamento com BTU/h, divisões e marca é o que o «Pôr nas opções» da potência vai buscar. */
+  const ORC_GRUPOS = [['equip','Equipamento']].concat(GRUPOS);
+  const ORC_IVAS = [23, 13, 6];
+  const ORC_COLS = ['Grupo', 'Ref.', 'Descrição', 'Un.', 'Preço s/IVA', 'IVA %', 'Marca', 'BTU/h', 'Divisões'];
+  let cfgOrc = null, cfgOrcVersao = 0, ocEd = null, ocBaseV = 0, ocSujo = false;
+  const orcCfg = () => Object.assign({iva: 23, validadeDias: 30, pagamento: '', condicoes: '', itens: []}, cfgOrc || {});
+  // Travessões da folha de cálculo: entre espaços passam a vírgula, colados entre números (9000 a 12000) passam a hífen.
+  const orcSemTrav = s => String(s == null ? '' : s).replace(/\s+[\u2012-\u2015\u2E3A\u2E3B]+\s+/g, ', ').replace(/[\u2012-\u2015\u2E3A\u2E3B]+/g, '-');
+  function orcGrupoDe(s) {
+    const t = String(s || '').trim().toLowerCase();
+    const g = ORC_GRUPOS.find(([k, n]) => t === k || t === n.toLowerCase());
+    if (g) return g[0];
+    return /^equip/.test(t) ? 'equip' : /^m[ãa]o/.test(t) ? 'mo' : /^desl/.test(t) ? 'desl' : /^mat/.test(t) ? 'mat' : /^(div|desc)/.test(t) ? 'div' : null;
+  }
+  // Um item escrito ou colado (texto) para o formato guardado: [item, erro]. Preço em euros, vazio = a definir.
+  function orcItem(o) {
+    const g = orcGrupoDe(o.g);
+    if (!g) return [null, `grupo «${o.g || ''}» desconhecido (${ORC_GRUPOS.map(x => x[1]).join(', ')})`];
+    const desc = orcSemTrav(o.desc).trim(), ref = orcSemTrav(o.ref).trim();
+    if (!desc) return [null, 'falta a descrição'];
+    if (ORC_PROIB_RE.test(desc + ' ' + ref)) return [null, `«${desc}» tem uma marca que a MDM não trabalha (só ${ORC_MARCAS.join(', ')})`];
+    const txt = v => String(v == null ? '' : v).trim();
+    const c = orcCent(txt(o.preco));
+    if (txt(o.preco) && c == null) return [null, `preço «${txt(o.preco)}» não é um número`];
+    const iva = txt(o.iva) ? Number(txt(o.iva).replace('%', '').replace(',', '.')) : null;
+    if (iva != null && !ORC_IVAS.includes(iva)) return [null, `IVA «${txt(o.iva)}»: só ${ORC_IVAS.join(', ')} ou vazio (o da tabela)`];
+    const marca = txt(o.marca), mk = marca ? ORC_MARCAS.find(m => m.toLowerCase() === marca.toLowerCase()) : '';
+    if (marca && !mk) return [null, `marca «${marca}» fora das marcas da MDM (${ORC_MARCAS.join(', ')})`];
+    const btu = txt(o.btu) ? parseNumero(txt(o.btu)) : null, div = txt(o.divisoes) ? Number(txt(o.divisoes)) : null;
+    if (btu != null && !(Number.isInteger(btu) && btu > 0)) return [null, `BTU/h «${txt(o.btu)}» não é um número inteiro`];
+    if (div != null && !(Number.isInteger(div) && div >= 1 && div <= 8)) return [null, `divisões «${txt(o.divisoes)}»: de 1 a 8`];
+    const it = {g, ref, desc, un: orcSemTrav(o.un).trim() || (g === 'mo' ? 'h' : 'un'), preco: c == null ? null : c / 100, iva};
+    if (mk) it.marca = mk;
+    if (btu) it.btu = btu;
+    if (div) it.divisoes = div;
+    return [it, null];
+  }
+  // Para os campos de texto do editor (vírgula decimal, vazios em vez de null).
+  const ocTxt = it => ({g: it.g, ref: it.ref || '', desc: it.desc || '', un: it.un || '', preco: it.preco == null ? '' : String(it.preco).replace('.', ','), iva: it.iva == null ? '' : String(it.iva), marca: it.marca || '', btu: it.btu ? String(it.btu) : '', divisoes: it.divisoes ? String(it.divisoes) : ''});
+  // Colar da folha de cálculo: uma linha por item, colunas pela ordem de ORC_COLS (tabulação ou ponto e vírgula). Uma
+  // primeira linha de títulos salta-se. Com um erro não entra nada, para não ficar meia tabela.
+  function orcColar(texto) {
+    const linhas = String(texto || '').split(/\r?\n/), itens = [], erros = [];
+    linhas.forEach((l, i) => {
+      if (!l.trim()) return;
+      const c = l.split(l.indexOf('\t') >= 0 ? '\t' : ';');
+      if (!itens.length && !erros.length && !orcGrupoDe(c[0]) && /grupo/i.test(c[0] || '')) return;
+      const [it, e] = orcItem({g: c[0], ref: c[1], desc: c[2], un: c[3], preco: c[4], iva: c[5], marca: c[6], btu: c[7], divisoes: c[8]});
+      if (e) erros.push(`Linha ${i + 1}: ${e}.`); else itens.push(it);
+    });
+    return {itens, erros};
+  }
+  // Juntar: um item com a mesma referência (ou, sem referência, a mesma descrição) é substituído; os outros entram no fim.
+  function orcJuntar(lista, novos) {
+    const chave = it => it.ref ? 'r:' + it.ref.toLowerCase() : 'd:' + it.g + ':' + it.desc.toLowerCase();
+    const out = lista.slice();
+    for (const it of novos) { const i = out.findIndex(x => chave(x) === chave(it)); if (i >= 0) out[i] = it; else out.push(it); }
+    return out;
+  }
+  const orcTarifasItens = () => tarifas().mo.map(([k, nome, v]) => ({g:'mo', ref:k, desc:`Mão de obra (${nome})`, un:'h', preco:v, iva:null}))
+    .concat(tarifas().desl.map(([k, nome, v]) => ({g:'desl', ref:k, desc:`Deslocação (${nome})`, un:'un', preco:v, iva:null})));
+
+  function renderOrcCfg() {
+    const box = F('orcCfg'); if (!box) return;
+    if (status !== 'ok') { fill(box); return; }
+    if (ocSujo && ocEd) return; // não apaga alterações por guardar
+    const c = orcCfg();
+    ocEd = {iva: String(c.iva), validadeDias: String(c.validadeDias), pagamento: c.pagamento || '', condicoes: c.condicoes || '', itens: (c.itens || []).map(ocTxt)};
+    ocBaseV = cfgOrcVersao;
+    desenhaOrcCfg();
+  }
+  function ocMuda() { ocSujo = true; const e = F('oc-estado'), d = F('oc-desfazer'); if (e) e.textContent = 'Alterações por guardar'; if (d) d.hidden = false; }
+  function desenhaOrcCfg() {
+    const box = F('orcCfg'), c = orcCfg(), ed = ocEd, ro = canWrite ? null : true;
+    // As linhas coladas ainda por juntar e a caixa aberta sobrevivem a um redesenho (um colega que guarda, por exemplo).
+    const colAntes = F('oc-colar') ? F('oc-colar').value : '', colAberto = !!(box.querySelector('.oc-colar') && box.querySelector('.oc-colar').open);
+    const campoTxt = (k, extra) => h('input',Object.assign({value: ed.itens[k.i][k.c], disabled: ro, 'aria-label': k.l, oninput: ev => { ed.itens[k.i][k.c] = ev.target.value; ocMuda(); }}, extra || {}));
+    const linha = (it, i) => h('tr',null,
+      h('td',null, (() => { const s = h('select',{'aria-label':'Grupo', disabled: ro, onchange: ev => { it.g = ev.target.value; ocMuda(); }}, ORC_GRUPOS.map(([k, n]) => h('option',{value:k}, n))); s.value = it.g; return s; })()),
+      h('td',null, campoTxt({i, c:'ref', l:'Referência'})),
+      h('td',null, campoTxt({i, c:'desc', l:'Descrição'})),
+      h('td',null, campoTxt({i, c:'un', l:'Unidade'})),
+      h('td',null, campoTxt({i, c:'preco', l:'Preço sem IVA'}, {class:'num', inputmode:'decimal', placeholder:'a definir'})),
+      h('td',null, (() => { const s = h('select',{'aria-label':'IVA', disabled: ro, onchange: ev => { it.iva = ev.target.value; ocMuda(); }}, h('option',{value:''}, `${ed.iva || 23}`), ORC_IVAS.map(v => h('option',{value:String(v)}, String(v)))); s.value = it.iva; return s; })()),
+      h('td',null, (() => { const s = h('select',{'aria-label':'Marca', disabled: ro, onchange: ev => { it.marca = ev.target.value; ocMuda(); }}, h('option',{value:''}, ''), ORC_MARCAS.map(m => h('option',{value:m}, m))); s.value = it.marca; return s; })()),
+      h('td',null, campoTxt({i, c:'btu', l:'BTU/h'}, {class:'num', inputmode:'numeric'})),
+      h('td',null, campoTxt({i, c:'divisoes', l:'Divisões'}, {class:'num', inputmode:'numeric'})),
+      h('td',null, ro ? null : h('button',{class:'oc-x', type:'button', title:'Tirar o item', 'aria-label':'Tirar o item', onclick:() => { ed.itens.splice(i, 1); ocMuda(); desenhaOrcCfg(); }}, '×')));
+    const geral = h('div',{class:'sgc-g'},
+      h('div',null, h('label',{for:'oc-iva'}, 'IVA habitual'), (() => { const s = sel('oc-iva', ORC_IVAS.map(v => [String(v), v + ' %']), ed.iva); s.disabled = !!ro; s.onchange = ev => { ed.iva = ev.target.value; ocMuda(); desenhaOrcCfg(); }; return s; })()),
+      h('div',null, h('label',{for:'oc-val'}, 'Validade do orçamento (dias)'), inp('oc-val', ed.validadeDias, {inputmode:'numeric', readonly: ro, oninput: ev => { ed.validadeDias = ev.target.value; ocMuda(); }})),
+      h('div',null, h('label',{for:'oc-pag'}, 'Condições de pagamento (vazio: não aparecem)'), h('textarea',{id:'oc-pag', readonly: ro, oninput: ev => { ed.pagamento = ev.target.value; ocMuda(); }}, ed.pagamento)),
+      h('div',null, h('label',{for:'oc-cond'}, 'Outras condições (uma por linha)'), h('textarea',{id:'oc-cond', readonly: ro, oninput: ev => { ed.condicoes = ev.target.value; ocMuda(); }}, ed.condicoes)));
+    const colar = canWrite ? h('details',{class:'oc-colar', open: colAberto || null}, h('summary',null, 'Colar da folha de cálculo'),
+      h('p',{class:'note', style:'margin:6px 0'}, `Copia as linhas da folha (Excel ou Numbers) com as colunas por esta ordem: ${ORC_COLS.join(', ')}. As últimas três podem ficar vazias; o IVA vazio é o habitual. Grupos: ${ORC_GRUPOS.map(x => x[1]).join(', ')}. Os travessões passam a vírgulas.`),
+      h('textarea',{id:'oc-colar', 'aria-label':'Linhas coladas', placeholder: ORC_COLS.join('\t')}, colAntes),
+      h('p',{class:'err', id:'oc-colar-err', hidden:true}),
+      h('div',{class:'row-end', style:'margin-top:8px'},
+        h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => ocAplicaColar(false)}, 'Juntar à tabela'),
+        h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => ocAplicaColar(true)}, 'Substituir a tabela'))) : null;
+    const n = ed.itens.length;
+    fill(box,
+      h('p',{class:'note', style:'margin:0'}, 'Preços sem IVA, só para a equipa (ficam na base de dados do registo, nunca no site). O orçamento de cada pedido vai buscar aqui as linhas; o preço pode sempre mudar no orçamento. Um equipamento com BTU/h, divisões e marca entra sozinho pela potência das divisões.'),
+      geral,
+      h('div',{class:'tw'}, h('table',{class:'oc-tab'},
+        h('colgroup',null, ['9.6em','7em',null,'3.6em','6.4em','4.6em','9.4em','5.4em','4.4em','2.4em'].map(w => h('col',{style: w ? 'width:' + w : null}))),
+        h('thead',null, h('tr',null, ORC_COLS.map(t => h('th',null, t)), h('th',null, ''))),
+        h('tbody',null, n ? ed.itens.map(linha) : h('tr',null, h('td',{colspan:'10', class:'oc-vazio'}, 'Ainda sem itens. Cola da folha de cálculo ou junta as tarifas da folha de obra.'))))),
+      colar,
+      h('div',{class:'row-end'},
+        h('span',{class:'sub', id:'oc-estado', style:'margin-right:auto;align-self:center'}, ocSujo ? 'Alterações por guardar' : `${n} ${n === 1 ? 'item' : 'itens'}${c.atualizado ? ` · mudada a ${ddmm(String(c.atualizado).slice(0, 10))}` : ''}`),
+        canWrite ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { ed.itens.push({g:'equip', ref:'', desc:'', un:'', preco:'', iva:'', marca:'', btu:'', divisoes:''}); ocMuda(); desenhaOrcCfg(); const ins = F('orcCfg').querySelectorAll('.oc-tab tbody tr:last-child input'); if (ins[1]) ins[1].focus(); }}, '+ Item') : null,
+        canWrite ? h('button',{class:'btn btn-ghost btn-sm', type:'button', title:'Técnico, ajudante e as três deslocações, aos preços da folha de obra', onclick:() => { ed.itens = orcJuntar(ed.itens.map(x => orcItem(x)[0] || x), orcTarifasItens()).map(ocTxt); ocMuda(); desenhaOrcCfg(); }}, 'Juntar as tarifas da folha de obra') : null,
+        canWrite ? h('button',{class:'btn btn-ghost btn-sm', type:'button', id:'oc-desfazer', hidden: ocSujo ? null : true, title:'Deita fora as alterações e mostra a tabela guardada', onclick:() => { ocSujo = false; F('oc-err').hidden = true; renderOrcCfg(); carregar(); }}, 'Desfazer') : null,
+        canWrite ? h('button',{class:'btn', type:'button', onclick: guardarOrcCfg}, 'Guardar tabela') : null),
+      h('p',{class:'err', id:'oc-err', hidden:true}));
+  }
+  function ocAplicaColar(substituir) {
+    const e = F('oc-colar-err'), {itens, erros} = orcColar(F('oc-colar').value);
+    if (erros.length) { e.textContent = erros.slice(0, 5).join(' ') + (erros.length > 5 ? ` E mais ${erros.length - 5}.` : '') + ' Nada entrou.'; e.hidden = false; return; }
+    if (!itens.length) { e.textContent = 'Não há linhas para juntar.'; e.hidden = false; return; }
+    if (substituir && ocEd.itens.length && !confirm(`Substituir os ${ocEd.itens.length} itens da tabela pelos ${itens.length} colados?`)) return;
+    ocEd.itens = (substituir ? itens : orcJuntar(ocEd.itens.map(x => orcItem(x)[0] || x), itens)).map(ocTxt);
+    F('oc-colar').value = ''; e.hidden = true; ocMuda(); desenhaOrcCfg(); toast(`${itens.length} ${itens.length === 1 ? 'item' : 'itens'} na tabela. Confere e guarda.`);
+  }
+  async function guardarOrcCfg() {
+    const erro = m => { const e = F('oc-err'); e.textContent = m; e.hidden = false; };
+    const ed = ocEd, itens = [], erros = [];
+    ed.itens.forEach((x, i) => { if (!x.desc.trim() && !x.ref.trim() && !x.preco.trim()) return; const [it, e] = orcItem(x); if (e) erros.push(`Item ${i + 1}: ${e}.`); else itens.push(it); });
+    if (erros.length) return erro(erros.slice(0, 5).join(' '));
+    const dias = Number(ed.validadeDias);
+    if (!(Number.isInteger(dias) && dias >= 1 && dias <= 365)) return erro('A validade é um número de dias, de 1 a 365.');
+    for (const [t, l] of [[ed.pagamento, 'nas condições de pagamento'], [ed.condicoes, 'nas outras condições']]) {
+      if (ORC_TRAV.test(t)) return erro(`Sem travessões ${l}: usa vírgulas ou parênteses.`);
+      if (ORC_PROIB_RE.test(t)) return erro(`Há uma marca que a MDM não trabalha ${l}.`);
+    }
+    const ordem = ORC_GRUPOS.map(x => x[0]);
+    itens.sort((a, b) => ordem.indexOf(a.g) - ordem.indexOf(b.g));
+    const valor = Object.assign({}, cfgOrc || {}, {iva: Number(ed.iva) || 23, validadeDias: dias, pagamento: ed.pagamento.trim(), condicoes: ed.condicoes.trim(), itens, atualizado: new Date().toISOString()});
+    try {
+      // Só grava sobre a versão que estava quando começaste a mexer: a tabela de um colega não se perde por cima.
+      const r = ocBaseV
+        ? await sb.from('config').update({valor, versao: ocBaseV + 1, atualizado_por: eu.email}).eq('chave', 'orcamento').eq('versao', ocBaseV).select('versao')
+        : await sb.from('config').insert({chave: 'orcamento', valor, atualizado_por: eu.email}).select('versao');
+      const conflito = r.error ? (!ocBaseV && /duplicate|unique|23505/i.test(r.error.message || '')) : !(r.data && r.data.length);
+      if (r.error && !conflito) throw r.error;
+      if (conflito) return erro('Outra pessoa mudou a tabela entretanto. Copia o que mudaste, carrega em «Desfazer» para ver a tabela atual e volta a fazer.');
+      cfgOrc = valor; cfgOrcVersao = r.data[0].versao; ocSujo = false; F('oc-err').hidden = true;
+      toast(`Tabela de preços guardada (${itens.length} ${itens.length === 1 ? 'item' : 'itens'})`); renderOrcCfg();
+    } catch (e) { erro(/permiss|row-level/.test(String(e.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar a tabela.'); }
+  }
 
   /* ---------- Seguimentos: o motor (supabase/seguimentos.sql) ----------
      A base de dados decide (sequências, dias, rascunhos, perdas, cobrança ao chefe); a página mostra a lista de hoje,
@@ -5809,7 +5979,7 @@ if (!Element.prototype.replaceChildren) {
       ]);
       if (p.error) throw p.error;
       rows = p.data.map(r => ({id: r.id, ...r.dados, _versao: r.versao}));
-      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') TB_PED.cfg = x.valor || null; if (x.chave === 'colunas_clientes') TB_CLI.cfg = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
+      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') TB_PED.cfg = x.valor || null; if (x.chave === 'colunas_clientes') TB_CLI.cfg = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'orcamento') { cfgOrc = x.valor || null; cfgOrcVersao = x.versao; } if (x.chave === 'orcamento_numero') cfgOrcNum = x.valor || null; if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
       if (ft.error) { if (/relation|does not exist|schema cache/i.test(ft.error.message || '')) fatTabela = false; }
       else { fatTabela = true; const novo = {}; for (const x of ft.data) if (x.dados && x.dados.mes) novo[x.dados.mes] = x.dados; faturacao = novo; if (!faturacao[fatMes]) fatMes = ''; }
       if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) { fichaTabela = false; const novo = {}; for (const id of Object.keys(fichas)) if (fichas[id]._novo) novo[id] = fichas[id]; fichas = novo; } }
@@ -5857,7 +6027,7 @@ if (!Element.prototype.replaceChildren) {
   }
   function sair() {
     if (canal) { sb.removeChannel(canal); canal = null; }
-    sessao = null; eu = null; rows = []; faturacao = {}; cfgClientes = {}; fichas = {}; pn = null; sg = null; segTabela = null; cfgSeg = null; segMotor = null; sgCorreu = false; sgEdit = null; agTabela = null; cfgAgenda = null; agTec = []; agMarc = []; agConf = {}; agPor = []; agLinks = {}; agSel = null; agAcao = null; agCfgSujo = false; canWrite = false; status = 'loading'; ligado = false;
+    sessao = null; eu = null; rows = []; faturacao = {}; cfgClientes = {}; fichas = {}; pn = null; sg = null; segTabela = null; cfgSeg = null; segMotor = null; sgCorreu = false; sgEdit = null; agTabela = null; cfgAgenda = null; agTec = []; agMarc = []; agConf = {}; agPor = []; agLinks = {}; agSel = null; agAcao = null; agCfgSujo = false; cfgOrc = null; cfgOrcVersao = 0; cfgOrcNum = null; ocEd = null; ocSujo = false; canWrite = false; status = 'loading'; ligado = false;
     F_LOGIN(); erroLogin('');
   }
   F('loginForm').addEventListener('submit', async ev => {
