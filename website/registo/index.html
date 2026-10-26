@@ -1616,11 +1616,16 @@ if (!Element.prototype.replaceChildren) {
   }
 
   /* ---------- Numeração ---------- */
+  // O número seguinte olha para os números dos pedidos, para os dos orçamentos feitos no registo (já reservados no PDF,
+  // ainda sem envio) e para o contador da equipa (config «orcamento_numero»).
+  let cfgOrcNum = null;
   function nextNumber() {
     const year = new Date().getFullYear();
-    const max = rows.reduce((m, r) => { const x = /^ORC(\d{4})_(\d{4})$/.exec(r.num || ''); return x && Number(x[2]) === year ? Math.max(m, Number(x[1])) : m; }, 0);
+    const de = n => { const x = /^ORC(\d{4})_(\d{4})$/.exec(n || ''); return x && Number(x[2]) === year ? Number(x[1]) : 0; };
+    const max = rows.reduce((m, r) => Math.max(m, de(r.num), de(r.orcamento && r.orcamento.num)), cfgOrcNum && cfgOrcNum.ano === year ? Number(cfgOrcNum.ultimo) || 0 : 0);
     return `ORC${String(max + 1).padStart(4,'0')}_${year}`;
   }
+  const numUsado = (n, id) => rows.some(x => x.id !== id && (x.num === n || (x.orcamento && x.orcamento.num === n)));
   function nextPedido() {
     const year = new Date().getFullYear();
     const max = rows.reduce((m, r) => { const x = /^PED(\d{4})_(\d{4})$/.exec(r.id || ''); return x && Number(x[2]) === year ? Math.max(m, Number(x[1])) : m; }, 0);
@@ -4211,7 +4216,7 @@ if (!Element.prototype.replaceChildren) {
     if (t.envio) {
       const n = val('t-num').toUpperCase(), m = /^ORC(\d{4})_(\d{4})$/.exec(n);
       if (!m) return erroT('O número tem de seguir o formato ORC0073_2026.');
-      if (rows.some(x => x.num === n && x.id !== r.id)) return erroT(`O ${n} já está noutro pedido.`);
+      if (numUsado(n, r.id)) return erroT(`O ${n} já está noutro pedido.`);
       const v = parseValor(val('t-valor'));
       if (v == null || Number.isNaN(v)) return erroT('Indica o valor s/IVA (por exemplo 1250,00).');
       if (!val('t-denv') || !val('t-epor')) return erroT('Indica a data de envio e quem enviou.');
@@ -4323,6 +4328,98 @@ if (!Element.prototype.replaceChildren) {
     await gravar(r.id, novo, 'Obra guardada');
   }
 
+
+  /* ---------- Orçamento: contas, número e potência (bloco puro, sem DOM) ----------
+     ORC-PURO-INICIO. O build.py (check_registo) confirma que a potência é a mesma de website/netlify/lib/calculo.mjs, que
+     ORC_BTU é o «btu» de data/site.json, ORC_MARCAS e ORC_PROIBIDAS as de data/regras-marcas.json e ORC_EMPRESA os dados
+     de data/site.json. Quem muda um lado muda o outro. */
+  const ORC_BTU = {"porM2": 400, "tipos": {"Quarto": 1.0, "Sala": 1.1, "Cozinha": 1.25, "Escritório": 1.15, "Outra divisão": 1.0}, "sol": 1.15, "ultimoAndar": 1.1, "tamanhos": [7000, 9000, 12000, 18000, 24000], "folga": 0.1, "btuPorKw": 3412, "areaMin": 2, "areaMax": 200, "maxDivisoes": 8};
+  const ORC_MARCAS = ["Midea", "Mitsubishi Electric", "Daikin", "France Air"];
+  const ORC_PROIBIDAS = ["LG", "Samsung", "Toshiba", "Fujitsu", "Hitachi", "Panasonic", "Sharp", "Mitsubishi Heavy", "Gree", "Haier", "Hisense", "TCL", "Kaysun", "Daitsu", "Airwell", "Carrier", "Lennox", "Trane", "Climaveneta", "Electrolux", "Beko", "Zanussi", "Olimpia Splendid", "Bosch", "Junkers", "Vulcano", "Vaillant", "Saunier Duval", "Ariston", "Baxi", "Ferroli", "Riello", "Soler & Palau", "Systemair", "Zehnder", "Swegon"];
+  const ORC_EMPRESA = {nome: "MDM Assistência Técnica", nomeLegal: "M.D.M. - Manuel Domingos Melancia, Lda", nif: "502 644 761", telefone: "218 935 050", whatsapp: "910 307 579", email: "mdmassist@mdmassist.com", morada: ["Alameda dos Oceanos 108 A, Edifício Vila do Oriente", "1990-426 Lisboa · Parque das Nações"], horario: '2.ª a 6.ª, das 8h às 17h', desde: "1991"};
+  // A potência por divisão, igual à do site e da skill «ORÇAMENTO MDM» (copiada de calculo.mjs, sem «export»).
+  const ORC_POT = (function () {
+    const NB = ' ';
+    function milhares(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, NB); }
+    function btuh(n) { return milhares(n) + NB + 'BTU/h'; }
+    function decimal(n) { return String(Math.round(n * 100) / 100).replace('.', ','); }
+    const espacos = (t) => t.replace(/ /g, ' ');
+    function configPotencia(cfg) {
+      const tipos = cfg && cfg.tipos ? Object.keys(cfg.tipos) : [];
+      const tamanhos = cfg && cfg.tamanhos ? cfg.tamanhos.slice().sort((a, b) => a - b) : [];
+      if (!tipos.length || !tamanhos.length || !(cfg.porM2 > 0) || !(cfg.btuPorKw > 0)) return null;
+      return {
+        cfg, tipos, tamanhos, MAIOR: tamanhos[tamanhos.length - 1], MAX: cfg.maxDivisoes || 8,
+        FOLGA: cfg.folga >= 0 && cfg.folga < 0.5 ? cfg.folga : 0,
+        AREA_MIN: cfg.areaMin || 2, AREA_MAX: cfg.areaMax || 200,
+      };
+    }
+    function potencia(C, divisoes) {
+      if (!C) return { erro: 'A estimativa de potência não está configurada (btu em data/site.json).' };
+      const erros = [], divs = [];
+      if (!Array.isArray(divisoes) || !divisoes.length) return { erro: 'Falta pelo menos uma divisão, com o tipo e a área.' };
+      if (divisoes.length > C.MAX) erros.push(`No máximo ${C.MAX} divisões; para mais, a MDM dimensiona na visita.`);
+      divisoes.slice(0, C.MAX).forEach((d, i) => {
+        const tipo = C.tipos.includes(d.tipo) ? d.tipo : null;
+        const a = Math.round(Number(d.area) * 100) / 100;
+        if (!tipo) { erros.push(`Divisão ${i + 1}: tipo «${d.tipo}» desconhecido (${C.tipos.join(', ')}).`); return; }
+        if (!(a > 0)) { erros.push(`Divisão ${i + 1}: falta a área em m².`); return; }
+        if (a < C.AREA_MIN) { erros.push(`Divisão ${i + 1}: a área tem de ter pelo menos ${decimal(C.AREA_MIN)} m².`); return; }
+        const cfg = C.cfg, sol = !!d.sol, topo = !!d.ultimoAndar;
+        const est = Math.round(a * cfg.porM2 * (cfg.tipos[tipo] || 1) * (sol ? cfg.sol || 1 : 1) * (topo ? cfg.ultimoAndar || 1 : 1));
+        /* acima de AREA_MAX m² a divisão conta, a dimensionar na visita (tam 0), como acima do maior aparelho; como no site.js */
+        const tam = a > C.AREA_MAX ? 0 : C.tamanhos.find((t) => t >= est * (1 - C.FOLGA)) || 0;
+        divs.push({ tipo, area: a, sol, topo, est, tam });
+      });
+      let total = 0, acima = false;
+      divs.forEach((d) => { total += d.tam || C.MAIOR; if (!d.tam) acima = true; });
+      const kw = (btu) => (btu / C.cfg.btuPorKw).toFixed(1).replace('.', ',');
+      const partes = divs.map((d) => {
+        const extra = [];
+        if (d.sol) extra.push('muito sol');
+        if (d.topo) extra.push('último andar');
+        return d.tipo + ' ' + decimal(d.area) + NB + 'm²' + (extra.length ? ' (' + extra.join(', ') + ')' : '') + ': ' +
+          (d.tam ? btuh(d.tam) : 'mais de ' + btuh(C.MAIOR) + ', a dimensionar na visita');
+      });
+      if (divs.length) partes.push('Total ' + (acima ? 'mais de ' : '') + btuh(total) + ' (' + kw(total) + NB + 'kW)');
+      return {
+        divs: divs.map((d) => ({ ...d, kw: d.tam ? kw(d.tam) : null,
+          texto: espacos(d.tam ? btuh(d.tam) : 'mais de ' + btuh(C.MAIOR) + ', a dimensionar na visita') })), n: divs.length, total, acima, kwTotal: kw(total),
+        resumo: espacos(partes.join(' · ')), erros,
+      };
+    }
+    return {configPotencia: configPotencia, potencia: potencia, btuh: btuh};
+  })();
+  const ORC_C = ORC_POT.configPotencia(ORC_BTU);
+  // Dinheiro em cêntimos inteiros: o preço em cêntimos, a quantidade em milésimos; a linha arredonda ao cêntimo, a meio
+  // para longe do zero (as linhas de desconto são negativas). O IVA conta-se por taxa, sobre a soma das linhas dessa taxa.
+  const orcCent = v => { if (v == null || v === '') return null; const n = typeof v === 'number' ? v : parseValor(String(v)); return n == null || Number.isNaN(n) ? null : Math.round(n * 100); };
+  const orcMil = v => { if (v == null || v === '') return null; const n = typeof v === 'number' ? v : parseNumero(String(v)); return n == null || Number.isNaN(n) ? null : Math.round(n * 1000); };
+  function orcLinha(l) {
+    const c = orcCent(l.preco), q = orcMil(l.qtd);
+    if (c == null || q == null) return null;
+    const p = q * c;
+    return (p < 0 ? -1 : 1) * Math.floor((Math.abs(p) + 500) / 1000);
+  }
+  // linhas: todas as linhas de uma opção (as dela e as comuns). semIva: autoliquidação (o cliente entrega o IVA ao Estado).
+  function orcTotais(linhas, semIva) {
+    const base = {}, porTaxa = {};
+    linhas.forEach(l => { const c = orcLinha(l); if (c == null) return; const t = String(l.iva == null || l.iva === '' ? 23 : l.iva); base[t] = (base[t] || 0) + c; });
+    let b = 0, i = 0, negativa = false;
+    Object.keys(base).sort((x, y) => Number(y) - Number(x)).forEach(t => {
+      const iva = semIva ? 0 : (base[t] < 0 ? -1 : 1) * Math.floor((Math.abs(base[t]) * Number(t) + 50) / 100);
+      porTaxa[t] = {base: base[t], iva}; b += base[t]; i += iva; if (base[t] < 0) negativa = true;
+    });
+    return {base: b, iva: i, comIva: b + i, porTaxa, negativa};
+  }
+  const orcEur = c => eur2((c || 0) / 100);
+  // «ORC0077_2026» dá «77/2026», como a SoftGCom escreve na descrição da fatura (orcDeDesc lê-o de volta).
+  const orcNumTxt = n => { const m = /^ORC(\d{4})_(\d{4})$/.exec(n || ''); return m ? `${Number(m[1])}/${m[2]}` : ''; };
+  // Travessões (do U+2012 ao U+2015 e os duplos U+2E3A e U+2E3B), escritos em código para não os pôr no ficheiro.
+  const ORC_TRAV = /[\u2012-\u2015\u2E3A\u2E3B]/;
+  // Marcas proibidas em texto livre: a palavra inteira, sem «lookbehind» (o Safari do iOS 12 não o conhece).
+  const ORC_PROIB_RE = new RegExp('(^|[^0-9A-Za-z\u00C0-\u00FF])(' + ORC_PROIBIDAS.map(m => m.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+')).join('|') + ')(?=$|[^0-9A-Za-z\u00C0-\u00FF])', 'i');
+  // ORC-PURO-FIM
 
   /* ---------- Folha de obra: o Excel «Folha de Obra Nº» no registo (10 % pessoa, 80 % registo, 10 % revisão) ----------
      O registo preenche o cabeçalho, o texto dos trabalhos, a zona e a deslocação, as observações, o executante e o tipo
@@ -5616,7 +5713,7 @@ if (!Element.prototype.replaceChildren) {
     const base = JSON.parse(JSON.stringify(r)); delete base.id;
     const doc = lerDados(base);
     if (doc.erro) { const el = F('d-err'); el.textContent = doc.erro; el.hidden = false; return; }
-    if (doc.num && rows.some(x => x.num === doc.num && x.id !== r.id)) { const el = F('d-err'); el.textContent = `O ${doc.num} já está noutro pedido.`; el.hidden = false; return; }
+    if (doc.num && numUsado(doc.num, r.id)) { const el = F('d-err'); el.textContent = `O ${doc.num} já está noutro pedido.`; el.hidden = false; return; }
     doc.historico = (doc.historico || []).slice(-60);
     if (doc.prioridade !== r.prioridade) doc.historico.push(nota(`P corrigido de ${r.prioridade || '–'} para ${doc.prioridade}`));
     if (r.porConfirmar && doc.porConfirmar === false) doc.historico.push(nota('Dados confirmados; o relógio passa a contar'));
