@@ -607,8 +607,10 @@ table.tb{border-collapse:separate;border-spacing:0;min-width:100%;font-size:13.5
 .tb-cols{display:flex;flex-direction:column;gap:8px;min-width:220px}
 .tb-cols small{color:var(--ink-2)}
 .fbox.agrupar select{border:0;background:transparent;font:inherit;color:inherit;width:100%}
-@media (min-width:768px){#lista,#v-gerir #mosLeg,#v-gerir #mosaico{display:none}}
-@media (max-width:767px){.tb-wrap,.fbox.agrupar{display:none}}
+@media (min-width:768px){#lista,#v-gerir #mosLeg,#v-gerir #mosaico,#cliLista{display:none}}
+.f-cli{display:inline-block;border:1px solid var(--accent);color:var(--accent);background:var(--surface);border-radius:999px;padding:4px 12px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.tb a.tb-lig,.tb button.tb-lig{background:none;border:0;padding:0;font:inherit;color:var(--accent);cursor:pointer;text-align:right}
+@media (max-width:767px){.tb-wrap,.fbox.agrupar,.so-largo{display:none}}
 .tb th.tb-mov{cursor:grab;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 
 .tb .tb-rz{position:absolute;top:0;right:-3px;width:7px;height:100%;cursor:col-resize;z-index:4}
@@ -822,7 +824,8 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
     <button class="tab" role="tab" type="button" id="tab-agenda" aria-controls="v-agenda" aria-selected="false" tabindex="-1">Agenda</button>
     <button class="tab" role="tab" type="button" id="tab-gerir" aria-controls="v-gerir" aria-selected="true">Gerir pedidos</button>
     <button class="tab" role="tab" type="button" id="tab-pipeline" aria-controls="v-pipeline" aria-selected="false" tabindex="-1">Pipeline</button>
-    <button class="tab" role="tab" type="button" id="tab-clientes" aria-controls="v-clientes" aria-selected="false" tabindex="-1">Clientes</button>
+    <button class="tab" role="tab" type="button" id="tab-contactos" aria-controls="v-contactos" aria-selected="false" tabindex="-1">Contactos</button>
+    <button class="tab" role="tab" type="button" id="tab-clientes" aria-controls="v-clientes" aria-selected="false" tabindex="-1">A contactar</button>
     <button class="tab" role="tab" type="button" id="tab-faturacao" aria-controls="v-faturacao" aria-selected="false" tabindex="-1">Faturação</button>
     <button class="tab" role="tab" type="button" id="tab-prazos" aria-controls="v-prazos" aria-selected="false" tabindex="-1">Prazos e exportar</button>
   </div>
@@ -1004,6 +1007,7 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
       <div class="fbox fprio" hidden><select id="fPrio" aria-label="Prioridade"><option value="">Prioridade</option><option value="P1">P1 · Urgente</option><option value="P2">P2 · Alta</option><option value="P3">P3 · Normal</option></select></div>
       <div class="fbox pesq"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input id="q" type="search" placeholder="Pesquisar" aria-label="Pesquisar cliente, localidade, nº ORC" autocomplete="off"></div>
     </div>
+    <p id="fCliBox" style="margin:0 0 8px" hidden><button class="f-cli" type="button" id="fCliChip" aria-label="Tirar o filtro do cliente"></button></p>
     <p class="t-conta" id="listaCount"></p>
     <div class="tb-wrap"><div id="tabela"></div></div>
     <div class="tabela" id="lista"></div>
@@ -1167,6 +1171,17 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
     </section>
   </div>
 
+  <div id="v-contactos" role="tabpanel" aria-labelledby="tab-contactos" hidden>
+    <div class="sec-h"><h2 id="h-cli-lista">Todos os clientes</h2><span class="count"><button class="link-add" type="button" id="btnNovoCliente" style="font-size:15px;padding:0">Adicionar cliente</button> <button class="link-add so-largo" type="button" id="btnCliCSV" class="link-add so-largo" style="font-size:15px;padding:0" hidden>Exportar CSV</button> <span id="cliListaCount"></span></span></div>
+    <div class="filtros">
+      <div class="fbox agrupar"><select id="cliAgrupar" aria-label="Agrupar por"></select></div>
+      <div class="fbox dono"><select id="cliEstado" aria-label="Situação"><option value="">Todas as situações</option><option value="manutencao">Manutenção a vencer</option><option value="cobrar">Fatura por cobrar</option><option value="frio">A esfriar</option><option value="orcamento">Orçamento sem resposta</option><option value="ativo">Em dia</option><option value="perdido">Sem faturação há mais de um ano</option><option value="ignorado">Ignorados</option></select></div>
+      <div class="fbox pesq"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input id="cliQ" type="search" placeholder="Pesquisar nome, NIF, telefone, email" aria-label="Pesquisar cliente" autocomplete="off"></div>
+    </div>
+    <div class="tb-wrap"><div id="cliTabela"></div></div>
+    <div class="panel lista-p" id="cliLista"></div>
+  </div>
+
   <div id="v-clientes" role="tabpanel" aria-labelledby="tab-clientes" hidden>
     <p class="note vis" id="cliRef" style="margin:0 0 12px"></p>
     <section class="kpis oito" id="cliKpis" aria-label="Clientes"></section>
@@ -1176,14 +1191,6 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
         <div class="mos-leg" id="cliLeg" role="group" aria-label="Motivo"></div>
         <div class="panel lista-p" id="cliContactar"></div>
         <p class="note">Ninguém se perde por esquecimento: cada cliente aparece aqui quando a manutenção está a chegar, quando há uma fatura por cobrar, quando passou do seu ritmo habitual sem nova fatura ou quando um orçamento está sem resposta. «Contactado» tira-o da lista por 30 dias; «Pedido» abre um pedido novo já com o nome.</p>
-      </section>
-      <section aria-labelledby="h-cli-lista" style="grid-column:1/-1">
-        <div class="sec-h"><h2 id="h-cli-lista">Todos os clientes</h2><span class="count"><button class="link-add" type="button" id="btnNovoCliente" style="font-size:15px;padding:0">Adicionar cliente</button> <span id="cliListaCount"></span></span></div>
-        <div class="filtros">
-          <div class="fbox dono"><select id="cliEstado" aria-label="Situação"><option value="">Todas as situações</option><option value="manutencao">Manutenção a vencer</option><option value="cobrar">Fatura por cobrar</option><option value="frio">A esfriar</option><option value="orcamento">Orçamento sem resposta</option><option value="ativo">Em dia</option><option value="perdido">Sem faturação há mais de um ano</option><option value="ignorado">Ignorados</option></select></div>
-          <div class="fbox pesq"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input id="cliQ" type="search" placeholder="Pesquisar cliente" aria-label="Pesquisar cliente" autocomplete="off"></div>
-        </div>
-        <div class="panel tw" id="cliLista"></div>
       </section>
     </div>
   </div>
@@ -1510,7 +1517,7 @@ if (!Element.prototype.replaceChildren) {
   /* ---------- Estado da página ---------- */
   let sb = null, sessao = null, eu = null, equipa = [], rows = [], status = 'loading', canWrite = false;
   let cfgPrazos = null, cfgPrazosVersao = 0, ligado = false;
-  let dono = '', query = '';
+  let dono = '', query = '', fCli = null;
   let currentId = null, modo = null, trans = null, saving = false, delArmed = null;
   let sheetSujo = false, dadosAberto = false, prazosSujos = false, novoBase = null;
 
@@ -1621,11 +1628,11 @@ if (!Element.prototype.replaceChildren) {
   }
 
   /* ---------- Separadores ---------- */
-  const TABS = ['hoje','painel','seguimentos','agenda','gerir','pipeline','clientes','faturacao','prazos'];
+  const TABS = ['hoje','painel','seguimentos','agenda','gerir','pipeline','contactos','clientes','faturacao','prazos'];
   // A barra tem cinco grupos; cada grupo mostra por baixo do título as suas vistas (só as que estão instaladas).
   const SECOES = [['hoje', 'Hoje', ['hoje','seguimentos','painel']], ['gerir', 'Pedidos', ['gerir','pipeline']], ['agenda', 'Agenda', ['agenda']],
-                  ['clientes', 'Clientes', ['clientes','faturacao']], ['prazos', 'Definições', ['prazos']]];
-  const SUB_NOME = {hoje:'Hoje', seguimentos:'Seguimentos', painel:'Números', gerir:'Tabela', pipeline:'Quadro', agenda:'Agenda', clientes:'Clientes', faturacao:'Faturação', prazos:'Definições'};
+                  ['clientes', 'Clientes', ['contactos','clientes','faturacao']], ['prazos', 'Definições', ['prazos']]];
+  const SUB_NOME = {hoje:'Hoje', seguimentos:'Seguimentos', painel:'Números', gerir:'Tabela', pipeline:'Quadro', agenda:'Agenda', contactos:'Contactos', clientes:'A contactar', faturacao:'Faturação', prazos:'Definições'};
   const grupoDe = t => SECOES.find(g => g[2].indexOf(t) >= 0) || SECOES[0];
   // Vistas cuja parte da base de dados ainda não foi instalada não aparecem (as variáveis vêm mais abaixo).
   function disponivel(t) {
@@ -1664,6 +1671,7 @@ if (!Element.prototype.replaceChildren) {
     document.querySelector('.page-h .vista').classList.toggle('so-gerir', t !== 'gerir');
     F('btnNovoTop').classList.toggle('so-gerir', t !== 'gerir');
     if (focus) F('tab-' + t).focus();
+    if (t === 'contactos' && status === 'ok') renderContactos();
   }
   TABS.forEach(k => { F('tab-' + k).addEventListener('click', () => setTab(k)); });
   SECOES.forEach(([k, , vs]) => { F('rail-' + k).addEventListener('click', () => setTab(ultimaVista[k] || vs.filter(disponivel)[0] || vs[0])); });
@@ -1700,7 +1708,7 @@ if (!Element.prototype.replaceChildren) {
   const valorN = r => Number(r.valor) || 0;
   // Ganho: orçamento aceite (dataAceite) ou resolvido com orçamento; a data é a do aceite, senão a do fecho.
   const dataGanho = r => r.dataAceite || (r.estado === 'resolvido' && r.num ? r.dataFecho : null) || null;
-  const irPara = (estado, quem) => { fEstado = estado; dono = quem || ''; fPrio = ''; F('fVista').value = 'abertos'; setTab('gerir'); renderAll(); };
+  const irPara = (estado, quem, cli) => { fEstado = estado; dono = quem || ''; fPrio = ''; fCli = cli || null; F('fVista').value = 'abertos'; setTab('gerir'); renderAll(); };
 
   function renderKpis(all) {
     const ab = all.filter(x => ABERTOS.includes(x.r.estado));
@@ -2014,7 +2022,10 @@ if (!Element.prototype.replaceChildren) {
       .filter(x => vista !== 'fechados' || !ABERTOS.includes(x.r.estado))
       .filter(x => !F('fDono').value || (x.r.dono || 'Sem dono') === F('fDono').value)
       .filter(x => !fPrio || x.pe.p === fPrio)
-      .filter(x => !q || norm([x.r.id, x.r.num, x.r.cliente, x.r.localidade, x.r.descricao, x.r.contacto, x.r.proximaAcao].join(' ')).includes(q));
+      .filter(x => !q || norm([x.r.id, x.r.num, x.r.cliente, x.r.localidade, x.r.descricao, x.r.contacto, x.r.proximaAcao].join(' ')).includes(q))
+      .filter(x => !fCli || chaveCli(x.r.cliente || '') === fCli.k);
+    // Vindo de Contactos: só os pedidos desse cliente (pela chave do nome, a mesma que junta o SAF-T e o registo).
+    F('fCliBox').hidden = !fCli; F('fCliChip').textContent = fCli ? `Cliente: ${fCli.nome}  ✕` : '';
     const dp = r => String(r.dataPedido || (r.criado || '').slice(0,10));
     if (fOrdem === 'antigo') lista.sort((a, b) => dp(a.r).localeCompare(dp(b.r)) || String(a.r.id).localeCompare(String(b.r.id)));
     else if (fOrdem === 'recente') lista.sort((a, b) => dp(b.r).localeCompare(dp(a.r)) || String(b.r.id).localeCompare(String(a.r.id)));
@@ -2042,93 +2053,69 @@ if (!Element.prototype.replaceChildren) {
     {id:'prob', nome:'Prob.'}, {id:'previsao', nome:'Previsão'}, {id:'dataFechoPrevista', nome:'Fecho previsto'}, {id:'tipo', nome:'Tipo'},
     {id:'origem', nome:'Origem'}, {id:'localidade', nome:'Localidade'}, {id:'contacto', nome:'Contacto'}, {id:'notas', nome:'Notas'}];
   const TB_OCULTAS_PADRAO = ['origem','localidade','contacto','notas'];
-  let cfgColunas = null, cfgProb = null, tbGrupo = 'estado', tbFechados = {};
-  try { tbGrupo = localStorage.getItem('registo-agrupar') || 'estado'; tbFechados = JSON.parse(localStorage.getItem('registo-grupos-fechados') || '{}') || {}; } catch (e) {}
-  const tbCfg = () => ({ocultas: (cfgColunas && cfgColunas.ocultas) || TB_OCULTAS_PADRAO, extra: (cfgColunas && cfgColunas.extra) || []});
+  let cfgProb = null;
+  // Um quadro (tabela ao estilo do monday) é descrito por um objeto q: onde se desenha, que colunas tem, como agrupa, lê e
+  // grava. As funções tb* servem os dois quadros (Pedidos e Contactos). Cada quadro guarda o seu estado: configuração
+  // partilhada (config), agrupamento, grupos recolhidos e larguras (localStorage de cada pessoa).
+  function tbQuadro(q) {
+    q.cfg = null; q.pendente = false; q.mapa = {}; q.grupo = q.grupoPadrao; q.fechados = {}; q.larg = {};
+    try { q.grupo = localStorage.getItem(q.ls.grupo) || q.grupoPadrao; q.fechados = JSON.parse(localStorage.getItem(q.ls.fechados) || '{}') || {}; } catch (e) {}
+    try { q.larg = JSON.parse(localStorage.getItem(q.ls.larg) || '{}') || {}; } catch (e) {}
+    return q;
+  }
+  const tbCfg = (q = TB_PED) => ({ocultas: (q.cfg && q.cfg.ocultas) || q.ocultasPadrao, extra: (q.cfg && q.cfg.extra) || []});
   const probDe = r => r.probabilidade != null && r.probabilidade !== '' ? Number(r.probabilidade) : Number(((cfgProb || {})[r.estado] != null ? cfgProb : PROB_PADRAO)[r.estado] || 0);
   const previsaoDe = r => valorN(r) * probDe(r) / 100;
   const tomEstado = k => ({info:'var(--info)', muted:'var(--muted)', accent:'var(--accent)', good:'var(--good)', bad:'var(--bad)'})[(ESTADOS[k] || {}).t] || 'var(--info)';
   const TOM_P = {P1:'var(--bad)', P2:'var(--warn)', P3:'var(--good)'};
   const iniciais = n => String(n || '?').trim().split(/\s+/).map(x => x[0]).slice(0, 2).join('').toUpperCase();
-  function tbColunas() {
-    const c = tbCfg(), ordem = (cfgColunas && cfgColunas.ordem) || [];
-    const todas = TB_BASE.map(x => Object.assign({}, x, {oculta: !x.fixa && c.ocultas.indexOf(x.id) >= 0}))
+  function tbColunas(q) {
+    const c = tbCfg(q), ordem = (q.cfg && q.cfg.ordem) || [];
+    const todas = q.base.map(x => Object.assign({}, x, {oculta: !x.fixa && c.ocultas.indexOf(x.id) >= 0}))
       .concat(c.extra.map(x => Object.assign({}, x, {extra: true, oculta: !!x.oculta})));
-    const pos = x => { const i = ordem.indexOf(x.id); return x.fixa ? -100 + TB_BASE.indexOf(x) : i < 0 ? 1000 + todas.indexOf(x) : i; };
+    const pos = x => { const i = ordem.indexOf(x.id); return x.fixa ? -100 + q.base.findIndex(z => z.id === x.id) : i < 0 ? 1000 + todas.indexOf(x) : i; };
     return todas.slice().sort((a, b) => pos(a) - pos(b));
   }
   // Larguras de cada pessoa (localStorage): uma regra de CSS por coluna, para o cabeçalho, as linhas e os totais.
-  let tbLarg = {};
-  try { tbLarg = JSON.parse(localStorage.getItem('registo-larguras') || '{}') || {}; } catch (e) {}
-  function tbAplicaLarguras() {
-    let st = F('tbLarg');
-    if (!st) { st = document.createElement('style'); st.id = 'tbLarg'; document.head.appendChild(st); }
-    st.textContent = Object.keys(tbLarg).map(k => `.tb .k-${k}{width:${tbLarg[k]}px;min-width:${tbLarg[k]}px;max-width:${tbLarg[k]}px}`).join('\n');
+  function tbAplicaLarguras(q) {
+    let st = F(q.estilo);
+    if (!st) { st = document.createElement('style'); st.id = q.estilo; document.head.appendChild(st); }
+    st.textContent = Object.keys(q.larg).map(k => `.tb .${q.pre}${k}{width:${q.larg[k]}px;min-width:${q.larg[k]}px;max-width:${q.larg[k]}px}`).join('\n');
   }
-  function tbGuardaLarguras() { try { localStorage.setItem('registo-larguras', JSON.stringify(tbLarg)); } catch (e) {} }
+  function tbGuardaLarguras(q) { try { localStorage.setItem(q.ls.larg, JSON.stringify(q.larg)); } catch (e) {} }
   function trimestre(r) { const d = dataPedidoDe(r); if (!d) return 'Sem data'; return `T${Math.floor((Number(d.slice(5, 7)) - 1) / 3) + 1} ${d.slice(0, 4)}`; }
-  function tbAgrupadores() {
-    const base = [['estado','Passo'], ['dono','Dono'], ['prioridade','Prioridade'], ['tipo','Tipo'], ['trimestre','Trimestre'], ['nenhum','Sem grupos']];
-    return base.concat(tbCfg().extra.filter(c => c.tipo === 'estado' || c.tipo === 'lista').map(c => ['x:' + c.id, c.nome]));
+  function tbAgrupadores(q) {
+    return q.agrupadoresBase.concat(tbCfg(q).extra.filter(c => c.tipo === 'estado' || c.tipo === 'lista').map(c => ['x:' + c.id, c.nome]));
   }
-  function tbGrupoDe(x) {
-    const r = x.r;
-    if (tbGrupo === 'estado') return {k: r.estado, nome: (ESTADOS[r.estado] || {}).l || r.estado, cor: tomEstado(r.estado), ordem: Object.keys(ESTADOS).indexOf(r.estado)};
-    if (tbGrupo === 'dono') return {k: r.dono || '', nome: r.dono || 'Sem dono', cor: 'var(--accent)', ordem: r.dono ? 0 : 1};
-    if (tbGrupo === 'prioridade') return {k: x.pe.p, nome: PRIO_NOME[x.pe.p], cor: TOM_P[x.pe.p], ordem: PRIOS.indexOf(x.pe.p)};
-    if (tbGrupo === 'tipo') return {k: r.tipo || '', nome: TIPOS[r.tipo] || 'Sem tipo', cor: 'var(--copper)', ordem: r.tipo ? Object.keys(TIPOS).indexOf(r.tipo) : 99};
-    if (tbGrupo === 'trimestre') { const t = trimestre(r); return {k: t, nome: t, cor: 'var(--info)', ordem: t === 'Sem data' ? '0' : t.slice(3) + t.slice(1, 2), desc: true}; }
-    if (tbGrupo.indexOf('x:') === 0) {
-      const c = tbCfg().extra.find(z => z.id === tbGrupo.slice(2));
-      const v = r.extra && c ? r.extra[c.id] : '';
+  function tbGrupoDe(q, x) {
+    if (q.grupo.indexOf('x:') === 0) {
+      const c = tbCfg(q).extra.find(z => z.id === q.grupo.slice(2)), ex = q.extraDe(x);
+      const v = ex && c ? ex[c.id] : '';
       const o = c && (c.opcoes || []).find(z => z.nome === v);
       return {k: v || '', nome: v || 'Sem valor', cor: o ? o.cor : 'var(--muted)', ordem: c && o ? c.opcoes.indexOf(o) : 99};
     }
-    return {k: '', nome: 'Todos os pedidos', cor: 'var(--accent)', ordem: 0};
+    return q.grupoDe(x);
   }
 
   // Uma célula: o que se vê e, se for editável, o que acontece ao tocar.
-  function tbCelula(x, c) {
-    const r = x.r, aberto = ABERTOS.includes(r.estado);
-    const ed = (conteudo, fn, classe) => h('td',{class:'tb-c' + (classe ? ' ' + classe : '') + (canWrite && fn ? ' tb-ed' : ''), onclick: canWrite && fn ? ev => fn(ev.currentTarget) : null}, conteudo);
-    const pill = (txt, cor, extra) => h('span',{class:'tb-pill' + (extra ? ' ' + extra : ''), style:`--c:${cor}`}, txt);
+  const tbTd = (conteudo, fn, classe) => h('td',{class:'tb-c' + (classe ? ' ' + classe : '') + (canWrite && fn ? ' tb-ed' : ''), onclick: canWrite && fn ? ev => fn(ev.currentTarget) : null}, conteudo);
+  const tbPill = (txt, cor, extra) => h('span',{class:'tb-pill' + (extra ? ' ' + extra : ''), style:`--c:${cor}`}, txt);
+  function tbCelula(q, x, c) {
     if (c.extra) {
-      const v = r.extra ? r.extra[c.id] : null;
+      const ex = q.extraDe(x), v = ex ? ex[c.id] : null;
       const vazio = v == null || v === '';
-      if (c.tipo === 'caixa') return ed(h('span',{class:'tb-caixa' + (v ? ' on' : ''), 'aria-label': v ? 'sim' : 'não'}, v ? '✓' : ''), () => tbGuardar(r, {extra: c.id}, !v, c.nome, v ? 'sim' : 'não', !v ? 'sim' : 'não'));
+      if (c.tipo === 'caixa') return tbTd(h('span',{class:'tb-caixa' + (v ? ' on' : ''), 'aria-label': v ? 'sim' : 'não'}, v ? '✓' : ''), () => q.guardar(x, {extra: c.id}, !v, c.nome, v ? 'sim' : 'não', !v ? 'sim' : 'não'));
       if (c.tipo === 'estado' || c.tipo === 'lista') {
         const o = (c.opcoes || []).find(z => z.nome === v);
-        return ed(vazio ? '' : c.tipo === 'estado' ? pill(v, o ? o.cor : 'var(--muted)', 'cheia') : pill(v, o ? o.cor : 'var(--muted)'), td => tbEscolher(td, r, c, (c.opcoes || []).map(z => [z.nome, z.nome, z.cor]).concat([['', 'Limpar']])), c.tipo === 'estado' ? 'tb-estado' : '');
+        return tbTd(vazio ? '' : c.tipo === 'estado' ? tbPill(v, o ? o.cor : 'var(--muted)', 'cheia') : tbPill(v, o ? o.cor : 'var(--muted)'), td => tbEscolher(q, td, x, c, (c.opcoes || []).map(z => [z.nome, z.nome, z.cor]).concat([['', 'Limpar']])), c.tipo === 'estado' ? 'tb-estado' : '');
       }
       const txt = vazio ? '' : c.tipo === 'numero' ? String(v).replace('.', ',') : c.tipo === 'data' ? ddmm(v) : String(v);
-      return ed(txt, td => tbEditarTexto(td, r, c, c.tipo === 'numero' ? 'number' : c.tipo === 'data' ? 'date' : 'text'), c.tipo === 'numero' ? 'num' : '');
+      return tbTd(txt, td => tbEditarTexto(q, td, x, c, c.tipo === 'numero' ? 'number' : c.tipo === 'data' ? 'date' : 'text'), c.tipo === 'numero' ? 'num' : '');
     }
-    switch (c.id) {
-      case 'cliente': return h('td',{class:'tb-c tb-cli'}, canWrite && tbArrastavel() ? h('span',{class:'tb-pega', title:'Arrastar para outro grupo', 'aria-hidden':'true'}, '⠿') : null,
-        h('button',{type:'button', onclick:() => openSheet(r.id)}, r.cliente || 'Sem nome'),
-        r.porConfirmar ? h('span',{class:'tag-conf'}, 'por confirmar') : null);
-      case 'estado': return ed(pill((ESTADOS[r.estado] || {}).l || r.estado, tomEstado(r.estado), 'cheia'), td => tbPasso(td, x), 'tb-estado');
-      case 'prioridade': return ed(pill(x.pe.p, TOM_P[x.pe.p], 'cheia'), aberto ? td => tbPrioridade(td, r) : null, 'tb-estado tb-p');
-      case 'dono': return ed(r.dono ? h('span',{class:'tb-dono'}, h('i',null, iniciais(r.dono)), r.dono) : h('span',{class:'tb-vazio'}, 'Sem dono'),
-        td => tbEscolher(td, r, {id:'dono', nome:'Dono'}, donosConhecidos().map(d => [d, d])));
-      case 'proximaAcao': return ed(r.proximaAcao || '', td => tbEditarTexto(td, r, {id:'proximaAcao', nome:'Próxima ação'}, 'text'));
-      case 'dataProximaAcao': return ed(r.dataProximaAcao ? ddmm(r.dataProximaAcao) : '', td => tbEditarTexto(td, r, {id:'dataProximaAcao', nome:'Data da próxima ação'}, 'date'),
-        aberto && r.dataProximaAcao && r.dataProximaAcao < today() ? 'tb-late' : '');
-      case 'prazo': return h('td',{class:'tb-c tb-prazo'}, aberto && !r.porConfirmar ? [h('i',{class:'tb-dot', style:`--c:var(--${semTone(x.sem)})`}), tempoTxt(r, x.rel)] : '');
-      case 'valor': return ed(r.valor ? eur(valorN(r)) : '', td => tbEditarTexto(td, r, {id:'valor', nome:'Valor s/IVA'}, 'number'), 'num');
-      case 'prob': return ed(h('span',{class: r.probabilidade != null && r.probabilidade !== '' ? '' : 'tb-padrao'}, probDe(r) + '%'), td => tbEditarTexto(td, r, {id:'probabilidade', nome:'Probabilidade (%)'}, 'number'), 'num');
-      case 'previsao': return h('td',{class:'tb-c num'}, valorN(r) ? eur(previsaoDe(r)) : '');
-      case 'dataFechoPrevista': return ed(r.dataFechoPrevista ? ddmm(r.dataFechoPrevista) : '', td => tbEditarTexto(td, r, {id:'dataFechoPrevista', nome:'Fecho previsto'}, 'date'));
-      case 'tipo': return ed(r.tipo ? pill(TIPOS[r.tipo], 'var(--copper)') : '', td => tbEscolher(td, r, {id:'tipo', nome:'Tipo'}, Object.entries(TIPOS)));
-      case 'origem': return ed(ORIGENS[r.origem] || '', td => tbEscolher(td, r, {id:'origem', nome:'Origem'}, Object.entries(ORIGENS)));
-      case 'localidade': return ed(String(r.localidade || '').split('\n')[0], td => tbEditarTexto(td, r, {id:'localidade', nome:'Localidade'}, 'text'));
-      case 'contacto': return ed(r.contacto || '', td => tbEditarTexto(td, r, {id:'contacto', nome:'Contacto'}, 'text'));
-      case 'notas': return ed(r.notas || '', td => tbEditarTexto(td, r, {id:'notas', nome:'Notas'}, 'text'), 'tb-notas');
-    }
-    return h('td',{class:'tb-c'});
+    return q.celula(x, c) || h('td',{class:'tb-c'});
   }
 
-  // Guardar um campo: cópia do pedido, histórico, versão (guardar_pedido) e «Desfazer».
+  // Pedidos: guardar um campo: cópia do pedido, histórico, versão (guardar_pedido) e «Desfazer».
   const tbTexto = (campo, v) => v == null || v === '' ? 'vazio' : campo === 'valor' ? eur(Number(v)) : /^data/.test(campo) ? ddmm(v) : campo === 'probabilidade' ? v + '%' : campo === 'tipo' ? TIPOS[v] : campo === 'origem' ? ORIGENS[v] : String(v);
   // Parte sempre da cópia mais recente do pedido (o tempo real pode tê-la trocado desde que a célula foi desenhada) e
   // recusa se alguém mudou este mesmo campo entretanto, para não apagar a mudança de um colega sem aviso.
@@ -2164,34 +2151,34 @@ if (!Element.prototype.replaceChildren) {
       h('div',{class:'sg-b'}, h('button',{class:'btn btn-sm', type:'button', onclick: ok}, 'Guardar'), h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick: fechaPop}, 'Cancelar'))), 'tb-ed');
     setTimeout(() => { try { input.focus(); if (input.select) input.select(); } catch (e) {} }, 30);
   }
-  function tbEditarTexto(td, r, c, tipo) {
-    const campo = c.extra ? c.id : c.id;
-    const atual = c.extra ? (r.extra || {})[c.id] : r[c.id];
+  // Editar texto, número ou data numa célula. q.obrigatorio diz se não pode ficar vazio; q.validar verifica o valor.
+  function tbEditarTexto(q, td, x, c, tipo) {
+    const atual = q.ler(x, c);
     // Números em texto com teclado decimal: aceita «1 250,50» como se escreve em Portugal.
     const input = h('input',{type: tipo === 'number' ? 'text' : tipo, value: atual == null ? '' : tipo === 'number' ? String(atual).replace('.', ',') : String(atual), inputmode: tipo === 'number' ? 'decimal' : null});
     tbEditor(td, c.nome, input, () => {
       let v = input.value.trim();
       if (/[—–]/.test(v)) return 'Sem travessões: usa vírgulas ou parênteses.';
-      if (!v && !c.extra && tbObrigatorio(r, campo)) return 'Um pedido aberto tem sempre dono, próxima ação e data.';
+      if (!v) { const m = q.obrigatorio(x, c); if (m) return m; }
       if (tipo === 'number' && v) {
-        const n = c.id === 'valor' ? parseValor(v) : parseNumero(v);
+        const n = q.dinheiro.indexOf(c.id) >= 0 ? parseValor(v) : parseNumero(v);
         if (Number.isNaN(n)) return 'Não é um número.';
-        if (c.id === 'probabilidade' && (n < 0 || n > 100)) return 'A probabilidade vai de 0 a 100.';
         v = n;
       }
+      if (v !== '') { const m = q.validar(x, c, v); if (m) return m; }
       if (String(v) === String(atual == null ? '' : atual)) { fechaPop(); return null; }
-      tbGuardar(r, c.extra ? {extra: c.id} : c.id, v, c.nome, c.extra ? (atual == null || atual === '' ? 'vazio' : String(atual)) : tbTexto(c.id, atual), c.extra ? (v === '' ? 'vazio' : String(v)) : tbTexto(c.id, v));
+      q.guardar(x, c.extra ? {extra: c.id} : c.id, v, c.nome, c.extra ? (atual == null || atual === '' ? 'vazio' : String(atual)) : q.texto(c.id, atual), c.extra ? (v === '' ? 'vazio' : String(v)) : q.texto(c.id, v));
       return null;
-    }, c.id === 'probabilidade' ? `Vazio volta ao valor do passo (${Number(((cfgProb || {})[r.estado] != null ? cfgProb : PROB_PADRAO)[r.estado] || 0)}%).` : null);
+    }, q.aviso(x, c));
   }
-  function tbEscolher(td, r, c, opcoes) {
-    const atual = c.extra ? (r.extra || {})[c.id] : r[c.id];
+  function tbEscolher(q, td, x, c, opcoes) {
+    const atual = q.ler(x, c);
     abrePop(td, opcoes.map(([v, l, cor]) => {
       const b = h('button',{type:'button', role:'menuitem', onclick: () => {
         fechaPop();
         if (String(v) === String(atual == null ? '' : atual)) return;
-        if (!v && !c.extra && tbObrigatorio(r, c.id)) { toast('Um pedido aberto tem sempre dono.'); return; }
-        tbGuardar(r, c.extra ? {extra: c.id} : c.id, v, c.nome, c.extra ? (atual || 'vazio') : tbTexto(c.id, atual), c.extra ? (v || 'vazio') : tbTexto(c.id, v));
+        if (!v) { const m = q.obrigatorio(x, c, true); if (m) { toast(m); return; } }
+        q.guardar(x, c.extra ? {extra: c.id} : c.id, v, c.nome, c.extra ? (atual || 'vazio') : q.texto(c.id, atual), c.extra ? (v || 'vazio') : q.texto(c.id, v));
       }}, cor ? h('i',{class:'tb-cor', style:`background:${cor}`}) : null, l, String(v) === String(atual == null ? '' : atual) ? ' ✓' : '');
       return b;
     }), 'menu');
@@ -2223,37 +2210,37 @@ if (!Element.prototype.replaceChildren) {
     abrePop(td, itens.map(([l, fn, ic]) => { const b = h('button',{type:'button', role:'menuitem', onclick:() => { fechaPop(); fn(); }}); b.innerHTML = IC[ic] || ''; b.appendChild(document.createTextNode(l)); return b; }), 'menu');
   }
 
-  // Colunas: mostrar, esconder, juntar, mudar o nome e apagar (config «colunas», partilhada pela equipa).
+  // Colunas: mostrar, esconder, juntar, mudar o nome e apagar (config q.chaveCfg, partilhada pela equipa).
   // A configuração é da equipa: lê a atual, aplica a mudança (uma função da configuração atual) e grava só se a versão
   // ainda for a mesma, para não apagar a coluna que um colega criou entretanto com a cópia velha desta página.
-  const tbCfgDe = v => ({ocultas: (v && v.ocultas) || TB_OCULTAS_PADRAO, extra: (v && v.extra) || [], ordem: (v && v.ordem) || []});
-  async function tbGuardarCfg(muda, msg) {
+  const tbCfgDe = (q, v) => ({ocultas: (v && v.ocultas) || q.ocultasPadrao, extra: (v && v.extra) || [], ordem: (v && v.ordem) || []});
+  async function tbGuardarCfg(q, muda, msg) {
     try {
       for (let tent = 0; tent < 3; tent++) {
-        const r1 = await sb.from('config').select('valor,versao').eq('chave', 'colunas').maybeSingle();
+        const r1 = await sb.from('config').select('valor,versao').eq('chave', q.chaveCfg).maybeSingle();
         if (r1.error) throw r1.error;
-        const atual = r1.data, base = tbCfgDe(atual && atual.valor), c = Object.assign({}, base, muda(base));
+        const atual = r1.data, base = tbCfgDe(q, atual && atual.valor), c = Object.assign({}, base, muda(base));
         const r2 = atual
-          ? await sb.from('config').update({valor: c, versao: atual.versao + 1, atualizado_por: eu.email}).eq('chave', 'colunas').eq('versao', atual.versao).select('versao')
-          : await sb.from('config').insert({chave: 'colunas', valor: c, atualizado_por: eu.email}).select('versao');
+          ? await sb.from('config').update({valor: c, versao: atual.versao + 1, atualizado_por: eu.email}).eq('chave', q.chaveCfg).eq('versao', atual.versao).select('versao')
+          : await sb.from('config').insert({chave: q.chaveCfg, valor: c, atualizado_por: eu.email}).select('versao');
         if (r2.error) { if (!atual && /duplicate|unique|23505/i.test(r2.error.message || '')) continue; throw r2.error; }
         if (!r2.data || !r2.data.length) continue;
-        cfgColunas = c; toast(msg); renderAll(); return;
+        q.cfg = c; toast(msg); renderAll(); return;
       }
       toast('Outra pessoa mudou as colunas ao mesmo tempo. Tenta outra vez.'); carregar();
     } catch (e) { toast(/permiss|row-level/.test(String(e.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar as colunas.'); }
   }
-  function tbMenuColunas(botao) {
-    const cols = tbColunas();
+  function tbMenuColunas(q, botao) {
+    const cols = tbColunas(q);
     const lista = h('div',{class:'tb-cols'}, h('b',null, 'Colunas'),
       cols.filter(c => !c.fixa).map(c => h('label',{class:'check'}, h('input',{type:'checkbox', checked: c.oculta ? null : true, disabled: canWrite ? null : true, onchange: ev => {
-        if (c.extra) tbGuardarCfg(cf => ({extra: cf.extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: !ev.target.checked}) : z)}), ev.target.checked ? `«${c.nome}» à vista` : `«${c.nome}» escondida`);
-        else tbGuardarCfg(cf => { const o = cf.ocultas.filter(z => z !== c.id); if (!ev.target.checked) o.push(c.id); return {ocultas: o}; }, ev.target.checked ? `«${c.nome}» à vista` : `«${c.nome}» escondida`);
+        if (c.extra) tbGuardarCfg(q, cf => ({extra: cf.extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: !ev.target.checked}) : z)}), ev.target.checked ? `«${c.nome}» à vista` : `«${c.nome}» escondida`);
+        else tbGuardarCfg(q, cf => { const o = cf.ocultas.filter(z => z !== c.id); if (!ev.target.checked) o.push(c.id); return {ocultas: o}; }, ev.target.checked ? `«${c.nome}» à vista` : `«${c.nome}» escondida`);
       }}), c.nome, c.extra ? h('small',null, ' · ' + (TB_TIPOS_COL.find(t => t[0] === c.tipo) || [0, ''])[1]) : null)),
-      canWrite ? h('button',{class:'btn btn-sm', type:'button', onclick:() => { fechaPop(); tbNovaColuna(botao); }}, '+ Nova coluna') : null);
+      canWrite ? h('button',{class:'btn btn-sm', type:'button', onclick:() => { fechaPop(); tbNovaColuna(q, botao); }}, '+ Nova coluna') : null);
     abrePop(botao, lista, 'tb-ed');
   }
-  function tbNovaColuna(botao, editar) {
+  function tbNovaColuna(q, botao, editar) {
     const nome = h('input',{type:'text', placeholder:'Nome da coluna', value: editar ? editar.nome : ''});
     const tipo = h('select',{disabled: editar ? true : null}, TB_TIPOS_COL.map(([v, l]) => h('option',{value:v}, l)));
     if (editar) tipo.value = editar.tipo;
@@ -2266,74 +2253,164 @@ if (!Element.prototype.replaceChildren) {
       const n = nome.value.trim();
       if (!n) return 'Dá um nome à coluna.';
       if (/[—–]/.test(n + ops.value)) return 'Sem travessões: usa vírgulas ou parênteses.';
-      if (tbColunas().some(c => c.nome.toLowerCase() === n.toLowerCase() && (!editar || c.id !== editar.id))) return 'Já há uma coluna com esse nome.';
+      if (tbColunas(q).some(c => c.nome.toLowerCase() === n.toLowerCase() && (!editar || c.id !== editar.id))) return 'Já há uma coluna com esse nome.';
       const opcoes = ops.value.split('\n').map(z => z.trim()).filter(Boolean).filter((z, i, a) => a.indexOf(z) === i).map((z, i) => {
         const velha = editar && (editar.opcoes || []).find(o => o.nome === z);
         return {nome: z, cor: velha ? velha.cor : TB_CORES[i % TB_CORES.length]};
       });
       if ((tipo.value === 'lista' || tipo.value === 'estado') && !opcoes.length) return 'Escreve pelo menos uma opção.';
       fechaPop();
-      if (editar) tbGuardarCfg(cf => ({extra: cf.extra.map(z => z.id === editar.id ? Object.assign({}, z, {nome: n, opcoes}) : z)}), 'Coluna mudada');
-      else { const nova = {id: 'c' + Date.now().toString(36), nome: n, tipo: tipo.value, opcoes}; tbGuardarCfg(cf => ({extra: cf.extra.concat([nova])}), `Coluna «${n}» criada`); }
+      if (editar) tbGuardarCfg(q, cf => ({extra: cf.extra.map(z => z.id === editar.id ? Object.assign({}, z, {nome: n, opcoes}) : z)}), 'Coluna mudada');
+      else { const nova = {id: 'c' + Date.now().toString(36), nome: n, tipo: tipo.value, opcoes}; tbGuardarCfg(q, cf => ({extra: cf.extra.concat([nova])}), `Coluna «${n}» criada`); }
       return null;
     });
     setTimeout(() => nome.focus(), 40);
   }
-  function tbMenuCabecalho(th, c) {
+  function tbMenuCabecalho(q, th, c) {
     const itens = [];
-    if (tbLarg[c.id]) itens.push(['Largura normal', () => { delete tbLarg[c.id]; tbGuardaLarguras(); tbAplicaLarguras(); }, 'seta']);
-    itens.push(['Esconder', () => { if (c.extra) tbGuardarCfg(cf => ({extra: cf.extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: true}) : z)}), `«${c.nome}» escondida`); else tbGuardarCfg(cf => ({ocultas: cf.ocultas.filter(z => z !== c.id).concat([c.id])}), `«${c.nome}» escondida`); }, 'x']);
+    if (q.larg[c.id]) itens.push(['Largura normal', () => { delete q.larg[c.id]; tbGuardaLarguras(q); tbAplicaLarguras(q); }, 'seta']);
+    itens.push(['Esconder', () => { if (c.extra) tbGuardarCfg(q, cf => ({extra: cf.extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: true}) : z)}), `«${c.nome}» escondida`); else tbGuardarCfg(q, cf => ({ocultas: cf.ocultas.filter(z => z !== c.id).concat([c.id])}), `«${c.nome}» escondida`); }, 'x']);
     if (c.extra) {
-      itens.unshift(['Mudar o nome ou as opções', () => tbNovaColuna(th, c), 'lapis']);
-      itens.push(['Apagar a coluna', () => { if (window.confirm(`Apagar a coluna «${c.nome}»? Os valores ficam guardados nos pedidos mas deixam de se ver.`)) tbGuardarCfg(cf => ({extra: cf.extra.filter(z => z.id !== c.id)}), `Coluna «${c.nome}» apagada`); }, 'x']);
+      itens.unshift(['Mudar o nome ou as opções', () => tbNovaColuna(q, th, c), 'lapis']);
+      itens.push(['Apagar a coluna', () => { if (window.confirm(`Apagar a coluna «${c.nome}»? ${q.textos.apagar}`)) tbGuardarCfg(q, cf => ({extra: cf.extra.filter(z => z.id !== c.id)}), `Coluna «${c.nome}» apagada`); }, 'x']);
     }
-    if (c.tipo === 'estado' || c.tipo === 'lista' || ['dono','prioridade','tipo','estado'].indexOf(c.id) >= 0) itens.unshift(['Agrupar por esta coluna', () => tbAgrupar(c.extra ? 'x:' + c.id : c.id), 'seta']);
+    if (c.tipo === 'estado' || c.tipo === 'lista' || q.agrupaveis.indexOf(c.id) >= 0) itens.unshift(['Agrupar por esta coluna', () => tbAgruparEm(q, c.extra ? 'x:' + c.id : c.id), 'seta']);
     abrePop(th.closest('th') || th, itens.map(([l, fn, ic]) => { const b = h('button',{type:'button', role:'menuitem', class: l === 'Apagar a coluna' ? 'perigo' : null, onclick:() => { fechaPop(); fn(); }}); b.innerHTML = IC[ic] || ''; b.appendChild(document.createTextNode(l)); return b; }), 'menu');
   }
-  function tbAgrupar(g) { tbGrupo = g; try { localStorage.setItem('registo-agrupar', g); } catch (e) {} renderAll(); }
+  function tbAgruparEm(q, g) { q.grupo = g; try { localStorage.setItem(q.ls.grupo, g); } catch (e) {} renderAll(); }
+  function tbAgrupar(g) { tbAgruparEm(TB_PED, g); }
 
-  // A tabela: um <tbody> por grupo (cabeçalho com cor, linhas, «+ Adicionar pedido» e totais com a barra de cores).
-  function renderTabela(lista) {
-    const box = F('tabela'); if (!box) return;
+  // A tabela: um <tbody> por grupo (cabeçalho com cor, linhas, «+ Adicionar» e totais).
+  function tbRender(q, lista) {
+    const box = F(q.box); if (!box) return;
     if (status !== 'ok') { fill(box, stateMsg()); return; }
-    if (!tbAgrupadores().some(a => a[0] === tbGrupo)) tbGrupo = 'estado';
-    F('tbAgrupar').replaceChildren(...tbAgrupadores().map(([v, l]) => h('option',{value:v}, 'Agrupar: ' + l)));
-    F('tbAgrupar').value = tbGrupo;
-    const cols = tbColunas().filter(c => !c.oculta);
+    if (!tbAgrupadores(q).some(a => a[0] === q.grupo)) q.grupo = q.grupoPadrao;
+    F(q.agrupar).replaceChildren(...tbAgrupadores(q).map(([v, l]) => h('option',{value:v}, 'Agrupar: ' + l)));
+    F(q.agrupar).value = q.grupo;
+    const cols = tbColunas(q).filter(c => !c.oculta), prim = q.base[0].id;
     const grupos = {}, ordemG = [];
-    lista.forEach(x => { const g = tbGrupoDe(x); if (!grupos[g.k]) { grupos[g.k] = Object.assign(g, {xs: []}); ordemG.push(g.k); } grupos[g.k].xs.push(x); });
+    lista.forEach(x => { const g = tbGrupoDe(q, x); if (!grupos[g.k]) { grupos[g.k] = Object.assign(g, {xs: []}); ordemG.push(g.k); } grupos[g.k].xs.push(x); });
     ordemG.sort((a, b) => { const A = grupos[a], B = grupos[b]; return A.desc ? String(B.ordem).localeCompare(String(A.ordem)) : (A.ordem - B.ordem) || String(A.nome).localeCompare(String(B.nome), 'pt'); });
-    if (tbArr || tbCol) { tbPendente = true; return; }
-    tbAplicaLarguras();
-    const thead = h('thead',null, h('tr',null, cols.map(c => h('th',{class: 'k-' + c.id + (c.id === 'cliente' ? ' tb-cli' : '') + (['valor','prob','previsao'].indexOf(c.id) >= 0 || c.tipo === 'numero' ? ' num' : '') + (c.fixa || !canWrite ? '' : ' tb-mov'), 'data-col': c.id},
-      h('span',null, c.nome), c.fixa || !canWrite ? null : h('button',{class:'tb-hm', type:'button', 'aria-label':'Opções da coluna ' + c.nome, onclick: ev => { ev.stopPropagation(); tbMenuCabecalho(ev.currentTarget, c); }}, '⋯'),
+    if ((tbArr && tbArr.q === q) || (tbCol && tbCol.q === q)) { q.pendente = true; return; }
+    tbAplicaLarguras(q);
+    q.mapa = {}; lista.forEach(x => { q.mapa[q.id(x)] = x; });
+    const thead = h('thead',null, h('tr',null, cols.map(c => h('th',{class: q.pre + c.id + (c.id === prim ? ' tb-cli' : '') + (q.num.indexOf(c.id) >= 0 || c.tipo === 'numero' ? ' num' : '') + (c.fixa || !canWrite ? '' : ' tb-mov'), 'data-col': c.id},
+      h('span',null, c.nome), c.fixa || !canWrite ? null : h('button',{class:'tb-hm', type:'button', 'aria-label':'Opções da coluna ' + c.nome, onclick: ev => { ev.stopPropagation(); tbMenuCabecalho(q, ev.currentTarget, c); }}, '⋯'),
       h('span',{class:'tb-rz', 'aria-hidden':'true', title:'Arrastar para mudar a largura'}))),
-      h('th',{class:'tb-mais'}, canWrite ? h('button',{type:'button', 'aria-label':'Juntar ou esconder colunas', title:'Colunas', onclick: ev => tbMenuColunas(ev.currentTarget)}, '+') : null)));
+      h('th',{class:'tb-mais'}, canWrite ? h('button',{type:'button', 'aria-label':'Juntar ou esconder colunas', title:'Colunas', onclick: ev => tbMenuColunas(q, ev.currentTarget)}, '+') : null)));
     const corpos = ordemG.map(k => {
-      const g = grupos[k], fechado = !!tbFechados[tbGrupo + '|' + k];
-      const soma = g.xs.reduce((t, x) => t + valorN(x.r), 0), prev = g.xs.reduce((t, x) => t + previsaoDe(x.r), 0);
+      const g = grupos[k], fk = q.grupo + '|' + k;
+      const fechado = fk in q.fechados ? !!q.fechados[fk] : !!(q.fechadoPadrao && q.fechadoPadrao(q, k));
+      const t = q.totais(g);
       const cab = h('tr',{class:'tb-gh', style:`--g:${g.cor}`}, h('td',{colspan: String(cols.length + 1)},
-        h('button',{type:'button', class:'tb-gt', 'aria-expanded': String(!fechado), onclick:() => { tbFechados[tbGrupo + '|' + k] = !fechado; try { localStorage.setItem('registo-grupos-fechados', JSON.stringify(tbFechados)); } catch (e) {} renderAll(); }},
-          h('span',{class:'tb-chev'}, fechado ? '▸' : '▾'), g.nome), h('span',{class:'tb-gn'}, ` ${g.xs.length} ${g.xs.length === 1 ? 'pedido' : 'pedidos'}${soma ? ' · ' + eur(soma) : ''}`)));
+        h('button',{type:'button', class:'tb-gt', 'aria-expanded': String(!fechado), onclick:() => { q.fechados[fk] = !fechado; try { localStorage.setItem(q.ls.fechados, JSON.stringify(q.fechados)); } catch (e) {} renderAll(); }},
+          h('span',{class:'tb-chev'}, fechado ? '▸' : '▾'), g.nome), h('span',{class:'tb-gn'}, ` ${g.xs.length} ${g.xs.length === 1 ? q.textos.um : q.textos.varios}${t.resumo}`)));
       if (fechado) return h('tbody',{class:'tb-g', style:`--g:${g.cor}`, 'data-k': k}, cab);
-      const linhas = g.xs.map(x => h('tr',{class:'tb-r' + (ABERTOS.includes(x.r.estado) ? '' : ' fechado'), 'data-id': x.r.id}, cols.map(c => { const td = tbCelula(x, c); td.classList.add('k-' + c.id); return td; }), h('td',{class:'tb-c'})));
-      const pode = canWrite && (tbGrupo !== 'estado' || k === 'novo') && tbGrupo !== 'trimestre' && tbGrupo.indexOf('x:') !== 0;
-      const add = pode ? h('tr',{class:'tb-add'}, h('td',{colspan: String(cols.length + 1)}, h('button',{type:'button', onclick:() => {
-        novoBase = tbGrupo === 'prioridade' ? {prioridade: k} : tbGrupo === 'tipo' && k ? {tipo: k} : {};
-        abrirNovo();
-        if (tbGrupo === 'dono' && k && F('n-dono')) F('n-dono').value = k;
-      }}, '+ Adicionar pedido'))) : null;
-      // Totais: barra de cores dos passos (como a «bateria» do monday), soma do valor e da previsão
+      const linhas = g.xs.map(x => h('tr',{class:'tb-r' + q.classeLinha(x), 'data-id': q.id(x)}, cols.map(c => { const td = tbCelula(q, x, c); td.classList.add(q.pre + c.id); return td; }), h('td',{class:'tb-c'})));
+      const add = canWrite && q.podeAdicionar(k) ? h('tr',{class:'tb-add'}, h('td',{colspan: String(cols.length + 1)}, h('button',{type:'button', onclick:() => q.adicionar(k)}, q.textos.add))) : null;
+      const tot = h('tr',{class:'tb-tot'}, cols.map(c => h('td',{class: q.pre + c.id + (c.id === prim ? ' tb-cli' : q.num.indexOf(c.id) >= 0 ? ' num' : '')}, t.celula(c))), h('td'));
+      return h('tbody',{class:'tb-g', style:`--g:${g.cor}`, 'data-k': k}, cab, linhas, add, tot);
+    });
+    fill(box, lista.length ? h('table',{class:'tb'}, thead, corpos) : h('p',{class:'t-vazio'}, q.vazio()));
+  }
+
+  // O quadro dos Pedidos: uma linha por pedido (x = {r, rel, sem, pe} da lista).
+  const TB_PED = tbQuadro({
+    box: 'tabela', agrupar: 'tbAgrupar', estilo: 'tbLarg', pre: 'k-', chaveCfg: 'colunas',
+    ls: {larg: 'registo-larguras', grupo: 'registo-agrupar', fechados: 'registo-grupos-fechados'},
+    base: TB_BASE, ocultasPadrao: TB_OCULTAS_PADRAO, grupoPadrao: 'estado',
+    agrupadoresBase: [['estado','Passo'], ['dono','Dono'], ['prioridade','Prioridade'], ['tipo','Tipo'], ['trimestre','Trimestre'], ['nenhum','Sem grupos']],
+    agrupaveis: ['dono','prioridade','tipo','estado'], num: ['valor','prob','previsao'], dinheiro: ['valor'],
+    textos: {um: 'pedido', varios: 'pedidos', add: '+ Adicionar pedido', apagar: 'Os valores ficam guardados nos pedidos mas deixam de se ver.'},
+    id: x => x.r.id,
+    nomeDe: x => x.r.cliente || x.r.id,
+    extraDe: x => x.r.extra,
+    ler: (x, c) => c.extra ? (x.r.extra || {})[c.id] : x.r[c.id],
+    guardar: (x, alvo, valor, rotulo, antesTxt, depoisTxt, motivo) => tbGuardar(x.r, alvo, valor, rotulo, antesTxt, depoisTxt, motivo),
+    texto: (campo, v) => tbTexto(campo, v),
+    obrigatorio: (x, c, curto) => !c.extra && tbObrigatorio(x.r, c.id) ? (curto ? 'Um pedido aberto tem sempre dono.' : 'Um pedido aberto tem sempre dono, próxima ação e data.') : null,
+    validar: (x, c, v) => c.id === 'probabilidade' && (v < 0 || v > 100) ? 'A probabilidade vai de 0 a 100.' : null,
+    aviso: (x, c) => c.id === 'probabilidade' ? `Vazio volta ao valor do passo (${Number(((cfgProb || {})[x.r.estado] != null ? cfgProb : PROB_PADRAO)[x.r.estado] || 0)}%).` : null,
+    vazio: () => rows.length ? 'Nenhum pedido com estes filtros.' : 'Ainda não há pedidos.',
+    classeLinha: x => ABERTOS.includes(x.r.estado) ? '' : ' fechado',
+    grupoDe: x => {
+      const r = x.r, g = TB_PED.grupo;
+      if (g === 'estado') return {k: r.estado, nome: (ESTADOS[r.estado] || {}).l || r.estado, cor: tomEstado(r.estado), ordem: Object.keys(ESTADOS).indexOf(r.estado)};
+      if (g === 'dono') return {k: r.dono || '', nome: r.dono || 'Sem dono', cor: 'var(--accent)', ordem: r.dono ? 0 : 1};
+      if (g === 'prioridade') return {k: x.pe.p, nome: PRIO_NOME[x.pe.p], cor: TOM_P[x.pe.p], ordem: PRIOS.indexOf(x.pe.p)};
+      if (g === 'tipo') return {k: r.tipo || '', nome: TIPOS[r.tipo] || 'Sem tipo', cor: 'var(--copper)', ordem: r.tipo ? Object.keys(TIPOS).indexOf(r.tipo) : 99};
+      if (g === 'trimestre') { const t = trimestre(r); return {k: t, nome: t, cor: 'var(--info)', ordem: t === 'Sem data' ? '0' : t.slice(3) + t.slice(1, 2), desc: true}; }
+      return {k: '', nome: 'Todos os pedidos', cor: 'var(--accent)', ordem: 0};
+    },
+    celula: (x, c) => {
+      const r = x.r, aberto = ABERTOS.includes(r.estado), Q = TB_PED;
+      switch (c.id) {
+        case 'cliente': return h('td',{class:'tb-c tb-cli'}, canWrite && Q.arrastavel() ? h('span',{class:'tb-pega', title:'Arrastar para outro grupo', 'aria-hidden':'true'}, '⠿') : null,
+          h('button',{type:'button', onclick:() => openSheet(r.id)}, r.cliente || 'Sem nome'),
+          r.porConfirmar ? h('span',{class:'tag-conf'}, 'por confirmar') : null);
+        case 'estado': return tbTd(tbPill((ESTADOS[r.estado] || {}).l || r.estado, tomEstado(r.estado), 'cheia'), td => tbPasso(td, x), 'tb-estado');
+        case 'prioridade': return tbTd(tbPill(x.pe.p, TOM_P[x.pe.p], 'cheia'), aberto ? td => tbPrioridade(td, r) : null, 'tb-estado tb-p');
+        case 'dono': return tbTd(r.dono ? h('span',{class:'tb-dono'}, h('i',null, iniciais(r.dono)), r.dono) : h('span',{class:'tb-vazio'}, 'Sem dono'),
+          td => tbEscolher(Q, td, x, {id:'dono', nome:'Dono'}, donosConhecidos().map(d => [d, d])));
+        case 'proximaAcao': return tbTd(r.proximaAcao || '', td => tbEditarTexto(Q, td, x, {id:'proximaAcao', nome:'Próxima ação'}, 'text'));
+        case 'dataProximaAcao': return tbTd(r.dataProximaAcao ? ddmm(r.dataProximaAcao) : '', td => tbEditarTexto(Q, td, x, {id:'dataProximaAcao', nome:'Data da próxima ação'}, 'date'),
+          aberto && r.dataProximaAcao && r.dataProximaAcao < today() ? 'tb-late' : '');
+        case 'prazo': return h('td',{class:'tb-c tb-prazo'}, aberto && !r.porConfirmar ? [h('i',{class:'tb-dot', style:`--c:var(--${semTone(x.sem)})`}), tempoTxt(r, x.rel)] : '');
+        case 'valor': return tbTd(r.valor ? eur(valorN(r)) : '', td => tbEditarTexto(Q, td, x, {id:'valor', nome:'Valor s/IVA'}, 'number'), 'num');
+        case 'prob': return tbTd(h('span',{class: r.probabilidade != null && r.probabilidade !== '' ? '' : 'tb-padrao'}, probDe(r) + '%'), td => tbEditarTexto(Q, td, x, {id:'probabilidade', nome:'Probabilidade (%)'}, 'number'), 'num');
+        case 'previsao': return h('td',{class:'tb-c num'}, valorN(r) ? eur(previsaoDe(r)) : '');
+        case 'dataFechoPrevista': return tbTd(r.dataFechoPrevista ? ddmm(r.dataFechoPrevista) : '', td => tbEditarTexto(Q, td, x, {id:'dataFechoPrevista', nome:'Fecho previsto'}, 'date'));
+        case 'tipo': return tbTd(r.tipo ? tbPill(TIPOS[r.tipo], 'var(--copper)') : '', td => tbEscolher(Q, td, x, {id:'tipo', nome:'Tipo'}, Object.entries(TIPOS)));
+        case 'origem': return tbTd(ORIGENS[r.origem] || '', td => tbEscolher(Q, td, x, {id:'origem', nome:'Origem'}, Object.entries(ORIGENS)));
+        case 'localidade': return tbTd(String(r.localidade || '').split('\n')[0], td => tbEditarTexto(Q, td, x, {id:'localidade', nome:'Localidade'}, 'text'));
+        case 'contacto': return tbTd(r.contacto || '', td => tbEditarTexto(Q, td, x, {id:'contacto', nome:'Contacto'}, 'text'));
+        case 'notas': return tbTd(r.notas || '', td => tbEditarTexto(Q, td, x, {id:'notas', nome:'Notas'}, 'text'), 'tb-notas');
+      }
+      return null;
+    },
+    // Totais: barra de cores dos passos (como a «bateria» do monday), soma do valor e da previsão, probabilidade média
+    totais: g => {
+      const soma = g.xs.reduce((t, x) => t + valorN(x.r), 0), prev = g.xs.reduce((t, x) => t + previsaoDe(x.r), 0);
       const porEstado = {}; g.xs.forEach(x => { porEstado[x.r.estado] = (porEstado[x.r.estado] || 0) + 1; });
       const bateria = h('span',{class:'tb-bat', title: Object.keys(porEstado).map(e => `${(ESTADOS[e] || {}).l || e}: ${porEstado[e]}`).join('\n')},
         Object.keys(porEstado).map(e => h('i',{style:`background:${tomEstado(e)};width:${(100 * porEstado[e] / g.xs.length).toFixed(1)}%`})));
       const pm = g.xs.length ? Math.round(g.xs.reduce((t, x) => t + probDe(x.r), 0) / g.xs.length) : 0;
-      const tot = h('tr',{class:'tb-tot'}, cols.map(c => h('td',{class: 'k-' + c.id + (c.id === 'cliente' ? ' tb-cli' : ['valor','previsao','prob'].indexOf(c.id) >= 0 ? ' num' : '')},
-        c.id === 'estado' ? bateria : c.id === 'valor' ? (soma ? eur(soma) : '') : c.id === 'previsao' ? (prev ? eur(prev) : '') : c.id === 'prob' ? `${pm}% méd.` : '')), h('td'));
-      return h('tbody',{class:'tb-g', style:`--g:${g.cor}`, 'data-k': k}, cab, linhas, add, tot);
-    });
-    fill(box, lista.length ? h('table',{class:'tb'}, thead, corpos) : h('p',{class:'t-vazio'}, rows.length ? 'Nenhum pedido com estes filtros.' : 'Ainda não há pedidos.'));
-  }
+      return {resumo: soma ? ' · ' + eur(soma) : '',
+        celula: c => c.id === 'estado' ? bateria : c.id === 'valor' ? (soma ? eur(soma) : '') : c.id === 'previsao' ? (prev ? eur(prev) : '') : c.id === 'prob' ? `${pm}% méd.` : ''};
+    },
+    podeAdicionar: k => { const g = TB_PED.grupo; return (g !== 'estado' || k === 'novo') && g !== 'trimestre' && g.indexOf('x:') !== 0; },
+    adicionar: k => {
+      const g = TB_PED.grupo;
+      novoBase = g === 'prioridade' ? {prioridade: k} : g === 'tipo' && k ? {tipo: k} : {};
+      abrirNovo();
+      if (g === 'dono' && k && F('n-dono')) F('n-dono').value = k;
+    },
+    // Arrastar linhas: por Passo abre a mudança curta (as regras do processo); por Prioridade pede o motivo; por Dono, Tipo
+    // ou coluna da equipa muda logo, com histórico e «Desfazer».
+    arrastavel: () => { const g = TB_PED.grupo; return ['estado', 'dono', 'prioridade', 'tipo'].indexOf(g) >= 0 || g.indexOf('x:') === 0; },
+    alvosLinha: (x, chaves) => {
+      const r = x.r, g = TB_PED.grupo, ok = {};
+      if (g === 'estado') { const a = kAlvos(r); chaves.forEach(k => { if (a[k]) ok[k] = a[k]; }); return ok; }
+      const atual = tbGrupoDe(TB_PED, x).k;
+      chaves.forEach(k => { if (k === atual) return; if (g === 'dono' && !k && ABERTOS.includes(r.estado)) return; ok[k] = true; });
+      return ok;
+    },
+    largou: (x, k, alvo, linha) => {
+      const r = x.r, g = TB_PED.grupo;
+      if (g === 'estado') {
+        openSheet(r.id);
+        if (alvo.agenda) agAbrir('sheet', r.id, r.tipo === 'manutencao' || r.tipo === 'reparacao' ? r.tipo : 'visita', null, 'sug'); else abrirTrans(alvo);
+      } else if (g === 'dono') tbGuardar(r, 'dono', k, 'Dono', r.dono || 'vazio', k || 'vazio');
+      else if (g === 'prioridade') { const td = linha && linha.querySelector('.k-prioridade'); tbPrioridade(td || linha, r, k); }
+      else if (g === 'tipo') tbGuardar(r, 'tipo', k, 'Tipo', tbTexto('tipo', r.tipo), tbTexto('tipo', k));
+      else if (g.indexOf('x:') === 0) {
+        const c = tbCfg(TB_PED).extra.find(z => z.id === g.slice(2)); if (!c) return;
+        const antes = (r.extra || {})[c.id];
+        tbGuardar(r, {extra: c.id}, k, c.nome, antes || 'vazio', k || 'vazio');
+      }
+    },
+  });
+  function renderTabela(lista) { tbRender(TB_PED, lista); }
 
   // Definições: a probabilidade de fecho de cada passo (o «win probability» da folha de Excel do pipeline).
   function renderProb() {
@@ -2349,51 +2426,28 @@ if (!Element.prototype.replaceChildren) {
       }}, 'Guardar probabilidades')) : null);
   }
 
-  F('tbAgrupar').addEventListener('change', ev => tbAgrupar(ev.target.value));
-
   /* ---------- Tabela: arrastar ----------
-     Colunas: arrastar o cabeçalho muda a ordem (para a equipa, config «colunas».ordem); a beira direita muda a largura
-     (de cada pessoa). Linhas: a pega «⠿» leva o pedido para outro grupo; só acendem os grupos permitidos. Por Passo abre
-     a mudança curta (as regras do processo); por Prioridade pede o motivo; por Dono, Tipo ou coluna da equipa muda logo,
-     com histórico e «Desfazer». Rato: arrastar. Toque: carregar meio segundo e arrastar. */
-  let tbArr = null, tbCol = null, tbPendente = false;
+     Colunas: arrastar o cabeçalho muda a ordem (para a equipa, config do quadro, .ordem); a beira direita muda a largura
+     (de cada pessoa). Linhas: a pega «⠿» leva a linha para outro grupo; só acendem os grupos permitidos (q.alvosLinha) e
+     o largar faz o que o quadro diz (q.largou). Rato: arrastar. Toque: carregar meio segundo e arrastar. Só um arrastar de
+     cada vez, por isso o estado é um só e leva o seu quadro (q). */
+  let tbArr = null, tbCol = null;
   // O clique que o browser dispara ao largar não conta (não fecha o editor que o largar abriu nem recolhe um grupo).
   document.addEventListener('click', ev => { if (kSoltou) { ev.stopPropagation(); ev.preventDefault(); } }, true);
-  const tbArrastavel = () => ['estado', 'dono', 'prioridade', 'tipo'].indexOf(tbGrupo) >= 0 || tbGrupo.indexOf('x:') === 0;
-  function tbAlvosLinha(r, chaves) {
-    const ok = {};
-    if (tbGrupo === 'estado') { const a = kAlvos(r); chaves.forEach(k => { if (a[k]) ok[k] = a[k]; }); return ok; }
-    const atual = tbGrupoDe({r, pe: pEfetiva(r, relogio(r))}).k;
-    chaves.forEach(k => { if (k === atual) return; if (tbGrupo === 'dono' && !k && ABERTOS.includes(r.estado)) return; ok[k] = true; });
-    return ok;
-  }
-  function tbFimSujo() { if (tbPendente) { tbPendente = false; renderAll(); } }
-  function tbLargou(r, k, alvo, linha) {
-    if (tbGrupo === 'estado') {
-      openSheet(r.id);
-      if (alvo.agenda) agAbrir('sheet', r.id, r.tipo === 'manutencao' || r.tipo === 'reparacao' ? r.tipo : 'visita', null, 'sug'); else abrirTrans(alvo);
-    } else if (tbGrupo === 'dono') tbGuardar(r, 'dono', k, 'Dono', r.dono || 'vazio', k || 'vazio');
-    else if (tbGrupo === 'prioridade') { const td = linha && linha.querySelector('.k-prioridade'); tbPrioridade(td || linha, r, k); }
-    else if (tbGrupo === 'tipo') tbGuardar(r, 'tipo', k, 'Tipo', tbTexto('tipo', r.tipo), tbTexto('tipo', k));
-    else if (tbGrupo.indexOf('x:') === 0) {
-      const c = tbCfg().extra.find(z => z.id === tbGrupo.slice(2)); if (!c) return;
-      const antes = (r.extra || {})[c.id];
-      tbGuardar(r, {extra: c.id}, k, c.nome, antes || 'vazio', k || 'vazio');
-    }
-  }
-  function tbComecaLinha(tr, x, y) {
-    const r = rows.find(z => z.id === tr.getAttribute('data-id')); if (!r) return;
-    const corpos = Array.prototype.slice.call(document.querySelectorAll('#tabela tbody.tb-g'));
-    const alvos = tbAlvosLinha(r, corpos.map(c => c.getAttribute('data-k')));
-    const fant = h('div',{class:'tb-fant'}, r.cliente || r.id);
+  function tbFimSujo(q) { if (q.pendente) { q.pendente = false; renderAll(); } }
+  function tbComecaLinha(q, tr, x, y) {
+    const it = q.mapa[tr.getAttribute('data-id')]; if (!it) return;
+    const corpos = Array.prototype.slice.call(F(q.box).querySelectorAll('tbody.tb-g'));
+    const alvos = q.alvosLinha(it, corpos.map(c => c.getAttribute('data-k')));
+    const fant = h('div',{class:'tb-fant'}, q.nomeDe(it));
     document.body.appendChild(fant);
-    tbArr = {r, tr, alvos, fant, sobre: null};
+    tbArr = {q, it, tr, alvos, fant, sobre: null};
     tr.classList.add('karr'); document.body.classList.add('a-arrastar');
     corpos.forEach(c => c.classList.add(alvos[c.getAttribute('data-k')] ? 'alvo' : c.contains(tr) ? 'origem' : 'fora'));
     tbMoveLinha(x, y);
   }
-  function tbAutoScroll(x, y) {
-    const w = document.querySelector('.tb-wrap'); if (!w) return;
+  function tbAutoScroll(q, x, y) {
+    const w = F(q.box) && F(q.box).parentNode; if (!w) return;
     // a parte da tabela que se vê (pode passar do fundo do ecrã); quando a tabela já não desce, desce a página
     const b = w.getBoundingClientRect(), cima = Math.max(b.top, 0), baixo = Math.min(b.bottom, window.innerHeight);
     if (y < cima + 40) { if (w.scrollTop > 0) w.scrollTop -= 16; else window.scrollBy(0, -16); }
@@ -2404,30 +2458,32 @@ if (!Element.prototype.replaceChildren) {
     if (!tbArr) return;
     tbArr.fant.style.transform = `translate(${x + 12}px, ${y - 14}px)`;
     const el = document.elementFromPoint(x, y);
-    const c = el && el.closest ? el.closest('#tabela tbody.tb-g') : null;
+    let c = el && el.closest ? el.closest('tbody.tb-g') : null;
+    if (c && !F(tbArr.q.box).contains(c)) c = null;
     if (tbArr.sobre && tbArr.sobre !== c) tbArr.sobre.classList.remove('sobre');
     tbArr.sobre = c && c.classList.contains('alvo') ? c : null;
     if (tbArr.sobre) tbArr.sobre.classList.add('sobre');
-    tbAutoScroll(x, y);
+    tbAutoScroll(tbArr.q, x, y);
   }
   function tbFimLinha(largou) {
     if (!tbArr) return;
-    const {r, tr, alvos, sobre} = tbArr;
+    const {q, it, tr, alvos, sobre} = tbArr;
     tbArr.fant.remove(); tr.classList.remove('karr'); document.body.classList.remove('a-arrastar');
-    Array.prototype.forEach.call(document.querySelectorAll('#tabela tbody.tb-g'), c => c.classList.remove('alvo', 'fora', 'origem', 'sobre'));
+    Array.prototype.forEach.call(F(q.box).querySelectorAll('tbody.tb-g'), c => c.classList.remove('alvo', 'fora', 'origem', 'sobre'));
     tbArr = null;
     kSoltou = true; setTimeout(() => { kSoltou = false; }, 350);
-    tbFimSujo();
+    tbFimSujo(q);
     if (!largou || !sobre) return;
     const k = sobre.getAttribute('data-k');
-    tbLargou(r, k, alvos[k], document.querySelector(`#tabela tr[data-id="${r.id}"]`));
+    // a linha como estava quando o arrastar começou: se um colega a mudou entretanto, a gravação recusa
+    q.largou(it, k, alvos[k], F(q.box).querySelector(`tr[data-id="${q.id(it)}"]`));
   }
   // Colunas: mudar a ordem
-  function tbComecaCol(th, x) {
+  function tbComecaCol(q, th, x) {
     const ths = Array.prototype.slice.call(th.parentNode.children).filter(t => t.getAttribute('data-col'));
     const guia = h('div',{class:'tb-guia'});
     document.body.appendChild(guia);
-    tbCol = {th, id: th.getAttribute('data-col'), ths, guia, antes: null};
+    tbCol = {q, th, id: th.getAttribute('data-col'), ths, guia, antes: null};
     th.classList.add('karr'); document.body.classList.add('a-arrastar');
     tbMoveCol(x);
   }
@@ -2440,77 +2496,82 @@ if (!Element.prototype.replaceChildren) {
     tbCol.antes = antes;
     const ref = antes ? antes.getBoundingClientRect() : movs[movs.length - 1].getBoundingClientRect();
     const xl = antes ? ref.left : ref.right;
-    const t = document.querySelector('#tabela table').getBoundingClientRect(), w = document.querySelector('.tb-wrap').getBoundingClientRect();
+    const box = F(tbCol.q.box), t = box.querySelector('table').getBoundingClientRect(), w = box.parentNode.getBoundingClientRect();
     tbCol.guia.style.left = (xl - 1) + 'px'; tbCol.guia.style.top = Math.max(t.top, w.top) + 'px'; tbCol.guia.style.height = (Math.min(t.bottom, w.bottom) - Math.max(t.top, w.top)) + 'px';
-    tbAutoScroll(x, (w.top + w.bottom) / 2);
+    tbAutoScroll(tbCol.q, x, (w.top + w.bottom) / 2);
   }
   function tbFimCol(largou) {
     if (!tbCol) return;
-    const {th, id, guia, antes} = tbCol;
+    const {q, th, id, guia, antes} = tbCol;
     guia.remove(); th.classList.remove('karr'); document.body.classList.remove('a-arrastar');
     tbCol = null;
     kSoltou = true; setTimeout(() => { kSoltou = false; }, 350);
-    if (!largou) { tbFimSujo(); return; }
-    const ids = tbColunas().filter(c => !c.fixa).map(c => c.id).filter(z => z !== id);
+    if (!largou) { tbFimSujo(q); return; }
+    const ids = tbColunas(q).filter(c => !c.fixa).map(c => c.id).filter(z => z !== id);
     const i = antes ? ids.indexOf(antes.getAttribute('data-col')) : -1;
     if (i < 0) ids.push(id); else ids.splice(i, 0, id);
-    const atual = tbColunas().filter(c => !c.fixa).map(c => c.id);
-    if (ids.join() === atual.join()) { tbFimSujo(); return; }
-    tbPendente = false;
-    tbGuardarCfg(() => ({ordem: ids}), 'Ordem das colunas guardada');
+    const atual = tbColunas(q).filter(c => !c.fixa).map(c => c.id);
+    if (ids.join() === atual.join()) { tbFimSujo(q); return; }
+    q.pendente = false;
+    tbGuardarCfg(q, () => ({ordem: ids}), 'Ordem das colunas guardada');
   }
   // Colunas: mudar a largura
   let tbRz = null;
-  function tbMoveRz(x) { if (!tbRz) return; const w = Math.max(60, Math.min(480, Math.round(tbRz.w + x - tbRz.x))); tbLarg[tbRz.id] = w; tbAplicaLarguras(); }
-  function tbFimRz() { if (!tbRz) return; tbRz = null; document.body.classList.remove('a-redimensionar'); tbGuardaLarguras(); kSoltou = true; setTimeout(() => { kSoltou = false; }, 350); }
-  (function () {
-    const box = F('tabela');
-    let ini = null, temp = null;
-    const inicio = (ev, x, y) => {
-      if (!canWrite) return null;
-      const rz = ev.target.closest('.tb-rz');
-      if (rz) { const th = rz.closest('th'); tbRz = {id: th.getAttribute('data-col'), x, w: th.getBoundingClientRect().width}; document.body.classList.add('a-redimensionar'); return 'rz'; }
-      const pega = ev.target.closest('.tb-pega');
-      if (pega) return {tipo: 'linha', el: pega.closest('tr'), x, y};
-      const th = ev.target.closest('th.tb-mov');
-      if (th && !ev.target.closest('button')) return {tipo: 'col', el: th, x, y};
-      return null;
-    };
-    const arranca = (i, x, y) => { if (i.tipo === 'linha') tbComecaLinha(i.el, x, y); else tbComecaCol(i.el, x); };
+  function tbMoveRz(x) { if (!tbRz) return; const w = Math.max(60, Math.min(480, Math.round(tbRz.w + x - tbRz.x))); tbRz.q.larg[tbRz.id] = w; tbAplicaLarguras(tbRz.q); }
+  function tbFimRz() { if (!tbRz) return; const q = tbRz.q; tbRz = null; document.body.classList.remove('a-redimensionar'); tbGuardaLarguras(q); kSoltou = true; setTimeout(() => { kSoltou = false; }, 350); }
+  // Os ouvintes do documento são um só conjunto; cada quadro liga os seus (tbLigar) à sua caixa.
+  let tbIni = null, tbTemp = null;
+  function tbInicio(q, ev, x, y) {
+    if (!canWrite) return null;
+    const rz = ev.target.closest('.tb-rz');
+    if (rz) { const th = rz.closest('th'); tbRz = {q, id: th.getAttribute('data-col'), x, w: th.getBoundingClientRect().width}; document.body.classList.add('a-redimensionar'); return 'rz'; }
+    const pega = ev.target.closest('.tb-pega');
+    if (pega) return {q, tipo: 'linha', el: pega.closest('tr'), x, y};
+    const th = ev.target.closest('th.tb-mov');
+    if (th && !ev.target.closest('button')) return {q, tipo: 'col', el: th, x, y};
+    return null;
+  }
+  const tbArranca = (i, x, y) => { if (i.tipo === 'linha') tbComecaLinha(i.q, i.el, x, y); else tbComecaCol(i.q, i.el, x); };
+  function tbLigar(q) {
+    const box = F(q.box);
+    F(q.agrupar).addEventListener('change', ev => tbAgruparEm(q, ev.target.value));
     box.addEventListener('mousedown', ev => {
       if (ev.button !== 0) return;
-      const i = inicio(ev, ev.clientX, ev.clientY);
+      const i = tbInicio(q, ev, ev.clientX, ev.clientY);
       if (i === 'rz') { ev.preventDefault(); return; }
-      if (i) { ini = i; if (i.tipo === 'linha') ev.preventDefault(); }
+      if (i) { tbIni = i; if (i.tipo === 'linha') ev.preventDefault(); }
     });
+    box.addEventListener('touchstart', ev => {
+      if (ev.touches.length !== 1) return;
+      const t = ev.touches[0], i = tbInicio(q, ev, t.clientX, t.clientY);
+      if (i === 'rz') return;
+      if (!i) return;
+      tbIni = i; clearTimeout(tbTemp);
+      // a pega da linha arranca logo; o cabeçalho espera meio segundo (para o dedo poder deslizar a tabela)
+      if (i.tipo === 'linha') { tbArranca(i, i.x, i.y); tbIni = null; }
+      else tbTemp = setTimeout(() => { if (tbIni) { tbArranca(tbIni, tbIni.x, tbIni.y); tbIni = null; } }, 450);
+    }, {passive: true});
+  }
+  (function () {
     document.addEventListener('mousemove', ev => {
       if (tbRz) { tbMoveRz(ev.clientX); ev.preventDefault(); return; }
       if (tbArr) { tbMoveLinha(ev.clientX, ev.clientY); ev.preventDefault(); return; }
       if (tbCol) { tbMoveCol(ev.clientX); ev.preventDefault(); return; }
-      if (ini && Math.abs(ev.clientX - ini.x) + Math.abs(ev.clientY - ini.y) > 6) { arranca(ini, ev.clientX, ev.clientY); ini = null; }
+      if (tbIni && Math.abs(ev.clientX - tbIni.x) + Math.abs(ev.clientY - tbIni.y) > 6) { tbArranca(tbIni, ev.clientX, ev.clientY); tbIni = null; }
     });
-    document.addEventListener('mouseup', () => { ini = null; if (tbRz) tbFimRz(); if (tbArr) tbFimLinha(true); if (tbCol) tbFimCol(true); });
-    box.addEventListener('touchstart', ev => {
-      if (ev.touches.length !== 1) return;
-      const t = ev.touches[0], i = inicio(ev, t.clientX, t.clientY);
-      if (i === 'rz') return;
-      if (!i) return;
-      ini = i; clearTimeout(temp);
-      // a pega da linha arranca logo; o cabeçalho espera meio segundo (para o dedo poder deslizar a tabela)
-      if (i.tipo === 'linha') { arranca(i, i.x, i.y); ini = null; }
-      else temp = setTimeout(() => { if (ini) { arranca(ini, ini.x, ini.y); ini = null; } }, 450);
-    }, {passive: true});
+    document.addEventListener('mouseup', () => { tbIni = null; if (tbRz) tbFimRz(); if (tbArr) tbFimLinha(true); if (tbCol) tbFimCol(true); });
     document.addEventListener('touchmove', ev => {
       const t = ev.touches[0];
       if (tbRz) { ev.preventDefault(); tbMoveRz(t.clientX); return; }
       if (tbArr) { ev.preventDefault(); tbMoveLinha(t.clientX, t.clientY); return; }
       if (tbCol) { ev.preventDefault(); tbMoveCol(t.clientX); return; }
-      if (ini && Math.abs(t.clientX - ini.x) + Math.abs(t.clientY - ini.y) > 10) { clearTimeout(temp); ini = null; }
+      if (tbIni && Math.abs(t.clientX - tbIni.x) + Math.abs(t.clientY - tbIni.y) > 10) { clearTimeout(tbTemp); tbIni = null; }
     }, {passive: false});
-    document.addEventListener('touchend', ev => { clearTimeout(temp); ini = null; if (tbRz) tbFimRz(); if (tbArr) { ev.preventDefault(); tbFimLinha(true); } if (tbCol) { ev.preventDefault(); tbFimCol(true); } });
-    document.addEventListener('touchcancel', () => { clearTimeout(temp); ini = null; tbFimRz(); tbFimLinha(false); tbFimCol(false); });
+    document.addEventListener('touchend', ev => { clearTimeout(tbTemp); tbIni = null; if (tbRz) tbFimRz(); if (tbArr) { ev.preventDefault(); tbFimLinha(true); } if (tbCol) { ev.preventDefault(); tbFimCol(true); } });
+    document.addEventListener('touchcancel', () => { clearTimeout(tbTemp); tbIni = null; tbFimRz(); tbFimLinha(false); tbFimCol(false); });
     document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { tbFimLinha(false); tbFimCol(false); } });
   })();
+  tbLigar(TB_PED);
 
 
   /* ---------- Números: painel de widgets (ao estilo do dashboard do monday) ----------
@@ -2723,20 +2784,18 @@ if (!Element.prototype.replaceChildren) {
   // Os dados de contacto dos clientes (NIF, telefone, email, morada) vêm da tabela de clientes do SAF-T e entram na ficha,
   // só nos campos que ainda estão vazios: o que a equipa escreveu na ficha manda.
   async function importarMestres(mestres) {
-    const linhas = [];
+    if (!sb || !canWrite) return;
+    const enche = mdoc => base => {
+      const patch = {};
+      for (const campo of ['nif', 'contacto', 'telefone', 'email', 'morada']) if (!base[campo] && mdoc[campo]) patch[campo] = mdoc[campo];
+      if (!base.nome) patch.nome = mdoc.nome;
+      return patch;
+    };
     for (const mdoc of mestres) {
       const k = chaveCli(mdoc.nome); if (!k) continue;
-      const f = fichas[k] || {}; const patch = {};
-      for (const campo of ['nif', 'contacto', 'telefone', 'email', 'morada']) if (!f[campo] && mdoc[campo]) patch[campo] = mdoc[campo];
-      if (!f.nome) patch.nome = mdoc.nome;
-      if (!Object.keys(patch).length) continue;
-      const doc = {...f, ...patch, atualizado: new Date().toISOString(), por: eu ? eu.email : null}; delete doc._versao; delete doc._novo;
-      fichas[k] = {...doc, _versao: (f._versao || 0) + 1};
-      linhas.push({id: k, dados: doc, atualizado_por: eu ? eu.email : null});
-    }
-    if (linhas.length && sb && canWrite && fichaTabela) {
-      const {error} = await sb.from('clientes').upsert(linhas, {onConflict:'id'});
-      if (error && /relation|does not exist|schema cache/i.test(error.message || '')) fichaTabela = false;
+      // Só vai à base de dados quando a cópia local diz que falta alguma coisa; lá dentro volta a ver na cópia atual.
+      if (!Object.keys(enche(mdoc)(Object.assign({}, cfgClientes[k] || {}, fichas[k] || {}))).length) continue;
+      try { await gravarCliente(k, enche(mdoc), null, null); } catch (e) { /* segue com os outros clientes */ }
     }
   }
   async function apagarMes(mes) {
@@ -2897,7 +2956,11 @@ if (!Element.prototype.replaceChildren) {
 
   /* ---------- Clientes: não perder nenhum ---------- */
   // Junta os clientes da faturação (SAF-T) e do registo, calcula o ritmo de cada um e quem precisa de contacto.
-  let cfgClientes = {}, fichas = {}, fichaTabela = true, fichaKey = null, cliEstado = '', cliQ = '', cliMotivo = '';
+  let cfgClientes = {}, fichas = {}, fichaTabela = true, fichaKey = null, fichaBase = null, cliEstado = '', cliQ = '', cliMotivo = '', cliUltima = null;
+  const TIPO_CLI = [['particular','Particular'], ['empresa','Empresa'], ['condominio','Condomínio']];
+  const PRIO_CLI = [['alta','Alta','var(--bad)'], ['media','Média','var(--warn)'], ['baixa','Baixa','var(--good)']];
+  const TOM_MOTIVO = {manutencao:'var(--info)', cobrar:'var(--bad)', frio:'var(--warn)', orcamento:'var(--copper)', ativo:'var(--good)', perdido:'var(--muted)', ignorado:'var(--muted)'};
+  const CLI_SIT_ORD = ['cobrar','manutencao','orcamento','frio','ativo','perdido','ignorado'];
   const MOTIVO = {manutencao:'Manutenção a vencer', cobrar:'Fatura por cobrar', frio:'A esfriar', orcamento:'Orçamento sem resposta', ativo:'Em dia', perdido:'Sem faturação há mais de um ano', ignorado:'Ignorado'};
   const MOTIVO_ORD = ['cobrar','manutencao','orcamento','frio'];
   const MOTIVO_CURTO = {cobrar:'Cobrar', manutencao:'Manutenção', orcamento:'Orçamento', frio:'A esfriar', ativo:'Em dia', perdido:'Parado', ignorado:'Ignorado'};
@@ -2965,35 +3028,98 @@ if (!Element.prototype.replaceChildren) {
         if (c.contactado && mesesEntre(c.contactado, today()) < 1) c.motivos = c.motivos.filter(m => m === 'cobrar' || m === 'orcamento');
         c.estado = c.motivos.length ? MOTIVO_ORD.find(m => c.motivos.includes(m)) : c.ultima && mesesEntre(c.ultima, ref) >= 12 ? 'perdido' : 'ativo';
       }
+      // Para o quadro de Contactos: valor dos pedidos abertos, faturas sem recibo e a localidade (da ficha, da morada ou dos pedidos).
+      c.valorAberto = c.abertos.reduce((t, r) => t + valorN(r), 0);
+      c.porCobrar = c.semRecibo.reduce((t, d) => t + d.bruto, 0);
+      const cp = /\d{4}-\d{3},?\s*([^,\n]+)/.exec(cfg.morada || '');
+      const locPed = c.pedidos.map(r => String(r.localidade || '').split('\n')[0].trim()).filter(Boolean)[0];
+      c.localidadeAuto = (cp && cp[1].trim()) || locPed || '';
+      c.localidade = cfg.localidade || c.localidadeAuto;
       c.urg = c.estado === 'cobrar' ? -cobrar.reduce((t, d) => t + d.bruto, 0) : c.estado === 'manutencao' ? new Date(c.proxima).getTime() : c.estado === 'orcamento' ? 0 : c.ultima ? new Date(c.ultima).getTime() : 0;
       return c;
     });
     return {ref, lista};
   }
 
-  async function guardarCliente(k, patch, msg) {
-    if (!sb || !canWrite) return false;
-    const atual = fichas[k] || {};
-    const doc = {...atual, ...patch, atualizado: new Date().toISOString(), por: eu.email}; delete doc._versao;
-    if (!doc.nome) { const c = clientes().lista.find(x => x.k === k); doc.nome = (c && c.nome) || k; }
-    try {
+  // Gravar uma ficha sem apagar o que um colega mudou entretanto: lê a linha atual, aplica só os campos mudados,
+  // recusa se um campo que a pessoa estava a ver mudou entretanto, e grava só se a versão ainda for a mesma
+  // (update ... where versao = v; zero linhas quer dizer que alguém gravou pelo meio, e volta a ler). Sem SQL novo.
+  const CLI_CONFLITO = 'Alguém mudou esta ficha entretanto. Vê o valor novo e repete.';
+  // Compara valores sem depender da ordem das chaves (o jsonb da base de dados devolve-as noutra ordem).
+  const cliEst = v => Array.isArray(v) ? v.map(cliEst) : v && typeof v === 'object' ? Object.keys(v).sort().reduce((o, x) => { o[x] = cliEst(v[x]); return o; }, {}) : v;
+  const cliNorm = v => v == null || v === '' ? null : JSON.stringify(cliEst(v));
+  const cliPega = (o, p) => { let v = o; for (const x of p.split('.')) { if (v == null) return null; v = v[x]; } return v; };
+  function cliAplica(doc, patch) {
+    for (const p of Object.keys(patch)) {
+      const ps = p.split('.'), v = patch[p]; let o = doc;
+      for (let i = 0; i < ps.length - 1; i++) o = o[ps[i]] = Object.assign({}, o[ps[i]] || {});
+      if (v === '' || v == null) delete o[ps[ps.length - 1]]; else o[ps[ps.length - 1]] = v;
+    }
+    return doc;
+  }
+  // patch: {campo: valor} (caminhos como «extra.c1x») ou uma função que o calcula a partir da cópia atual.
+  // vistos: {campo: valor que a pessoa via}. Devolve true, 'conflito' ou lança o erro.
+  async function gravarCliente(k, patch, vistos, linha) {
+    const mudou = base => Object.keys(vistos || {}).some(p => cliNorm(cliPega(base, p)) !== cliNorm(vistos[p]));
+    const monta = base => {
+      const p = typeof patch === 'function' ? patch(base) : patch;
+      if (!p || !Object.keys(p).length) return null;
+      const doc = cliAplica(JSON.parse(JSON.stringify(base)), p);
+      const velho = cfgClientes[k] || {};
+      Object.keys(p).forEach(x => { if (x.indexOf('.') < 0 && (p[x] === '' || p[x] == null) && velho[x] != null && velho[x] !== '') doc[x] = null; });
+      delete doc._versao; delete doc._novo;
+      if (!doc.nome) { const c = clientes().lista.find(x => x.k === k); doc.nome = (c && c.nome) || k; }
+      if (linha) doc.historico = (doc.historico || []).slice(-59).concat([{em: new Date().toISOString(), texto: linha, por: eu.email}]);
+      doc.atualizado = new Date().toISOString(); doc.por = eu.email;
+      return doc;
+    };
+    for (let tent = 0; tent < 3; tent++) {
       if (fichaTabela) {
-        const {error} = await sb.from('clientes').upsert({id: k, dados: doc, atualizado_por: eu.email}, {onConflict:'id'});
-        if (error) { if (/relation|does not exist|schema cache/i.test(error.message || '')) fichaTabela = false; else throw error; }
+        const r1 = await sb.from('clientes').select('dados,versao').eq('id', k).maybeSingle();
+        if (r1.error && /relation|does not exist|schema cache/i.test(r1.error.message || '')) fichaTabela = false;
+        else {
+          if (r1.error) throw r1.error;
+          const atual = r1.data, base = Object.assign({}, cfgClientes[k] || {}, atual ? atual.dados : {});
+          if (mudou(base)) return 'conflito';
+          const doc = monta(base); if (!doc) return true;
+          const meta = {dados: doc, atualizado: doc.atualizado, atualizado_por: eu.email};
+          const r2 = atual
+            ? await sb.from('clientes').update(Object.assign({versao: atual.versao + 1}, meta)).eq('id', k).eq('versao', atual.versao).select('versao')
+            : await sb.from('clientes').insert(Object.assign({id: k, versao: 1}, meta)).select('versao');
+          if (r2.error) { if (!atual && /duplicate|unique|23505/i.test(r2.error.message || '')) continue; throw r2.error; }
+          if (!r2.data || !r2.data.length) continue;
+          fichas[k] = Object.assign({}, doc, {_versao: r2.data[0].versao});
+          return true;
+        }
       }
-      if (!fichaTabela) {
-        // Sem a tabela clientes: guarda em config, chave clientes, como antes.
-        const novo = {...cfgClientes, [k]: {...(cfgClientes[k] || {}), ...doc}};
-        const {error} = await sb.from('config').upsert({chave:'clientes', valor: novo, atualizado_por: eu.email}, {onConflict:'chave'});
-        if (error) throw error;
-        cfgClientes = novo;
-      }
-      fichas[k] = {...doc, _versao: (atual._versao || 0) + 1};
+      // Sem a tabela clientes: guarda em config, chave clientes, também só se a versão ainda for a mesma.
+      const r3 = await sb.from('config').select('valor,versao').eq('chave', 'clientes').maybeSingle();
+      if (r3.error) throw r3.error;
+      const linhaCfg = r3.data, todos = (linhaCfg && linhaCfg.valor) || {}, base = todos[k] || {};
+      if (mudou(base)) return 'conflito';
+      const doc = monta(base); if (!doc) return true;
+      const novo = Object.assign({}, todos, {[k]: doc});
+      const r4 = linhaCfg
+        ? await sb.from('config').update({valor: novo, versao: linhaCfg.versao + 1, atualizado_por: eu.email}).eq('chave', 'clientes').eq('versao', linhaCfg.versao).select('versao')
+        : await sb.from('config').insert({chave: 'clientes', valor: novo, atualizado_por: eu.email}).select('versao');
+      if (r4.error) { if (!linhaCfg && /duplicate|unique|23505/i.test(r4.error.message || '')) continue; throw r4.error; }
+      if (!r4.data || !r4.data.length) continue;
+      cfgClientes = novo; if (fichas[k] && fichas[k]._novo) delete fichas[k];
+      return true;
+    }
+    return 'conflito';
+  }
+  // Para os botões e a ficha: grava, avisa e redesenha. vistos só quando a pessoa via um valor que pode ter mudado.
+  async function guardarCliente(k, patch, msg, vistos, linha) {
+    if (!sb || !canWrite) return false;
+    try {
+      const r = await gravarCliente(k, patch, vistos, linha);
+      if (r === 'conflito') { toast(CLI_CONFLITO); await carregar(); if (modo === 'ficha' && fichaKey === k && !F('sheetWrap').hidden) renderFicha(); return false; }
       if (msg) toast(msg);
       renderClientes();
       if (modo === 'ficha' && fichaKey === k && !F('sheetWrap').hidden) renderFicha();
       return true;
-    } catch (e) { toast('Não foi possível guardar.'); return false; }
+    } catch (e) { toast(/permiss|row-level/.test(String(e && e.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar.'); return false; }
   }
   const abrirNovoPara = nome => { novoBase = {cliente: nome}; abrirNovo(); };
 
@@ -3006,7 +3132,8 @@ if (!Element.prototype.replaceChildren) {
     const cobrarV = lista.flatMap(c => c.estado === 'cobrar' ? c.semRecibo.filter(d => mesesEntre(d.data, ref) >= 1) : []).reduce((t, d) => t + d.bruto, 0);
     const novos = lista.filter(c => c.primeira && mesesEntre(c.primeira, ref) < 3).length;
     const contratos = lista.filter(c => c.contrato).length;
-    const tile = (l, v, s, tone, filtro) => h('button',{class:'kpi' + (tone ? ' t-' + tone : ''), type:'button', onclick:() => { cliEstado = filtro; F('cliEstado').value = filtro; renderCliLista(lista); F('h-cli-lista').scrollIntoView({behavior:'smooth'}); }},
+    cliUltima = {ref, lista};
+    const tile = (l, v, s, tone, filtro) => h('button',{class:'kpi' + (tone ? ' t-' + tone : ''), type:'button', onclick:() => { cliEstado = filtro; F('cliEstado').value = filtro; setTab('contactos'); }},
       h('span',{class:'k-l'}, l), h('span',{class:'k-v'}, temDados ? v : '–'), h('span',{class:'k-s'}, temDados ? s : ' '));
     F('cliKpis').replaceChildren(
       tile('Clientes', String(lista.length), `${ativos12} com fatura nos últimos 12 meses`, '', ''),
@@ -3026,8 +3153,8 @@ if (!Element.prototype.replaceChildren) {
     const vis = todos.filter(c => !cliMotivo || c.estado === cliMotivo).sort((a, b) => MOTIVO_ORD.indexOf(a.estado) - MOTIVO_ORD.indexOf(b.estado) || a.urg - b.urg);
     F('cliContactarCount').textContent = vis.length ? `${vis.length} ${vis.length === 1 ? 'cliente' : 'clientes'}` : '';
     if (!vis.length) box.replaceChildren(h('p',{class:'empty'}, temDados ? 'Ninguém para contactar: todos os clientes estão em dia.' : 'Sem dados ainda.'));
-    else fill(box, vis.slice(0, 40).map(c => linhaCliente(c, ref)), vis.length > 40 ? h('p',{class:'note vis', style:'padding:10px 12px'}, `A mostrar 40 de ${vis.length}. Filtra pelo motivo ou vê a lista completa em baixo.`) : null);
-    renderCliLista(lista);
+    else fill(box, vis.slice(0, 40).map(c => linhaCliente(c, ref)), vis.length > 40 ? h('p',{class:'note vis', style:'padding:10px 12px'}, `A mostrar 40 de ${vis.length}. Filtra pelo motivo ou vê todos em Contactos.`) : null);
+    renderContactos();
   }
 
   function motivoTxt(c, ref) {
@@ -3058,33 +3185,163 @@ if (!Element.prototype.replaceChildren) {
       botoesCliente(c));
   }
 
-  function renderCliLista(lista) {
-    const box = F('cliLista'), q = norm(cliQ.trim());
-    const ref = dataRef();
-    const xs = lista.filter(c => !cliEstado || c.estado === cliEstado).filter(c => !q || norm(c.nome).includes(q))
-      .sort((a, b) => b.total12 - a.total12 || String(b.ultima || '').localeCompare(String(a.ultima || '')));
+  // Contactos: o mesmo quadro dos Pedidos, uma linha por cliente (x = o cliente de clientes()). No telemóvel, cartões.
+  // Só se desenha quando está à vista (é grande e o iPad antigo agradece).
+  function cliFiltrados() {
+    if (!cliUltima) return [];
+    const q = norm(cliQ.trim()), qd = cliQ.replace(/\D/g, '');
+    return cliUltima.lista.filter(c => !cliEstado || c.estado === cliEstado)
+      .filter(c => !q || norm([c.nome, c.cfg.nif, c.cfg.email, c.cfg.contacto, c.localidade, c.cfg.telefone].join(' ')).includes(q) || (qd.length >= 3 && String(c.cfg.telefone || '').replace(/\D/g, '').includes(qd)))
+      .sort((a, b) => b.total12 - a.total12 || String(b.ultima || '').localeCompare(String(a.ultima || '')) || a.nome.localeCompare(b.nome, 'pt'));
+  }
+  function renderContactos() {
+    if (tab !== 'contactos') return;
+    if (status !== 'ok') { F('cliListaCount').textContent = ''; F('btnCliCSV').hidden = true; tbRender(TB_CLI, []); F('cliLista').replaceChildren(stateMsg()); return; }
+    if (!cliUltima) { renderClientes(); return; }
+    const xs = cliFiltrados(), ref = cliUltima.ref, largo = window.innerWidth >= 768;
     F('cliListaCount').textContent = `${xs.length} ${xs.length === 1 ? 'cliente' : 'clientes'}`;
+    F('btnCliCSV').hidden = false;
+    const box = F('cliLista');
+    if (largo) { tbRender(TB_CLI, xs); box.replaceChildren(); return; }
+    F('cliTabela').replaceChildren();
     if (!xs.length) { box.replaceChildren(h('p',{class:'empty'}, 'Nenhum cliente com estes filtros.')); return; }
     const vis = xs.slice(0, 200);
-    fill(box, h('table',null,
-      h('thead',null, h('tr',null, h('th',null,'Cliente'), h('th',null,'Situação'), h('th',{class:'n'},'Faturas'), h('th',{class:'n'},'12 meses'), h('th',null,'Última'), h('th',null,'Ritmo'), h('th',null,'Próxima'), h('th',{class:'n'},'Por cobrar'), h('th',{class:'n'},'Pedidos'), h('th',null,''))),
-      h('tbody',null, vis.map(c => h('tr',null,
-        h('td',null, h('button',{class:'t-nome', type:'button', style:'font-size:15px', onclick:() => openFicha(c.k)}, c.nome), c.contrato ? [' ', h('span',{class:'cli-tag m-manutencao'}, 'contrato')] : null),
-        h('td',null, h('span',{class:`cli-tag m-${c.estado}`}, MOTIVO[c.estado]), h('div',{class:'sub', style:'max-width:34ch'}, motivoTxt(c, ref))),
-        h('td',{class:'n'}, String(c.n)), h('td',{class:'n'}, c.total12 ? eur(c.total12) : ''),
-        h('td',{class:'sub', style:'white-space:nowrap'}, c.ultima ? `${ddmm(c.ultima)}/${c.ultima.slice(2, 4)}` : '–'),
-        h('td',{class:'sub'}, c.cadencia ? `${c.cadencia} ${c.cadencia === 1 ? 'mês' : 'meses'}` : c.n <= 1 ? 'uma fatura' : 'irregular'),
-        h('td',{class:'sub', style:'white-space:nowrap'}, c.proxima ? `${ddmm(c.proxima)}/${c.proxima.slice(2, 4)}` : '–'),
-        h('td',{class:'n' + (c.semRecibo.length ? ' over' : '')}, c.semRecibo.length ? eur(c.semRecibo.reduce((t, d) => t + d.bruto, 0)) : ''),
-        h('td',{class:'n'}, c.abertos.length ? h('button',{type:'button', class:'lk', style:'font-size:14px;margin:0', onclick:() => openSheet(c.abertos[0].id)}, `${c.abertos.length} aberto${c.abertos.length > 1 ? 's' : ''}`) : c.pedidos.length ? h('span',{class:'sub'}, String(c.pedidos.length)) : ''),
-        h('td',null, botoesCliente(c)))))),
-      xs.length > vis.length ? h('p',{class:'note vis', style:'padding:10px 12px'}, `A mostrar ${vis.length} de ${xs.length}. Pesquisa para ver os outros.`) : null);
+    fill(box, vis.map(c => linhaCliente(c, ref)), xs.length > vis.length ? h('p',{class:'note vis', style:'padding:10px 12px'}, `A mostrar ${vis.length} de ${xs.length}. Pesquisa para ver os outros.`) : null);
   }
+  const verPedidosDe = c => { query = ''; F('q').value = ''; irPara('todos', '', {k: c.k, nome: c.nome}); };
+  const cliTexto = (campo, v) => v == null || v === '' ? 'vazio' : campo === 'prioridade' ? ((PRIO_CLI.find(p => p[0] === v) || [0, v])[1]) : campo === 'tipoCliente' ? ((TIPO_CLI.find(p => p[0] === v) || [0, v])[1]) : campo === 'proximoContacto' ? ddmm(v) : String(v);
+  // Guardar uma célula: só esse campo, com o valor que a pessoa via (se um colega o mudou entretanto, recusa), histórico e «Desfazer».
+  async function cliGuardar(x, alvo, valor, rotulo, antesTxt, depoisTxt, motivo) {
+    fechaPop();
+    if (!sb || !canWrite) return false;
+    const campo = alvo.extra ? 'extra.' + alvo.extra : alvo, antes = cliPega(x.cfg, campo);
+    let r;
+    try { r = await gravarCliente(x.k, {[campo]: valor}, {[campo]: antes == null ? null : antes}, `${rotulo}: ${antesTxt} → ${depoisTxt}${motivo ? ' (' + motivo + ')' : ''}`); }
+    catch (e) { toast(/permiss|row-level/.test(String(e && e.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar.'); return false; }
+    if (r === 'conflito') { toast(CLI_CONFLITO); carregar(); return false; }
+    renderClientes();
+    // «Desfazer» parte do valor que esta pessoa escreveu: se um colega o mudou entretanto, recusa.
+    toast(`${rotulo}: ${depoisTxt}`, {label:'Desfazer', fn: () => {
+      const agora = (cliUltima ? cliUltima.lista : []).find(z => z.k === x.k); if (!agora) return;
+      cliGuardar(Object.assign({}, agora, {cfg: cliAplica(JSON.parse(JSON.stringify(agora.cfg)), {[campo]: valor})}), alvo, antes, rotulo, depoisTxt, antesTxt, 'desfeito');
+    }});
+    return true;
+  }
+  function cliMenuSituacao(td, c) {
+    const itens = [];
+    if (canWrite) {
+      itens.push(['Contactado hoje', () => guardarCliente(c.k, {contactado: today()}, 'Contacto registado', null, 'Contactado'), 'ok']);
+      if (c.cfg.ignorar) itens.push(['Voltar a seguir', () => guardarCliente(c.k, {ignorar: false}, 'Volta a ser seguido', null, 'Voltou a ser seguido'), 'seta']);
+      else itens.push(['Ignorar', () => { if (window.confirm(`Deixar de seguir ${c.nome}? Deixa de aparecer na lista para contactar.`)) guardarCliente(c.k, {ignorar: true}, 'Deixou de ser seguido', null, 'Deixou de ser seguido'); }, 'x']);
+      itens.push(['Novo pedido', () => abrirNovoPara(c.nome), 'seta']);
+    }
+    if (c.abertos.length) itens.push([`Abrir o pedido em aberto${c.abertos.length > 1 ? ` (${c.abertos.length})` : ''}`, () => openSheet(c.abertos[0].id), 'lapis']);
+    itens.push(['Abrir a ficha', () => openFicha(c.k), 'lapis']);
+    abrePop(td, h('div',null, h('p',{class:'hint', style:'margin:4px 8px 6px;max-width:34ch'}, motivoTxt(c, cliUltima ? cliUltima.ref : dataRef())),
+      itens.map(([l, fn, ic]) => { const b = h('button',{type:'button', role:'menuitem', onclick:() => { fechaPop(); fn(); }}); b.innerHTML = IC[ic] || ''; b.appendChild(document.createTextNode(l)); return b; })), 'menu');
+  }
+  const TB_CLI_BASE = [
+    {id:'nome', nome:'Cliente', fixa:true}, {id:'situacao', nome:'Situação', fixa:true}, {id:'dono', nome:'Dono'}, {id:'prioridade', nome:'Prioridade'},
+    {id:'tipoCliente', nome:'Tipo'}, {id:'telefone', nome:'Telefone'}, {id:'email', nome:'Email'}, {id:'pedidos', nome:'Pedidos'},
+    {id:'valorAberto', nome:'Em aberto'}, {id:'total12', nome:'Faturado 12 meses'}, {id:'porCobrar', nome:'Por cobrar'}, {id:'ultima', nome:'Última fatura'},
+    {id:'proxima', nome:'Próxima visita'}, {id:'proximoContacto', nome:'Próximo contacto'}, {id:'contacto', nome:'Pessoa de contacto'}, {id:'localidade', nome:'Localidade'},
+    {id:'nif', nome:'NIF'}, {id:'morada', nome:'Morada'}, {id:'faturas', nome:'Faturas'}, {id:'ritmo', nome:'Ritmo'}, {id:'contactado', nome:'Contactado'}, {id:'notas', nome:'Notas'}];
+  const ddmmaa = d => d ? `${ddmm(d)}/${String(d).slice(2, 4)}` : '';
+  const TB_CLI = tbQuadro({
+    box: 'cliTabela', agrupar: 'cliAgrupar', estilo: 'tbLargCli', pre: 'kc-', chaveCfg: 'colunas_clientes',
+    ls: {larg: 'registo-larguras-cli', grupo: 'registo-agrupar-cli', fechados: 'registo-grupos-fechados-cli'},
+    base: TB_CLI_BASE, ocultasPadrao: ['contacto','localidade','nif','morada','faturas','ritmo','contactado','notas'], grupoPadrao: 'situacao',
+    agrupadoresBase: [['situacao','Situação'], ['dono','Dono'], ['prioridade','Prioridade'], ['tipoCliente','Tipo'], ['localidade','Localidade'], ['nenhum','Sem grupos']],
+    agrupaveis: ['situacao','dono','prioridade','tipoCliente','localidade'], num: ['pedidos','valorAberto','total12','porCobrar','faturas'], dinheiro: [],
+    textos: {um: 'cliente', varios: 'clientes', add: '+ Adicionar cliente', apagar: 'Os valores ficam guardados nas fichas mas deixam de se ver.'},
+    id: c => c.k,
+    nomeDe: c => c.nome,
+    extraDe: c => c.cfg.extra,
+    ler: (x, c) => c.extra ? (x.cfg.extra || {})[c.id] : x.cfg[c.id],
+    guardar: (x, alvo, valor, rotulo, antesTxt, depoisTxt, motivo) => cliGuardar(x, alvo, valor, rotulo, antesTxt, depoisTxt, motivo),
+    texto: (campo, v) => cliTexto(campo, v),
+    obrigatorio: () => null,
+    validar: (x, c, v) => {
+      if (c.id === 'email' && !/^\S+@\S+\.\S+$/.test(v)) return 'O email não parece certo.';
+      if (c.id === 'nif' && !/^\d{9}$/.test(String(v))) return 'O NIF tem 9 algarismos, sem espaços.';
+      if (c.id === 'telefone' && String(v).replace(/\D/g, '').length < 9) return 'O telefone tem pelo menos 9 algarismos.';
+      return null;
+    },
+    aviso: (x, c) => c.id === 'localidade' && !x.cfg.localidade && x.localidadeAuto ? `Vazio usa «${x.localidadeAuto}» (da morada ou dos pedidos).` : null,
+    vazio: () => cliUltima && cliUltima.lista.length ? 'Nenhum cliente com estes filtros.' : 'Ainda não há clientes. Junta os SAF-T em Faturação ou adiciona um cliente.',
+    classeLinha: c => c.estado === 'ignorado' ? ' fechado' : '',
+    fechadoPadrao: (q, k) => q.grupo === 'situacao' && k === 'ignorado',
+    grupoDe: c => {
+      const g = TB_CLI.grupo, f = c.cfg;
+      if (g === 'situacao') return {k: c.estado, nome: MOTIVO[c.estado], cor: TOM_MOTIVO[c.estado], ordem: CLI_SIT_ORD.indexOf(c.estado)};
+      if (g === 'dono') return {k: f.dono || '', nome: f.dono || 'Sem dono', cor: 'var(--accent)', ordem: f.dono ? 0 : 1};
+      if (g === 'prioridade') { const i = PRIO_CLI.findIndex(p => p[0] === f.prioridade); return {k: i >= 0 ? f.prioridade : '', nome: i >= 0 ? PRIO_CLI[i][1] : 'Sem prioridade', cor: i >= 0 ? PRIO_CLI[i][2] : 'var(--muted)', ordem: i >= 0 ? i : 99}; }
+      if (g === 'tipoCliente') { const i = TIPO_CLI.findIndex(p => p[0] === f.tipoCliente); return {k: i >= 0 ? f.tipoCliente : '', nome: i >= 0 ? TIPO_CLI[i][1] : 'Sem tipo', cor: 'var(--copper)', ordem: i >= 0 ? i : 99}; }
+      if (g === 'localidade') return {k: norm(c.localidade || ''), nome: c.localidade || 'Sem localidade', cor: 'var(--info)', ordem: c.localidade ? 0 : 1};
+      return {k: '', nome: 'Todos os clientes', cor: 'var(--accent)', ordem: 0};
+    },
+    celula: (x, c) => {
+      const f = x.cfg, Q = TB_CLI, txt = (id, nome, tipo, classe) => tbTd(f[id] || '', td => tbEditarTexto(Q, td, x, {id, nome}, tipo || 'text'), classe);
+      switch (c.id) {
+        case 'nome': return h('td',{class:'tb-c tb-cli'}, canWrite && Q.arrastavel() ? h('span',{class:'tb-pega', title:'Arrastar para outro grupo', 'aria-hidden':'true'}, '⠿') : null,
+          h('button',{type:'button', onclick:() => openFicha(x.k)}, x.nome), x.contrato ? h('span',{class:'tag-conf'}, 'contrato') : null);
+        case 'situacao': return h('td',{class:'tb-c tb-estado tb-ed', title: motivoTxt(x, cliUltima ? cliUltima.ref : dataRef()), onclick: ev => cliMenuSituacao(ev.currentTarget, x)}, tbPill(MOTIVO_CURTO[x.estado], TOM_MOTIVO[x.estado], 'cheia'));
+        case 'dono': return tbTd(f.dono ? h('span',{class:'tb-dono'}, h('i',null, iniciais(f.dono)), f.dono) : '', td => tbEscolher(Q, td, x, {id:'dono', nome:'Dono'}, donosConhecidos().map(d => [d, d]).concat([['', 'Sem dono']])));
+        case 'prioridade': { const p = PRIO_CLI.find(z => z[0] === f.prioridade); return tbTd(p ? tbPill(p[1], p[2], 'cheia') : '', td => tbEscolher(Q, td, x, {id:'prioridade', nome:'Prioridade'}, PRIO_CLI.map(z => [z[0], z[1], z[2]]).concat([['', 'Limpar']])), 'tb-estado'); }
+        case 'tipoCliente': { const t = TIPO_CLI.find(z => z[0] === f.tipoCliente); return tbTd(t ? tbPill(t[1], 'var(--copper)') : '', td => tbEscolher(Q, td, x, {id:'tipoCliente', nome:'Tipo'}, TIPO_CLI.concat([['', 'Limpar']]))); }
+        case 'telefone': return txt('telefone', 'Telefone', 'tel');
+        case 'email': return txt('email', 'Email', 'email');
+        case 'contacto': return txt('contacto', 'Pessoa de contacto');
+        case 'nif': return txt('nif', 'NIF');
+        case 'morada': return txt('morada', 'Morada');
+        case 'notas': return txt('notas', 'Notas', 'text', 'tb-notas');
+        case 'localidade': return tbTd(f.localidade ? f.localidade : x.localidadeAuto ? h('span',{class:'tb-padrao'}, x.localidadeAuto) : '', td => tbEditarTexto(Q, td, x, {id:'localidade', nome:'Localidade'}, 'text'));
+        case 'proximoContacto': return tbTd(f.proximoContacto ? ddmm(f.proximoContacto) : '', td => tbEditarTexto(Q, td, x, {id:'proximoContacto', nome:'Próximo contacto'}, 'date'), f.proximoContacto && f.proximoContacto < today() ? 'tb-late' : '');
+        case 'pedidos': return h('td',{class:'tb-c num'}, x.pedidos.length ? h('button',{type:'button', class:'tb-lig', title:'Ver os pedidos deste cliente', onclick:() => verPedidosDe(x)}, x.abertos.length ? `${x.abertos.length} ${x.abertos.length === 1 ? 'aberto' : 'abertos'} · ${x.pedidos.length}` : String(x.pedidos.length)) : '');
+        case 'valorAberto': return h('td',{class:'tb-c num'}, x.valorAberto ? eur(x.valorAberto) : '');
+        case 'total12': return h('td',{class:'tb-c num'}, x.total12 ? eur(x.total12) : '');
+        case 'porCobrar': return h('td',{class:'tb-c num' + (x.estado === 'cobrar' ? ' tb-late' : '')}, x.porCobrar ? eur(x.porCobrar) : '');
+        case 'ultima': return h('td',{class:'tb-c'}, ddmmaa(x.ultima));
+        case 'proxima': return h('td',{class:'tb-c' + (x.proxima && x.proxima < today() ? ' tb-late' : '')}, ddmmaa(x.proxima));
+        case 'faturas': return h('td',{class:'tb-c num'}, x.n ? String(x.n) : '');
+        case 'ritmo': return h('td',{class:'tb-c'}, x.cadencia ? `${x.cadencia} em ${x.cadencia} ${x.cadencia === 1 ? 'mês' : 'meses'}` : '');
+        case 'contactado': return h('td',{class:'tb-c'}, ddmmaa(x.contactado));
+      }
+      return null;
+    },
+    // Totais: barra das situações, pedidos abertos e as somas de dinheiro.
+    totais: g => {
+      const soma = f => g.xs.reduce((t, c) => t + (Number(f(c)) || 0), 0);
+      const ab = soma(c => c.valorAberto), t12 = soma(c => c.total12), pc = soma(c => c.porCobrar), nAb = soma(c => c.abertos.length);
+      const por = {}; g.xs.forEach(c => { por[c.estado] = (por[c.estado] || 0) + 1; });
+      const bat = h('span',{class:'tb-bat', title: Object.keys(por).map(e => `${MOTIVO[e]}: ${por[e]}`).join('\n')},
+        Object.keys(por).map(e => h('i',{style:`background:${TOM_MOTIVO[e]};width:${(100 * por[e] / g.xs.length).toFixed(1)}%`})));
+      return {resumo: t12 ? ` · ${eur(t12)} em 12 meses` : '',
+        celula: c => c.id === 'situacao' ? bat : c.id === 'pedidos' ? (nAb ? `${nAb} ${nAb === 1 ? 'aberto' : 'abertos'}` : '') : c.id === 'valorAberto' ? (ab ? eur(ab) : '') : c.id === 'total12' ? (t12 ? eur(t12) : '') : c.id === 'porCobrar' ? (pc ? eur(pc) : '') : ''};
+    },
+    podeAdicionar: () => ['nenhum','dono','prioridade','tipoCliente'].indexOf(TB_CLI.grupo) >= 0,
+    adicionar: k => { const g = TB_CLI.grupo, base = {}; if (k && g !== 'nenhum') base[g] = k; openFicha(null, null, base); },
+    // Arrastar: por Dono, Prioridade, Tipo ou coluna da equipa muda logo, com histórico e «Desfazer». A Situação e a
+    // Localidade vêm das faturas e da morada: não se arrastam.
+    arrastavel: () => { const g = TB_CLI.grupo; return ['dono','prioridade','tipoCliente'].indexOf(g) >= 0 || g.indexOf('x:') === 0; },
+    alvosLinha: (x, chaves) => { const atual = tbGrupoDe(TB_CLI, x).k, ok = {}; chaves.forEach(k => { if (k !== atual) ok[k] = true; }); return ok; },
+    largou: (x, k) => {
+      const g = TB_CLI.grupo;
+      if (g.indexOf('x:') === 0) {
+        const c = tbCfg(TB_CLI).extra.find(z => z.id === g.slice(2)); if (!c) return;
+        const antes = (x.cfg.extra || {})[c.id];
+        cliGuardar(x, {extra: c.id}, k || null, c.nome, antes || 'vazio', k || 'vazio');
+      } else {
+        const nome = {dono:'Dono', prioridade:'Prioridade', tipoCliente:'Tipo'}[g];
+        cliGuardar(x, g, k || null, nome, cliTexto(g, x.cfg[g]), cliTexto(g, k));
+      }
+    },
+  });
 
   /* ---------- Ficha do cliente (o «Contactos» do Odoo): dados, equipamentos, contrato e todo o histórico ---------- */
   const EQUIP_TIPOS = ['Split', 'Multi-split', 'Cassete', 'Conduta', 'VRF', 'Bomba de calor AQS', 'Chiller', 'Ventilação', 'Quadro elétrico', 'Outro'];
-  function openFicha(k, nomeNovo) {
-    fichaKey = k || null; currentId = null; modo = 'ficha'; trans = null; dadosAberto = false;
+  function openFicha(k, nomeNovo, base) {
+    fichaBase = base || null; fichaKey = k || null; currentId = null; modo = 'ficha'; trans = null; dadosAberto = false;
     if (k && !fichas[k] && nomeNovo) fichas[k] = {nome: nomeNovo, _novo: true};
     F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); setTimeout(() => F('btnClose').focus(), 30);
   }
@@ -3094,7 +3351,7 @@ if (!Element.prototype.replaceChildren) {
     let c = fichaKey ? todos.lista.find(x => x.k === fichaKey) : null;
     const novo = !fichaKey;
     if (!c) c = {k: fichaKey, nome: (fichas[fichaKey] && fichas[fichaKey].nome) || '', docs: [], pedidos: [], semRecibo: [], abertos: [], orcSemResposta: [], motivos: [], estado: 'ativo', cfg: fichas[fichaKey] || {}, ficha: fichas[fichaKey] || null, n: 0, total12: 0, cadencia: null, proxima: null, ultima: null, contactado: null};
-    const f = c.cfg || {};
+    const f = novo && fichaBase ? fichaBase : (c.cfg || {});
     F('sheetTitle').textContent = novo ? 'Novo cliente' : c.nome;
     F('sheetSub').textContent = novo ? 'Ficha do cliente' : [f.nif ? 'NIF ' + f.nif : null, f.telefone, f.email].filter(Boolean).join(' · ') || 'Ficha do cliente';
     const ref = todos.ref;
@@ -3107,7 +3364,7 @@ if (!Element.prototype.replaceChildren) {
     if (!novo) {
       blocos.push(h('div',{class:'status'}, h('span',{class:`cli-tag m-${c.estado}`}, MOTIVO[c.estado]), h('span',{class:'bola'}, motivoTxt(c, ref)), c.contactado ? h('span',{class:'bola'}, `· contactado a ${ddmm(c.contactado)}`) : null));
       blocos.push(h('div',{class:'kpis', style:'grid-template-columns:repeat(2,minmax(0,1fr))'},
-        smart('Pedidos', String(c.pedidos.length), c.abertos.length ? `${c.abertos.length} em aberto` : 'nenhum em aberto', c.pedidos.length ? () => { closeSheet(); query = c.nome; F('q').value = c.nome; irPara('todos'); } : null),
+        smart('Pedidos', String(c.pedidos.length), c.abertos.length ? `${c.abertos.length} em aberto` : 'nenhum em aberto', c.pedidos.length ? () => { closeSheet(); verPedidosDe(c); } : null),
         smart('Faturas', String(fts.length), fts.length ? `${eur(c.total12)} em 12 meses` : 'sem faturas nos SAF-T', fts.length ? () => { closeSheet(); fatQ = c.nome; F('fatQ').value = c.nome; fatMes = ''; setTab('faturacao'); renderFatDocs(); } : null),
         smart('Por cobrar', c.semRecibo.length ? eur(c.semRecibo.reduce((t, d) => t + d.bruto, 0)) : '0 €', c.semRecibo.length ? `${c.semRecibo.length} ${c.semRecibo.length === 1 ? 'fatura' : 'faturas'} sem recibo` : 'tudo recebido', null),
         smart('Equipamentos', String(equip.length), c.cadencia ? `manutenção de ${c.cadencia} em ${c.cadencia} meses` : c.proxima ? `próxima visita ${ddmm(c.proxima)}/${c.proxima.slice(2, 4)}` : 'sem ritmo conhecido', null)));
@@ -3126,6 +3383,10 @@ if (!Element.prototype.replaceChildren) {
       campo('c-email','Email', inp('c-email', f.email, {type:'email'})),
       campo('c-contacto','Pessoa de contacto', inp('c-contacto', f.contacto)),
       campo('c-morada','Morada', inp('c-morada', f.morada)),
+      campo('c-dono','Dono', sel('c-dono', donosConhecidos().concat(f.dono && donosConhecidos().indexOf(f.dono) < 0 ? [f.dono] : []).map(d => [d, d]), f.dono, 'Sem dono')),
+      campo('c-prio','Prioridade', sel('c-prio', PRIO_CLI.map(z => [z[0], z[1]]), f.prioridade, 'Sem prioridade')),
+      campo('c-prox','Próximo contacto', inp('c-prox', f.proximoContacto, {type:'date'})),
+      campo('c-local','Localidade', inp('c-local', f.localidade, {placeholder: c.localidadeAuto || ''}), c.localidadeAuto && !f.localidade ? `Vazio usa «${c.localidadeAuto}».` : null),
       campo('c-notas','Notas', h('textarea',{id:'c-notas'}, f.notas || ''), 'Acessos, horários, preferências de marca, o que for útil a quem lá vai.', true));
     // Contrato
     const ct = f.contrato || {};
@@ -3137,7 +3398,7 @@ if (!Element.prototype.replaceChildren) {
       campo('ct-valor','Valor anual s/IVA (€)', inp('ct-valor', ct.valor != null ? String(ct.valor).replace('.', ',') : '', {inputmode:'decimal'})));
     // Equipamentos
     const eqRows = equip.map((e, i) => h('tr',null, h('td',null, e.tipo || ''), h('td',null, [e.marca, e.modelo].filter(Boolean).join(' ')), h('td',{class:'sub'}, e.local || ''), h('td',{class:'sub', style:'white-space:nowrap'}, e.instaladoEm ? `${ddmm(e.instaladoEm)}/${e.instaladoEm.slice(2, 4)}` : ''),
-      h('td',null, canWrite ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => guardarCliente(c.k, {equipamentos: equip.filter((_, j) => j !== i)}, 'Equipamento retirado')}, 'Tirar') : null)));
+      h('td',null, canWrite ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => guardarCliente(c.k, {equipamentos: equip.filter((_, j) => j !== i)}, 'Equipamento retirado', {equipamentos: f.equipamentos || null}, `Equipamento retirado: ${[e.tipo, e.marca, e.modelo].filter(Boolean).join(' ')}`)}, 'Tirar') : null)));
     const eqForm = canWrite ? h('div',{class:'fields', style:'margin-top:10px'},
       campo('e-tipo','Tipo', sel('e-tipo', EQUIP_TIPOS.map(t => [t, t]), 'Split')), campo('e-marca','Marca', inp('e-marca', '', {placeholder:'Mitsubishi Electric, Daikin, Midea…'})),
       campo('e-modelo','Modelo', inp('e-modelo', '')), campo('e-local','Onde está', inp('e-local', '', {placeholder:'sala, 1.º andar, cobertura'})),
@@ -3145,7 +3406,7 @@ if (!Element.prototype.replaceChildren) {
       h('div',{class:'f', style:'justify-content:flex-end'}, h('button',{class:'btn btn-ghost', type:'button', onclick:() => {
         const e = {tipo: val('e-tipo'), marca: val('e-marca') || null, modelo: val('e-modelo') || null, local: val('e-local') || null, instaladoEm: val('e-data') || null};
         if (!e.marca && !e.modelo && !e.local) { toast('Indica pelo menos a marca, o modelo ou onde está.'); return; }
-        guardarCliente(c.k, {equipamentos: [...equip, e]}, 'Equipamento juntado');
+        guardarCliente(c.k, {equipamentos: [...equip, e]}, 'Equipamento juntado', {equipamentos: f.equipamentos || null}, `Equipamento juntado: ${[e.tipo, e.marca, e.modelo].filter(Boolean).join(' ')}`);
       }}, 'Juntar equipamento'))) : null;
     const equipBloco = h('div',{class:'block'}, h('h3',null, 'Equipamentos instalados'),
       equip.length ? h('div',{class:'tw'}, h('table',null, h('thead',null, h('tr',null, h('th',null,'Tipo'), h('th',null,'Marca e modelo'), h('th',null,'Onde'), h('th',null,'Instalado'), h('th',null,''))), h('tbody',null, eqRows))) : h('p',{class:'hint'}, 'Ainda sem equipamentos registados. As faturas de instalação dizem o que lá está; junta-os aqui para a manutenção saber o que vai encontrar.'),
@@ -3162,11 +3423,26 @@ if (!Element.prototype.replaceChildren) {
       const k = fichaKey || chaveCli(nome); if (!k) { toast('Nome inválido.'); return; }
       const per = val('ct-per'), valor = parseValor(val('ct-valor'));
       if (per && !/^\d+$/.test(per)) { toast('A periodicidade é um número de meses.'); return; }
-      const patch = {nome, nif: val('c-nif') || null, tipoCliente: val('c-tipo') || null, telefone: val('c-tel') || null, email: val('c-email') || null, contacto: val('c-contacto') || null, morada: val('c-morada') || null, notas: val('c-notas') || null,
-        contrato: {tipo: val('ct-tipo'), periodicidade: per ? Number(per) : null, inicio: val('ct-ini') || null, fim: val('ct-fim') || null, valor: Number.isNaN(valor) ? null : valor}};
-      if (!fichaKey) { fichaKey = k; fichas[k] = fichas[k] || {}; }
-      if (fichas[k]) delete fichas[k]._novo;
-      await guardarCliente(k, patch, 'Ficha guardada');
+      // Cliente novo com o nome de um que já existe (do SAF-T, do registo ou de um colega): abre esse em vez de lhe escrever por cima.
+      if (novo && ((fichas[k] && !fichas[k]._novo) || cfgClientes[k] || (cliUltima || clientes()).lista.some(x => x.k === k))) { toast('Já existe um cliente com este nome: abri a ficha dele.'); openFicha(k); return; }
+      const email = val('c-email'), nif = val('c-nif');
+      const ctDe = o => ({tipo: o.tipo || 'nenhum', periodicidade: o.periodicidade || null, inicio: o.inicio || null, fim: o.fim || null, valor: o.valor == null ? null : o.valor});
+      const todos = {nome, nif: nif ? nif.replace(/\s/g, '') : null, tipoCliente: val('c-tipo') || null, telefone: val('c-tel') || null, email: email || null, contacto: val('c-contacto') || null, morada: val('c-morada') || null, notas: val('c-notas') || null,
+        dono: val('c-dono') || null, prioridade: val('c-prio') || null, proximoContacto: val('c-prox') || null, localidade: val('c-local') || null,
+        contrato: ctDe({tipo: val('ct-tipo'), periodicidade: per ? Number(per) : null, inicio: val('ct-ini') || null, fim: val('ct-fim') || null, valor: Number.isNaN(valor) ? null : valor})};
+      // Só os campos que mudaram, com o valor que a ficha mostrava: assim não apaga o que um colega mudou noutro campo.
+      // Num cliente novo compara com uma ficha vazia, para os valores do grupo (dono, prioridade, tipo) também irem.
+      const antes = novo ? {contrato: ctDe({})} : Object.assign({}, f, {contrato: ctDe(f.contrato || {})});
+      const patch = {}, vistos = {};
+      for (const x of Object.keys(todos)) if (cliNorm(todos[x]) !== cliNorm(antes[x])) { patch[x] = todos[x]; vistos[x] = novo ? null : f[x]; }
+      if (!novo && !Object.keys(patch).length) { toast('Nada mudou.'); return; }
+      // Só se verifica o que mudou: um valor antigo (do SAF-T, por exemplo) não impede de guardar outro campo.
+      if (patch.email && !/^\S+@\S+\.\S+$/.test(patch.email)) { toast('O email não parece certo.'); return; }
+      if (patch.nif && !/^\d{9}$/.test(patch.nif)) { toast('O NIF tem 9 algarismos.'); return; }
+      if (['nome', 'contacto', 'morada', 'notas', 'localidade'].some(x => /[—–]/.test(patch[x] || ''))) { toast('Sem travessões: usa vírgulas ou parênteses.'); return; }
+      if (!fichaKey) fichaKey = k;
+      const nomes = {nome:'Nome', nif:'NIF', tipoCliente:'Tipo', telefone:'Telefone', email:'Email', contacto:'Pessoa de contacto', morada:'Morada', notas:'Notas', contrato:'Contrato', dono:'Dono', prioridade:'Prioridade', proximoContacto:'Próximo contacto', localidade:'Localidade'};
+      await guardarCliente(k, patch, 'Ficha guardada', vistos, novo ? 'Ficha criada' : `Ficha: ${Object.keys(patch).map(x => nomes[x]).join(', ')}`);
     };
     fill(body, blocos,
       h('div',{class:'block'}, h('h3',null, 'Dados'), h('fieldset',{disabled: !canWrite}, dados)),
@@ -3178,8 +3454,13 @@ if (!Element.prototype.replaceChildren) {
   }
   F('btnNovoCliente').addEventListener('click', () => openFicha(null));
 
-  F('cliEstado').addEventListener('change', e => { cliEstado = e.target.value; renderClientes(); });
-  F('cliQ').addEventListener('input', e => { cliQ = e.target.value; renderClientes(); });
+  F('cliEstado').addEventListener('change', e => { cliEstado = e.target.value; renderContactos(); });
+  F('cliQ').addEventListener('input', e => { cliQ = e.target.value; renderContactos(); });
+  F('btnCliCSV').addEventListener('click', () => baixarCSV(gerarCSVClientes(cliFiltrados()), `clientes-mdm-${today()}.csv`));
+  tbLigar(TB_CLI);
+  // Ao rodar o aparelho ou mudar a largura (Split View do iPad): troca a tabela pelos cartões e vice-versa.
+  // (No iOS 12 a MediaQueryList só tem addListener.)
+  if (window.matchMedia) { const mq = window.matchMedia('(min-width:768px)'); if (mq.addListener) mq.addListener(() => { if (tab === 'contactos') renderContactos(); }); }
 
 
   /* ---------- Pipeline: fugas, os nove passos e o funil ---------- */
@@ -3222,12 +3503,12 @@ if (!Element.prototype.replaceChildren) {
       ['Clientes a esfriar', 'passaram do seu ritmo sem nova fatura', conta('frio'), 'warn', () => irCli('frio')],
     ];
   }
-  const irCli = m => { cliEstado = m; F('cliEstado').value = m; cliMotivo = m; setTab('clientes'); renderClientes(); };
+  const irCli = m => { cliMotivo = m; setTab('clientes'); renderClientes(); };
 
   function renderPipeline(all) {
     const box = F('fugas');
     if (status !== 'ok') { box.replaceChildren(stateMsg()); F('fugasCount').textContent = ''; F('fugaBadge').textContent = ''; F('board').replaceChildren(); F('funil').replaceChildren(stateMsg()); return; }
-    const cli = clientes();
+    const cli = cliUltima || clientes();
     const lista = fugas(all, cli);
     const total = lista.reduce((t, f) => t + f[2], 0), graves = lista.filter(f => f[3] === 'bad').reduce((t, f) => t + f[2], 0);
     F('fugasCount').textContent = total ? `${total} ${total === 1 ? 'coisa' : 'coisas'} a tratar` : 'nada a tratar';
@@ -3565,7 +3846,8 @@ if (!Element.prototype.replaceChildren) {
     const n = rows.length;
     fill(box,
       h('p',{class:'note', style:'margin:0'}, 'Descarrega todos os pedidos em CSV (abre no Excel e no Google Sheets, separador vírgula, valores com vírgula decimal). Abertos primeiro, pela ordem da triagem; depois os fechados.'),
-      h('div',{class:'row-end'}, h('button',{class:'btn', type:'button', disabled: status !== 'ok' || !n, onclick: descarregarCSV}, `Exportar CSV (${n})`)));
+      h('div',{class:'row-end'}, h('button',{class:'btn', type:'button', disabled: status !== 'ok' || !n, onclick: descarregarCSV}, `Exportar CSV (${n})`),
+        h('button',{class:'btn btn-ghost', type:'button', disabled: status !== 'ok' || !cliUltima, onclick:() => baixarCSV(gerarCSVClientes(cliUltima.lista), `clientes-mdm-${today()}.csv`)}, `Exportar clientes (${cliUltima ? cliUltima.lista.length : 0})`)));
   }
   function renderEquipa() {
     const box = F('equipa');
@@ -3574,13 +3856,30 @@ if (!Element.prototype.replaceChildren) {
       h('tbody',null, equipa.map(c => h('tr',null, h('td',null, c.nome || ''), h('td',{class:'sub'}, c.email))))),
       h('p',{class:'note', style:'padding:10px 12px'}, 'Para dar acesso a mais alguém: criar a conta em Supabase, Authentication, Users, e juntar o email à tabela colaboradores.'));
   }
-  function descarregarCSV() {
-    const blob = new Blob(['\ufeff' + gerarCSV()], {type:'text/csv;charset=utf-8'});
+  function descarregarCSV() { baixarCSV(gerarCSV(), `registo-mdm-${today()}.csv`); }
+  // O Safari do iOS 12 não conhece «download»: abre o ficheiro numa janela nova em vez de sair da página.
+  function baixarCSV(texto, nome) {
+    const blob = new Blob(['\ufeff' + texto], {type:'text/csv;charset=utf-8'}), url = URL.createObjectURL(blob);
+    if (!('download' in HTMLAnchorElement.prototype)) { window.open(url, '_blank'); setTimeout(() => URL.revokeObjectURL(url), 60000); return; }
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = `registo-mdm-${today()}.csv`;
+    a.href = url; a.download = nome;
     document.body.append(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
     toast('CSV descarregado');
+  }
+  // Texto que começa por + - = @ (telefones «+351…», notas «- …») seria lido como fórmula no Excel: leva uma plica antes.
+  const csvTxt = v => csvCell(v != null && /^[=+\-@]/.test(String(v)) ? "'" + v : v);
+  function gerarCSVClientes(lista) {
+    const ext = tbCfg(TB_CLI).extra;
+    const cab = ['Cliente','Situação','Motivo','Tipo','Dono','Prioridade','Pessoa de contacto','Telefone','Email','NIF','Morada','Localidade','Próximo contacto','Contactado em','Contrato','Ritmo (meses)','Próxima visita','Faturas','Faturado 12 meses s/IVA','Última fatura','Por cobrar c/IVA','Pedidos','Pedidos abertos','Valor em aberto s/IVA','Notas', ...ext.map(c => c.nome)];
+    const ref = cliUltima ? cliUltima.ref : dataRef();
+    const tx = v => ({tx: v});
+    const linhas = lista.map(c => { const f = c.cfg; return [
+      tx(c.nome), MOTIVO[c.estado], motivoTxt(c, ref), cliTexto('tipoCliente', f.tipoCliente).replace(/^vazio$/, ''), tx(f.dono), cliTexto('prioridade', f.prioridade).replace(/^vazio$/, ''), tx(f.contacto), tx(f.telefone), tx(f.email), tx(f.nif), tx(f.morada), tx(c.localidade),
+      f.proximoContacto, c.contactado, c.contrato ? 'Sim' : '', c.cadencia || '', c.proxima, c.n, dec(c.total12), c.ultima, dec(c.porCobrar), c.pedidos.length, c.abertos.length, dec(c.valorAberto), tx(f.notas),
+      ...ext.map(z => { const v = (f.extra || {})[z.id]; return z.tipo === 'caixa' ? (v ? 'Sim' : '') : z.tipo === 'numero' && v != null && v !== '' ? String(v).replace('.', ',') : tx(v); }),
+    ].map(v => v && typeof v === 'object' && 'tx' in v ? csvTxt(v.tx) : typeof v === 'number' ? `"${v}"` : csvCell(v)).join(','); });
+    return [cab.map(csvCell).join(','), ...linhas].join('\n') + '\n';
   }
 
   /* ---------- Folha na Drive ---------- */
@@ -3605,7 +3904,7 @@ if (!Element.prototype.replaceChildren) {
     F('nextNum').textContent = status === 'ok' ? nextNumber() : 'ORC…';
     const verm = all.filter(x => x.sem === 'vermelho').length;
     F('redBadge').textContent = verm ? String(verm) : '';
-    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderExport(); renderEquipa(); renderFaturacao(); renderClientes(); renderPipeline(all); renderSeg(); renderSegCfg(); renderAgenda(); renderAgCfg(); renderInicio(all); renderProb(); renderDash(); renderObjCfg();
+    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderEquipa(); renderFaturacao(); renderClientes(); renderExport(); renderPipeline(all); renderSeg(); renderSegCfg(); renderAgenda(); renderAgCfg(); renderInicio(all); renderProb(); renderDash(); renderObjCfg();
     F('btnNovoTop').hidden = F('railNovo').hidden = F('btnNovoCliente').hidden = !(canWrite && status === 'ok');
     // Não redesenha a folha aberta enquanto há um formulário a meio.
     if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
@@ -5378,6 +5677,7 @@ if (!Element.prototype.replaceChildren) {
   const abrirNovo = () => { currentId = null; modo = 'novo'; trans = null; F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); };
   F('btnNovoTop').addEventListener('click', abrirNovo); F('railNovo').addEventListener('click', abrirNovo);
   F('q').addEventListener('input', e => { query = e.target.value; renderLista(status === 'ok' ? enriquecidos() : []); });
+  F('fCliChip').addEventListener('click', () => { fCli = null; renderAll(); });
   F('fDono').addEventListener('change', e => { dono = e.target.value; renderAll(); });
   F('fEstado').addEventListener('change', e => { fEstado = e.target.value; renderAll(); });
   F('fOrdem').addEventListener('change', e => { fOrdem = e.target.value; renderAll(); });
@@ -5412,10 +5712,10 @@ if (!Element.prototype.replaceChildren) {
       ]);
       if (p.error) throw p.error;
       rows = p.data.map(r => ({id: r.id, ...r.dados, _versao: r.versao}));
-      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') cfgColunas = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
+      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') TB_PED.cfg = x.valor || null; if (x.chave === 'colunas_clientes') TB_CLI.cfg = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
       if (ft.error) { if (/relation|does not exist|schema cache/i.test(ft.error.message || '')) fatTabela = false; }
       else { fatTabela = true; const novo = {}; for (const x of ft.data) if (x.dados && x.dados.mes) novo[x.dados.mes] = x.dados; faturacao = novo; if (!faturacao[fatMes]) fatMes = ''; }
-      if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) fichaTabela = false; }
+      if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) { fichaTabela = false; const novo = {}; for (const id of Object.keys(fichas)) if (fichas[id]._novo) novo[id] = fichas[id]; fichas = novo; } }
       else { fichaTabela = true; const novo = {}; for (const x of fc.data) novo[x.id] = {...x.dados, _versao: x.versao}; fichas = novo; }
       if (!q.error) { equipa = q.data; const m = equipa.find(x => x.email === (eu && eu.email)); if (m && m.nome) eu.nome = m.nome; }
       status = 'ok'; renderAll();

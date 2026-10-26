@@ -38,4 +38,7 @@ website/registo/supabase/dados*.sql
 
 # Ficheiros SAF-T da faturação (dados reais de clientes): nunca entram no repositório
 DadosFat_*.xml
+# CSV descarregados do registo (pedidos e clientes, com dados pessoais).
+registo-mdm-*.csv
+clientes-mdm-*.csv
 *.saft.xml
