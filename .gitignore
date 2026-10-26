@@ -41,4 +41,7 @@ DadosFat_*.xml
 # CSV descarregados do registo (pedidos e clientes, com dados pessoais).
 registo-mdm-*.csv
 clientes-mdm-*.csv
+# PDF dos orçamentos do registo (dados de clientes): guardam-se fora do repositório.
+Orcamento*.pdf
+Orçamento*.pdf
 *.saft.xml
