@@ -481,7 +481,7 @@ test('as fotografias: original, tamanhos, prévias e texto alternativo', () => {
   assert.match(/<picture class="foto"[^>]*><source type="image\/avif" srcset="[^"]*foto-02-[^"]*" sizes="([^"]*)"/.exec(t)[1], /\(min-width: 981px\) min\(360px, calc\(\(100vw - 64px\) \* \.33\)\), calc\(100vw - 64px\)$/, 'Porquê Nós: sizes da moldura (4:3)');
   // os cartões: 579 px (duas colunas a partir de 981), uma coluna até lá. No telemóvel, em obras.html e nas outras obras,
   // a fotografia fica numa moldura 4/3 (deitada) ou 4/5 (ao alto) e uma mais deitada do que a moldura pede a largura ×
-  // (a sua proporção / a da moldura) (foto-05, 1080 × 620 em 4/3: × 1,306); nas obras em destaque da página inicial o
+  // (a sua proporção / a da moldura) (foto-05, 1080 × 610 em 4/3: × 1,328); nas obras em destaque da página inicial o
   // cartão tem 280 px de altura e as mais deitadas do que ele pedem 280 px × a sua proporção
   const F = Object.fromEntries(FOTOS);
   const obras = le('obras.html'), casa = le('index.html');
@@ -678,6 +678,23 @@ test('os ícones: icones.svg em linha com {{icone nome}}, sem os glifos → ≡ 
     assert.equal(r.status, 1, 'glifo antigo: sai com 1');
     assert.match(r.stdout, /404\.html: glifo que passou a ícone/);
   } finally { fs.rmSync(d, { recursive: true, force: true }); }
+});
+
+test('o --check confere o tamanho dos JPEG: o original de cada fotografia o de fotos.json, a imagem de partilha o do og:image', () => {
+  // a foto-05 perdeu a faixa preta de cima (1080 × 620 → 1080 × 610): um fotos.json por mudar dava os sizes da
+  // proporção antiga e deixava os tamanhos velhos; e uma imagem de partilha de outro tamanho do que o og:image anuncia
+  const F = Object.fromEntries(FOTOS)['05'];
+  const c = geraCopia(d => {
+    mudaJson(d, 'data/fotos.json', j => { j['05'].h += 10; });
+    const og = path.join(d, 'assets/img/og-melperfaz.jpg');
+    fs.unlinkSync(og);   // a ligação simbólica da cópia, não o ficheiro
+    fs.copyFileSync(path.join(W, 'assets/img/fotos/foto-05.jpg'), og);
+  });
+  try {
+    assert.equal(c.r.status, 1, c.r.stdout);
+    assert.ok(c.r.stdout.includes(`assets/img/fotos/foto-05.jpg mede ${F.w}×${F.h}, mas data/fotos.json diz ${F.w}×${F.h + 10}: depois de um corte, mudar o fotos.json e refazer os tamanhos (python3 gerar_fotos.py --todas 05)`), c.r.stdout);
+    assert.match(c.r.stdout, /assets\/img\/og-melperfaz\.jpg: tem de ser um JPEG de 1200×630, o tamanho que o og:image anuncia \(python3 gerar_fotos\.py --partilha\)/);
+  } finally { fs.rmSync(c.d, { recursive: true, force: true }); }
 });
 
 test('o --check falha com uma ligação partida e com um travessão', () => {

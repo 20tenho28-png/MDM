@@ -152,7 +152,7 @@ def campos_obra(o):
     # o cartão (obra-foto.html): duas colunas de 579 px a partir de 981 px (a .wrap de 1176 px menos 18 de intervalo),
     # uma coluna até lá. Até 640 px o cartão tem a largura do ecrã menos 32 px e a fotografia fica numa moldura 4/3
     # (deitada) ou 4/5 (ao alto), com a legenda por baixo: uma fotografia mais deitada do que a moldura é cortada nos
-    # lados e precisa da largura da moldura × (a sua proporção / a da moldura) (foto-05, 1080 × 620 em 4/3: × 1,306).
+    # lados e precisa da largura da moldura × (a sua proporção / a da moldura) (foto-05, 1080 × 610 em 4/3: × 1,328).
     # As obras em destaque da página inicial ficam com a legenda por cima e 280 px de altura (--photo-row-1col): aí uma
     # fotografia mais deitada do que o cartão precisa de 280 px × a sua proporção (cartaoSizesDestaque)
     largas = "(min-width: 981px) min(calc(50vw - 41px), 579px), (min-width: 641px) calc(100vw - 64px)"
@@ -917,16 +917,37 @@ def check_preview():
     return out
 
 
+def tamanho_jpeg(p):
+    """(largura, altura) de um JPEG, lidas do cabeçalho do quadro (o marcador SOF); None se não for um JPEG."""
+    b = p.read_bytes()
+    if b[:2] != b"\xff\xd8":
+        return None
+    i = 2
+    while i + 9 <= len(b) and b[i] == 0xFF:
+        m = b[i + 1]
+        if m == 0xFF:                                  # bytes de enchimento antes do marcador
+            i += 1
+            continue
+        if 0xC0 <= m <= 0xCF and m not in (0xC4, 0xC8, 0xCC):
+            return int.from_bytes(b[i + 7:i + 9], "big"), int.from_bytes(b[i + 5:i + 7], "big")
+        i += 2 + int.from_bytes(b[i + 2:i + 4], "big")
+    return None
+
+
 def check_fotos():
-    """Cada fotografia de data/fotos.json tem o original e todos os tamanhos (gerar_fotos.py); nada vazio nem a meio."""
+    """Cada fotografia de data/fotos.json tem o original, do tamanho que lá diz, e todos os tamanhos (gerar_fotos.py);
+    nada vazio nem a meio. A imagem de partilha tem o tamanho de OG_IMG (o que o og:image anuncia)."""
     out, pasta = [], ASSETS / "img" / "fotos"
     for n, f in FOTOS.items():
         if not (pasta / f"foto-{n}.jpg").is_file():
             out.append(f"fotos.json «{n}»: falta assets/img/fotos/foto-{n}.jpg (o original)")
             continue
-        cab = (pasta / f"foto-{n}.jpg").read_bytes()[:2]
-        if cab != b"\xff\xd8":
+        tam = tamanho_jpeg(pasta / f"foto-{n}.jpg")
+        if tam is None:
             out.append(f"assets/img/fotos/foto-{n}.jpg: não é um JPEG")
+        elif tam != (f["w"], f["h"]):
+            out.append(f"assets/img/fotos/foto-{n}.jpg mede {tam[0]}×{tam[1]}, mas data/fotos.json diz {f['w']}×{f['h']}: "
+                       f"depois de um corte, mudar o fotos.json e refazer os tamanhos (python3 gerar_fotos.py --todas {n})")
         for lado in lados(n):
             for ext in ("avif", "webp"):
                 p = pasta / f"foto-{n}-{lado}.{ext}"
@@ -938,6 +959,10 @@ def check_fotos():
             out.append(f"fotos.json «{n}»: sem prévia em data/lqip.json (python3 gerar_fotos.py)")
     for p in pasta.glob("*.tmp"):
         out.append(f"{p.name}: sobra de uma gravação interrompida do gerar_fotos.py: apagar")
+    og = ASSETS / "img" / OG_IMG["src"]
+    if (tamanho_jpeg(og) if og.is_file() else None) != (OG_IMG["w"], OG_IMG["h"]):
+        out.append(f"assets/img/{OG_IMG['src']}: tem de ser um JPEG de {OG_IMG['w']}×{OG_IMG['h']}, o tamanho que o og:image "
+                   "anuncia (python3 gerar_fotos.py --partilha)")
     for p in sorted(pasta.glob("foto-*")):
         n = re.match(r"foto-(\d+)", p.name).group(1)
         if n not in FOTOS:

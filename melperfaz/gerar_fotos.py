@@ -13,24 +13,33 @@ build.py põe por trás da fotografia enquanto ela descarrega.
     python3 gerar_fotos.py                  # todas as fotografias, só o que falta
     python3 gerar_fotos.py 03 04            # só estas
     python3 gerar_fotos.py --todas          # refaz todos os ficheiros
+    python3 gerar_fotos.py --partilha       # refaz só a imagem de partilha (assets/img/og-melperfaz.jpg)
+
+A imagem de partilha (og:image das páginas sem fotografia própria) faz-se do logótipo branco (logo-melperfaz-branco.png):
+ao centro de uma tela do tamanho de OG_IMG (build.py), no --ink do site.css. Refaz-se depois de mudar o logótipo ou
+o --ink.
 
 Uma fotografia nova: pôr o foto-NN.jpg na pasta (sem dados de localização na EXIF), registá-la em data/fotos.json
-(w, h, origem, alt), correr o script e depois python3 build.py --check, que falha se faltar algum tamanho.
+(w, h, origem, alt), correr o script e depois python3 build.py --check, que falha se faltar algum tamanho ou se o JPEG
+não medir o que o fotos.json diz (depois de um corte: mudar o w e o h e correr com --todas NN).
 """
 import base64
 import io
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
 from PIL import Image, ImageOps, features
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from build import FOTO_LADOS, FOTOS, lados  # noqa: E402  (os mesmos tamanhos que o srcset pede)
+from build import FOTO_LADOS, FOTOS, OG_IMG, lados  # noqa: E402  (os mesmos tamanhos que o srcset pede)
 
 PASTA = Path(__file__).resolve().parent / "assets" / "img" / "fotos"
 LQIP = Path(__file__).resolve().parent / "data" / "lqip.json"
+IMG = PASTA.parent
+CSS = IMG.parent / "css" / "site.css"
 FORMATOS = {"avif": dict(quality=60, speed=4), "webp": dict(quality=80, method=6)}
 
 
@@ -76,7 +85,23 @@ def previa(n):
     return "data:image/webp;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
 
 
+def partilha():
+    """O logótipo branco, sem a margem transparente, ao centro da tela de OG_IMG, sobre o --ink do site.css."""
+    m = re.search(r"--ink:\s*(#[0-9a-fA-F]{6})\b", CSS.read_text(encoding="utf-8"))
+    if not m:
+        sys.exit(f"não encontro o --ink em {CSS}")
+    logo = Image.open(IMG / "logo-melperfaz-branco.png").convert("RGBA")
+    logo = logo.crop(logo.getchannel("A").getbbox())
+    tela = Image.new("RGB", (OG_IMG["w"], OG_IMG["h"]), m.group(1))
+    tela.paste(logo, ((tela.width - logo.width) // 2, (tela.height - logo.height) // 2), logo)
+    destino = IMG / OG_IMG["src"]
+    grava(destino, lambda tmp: tela.save(tmp, "JPEG", quality=90, subsampling=0, optimize=True, progressive=True))
+    print(f"{destino.name}: {tela.width}×{tela.height}, o logótipo de {logo.width}×{logo.height} ao centro, sobre {m.group(1)}")
+
+
 def main():
+    if "--partilha" in sys.argv:
+        return partilha()
     if not features.check("avif"):
         sys.exit("Este Pillow não escreve AVIF: pip install -U \"Pillow>=11.3\"")
     todas = "--todas" in sys.argv

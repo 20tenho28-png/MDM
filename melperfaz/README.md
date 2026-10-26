@@ -166,12 +166,16 @@ de cada fotografia); num telemóvel de 3x pede-se a de 2x; a fotografia da ficha
 `foco` de cada obra (`obras.json`) é o ponto que fica à vista nos cortes (na M04, a cabeça do trabalhador), também na
 miniatura de 64 px dos serviços, que mostra a primeira obra em destaque de cada serviço (nos Acabamentos a M05, o
 assentamento do pavimento, e não o teto branco da M02).
-A `foto-05` tem uma faixa preta de 8 px no topo, que já vem no original do sistema de desenho (`obra5.jpg`): fica à
-espera da resposta do dono antes de se cortar.
+A `foto-05` e a `foto-06` traziam uma faixa preta do original do sistema de desenho (`obra5.jpg` 10 linhas em cima,
+`antes-wc.jpg` 20 em baixo): foram cortadas no próprio JPEG, sem tirar nada da fotografia, e os tamanhos refeitos com
+`--todas`. O `--check` falha quando um `foto-NN.jpg` não mede o que `fotos.json` diz (depois de um corte), e o teste do
+browser quando uma fotografia, ou um dos seus tamanhos, tem uma faixa preta ou uma orla escura numa borda.
 
-As fotografias, os logótipos, os favicons e a imagem de partilha vêm do sistema de desenho (pasta `assets/` do pacote
+As fotografias, os logótipos e os favicons vêm do sistema de desenho (pasta `assets/` do pacote
 «melperfaz-design-system»). Os logótipos foram recortados às linhas de recorte que os PNG traziam e reduzidos a 400 px de
-largura.
+largura. A imagem de partilha (`og-melperfaz.jpg`, o `og:image` das páginas sem fotografia própria) já não é a do
+sistema de desenho: faz-se com `python3 gerar_fotos.py --partilha`, o logótipo branco do rodapé ao centro de 1200 × 630,
+no `--ink` do `site.css`. Refaz-se depois de mudar o logótipo ou o `--ink`.
 
 ## Publicar no Netlify
 

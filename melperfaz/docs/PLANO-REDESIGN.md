@@ -593,6 +593,18 @@ testes (`tests/site.test.mjs` e `tests/browser.mjs`) conferem o que está constr
     etiquetas, nos traços e no painel. O `--check` recusa a superfície `s-clay` fora do painel e uma CtaBand numa
     secção que não seja paper ou bone; o teste do browser exige 48px ou mais de claro entre o painel e qualquer secção
     ink, e 16px ou mais dos lados.
+15. **As faixas pretas cortadas sem esperar pelo dono, e a imagem de partilha refeita** (revisão do tema verde e
+    vermelho). O plano dizia para perguntar ao dono se a faixa preta da foto-05 estava no original (pergunta 8). Estava
+    no original do sistema de desenho, e a 375px via-se como um traço preto por cima do cartão, numa superfície clara.
+    Foi cortada no próprio JPEG: 10 linhas em cima (9 pretas e uma de transição), de 1080x620 para 1080x610. A foto-06
+    (o antes da M05) tinha 20 linhas pretas em baixo, escondidas pela moldura 4/3 do comparador, mas à vista se um dia
+    aparecesse na sua proporção: foi cortada também, de 958x820 para 958x800. Os cortes só tiram o preto, nada da
+    fotografia. A imagem de partilha (`og-melperfaz.jpg`) já não é a do sistema de desenho recolorida: trazia um traço
+    claro solto, mais largo do que o logótipo e 83px acima dele. Agora faz-se com `gerar_fotos.py --partilha`: o
+    logótipo branco do rodapé ao centro de 1200x630, no `--ink`. Fica sem acento vermelho, porque o vermelho nunca
+    encosta ao verde (ponto 14). O `--check` confere que cada JPEG tem o tamanho de `fotos.json` e que a imagem de
+    partilha tem o do `og:image`. O teste do browser confere que nenhuma fotografia nem nenhum dos seus tamanhos tem
+    faixa preta ou orla escura nas bordas, e que a imagem de partilha é só o logótipo ao centro, sobre o `--ink`.
 
 ---
 
@@ -620,7 +632,7 @@ testes (`tests/site.test.mjs` e `tests/browser.mjs`) conferem o que está constr
 5. Confirma, por escrito, "orçamento a preço fixo", "garantia de execução de 2 anos", "equipa própria" e "atualizações semanais"?
 6. Para cada uma das 5 obras: concelho ou freguesia, data, duração, qual era o problema, o que foi feito e o resultado. E 2 a 4 fotografias extra por obra (antes, durante, depois)?
 7. Aceita o campo opcional "Localidade" no formulário?
-8. A foto-05 (espaço interior) tem a faixa preta no original?
+8. ~~A foto-05 (espaço interior) tem a faixa preta no original?~~ Tinha, no do sistema de desenho; foi cortada (ponto 15 de «Onde o site construído difere do plano»). Se o dono tiver o original sem a faixa, substitui-se.
 9. Usa os valores atuais do "tipo de obra" em algum filtro de email ou folha de cálculo?
 10. Aprova a legenda por cima da fotografia nas obras em destaque da página inicial, no telemóvel (ver «Onde o site construído difere do plano», ponto 1)?
 

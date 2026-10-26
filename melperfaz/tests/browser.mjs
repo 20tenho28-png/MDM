@@ -34,7 +34,8 @@
       texto a 320 e 390 px;
    M. as fotografias sem ampliação: a 375 px a do hero tem pelo menos tantos píxeis como a moldura, e nenhuma fotografia é
       mostrada maior do que o ficheiro escolhido, salvo quando o próprio original é mais pequeno do que a moldura; num
-      telemóvel de 3x, a de 2x;
+      telemóvel de 3x, a de 2x; os ficheiros: cada fotografia e os seus tamanhos com o tamanho de data/fotos.json e sem
+      faixa preta nas bordas, e a imagem de partilha só com o logótipo branco ao centro, sobre o --ink;
    N. o movimento (Fase 5b): o cabeçalho compacto depois de 80 px, sem mudar de altura; CLS abaixo de 0,05; a seta
       avança com o rato; os vistos desenham-se ao entrar no ecrã; as fotografias em lazy load entram num fade; o
       WhatsApp pulsa duas vezes e pára; o indicador de carga do envio; o visto de obrigado.html; e, com movimento
@@ -967,6 +968,67 @@ try {
       await page.goto(`${srv.base}/obras/${OBRA_GRANDE.slug}.html`, { waitUntil: 'networkidle' });
       const fo = await page.evaluate(() => { const i = document.querySelector('.obra-foto img'), r = i.getBoundingClientRect(); return { prop: Math.abs(r.width / r.height - i.naturalWidth / i.naturalHeight), h: r.height, max: innerHeight * 0.78 + 1 }; });
       ok(fo.prop < 0.01 && fo.h <= fo.max, `M: a ${largura} px a fotografia da ficha na sua proporção, até 78% da altura`, fo);
+      await ctx.close();
+    }
+    {
+      // os ficheiros, lidos píxel a píxel num canvas. Cada fotografia (o JPEG e cada tamanho em AVIF e WebP) com o tamanho
+      // de data/fotos.json (um tamanho velho, de antes de um corte, fica com a proporção antiga) e sem faixa preta nem orla
+      // escura em nenhuma borda: a foto-05 começava com 10 linhas pretas, um traço preto por cima do cartão a 375 px.
+      // Uma linha é preta com a média abaixo de 32 e nenhum píxel acima de 64; a orla é a linha da borda mais escura do
+      // que as 8 seguintes (a linha de transição que fica de um corte mal feito)
+      const FOTOS = Object.entries(JSON.parse(fs.readFileSync(path.join(W, 'data/fotos.json'), 'utf8'))).filter(([k]) => !k.startsWith('_'));
+      const { ctx, page } = await pagina();
+      await page.goto(srv.base + '/', { waitUntil: 'networkidle' });
+      const le = (src, bordas) => page.evaluate(async ([src, bordas]) => {
+        const i = new Image(); i.src = src; await i.decode();
+        const w = i.naturalWidth, h = i.naturalHeight;
+        if (!bordas) return { w, h };
+        const c = Object.assign(document.createElement('canvas'), { width: w, height: h }), g = c.getContext('2d', { willReadFrequently: true });
+        g.drawImage(i, 0, 0);
+        const d = g.getImageData(0, 0, w, h).data, lum = (x, y) => (d[(y * w + x) * 4] + d[(y * w + x) * 4 + 1] + d[(y * w + x) * 4 + 2]) / 3;
+        const linha = (lado, k) => {
+          const v = lado === 'topo' || lado === 'base' ? Array.from({ length: w }, (_, x) => lum(x, lado === 'topo' ? k : h - 1 - k))
+            : Array.from({ length: h }, (_, y) => lum(lado === 'esq' ? k : w - 1 - k, y));
+          return { media: v.reduce((a, b) => a + b, 0) / v.length, max: Math.max(...v) };
+        };
+        const out = {};
+        for (const lado of ['topo', 'base', 'esq', 'dir']) {
+          const l = Array.from({ length: 9 }, (_, k) => linha(lado, k)), dentro = l.slice(1).reduce((a, b) => a + b.media, 0) / 8;
+          out[lado] = { preta: l.slice(0, 3).some(x => x.media < 32 && x.max < 64), orla: l[0].media < 0.9 * dentro - 4, borda: Math.round(l[0].media), dentro: Math.round(dentro) };
+        }
+        return { w, h, bordas: out };
+      }, [src, bordas]);
+      for (const [n, f] of FOTOS) {
+        const jpg = await le(`/assets/img/fotos/foto-${n}.jpg`, true);
+        ok(jpg.w === f.w && jpg.h === f.h, `M: foto-${n}.jpg com o tamanho de data/fotos.json (${f.w} × ${f.h})`, [jpg.w, jpg.h]);
+        const mas = Object.entries(jpg.bordas).filter(([, b]) => b.preta || b.orla);
+        ok(mas.length === 0, `M: foto-${n}.jpg sem faixa preta nem orla escura nas bordas`, mas);
+        const maior = Math.max(f.w, f.h), errados = [];
+        for (const lado of [400, 600, 800, 1000, 1200, 1600].filter(l => l < maior).concat([maior])) {
+          for (const ext of ['avif', 'webp']) {
+            const t = await le(`/assets/img/fotos/foto-${n}-${lado}.${ext}`, false), e = lado / maior;
+            if (Math.abs(t.w - f.w * e) > 1 || Math.abs(t.h - f.h * e) > 1) errados.push([`foto-${n}-${lado}.${ext}`, t.w, t.h]);
+          }
+        }
+        ok(errados.length === 0, `M: os tamanhos da foto-${n} feitos do original de hoje (python3 gerar_fotos.py --todas ${n})`, errados);
+      }
+      // a imagem de partilha (gerar_fotos.py --partilha): do tamanho do og:image, sobre o --ink, só com o logótipo branco
+      // (o mesmo do rodapé, do mesmo tamanho) ao centro; nada mais, como o traço solto de 420 px que havia 83 px acima dele
+      const og = await page.evaluate(async () => {
+        const meta = p => document.querySelector(`meta[property="og:image${p}"]`).content;
+        const carrega = async src => { const i = new Image(); i.src = src; await i.decode(); const c = Object.assign(document.createElement('canvas'), { width: i.naturalWidth, height: i.naturalHeight }), g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(i, 0, 0); return { w: c.width, h: c.height, d: g.getImageData(0, 0, c.width, c.height).data }; };
+        const caixa = (im, dentro) => { let x0 = im.w, y0 = im.h, x1 = -1, y1 = -1; for (let y = 0; y < im.h; y++) for (let x = 0; x < im.w; x++) if (dentro((y * im.w + x) * 4)) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); } return { x0, y0, x1, y1, w: x1 - x0 + 1, h: y1 - y0 + 1 }; };
+        const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim().match(/\w\w/g).map(x => parseInt(x, 16));
+        const im = await carrega(new URL(meta('')).pathname), logo = await carrega('/assets/img/logo-melperfaz-branco.png');
+        const dif = k => Math.max(...[0, 1, 2].map(j => Math.abs(im.d[k + j] - ink[j])));
+        const c = caixa(im, k => dif(k) > 40), l = caixa(logo, k => logo.d[k + 3] > 0);
+        let fora = 0;
+        for (let y = 0; y < im.h; y++) for (let x = 0; x < im.w; x++) if ((x < c.x0 - 8 || x > c.x1 + 8 || y < c.y0 - 8 || y > c.y1 + 8)) fora = Math.max(fora, dif((y * im.w + x) * 4));
+        return { w: im.w, h: im.h, metaW: +meta(':width'), metaH: +meta(':height'), caixa: c, logo: { w: l.w, h: l.h }, fora, cx: (c.x0 + c.x1 + 1) / 2 - im.w / 2, cy: (c.y0 + c.y1 + 1) / 2 - im.h / 2 };
+      });
+      ok(og.w === og.metaW && og.h === og.metaH && og.w === 1200 && og.h === 630, 'M: a imagem de partilha com o tamanho do og:image (1200 × 630)', og);
+      ok(og.fora <= 12, 'M: a imagem de partilha é só o --ink fora do logótipo (sem traços soltos)', og);
+      ok(Math.abs(og.caixa.w - og.logo.w) <= 8 && Math.abs(og.caixa.h - og.logo.h) <= 8 && Math.abs(og.cx) <= 3 && Math.abs(og.cy) <= 3, 'M: a imagem de partilha com o logótipo branco do rodapé, do mesmo tamanho, ao centro', og);
       await ctx.close();
     }
   }
