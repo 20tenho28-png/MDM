@@ -1,0 +1,3 @@
+<!-- ProofLine: as garantias que já estão no site (data/site.json «provas») e o alvará quando a Melperfaz o der.
+     Fica por baixo de cada grupo de botões; a cor vem da superfície (branco no painel vermelho da CtaBand). -->
+<ul class="prova">{{#cada provas}}<li>{{ item }}</li>{{/cada}}{{#se dados.alvara}}<li>Alvará n.º {{ dados.alvara }}</li>{{/se}}</ul>

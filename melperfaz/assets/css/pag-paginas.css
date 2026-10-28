@@ -1,0 +1,18 @@
+/* A política de privacidade: índice à esquerda, texto à direita. O cabeçalho de página, as migalhas e a prosa vivem
+   em site.css; obrigado.html e 404.html só usam componentes de site.css. */
+.priv-grelha { display: grid; grid-template-columns: 260px 1fr; gap: var(--space-80); align-items: start; }
+.priv-grelha > * { width: 100%; min-width: 0; }
+.priv-indice { position: sticky; top: calc(var(--nav-height) + var(--space-22)); }
+.priv-indice-t { font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: var(--space-12); }
+.priv-indice ol { list-style: none; counter-reset: idx; }
+.priv-indice li { counter-increment: idx; border-bottom: var(--border-hairline) solid var(--line); }
+.priv-indice a { display: flex; align-items: center; min-height: var(--alvo); color: var(--ink); text-decoration: none; font-size: var(--fs-body); }
+.priv-indice a::before { content: counter(idx, decimal-leading-zero); font-family: var(--font-serif); color: var(--muted); font-weight: 600; margin-right: var(--space-12); }
+.priv-indice a:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* o texto até 760 px, encostado à esquerda; as fichas de cada tratamento são o componente Ficha de site.css */
+.priv-texto { max-width: 760px; }
+
+@media (max-width: 980px) {
+  .priv-grelha { grid-template-columns: 1fr; gap: var(--space-44); }
+  .priv-indice { position: static; }
+}

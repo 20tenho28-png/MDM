@@ -18,8 +18,9 @@ htmlcov/
 *.sqlite3
 .DS_Store
 
-# Site gerado (python3 website/build.py)
+# Sites gerados (python3 website/build.py, python3 melperfaz/build.py)
 website/public/
+melperfaz/public/
 
 
 # Dependências da função do assistente de propostas (website/package.json)
