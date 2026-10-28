@@ -1413,6 +1413,18 @@ def check_registo():
     m_gap = SEM_GAP_RE.search(css)
     if not m_gap or m_gap.group(0) != registo_sem_gap(css):
         out.append("registo/index.html: o bloco SEM-GAP (espaços para o iPad antigo) não está em dia; correr python3 website/build.py --registo-gap")
+    # o iPad antigo (Safari do iOS 12): nada de JavaScript mais novo do que 2018 nem «color-mix» sem cor de reserva antes
+    js = text[text.index("</style>"):]
+    js = re.sub(r"'(?:[^'\\\n]|\\.)*'|\"(?:[^\"\\\n]|\\.)*\"", "''", js)
+    js = re.sub(r"/\*.*?\*/", "", js, flags=re.S)
+    js = re.sub(r"(^|[^:\\])//[^\n]*", r"\1", js)
+    for padrao, nome in ((r"\?\.[A-Za-z_$(\[]", "?."), (r"\?\?", "??"), (r"\(\?<[=!]", "lookbehind (?<= / ?<!)")):
+        if re.search(padrao, js):
+            out.append(f"registo/index.html: «{nome}» não funciona no Safari do iPad antigo (iOS 12)")
+    for m_cm in re.finditer(r"([{;])\s*([a-z-]+)\s*:[^;{}]*color-mix\(", css):
+        antes = css[:m_cm.start() + 1]
+        if not re.search(re.escape(m_cm.group(2)) + r"\s*:[^;{}]*;\s*$", antes):
+            out.append(f"registo/index.html: «{m_cm.group(2)}: color-mix(...)» sem uma cor de reserva antes (o iOS 12 não conhece color-mix)")
     m = re.search(r"ORC-PURO-INICIO(.*?)ORC-PURO-FIM", text, re.S)
     if not m:
         return ["registo/index.html: falta o bloco ORC-PURO-INICIO ... ORC-PURO-FIM (contas do orçamento)"]

@@ -762,7 +762,9 @@ table.tb{border-collapse:separate;border-spacing:0;min-width:100%;font-size:13.5
 .tb-cols small{color:var(--ink-2)}
 .fbox.agrupar select{border:0;background:transparent;font:inherit;color:inherit;width:100%}
 @media (min-width:768px){#lista,#v-gerir #mosLeg,#v-gerir #mosaico,#cliLista{display:none}}
-.f-cli{display:inline-block;border:1px solid var(--accent);color:var(--accent);background:var(--surface);border-radius:999px;padding:4px 12px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.mes-chip button.armed{color:var(--bad);font-weight:600}
+@media (pointer:coarse){.mes-chip button{min-width:44px;min-height:44px}}
+.f-cli-chip{display:inline-block;border:1px solid var(--accent);color:var(--accent);background:var(--surface);border-radius:999px;padding:4px 12px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
 .tb a.tb-lig,.tb button.tb-lig{background:none;border:0;padding:0;font:inherit;color:var(--accent);cursor:pointer;text-align:right}
 @media (max-width:767px){.tb-wrap,.fbox.agrupar,.so-largo{display:none}}
 .tb th.tb-mov{cursor:grab;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -1299,7 +1301,7 @@ html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
       <div class="fbox fprio" hidden><select id="fPrio" aria-label="Prioridade"><option value="">Prioridade</option><option value="P1">P1 · Urgente</option><option value="P2">P2 · Alta</option><option value="P3">P3 · Normal</option></select></div>
       <div class="fbox pesq"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input id="q" type="search" placeholder="Pesquisar" aria-label="Pesquisar cliente, localidade, nº ORC" autocomplete="off"></div>
     </div>
-    <p id="fCliBox" style="margin:0 0 8px" hidden><button class="f-cli" type="button" id="fCliChip" aria-label="Tirar o filtro do cliente"></button></p>
+    <p id="fCliBox" style="margin:0 0 8px" hidden><button class="f-cli-chip" type="button" id="fCliChip" aria-label="Tirar o filtro do cliente"></button></p>
     <p class="t-conta" id="listaCount"></p>
     <div class="tb-wrap"><div id="tabela"></div></div>
     <div class="tabela" id="lista"></div>
@@ -1960,6 +1962,8 @@ if (!Element.prototype.replaceChildren) {
     return `PED${String(max + 1).padStart(4,'0')}_${year}`;
   }
 
+  const lerFicheiro = f => new Promise((ok, falha) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = () => falha(r.error); r.readAsArrayBuffer(f); });
+
   /* ---------- Separadores ---------- */
   const TABS = ['hoje','painel','seguimentos','agenda','gerir','pipeline','contactos','clientes','faturacao','prazos'];
   // A barra tem cinco grupos; cada grupo mostra por baixo do título as suas vistas (só as que estão instaladas).
@@ -1998,6 +2002,7 @@ if (!Element.prototype.replaceChildren) {
       F('v-' + k).hidden = k !== t;
     }
     try { localStorage.setItem('registo-tab', t); } catch (e) {}
+    if (!currentId && !/^#p\//.test(location.hash)) enderecoPara('#' + t); // #p/… à espera dos dados: abreDoEndereco
     // A escolha «Pedidos em aberto» e «Adicionar pedido» só fazem sentido em Gerir; nos outros, o nome do separador.
     F('tabTitulo').textContent = g[1];
     F('tabTitulo').hidden = t === 'gerir';
@@ -2859,7 +2864,7 @@ if (!Element.prototype.replaceChildren) {
   function tbMoveRz(x) { if (!tbRz) return; const w = Math.max(60, Math.min(480, Math.round(tbRz.w + x - tbRz.x))); tbRz.q.larg[tbRz.id] = w; tbAplicaLarguras(tbRz.q); }
   function tbFimRz() { if (!tbRz) return; const q = tbRz.q; tbRz = null; document.body.classList.remove('a-redimensionar'); tbGuardaLarguras(q); kSoltou = true; setTimeout(() => { kSoltou = false; }, 350); }
   // Os ouvintes do documento são um só conjunto; cada quadro liga os seus (tbLigar) à sua caixa.
-  let tbIni = null, tbTemp = null;
+  let tbIni = null, tbTemp = null, tbToqueLiga = () => {};
   function tbInicio(q, ev, x, y) {
     if (!canWrite) return null;
     const rz = ev.target.closest('.tb-rz');
@@ -2883,8 +2888,9 @@ if (!Element.prototype.replaceChildren) {
     box.addEventListener('touchstart', ev => {
       if (ev.touches.length !== 1) return;
       const t = ev.touches[0], i = tbInicio(q, ev, t.clientX, t.clientY);
-      if (i === 'rz') return;
       if (!i) return;
+      tbToqueLiga();
+      if (i === 'rz') return;
       tbIni = i; clearTimeout(tbTemp);
       // a pega da linha arranca logo; o cabeçalho espera meio segundo (para o dedo poder deslizar a tabela)
       if (i.tipo === 'linha') { tbArranca(i, i.x, i.y); tbIni = null; }
@@ -2899,13 +2905,18 @@ if (!Element.prototype.replaceChildren) {
       if (tbIni && Math.abs(ev.clientX - tbIni.x) + Math.abs(ev.clientY - tbIni.y) > 6) { tbArranca(tbIni, ev.clientX, ev.clientY); tbIni = null; }
     });
     document.addEventListener('mouseup', () => { tbIni = null; if (tbRz) tbFimRz(); if (tbArr) tbFimLinha(true); if (tbCol) tbFimCol(true); });
-    document.addEventListener('touchmove', ev => {
+    // O «touchmove» que pode impedir o deslizar só está ligado enquanto um dedo começou numa pega, num cabeçalho ou numa
+    // beira: no resto da página o deslizar não espera por ele (no iPad antigo isso pesava em cada deslizar).
+    const tbMoveToque = ev => {
       const t = ev.touches[0];
       if (tbRz) { ev.preventDefault(); tbMoveRz(t.clientX); return; }
       if (tbArr) { ev.preventDefault(); tbMoveLinha(t.clientX, t.clientY); return; }
       if (tbCol) { ev.preventDefault(); tbMoveCol(t.clientX); return; }
       if (tbIni && Math.abs(t.clientX - tbIni.x) + Math.abs(t.clientY - tbIni.y) > 10) { clearTimeout(tbTemp); tbIni = null; }
-    }, {passive: false});
+    };
+    tbToqueLiga = () => document.addEventListener('touchmove', tbMoveToque, {passive: false});
+    const tbToqueDesliga = () => document.removeEventListener('touchmove', tbMoveToque, {passive: false});
+    document.addEventListener('touchend', tbToqueDesliga); document.addEventListener('touchcancel', tbToqueDesliga);
     document.addEventListener('touchend', ev => { clearTimeout(tbTemp); tbIni = null; if (tbRz) tbFimRz(); if (tbArr) { ev.preventDefault(); tbFimLinha(true); } if (tbCol) { ev.preventDefault(); tbFimCol(true); } });
     document.addEventListener('touchcancel', () => { clearTimeout(tbTemp); tbIni = null; tbFimRz(); tbFimLinha(false); tbFimCol(false); });
     document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { tbFimLinha(false); tbFimCol(false); } });
@@ -3101,7 +3112,7 @@ if (!Element.prototype.replaceChildren) {
     let ok = 0, erros = [];
     for (const f of files) {
       try {
-        const buf = await f.arrayBuffer();
+        const buf = await lerFicheiro(f); // FileReader: o Safari do iPad antigo não tem f.arrayBuffer()
         // Os ficheiros da AT costumam vir em Windows-1252; o cabeçalho XML diz qual.
         const cab = new TextDecoder('latin1').decode(buf.slice(0, 120));
         const enc = (/encoding="([^"]+)"/i.exec(cab) || [])[1] || 'utf-8';
@@ -3136,6 +3147,15 @@ if (!Element.prototype.replaceChildren) {
       if (!Object.keys(enche(mdoc)(Object.assign({}, cfgClientes[k] || {}, fichas[k] || {}))).length) continue;
       try { await gravarCliente(k, enche(mdoc), null, null); } catch (e) { /* segue com os outros clientes */ }
     }
+  }
+  // Tirar um mês inteiro de faturas pede um segundo toque (o × é pequeno e não há «Desfazer»).
+  function tirarMesDoisToques(btn, mes) {
+    if (!btn.classList.contains('armed')) {
+      btn.classList.add('armed'); btn.textContent = `Tirar ${mesTxt(mes)}?`;
+      setTimeout(() => { if (btn.isConnected) { btn.classList.remove('armed'); btn.textContent = '×'; } }, 4000);
+      return;
+    }
+    apagarMes(mes);
   }
   async function apagarMes(mes) {
     delete faturacao[mes];
@@ -3280,7 +3300,7 @@ if (!Element.prototype.replaceChildren) {
       let [y, m] = ms[0].split('-').map(Number); const fim = ms[ms.length - 1];
       for (let i = 0; i < 36; i++) {
         const ym = `${y}-${pad(m)}`;
-        if (faturacao[ym]) chips.push(h('span',{class:'mes-chip', title:`${faturacao[ym].ficheiro || ym} · ${faturacao[ym].docs.length} documentos, ${faturacao[ym].recibos.length} recibos`}, mesTxt(ym), canWrite ? h('button',{type:'button', 'aria-label':`Tirar ${mesTxt(ym)}`, title:'Tirar este mês', onclick:() => apagarMes(ym)}, '×') : null));
+        if (faturacao[ym]) chips.push(h('span',{class:'mes-chip', title:`${faturacao[ym].ficheiro || ym} · ${faturacao[ym].docs.length} documentos, ${faturacao[ym].recibos.length} recibos`}, mesTxt(ym), canWrite ? h('button',{type:'button', 'aria-label':`Tirar ${mesTxt(ym)}`, title:'Tirar este mês', onclick: ev => tirarMesDoisToques(ev.currentTarget, ym)}, '×') : null));
         else chips.push(h('span',{class:'mes-chip falta', title:'Falta o ficheiro deste mês'}, mesTxt(ym), ' · falta'));
         if (ym === fim) break; m++; if (m > 12) { m = 1; y++; }
       }
@@ -4288,8 +4308,28 @@ if (!Element.prototype.replaceChildren) {
 
   /* ---------- Folha de um pedido ---------- */
   const cur = () => rows.find(r => r.id === currentId) || null;
-  function openSheet(id) { currentId = id; modo = null; trans = null; dadosAberto = false; F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); setTimeout(() => F('btnClose').focus(), 30); }
-  function closeSheet() { F('sheetWrap').hidden = true; document.body.style.overflow = ''; currentId = null; modo = null; trans = null; fichaKey = null; sheetSujo = false; sgRespondeu = null; sgEdit = null; if (agAcao && agAcao.onde === 'sheet') agAcao = null; if (status === 'ok') renderAll(); }
+  // Cada vista e cada pedido têm o seu endereço (#gerir, #p/PED0301_2026): o «voltar» do iPad fecha o pedido em vez de
+  // sair da app, e uma página recarregada (o iPad antigo descarta as abas) volta ao mesmo sítio.
+  function enderecoPara(h, novo) {
+    if (location.hash === h) return;
+    try { if (novo) history.pushState(null, '', h); else history.replaceState(null, '', h); } catch (e) {}
+  }
+  function abreDoEndereco() {
+    const m = /^#p\/([A-Za-z0-9_]+)$/.exec(location.hash);
+    if (m && rows.some(r => r.id === m[1])) { if (currentId !== m[1]) openSheet(m[1]); }
+    else if (m) enderecoPara('#' + tab);
+  }
+  window.addEventListener('popstate', () => {
+    const t = location.hash.replace('#', '');
+    if (/^p\//.test(t)) { abreDoEndereco(); return; }
+    if (!F('sheetWrap').hidden) {
+      if (sheetSujo && canWrite && !confirm('Há alterações por guardar. Fechar mesmo assim?')) { enderecoPara('#p/' + currentId, true); return; }
+      closeSheet();
+    }
+    if (TABS.includes(t) && t !== tab) setTab(t);
+  });
+  function openSheet(id) { enderecoPara('#p/' + id, true); currentId = id; modo = null; trans = null; dadosAberto = false; F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); setTimeout(() => F('btnClose').focus(), 30); }
+  function closeSheet() { enderecoPara('#' + tab); F('sheetWrap').hidden = true; document.body.style.overflow = ''; currentId = null; modo = null; trans = null; fichaKey = null; sheetSujo = false; sgRespondeu = null; sgEdit = null; if (agAcao && agAcao.onde === 'sheet') agAcao = null; if (status === 'ok') renderAll(); }
   // Fechar a folha com o × , um toque ao lado ou Esc nunca perde o que se escreveu sem perguntar.
   function fecharSheetPedido() { if (sheetSujo && canWrite && !confirm('Há alterações por guardar. Fechar mesmo assim?')) return; closeSheet(); }
   F('btnClose').addEventListener('click', fecharSheetPedido);
@@ -6907,14 +6947,18 @@ if (!Element.prototype.replaceChildren) {
     board.addEventListener('touchstart', ev => {
       const c = ev.target.closest('.kcard'); if (!c || ev.touches.length !== 1) return;
       const t = ev.touches[0]; ini = {c, x: t.clientX, y: t.clientY};
+      document.addEventListener('touchmove', kMoveToque, {passive: false});
       clearTimeout(temp);
       temp = setTimeout(() => { if (ini) { kComeca(ini.c, ini.x, ini.y); ini = null; } }, 450);
     }, {passive: true});
-    document.addEventListener('touchmove', ev => {
+    // Ligado só quando o dedo começa num cartão (ver o quadro da tabela, tbMoveToque).
+    function kMoveToque(ev) {
       const t = ev.touches[0];
       if (kArr) { ev.preventDefault(); kMove(t.clientX, t.clientY); return; }
       if (ini && Math.abs(t.clientX - ini.x) + Math.abs(t.clientY - ini.y) > 10) { clearTimeout(temp); ini = null; }
-    }, {passive: false});
+    }
+    const kDesliga = () => document.removeEventListener('touchmove', kMoveToque, {passive: false});
+    document.addEventListener('touchend', kDesliga); document.addEventListener('touchcancel', kDesliga);
     document.addEventListener('touchend', ev => { clearTimeout(temp); ini = null; if (kArr) { ev.preventDefault(); kFim(true); } });
     document.addEventListener('touchcancel', () => { clearTimeout(temp); ini = null; if (kArr) kFim(false); });
     document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && kArr) kFim(false); });
@@ -7112,7 +7156,9 @@ if (!Element.prototype.replaceChildren) {
   }
   const abrirNovo = () => { currentId = null; modo = 'novo'; trans = null; F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); };
   F('btnNovoTop').addEventListener('click', abrirNovo); F('railNovo').addEventListener('click', abrirNovo);
-  F('q').addEventListener('input', e => { query = e.target.value; renderLista(status === 'ok' ? enriquecidos() : []); });
+  // A procura espera que se pare de escrever (no iPad antigo cada tecla redesenhava a lista inteira).
+  let qEspera = null;
+  F('q').addEventListener('input', e => { query = e.target.value; clearTimeout(qEspera); qEspera = setTimeout(() => renderLista(status === 'ok' ? enriquecidos() : []), 200); });
   F('fCliChip').addEventListener('click', () => { fCli = null; renderAll(); });
   F('fDono').addEventListener('change', e => { dono = e.target.value; renderAll(); });
   F('fEstado').addEventListener('change', e => { fEstado = e.target.value; renderAll(); });
@@ -7161,7 +7207,7 @@ if (!Element.prototype.replaceChildren) {
       if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) { fichaTabela = false; const novo = {}; for (const id of Object.keys(fichas)) if (fichas[id]._novo) novo[id] = fichas[id]; fichas = novo; } }
       else { fichaTabela = true; const novo = {}; for (const x of fc.data) novo[x.id] = {...x.dados, _versao: x.versao}; fichas = novo; }
       if (!q.error) { equipa = q.data; const m = equipa.find(x => x.email === (eu && eu.email)); if (m && m.nome) eu.nome = m.nome; }
-      status = 'ok'; renderAll();
+      status = 'ok'; renderAll(); abreDoEndereco();
       carregarPainel();
       carregarSeg();
       carregarAgenda();
