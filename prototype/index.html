@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#b61918">
+  <meta name="description" content="MDM Assist — assistência técnica em ar condicionado, eletricidade, ventilação e manutenção de edifícios em Lisboa desde 1991.">
+  <title>MDM Assist — Prototype v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #faf8f4;
+      --bg-elevated: #ffffff;
+      --bg-subtle: #f0ebe3;
+      --bg-dark: #2a2825;
+      --border-soft: #e5ddd0;
+      --border-strong: #2a2825;
+      --text-primary: #2a2825;
+      --text-secondary: #5c5852;
+      --text-tertiary: #8a857d;
+      --text-on-dark: #faf8f4;
+      --text-on-dark-soft: rgba(250, 248, 244, 0.78);
+      --accent: #b61918;
+      --accent-hover: #9c1515;
+      --accent-soft: #fbeceb;
+      --whatsapp: #25D366;
+      --whatsapp-dark: #1ea954;
+      --success: #2d6a4f;
+      --focus-ring: #b61918;
+
+      --radius-btn: 10px;
+      --radius-card: 14px;
+      --radius-input: 10px;
+      --radius-pill: 999px;
+
+      --shadow-card: 0 1px 2px rgba(42,40,37,0.04), 0 4px 16px rgba(42,40,37,0.06);
+      --shadow-card-hover: 0 4px 8px rgba(42,40,37,0.06), 0 12px 32px rgba(42,40,37,0.10);
+      --shadow-bar: 0 -4px 16px rgba(0,0,0,0.06);
+      --shadow-btn: 0 1px 2px rgba(42,40,37,0.06), 0 1px 3px rgba(42,40,37,0.10);
+
+      --ease: cubic-bezier(0.4, 0, 0.2, 1);
+      --t-fast: 150ms;
+      --t-med: 220ms;
+
+      --container: 1200px;
+      --pad-x: 20px;
+    }
+
+    @media (min-width: 768px) { :root { --pad-x: 32px; } }
+    @media (min-width: 1024px) { :root { --pad-x: 48px; } }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      line-height: 1.55;
+      color: var(--text-primary);
+      background: var(--bg-base);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      padding-bottom: calc(76px + env(safe-area-inset-bottom));
+    }
+    @media (min-width: 1024px) { body { padding-bottom: 0; } }
+
+    h1, h2, h3, h4 {
+      font-family: 'Archivo', system-ui, sans-serif;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    p { margin: 0; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; border: 0; background: none; color: inherit; padding: 0; }
+    img { display: block; max-width: 100%; }
+
+    :focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    .container {
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 0 var(--pad-x);
+    }
+
+    .skip-link {
+      position: absolute; left: -9999px; top: 8px;
+      background: var(--text-primary); color: #fff;
+      padding: 12px 16px; border-radius: 8px; z-index: 1000;
+    }
+    .skip-link:focus { left: 8px; }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    /* ══════ Button system ══════ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 22px;
+      border: 1.5px solid transparent;
+      border-radius: var(--radius-btn);
+      font-family: inherit;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background var(--t-fast) var(--ease),
+                  border-color var(--t-fast) var(--ease),
+                  color var(--t-fast) var(--ease),
+                  transform var(--t-fast) var(--ease),
+                  box-shadow var(--t-fast) var(--ease);
+      box-shadow: var(--shadow-btn);
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn--lg { min-height: 56px; font-size: 16px; padding: 0 26px; }
+    .btn--md { min-height: 48px; font-size: 15px; padding: 0 22px; }
+    .btn--sm { min-height: 40px; font-size: 14px; padding: 0 16px; gap: 8px; }
+    .btn--block { width: 100%; }
+
+    /* WhatsApp green — universal recognition. Used for ANY action that opens WhatsApp. */
+    .btn--whatsapp { background: var(--whatsapp); color: #fff; border-color: var(--whatsapp); }
+    .btn--whatsapp:hover { background: var(--whatsapp-dark); border-color: var(--whatsapp-dark); }
+
+    /* Brand red — reserved for conversion (submit, primary "Pedir orçamento" inside a flow). */
+    .btn--primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn--primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+    /* Dark outline — neutral secondary action on light bg. */
+    .btn--outline { background: transparent; color: var(--text-primary); border-color: var(--text-primary); box-shadow: none; }
+    .btn--outline:hover { background: var(--text-primary); color: #fff; }
+
+    /* Light outline — secondary action on dark/hero photo bg. */
+    .btn--outline-light { background: rgba(255,255,255,0.06); color: var(--text-on-dark); border-color: rgba(255,255,255,0.55); backdrop-filter: blur(4px); box-shadow: none; }
+    .btn--outline-light:hover { background: var(--text-on-dark); color: var(--text-primary); border-color: var(--text-on-dark); }
+
+    /* Ghost — minimal tertiary, becomes underline on hover. */
+    .btn--ghost { background: transparent; color: var(--accent); border-color: transparent; box-shadow: none; padding-left: 0; padding-right: 0; min-height: 40px; }
+    .btn--ghost:hover { color: var(--accent-hover); text-decoration: underline; text-underline-offset: 4px; }
+
+    .btn__icon { display: inline-flex; line-height: 0; }
+
+    /* ══════ Topbar ══════ */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(250, 248, 244, 0.94);
+      backdrop-filter: saturate(180%) blur(12px);
+      -webkit-backdrop-filter: saturate(180%) blur(12px);
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .topbar__inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .brand { display: inline-flex; align-items: center; gap: 10px; }
+    .brand__logo { height: 32px; width: auto; }
+    .brand__wordmark { display: none; font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 16px; letter-spacing: -0.02em; color: var(--text-primary); }
+    @media (min-width: 480px) { .brand__wordmark { display: inline; } }
+    .topbar__link {
+      font-size: 14px; font-weight: 600; color: var(--text-primary);
+      padding: 10px 16px; border-radius: var(--radius-btn);
+      transition: background var(--t-fast) var(--ease);
+    }
+    .topbar__link:hover { background: var(--bg-subtle); }
+
+    /* ══════ Sections ══════ */
+    section { padding: 56px 0; }
+    @media (min-width: 1024px) { section { padding: 96px 0; } }
+
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    .eyebrow--accent { color: var(--accent); }
+    .eyebrow__dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+
+    .section-title { font-size: clamp(1.5rem, 5vw, 2.25rem); line-height: 1.2; margin-bottom: 12px; }
+    .section-lead { font-size: 16px; color: var(--text-secondary); max-width: 56ch; margin-bottom: 32px; }
+
+    /* ══════ Hero ══════ */
+    .hero {
+      position: relative;
+      padding: 80px 0 64px;
+      color: var(--text-on-dark);
+      isolation: isolate;
+      overflow: hidden;
+    }
+    @media (min-width: 1024px) { .hero { padding: 144px 0 128px; } }
+    .hero__bg {
+      position: absolute; inset: 0; z-index: -2;
+      background-image: url('assets/mdm-service-hvac-electrical.webp');
+      background-size: cover;
+      background-position: center 30%;
+    }
+    .hero__overlay {
+      position: absolute; inset: 0; z-index: -1;
+      background:
+        linear-gradient(180deg, rgba(42,40,37,0.82) 0%, rgba(42,40,37,0.62) 50%, rgba(250,248,244,0.98) 100%);
+    }
+    @media (min-width: 1024px) {
+      .hero__overlay {
+        background:
+          linear-gradient(95deg, rgba(42,40,37,0.85) 0%, rgba(42,40,37,0.55) 60%, rgba(42,40,37,0.25) 100%),
+          linear-gradient(180deg, transparent 70%, rgba(250,248,244,0.95) 100%);
+      }
+    }
+    .trust-strip {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-on-dark-soft);
+      margin-bottom: 28px;
+    }
+    .trust-strip__pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 10px; background: rgba(182,25,24,0.20); color: #ffd5d4;
+      border: 1px solid rgba(255,213,212,0.30);
+      border-radius: var(--radius-pill); font-weight: 700;
+    }
+    .trust-strip__sep { color: rgba(255,255,255,0.30); }
+    .hero__title {
+      font-family: 'Archivo', sans-serif; font-weight: 600;
+      font-size: clamp(1.85rem, 7vw, 2.5rem); line-height: 1.12;
+      letter-spacing: -0.015em; color: var(--text-on-dark);
+      margin-bottom: 20px; text-wrap: balance;
+      max-width: 18ch;
+    }
+    .hero__title .accent { color: #ff6b6a; }
+    @media (min-width: 1024px) {
+      .hero__title { font-size: clamp(3rem, 6vw, 5rem); line-height: 1.05; max-width: 16ch; }
+    }
+    .hero__sub {
+      font-size: 17px; color: var(--text-on-dark-soft);
+      max-width: 36ch; margin-bottom: 32px;
+    }
+    @media (min-width: 1024px) { .hero__sub { font-size: 19px; max-width: 48ch; } }
+    .hero__ctas {
+      display: flex; flex-direction: column; gap: 12px; max-width: 380px;
+    }
+    @media (min-width: 1024px) {
+      .hero__ctas { flex-direction: row; max-width: none; }
+    }
+    .hero__meta {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 24px;
+      font-size: 13px; color: var(--text-on-dark-soft);
+    }
+    .hero__meta-dot { width: 8px; height: 8px; background: var(--whatsapp); border-radius: 50%; box-shadow: 0 0 0 4px rgba(37,211,102,0.20); }
+
+    /* ══════ Mitsubishi partner band ══════ */
+    .partner-band {
+      background: var(--bg-elevated);
+      border-top: 1px solid var(--border-soft);
+      border-bottom: 1px solid var(--border-soft);
+      padding: 36px 0;
+    }
+    @media (min-width: 1024px) { .partner-band { padding: 56px 0; } }
+    .partner-band__inner {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    @media (min-width: 768px) {
+      .partner-band__inner { flex-direction: row; align-items: center; gap: 32px; }
+    }
+    .partner-band__logo {
+      flex-shrink: 0;
+      width: 84px; height: auto;
+      background: var(--bg-base);
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-soft);
+    }
+    @media (min-width: 768px) { .partner-band__logo { width: 104px; } }
+    .partner-band__body { flex: 1; min-width: 0; }
+    .partner-band__eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.10em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .partner-band__title {
+      font-family: 'Archivo', sans-serif; font-weight: 600;
+      font-size: 17px; line-height: 1.35; color: var(--text-primary);
+      margin-bottom: 14px; max-width: 50ch;
+    }
+    @media (min-width: 768px) { .partner-band__title { font-size: 19px; } }
+    .partner-band__ctas { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+
+    /* ══════ Quick contact (mobile-promoted) ══════ */
+    .contact-quick { background: var(--bg-subtle); padding: 40px 0; }
+    @media (min-width: 1024px) { .contact-quick { display: none; } }
+    .contact-quick__grid { display: grid; gap: 12px; }
+    .tile {
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
+      transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+      box-shadow: var(--shadow-card);
+    }
+    .tile:active { transform: scale(0.99); }
+    .tile:hover { border-color: var(--text-primary); box-shadow: var(--shadow-card-hover); }
+    .tile__icon {
+      flex: 0 0 48px; width: 48px; height: 48px;
+      display: grid; place-items: center;
+      background: var(--bg-subtle); color: var(--text-primary);
+      border-radius: 12px;
+    }
+    .tile--whatsapp { border-left: 4px solid var(--whatsapp); }
+    .tile--whatsapp .tile__icon { background: var(--whatsapp); color: #fff; }
+    .tile__body { flex: 1; min-width: 0; }
+    .tile__label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--text-tertiary);
+      margin-bottom: 2px;
+    }
+    .tile__label--accent { color: var(--whatsapp-dark); }
+    .tile__value { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+    .tile__meta { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+    .tile__chevron { color: var(--text-tertiary); flex-shrink: 0; }
+
+    /* ══════ Services ══════ */
+    .services { background: var(--bg-elevated); }
+    .service-list { display: flex; flex-direction: column; gap: 14px; }
+    @media (min-width: 1024px) {
+      .service-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    }
+    .service {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+    }
+    .service:hover { border-color: var(--text-primary); box-shadow: var(--shadow-card-hover); transform: translateY(-2px); }
+    .service__photo {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background-color: var(--bg-subtle);
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .service__photo--climatizacao { background-image: url('assets/mdm-service-hvac-electrical.webp'); background-position: center 20%; }
+    .service__photo--eletricidade { background-image: url('assets/mdm-service-hvac-electrical.webp'); background-position: center 80%; }
+    .service__photo--ventilacao {
+      background-image:
+        linear-gradient(135deg, rgba(42,40,37,0.4), rgba(42,40,37,0.7)),
+        linear-gradient(135deg, #6b8e9c 0%, #4a6975 50%, #2e4854 100%);
+    }
+    .service__photo--ventilacao::after {
+      content: 'PLACEHOLDER · substituir com foto real';
+      position: absolute; bottom: 8px; left: 8px;
+      padding: 4px 8px;
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      font-size: 9px; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; border-radius: 4px;
+    }
+    .service__photo--manutencao { background-image: url('assets/mdm-contact-operations.webp'); background-position: center; }
+    .service__header {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 18px; width: 100%; text-align: left;
+    }
+    @media (min-width: 1024px) {
+      .service__header { flex-direction: column; gap: 12px; padding: 20px; }
+    }
+    .service__icon {
+      flex-shrink: 0; width: 36px; height: 36px;
+      display: grid; place-items: center;
+      background: var(--accent-soft); color: var(--accent);
+      border-radius: 8px;
+    }
+    .service__title-wrap { flex: 1; min-width: 0; }
+    .service__eyebrow {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-tertiary);
+      margin-bottom: 4px;
+    }
+    .service__title { font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 18px; color: var(--text-primary); }
+    .service__desc { font-size: 14px; color: var(--text-secondary); margin-top: 6px; display: none; }
+    @media (min-width: 1024px) { .service__desc { display: block; } }
+    .service__chevron { color: var(--text-tertiary); transition: transform var(--t-med) var(--ease); flex-shrink: 0; margin-top: 8px; }
+    @media (min-width: 1024px) { .service__chevron { display: none; } }
+    .service[open] .service__chevron { transform: rotate(180deg); }
+    .service__body { max-height: 0; overflow: hidden; transition: max-height var(--t-med) var(--ease); }
+    @media (min-width: 1024px) { .service__body { max-height: none; } }
+    .service[open] .service__body { max-height: 380px; }
+    .service__body-inner { padding: 0 18px 18px; }
+    @media (min-width: 1024px) { .service__body-inner { padding: 0 20px 20px; } }
+    .service__bullets {
+      list-style: none; padding: 0;
+      margin: 0 0 16px;
+      border-top: 1px solid var(--border-soft);
+      padding-top: 14px;
+    }
+    @media (min-width: 1024px) { .service__bullets { border-top: 0; padding-top: 0; } }
+    .service__bullets li {
+      font-size: 14px; color: var(--text-secondary);
+      padding: 6px 0 6px 18px; position: relative;
+    }
+    .service__bullets li::before {
+      content: ''; position: absolute; left: 0; top: 14px;
+      width: 5px; height: 5px; background: var(--accent); border-radius: 50%;
+    }
+
+    /* ══════ Multi-brand supplier strip ══════ */
+    .suppliers { background: var(--bg-base); padding: 40px 0; }
+    .suppliers__eyebrow { color: var(--text-tertiary); margin-bottom: 18px; }
+    .suppliers__scroller {
+      display: flex; gap: 10px; overflow-x: auto;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 8px;
+      margin: 0 calc(var(--pad-x) * -1);
+      padding-left: var(--pad-x); padding-right: var(--pad-x);
+      scrollbar-width: thin;
+    }
+    @media (min-width: 768px) {
+      .suppliers__scroller { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; gap: 12px; }
+    }
+    .supplier {
+      flex-shrink: 0;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px 18px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-pill);
+      font-family: 'Archivo', sans-serif; font-weight: 700;
+      font-size: 13px; color: var(--text-secondary);
+      letter-spacing: -0.01em;
+      filter: grayscale(0.5);
+      opacity: 0.85;
+      transition: opacity var(--t-fast) var(--ease), filter var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+    }
+    .supplier:hover { opacity: 1; filter: grayscale(0); border-color: var(--text-primary); }
+    .supplier__logo { height: 18px; width: auto; }
+    .supplier__mark {
+      display: inline-block; width: 14px; height: 14px;
+      background: currentColor; border-radius: 2px;
+    }
+    .supplier__placeholder-note { font-size: 11px; color: var(--text-tertiary); margin-top: 8px; font-style: italic; }
+
+    /* ══════ Setores ══════ */
+    .setores { background: var(--bg-elevated); }
+    .setores__scroller {
+      display: flex; gap: 14px; overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 12px;
+      margin: 0 calc(var(--pad-x) * -1);
+      padding-left: var(--pad-x); padding-right: var(--pad-x);
+      scrollbar-width: thin;
+    }
+    @media (min-width: 1024px) {
+      .setores__scroller {
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+        overflow: visible; margin: 0; padding: 0;
+      }
+    }
+    .setor {
+      flex: 0 0 78%;
+      scroll-snap-align: start;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      transition: border-color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+    }
+    @media (min-width: 1024px) { .setor { flex: none; } }
+    .setor:hover { border-color: var(--text-primary); transform: translateY(-2px); box-shadow: var(--shadow-card-hover); }
+    .setor__photo {
+      width: 100%; aspect-ratio: 4 / 3;
+      background-color: var(--bg-subtle);
+      background-size: cover; background-position: center;
+      position: relative;
+    }
+    .setor__photo--industria {
+      background-image:
+        linear-gradient(160deg, rgba(255,255,255,0.05), rgba(0,0,0,0.35)),
+        linear-gradient(160deg, #6b7280 0%, #374151 100%);
+    }
+    .setor__photo--escritorios {
+      background-image:
+        linear-gradient(160deg, rgba(255,255,255,0.1), rgba(0,0,0,0.30)),
+        linear-gradient(160deg, #d1c7b7 0%, #8b7d6b 100%);
+    }
+    .setor__photo--condominios {
+      background-image:
+        linear-gradient(160deg, rgba(255,255,255,0.05), rgba(0,0,0,0.35)),
+        linear-gradient(160deg, #c8b48a 0%, #7a5d3a 100%);
+    }
+    .setor__photo--parque {
+      background-image:
+        linear-gradient(160deg, rgba(255,255,255,0.10), rgba(0,0,0,0.35)),
+        linear-gradient(160deg, #4a90a4 0%, #1e3a4a 100%);
+    }
+    .setor__placeholder-badge {
+      position: absolute; top: 10px; left: 10px;
+      padding: 4px 8px;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; border-radius: 4px;
+    }
+    .setor__icon-bg {
+      position: absolute; bottom: 16px; left: 16px;
+      color: rgba(255,255,255,0.65);
+    }
+    .setor__body { padding: 18px 18px 22px; }
+    .setor__title { font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 18px; margin-bottom: 6px; }
+    .setor__desc { font-size: 14px; color: var(--text-secondary); }
+
+    /* ══════ Empresa ══════ */
+    .empresa { background: var(--bg-base); }
+    .empresa__grid { display: grid; gap: 32px; }
+    @media (min-width: 1024px) { .empresa__grid { grid-template-columns: 1.1fr 1fr; align-items: center; gap: 56px; } }
+    .empresa__photo {
+      width: 100%; aspect-ratio: 4 / 3;
+      background-image: url('assets/mdm-contact-operations.webp');
+      background-size: cover; background-position: center;
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+    }
+    .values { display: grid; gap: 14px; margin-top: 24px; }
+    .value {
+      padding: 20px 22px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-card);
+      border-left: 3px solid var(--accent);
+      box-shadow: var(--shadow-card);
+    }
+    .value__title { font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 17px; margin-bottom: 4px; }
+    .value__desc { font-size: 14px; color: var(--text-secondary); }
+
+    /* ══════ Trust numbers band ══════ */
+    .trust-numbers { background: var(--bg-subtle); padding: 48px 0; }
+    @media (min-width: 1024px) { .trust-numbers { padding: 72px 0; } }
+    .trust-numbers__grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px 16px;
+    }
+    @media (min-width: 768px) { .trust-numbers__grid { grid-template-columns: repeat(4, 1fr); gap: 16px; } }
+    .stat { text-align: center; }
+    .stat__icon { display: inline-flex; color: var(--text-tertiary); margin-bottom: 8px; }
+    .stat__num {
+      font-family: 'Archivo', sans-serif; font-weight: 700;
+      font-size: clamp(2rem, 8vw, 3rem); line-height: 1;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+    .stat__label {
+      font-size: 12px; font-weight: 500;
+      color: var(--text-secondary);
+      margin-top: 8px; line-height: 1.4;
+      max-width: 14ch; margin-left: auto; margin-right: auto;
+    }
+
+    /* ══════ Process flow ══════ */
+    .process { background: var(--bg-base); padding-bottom: 0; }
+    .process__steps {
+      display: grid; gap: 18px;
+      position: relative;
+      margin-bottom: 28px;
+    }
+    @media (min-width: 768px) { .process__steps { grid-template-columns: repeat(4, 1fr); gap: 16px; } }
+    .step {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 16px 18px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
+    }
+    @media (min-width: 768px) { .step { flex-direction: column; align-items: flex-start; padding: 20px; } }
+    .step__num {
+      flex-shrink: 0;
+      width: 32px; height: 32px;
+      display: grid; place-items: center;
+      background: var(--accent); color: #fff;
+      border-radius: 50%;
+      font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 14px;
+    }
+    .step__body { flex: 1; }
+    .step__title { font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+    .step__meta { font-size: 13px; color: var(--text-secondary); }
+    .reassurance {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px;
+      background: var(--accent-soft); color: var(--accent);
+      border-radius: var(--radius-pill);
+      font-size: 13px; font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    /* ══════ Orçamento (form) ══════ */
+    .orcamento { background: var(--bg-base); padding-top: 24px; }
+    .compose-chrome { display: contents; }
+    @media (min-width: 1024px) {
+      .compose-chrome {
+        display: block;
+        max-width: 720px; margin: 0 auto;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-soft);
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(42,40,37,0.10), 0 4px 12px rgba(42,40,37,0.04);
+      }
+      .compose-chrome__bar {
+        display: flex; align-items: center; gap: 8px;
+        padding: 12px 16px;
+        background: #ecebe6;
+        border-bottom: 1px solid var(--border-soft);
+      }
+      .compose-chrome__dots { display: flex; gap: 6px; }
+      .compose-chrome__dot { width: 12px; height: 12px; border-radius: 50%; }
+      .compose-chrome__dot--red { background: #ff5f57; }
+      .compose-chrome__dot--yellow { background: #febc2e; }
+      .compose-chrome__dot--green { background: #28c840; }
+      .compose-chrome__title { flex: 1; text-align: center; font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+      .compose-chrome__to { padding: 10px 20px; font-size: 13px; color: var(--text-secondary); border-bottom: 1px solid var(--border-soft); }
+      .compose-chrome__to strong { color: var(--text-primary); font-weight: 600; }
+    }
+    .compose-chrome__bar, .compose-chrome__to { display: none; }
+    @media (min-width: 1024px) { .compose-chrome__bar, .compose-chrome__to { display: flex; } .compose-chrome__to { display: block; } }
+    .form-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+    }
+    @media (min-width: 1024px) {
+      .form-card { border: 0; border-radius: 0; padding: 28px 32px; box-shadow: none; }
+    }
+    .field { margin-bottom: 18px; }
+    .field__label {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 13px; font-weight: 600;
+      color: var(--text-primary); margin-bottom: 8px;
+    }
+    .field__required { color: var(--accent); }
+    .field__input, .field__textarea {
+      width: 100%; min-height: 48px;
+      padding: 12px 14px; font: inherit; font-size: 16px;
+      color: var(--text-primary); background: var(--bg-base);
+      border: 1px solid var(--border-soft); border-radius: var(--radius-input);
+      transition: border-color var(--t-fast) var(--ease), background var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+    }
+    .field__input:focus, .field__textarea:focus {
+      outline: 0; border-color: var(--text-primary);
+      background: var(--bg-elevated);
+      box-shadow: 0 0 0 3px rgba(42,40,37,0.08);
+    }
+    .field__input[aria-invalid="true"], .field__textarea[aria-invalid="true"] {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .field__textarea { min-height: 104px; resize: vertical; line-height: 1.5; }
+    .field__error { display: none; font-size: 13px; color: var(--accent); margin-top: 6px; }
+    .field[data-invalid="true"] .field__error { display: block; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 11px 16px; min-height: 44px;
+      background: var(--bg-base);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-pill);
+      font-size: 14px; font-weight: 500; color: var(--text-primary);
+      transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+    }
+    .chip:hover { border-color: var(--text-primary); }
+    .chip[aria-checked="true"] {
+      background: var(--text-primary); color: #fff; border-color: var(--text-primary);
+    }
+
+    .hp { position: absolute !important; left: -9999px !important; width: 1px; height: 1px; opacity: 0; }
+
+    .b2b-toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; padding: 14px 16px;
+      background: var(--bg-base);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-input);
+      font-size: 14px; font-weight: 600; color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+    .b2b-toggle:hover { border-color: var(--text-primary); }
+    .b2b-toggle__chevron { transition: transform var(--t-med) var(--ease); }
+    .b2b-toggle[aria-expanded="true"] .b2b-toggle__chevron { transform: rotate(180deg); }
+    .b2b-fields {
+      display: none; padding: 18px;
+      background: var(--bg-base); border-radius: var(--radius-input);
+      margin-bottom: 18px;
+    }
+    .b2b-fields[data-open="true"] { display: block; }
+
+    .form-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+    .form-escape { text-align: center; font-size: 14px; color: var(--text-secondary); padding: 8px 0; }
+    .form-escape a { color: var(--whatsapp-dark); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+    .form-success { display: none; padding: 28px; background: var(--bg-elevated); border: 1px solid var(--success); border-radius: var(--radius-card); text-align: center; }
+    .form-success[data-show="true"] { display: block; }
+    .form-success__icon { width: 56px; height: 56px; margin: 0 auto 16px; background: var(--success); color: #fff; border-radius: 50%; display: grid; place-items: center; }
+    .form-success__title { font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 20px; margin-bottom: 8px; }
+    .form-success__body { font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; }
+    .form-fineprint { font-size: 12px; color: var(--text-tertiary); margin-top: 14px; text-align: center; }
+
+    /* ══════ Testimonial ══════ */
+    .testimonial { background: var(--bg-subtle); padding: 48px 0; }
+    .testimonial__card {
+      background: var(--bg-elevated);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius-card);
+      padding: 28px;
+      box-shadow: var(--shadow-card);
+      max-width: 720px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .testimonial__quote-mark {
+      position: absolute; top: 16px; right: 24px;
+      font-family: 'Archivo', sans-serif; font-weight: 700;
+      font-size: 64px; line-height: 1; color: var(--accent-soft);
+      pointer-events: none;
+    }
+    .testimonial__placeholder-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      background: var(--accent-soft); color: var(--accent);
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    .testimonial__quote { font-family: 'Archivo', sans-serif; font-style: italic; font-weight: 500; font-size: 17px; line-height: 1.55; color: var(--text-primary); margin-bottom: 18px; }
+    @media (min-width: 768px) { .testimonial__quote { font-size: 19px; } }
+    .testimonial__attribution { display: flex; align-items: center; gap: 12px; }
+    .testimonial__avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--bg-subtle); color: var(--text-primary);
+      display: grid; place-items: center;
+      font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 14px;
+    }
+    .testimonial__name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .testimonial__role { font-size: 13px; color: var(--text-secondary); }
+
+    /* ══════ Contacto completo ══════ */
+    .contacto { background: var(--bg-base); }
+    .contacto__layout { display: grid; gap: 24px; }
+    @media (min-width: 1024px) { .contacto__layout { grid-template-columns: 1.4fr 1fr; align-items: start; gap: 56px; } }
+    .contacto__grid { display: grid; gap: 14px; }
+    @media (min-width: 768px) and (max-width: 1023px) { .contacto__grid { grid-template-columns: repeat(3, 1fr); } }
+    .map-block {
+      margin-top: 24px; padding: 20px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
+      display: flex; flex-direction: column; gap: 14px;
+      box-shadow: var(--shadow-card);
+    }
+    @media (min-width: 768px) { .map-block { flex-direction: row; align-items: center; } }
+    .map-block__img {
+      width: 100%; height: 140px;
+      background: linear-gradient(135deg, #e8e3d8 0%, #d4cfc3 100%);
+      border-radius: 10px; position: relative; overflow: hidden;
+      flex-shrink: 0;
+    }
+    @media (min-width: 768px) { .map-block__img { width: 240px; height: 120px; } }
+    .map-block__img::before {
+      content: ''; position: absolute; inset: 0;
+      background-image:
+        linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px),
+        linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .map-block__pin {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -100%); color: var(--accent);
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+    }
+    .map-block__title { font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+    .map-block__sub { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
+    .map-block__hours { font-size: 13px; color: var(--text-tertiary); }
+
+    .qr-card {
+      display: none;
+      padding: 24px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
+      text-align: center;
+      box-shadow: var(--shadow-card);
+    }
+    @media (min-width: 1024px) { .qr-card { display: block; } }
+    .qr-card__img { width: 200px; height: 200px; margin: 0 auto 14px; }
+    .qr-card__label { font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 14px; color: var(--text-primary); }
+    .qr-card__sub { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+
+    /* ══════ Footer ══════ */
+    footer { padding: 40px 0 32px; background: var(--bg-dark); color: #d4d0c9; font-size: 13px; }
+    .footer__grid { display: flex; flex-direction: column; gap: 24px; }
+    @media (min-width: 768px) { .footer__grid { flex-direction: row; align-items: flex-start; justify-content: space-between; } }
+    .footer__brand-block { display: flex; align-items: center; gap: 14px; }
+    .footer__logo { height: 44px; width: auto; opacity: 0.95; filter: brightness(0) invert(1); }
+    .footer__brand-text { color: #fff; font-weight: 600; font-family: 'Archivo', sans-serif; font-size: 15px; margin-bottom: 4px; }
+    .footer__meta { color: #8a857d; font-size: 12px; line-height: 1.6; }
+    .footer__meta a { color: #d4d0c9; }
+    .footer__meta a:hover { color: #fff; }
+
+    /* ══════ Sticky bottom action bar ══════ */
+    .bottom-bar {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+      display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 8px;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      background: rgba(250, 248, 244, 0.97);
+      backdrop-filter: saturate(180%) blur(14px);
+      -webkit-backdrop-filter: saturate(180%) blur(14px);
+      border-top: 1px solid var(--border-soft);
+      box-shadow: var(--shadow-bar);
+      transform: translateY(120%); opacity: 0;
+      transition: transform var(--t-med) var(--ease), opacity var(--t-med) var(--ease);
+    }
+    .bottom-bar[data-visible="true"] { transform: translateY(0); opacity: 1; }
+    @media (min-width: 1024px) { .bottom-bar { display: none; } }
+    .bbtn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+      min-height: 52px; padding: 8px 6px;
+      background: transparent; color: var(--text-primary);
+      border: 1.5px solid transparent;
+      border-radius: var(--radius-btn);
+      font-size: 12px; font-weight: 600; letter-spacing: 0.01em;
+      transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+    }
+    .bbtn:active { background: var(--bg-subtle); }
+    .bbtn--whatsapp { background: var(--whatsapp); color: #fff; border-color: var(--whatsapp); }
+    .bbtn--whatsapp:active { background: var(--whatsapp-dark); border-color: var(--whatsapp-dark); }
+    .bbtn__icon { line-height: 0; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0ms !important;
+        transition-duration: 0ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    /* ══════ Heatmap debug overlay (?heatmap=debug) ══════ */
+    body.heatmap-debug [data-heat-tier="1"] { outline: 2px solid #ef4444 !important; outline-offset: 2px; }
+    body.heatmap-debug [data-heat-tier="2"] { outline: 2px solid #f59e0b !important; outline-offset: 2px; }
+    body.heatmap-debug [data-heat-tier="3"] { outline: 2px solid #eab308 !important; outline-offset: 2px; }
+    body.heatmap-debug [data-heat-tier="4"] { outline: 2px dashed #6b7280 !important; outline-offset: 2px; }
+    .heatmap-legend {
+      display: none;
+      position: fixed; top: 12px; right: 12px; z-index: 9999;
+      background: rgba(255,255,255,0.97);
+      border: 1px solid var(--border-soft);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 12px; line-height: 1.6;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+      max-width: 240px;
+    }
+    body.heatmap-debug .heatmap-legend { display: block; }
+    .heatmap-legend__title { font-weight: 700; font-family: 'Archivo', sans-serif; font-size: 12px; margin-bottom: 6px; }
+    .heatmap-legend__row { display: flex; align-items: center; gap: 8px; }
+    .heatmap-legend__swatch { width: 14px; height: 4px; border-radius: 2px; }
+    .heatmap-legend__close { float: right; cursor: pointer; color: var(--text-tertiary); margin-left: 8px; }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Saltar para o conteúdo</a>
+
+  <div class="heatmap-legend" id="heatmap-legend" role="complementary" aria-label="Legenda do heatmap previsto">
+    <span class="heatmap-legend__close" id="heatmap-close" aria-label="Fechar legenda">×</span>
+    <div class="heatmap-legend__title">Touch heatmap (previsto)</div>
+    <div class="heatmap-legend__row"><span class="heatmap-legend__swatch" style="background:#ef4444"></span> Tier 1 — alta intensidade</div>
+    <div class="heatmap-legend__row"><span class="heatmap-legend__swatch" style="background:#f59e0b"></span> Tier 2 — média</div>
+    <div class="heatmap-legend__row"><span class="heatmap-legend__swatch" style="background:#eab308"></span> Tier 3 — baixa</div>
+    <div class="heatmap-legend__row"><span class="heatmap-legend__swatch" style="background:#6b7280;outline:1px dashed #6b7280"></span> Tier 4 — quase zero</div>
+  </div>
+
+  <header class="topbar">
+    <div class="container topbar__inner">
+      <a href="#topo" class="brand" aria-label="MDM Assist — início" data-heat-tier="4">
+        <img class="brand__logo" src="assets/mdm-logo-original.png" alt="MDM Assist">
+        <span class="brand__wordmark">MDM Assist</span>
+      </a>
+      <a href="#contacto" class="topbar__link" data-heat-tier="3">Contacto</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ═══ HERO ═══ -->
+    <section class="hero" id="topo" aria-labelledby="hero-title">
+      <div class="hero__bg" role="img" aria-label="Técnico MDM Assist a trabalhar em equipamento de ar condicionado"></div>
+      <div class="hero__overlay" aria-hidden="true"></div>
+      <div class="container">
+        <div class="trust-strip" aria-label="Sinais de confiança">
+          <span class="trust-strip__pill">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            Desde 1991
+          </span>
+          <span>Lisboa</span>
+          <span class="trust-strip__sep" aria-hidden="true">·</span>
+          <span>Mitsubishi Electric authorized</span>
+        </div>
+        <h1 class="hero__title" id="hero-title">
+          O seu ar condicionado,<br>
+          a sua eletricidade,<br>
+          a sua ventilação<span class="accent">.</span>
+        </h1>
+        <p class="hero__sub">
+          Assistência técnica em Lisboa. Resposta no mesmo dia, com transparência e relatório claro.
+        </p>
+        <div class="hero__ctas" id="hero-ctas">
+          <a class="btn btn--whatsapp btn--lg btn--block" href="https://wa.me/351910307579?text=Ol%C3%A1%20MDM%20Assist%2C%20preciso%20de%20assist%C3%AAncia%20t%C3%A9cnica." rel="noopener" target="_blank" aria-label="Falar no WhatsApp — abre WhatsApp" data-heat-tier="1">
+            <span class="btn__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+            </span>
+            Falar no WhatsApp
+          </a>
+          <a class="btn btn--outline-light btn--lg btn--block" href="tel:+351910307579" aria-label="Ligar para 910 307 579" data-heat-tier="1">
+            <span class="btn__icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </span>
+            Ligar 910&nbsp;307&nbsp;579
+          </a>
+        </div>
+        <div class="hero__meta">
+          <span class="hero__meta-dot" aria-hidden="true"></span>
+          Resposta típica em 2h em horário útil
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ MITSUBISHI PARTNER BAND ═══ -->
+    <section class="partner-band" aria-labelledby="partner-title">
+      <div class="container partner-band__inner">
+        <img class="partner-band__logo" src="assets/mitsubishi-electric-logo.png" alt="Mitsubishi Electric — fornecedor autorizado">
+        <div class="partner-band__body">
+          <div class="partner-band__eyebrow">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            Parceiro oficial
+          </div>
+          <h2 class="partner-band__title" id="partner-title">
+            Instalação e manutenção certificada Mitsubishi Electric em Lisboa, desde 1991.
+          </h2>
+          <div class="partner-band__ctas">
+            <a class="btn btn--ghost btn--sm" href="#empresa" data-heat-tier="3">Saber mais →</a>
+            <a class="btn btn--primary btn--sm" href="#orcamento" data-heat-tier="2">Pedir orçamento</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CONTACTO RÁPIDO (mobile) ═══ -->
+    <section class="contact-quick" aria-labelledby="contact-quick-title">
+      <div class="container">
+        <h2 id="contact-quick-title" class="sr-only">Contacto rápido</h2>
+        <div class="contact-quick__grid">
+          <a class="tile tile--whatsapp" href="https://wa.me/351910307579" rel="noopener" target="_blank" aria-label="Falar no WhatsApp" data-heat-tier="1">
+            <span class="tile__icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+            </span>
+            <span class="tile__body">
+              <span class="tile__label tile__label--accent">WhatsApp · recomendado</span>
+              <span class="tile__value">+351&nbsp;910&nbsp;307&nbsp;579</span>
+              <span class="tile__meta">Tipicamente respondemos em 2h</span>
+            </span>
+            <svg class="tile__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+          <a class="tile" href="tel:+351910307579" aria-label="Ligar para 910 307 579" data-heat-tier="1">
+            <span class="tile__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            </span>
+            <span class="tile__body">
+              <span class="tile__label">Telefone</span>
+              <span class="tile__value">+351&nbsp;910&nbsp;307&nbsp;579</span>
+              <span class="tile__meta">Seg–Sex 9h–18h</span>
+            </span>
+            <svg class="tile__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ SERVIÇOS ═══ -->
+    <section class="services" id="servicos" aria-labelledby="servicos-title">
+      <div class="container">
+        <span class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Serviços</span>
+        <h2 id="servicos-title" class="section-title">Tudo o que o seu edifício precisa.</h2>
+        <p class="section-lead">Climatização, eletricidade, ventilação e manutenção — uma única equipa, comunicação clara, fatura com dados completos.</p>
+
+        <div class="service-list" id="service-list">
+          <article class="service" data-service="climatizacao">
+            <div class="service__photo service__photo--climatizacao" role="img" aria-label="Unidade de ar condicionado instalada"></div>
+            <button class="service__header" type="button" aria-expanded="false" aria-controls="srv-body-climatizacao" data-heat-tier="1">
+              <span class="service__icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+              </span>
+              <span class="service__title-wrap">
+                <span class="service__eyebrow">Climatização</span>
+                <span class="service__title">Ar Condicionado</span>
+                <span class="service__desc">Instalação, manutenção e reparação multi-marca.</span>
+              </span>
+              <svg class="service__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="service__body" id="srv-body-climatizacao" role="region">
+              <div class="service__body-inner">
+                <ul class="service__bullets">
+                  <li>Diagnóstico técnico</li>
+                  <li>Manutenção programada</li>
+                  <li>Equipamentos multi-marca</li>
+                </ul>
+                <a class="btn btn--primary btn--sm" href="#orcamento" data-srv-cta="climatizacao" data-heat-tier="2">Pedir orçamento</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="service" data-service="eletricidade">
+            <div class="service__photo service__photo--eletricidade" role="img" aria-label="Quadro elétrico e instalação"></div>
+            <button class="service__header" type="button" aria-expanded="false" aria-controls="srv-body-eletricidade" data-heat-tier="1">
+              <span class="service__icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </span>
+              <span class="service__title-wrap">
+                <span class="service__eyebrow">Infraestrutura</span>
+                <span class="service__title">Eletricidade</span>
+                <span class="service__desc">Quadros, avarias e apoio a edifícios.</span>
+              </span>
+              <svg class="service__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="service__body" id="srv-body-eletricidade" role="region">
+              <div class="service__body-inner">
+                <ul class="service__bullets">
+                  <li>Quadros elétricos</li>
+                  <li>Avarias e reparações</li>
+                  <li>Apoio a edifícios</li>
+                </ul>
+                <a class="btn btn--primary btn--sm" href="#orcamento" data-srv-cta="eletricidade" data-heat-tier="2">Pedir orçamento</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="service" data-service="ventilacao">
+            <div class="service__photo service__photo--ventilacao" role="img" aria-label="Sistema de ventilação — placeholder"></div>
+            <button class="service__header" type="button" aria-expanded="false" aria-controls="srv-body-ventilacao" data-heat-tier="1">
+              <span class="service__icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2"/><path d="M12.59 19.41A2 2 0 1 0 14 16H2"/><path d="M17.73 7.73A2.5 2.5 0 1 1 19.5 12H2"/></svg>
+              </span>
+              <span class="service__title-wrap">
+                <span class="service__eyebrow">Qualidade do ar</span>
+                <span class="service__title">Ventilação</span>
+                <span class="service__desc">Sistemas de extração, condutas e revisão.</span>
+              </span>
+              <svg class="service__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="service__body" id="srv-body-ventilacao" role="region">
+              <div class="service__body-inner">
+                <ul class="service__bullets">
+                  <li>Sistemas de extração</li>
+                  <li>Condutas e unidades</li>
+                  <li>Revisão funcional</li>
+                </ul>
+                <a class="btn btn--primary btn--sm" href="#orcamento" data-srv-cta="ventilacao" data-heat-tier="2">Pedir orçamento</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="service" data-service="manutencao">
+            <div class="service__photo service__photo--manutencao" role="img" aria-label="Equipa MDM Assist em operação"></div>
+            <button class="service__header" type="button" aria-expanded="false" aria-controls="srv-body-manutencao" data-heat-tier="1">
+              <span class="service__icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.121 2.121 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              </span>
+              <span class="service__title-wrap">
+                <span class="service__eyebrow">Assistência</span>
+                <span class="service__title">Manutenção técnica</span>
+                <span class="service__desc">Planos preventivos e resposta técnica.</span>
+              </span>
+              <svg class="service__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="service__body" id="srv-body-manutencao" role="region">
+              <div class="service__body-inner">
+                <ul class="service__bullets">
+                  <li>Planos preventivos</li>
+                  <li>Resposta técnica</li>
+                  <li>Relatórios claros</li>
+                </ul>
+                <a class="btn btn--primary btn--sm" href="#orcamento" data-srv-cta="manutencao" data-heat-tier="2">Pedir orçamento</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ MULTI-BRAND SUPPLIER STRIP ═══ -->
+    <section class="suppliers" aria-labelledby="suppliers-title">
+      <div class="container">
+        <h3 id="suppliers-title" class="eyebrow suppliers__eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Serviço multimarca</h3>
+        <div class="suppliers__scroller" role="list" aria-label="Marcas de equipamento que servimos">
+          <!-- PLACEHOLDER: wordmarks rendered in Archivo as a faithful substitute. Replace with brand-approved SVG/PNG before production. -->
+          <span class="supplier" role="listitem">
+            <img class="supplier__logo" src="assets/mitsubishi-electric-logo.png" alt="Mitsubishi Electric">
+          </span>
+          <span class="supplier" role="listitem" style="color:#0086D6">Daikin</span>
+          <span class="supplier" role="listitem" style="color:#A50034">LG</span>
+          <span class="supplier" role="listitem" style="color:#1428A0">SAMSUNG</span>
+          <span class="supplier" role="listitem" style="color:#E60012">TOSHIBA</span>
+          <span class="supplier" role="listitem" style="color:#000000">HITACHI</span>
+        </div>
+        <p class="supplier__placeholder-note">Logótipos das marcas a substituir pelos ficheiros oficiais antes de publicação.</p>
+      </div>
+    </section>
+
+    <!-- ═══ SETORES ═══ -->
+    <section class="setores" id="setores" aria-labelledby="setores-title">
+      <div class="container">
+        <span class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Setores</span>
+        <h2 id="setores-title" class="section-title">Para quem gere edifícios.</h2>
+        <p class="section-lead">Apoio técnico desenhado para o seu contexto — encontre-se.</p>
+        <div class="setores__scroller" role="region" aria-roledescription="carrossel" aria-label="Setores que servimos">
+          <article class="setor" data-heat-tier="3">
+            <div class="setor__photo setor__photo--industria" role="img" aria-label="Indústria — placeholder">
+              <span class="setor__placeholder-badge">Placeholder</span>
+              <span class="setor__icon-bg" aria-hidden="true">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22V8l5-3 5 3v14"/><path d="M12 11h10v11"/><path d="M16 15h2M16 19h2"/></svg>
+              </span>
+            </div>
+            <div class="setor__body">
+              <h3 class="setor__title">Indústria</h3>
+              <p class="setor__desc">Apoio onde continuidade, segurança e tempo de resposta são críticos.</p>
+            </div>
+          </article>
+          <article class="setor" data-heat-tier="3">
+            <div class="setor__photo setor__photo--escritorios" role="img" aria-label="Escritórios — placeholder">
+              <span class="setor__placeholder-badge">Placeholder</span>
+              <span class="setor__icon-bg" aria-hidden="true">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+              </span>
+            </div>
+            <div class="setor__body">
+              <h3 class="setor__title">Escritórios</h3>
+              <p class="setor__desc">Manutenção responsiva sem disrupção do dia-a-dia da equipa.</p>
+            </div>
+          </article>
+          <article class="setor" data-heat-tier="3">
+            <div class="setor__photo setor__photo--condominios" role="img" aria-label="Condomínios — placeholder">
+              <span class="setor__placeholder-badge">Placeholder</span>
+              <span class="setor__icon-bg" aria-hidden="true">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 9v2M9 14v2M15 9v2M15 14v2"/></svg>
+              </span>
+            </div>
+            <div class="setor__body">
+              <h3 class="setor__title">Condomínios</h3>
+              <p class="setor__desc">Comunicação transparente e intervenção responsável.</p>
+            </div>
+          </article>
+          <article class="setor" data-heat-tier="3">
+            <div class="setor__photo setor__photo--parque" role="img" aria-label="Parque das Nações — placeholder">
+              <span class="setor__placeholder-badge">Placeholder</span>
+              <span class="setor__icon-bg" aria-hidden="true">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </span>
+            </div>
+            <div class="setor__body">
+              <h3 class="setor__title">Parque das Nações</h3>
+              <p class="setor__desc">Presença local, próxima de empresas e habitação.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ EMPRESA ═══ -->
+    <section class="empresa" id="empresa" aria-labelledby="empresa-title">
+      <div class="container empresa__grid">
+        <div>
+          <span class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Empresa</span>
+          <h2 id="empresa-title" class="section-title">Uma base local com ambição técnica.</h2>
+          <p class="section-lead">MDM — Manuel Domingos Melancia Lda. Assistência técnica em ar condicionado, eletricidade e ventilação desde 1991. Sediados em Lisboa, próximos das empresas, condomínios e famílias a quem servimos.</p>
+          <div class="values">
+            <div class="value">
+              <h3 class="value__title">Transparência</h3>
+              <p class="value__desc">Comunicação clara em cada fase do processo técnico.</p>
+            </div>
+            <div class="value">
+              <h3 class="value__title">Versatilidade</h3>
+              <p class="value__desc">Climatização, ventilação, eletricidade e gás — uma única equipa.</p>
+            </div>
+            <div class="value">
+              <h3 class="value__title">Confiança</h3>
+              <p class="value__desc">Relações de longo prazo com empresas, condomínios e habitação.</p>
+            </div>
+          </div>
+        </div>
+        <div class="empresa__photo" role="img" aria-label="Equipa MDM Assist em operação"></div>
+      </div>
+    </section>
+
+    <!-- ═══ TRUST NUMBERS ═══ -->
+    <section class="trust-numbers" aria-labelledby="numbers-title">
+      <div class="container">
+        <h2 id="numbers-title" class="sr-only">MDM em números</h2>
+        <div class="trust-numbers__grid">
+          <div class="stat">
+            <span class="stat__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </span>
+            <div class="stat__num">30+</div>
+            <div class="stat__label">anos desde 1991</div>
+          </div>
+          <div class="stat">
+            <span class="stat__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            </span>
+            <div class="stat__num">4</div>
+            <div class="stat__label">serviços integrados</div>
+          </div>
+          <div class="stat">
+            <span class="stat__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </span>
+            <div class="stat__num">2h</div>
+            <div class="stat__label">resposta média</div>
+          </div>
+          <div class="stat">
+            <span class="stat__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </span>
+            <div class="stat__num">100%</div>
+            <div class="stat__label">Lisboa &amp; redondezas</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ ORÇAMENTO (process flow + form) ═══ -->
+    <section class="process" aria-labelledby="process-title">
+      <div class="container">
+        <span class="eyebrow eyebrow--accent"><span class="eyebrow__dot" aria-hidden="true"></span>Orçamento</span>
+        <h2 id="process-title" class="section-title">Como funciona o seu pedido.</h2>
+        <p class="section-lead">Quatro passos, sem letra miúda. Resposta em horas, visita técnica gratuita, orçamento por email em menos de 24h úteis.</p>
+        <div class="process__steps">
+          <div class="step">
+            <span class="step__num">1</span>
+            <div class="step__body">
+              <div class="step__title">Pedido</div>
+              <div class="step__meta">Preenche o formulário ou WhatsApp.</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step__num">2</span>
+            <div class="step__body">
+              <div class="step__title">Resposta em 2h</div>
+              <div class="step__meta">Confirmação e dúvidas iniciais.</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step__num">3</span>
+            <div class="step__body">
+              <div class="step__title">Visita gratuita</div>
+              <div class="step__meta">Avaliação técnica sem compromisso.</div>
+            </div>
+          </div>
+          <div class="step">
+            <span class="step__num">4</span>
+            <div class="step__body">
+              <div class="step__title">Orçamento &lt;24h</div>
+              <div class="step__meta">Proposta clara por email.</div>
+            </div>
+          </div>
+        </div>
+        <span class="reassurance">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          Orçamento gratuito · sem compromisso · resposta em horário útil
+        </span>
+      </div>
+    </section>
+
+    <section class="orcamento" id="orcamento" aria-labelledby="orcamento-title">
+      <div class="container">
+        <div class="form-success" id="form-success" role="status" aria-live="polite" data-show="false">
+          <div class="form-success__icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h3 class="form-success__title" id="orcamento-title">Pedido recebido</h3>
+          <p class="form-success__body">Resposta tipicamente em 2h em horário útil. Para urgências:</p>
+          <a class="btn btn--whatsapp btn--lg btn--block" href="https://wa.me/351910307579" rel="noopener" target="_blank" data-heat-tier="1">Falar no WhatsApp</a>
+        </div>
+
+        <div class="compose-chrome">
+          <div class="compose-chrome__bar">
+            <div class="compose-chrome__dots" aria-hidden="true">
+              <span class="compose-chrome__dot compose-chrome__dot--red"></span>
+              <span class="compose-chrome__dot compose-chrome__dot--yellow"></span>
+              <span class="compose-chrome__dot compose-chrome__dot--green"></span>
+            </div>
+            <span class="compose-chrome__title">Nova mensagem — MDM Assist</span>
+            <span style="width:48px"></span>
+          </div>
+          <div class="compose-chrome__to">Para: <strong>MDM Assist — Assistência Técnica</strong></div>
+          <form class="form-card" id="quote-form" novalidate>
+            <div class="field" data-field="servico">
+              <label class="field__label">Serviço <span class="field__required" aria-label="obrigatório">*</span></label>
+              <div class="chips" role="radiogroup" aria-label="Serviço">
+                <button type="button" class="chip" role="radio" aria-checked="false" data-value="climatizacao" data-heat-tier="2">Ar Condicionado</button>
+                <button type="button" class="chip" role="radio" aria-checked="false" data-value="eletricidade" data-heat-tier="2">Eletricidade</button>
+                <button type="button" class="chip" role="radio" aria-checked="false" data-value="ventilacao" data-heat-tier="2">Ventilação</button>
+                <button type="button" class="chip" role="radio" aria-checked="false" data-value="manutencao" data-heat-tier="2">Manutenção</button>
+              </div>
+              <div class="field__error">Escolha um serviço.</div>
+            </div>
+
+            <div class="field" data-field="assunto">
+              <label class="field__label" for="f-assunto">Assunto <span class="field__required" aria-label="obrigatório">*</span></label>
+              <input class="field__input" id="f-assunto" name="assunto" type="text" autocomplete="off" required data-heat-tier="3">
+              <div class="field__error">Indique um assunto breve.</div>
+            </div>
+
+            <div class="field" data-field="mensagem">
+              <label class="field__label" for="f-mensagem">Mensagem <span class="field__required" aria-label="obrigatório">*</span></label>
+              <textarea class="field__textarea" id="f-mensagem" name="mensagem" rows="4" required data-heat-tier="3"></textarea>
+              <div class="field__error">Descreva brevemente a sua necessidade.</div>
+            </div>
+
+            <div class="field" data-field="nome">
+              <label class="field__label" for="f-nome">Nome <span class="field__required" aria-label="obrigatório">*</span></label>
+              <input class="field__input" id="f-nome" name="nome" type="text" autocomplete="name" required data-heat-tier="3">
+              <div class="field__error">Indique o seu nome.</div>
+            </div>
+
+            <div class="field" data-field="telefone">
+              <label class="field__label" for="f-telefone">Telefone <span class="field__required" aria-label="obrigatório">*</span></label>
+              <input class="field__input" id="f-telefone" name="telefone" type="tel" inputmode="tel" autocomplete="tel" required data-heat-tier="3">
+              <div class="field__error">Telefone para contacto.</div>
+            </div>
+
+            <div class="field" data-field="email">
+              <label class="field__label" for="f-email">Email <span class="field__required" aria-label="obrigatório">*</span></label>
+              <input class="field__input" id="f-email" name="email" type="email" inputmode="email" autocomplete="email" required data-heat-tier="3">
+              <div class="field__error">Email válido para resposta.</div>
+            </div>
+
+            <button class="b2b-toggle" type="button" id="b2b-toggle" aria-expanded="false" aria-controls="b2b-fields" data-heat-tier="3">
+              <span>Sou empresa <span style="color:var(--text-tertiary);font-weight:400">(opcional)</span></span>
+              <svg class="b2b-toggle__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="b2b-fields" id="b2b-fields" data-open="false">
+              <div class="field">
+                <label class="field__label" for="f-empresa">Empresa</label>
+                <input class="field__input" id="f-empresa" name="empresa" type="text" autocomplete="organization">
+              </div>
+              <div class="field">
+                <label class="field__label" for="f-nif">NIF</label>
+                <input class="field__input" id="f-nif" name="nif" type="text" inputmode="numeric" pattern="[0-9]{9}" maxlength="9" autocomplete="off">
+              </div>
+              <div class="field" style="margin-bottom:0">
+                <label class="field__label" for="f-localidade">Localidade</label>
+                <input class="field__input" id="f-localidade" name="localidade" type="text" autocomplete="address-level2">
+              </div>
+            </div>
+
+            <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+            <div class="form-actions">
+              <button class="btn btn--primary btn--lg btn--block" type="submit" data-heat-tier="1">Enviar pedido</button>
+              <p class="form-escape">Prefere falar agora? <a href="https://wa.me/351910307579" rel="noopener" target="_blank" data-heat-tier="2">WhatsApp →</a></p>
+            </div>
+            <p class="form-fineprint">Os seus dados são usados exclusivamente para responder ao pedido de orçamento.</p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TESTIMONIAL ═══ -->
+    <section class="testimonial" aria-labelledby="testimonial-title">
+      <div class="container">
+        <h2 id="testimonial-title" class="sr-only">Testemunho</h2>
+        <div class="testimonial__card">
+          <span class="testimonial__quote-mark" aria-hidden="true">“</span>
+          <span class="testimonial__placeholder-badge">Placeholder · usar testemunho real</span>
+          <blockquote class="testimonial__quote">
+            Resposta no mesmo dia, comunicação clara, orçamento sem surpresas. Já são quatro anos a manter o nosso edifício.
+          </blockquote>
+          <div class="testimonial__attribution">
+            <span class="testimonial__avatar" aria-hidden="true">AC</span>
+            <div>
+              <div class="testimonial__name">Administrador de condomínio</div>
+              <div class="testimonial__role">Parque das Nações</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CONTACTO COMPLETO ═══ -->
+    <section class="contacto" id="contacto" aria-labelledby="contacto-title">
+      <div class="container">
+        <span class="eyebrow"><span class="eyebrow__dot" aria-hidden="true"></span>Contacto</span>
+        <h2 id="contacto-title" class="section-title">Avaria ou pedido? Resposta em minutos.</h2>
+
+        <div class="contacto__layout">
+          <div>
+            <div class="contacto__grid">
+              <a class="tile tile--whatsapp" href="https://wa.me/351910307579" rel="noopener" target="_blank" data-heat-tier="1">
+                <span class="tile__icon" aria-hidden="true">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                </span>
+                <span class="tile__body">
+                  <span class="tile__label tile__label--accent">WhatsApp</span>
+                  <span class="tile__value">+351&nbsp;910&nbsp;307&nbsp;579</span>
+                  <span class="tile__meta">Resposta em 2h · 24/7 urgências</span>
+                </span>
+              </a>
+              <a class="tile" href="tel:+351218935050" data-heat-tier="2">
+                <span class="tile__icon" aria-hidden="true">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </span>
+                <span class="tile__body">
+                  <span class="tile__label">Telefone</span>
+                  <span class="tile__value">218&nbsp;935&nbsp;050</span>
+                  <span class="tile__meta">Seg–Sex 9h–18h</span>
+                </span>
+              </a>
+              <a class="tile" href="mailto:geral@mdmassist.com" data-heat-tier="2">
+                <span class="tile__icon" aria-hidden="true">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                </span>
+                <span class="tile__body">
+                  <span class="tile__label">Email</span>
+                  <span class="tile__value">geral@mdmassist.com</span>
+                  <span class="tile__meta">Resposta em 24h úteis</span>
+                </span>
+              </a>
+            </div>
+
+            <a class="map-block" href="https://maps.google.com/?q=Parque+das+Nações+Lisboa" rel="noopener" target="_blank" aria-label="Abrir morada no mapa" data-heat-tier="3">
+              <div class="map-block__img" aria-hidden="true">
+                <svg class="map-block__pin" width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-4.4 0-8 3.6-8 8 0 5.4 7 13 7.4 13.4.2.2.4.3.6.3s.4-.1.6-.3C13 21 20 13.4 20 8c0-4.4-3.6-8-8-8zm0 11.5c-1.9 0-3.5-1.6-3.5-3.5S10.1 4.5 12 4.5 15.5 6.1 15.5 8 13.9 11.5 12 11.5z"/></svg>
+              </div>
+              <div>
+                <div class="map-block__title">Parque das Nações</div>
+                <div class="map-block__sub">Lisboa, Portugal</div>
+                <div class="map-block__hours">Seg–Sex 9h–18h · Urgências 24/7 via WhatsApp</div>
+              </div>
+            </a>
+          </div>
+
+          <aside class="qr-card" aria-label="QR code WhatsApp">
+            <img class="qr-card__img" src="assets/mdm-qr-whatsapp.png" alt="QR code para WhatsApp MDM Assist">
+            <div class="qr-card__label">Scan para WhatsApp</div>
+            <div class="qr-card__sub">Aponte a câmara do telemóvel para o código.</div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer__grid">
+      <div class="footer__brand-block">
+        <img class="footer__logo" src="assets/mdm-logo-original.png" alt="MDM Assist">
+        <div>
+          <div class="footer__brand-text">MDM — Manuel Domingos Melancia Lda.</div>
+          <div class="footer__meta">Assistência técnica desde 1991 · Lisboa, Portugal</div>
+        </div>
+      </div>
+      <div class="footer__meta">
+        WhatsApp · <a href="https://wa.me/351910307579">+351&nbsp;910&nbsp;307&nbsp;579</a><br>
+        Email · <a href="mailto:geral@mdmassist.com">geral@mdmassist.com</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══ BOTTOM ACTION BAR ═══ -->
+  <div class="bottom-bar" id="bottom-bar" role="toolbar" aria-label="Ações rápidas" data-visible="false">
+    <a class="bbtn" href="tel:+351910307579" aria-label="Ligar para 910 307 579" data-heat-tier="1">
+      <span class="bbtn__icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </span>
+      Ligar
+    </a>
+    <a class="bbtn bbtn--whatsapp" href="https://wa.me/351910307579" rel="noopener" target="_blank" aria-label="Falar no WhatsApp" data-heat-tier="1">
+      <span class="bbtn__icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.263.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+      </span>
+      WhatsApp
+    </a>
+    <a class="bbtn" href="#orcamento" aria-label="Pedir orçamento" data-heat-tier="2">
+      <span class="bbtn__icon" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </span>
+      Orçamento
+    </a>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ─── Services accordion (mobile only) ───
+      const services = document.querySelectorAll('.service');
+      services.forEach(function (svc) {
+        const btn = svc.querySelector('.service__header');
+        btn.addEventListener('click', function () {
+          if (window.matchMedia('(min-width: 1024px)').matches) return;
+          const open = svc.hasAttribute('open');
+          services.forEach(function (s) {
+            s.removeAttribute('open');
+            s.querySelector('.service__header').setAttribute('aria-expanded', 'false');
+          });
+          if (!open) {
+            svc.setAttribute('open', '');
+            btn.setAttribute('aria-expanded', 'true');
+          }
+        });
+      });
+
+      // ─── Service "Pedir orçamento" → pre-select chip ───
+      document.querySelectorAll('[data-srv-cta]').forEach(function (link) {
+        link.addEventListener('click', function () {
+          selectChip(link.dataset.srvCta);
+        });
+      });
+
+      // ─── Chip select (radio behavior) ───
+      const chips = document.querySelectorAll('.chips .chip');
+      function selectChip(val) {
+        chips.forEach(function (c) {
+          c.setAttribute('aria-checked', c.dataset.value === val ? 'true' : 'false');
+        });
+        const f = document.querySelector('[data-field="servico"]');
+        if (f) f.removeAttribute('data-invalid');
+      }
+      chips.forEach(function (c) {
+        c.addEventListener('click', function () { selectChip(c.dataset.value); });
+        c.addEventListener('keydown', function (e) {
+          if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); c.click(); }
+        });
+      });
+
+      const hashMatch = window.location.hash.match(/[?&]servico=([^&]+)/);
+      if (hashMatch) selectChip(decodeURIComponent(hashMatch[1]));
+
+      // ─── B2B toggle ───
+      const b2bBtn = document.getElementById('b2b-toggle');
+      const b2bFields = document.getElementById('b2b-fields');
+      b2bBtn.addEventListener('click', function () {
+        const open = b2bBtn.getAttribute('aria-expanded') === 'true';
+        b2bBtn.setAttribute('aria-expanded', open ? 'false' : 'true');
+        b2bFields.setAttribute('data-open', open ? 'false' : 'true');
+      });
+
+      // ─── Auto-grow textarea ───
+      const ta = document.getElementById('f-mensagem');
+      ta.addEventListener('input', function () {
+        ta.style.height = 'auto';
+        ta.style.height = Math.min(ta.scrollHeight, 320) + 'px';
+      });
+
+      // ─── Form validation ───
+      const form = document.getElementById('quote-form');
+      const success = document.getElementById('form-success');
+
+      function getServico() {
+        const c = document.querySelector('.chip[aria-checked="true"]');
+        return c ? c.dataset.value : '';
+      }
+
+      function setInvalid(name, invalid) {
+        const f = document.querySelector('[data-field="' + name + '"]');
+        if (!f) return;
+        if (invalid) f.setAttribute('data-invalid', 'true');
+        else f.removeAttribute('data-invalid');
+        const input = f.querySelector('.field__input, .field__textarea');
+        if (input) input.setAttribute('aria-invalid', invalid ? 'true' : 'false');
+      }
+
+      ['assunto', 'mensagem', 'nome', 'telefone', 'email'].forEach(function (name) {
+        const input = document.getElementById('f-' + name);
+        input.addEventListener('blur', function () {
+          if (!input.value.trim()) setInvalid(name, true);
+          else if (name === 'email' && !input.checkValidity()) setInvalid(name, true);
+          else setInvalid(name, false);
+        });
+      });
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (form.elements.website && form.elements.website.value) return;
+
+        let ok = true;
+        if (!getServico()) {
+          document.querySelector('[data-field="servico"]').setAttribute('data-invalid', 'true');
+          ok = false;
+        }
+        ['assunto', 'mensagem', 'nome', 'telefone', 'email'].forEach(function (name) {
+          const input = document.getElementById('f-' + name);
+          const bad = !input.value.trim() || (name === 'email' && !input.checkValidity());
+          setInvalid(name, bad);
+          if (bad) ok = false;
+        });
+
+        if (!ok) {
+          const firstBad = document.querySelector('.field[data-invalid="true"]');
+          if (firstBad) firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          return;
+        }
+
+        form.style.display = 'none';
+        success.setAttribute('data-show', 'true');
+        success.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+
+      // ─── Sticky bottom action bar ───
+      const bar = document.getElementById('bottom-bar');
+      const heroCtas = document.getElementById('hero-ctas');
+      const orc = document.getElementById('orcamento');
+      let pastHero = false;
+      let inForm = false;
+      let lastScrollY = window.scrollY;
+      let hidden = false;
+
+      function updateBar() {
+        const show = pastHero && !inForm;
+        bar.setAttribute('data-visible', show && !hidden ? 'true' : 'false');
+      }
+
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (es) {
+          es.forEach(function (e) { pastHero = !e.isIntersecting; updateBar(); });
+        }, { threshold: 0 }).observe(heroCtas);
+
+        new IntersectionObserver(function (es) {
+          es.forEach(function (e) { inForm = e.isIntersecting; updateBar(); });
+        }, { threshold: 0.25 }).observe(orc);
+      } else {
+        pastHero = true; updateBar();
+      }
+
+      window.addEventListener('scroll', function () {
+        const y = window.scrollY;
+        if (Math.abs(y - lastScrollY) < 6) return;
+        hidden = y > lastScrollY && y > 200;
+        lastScrollY = y;
+        updateBar();
+      }, { passive: true });
+
+      // ─── Heatmap debug overlay (?heatmap=debug) ───
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('heatmap') === 'debug') {
+        document.body.classList.add('heatmap-debug');
+      }
+      const heatmapClose = document.getElementById('heatmap-close');
+      if (heatmapClose) {
+        heatmapClose.addEventListener('click', function () {
+          document.body.classList.remove('heatmap-debug');
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
