@@ -4306,9 +4306,10 @@ if (!Element.prototype.replaceChildren) {
     }
     if (orcEmMao(r, t)) {
       // A revisão que este passo mostra: se sair outro PDF entretanto, o «Confirmar» recusa.
-      const o = r.orcamento, c = orcDoPdf(o), aceita = !o.aceite && !r.dataAceite;
+      const o = r.orcamento, c = orcDoPdf(o), aceita = orcMaoAceita(r);
       if (t.maoRev == null) t.maoRev = o.rev;
-      els.push(h('p',{class:'hint'}, aceita ? `O orçamento ${o.num} (PDF da revisão ${o.rev}) foi aceite em mão: o pedido fica com este número e o valor da opção aceite.` : `O pedido fica com o número do orçamento, ${o.num}.`));
+      els.push(h('p',{class:'hint'}, r.num ? `O PDF da revisão ${o.rev} ainda não foi enviado nem aceite pelo registo: foi aceite em mão e o valor do pedido passa a ser o da opção aceite.`
+        : aceita ? `O orçamento ${o.num} (PDF da revisão ${o.rev}) foi aceite em mão: o pedido fica com este número e o valor da opção aceite.` : `O pedido fica com o número do orçamento, ${o.num}.`));
       if (aceita && c.opcoes.length > 1) els.push(orcOpcaoSel(c, c.recomendada, null));
       if (orcHash(orcParaEditar(o)) !== o.hash) els.push(h('p',{class:'hint'}, `O orçamento tem alterações depois do último PDF: conta o PDF da revisão ${o.rev}, o que o cliente viu.`));
     }
@@ -4457,12 +4458,14 @@ if (!Element.prototype.replaceChildren) {
     if (orcEmMao(r, t) || t.maoRev != null) {
       if (!orcEmMao(r, t) || r.orcamento.rev !== t.maoRev) return erroT('O orçamento ou o pedido mudou depois de abrires este passo: volta atrás e confere.');
       const o = novo.orcamento, c = orcDoPdf(o), m = /^ORC(\d{4})_(\d{4})$/.exec(o.num);
-      if (!m || numUsado(o.num, r.id)) return erroT(`O ${o.num} já está noutro pedido.`);
-      Object.assign(novo, {num: o.num, seq: Number(m[1]), ano: Number(m[2])});
-      if (!o.aceite && !r.dataAceite) {
+      if (!r.num) {
+        if (!m || numUsado(o.num, r.id)) return erroT(`O ${o.num} já está noutro pedido.`);
+        Object.assign(novo, {num: o.num, seq: Number(m[1]), ano: Number(m[2])});
+      }
+      if (orcMaoAceita(r)) {
         const k = c.opcoes.length > 1 ? val('t-opcao') || c.recomendada : c.opcoes[0].k, op = c.opcoes.find(x => x.k === k) || orcRec(c);
         Object.assign(o, {aceite: orcAceiteDe(c, op, o.rev), enviadoRev: o.rev, enviadoEm: today()});
-        Object.assign(novo, {valor: o.aceite.base / 100, dataAceite: today(), revisaoPendente: false});
+        Object.assign(novo, {valor: o.aceite.base / 100, dataAceite: r.dataAceite || today(), revisaoPendente: false});
         if (!r.dataEnvio) Object.assign(novo, {dataEnvio: today(), enviadoPor: meuNome(), enviadoPorOnde: 'em_mao', envioConfirmado: true});
         hist.push(nota(`Orçamento ${o.num} (rev. ${o.rev}) aceite em mão${c.opcoes.length > 1 ? `: opção ${op.k}${op.titulo || op.marca ? ` (${[op.titulo, op.marca].filter(Boolean).join(', ')})` : ''}` : ''}`));
       } else hist.push(nota(`O pedido fica com o número do orçamento, ${o.num}`));
@@ -5690,8 +5693,12 @@ if (!Element.prototype.replaceChildren) {
   // envio de um PDF do registo e com aceite. Com o envio registado antes do PDF do registo, escreve-se à mão.
   const orcManda = r => orcTemPdf(r) && !!(r.orcamento.enviadoRev || r.orcamento.aceite || (orcAFazer(r) && !r.dataAceite));
   // O trabalho começa (ou acaba) sem «Orçamento enviado»: o PDF do registo foi entregue e aceite em mão, na visita.
-  // O pedido fica com o número dele (as faturas, os ganhos e os textos precisam dele) e, sem aceite, com a opção escolhida.
-  const orcEmMao = (r, t) => !t.envio && !t.ganho && orcTemPdf(r) && !r.num && ['em_execucao', 'por_faturar', 'faturado', 'resolvido'].indexOf(t.para) >= 0;
+  // Sem número, o pedido fica com o dele (as faturas, os ganhos e os textos precisam dele) e, sem aceite, com a opção
+  // escolhida. Com o número, um PDF mais novo do que o enviado e o aceite pergunta a opção que o cliente aceitou.
+  const orcPdfNovo = o => o.rev !== o.enviadoRev && !(o.aceite && o.aceite.rev === o.rev);
+  const orcEmMao = (r, t) => !t.envio && !t.ganho && orcTemPdf(r) && ['em_execucao', 'por_faturar', 'faturado', 'resolvido'].indexOf(t.para) >= 0
+    && (!r.num || (r.num === r.orcamento.num && orcPdfNovo(r.orcamento)));
+  const orcMaoAceita = r => r.num ? true : !r.orcamento.aceite && !r.dataAceite;
   function orcAceiteDe(c, op, rev) {
     const unico = !!(op.titulo || op.marca) && c.opcoes.filter(x => orcIdOp(x) === orcIdOp(op)).length === 1;
     return {rev, k: op.k, titulo: op.titulo || '', marca: op.marca || '', base: orcTotOp(c, op).base, unico};
@@ -6781,7 +6788,8 @@ if (!Element.prototype.replaceChildren) {
       campo('d-prio','Prioridade', sel('d-prio', PRIOS.map(p => [p, PRIO_NOME[p]]), r.prioridade || sug.p), `Pelas regras: ${sug.p} (${sug.why}).`, true),
       campo('d-desc','Descrição do trabalho', h('textarea',{id:'d-desc'}, r.descricao || ''), null, true),
       novo ? null : campo('d-num','Nº do orçamento', inp('d-num', r.num, {spellcheck:'false', placeholder: orcTemPdf(r) ? r.orcamento.num : 'ORC0073_2026', readonly: orcTemPdf(r) ? true : null}),
-        orcManda(r) ? `Vêm do orçamento ${r.orcamento.num} (o número entra no envio): mudam-se lá.` : orcTemPdf(r) ? `O número vem do orçamento ${r.orcamento.num}. O valor escreve-se aqui: o envio foi registado antes do PDF do registo.` : null),
+        orcManda(r) ? `Vêm do orçamento ${r.orcamento.num} (o número entra no envio): mudam-se lá.` : orcTemPdf(r) ? (r.num && r.dataEnvio ? `O número vem do orçamento ${r.orcamento.num}. O valor escreve-se aqui: o envio foi registado antes do PDF do registo.`
+          : `O PDF do registo (${r.orcamento.num}) não foi enviado nem aceite pelo registo: o valor escreve-se aqui.`) : null),
       novo ? null : campo('d-valor','Valor s/IVA (€)', inp('d-valor', r.valor != null ? String(r.valor).replace('.',',') : '', {inputmode:'decimal', readonly: orcManda(r) ? true : null})),
       campo('d-dped','Data do pedido', inp('d-dped', r.dataPedido || today(), {type:'date'})),
       novo ? null : campo('d-denv','Data de envio do orçamento', inp('d-denv', r.dataEnvio, {type:'date'})),
