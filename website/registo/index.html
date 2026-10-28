@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <title>Registo MDM</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Registo MDM">
+<link rel="apple-touch-icon" href="icone-180.png">
+<script>
+// O Safari do iOS 12 (o iPad antigo) não faz o «gap» dos flex: com a classe sem-gap, o bloco SEM-GAP do CSS dá o mesmo
+// espaço com margens. Testa-se o comportamento, nunca o nome do browser.
+(function () { try { var d = document.createElement('div'); d.style.cssText = 'display:flex;flex-direction:column;row-gap:1px;position:absolute';
+  d.appendChild(document.createElement('div')); d.appendChild(document.createElement('div')); document.documentElement.appendChild(d);
+  if (d.scrollHeight !== 1) document.documentElement.className += ' sem-gap'; d.parentNode.removeChild(d); } catch (e) {} })();
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%230D6788%22/%3E%3Ctext x=%2216%22 y=%2221%22 font-family=%22Arial%22 font-weight=%22700%22 font-size=%2214%22 fill=%22%23fff%22 text-anchor=%22middle%22%3EMDM%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -63,7 +74,7 @@ h1{font-size:36px;font-weight:600;line-height:1.05;letter-spacing:.005em}
 .badge{font-family:var(--font-mono);font-size:11.5px;font-weight:500;background:var(--bad);color:var(--surface);border-radius:999px;padding:0 7px;line-height:1.65}
 .badge:empty{display:none}
 
-main.wrap{padding-block:18px 110px}
+main.wrap{padding-block:18px 40px}
 .sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
 .sec-h h2{font-size:21px;font-weight:600}
 .sec-h .count{font-family:var(--font-mono);font-size:13px;color:var(--ink-2)}
@@ -74,7 +85,7 @@ main.wrap{padding-block:18px 110px}
 .kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
 @media (min-width:720px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .kpi{background:var(--surface);padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0;text-align:left;border:0;cursor:pointer}
-.kpi:hover{background:var(--sunk)}
+@media (hover:hover){.kpi:hover{background:var(--sunk)}}
 .kpi .k-l{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);font-weight:500}
 .kpi .k-v{font-family:var(--font-display);font-size:30px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
 .kpi .k-s{font-size:13px;color:var(--ink-2);overflow-wrap:anywhere}
@@ -99,7 +110,7 @@ main.wrap{padding-block:18px 110px}
 /* Cartões de pedido */
 .card{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 12px;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:12px 14px 12px 18px;cursor:pointer}
 .card:first-child{border-top:0}
-.card:hover{background:var(--sunk)}
+@media (hover:hover){.card:hover{background:var(--sunk)}}
 .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--stripe,transparent)}
 .s-vermelho{--stripe:var(--bad)}.s-amarelo{--stripe:var(--warn)}.s-verde{--stripe:var(--good)}
 .c-top{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;min-width:0}
@@ -110,14 +121,14 @@ main.wrap{padding-block:18px 110px}
 .c-acao b{font-weight:600}
 .c-time{font-size:13px;font-weight:600;text-align:right;align-self:start;white-space:nowrap;color:var(--tone,var(--ink-2))}
 .c-money{font-family:var(--font-mono);font-size:12.5px;color:var(--copper);white-space:nowrap}
-.pill{font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;color:var(--tone);background:color-mix(in srgb,var(--tone) 14%,transparent);white-space:nowrap}
+.pill{font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;color:var(--tone);background:var(--sunk);background:color-mix(in srgb,var(--tone) 14%,transparent);white-space:nowrap}
 .t-good{--tone:var(--good)}.t-warn{--tone:var(--warn)}.t-bad{--tone:var(--bad)}.t-info{--tone:var(--info)}.t-muted{--tone:var(--muted)}.t-accent{--tone:var(--accent)}
 .prio{font-family:var(--font-mono);font-size:11.5px;font-weight:500;border:1px solid currentColor;border-radius:4px;padding:0 5px;line-height:1.5}
 .p-P1{color:var(--bad)}.p-P2{color:var(--warn)}.p-P3{color:var(--good)}
 .u-P1{--u:var(--bad)}.u-P2{--u:var(--warn)}.u-P3{--u:var(--good)}
 /* Mosaico */
 .mos-leg{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 10px}
-.mos-leg button{font:inherit;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;border:1px solid color-mix(in srgb,var(--u) 45%,transparent);background:color-mix(in srgb,var(--u) 10%,var(--surface));color:var(--ink);cursor:pointer;min-height:40px}
+.mos-leg button{font:inherit;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);border:1px solid color-mix(in srgb,var(--u) 45%,transparent);background:var(--sunk);background:color-mix(in srgb,var(--u) 10%,var(--surface));color:var(--ink);cursor:pointer;min-height:40px}
 .mos-leg button::before{content:"";width:12px;height:12px;border-radius:3px;background:var(--u)}
 .mos-leg button b{font-family:var(--font-mono);font-weight:600;color:var(--u)}
 .mos-leg button[aria-pressed="true"]{background:var(--u);color:var(--surface);border-color:var(--u)}
@@ -125,19 +136,25 @@ main.wrap{padding-block:18px 110px}
 .mos-leg button[aria-pressed="true"] b{color:var(--surface)}
 .mos-leg .todos{--u:var(--ink-2)}
 .mosaico{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin:0 0 18px}
-.tile{font:inherit;text-align:left;cursor:pointer;min-width:0;display:flex;flex-direction:column;gap:2px;padding:9px 10px;border-radius:8px;border:1px solid color-mix(in srgb,var(--u) 40%,transparent);border-left:5px solid var(--u);background:color-mix(in srgb,var(--u) 13%,var(--surface));color:var(--ink)}
-.tile:hover{background:color-mix(in srgb,var(--u) 22%,var(--surface))}
+.tile{font:inherit;text-align:left;cursor:pointer;min-width:0;display:flex;flex-direction:column;gap:2px;padding:9px 10px;border-radius:8px;border:1px solid var(--line);border:1px solid color-mix(in srgb,var(--u) 40%,transparent);border-left:5px solid var(--u);background:var(--sunk);background:color-mix(in srgb,var(--u) 13%,var(--surface));color:var(--ink)}
+@media (hover:hover){.tile:hover{background:var(--sunk);background:color-mix(in srgb,var(--u) 22%,var(--surface))}}
 .tile .tn{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tile .ts{font-size:12px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tile .ts.late{color:var(--bad);font-weight:600}
-.esc{font-size:11.5px;font-weight:600;color:var(--bad);border:1px solid color-mix(in srgb,var(--bad) 45%,transparent);border-radius:4px;padding:0 5px;line-height:1.5}
-.conf{font-size:11.5px;font-weight:600;color:var(--warn);border:1px dashed color-mix(in srgb,var(--warn) 60%,transparent);border-radius:4px;padding:0 5px;line-height:1.5}
+.esc{font-size:11.5px;font-weight:600;color:var(--bad);border:1px solid var(--line);border:1px solid color-mix(in srgb,var(--bad) 45%,transparent);border-radius:4px;padding:0 5px;line-height:1.5}
+.conf{font-size:11.5px;font-weight:600;color:var(--warn);border:1px dashed var(--line);border:1px dashed color-mix(in srgb,var(--warn) 60%,transparent);border-radius:4px;padding:0 5px;line-height:1.5}
 .bola{font-size:12px;color:var(--ink-2)}
 .empty{padding:20px 16px;color:var(--ink-2);margin:0}
 .empty b{color:var(--ink);font-family:var(--font-mono);font-weight:500}
 
 /* Tabelas pequenas */
 .tw{overflow-x:auto}
+/* No ecrã tátil nenhum campo fica abaixo de 16 px: o Safari do iPad aumenta a página ao tocar num campo mais pequeno.
+   A folha de obra é um A4 com o tamanho do papel e fica como está. */
+@media (pointer:coarse){input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px!important}
+  .folha input,.folha textarea,.folha select{font-size:inherit!important}.folha .f-tit input{font-size:13pt!important}}
+/* Deslizar com inércia no iPad antigo (iOS 12): cada caixa que se desloca sozinha. */
+.tabs,.chips,.tw,.sheet,.chart-w,.board,.col-b,.folha-palco,.pop,.tabs2,.tb-wrap,.panel{-webkit-overflow-scrolling:touch}
 table{border-collapse:collapse;width:100%;font-size:14px}
 th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);font-weight:500;text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:bottom}
 td{padding:8px 12px;border-top:1px solid var(--line);vertical-align:middle}
@@ -151,8 +168,8 @@ td.n input{width:72px;text-align:right;font-family:var(--font-mono);font-size:15
 .btn{border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);border-radius:8px;padding:9px 14px;font-weight:600;cursor:pointer;font-size:14.5px}
 .btn:disabled{opacity:.55;cursor:default}
 .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
-.btn-ghost:hover{background:var(--sunk)}
-.btn-danger{background:transparent;color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,transparent)}
+@media (hover:hover){.btn-ghost:hover{background:var(--sunk)}}
+.btn-danger{background:transparent;color:var(--bad);border-color:var(--line);border-color:color-mix(in srgb,var(--bad) 45%,transparent)}
 .btn-danger.armed{background:var(--bad);color:var(--surface);border-color:var(--bad)}
 .btn-sm{padding:6px 10px;font-size:13.5px}
 .fab{position:fixed;right:calc(16px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--accent);color:var(--on-accent);border:0;border-radius:999px;padding:13px 20px;font-family:var(--font-display);font-size:18px;font-weight:600;letter-spacing:.01em;cursor:pointer;box-shadow:0 6px 18px rgba(8,30,40,.28);z-index:20}
@@ -161,7 +178,7 @@ td.n input{width:72px;text-align:right;font-family:var(--font-mono);font-size:15
 .backdrop{position:fixed;top:0;right:0;bottom:0;left:0;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center;z-index:40}
 .sheet{background:var(--surface);width:100%;max-height:92%;overflow-y:auto;border-radius:14px 14px 0 0;box-sizing:border-box;padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (min-width:640px){.backdrop{align-items:center;padding:24px}.sheet{max-width:660px;border-radius:14px;max-height:100%}}
-.sheet-h{position:sticky;top:0;background:var(--surface);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:14px 16px 12px;border-bottom:1px solid var(--line);z-index:2}
+.sheet-h{position:-webkit-sticky;position:sticky;top:0;background:var(--surface);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:14px 16px 12px;border-bottom:1px solid var(--line);z-index:2}
 .sheet-h h2{font-size:22px;font-weight:600;overflow-wrap:anywhere}
 .sheet-h .sub{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-2)}
 .x{background:none;border:1px solid var(--line);border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:18px;line-height:1;flex:none}
@@ -191,7 +208,7 @@ fieldset{border:0;margin:0;padding:0;min-width:0}
 .f .aux a{color:var(--accent)}
 .check{display:flex;gap:8px;align-items:center;font-size:14.5px}
 .check input{width:18px;height:18px;flex:none}
-.tform{border:1px solid var(--accent);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:12px;background:color-mix(in srgb,var(--accent) 5%,var(--surface))}
+.tform{border:1px solid var(--accent);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:12px;background:var(--sunk);background:color-mix(in srgb,var(--accent) 5%,var(--surface))}
 .tform h3{font-size:18px}
 .row-end{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
 .err{color:var(--bad);font-size:13.5px;margin:0}
@@ -214,8 +231,8 @@ details.dados[open] summary{margin-bottom:10px}
 .sec-h .count{white-space:nowrap}
 .bars{display:flex;flex-direction:column;gap:2px;padding:10px 12px 12px}
 .bar{display:grid;grid-template-columns:minmax(120px,.9fr) minmax(0,2fr) minmax(44px,auto);gap:10px;align-items:center;background:none;border:0;padding:5px 4px;border-radius:6px;text-align:left;cursor:pointer;font:inherit;color:inherit;min-height:34px}
-.bar:hover{background:var(--sunk)}
-.bar[disabled]{cursor:default}.bar[disabled]:hover{background:none}
+@media (hover:hover){.bar:hover{background:var(--sunk)}}
+.bar[disabled]{cursor:default}@media (hover:hover){.bar[disabled]:hover{background:none}}
 .bar .bl{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bar .bl small{display:block;font-size:12px;color:var(--ink-2)}
 .bar .bt{display:flex;gap:2px;height:12px;min-width:0;position:relative}
@@ -234,11 +251,11 @@ details.dados[open] summary{margin-bottom:10px}
 .chart text.v{font-family:var(--font-mono);fill:var(--ink)}
 .chart .grid{stroke:var(--line);stroke-width:1}
 .chart rect.c1{fill:var(--c1)}.chart rect.c2{fill:var(--c2)}
-.chart rect:hover{opacity:.8}
+@media (hover:hover){.chart rect:hover{opacity:.8}}
 .lista-p{display:flex;flex-direction:column}
 .lp{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 12px;align-items:center;background:none;border:0;border-top:1px solid var(--line);padding:10px 12px 10px 14px;text-align:left;cursor:pointer;font:inherit;color:inherit;position:relative}
 .lp:first-child{border-top:0}
-.lp:hover{background:var(--sunk)}
+@media (hover:hover){.lp:hover{background:var(--sunk)}}
 .lp::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--stripe,transparent)}
 .lp .ln{font-weight:600;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lp .la{grid-column:2;font-size:13px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -249,7 +266,7 @@ details.dados[open] summary{margin-bottom:10px}
 .ativ li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px}
 .ativ .when{font-family:var(--font-mono);font-size:12px;color:var(--ink-2);padding-top:1px;white-space:nowrap}
 .ativ button{background:none;border:0;padding:0;font:inherit;font-weight:600;color:var(--accent);cursor:pointer}
-.ativ button:hover{text-decoration:underline}
+@media (hover:hover){.ativ button:hover{text-decoration:underline}}
 @media (max-width:640px){.lp{grid-template-columns:auto minmax(0,1fr)}.lp .lt{grid-column:2;grid-row:3;text-align:left;white-space:normal}.lp .ld{grid-row:1/4}.lp .ln{white-space:normal}}
 .vtiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
 .vtile{background:var(--surface);padding:10px 12px;display:flex;flex-direction:column;gap:1px;min-width:0}
@@ -258,35 +275,35 @@ details.dados[open] summary{margin-bottom:10px}
 .vtile .k-s{font-size:12.5px;color:var(--ink-2);overflow-wrap:anywhere}
 
 .drop{border:2px dashed var(--line);border-radius:10px;padding:18px;text-align:center;color:var(--ink-2);font-size:14px;cursor:pointer}
-.drop.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,var(--surface))}
+.drop.on{border-color:var(--accent);background:var(--sunk);background:color-mix(in srgb,var(--accent) 6%,var(--surface))}
 .drop b{color:var(--accent)}
 .meses-l{display:flex;flex-wrap:wrap;gap:6px}
 .mes-chip{font-family:var(--font-mono);font-size:12.5px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;display:inline-flex;gap:6px;align-items:center}
 .mes-chip.falta{border-style:dashed;color:var(--warn)}
 .mes-chip button{background:none;border:0;padding:0;cursor:pointer;color:var(--ink-2);font-size:14px;line-height:1}
-.mes-chip button:hover{color:var(--bad)}
+@media (hover:hover){.mes-chip button:hover{color:var(--bad)}}
 .chart .lin{fill:none;stroke:var(--c2);stroke-width:2}
 .chart circle.c2{fill:var(--c2);stroke:var(--surface);stroke-width:2}
 td.ref button{background:none;border:0;padding:0;font:inherit;font-family:var(--font-mono);font-size:12.5px;color:var(--accent);cursor:pointer}
-td.ref button:hover{text-decoration:underline}
+@media (hover:hover){td.ref button:hover{text-decoration:underline}}
 .tipo-NC{color:var(--copper)}.anulado{text-decoration:line-through;color:var(--ink-2)}
 
 .lp .lb{display:flex;gap:6px;flex-wrap:wrap;grid-column:3;grid-row:1/3;align-self:center}
 .lp .lb button{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 10px;cursor:pointer}
-.lp .lb button:hover{background:var(--sunk)}
+@media (hover:hover){.lp .lb button:hover{background:var(--sunk)}}
 td .lb{display:flex;flex-wrap:nowrap;gap:6px}
 .lp .lb button.pri{border-color:var(--accent);color:var(--accent)}
 @media (max-width:640px){.lp .lb{grid-column:2;grid-row:4}}
 .m-manutencao{--u:var(--info)}.m-cobrar{--u:var(--bad)}.m-frio{--u:var(--warn)}.m-orcamento{--u:var(--copper)}.m-ativo{--u:var(--good)}.m-perdido{--u:var(--muted)}.m-ignorado{--u:var(--muted)}
 .lp .ld.motivo{font-size:12px;font-family:var(--font-body);font-weight:600;color:var(--u);text-transform:uppercase;letter-spacing:.05em;line-height:1.2;max-width:84px;white-space:normal}
-.cli-tag{font-size:11.5px;font-weight:600;color:var(--u);border:1px solid color-mix(in srgb,var(--u) 45%,transparent);border-radius:4px;padding:0 5px;line-height:1.5;white-space:nowrap}
+.cli-tag{font-size:11.5px;font-weight:600;color:var(--u);border:1px solid var(--line);border:1px solid color-mix(in srgb,var(--u) 45%,transparent);border-radius:4px;padding:0 5px;line-height:1.5;white-space:nowrap}
 
 .fugas{display:flex;flex-direction:column}
 .fuga{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;background:none;border:0;border-top:1px solid var(--line);padding:9px 12px;text-align:left;cursor:pointer;font:inherit;color:inherit}
 .fuga:first-child{border-top:0}
-.fuga:hover{background:var(--sunk)}
-.fuga[disabled]{cursor:default}.fuga[disabled]:hover{background:none}
-.fuga .fi{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-mono);font-size:12px;font-weight:600;background:color-mix(in srgb,var(--u) 16%,transparent);color:var(--u)}
+@media (hover:hover){.fuga:hover{background:var(--sunk)}}
+.fuga[disabled]{cursor:default}@media (hover:hover){.fuga[disabled]:hover{background:none}}
+.fuga .fi{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-family:var(--font-mono);font-size:12px;font-weight:600;background:var(--sunk);background:color-mix(in srgb,var(--u) 16%,transparent);color:var(--u)}
 .fuga .fi svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .fuga .ft{font-size:14.5px}.fuga .ft small{display:block;font-size:12.5px;color:var(--ink-2)}
 .fuga .fn{font-family:var(--font-mono);font-size:14px;font-weight:600;color:var(--u);white-space:nowrap}
@@ -301,7 +318,7 @@ body.app-on .col{background:var(--sunk)}
 .col-h .cp{display:inline-block;font-family:var(--font-mono);font-size:10.5px;background:var(--accent);color:var(--on-accent);border-radius:999px;padding:0 6px;line-height:1.6;margin-right:6px;vertical-align:1px}
 .col-b{overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:6px;min-height:40px}
 .kcard{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--u);border-radius:8px;padding:8px 10px;text-align:left;cursor:pointer;font:inherit;color:inherit;display:flex;flex-direction:column;gap:2px;min-width:0}
-.kcard:hover{border-color:var(--accent)}
+@media (hover:hover){.kcard:hover{border-color:var(--accent)}}
 .kcard .kn{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .kcard .ka{font-size:12.5px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .kcard .kt{font-size:12.5px;font-weight:600;color:var(--tone,var(--ink-2))}
@@ -332,7 +349,7 @@ body.app-on .col{background:var(--sunk)}
 .folha textarea{resize:none;overflow:hidden;display:block}
 .folha input:focus,.folha textarea:focus,.folha select:focus{outline:2px solid #0D6788;outline-offset:0;background:#fff}
 .folha .auto{background:transparent;border-color:transparent}
-.folha .auto:hover{border-color:#E3D9A6}
+@media (hover:hover){.folha .auto:hover{border-color:#E3D9A6}}
 .folha .num{text-align:right;font-variant-numeric:tabular-nums}
 .f-top{display:grid;grid-template-columns:34mm 1fr;gap:4mm;align-items:start}
 .f-logo img{width:30mm;height:auto;display:block}
@@ -528,7 +545,7 @@ p.oe-pot-r{margin:8px 0 0}
 @media (max-width:520px){.p12{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.p12 button{padding:7px 8px}.p12 .pt{font-size:11px;letter-spacing:-.01em;overflow-wrap:break-word}}
 @media (max-width:640px){body .shell .rail{justify-content:space-between;gap:0;padding-left:6px;padding-right:6px;overflow-x:auto}body .shell .rail button{width:38px;height:44px;flex:none}body .shell .rail svg{width:22px;height:22px}}
 .p12 button{font:inherit;color:inherit;text-align:left;cursor:pointer;min-width:0;display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);border-top:4px solid var(--good);background:var(--surface)}
-.p12 button:hover{background:var(--sunk)}
+@media (hover:hover){.p12 button:hover{background:var(--sunk)}}
 .p12 button[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:1px}
 .p12 .pn{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-2)}
 .p12 .pt{font-weight:600;font-size:13px;line-height:1.2;overflow-wrap:anywhere}
@@ -539,7 +556,7 @@ p.oe-pot-r{margin:8px 0 0}
 .p12 button.vazio{border-top-color:var(--line)}
 .p12 button.cinza{border-style:dashed;border-top-width:1px;background:transparent;opacity:.7;cursor:default}
 .p12 button.cinza .pv{font-size:12.5px;font-family:var(--font-body);font-weight:500;color:var(--ink-2);padding-top:6px}
-.tag-prov{display:inline-block;font-family:var(--font-body);font-size:11.5px;font-weight:600;color:var(--warn);border:1px dashed color-mix(in srgb,var(--warn) 60%,transparent);border-radius:4px;padding:0 6px;line-height:1.6}
+.tag-prov{display:inline-block;font-family:var(--font-body);font-size:11.5px;font-weight:600;color:var(--warn);border:1px dashed var(--line);border:1px dashed color-mix(in srgb,var(--warn) 60%,transparent);border-radius:4px;padding:0 6px;line-height:1.6}
 .pn-tab{width:100%}
 .pn-tab td.lbl{font-weight:600}
 .pn-tab .zero{color:var(--ink-2)}
@@ -587,7 +604,7 @@ p.oe-pot-r{margin:8px 0 0}
 .oc-tab .num{text-align:right}
 .oc-tab .oc-vazio{color:var(--ink-2);padding:14px 4px}
 .oc-x{border:0;background:transparent;color:var(--ink-2);font-size:20px;line-height:1;cursor:pointer;padding:4px 8px}
-.oc-x:hover{color:var(--bad)}
+@media (hover:hover){.oc-x:hover{color:var(--bad)}}
 .oc-colar textarea{min-height:110px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
 .sg-faltas{display:flex;flex-wrap:wrap;gap:6px 14px}
 .toast button{font:inherit;font-weight:600;background:none;border:0;color:var(--bg);text-decoration:underline;margin-left:12px;padding:0;cursor:pointer}
@@ -597,12 +614,12 @@ p.oe-pot-r{margin:8px 0 0}
 :root{--rail:#1C2B35}
 body.app-on{background:var(--surface)}
 .shell{display:grid;grid-template-columns:72px minmax(0,1fr);min-height:100vh}
-.rail{position:sticky;top:0;height:100vh;background:var(--rail);display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 0 calc(14px + env(safe-area-inset-bottom,0px))}
+.rail{position:-webkit-sticky;position:sticky;top:0;height:100vh;background:var(--rail);display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 0 calc(14px + env(safe-area-inset-bottom,0px))}
 .rail button{width:48px;height:48px;border-radius:12px;border:0;background:transparent;color:#E8EEF1;display:grid;place-items:center;cursor:pointer;position:relative}
-.rail button:hover{background:rgba(255,255,255,.12)}
+@media (hover:hover){.rail button:hover{background:rgba(255,255,255,.12)}}
 .rail button[aria-current="page"]{background:rgba(255,255,255,.2)}
 .rail .r-novo{background:#FFFFFF;color:#13212B;box-shadow:0 1px 3px rgba(0,0,0,.25)}
-.rail .r-novo:hover{background:#FFFFFF}
+@media (hover:hover){.rail .r-novo:hover{background:#FFFFFF}}
 .rail svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .rail .r-fim{margin-top:auto}
 .rail .r-badge{position:absolute;top:4px;right:3px;font:600 10.5px/1.6 var(--font-mono);background:var(--bad);color:#fff;border-radius:999px;padding:0 5px}
@@ -611,7 +628,7 @@ body.app-on{background:var(--surface)}
 .logo{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--accent);letter-spacing:-.01em;line-height:1}
 .logo small{font-family:var(--font-body);font-size:13px;font-weight:500;color:var(--ink-2);margin-left:8px;letter-spacing:0}
 .topbar .user{gap:14px;font-size:14px}
-.page{padding:22px max(16px,env(safe-area-inset-right,0px)) 110px 24px;max-width:1500px}
+.page{padding:22px max(16px,env(safe-area-inset-right,0px)) 40px 24px;max-width:1500px}
 .so-gerir{display:none!important}
 .subnav{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 16px}
 .subnav .chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
@@ -621,13 +638,13 @@ body.app-on{background:var(--surface)}
 .vista select{appearance:none;-webkit-appearance:none;border:0;background:transparent;font-family:var(--font-display);font-size:32px;font-weight:600;color:var(--ink);padding:0 30px 0 0;cursor:pointer;max-width:100%;min-width:0;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
 .vista::after{content:"";position:absolute;right:6px;top:50%;width:9px;height:9px;border-right:2.5px solid var(--ink);border-bottom:2.5px solid var(--ink);transform:translateY(-70%) rotate(45deg);pointer-events:none}
 .link-add{background:none;border:0;color:var(--accent);font-weight:600;font-size:17px;cursor:pointer;padding:6px 0}
-.link-add:hover{text-decoration:underline}
+@media (hover:hover){.link-add:hover{text-decoration:underline}}
 .tabs2{display:flex;gap:6px;border-bottom:1px solid var(--line);margin:14px 0 14px;overflow-x:auto;scrollbar-width:none}
 .tabs2 .tab{font-family:var(--font-body);font-size:16px;font-weight:500;padding:12px 18px;border-bottom-width:3px}
 .tabs2 .tab[aria-selected="true"]{font-weight:600;border-bottom-color:var(--ink)}
 .filtros{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin-bottom:14px}
 .fbox{position:relative;display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--surface);min-height:48px;min-width:0}
-.fbox:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 25%,transparent)}
+.fbox:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px var(--line);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 25%,transparent)}
 .fbox select{appearance:none;-webkit-appearance:none;border:0;background:transparent;font:inherit;font-size:15px;color:var(--ink);padding:10px 38px 10px 14px;width:100%;cursor:pointer;min-width:0}
 .fbox::after{content:"";position:absolute;right:15px;top:50%;width:7px;height:7px;border-right:2px solid var(--ink-2);border-bottom:2px solid var(--ink-2);transform:translateY(-70%) rotate(45deg);pointer-events:none}
 .fbox.estado{flex:1 1 300px;max-width:430px}
@@ -646,10 +663,10 @@ body.app-on{background:var(--surface)}
 .t-head{background:var(--sunk);font-size:14px;color:var(--ink-2);font-weight:500;padding-top:12px;padding-bottom:12px}
 .t-row{border-bottom:1px solid var(--line);position:relative;align-items:start;padding-top:18px;padding-bottom:18px}
 .t-row::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--stripe,transparent)}
-.t-row:hover{background:color-mix(in srgb,var(--sunk) 55%,transparent)}
+@media (hover:hover){.t-row:hover{background:var(--sunk);background:color-mix(in srgb,var(--sunk) 55%,transparent)}}
 .t-row.fechado{color:var(--ink-2)}
 .t-nome{background:none;border:0;padding:0;text-align:left;cursor:pointer;font-family:var(--font-body);font-size:17px;font-weight:700;color:var(--ink);letter-spacing:.01em;overflow-wrap:anywhere}
-.t-nome:hover{text-decoration:underline}
+@media (hover:hover){.t-nome:hover{text-decoration:underline}}
 .t-sub{display:flex;flex-direction:column;gap:5px;margin-top:6px;font-size:14.5px;color:var(--ink)}
 .t-sub .tl{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .t-sub .muted{color:var(--ink-2)}
@@ -660,17 +677,17 @@ body.app-on{background:var(--surface)}
 .t-ativ{font-size:14.5px;color:var(--ink-2);line-height:1.5}
 .t-ativ .tempo{display:block;font-weight:600;color:var(--tone,var(--ink-2))}
 .t-ativ a,.t-ativ button.lk{background:none;border:0;padding:0;color:var(--accent);font:inherit;font-weight:700;font-size:16px;cursor:pointer;margin-top:6px}
-.t-ativ button.lk:hover{text-decoration:underline}
+@media (hover:hover){.t-ativ button.lk:hover{text-decoration:underline}}
 .t-btns{display:flex;align-items:center;gap:10px;justify-content:flex-end}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
 .seg button{width:58px;height:52px;border:0;background:transparent;cursor:pointer;display:grid;place-items:center;color:var(--ink)}
 .seg button + button{border-left:1px solid var(--line)}
-.seg button:hover{background:var(--sunk)}
+@media (hover:hover){.seg button:hover{background:var(--sunk)}}
 .seg button:disabled{opacity:.35;cursor:default;background:transparent}
 .seg svg,.mais svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .seg .q{font:700 22px/1 var(--font-body)}
 .mais{width:40px;height:40px;border:0;background:transparent;border-radius:50%;cursor:pointer;display:grid;place-items:center;color:var(--ink)}
-.mais:hover{background:var(--sunk)}
+@media (hover:hover){.mais:hover{background:var(--sunk)}}
 .t-vazio{padding:28px 20px;color:var(--ink-2)}
 .t-conta{font-size:14px;color:var(--ink-2);margin:0 0 10px}
 .t-row .t-sub{gap:3px}
@@ -708,7 +725,7 @@ table.tb{border-collapse:separate;border-spacing:0;min-width:100%;font-size:13.5
 .tb .tb-cli button{font:inherit;font-weight:600;background:none;border:0;padding:0 0 0 6px;color:var(--ink);cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
 .tb .tb-cli .tag-conf{margin-left:8px}
 .tb .tb-ed{cursor:pointer}
-.tb .tb-ed:hover{outline:1px solid var(--accent);outline-offset:-1px}
+@media (hover:hover){.tb .tb-ed:hover{outline:1px solid var(--accent);outline-offset:-1px}}
 .tb td.tb-estado{padding:0;text-align:center;min-width:130px}
 .tb td.tb-p{min-width:52px}
 .tb-pill{display:inline-block;padding:1px 9px;border-radius:999px;border:1px solid var(--c);color:var(--c);font-size:12.5px;font-weight:600;line-height:1.5}
@@ -731,7 +748,7 @@ table.tb{border-collapse:separate;border-spacing:0;min-width:100%;font-size:13.5
 .tb-gn{margin-left:12px;color:var(--ink-2);font-size:12.5px}
 .tb .tb-add td{height:34px;border-right:0}
 .tb-add button{font:inherit;color:var(--ink-2);background:none;border:0;padding:0 0 0 12px;cursor:pointer;position:-webkit-sticky;position:sticky;left:0}
-.tb-add button:hover{color:var(--accent)}
+@media (hover:hover){.tb-add button:hover{color:var(--accent)}}
 .tb .tb-tot td{background:var(--bg);font-weight:600;font-size:12.5px;height:36px}
 .tb-bat{display:flex;height:22px;border-radius:4px;overflow:hidden;margin:0 8px;background:var(--line)}
 .tb-bat i{display:block;height:100%}
@@ -745,7 +762,9 @@ table.tb{border-collapse:separate;border-spacing:0;min-width:100%;font-size:13.5
 .tb-cols small{color:var(--ink-2)}
 .fbox.agrupar select{border:0;background:transparent;font:inherit;color:inherit;width:100%}
 @media (min-width:768px){#lista,#v-gerir #mosLeg,#v-gerir #mosaico,#cliLista{display:none}}
-.f-cli{display:inline-block;border:1px solid var(--accent);color:var(--accent);background:var(--surface);border-radius:999px;padding:4px 12px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.mes-chip button.armed{color:var(--bad);font-weight:600}
+@media (pointer:coarse){.mes-chip button{min-width:44px;min-height:44px}}
+.f-cli-chip{display:inline-block;border:1px solid var(--accent);color:var(--accent);background:var(--surface);border-radius:999px;padding:4px 12px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
 .tb a.tb-lig,.tb button.tb-lig{background:none;border:0;padding:0;font:inherit;color:var(--accent);cursor:pointer;text-align:right}
 @media (max-width:767px){.tb-wrap,.fbox.agrupar,.so-largo{display:none}}
 .tb th.tb-mov{cursor:grab;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -758,8 +777,8 @@ body.a-redimensionar,body.a-redimensionar *{cursor:col-resize!important;-webkit-
 .tb-pega{display:inline-block;width:16px;color:var(--ink-2);cursor:grab;font-size:14px;line-height:1;margin-left:2px;-webkit-user-select:none;user-select:none;touch-action:none}
 .tb tr.karr td{opacity:.4}
 .tb-fant{position:fixed;left:0;top:0;z-index:300;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--accent);border-radius:8px;padding:6px 12px;font-weight:600;font-size:13.5px;box-shadow:0 10px 26px rgba(8,16,22,.25)}
-.tb tbody.tb-g.alvo .tb-gh td{background:color-mix(in srgb,var(--accent) 8%,var(--surface));outline:2px dashed var(--accent);outline-offset:-3px}
-.tb tbody.tb-g.sobre .tb-gh td{outline-style:solid;background:color-mix(in srgb,var(--accent) 16%,var(--surface))}
+.tb tbody.tb-g.alvo .tb-gh td{background:var(--sunk);background:color-mix(in srgb,var(--accent) 8%,var(--surface));outline:2px dashed var(--accent);outline-offset:-3px}
+.tb tbody.tb-g.sobre .tb-gh td{outline-style:solid;background:var(--sunk);background:color-mix(in srgb,var(--accent) 16%,var(--surface))}
 .tb tbody.tb-g.fora{opacity:.45}
 /* Números: widgets */
 .dash{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:22px}
@@ -786,7 +805,7 @@ body.a-redimensionar,body.a-redimensionar *{cursor:col-resize!important;-webkit-
 .dw-bar i{display:block;height:100%;background:var(--accent)}
 .dw-num{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:4px;font:inherit;color:inherit;background:none;border:0;padding:12px 0;text-align:center}
 button.dw-num{cursor:pointer;border-radius:8px}
-button.dw-num:hover{background:var(--sunk)}
+@media (hover:hover){button.dw-num:hover{background:var(--sunk)}}
 .dw-num b{font-family:var(--font-display);font-size:34px;font-weight:600;line-height:1.1}
 .dw-num small{color:var(--ink-2);font-size:13px}
 .dw-pie{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
@@ -811,7 +830,7 @@ button.dw-num:hover{background:var(--sunk)}
 body.a-arrastar{cursor:grabbing}
 body.a-arrastar *{cursor:grabbing!important}
 .col.alvo{outline:2px dashed var(--accent);outline-offset:-2px}
-.col.sobre{outline-style:solid;background:color-mix(in srgb,var(--accent) 10%,var(--sunk))}
+.col.sobre{outline-style:solid;background:var(--sunk);background:color-mix(in srgb,var(--accent) 10%,var(--sunk))}
 .col.fora{opacity:.45}
 .tag-conf{font-size:11.5px;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:0 7px;align-self:flex-start}
 /* Hoje */
@@ -826,7 +845,7 @@ body.a-arrastar *{cursor:grabbing!important}
 .hj-s{grid-column:1;font-size:13px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;gap:6px;align-items:center;min-width:0}
 .hj-l > .btn,.hj-l > a.btn{grid-column:2;grid-row:1/3;text-decoration:none}
 .hj-mais{display:block;width:100%;font:inherit;font-size:13.5px;font-weight:600;color:var(--accent);background:none;border:0;border-top:1px solid var(--line);padding:10px 14px;text-align:left;cursor:pointer}
-.hj-mais:hover{background:var(--sunk)}
+@media (hover:hover){.hj-mais:hover{background:var(--sunk)}}
 details.sec-d{margin-top:22px;grid-column:1/-1}
 details.sec-d > summary{cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
 details.sec-d > summary::-webkit-details-marker{display:none}
@@ -841,11 +860,11 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
 .pop{position:absolute;z-index:200;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 28px rgba(8,16,22,.18);padding:12px 14px;font-size:13.5px;line-height:1.5;max-width:min(360px,calc(100vw - 24px));white-space:pre-line}
 .pop.menu{padding:6px;display:flex;flex-direction:column;min-width:200px;white-space:normal}
 .pop.menu button{font:inherit;font-size:14.5px;text-align:left;background:none;border:0;border-radius:7px;padding:11px 12px;color:var(--ink);cursor:pointer;display:flex;gap:10px;align-items:center}
-.pop.menu button:hover,.pop.menu button:focus-visible{background:var(--sunk)}
+@media (hover:hover){.pop.menu button:hover{background:var(--sunk)}}.pop.menu button:active{background:var(--sunk)}.pop.menu button:focus-visible{background:var(--sunk)}
 .pop.menu button.perigo{color:var(--bad)}
 .pop.menu svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .mais-b{width:38px;height:34px;border:1px solid var(--line);background:var(--surface);border-radius:8px;cursor:pointer;display:inline-grid;place-items:center;color:var(--ink);padding:0}
-.mais-b:hover{background:var(--sunk)}
+@media (hover:hover){.mais-b:hover{background:var(--sunk)}}
 .mais-b svg{width:20px;height:20px;stroke:currentColor;fill:none}
 .ic{display:inline-flex;align-items:center;gap:5px}
 .ic svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
@@ -867,7 +886,7 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
 .ag-th.hoje,.ag-td.hoje{background:rgba(13,103,136,.07)}
 .ag-th.fer,.ag-td.fer{background:var(--sunk)}
 .ag-c{display:flex;flex-direction:column;gap:1px;text-align:left;font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--tom);border-radius:7px;padding:5px 7px;cursor:pointer;min-width:0;width:100%}
-.ag-c:hover{background:var(--sunk)}
+@media (hover:hover){.ag-c:hover{background:var(--sunk)}}
 .ag-c.on{outline:2px solid var(--accent);outline-offset:1px}
 .ag-c.conf{border-color:var(--bad);border-left-color:var(--tom)}
 .ag-c.feita{opacity:.6}
@@ -882,7 +901,7 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
 .ag-acao{display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:10px}
 .ag-sug{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
 .ag-s{display:flex;flex-direction:column;gap:1px;text-align:left;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer}
-.ag-s:hover{border-color:var(--accent)}
+@media (hover:hover){.ag-s:hover{border-color:var(--accent)}}
 .ag-s b{font-size:14.5px}
 .ag-s span{font-size:13px;color:var(--ink-2)}
 .ag-s small{font-size:12px;color:var(--ink-2)}
@@ -903,6 +922,144 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
 .agt input[type=color]{padding:2px;height:40px}
 @media (prefers-color-scheme:dark){.ag-th.hoje,.ag-td.hoje{background:rgba(93,184,221,.09)}}
 @media (max-width:640px){.ag-semana{display:none}.ag-dia{display:flex}}
+/* SEM-GAP-INICIO (gerado por website/build.py --registo-gap: não mudar à mão) */
+html.sem-gap .top-in > *{margin-right:12px}html.sem-gap .top-in > :last-child{margin-right:0}
+html.sem-gap .next > *{margin-bottom:2px}html.sem-gap .next > :last-child{margin-bottom:0}
+html.sem-gap .tabs > *{margin-right:4px}
+html.sem-gap .tab > *{margin-right:7px}
+html.sem-gap .sec-h > *{margin-right:8px}html.sem-gap .sec-h > :last-child{margin-right:0}
+html.sem-gap .kpis{grid-gap:1px}
+html.sem-gap .kpi > *{margin-bottom:2px}html.sem-gap .kpi > :last-child{margin-bottom:0}
+html.sem-gap .cols{grid-gap:22px}
+html.sem-gap .side > *{margin-bottom:22px}html.sem-gap .side > :last-child{margin-bottom:0}
+html.sem-gap .tools > *{margin-bottom:10px}html.sem-gap .tools > :last-child{margin-bottom:0}
+html.sem-gap .chips > *{margin-right:6px}
+html.sem-gap .chip > *{margin-right:6px}
+html.sem-gap .toolrow > *{margin-right:8px}
+html.sem-gap .card{grid-gap:3px 12px}
+html.sem-gap .c-top > *{margin-right:8px}
+html.sem-gap .c-meta > *{margin-right:8px}
+html.sem-gap .mos-leg > *{margin-right:8px}
+html.sem-gap .mos-leg button > *{margin-right:8px}
+html.sem-gap .mosaico{grid-gap:6px}
+html.sem-gap .tile > *{margin-bottom:2px}html.sem-gap .tile > :last-child{margin-bottom:0}
+html.sem-gap .sheet-h > *{margin-right:10px}html.sem-gap .sheet-h > :last-child{margin-right:0}
+html.sem-gap .sheet-b > *{margin-bottom:18px}html.sem-gap .sheet-b > :last-child{margin-bottom:0}
+html.sem-gap .block > *{margin-bottom:8px}html.sem-gap .block > :last-child{margin-bottom:0}
+html.sem-gap .status > *{margin-right:10px}
+html.sem-gap .clock{grid-gap:4px 12px}
+html.sem-gap .acao > *{margin-right:12px}html.sem-gap .acao > :last-child{margin-right:0}
+html.sem-gap .trans > *{margin-right:8px}
+html.sem-gap .fields{grid-gap:12px}
+html.sem-gap .f > *{margin-bottom:4px}html.sem-gap .f > :last-child{margin-bottom:0}
+html.sem-gap .check > *{margin-right:8px}
+html.sem-gap .tform > *{margin-bottom:12px}html.sem-gap .tform > :last-child{margin-bottom:0}
+html.sem-gap .row-end > *{margin-right:8px}html.sem-gap .row-end > :last-child{margin-right:0}
+html.sem-gap .hist > *{margin-bottom:6px}html.sem-gap .hist > :last-child{margin-bottom:0}
+html.sem-gap .hist li{grid-gap:2px 10px}
+html.sem-gap .grid-p{grid-gap:22px}
+html.sem-gap .bars > *{margin-bottom:2px}html.sem-gap .bars > :last-child{margin-bottom:0}
+html.sem-gap .bar{grid-gap:10px}
+html.sem-gap .bar .bt > *{margin-right:2px}
+html.sem-gap .leg > *{margin-right:14px}
+html.sem-gap .lp{grid-gap:4px 12px}
+html.sem-gap .ativ > *{margin-bottom:7px}html.sem-gap .ativ > :last-child{margin-bottom:0}
+html.sem-gap .ativ li{grid-gap:2px 10px}
+html.sem-gap .vtiles{grid-gap:1px}
+html.sem-gap .vtile > *{margin-bottom:1px}html.sem-gap .vtile > :last-child{margin-bottom:0}
+html.sem-gap .meses-l > *{margin-right:6px}
+html.sem-gap .mes-chip > *{margin-right:6px}
+html.sem-gap .lp .lb > *{margin-right:6px}
+html.sem-gap td .lb > *{margin-right:6px}
+html.sem-gap .fuga{grid-gap:10px}
+html.sem-gap .board > *{margin-right:10px}
+html.sem-gap .col-h .cn > *{margin-right:8px}html.sem-gap .col-h .cn > :last-child{margin-right:0}
+html.sem-gap .col-b > *{margin-bottom:6px}html.sem-gap .col-b > :last-child{margin-bottom:0}
+html.sem-gap .kcard > *{margin-bottom:2px}html.sem-gap .kcard > :last-child{margin-bottom:0}
+html.sem-gap .funil{grid-gap:1px}
+html.sem-gap .fstep > *{margin-bottom:4px}html.sem-gap .fstep > :last-child{margin-bottom:0}
+html.sem-gap .folha-bar > *{margin-right:10px}html.sem-gap .folha-bar > :last-child{margin-right:0}
+html.sem-gap .folha-bar-r > *{margin-right:8px}
+html.sem-gap .f-top{grid-gap:4mm}
+html.sem-gap .f-tit > *{margin-right:2mm}html.sem-gap .f-tit > :last-child{margin-right:0}
+html.sem-gap .f-emissao > *{margin-right:2mm}html.sem-gap .f-emissao > :last-child{margin-right:0}
+html.sem-gap .f-cli{grid-gap:1mm 2mm}
+html.sem-gap .f-dados{grid-gap:1.5mm 2mm}
+html.sem-gap .f-linha4{grid-gap:2mm}
+html.sem-gap .f-linha4 label > *{margin-right:1.5mm}
+html.sem-gap .f-tab .tot > *{margin-right:1mm}html.sem-gap .f-tab .tot > :last-child{margin-right:0}
+html.sem-gap .f-pe{grid-gap:3mm}
+html.sem-gap .f-pe .esq{grid-gap:2mm 2mm}
+html.sem-gap .f-tipo .barra > *{margin-right:5mm}
+html.sem-gap .f-tipo label > *{margin-right:1.2mm}
+html.sem-gap .f-tipo .desl > *{margin-right:3mm}
+html.sem-gap .p12{grid-gap:8px}
+@media (max-width:520px){html.sem-gap .p12{grid-gap:6px}}
+@media (max-width:640px){html.sem-gap body .shell .rail > *{margin-bottom:0}html.sem-gap body .shell .rail > :last-child{margin-bottom:0}}
+html.sem-gap .p12 button > *{margin-bottom:2px}html.sem-gap .p12 button > :last-child{margin-bottom:0}
+html.sem-gap .pn-cob > *{margin-right:14px}
+html.sem-gap .login-box > *{margin-bottom:14px}html.sem-gap .login-box > :last-child{margin-bottom:0}
+html.sem-gap .user > *{margin-right:8px}html.sem-gap .user > :last-child{margin-right:0}
+html.sem-gap .sg > *{margin-bottom:8px}html.sem-gap .sg > :last-child{margin-bottom:0}
+html.sem-gap .sg-h > *{margin-right:10px}
+html.sem-gap .sg-b > *{margin-right:6px}
+html.sem-gap .sg-ed > *{margin-bottom:8px}html.sem-gap .sg-ed > :last-child{margin-bottom:0}
+html.sem-gap .sgc > *{margin-bottom:12px}html.sem-gap .sgc > :last-child{margin-bottom:0}
+html.sem-gap .sgc .sgc-g{grid-gap:8px}
+html.sem-gap .sg-faltas > *{margin-right:14px}
+html.sem-gap .rail > *{margin-bottom:8px}html.sem-gap .rail > :last-child{margin-bottom:0}
+html.sem-gap .topbar > *{margin-right:12px}html.sem-gap .topbar > :last-child{margin-right:0}
+html.sem-gap .topbar .user > *{margin-right:14px}html.sem-gap .topbar .user > :last-child{margin-right:0}
+html.sem-gap .subnav > *{margin-right:8px}
+html.sem-gap .page-h > *{margin-right:12px}html.sem-gap .page-h > :last-child{margin-right:0}
+html.sem-gap .vista > *{margin-right:6px}
+html.sem-gap .tabs2 > *{margin-right:6px}
+html.sem-gap .filtros > *{margin-right:10px}
+html.sem-gap .t-head,html.sem-gap .t-row{grid-gap:20px}
+html.sem-gap .t-sub > *{margin-bottom:5px}html.sem-gap .t-sub > :last-child{margin-bottom:0}
+html.sem-gap .t-sub .tl > *{margin-right:6px}
+html.sem-gap .t-btns > *{margin-right:10px}html.sem-gap .t-btns > :last-child{margin-right:0}
+html.sem-gap .t-row .t-sub > *{margin-bottom:3px}html.sem-gap .t-row .t-sub > :last-child{margin-bottom:0}
+@media (max-width:1100px){html.sem-gap .t-row{grid-gap:10px 14px}}
+html.sem-gap .tb-dono > *{margin-right:6px}
+html.sem-gap .tb-ed-box > *{margin-bottom:8px}html.sem-gap .tb-ed-box > :last-child{margin-bottom:0}
+html.sem-gap .tb-ed-p > *,html.sem-gap .tb-nova > *{margin-bottom:8px}html.sem-gap .tb-ed-p > :last-child,html.sem-gap .tb-nova > :last-child{margin-bottom:0}
+html.sem-gap .tb-cols > *{margin-bottom:8px}html.sem-gap .tb-cols > :last-child{margin-bottom:0}
+html.sem-gap .dash{grid-gap:14px}
+html.sem-gap .dw > *{margin-bottom:10px}html.sem-gap .dw > :last-child{margin-bottom:0}
+html.sem-gap .dw-h > *{margin-right:8px}html.sem-gap .dw-h > :last-child{margin-right:0}
+html.sem-gap .dw-gwrap > *{margin-bottom:6px}html.sem-gap .dw-gwrap > :last-child{margin-bottom:0}
+html.sem-gap .dw-par > *{margin-right:10px}html.sem-gap .dw-par > :last-child{margin-right:0}
+html.sem-gap .dw-mes > *{margin-bottom:16px}html.sem-gap .dw-mes > :last-child{margin-bottom:0}
+html.sem-gap .dw-num > *{margin-bottom:4px}html.sem-gap .dw-num > :last-child{margin-bottom:0}
+html.sem-gap .dw-pie > *{margin-right:14px}
+html.sem-gap .dw-leg > *{margin-bottom:2px}html.sem-gap .dw-leg > :last-child{margin-bottom:0}
+html.sem-gap .dw-leg button > *{margin-right:8px}
+html.sem-gap .hj-grid{grid-gap:22px}
+html.sem-gap .hj-l{grid-gap:2px 10px}
+html.sem-gap .hj-s > *{margin-right:6px}
+html.sem-gap details.sec-d > summary > *{margin-right:10px}
+html.sem-gap .pop.menu button > *{margin-right:10px}
+html.sem-gap .ic > *{margin-right:5px}
+html.sem-gap .ag-bar > *{margin-right:8px}
+html.sem-gap .ag-td > *{margin-bottom:5px}html.sem-gap .ag-td > :last-child{margin-bottom:0}
+html.sem-gap .ag-c > *{margin-bottom:1px}html.sem-gap .ag-c > :last-child{margin-bottom:0}
+html.sem-gap .ag-ch > *{margin-right:5px}
+html.sem-gap .ag-det > *{margin-bottom:8px}html.sem-gap .ag-det > :last-child{margin-bottom:0}
+html.sem-gap .ag-acao > *{margin-bottom:8px}html.sem-gap .ag-acao > :last-child{margin-bottom:0}
+html.sem-gap .ag-sug{grid-gap:8px}
+html.sem-gap .ag-s > *{margin-bottom:1px}html.sem-gap .ag-s > :last-child{margin-bottom:0}
+html.sem-gap .ag-dnav > *{margin-right:8px}html.sem-gap .ag-dnav > :last-child{margin-right:0}
+html.sem-gap .ag-l > *{margin-bottom:6px}html.sem-gap .ag-l > :last-child{margin-bottom:0}
+html.sem-gap .ag-lh > *{margin-right:10px}
+html.sem-gap .agt > *{margin-bottom:8px}html.sem-gap .agt > :last-child{margin-bottom:0}
+html.sem-gap .agt-g > *{margin-right:14px}
+html.sem-gap .wrap{margin-right:auto}
+html.sem-gap .folha{margin-right:auto}
+html.sem-gap .od-folha{margin-right:auto}
+html.sem-gap .dw-gauge{margin-right:auto}
+html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
+/* SEM-GAP-FIM */
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
 </head>
@@ -1144,7 +1301,7 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
       <div class="fbox fprio" hidden><select id="fPrio" aria-label="Prioridade"><option value="">Prioridade</option><option value="P1">P1 · Urgente</option><option value="P2">P2 · Alta</option><option value="P3">P3 · Normal</option></select></div>
       <div class="fbox pesq"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input id="q" type="search" placeholder="Pesquisar" aria-label="Pesquisar cliente, localidade, nº ORC" autocomplete="off"></div>
     </div>
-    <p id="fCliBox" style="margin:0 0 8px" hidden><button class="f-cli" type="button" id="fCliChip" aria-label="Tirar o filtro do cliente"></button></p>
+    <p id="fCliBox" style="margin:0 0 8px" hidden><button class="f-cli-chip" type="button" id="fCliChip" aria-label="Tirar o filtro do cliente"></button></p>
     <p class="t-conta" id="listaCount"></p>
     <div class="tb-wrap"><div id="tabela"></div></div>
     <div class="tabela" id="lista"></div>
@@ -1556,6 +1713,22 @@ if (!Element.prototype.replaceChildren) {
     if (popEl) { popEl.remove(); popEl = null; }
     if (popDe) { popDe.setAttribute('aria-expanded', 'false'); popDe = null; }
   }
+  // Pôr o cursor num campo no próprio toque: o iPad só abre o teclado quando o foco chega dentro do gesto, não depois de
+  // uma espera. Se o campo ainda não estiver pronto, tenta outra vez logo a seguir (sem teclado, mas com o cursor).
+  function foca(el, selecionar) {
+    if (!el) return;
+    try { el.focus(); if (selecionar && el.select) el.select(); } catch (e) {}
+    setTimeout(() => { if (document.activeElement !== el && document.body.contains(el)) try { el.focus(); } catch (e) {} }, 40);
+  }
+  function posicionaPop() {
+    if (!popEl || !popDe) return;
+    const r = popDe.getBoundingClientRect(), w = popEl.offsetWidth, hh = popEl.offsetHeight, menu = popEl.classList.contains('menu');
+    let left = r.left + window.pageXOffset + (menu ? r.width - w : -12);
+    left = Math.max(12 + window.pageXOffset, Math.min(left, window.pageXOffset + document.documentElement.clientWidth - w - 12));
+    let top = r.bottom + window.pageYOffset + 6;
+    if (r.bottom + hh + 12 > window.innerHeight && r.top > hh + 12) top = r.top + window.pageYOffset - hh - 6;
+    popEl.style.left = left + 'px'; popEl.style.top = top + 'px';
+  }
   function abrePop(botao, conteudo, classe) {
     const mesmo = popDe === botao;
     fechaPop();
@@ -1564,12 +1737,7 @@ if (!Element.prototype.replaceChildren) {
     document.body.appendChild(popEl);
     popDe = botao; botao.setAttribute('aria-expanded', 'true');
     popNovo = true; setTimeout(() => { popNovo = false; }, 0);
-    const r = botao.getBoundingClientRect(), w = popEl.offsetWidth, hh = popEl.offsetHeight;
-    let left = r.left + window.pageXOffset + (classe === 'menu' ? r.width - w : -12);
-    left = Math.max(12 + window.pageXOffset, Math.min(left, window.pageXOffset + document.documentElement.clientWidth - w - 12));
-    let top = r.bottom + window.pageYOffset + 6;
-    if (r.bottom + hh + 12 > window.innerHeight && r.top > hh + 12) top = r.top + window.pageYOffset - hh - 6;
-    popEl.style.left = left + 'px'; popEl.style.top = top + 'px';
+    posicionaPop();
     const prim = popEl.querySelector('button'); if (prim) prim.focus();
   }
   // Um (i) com um texto fixo (para usar dentro das funções que desenham).
@@ -1615,7 +1783,8 @@ if (!Element.prototype.replaceChildren) {
     if (popEl && !popNovo && !popEl.contains(ev.target)) fechaPop();
   });
   document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && popEl) { const de = popDe; fechaPop(); if (de) de.focus(); ev.stopImmediatePropagation(); } }, true);
-  window.addEventListener('resize', fechaPop);
+  // Rodar o iPad: um campo a meio de ser escrito fica aberto (no sítio novo); um menu ou uma nota fecham.
+  window.addEventListener('resize', () => { if (popEl && popEl.querySelector('input, textarea, select') && popDe && popDe.isConnected) posicionaPop(); else fechaPop(); });
   if (window.MutationObserver) {
     let agendada = false;
     new MutationObserver(() => { if (agendada) return; agendada = true; requestAnimationFrame(() => { agendada = false; dobrarNotas(); }); })
@@ -1793,6 +1962,8 @@ if (!Element.prototype.replaceChildren) {
     return `PED${String(max + 1).padStart(4,'0')}_${year}`;
   }
 
+  const lerFicheiro = f => new Promise((ok, falha) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = () => falha(r.error); r.readAsArrayBuffer(f); });
+
   /* ---------- Separadores ---------- */
   const TABS = ['hoje','painel','seguimentos','agenda','gerir','pipeline','contactos','clientes','faturacao','prazos'];
   // A barra tem cinco grupos; cada grupo mostra por baixo do título as suas vistas (só as que estão instaladas).
@@ -1809,7 +1980,7 @@ if (!Element.prototype.replaceChildren) {
     return true;
   }
   const ultimaVista = {};
-  let tab = 'hoje';
+  let tab = 'hoje', porDesenhar = [], desenhoGeracao = 0; // porDesenhar: vistas por desenhar (renderAll)
   try { const s = localStorage.getItem('registo-tab'); if (TABS.includes(s)) tab = s; } catch (e) {}
   if (TABS.includes(location.hash.replace('#',''))) tab = location.hash.replace('#','');
   function setTab(t, focus) {
@@ -1831,12 +2002,14 @@ if (!Element.prototype.replaceChildren) {
       F('v-' + k).hidden = k !== t;
     }
     try { localStorage.setItem('registo-tab', t); } catch (e) {}
+    if (!currentId && !/^#p\//.test(location.hash)) enderecoPara('#' + t); // #p/… à espera dos dados: abreDoEndereco
     // A escolha «Pedidos em aberto» e «Adicionar pedido» só fazem sentido em Gerir; nos outros, o nome do separador.
     F('tabTitulo').textContent = g[1];
     F('tabTitulo').hidden = t === 'gerir';
     document.querySelector('.page-h .vista').classList.toggle('so-gerir', t !== 'gerir');
     F('btnNovoTop').classList.toggle('so-gerir', t !== 'gerir');
     if (focus) F('tab-' + t).focus();
+    desenharVista(t);
     if (t === 'contactos' && status === 'ok') renderContactos();
   }
   TABS.forEach(k => { F('tab-' + k).addEventListener('click', () => setTab(k)); });
@@ -2315,7 +2488,7 @@ if (!Element.prototype.replaceChildren) {
     input.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); ok(); } });
     abrePop(td, h('div',{class:'tb-ed-box'}, h('b',null, titulo), aviso ? h('p',{class:'hint'}, aviso) : null, input, err,
       h('div',{class:'sg-b'}, h('button',{class:'btn btn-sm', type:'button', onclick: ok}, 'Guardar'), h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick: fechaPop}, 'Cancelar'))), 'tb-ed');
-    setTimeout(() => { try { input.focus(); if (input.select) input.select(); } catch (e) {} }, 30);
+    foca(input, true);
   }
   // Editar texto, número ou data numa célula. q.obrigatorio diz se não pode ficar vazio; q.validar verifica o valor.
   function tbEditarTexto(q, td, x, c, tipo) {
@@ -2363,7 +2536,7 @@ if (!Element.prototype.replaceChildren) {
       tbGuardar(r, 'prioridade', s.value, 'Prioridade', r.prioridade || 'P3', s.value, m);
       return null;
     });
-    setTimeout(() => (destino ? motivo : s).focus(), 40);
+    foca(destino ? motivo : s);
   }
   // Passo: as mesmas mudanças do quadro; abre o formulário curto (ou a agenda) e só muda ao confirmar.
   function tbPasso(td, x) {
@@ -2431,7 +2604,7 @@ if (!Element.prototype.replaceChildren) {
       else { const nova = {id: 'c' + Date.now().toString(36), nome: n, tipo: tipo.value, opcoes}; tbGuardarCfg(q, cf => ({extra: cf.extra.concat([nova])}), `Coluna «${n}» criada`); }
       return null;
     });
-    setTimeout(() => nome.focus(), 40);
+    foca(nome);
   }
   function tbMenuCabecalho(q, th, c) {
     const itens = [];
@@ -2691,7 +2864,7 @@ if (!Element.prototype.replaceChildren) {
   function tbMoveRz(x) { if (!tbRz) return; const w = Math.max(60, Math.min(480, Math.round(tbRz.w + x - tbRz.x))); tbRz.q.larg[tbRz.id] = w; tbAplicaLarguras(tbRz.q); }
   function tbFimRz() { if (!tbRz) return; const q = tbRz.q; tbRz = null; document.body.classList.remove('a-redimensionar'); tbGuardaLarguras(q); kSoltou = true; setTimeout(() => { kSoltou = false; }, 350); }
   // Os ouvintes do documento são um só conjunto; cada quadro liga os seus (tbLigar) à sua caixa.
-  let tbIni = null, tbTemp = null;
+  let tbIni = null, tbTemp = null, tbToqueLiga = () => {};
   function tbInicio(q, ev, x, y) {
     if (!canWrite) return null;
     const rz = ev.target.closest('.tb-rz');
@@ -2715,8 +2888,9 @@ if (!Element.prototype.replaceChildren) {
     box.addEventListener('touchstart', ev => {
       if (ev.touches.length !== 1) return;
       const t = ev.touches[0], i = tbInicio(q, ev, t.clientX, t.clientY);
-      if (i === 'rz') return;
       if (!i) return;
+      tbToqueLiga();
+      if (i === 'rz') return;
       tbIni = i; clearTimeout(tbTemp);
       // a pega da linha arranca logo; o cabeçalho espera meio segundo (para o dedo poder deslizar a tabela)
       if (i.tipo === 'linha') { tbArranca(i, i.x, i.y); tbIni = null; }
@@ -2731,13 +2905,18 @@ if (!Element.prototype.replaceChildren) {
       if (tbIni && Math.abs(ev.clientX - tbIni.x) + Math.abs(ev.clientY - tbIni.y) > 6) { tbArranca(tbIni, ev.clientX, ev.clientY); tbIni = null; }
     });
     document.addEventListener('mouseup', () => { tbIni = null; if (tbRz) tbFimRz(); if (tbArr) tbFimLinha(true); if (tbCol) tbFimCol(true); });
-    document.addEventListener('touchmove', ev => {
+    // O «touchmove» que pode impedir o deslizar só está ligado enquanto um dedo começou numa pega, num cabeçalho ou numa
+    // beira: no resto da página o deslizar não espera por ele (no iPad antigo isso pesava em cada deslizar).
+    const tbMoveToque = ev => {
       const t = ev.touches[0];
       if (tbRz) { ev.preventDefault(); tbMoveRz(t.clientX); return; }
       if (tbArr) { ev.preventDefault(); tbMoveLinha(t.clientX, t.clientY); return; }
       if (tbCol) { ev.preventDefault(); tbMoveCol(t.clientX); return; }
       if (tbIni && Math.abs(t.clientX - tbIni.x) + Math.abs(t.clientY - tbIni.y) > 10) { clearTimeout(tbTemp); tbIni = null; }
-    }, {passive: false});
+    };
+    tbToqueLiga = () => document.addEventListener('touchmove', tbMoveToque, {passive: false});
+    const tbToqueDesliga = () => document.removeEventListener('touchmove', tbMoveToque, {passive: false});
+    document.addEventListener('touchend', tbToqueDesliga); document.addEventListener('touchcancel', tbToqueDesliga);
     document.addEventListener('touchend', ev => { clearTimeout(tbTemp); tbIni = null; if (tbRz) tbFimRz(); if (tbArr) { ev.preventDefault(); tbFimLinha(true); } if (tbCol) { ev.preventDefault(); tbFimCol(true); } });
     document.addEventListener('touchcancel', () => { clearTimeout(tbTemp); tbIni = null; tbFimRz(); tbFimLinha(false); tbFimCol(false); });
     document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { tbFimLinha(false); tbFimCol(false); } });
@@ -2933,7 +3112,7 @@ if (!Element.prototype.replaceChildren) {
     let ok = 0, erros = [];
     for (const f of files) {
       try {
-        const buf = await f.arrayBuffer();
+        const buf = await lerFicheiro(f); // FileReader: o Safari do iPad antigo não tem f.arrayBuffer()
         // Os ficheiros da AT costumam vir em Windows-1252; o cabeçalho XML diz qual.
         const cab = new TextDecoder('latin1').decode(buf.slice(0, 120));
         const enc = (/encoding="([^"]+)"/i.exec(cab) || [])[1] || 'utf-8';
@@ -2968,6 +3147,15 @@ if (!Element.prototype.replaceChildren) {
       if (!Object.keys(enche(mdoc)(Object.assign({}, cfgClientes[k] || {}, fichas[k] || {}))).length) continue;
       try { await gravarCliente(k, enche(mdoc), null, null); } catch (e) { /* segue com os outros clientes */ }
     }
+  }
+  // Tirar um mês inteiro de faturas pede um segundo toque (o × é pequeno e não há «Desfazer»).
+  function tirarMesDoisToques(btn, mes) {
+    if (!btn.classList.contains('armed')) {
+      btn.classList.add('armed'); btn.textContent = `Tirar ${mesTxt(mes)}?`;
+      setTimeout(() => { if (btn.isConnected) { btn.classList.remove('armed'); btn.textContent = '×'; } }, 4000);
+      return;
+    }
+    apagarMes(mes);
   }
   async function apagarMes(mes) {
     delete faturacao[mes];
@@ -3112,7 +3300,7 @@ if (!Element.prototype.replaceChildren) {
       let [y, m] = ms[0].split('-').map(Number); const fim = ms[ms.length - 1];
       for (let i = 0; i < 36; i++) {
         const ym = `${y}-${pad(m)}`;
-        if (faturacao[ym]) chips.push(h('span',{class:'mes-chip', title:`${faturacao[ym].ficheiro || ym} · ${faturacao[ym].docs.length} documentos, ${faturacao[ym].recibos.length} recibos`}, mesTxt(ym), canWrite ? h('button',{type:'button', 'aria-label':`Tirar ${mesTxt(ym)}`, title:'Tirar este mês', onclick:() => apagarMes(ym)}, '×') : null));
+        if (faturacao[ym]) chips.push(h('span',{class:'mes-chip', title:`${faturacao[ym].ficheiro || ym} · ${faturacao[ym].docs.length} documentos, ${faturacao[ym].recibos.length} recibos`}, mesTxt(ym), canWrite ? h('button',{type:'button', 'aria-label':`Tirar ${mesTxt(ym)}`, title:'Tirar este mês', onclick: ev => tirarMesDoisToques(ev.currentTarget, ym)}, '×') : null));
         else chips.push(h('span',{class:'mes-chip falta', title:'Falta o ficheiro deste mês'}, mesTxt(ym), ' · falta'));
         if (ym === fim) break; m++; if (m > 12) { m = 1; y++; }
       }
@@ -3280,15 +3468,26 @@ if (!Element.prototype.replaceChildren) {
     }
     return 'conflito';
   }
+  // Redesenhar a ficha depois de um toque (equipamento, «Contactado») sem perder o que já se escreveu nos dados dela.
+  function fichaRedesenha() {
+    const body = F('sheetBody'), sujo = sheetSujo, guardados = [];
+    if (sujo) body.querySelectorAll('input[id], textarea[id], select[id]').forEach(el => {
+      if (el.type === 'checkbox' || el.type === 'radio') { if (el.checked !== el.defaultChecked) guardados.push([el.id, 'checked', el.checked]); }
+      else if (el.tagName === 'SELECT' ? [].some.call(el.options, o => o.selected !== o.defaultSelected) : el.value !== el.defaultValue) guardados.push([el.id, 'value', el.value]);
+    });
+    renderFicha();
+    guardados.forEach(([id, prop, v]) => { const el = F(id); if (el) el[prop] = v; });
+    if (sujo) sheetSujo = true;
+  }
   // Para os botões e a ficha: grava, avisa e redesenha. vistos só quando a pessoa via um valor que pode ter mudado.
   async function guardarCliente(k, patch, msg, vistos, linha) {
     if (!sb || !canWrite) return false;
     try {
       const r = await gravarCliente(k, patch, vistos, linha);
-      if (r === 'conflito') { toast(CLI_CONFLITO); await carregar(); if (modo === 'ficha' && fichaKey === k && !F('sheetWrap').hidden) renderFicha(); return false; }
+      if (r === 'conflito') { toast(CLI_CONFLITO); await carregar(); if (modo === 'ficha' && fichaKey === k && !F('sheetWrap').hidden) fichaRedesenha(); return false; }
       if (msg) toast(msg);
       renderClientes();
-      if (modo === 'ficha' && fichaKey === k && !F('sheetWrap').hidden) renderFicha();
+      if (modo === 'ficha' && fichaKey === k && !F('sheetWrap').hidden) fichaRedesenha();
       return true;
     } catch (e) { toast(/permiss|row-level/.test(String(e && e.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar.'); return false; }
   }
@@ -3613,6 +3812,7 @@ if (!Element.prototype.replaceChildren) {
       if (['nome', 'contacto', 'morada', 'notas', 'localidade'].some(x => /[—–]/.test(patch[x] || ''))) { toast('Sem travessões: usa vírgulas ou parênteses.'); return; }
       if (!fichaKey) fichaKey = k;
       const nomes = {nome:'Nome', nif:'NIF', tipoCliente:'Tipo', telefone:'Telefone', email:'Email', contacto:'Pessoa de contacto', morada:'Morada', notas:'Notas', contrato:'Contrato', dono:'Dono', prioridade:'Prioridade', proximoContacto:'Próximo contacto', localidade:'Localidade'};
+      sheetSujo = false; // o que se escreveu é o que vai ser gravado: o redesenho mostra-o já gravado
       await guardarCliente(k, patch, 'Ficha guardada', vistos, novo ? 'Ficha criada' : `Ficha: ${Object.keys(patch).map(x => nomes[x]).join(', ')}`);
     };
     fill(body, blocos,
@@ -3621,7 +3821,7 @@ if (!Element.prototype.replaceChildren) {
       canWrite ? h('div',{class:'row-end'}, novo ? h('button',{class:'btn btn-ghost', type:'button', onclick:closeSheet}, 'Cancelar') : null, h('button',{class:'btn', type:'button', onclick:guardar}, novo ? 'Criar cliente' : 'Guardar ficha')) : null,
       novo ? null : equipBloco, histBloco,
       !fichaTabela ? h('p',{class:'hint alert'}, 'Falta instalar a tabela «clientes» (migracao.sql): a ficha fica guardada à parte.') : null);
-    setTimeout(() => { if (novo) F('c-nome').focus(); }, 30);
+    if (novo) foca(F('c-nome'));
   }
   F('btnNovoCliente').addEventListener('click', () => openFicha(null));
 
@@ -4070,12 +4270,37 @@ if (!Element.prototype.replaceChildren) {
     ].map(v => typeof v === 'number' ? `"${v}"` : csvCell(v)).join(','));
     return [cab.map(csvCell).join(','), ...linhas].join('\n') + '\n';
   }
+  function desenharResto(g) {
+    if (g !== desenhoGeracao || !porDesenhar.length) return;
+    const x = porDesenhar.shift(); x[1]();
+    setTimeout(() => desenharResto(g), 0);
+  }
+  // Ao mudar de vista: o que dela ainda estava na fila desenha-se já.
+  function desenharVista(t) {
+    const ja = porDesenhar.filter(x => x[0].split(' ').indexOf(t) >= 0);
+    if (!ja.length) return;
+    porDesenhar = porDesenhar.filter(x => ja.indexOf(x) < 0);
+    ja.forEach(x => x[1]());
+  }
   function renderAll() {
     const all = status === 'ok' ? enriquecidos() : [];
     F('nextNum').textContent = status === 'ok' ? nextNumber() : 'ORC…';
     const verm = all.filter(x => x.sem === 'vermelho').length;
     F('redBadge').textContent = verm ? String(verm) : '';
-    renderKpis(all); renderMosaico(all); renderLista(all); renderHoje(all); renderVisitas(all); renderFila(all); renderDonos(all); renderMeses(); renderValor(); renderOrigem(); renderAtividade(); renderPrazos(); renderEquipa(); renderFaturacao(); renderClientes(); renderExport(); renderPipeline(all); renderSeg(); renderSegCfg(); renderAgenda(); renderAgCfg(); renderInicio(all); renderProb(); renderDash(); renderObjCfg(); renderOrcCfg(); orcSincroniza();
+    // Primeiro a vista que está à frente; as outras desenham-se a seguir, uma por vez, sem prender o toque (no iPad antigo
+    // desenhar tudo de uma vez levava meio segundo). Um novo desenho antes de acabar recomeça a fila; mudar de vista
+    // desenha logo o que ainda faltar dessa vista.
+    const fila = [['painel', () => renderKpis(all)], ['gerir', () => renderMosaico(all)], ['gerir', () => renderLista(all)], ['painel', () => renderHoje(all)],
+      ['painel', () => renderVisitas(all)], ['painel', () => renderFila(all)], ['painel', () => renderDonos(all)], ['painel', renderMeses], ['painel', renderValor],
+      ['painel', renderOrigem], ['painel', renderAtividade], ['prazos', renderPrazos], ['prazos', renderEquipa], ['faturacao', renderFaturacao],
+      ['clientes contactos', renderClientes], ['prazos', renderExport], ['pipeline', () => renderPipeline(all)], ['seguimentos', renderSeg], ['prazos', renderSegCfg],
+      ['agenda', renderAgenda], ['agenda prazos', renderAgCfg], ['hoje', () => renderInicio(all)], ['prazos', renderProb], ['painel', renderDash],
+      ['prazos', renderObjCfg], ['prazos', renderOrcCfg]];
+    const agora = fila.filter(x => x[0].split(' ').indexOf(tab) >= 0), depois = fila.filter(x => agora.indexOf(x) < 0);
+    agora.forEach(x => x[1]());
+    porDesenhar = depois; desenhoGeracao++;
+    desenharResto(desenhoGeracao);
+    orcSincroniza();
     F('btnNovoTop').hidden = F('railNovo').hidden = F('btnNovoCliente').hidden = !(canWrite && status === 'ok');
     // Não redesenha a folha aberta enquanto há um formulário a meio.
     if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
@@ -4083,13 +4308,35 @@ if (!Element.prototype.replaceChildren) {
 
   /* ---------- Folha de um pedido ---------- */
   const cur = () => rows.find(r => r.id === currentId) || null;
-  function openSheet(id) { currentId = id; modo = null; trans = null; dadosAberto = false; F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); setTimeout(() => F('btnClose').focus(), 30); }
-  function closeSheet() { F('sheetWrap').hidden = true; document.body.style.overflow = ''; currentId = null; modo = null; trans = null; fichaKey = null; sheetSujo = false; sgRespondeu = null; sgEdit = null; if (agAcao && agAcao.onde === 'sheet') agAcao = null; if (status === 'ok') renderAll(); }
-  F('btnClose').addEventListener('click', closeSheet);
+  // Cada vista e cada pedido têm o seu endereço (#gerir, #p/PED0301_2026): o «voltar» do iPad fecha o pedido em vez de
+  // sair da app, e uma página recarregada (o iPad antigo descarta as abas) volta ao mesmo sítio.
+  function enderecoPara(h, novo) {
+    if (location.hash === h) return;
+    try { if (novo) history.pushState(null, '', h); else history.replaceState(null, '', h); } catch (e) {}
+  }
+  function abreDoEndereco() {
+    const m = /^#p\/([A-Za-z0-9_]+)$/.exec(location.hash);
+    if (m && rows.some(r => r.id === m[1])) { if (currentId !== m[1]) openSheet(m[1]); }
+    else if (m) enderecoPara('#' + tab);
+  }
+  window.addEventListener('popstate', () => {
+    const t = location.hash.replace('#', '');
+    if (/^p\//.test(t)) { abreDoEndereco(); return; }
+    if (!F('sheetWrap').hidden) {
+      if (sheetSujo && canWrite && !confirm('Há alterações por guardar. Fechar mesmo assim?')) { enderecoPara('#p/' + currentId, true); return; }
+      closeSheet();
+    }
+    if (TABS.includes(t) && t !== tab) setTab(t);
+  });
+  function openSheet(id) { enderecoPara('#p/' + id, true); currentId = id; modo = null; trans = null; dadosAberto = false; F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); setTimeout(() => F('btnClose').focus(), 30); }
+  function closeSheet() { enderecoPara('#' + tab); F('sheetWrap').hidden = true; document.body.style.overflow = ''; currentId = null; modo = null; trans = null; fichaKey = null; sheetSujo = false; sgRespondeu = null; sgEdit = null; if (agAcao && agAcao.onde === 'sheet') agAcao = null; if (status === 'ok') renderAll(); }
+  // Fechar a folha com o × , um toque ao lado ou Esc nunca perde o que se escreveu sem perguntar.
+  function fecharSheetPedido() { if (sheetSujo && canWrite && !confirm('Há alterações por guardar. Fechar mesmo assim?')) return; closeSheet(); }
+  F('btnClose').addEventListener('click', fecharSheetPedido);
   F('sheetBody').addEventListener('input', () => { sheetSujo = true; });
   F('sheetBody').addEventListener('change', () => { sheetSujo = true; });
-  F('sheetWrap').addEventListener('click', e => { if (e.target === F('sheetWrap')) closeSheet(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !F('sheetWrap').hidden) closeSheet(); });
+  F('sheetWrap').addEventListener('click', e => { if (e.target === F('sheetWrap')) fecharSheetPedido(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !F('sheetWrap').hidden) fecharSheetPedido(); });
 
   function sugestaoAcao(para, extra) {
     return {
@@ -4262,7 +4509,7 @@ if (!Element.prototype.replaceChildren) {
     body.replaceChildren(...blocos);
   }
 
-  function abrirTrans(t) { trans = t; renderSheet(); setTimeout(() => { const el = F('t-acao') || F('t-motivo') || F('t-vis'); if (el) el.focus(); }, 30); }
+  function abrirTrans(t) { trans = t; renderSheet(); foca(F('t-acao') || F('t-motivo') || F('t-vis')); }
 
   function formTrans(r) {
     const t = trans;
@@ -4808,7 +5055,7 @@ if (!Element.prototype.replaceChildren) {
       if (idx.length || canWrite) corpo.push(h('tr',{class:'grupo' + (idx.length ? '' : ' vazio')}, h('td',{colspan:'5'}, nome, canWrite ? [' ', h('button',{class:'f-add no-print', type:'button', onclick:() => {
         const base = g === 'mo' ? {ref:'Hora_Ajudante', desc:'Mão de obra: ajudante', custo:20} : g === 'desl' ? {ref:zonaDe(fol.morada), desc:`Deslocação (${tarifa('desl', zonaDe(fol.morada))[1]})`, custo:tarifa('desl', zonaDe(fol.morada))[2]} : {ref:'', desc:'', custo:''};
         fol.linhas.push({g, qtd: g === 'desl' ? 1 : '', venda:null, ...base}); folSujo = true; renderFolha();
-        setTimeout(() => { const ins = F('folha').querySelectorAll(`tr[data-g="${g}"] input`); if (ins.length) ins[ins.length - (g === 'mo' || g === 'desl' ? 3 : 4)].focus(); }, 30);
+        const ins = F('folha').querySelectorAll(`tr[data-g="${g}"] input`); if (ins.length) foca(ins[ins.length - (g === 'mo' || g === 'desl' ? 3 : 4)]);
       }}, '+ linha')] : null)));
       for (const [l, i] of idx) { const tr = linhaFolha(l, i); tr.dataset.g = g; corpo.push(tr); }
     }
@@ -5940,7 +6187,7 @@ if (!Element.prototype.replaceChildren) {
       }
       botoes.push(menu([
         tel ? null : ['Respondeu', () => segRespondeu(x.pedido_id), 'ok'],
-        ['Editar o texto', () => { sgEdit = {id: x.id, onde}; renderSeg(); if (currentId) renderSheet(); setTimeout(() => { const t = F('sg-texto'); if (t) t.focus(); }, 30); }, 'lapis'],
+        ['Editar o texto', () => { sgEdit = {id: x.id, onde}; renderSeg(); if (currentId) renderSheet(); foca(F('sg-texto')); }, 'lapis'],
         ['Abrir o pedido', () => openSheet(x.pedido_id), 'seta'],
       ]));
     }
@@ -6700,14 +6947,18 @@ if (!Element.prototype.replaceChildren) {
     board.addEventListener('touchstart', ev => {
       const c = ev.target.closest('.kcard'); if (!c || ev.touches.length !== 1) return;
       const t = ev.touches[0]; ini = {c, x: t.clientX, y: t.clientY};
+      document.addEventListener('touchmove', kMoveToque, {passive: false});
       clearTimeout(temp);
       temp = setTimeout(() => { if (ini) { kComeca(ini.c, ini.x, ini.y); ini = null; } }, 450);
     }, {passive: true});
-    document.addEventListener('touchmove', ev => {
+    // Ligado só quando o dedo começa num cartão (ver o quadro da tabela, tbMoveToque).
+    function kMoveToque(ev) {
       const t = ev.touches[0];
       if (kArr) { ev.preventDefault(); kMove(t.clientX, t.clientY); return; }
       if (ini && Math.abs(t.clientX - ini.x) + Math.abs(t.clientY - ini.y) > 10) { clearTimeout(temp); ini = null; }
-    }, {passive: false});
+    }
+    const kDesliga = () => document.removeEventListener('touchmove', kMoveToque, {passive: false});
+    document.addEventListener('touchend', kDesliga); document.addEventListener('touchcancel', kDesliga);
     document.addEventListener('touchend', ev => { clearTimeout(temp); ini = null; if (kArr) { ev.preventDefault(); kFim(true); } });
     document.addEventListener('touchcancel', () => { clearTimeout(temp); ini = null; if (kArr) kFim(false); });
     document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && kArr) kFim(false); });
@@ -6890,7 +7141,7 @@ if (!Element.prototype.replaceChildren) {
     const canalPelaOrigem = () => { if (!canalMexido) F('d-canal').value = canalDe({origem: val('d-origem'), contacto: val('d-contacto')}); };
     F('d-origem').addEventListener('change', canalPelaOrigem); F('d-contacto').addEventListener('input', canalPelaOrigem);
     atualizarP();
-    setTimeout(() => F('d-cliente').focus(), 30);
+    foca(F('d-cliente'));
   }
   async function criar(id) {
     if (rows.some(r => r.id === id)) id = nextPedido();
@@ -6905,7 +7156,9 @@ if (!Element.prototype.replaceChildren) {
   }
   const abrirNovo = () => { currentId = null; modo = 'novo'; trans = null; F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); };
   F('btnNovoTop').addEventListener('click', abrirNovo); F('railNovo').addEventListener('click', abrirNovo);
-  F('q').addEventListener('input', e => { query = e.target.value; renderLista(status === 'ok' ? enriquecidos() : []); });
+  // A procura espera que se pare de escrever (no iPad antigo cada tecla redesenhava a lista inteira).
+  let qEspera = null;
+  F('q').addEventListener('input', e => { query = e.target.value; clearTimeout(qEspera); qEspera = setTimeout(() => renderLista(status === 'ok' ? enriquecidos() : []), 200); });
   F('fCliChip').addEventListener('click', () => { fCli = null; renderAll(); });
   F('fDono').addEventListener('change', e => { dono = e.target.value; renderAll(); });
   F('fEstado').addEventListener('change', e => { fEstado = e.target.value; renderAll(); });
@@ -6954,7 +7207,7 @@ if (!Element.prototype.replaceChildren) {
       if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) { fichaTabela = false; const novo = {}; for (const id of Object.keys(fichas)) if (fichas[id]._novo) novo[id] = fichas[id]; fichas = novo; } }
       else { fichaTabela = true; const novo = {}; for (const x of fc.data) novo[x.id] = {...x.dados, _versao: x.versao}; fichas = novo; }
       if (!q.error) { equipa = q.data; const m = equipa.find(x => x.email === (eu && eu.email)); if (m && m.nome) eu.nome = m.nome; }
-      status = 'ok'; renderAll();
+      status = 'ok'; renderAll(); abreDoEndereco();
       carregarPainel();
       carregarSeg();
       carregarAgenda();
@@ -7014,7 +7267,7 @@ if (!Element.prototype.replaceChildren) {
       erroLogin(txt.includes('Invalid login') ? 'Email ou palavra-passe errados.' : txt.includes('Failed to fetch') ? 'Sem ligação. Verifica a internet.' : 'Não foi possível entrar. Tenta outra vez.');
     } finally { F('l-ok').disabled = false; }
   });
-  F('btnSair').addEventListener('click', async () => { await sb.auth.signOut(); sair(); });
+  F('btnSair').addEventListener('click', async () => { if (!confirm('Sair do registo neste aparelho?')) return; await sb.auth.signOut(); sair(); });
 
   (async () => {
     if (!window.supabase || !window.supabase.createClient) { F_LOGIN(); erroLogin('Não foi possível carregar a biblioteca da base de dados. Recarrega a página.'); return; }
@@ -7023,7 +7276,9 @@ if (!Element.prototype.replaceChildren) {
     if (data && data.session) await entrar(data.session); else F_LOGIN();
     sb.auth.onAuthStateChange((ev, session) => { if (ev === 'SIGNED_OUT' && sessao) sair(); });
     // Sem tempo real (rede a bloquear websockets), recarrega de minuto a minuto; com ele, confirma a cada 5 minutos.
-    setInterval(() => { if (sessao && status === 'ok' && !trans && modo !== 'novo' && !sheetSujo) carregar(); }, 60000);
+    // Nem a meio de escrever num campo (Objetivos, Probabilidades, Definições): a página redesenhada apagava o que se escrevia.
+    const aEscrever = () => { const a = document.activeElement; return !!a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && !a.readOnly; };
+    setInterval(() => { if (sessao && status === 'ok' && !trans && modo !== 'novo' && !sheetSujo && !aEscrever()) carregar(); }, 60000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden && sessao) carregar(); });
   })();
 })();

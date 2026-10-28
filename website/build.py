@@ -4,6 +4,7 @@
 Só biblioteca padrão. Uso:
     python3 website/build.py            # gera public/
     python3 website/build.py --check    # gera e valida ligações, recursos, placeholders e decisões do dono
+    python3 website/build.py --registo-gap   # gera de novo o bloco SEM-GAP do registo (iPad antigo, iOS 12)
     python3 website/build.py --faltam   # lista os dados que só a MDM pode dar (data/dados-mdm.json, factos das obras)
     MDM_OUT=/tmp/x python3 website/build.py --check   # gera noutra pasta (só apaga uma que o build.py gerou: limpa_saida)
     MDM_PRECOS_FICHEIRO=…                # outra tabela de preços em vez de data/precos.json, só para testes
@@ -1309,6 +1310,95 @@ def precos_contagem():
 
 
 
+# O iPad antigo (Safari do iOS 12) não conhece o «gap» dos flex: o registo põe a classe sem-gap no <html> quando ele não
+# funciona e este bloco, gerado a partir das regras com «gap», dá o mesmo espaço com margens (grid usa grid-gap, que o
+# Safari 12 conhece). Gerar de novo: python3 website/build.py --registo-gap; o --check confirma que está em dia.
+SEM_GAP_RE = re.compile(r"/\* SEM-GAP-INICIO.*?SEM-GAP-FIM \*/", re.S)
+
+
+def registo_css_regras(css):
+    css = re.sub(r"/\*.*?\*/", "", SEM_GAP_RE.sub("", css), flags=re.S)
+    def ler(s, ctx):
+        out, i = [], 0
+        while i < len(s):
+            j = s.find("{", i)
+            if j < 0:
+                break
+            sel = s[i:j].strip()
+            if sel.startswith("@"):
+                d, k = 1, j + 1
+                while d:
+                    d += {"{": 1, "}": -1}.get(s[k], 0)
+                    k += 1
+                if sel.startswith(("@media", "@supports")):
+                    out += ler(s[j + 1:k - 1], sel)
+                i = k
+                continue
+            k = s.find("}", j)
+            out.append((ctx, sel, s[j + 1:k]))
+            i = k + 1
+        return out
+    return ler(css, "")
+
+
+def registo_sem_gap(css):
+    regras = registo_css_regras(css)
+    props = lambda b: dict((a.strip(), v.strip()) for a, _, v in (d.partition(":") for d in b.split(";")) if v.strip())
+    por_sel = {}
+    for ctx, sel, b in regras:
+        if ctx:
+            continue
+        for x in sel.split(","):
+            por_sel.setdefault(x.strip(), {}).update(props(b))
+    linhas = []
+    for ctx, sel, b in regras:
+        p = props(b)
+        if "gap" not in p:
+            continue
+        sels = [x.strip() for x in sel.split(",")]
+        base = {}
+        for x in sels:
+            for chave in (x.split()[-1], x):
+                base.update(por_sel.get(chave, {}))
+        base.update(p)
+        disp = base.get("display", "")
+        g = p["gap"].split()
+        linha, coluna = g[0], g[-1]
+        alvo = lambda suf: ",".join("html.sem-gap " + x + suf for x in sels)
+        if "grid" in disp or "grid-template-columns" in base or "grid-template-areas" in base:
+            regra = f"{alvo('')}{{grid-gap:{p['gap']}}}"
+        elif "flex" in disp:
+            vertical = base.get("flex-direction", "row").startswith("column")
+            if vertical:
+                regra = f"{alvo(' > *')}{{margin-bottom:{linha}}}{alvo(' > :last-child')}{{margin-bottom:0}}"
+            else:
+                # margem à direita de cada filho (também antes de um texto solto); o último só a perde quando ela se veria
+                # (alinhado ao fim ou com o espaço repartido). Linhas que quebram ficam sem o espaço entre linhas.
+                fim = base.get("justify-content", "") in ("space-between", "space-around", "space-evenly", "flex-end", "end", "center")
+                regra = f"{alvo(' > *')}{{margin-right:{coluna}}}" + (f"{alvo(' > :last-child')}{{margin-right:0}}" if fim else "")
+        else:
+            continue
+        linhas.append(f"{ctx}{{{regra}}}" if ctx else regra)
+    # quem empurra os vizinhos com margin-right:auto (ou margin:… auto) continua a empurrar
+    for ctx, sel, b in regras:
+        p = props(b)
+        m = p.get("margin-right", "") == "auto" or (p.get("margin", "").split() + [""])[1 if len(p.get("margin", "").split()) > 1 else 0] == "auto"
+        if m and ":" not in sel.replace("::", ""):
+            regra = ",".join("html.sem-gap " + x.strip() for x in sel.split(",")) + "{margin-right:auto}"
+            linhas.append(f"{ctx}{{{regra}}}" if ctx else regra)
+    return "/* SEM-GAP-INICIO (gerado por website/build.py --registo-gap: não mudar à mão) */\n" + "\n".join(linhas) + "\n/* SEM-GAP-FIM */"
+
+
+def registo_gap_escrever():
+    reg = ROOT / "registo" / "index.html"
+    text = reg.read_text(encoding="utf-8")
+    a, b = text.index("<style>") + 7, text.index("</style>")
+    bloco = registo_sem_gap(text[a:b])
+    css = text[a:b]
+    css = SEM_GAP_RE.sub(lambda m: bloco, css) if SEM_GAP_RE.search(css) else css.rstrip("\n") + "\n" + bloco + "\n"
+    reg.write_text(text[:a] + css + text[b:], encoding="utf-8")
+
+
 def check_registo():
     """Registo (registo/index.html): o bloco puro do orçamento tem de ficar igual às fontes. A potência copiada de
     netlify/lib/calculo.mjs (as mesmas funções, sem «export»), ORC_BTU igual ao «btu» de data/site.json, ORC_MARCAS e
@@ -1319,6 +1409,22 @@ def check_registo():
     if not reg.exists():
         return out
     text = reg.read_text(encoding="utf-8")
+    css = text[text.index("<style>") + 7:text.index("</style>")]
+    m_gap = SEM_GAP_RE.search(css)
+    if not m_gap or m_gap.group(0) != registo_sem_gap(css):
+        out.append("registo/index.html: o bloco SEM-GAP (espaços para o iPad antigo) não está em dia; correr python3 website/build.py --registo-gap")
+    # o iPad antigo (Safari do iOS 12): nada de JavaScript mais novo do que 2018 nem «color-mix» sem cor de reserva antes
+    js = text[text.index("</style>"):]
+    js = re.sub(r"'(?:[^'\\\n]|\\.)*'|\"(?:[^\"\\\n]|\\.)*\"", "''", js)
+    js = re.sub(r"/\*.*?\*/", "", js, flags=re.S)
+    js = re.sub(r"(^|[^:\\])//[^\n]*", r"\1", js)
+    for padrao, nome in ((r"\?\.[A-Za-z_$(\[]", "?."), (r"\?\?", "??"), (r"\(\?<[=!]", "lookbehind (?<= / ?<!)")):
+        if re.search(padrao, js):
+            out.append(f"registo/index.html: «{nome}» não funciona no Safari do iPad antigo (iOS 12)")
+    for m_cm in re.finditer(r"([{;])\s*([a-z-]+)\s*:[^;{}]*color-mix\(", css):
+        antes = css[:m_cm.start() + 1]
+        if not re.search(re.escape(m_cm.group(2)) + r"\s*:[^;{}]*;\s*$", antes):
+            out.append(f"registo/index.html: «{m_cm.group(2)}: color-mix(...)» sem uma cor de reserva antes (o iOS 12 não conhece color-mix)")
     m = re.search(r"ORC-PURO-INICIO(.*?)ORC-PURO-FIM", text, re.S)
     if not m:
         return ["registo/index.html: falta o bloco ORC-PURO-INICIO ... ORC-PURO-FIM (contas do orçamento)"]
@@ -1526,6 +1632,8 @@ def faltam():
 
 
 if __name__ == "__main__":
+    if "--registo-gap" in sys.argv:
+        registo_gap_escrever()
     built = build()
     rc = check(built) if "--check" in sys.argv else 0
     if "--faltam" in sys.argv:
