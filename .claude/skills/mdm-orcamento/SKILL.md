@@ -109,6 +109,7 @@ Nos exemplos abaixo, `ORC` é esse caminho e `$PASTA` é a pasta temporária do 
 - **As contas e o texto** são os de `calculo.mjs` e `proposta-modelo.mjs` (no repositório, `website/netlify/lib/`; no pacote, `scripts/lib/`): os mesmos do formulário do site e da página da equipa.
 
   `website/tests/orcamento-skill.mjs` e `website/tests/paridade.mjs` confirmam que os três dão o mesmo.
+- **No registo da equipa** (`website/registo/`, card «Orçamento» de cada pedido) o ORC numerado sai com a mesma potência (cópia de `calculo.mjs`, confirmada pelo `build.py --check`) e as mesmas marcas, com os preços da tabela privada em Definições. Esta skill continua para a proposta modelo fora do registo.
 
 ## Opções do script
 - `--json` escreve o resultado em JSON.

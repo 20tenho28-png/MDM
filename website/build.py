@@ -978,7 +978,7 @@ def check(files):
                     problems.append(f"{f}: referência partida → {r}")
     problems += check_preview()
     problems += check_regras() + check_duracoes() + check_testemunhos() + check_formatos() + check_btu() + check_precos()
-    problems += check_marcas() + check_equipa()
+    problems += check_marcas() + check_equipa() + check_registo()
     problems += check_encaminhamento() + check_pedidos() + check_precos_teste()
     # uma imagem com 0 bytes (gravação interrompida) existe para REF_RE mas não aparece; .tmp é uma gravação a meio
     for img in sorted(p for p in (OUT / "assets" / "img").rglob("*") if p.is_file()):
@@ -1307,6 +1307,61 @@ def precos_contagem():
     cheios += sum(ex.get(k) is not None for k in PRECOS_EXTRAS) + sum(tem(inc.get(k) or "") for k in PRECOS_INCLUI)
     return cheios, total
 
+
+
+def check_registo():
+    """Registo (registo/index.html): o bloco puro do orçamento tem de ficar igual às fontes. A potência copiada de
+    netlify/lib/calculo.mjs (as mesmas funções, sem «export»), ORC_BTU igual ao «btu» de data/site.json, ORC_MARCAS e
+    ORC_PROIBIDAS iguais às de data/regras-marcas.json, ORC_JUNTA igual ao JUNTA_MARCA de netlify/lib/proposta-modelo.mjs
+    e ORC_EMPRESA com os dados de data/site.json."""
+    out = []
+    reg = ROOT / "registo" / "index.html"
+    if not reg.exists():
+        return out
+    text = reg.read_text(encoding="utf-8")
+    m = re.search(r"ORC-PURO-INICIO(.*?)ORC-PURO-FIM", text, re.S)
+    if not m:
+        return ["registo/index.html: falta o bloco ORC-PURO-INICIO ... ORC-PURO-FIM (contas do orçamento)"]
+    bloco = m.group(1)
+    so = lambda t: re.sub(r"\s+", "", t)
+    calc = (ROOT / "netlify" / "lib" / "calculo.mjs").read_text(encoding="utf-8").split("\n")
+    for nome in ("milhares", "btuh", "decimal", "configPotencia", "potencia"):
+        i = next((k for k, l in enumerate(calc) if re.match(r"^(export )?function " + nome + r"\(", l)), None)
+        if i is None:
+            out.append(f"calculo.mjs: falta a função {nome} (o registo copia-a)")
+            continue
+        j = i
+        if not (calc[i].rstrip().endswith("}") and calc[i].count("{") == calc[i].count("}")):
+            while calc[j] != "}":
+                j += 1
+        fonte = "\n".join(calc[i:j + 1]).replace("export ", "", 1)
+        if so(fonte) not in so(bloco):
+            out.append(f"registo/index.html: a função {nome} do orçamento não é igual à de netlify/lib/calculo.mjs; copiar de novo")
+    esp = next((l for l in calc if l.startswith("const espacos")), "")
+    if so(esp) not in so(bloco):
+        out.append("registo/index.html: «espacos» do orçamento não é igual ao de calculo.mjs")
+    def valor(nome):
+        mm = re.search(r"const " + nome + r" = (.*?);\n", bloco)
+        return mm.group(1) if mm else None
+    site = json.loads((DATA / "site.json").read_text(encoding="utf-8"))
+    marcas = json.loads((DATA / "regras-marcas.json").read_text(encoding="utf-8"))
+    for nome, esperado in (("ORC_BTU", site.get("btu")), ("ORC_MARCAS", marcas.get("permitidas")), ("ORC_PROIBIDAS", marcas.get("proibidas"))):
+        v = valor(nome)
+        try:
+            igual = v is not None and json.loads(v) == esperado
+        except json.JSONDecodeError:
+            igual = False
+        if not igual:
+            out.append(f"registo/index.html: {nome} não é igual ao de data/ (site.json ou regras-marcas.json)")
+    # a junção das palavras das marcas proibidas («Saunier-Duval», «SaunierDuval») é a do assistente e da skill
+    pm = re.search(r"const JUNTA_MARCA = (.*?);\n", (ROOT / "netlify" / "lib" / "proposta-modelo.mjs").read_text(encoding="utf-8"))
+    if not pm or valor("ORC_JUNTA") != pm.group(1):
+        out.append("registo/index.html: ORC_JUNTA não é igual ao JUNTA_MARCA de netlify/lib/proposta-modelo.mjs")
+    emp = valor("ORC_EMPRESA") or ""
+    for chave in ("name", "legalName", "nif", "phone", "whatsapp", "email", "address1", "address2"):
+        if json.dumps(site.get(chave, ""), ensure_ascii=False) not in emp:
+            out.append(f"registo/index.html: ORC_EMPRESA não tem o {chave} de data/site.json")
+    return out
 
 def check_btu():
     """Os números da estimativa de potência (site.json «btu»), que o dono pode mudar: todos positivos e coerentes."""
