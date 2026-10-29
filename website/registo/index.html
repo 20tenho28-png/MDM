@@ -12,6 +12,16 @@
 <script>
 // O Safari do iOS 12 (o iPad antigo) não faz o «gap» dos flex: com a classe sem-gap, o bloco SEM-GAP do CSS dá o mesmo
 // espaço com margens. Testa-se o comportamento, nunca o nome do browser.
+// Disposição: telefone, tablet estreito (ao alto), tablet largo (deitado) ou escritório (rato). Pelo ecrã e pelo tipo de
+// toque, nunca pelo nome do aparelho; «Disposição» em Definições força tátil ou escritório neste aparelho.
+function registoDisp() { try {
+  var pref = ''; try { pref = localStorage.getItem('registo-disp') || ''; } catch (e) {}
+  var w = window.innerWidth, curto = Math.min(screen.width || w, screen.height || w);
+  var tatil = pref === 'tatil' || (pref !== 'escritorio' && window.matchMedia && matchMedia('(pointer:coarse)').matches);
+  var m = w < 640 ? 'telefone' : !tatil ? 'escritorio' : curto < 600 ? 'telefone' : w >= 960 ? 'largo' : 'estreito';
+  if (document.documentElement.getAttribute('data-disp') !== m) document.documentElement.setAttribute('data-disp', m);
+} catch (e) {} }
+registoDisp(); window.addEventListener('resize', registoDisp); window.addEventListener('orientationchange', registoDisp);
 (function () { try { var d = document.createElement('div'); d.style.cssText = 'display:flex;flex-direction:column;row-gap:1px;position:absolute';
   d.appendChild(document.createElement('div')); d.appendChild(document.createElement('div')); document.documentElement.appendChild(d);
   if (d.scrollHeight !== 1) document.documentElement.className += ' sem-gap'; d.parentNode.removeChild(d); } catch (e) {} })();
@@ -922,6 +932,101 @@ button.i:hover,button.i[aria-expanded="true"]{border-color:var(--accent);color:v
 .agt input[type=color]{padding:2px;height:40px}
 @media (prefers-color-scheme:dark){.ag-th.hoje,.ag-td.hoje{background:rgba(93,184,221,.09)}}
 @media (max-width:640px){.ag-semana{display:none}.ag-dia{display:flex}}
+/* ===== Tablet (passo 1 do plano): html[data-disp=largo] deitado e html[data-disp=estreito] ao alto. O escritório e o
+   telefone ficam como estavam. Espaços com margens (nada de gap nos flex novos), alvos de 44 px ou mais. ===== */
+.so-tatil,.rail .r-lab,.rail button.so-tatil{display:none}
+html[data-disp=largo] .so-tatil,html[data-disp=estreito] .so-tatil{display:flex}
+html[data-disp=largo] body,html[data-disp=estreito] body{font-size:16px}
+html[data-disp=largo] #railNovo,html[data-disp=estreito] #railNovo,html[data-disp=largo] #rail-prazos,html[data-disp=estreito] #rail-prazos,
+html[data-disp=largo] #btnSair,html[data-disp=estreito] #btnSair{display:none}
+html[data-disp=largo] .rail .r-lab,html[data-disp=estreito] .rail .r-lab{display:block;font-size:12.5px;font-weight:500;margin-top:3px;line-height:1.1}
+html[data-disp=largo] .shell{grid-template-columns:84px minmax(0,1fr)}
+html[data-disp=largo] .rail{padding-top:10px}
+html[data-disp=largo] .rail button{width:72px;height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:6px}
+html[data-disp=estreito] .shell{display:block}
+html[data-disp=estreito] .rail{position:fixed;left:0;right:0;bottom:0;top:auto;height:auto;z-index:30;flex-direction:row;justify-content:space-around;align-items:stretch;padding:4px max(8px,env(safe-area-inset-right,0px)) calc(4px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));box-shadow:0 -1px 0 rgba(0,0,0,.08)}
+html[data-disp=estreito] .rail button{flex:1 1 0;width:auto;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 2px}
+html[data-disp=estreito] .page{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+html[data-disp=estreito] .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+html[data-disp=largo] .topbar,html[data-disp=estreito] .topbar{padding-top:6px;padding-bottom:6px;flex-wrap:nowrap}
+html[data-disp=largo] .logo small,html[data-disp=estreito] .logo small{display:none}
+.t-acoes{align-items:center;margin-left:auto;margin-right:12px}
+.t-acoes .btn{min-height:44px;margin-left:8px}
+.t-acoes svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;margin-right:6px}
+html[data-disp=largo] .chip,html[data-disp=estreito] .chip{min-height:44px;font-size:15px}
+html[data-disp=largo] .btn,html[data-disp=estreito] .btn{min-height:44px}
+html[data-disp=largo] .btn-sm,html[data-disp=estreito] .btn-sm{min-height:44px;font-size:15px}
+/* Trabalho: deitado, o pedido abre num painel à direita e a lista fica à vista (sem véu); ao alto, ocupa o ecrã. */
+html[data-disp=largo] #sheetWrap{left:auto;width:min(600px,max(420px,46vw));background:transparent;padding:0;align-items:stretch;z-index:25}
+html[data-disp=largo] #sheet,html[data-disp=estreito] #sheet{max-width:none;max-height:none;height:100%;border-radius:0}
+html[data-disp=largo] #sheet{border-left:1px solid var(--line);box-shadow:-8px 0 24px rgba(0,0,0,.08)}
+html[data-disp=largo].com-pedido .principal{margin-right:min(600px,max(420px,46vw))}
+html[data-disp=largo].com-pedido body{overflow:visible!important}
+html[data-disp=estreito] #sheetWrap{padding:0;align-items:stretch}
+#btnClose .x-volta{display:none}
+html[data-disp=estreito] #btnClose{width:auto;padding:0 12px;min-height:44px;font-size:16px}
+html[data-disp=estreito] #btnClose .x-x{display:none}
+html[data-disp=estreito] #btnClose .x-volta{display:inline}
+html[data-disp=largo] #btnClose{width:44px;height:44px}
+.t-row.aberto{background:var(--sunk)}
+/* A barra do passo fica sempre à vista no fundo do pedido; o passo aberto tem Cancelar e Confirmar em cima. */
+html[data-disp=largo] .passo-bar,html[data-disp=estreito] .passo-bar{position:-webkit-sticky;position:sticky;bottom:0;z-index:1;background:var(--surface);margin:0 -16px -18px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);box-shadow:0 -6px 12px rgba(0,0,0,.05)}
+html[data-disp=largo] .passo-bar h3,html[data-disp=estreito] .passo-bar h3{display:none}
+.t-cab{display:none}
+html[data-disp=largo] .t-cab,html[data-disp=estreito] .t-cab{display:flex;align-items:center;position:-webkit-sticky;position:sticky;top:0;z-index:3;background:var(--surface);border-bottom:1px solid var(--line)}
+.t-cab b{flex:1 1 auto;min-width:0;text-align:center;font-weight:600;margin:0 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html[data-disp=largo] .tform > .row-end,html[data-disp=estreito] .tform > .row-end{display:none}
+/* Com o pedido aberto ao lado, a lista passa a duas colunas (como abaixo de 1100 px). */
+html[data-disp=largo].com-pedido .t-head{display:none}
+html[data-disp=largo].com-pedido .t-row{grid-template-columns:minmax(0,1fr) auto;grid-gap:10px 14px}
+html[data-disp=largo].com-pedido .t-row > .t-acao,html[data-disp=largo].com-pedido .t-row > .t-ativ{grid-column:1/-1}
+html[data-disp=largo].com-pedido .t-row > .t-btns{grid-column:2;grid-row:1;align-self:start}
+html[data-disp=largo] .t-row,html[data-disp=estreito] .t-row{cursor:pointer}
+.contacto-rapido{display:flex;flex-wrap:wrap;align-items:center}
+.contacto-rapido > *{margin:0 8px 8px 0}
+html[data-disp=largo] .tform > h3,html[data-disp=estreito] .tform > h3{display:none}
+html[data-disp=largo] .t-cab,html[data-disp=estreito] .t-cab{margin:-12px -12px 0;padding:8px 12px;border-radius:10px 10px 0 0}
+/* Pedidos no tablet: a lista de toque; a Tabela fica no «Mais». */
+html[data-disp=largo]:not(.ver-tabela) #v-gerir .tb-wrap,html[data-disp=estreito]:not(.ver-tabela) #v-gerir .tb-wrap,
+html[data-disp=largo]:not(.ver-tabela) #v-gerir .fbox.agrupar,html[data-disp=estreito]:not(.ver-tabela) #v-gerir .fbox.agrupar{display:none}
+html[data-disp=largo]:not(.ver-tabela) #lista,html[data-disp=estreito]:not(.ver-tabela) #lista{display:block}
+.hj-acoes{display:inline-flex;flex-wrap:wrap;justify-content:flex-end}
+.hj-acoes > * + *{margin-left:6px}
+/* Procurar: um painel por cima de tudo, com os pedidos e os clientes. */
+.procura{position:fixed;top:0;right:0;bottom:0;left:0;z-index:55;background:var(--scrim);display:flex;justify-content:center;align-items:flex-start;padding:max(12px,env(safe-area-inset-top,0px)) 12px 12px}
+.procura[hidden]{display:none}
+.procura-c{background:var(--surface);border-radius:14px;width:100%;max-width:680px;max-height:100%;display:flex;flex-direction:column;box-shadow:0 12px 32px rgba(0,0,0,.25);overflow:hidden}
+.procura-h{display:flex;align-items:center;padding:12px;border-bottom:1px solid var(--line)}
+.procura-h input{flex:1 1 auto;min-width:0;font-size:17px;min-height:44px;margin-right:10px}
+.procura-r{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:6px 0 12px}
+.procura-r h4{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2);margin:12px 16px 4px;font-weight:600}
+.pr-l{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:10px 16px;min-height:56px;font:inherit;color:var(--ink);cursor:pointer}
+.pr-l b{display:block;font-size:16px}
+.pr-l span{display:block;font-size:14px;color:var(--ink-2);margin-top:2px}
+.pr-l:active{background:var(--sunk)}
+.procura-r .pr-mais,.procura-r .pr-novo{margin:10px 16px 0}
+.procura-r .empty{margin:16px}
+/* Pedido novo no tablet: sugestões de clientes por baixo do nome. */
+.sug-cli{border:1px solid var(--line);border-radius:10px;margin-top:6px;overflow:hidden;background:var(--surface)}
+.sug-cli[hidden]{display:none}
+.sug-cli .pr-l{min-height:48px}
+.ja-aberto{margin:6px 0 0}
+.ja-aberto .btn{margin-left:8px}
+details.mais-dados > summary{cursor:pointer;font-weight:600;min-height:44px;line-height:44px}
+.chips-rap{display:none}
+html[data-disp=largo] .chips-rap,html[data-disp=estreito] .chips-rap{display:block}
+.chips-rap .chips{margin-bottom:8px}
+.hj-fila{display:none;margin-bottom:22px}
+html[data-disp=largo] .hj-fila,html[data-disp=estreito] .hj-fila{display:block}
+.hj-fila .chips{margin:6px 0 10px}
+html[data-disp=telefone] .hj-dono,html[data-disp=escritorio] .hj-dono{display:none}
+.hj-dono{margin-bottom:18px}
+/* «Enviaste?»: fica à vista (acima da barra de baixo) até se responder. */
+.enviei{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:61;background:var(--surface);color:var(--ink);border:1px solid var(--accent);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:12px 14px;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;max-width:calc(100% - 32px);box-sizing:border-box;font-size:15px}
+.enviei[hidden]{display:none}
+.enviei > span:first-child{flex:1 1 220px;margin:4px 12px 4px 0}
+.enviei-b .btn{margin-left:8px}
+html[data-disp=estreito] .enviei{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 /* SEM-GAP-INICIO (gerado por website/build.py --registo-gap: não mudar à mão) */
 html.sem-gap .top-in > *{margin-right:12px}html.sem-gap .top-in > :last-child{margin-right:0}
 html.sem-gap .next > *{margin-bottom:2px}html.sem-gap .next > :last-child{margin-bottom:0}
@@ -1083,17 +1188,19 @@ html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
 <div class="shell">
 <nav class="rail" aria-label="Menu">
   <button class="r-novo" type="button" id="railNovo" title="Novo pedido" aria-label="Novo pedido"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
-  <button type="button" id="rail-hoje" title="Hoje" aria-label="Hoje"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg><span class="r-badge" id="hjBadge"></span></button>
-  <button type="button" id="rail-gerir" title="Pedidos" aria-label="Pedidos"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5" height="11" rx="1.5"/><rect x="16" y="4" width="5" height="7" rx="1.5"/></svg></button>
-  <button type="button" id="rail-agenda" title="Agenda" aria-label="Agenda"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h3M8 17h6"/></svg></button>
-  <button type="button" id="rail-clientes" title="Clientes" aria-label="Clientes"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.3c2.5-.2 4.3 1.3 4.8 4.2"/></svg></button>
-  <button type="button" id="rail-prazos" title="Definições" aria-label="Definições"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
+  <button type="button" id="rail-hoje" title="Hoje" aria-label="Hoje"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg><span class="r-lab">Hoje</span><span class="r-badge" id="hjBadge"></span></button>
+  <button type="button" id="rail-gerir" title="Pedidos" aria-label="Pedidos"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5" height="11" rx="1.5"/><rect x="16" y="4" width="5" height="7" rx="1.5"/></svg><span class="r-lab">Pedidos</span></button>
+  <button type="button" id="rail-agenda" title="Agenda" aria-label="Agenda"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h3M8 17h6"/></svg><span class="r-lab">Agenda</span></button>
+  <button type="button" id="rail-clientes" title="Clientes" aria-label="Clientes"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.3c2.5-.2 4.3 1.3 4.8 4.2"/></svg><span class="r-lab">Clientes</span></button>
+  <button type="button" id="rail-prazos" title="Definições" aria-label="Definições"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg><span class="r-lab">Definições</span></button>
+  <button type="button" id="rail-mais" class="so-tatil" aria-label="Mais" aria-haspopup="menu"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span class="r-lab">Mais</span></button>
   <button type="button" class="r-fim" id="btnSair" title="Sair" aria-label="Sair"><svg viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 8l-4 4 4 4M6 12h10"/></svg></button>
   <span hidden><span id="painelBadge"></span><span id="sgBadge"></span><span id="agBadge"></span><span id="redBadge"></span><span id="fugaBadge"></span><span id="cliBadge"></span></span>
 </nav>
-<div style="min-width:0">
+<div class="principal" style="min-width:0">
 <header class="topbar">
   <div class="logo">MDM<small>Registo de pedidos</small></div>
+  <div class="t-acoes so-tatil"><button class="btn btn-ghost" type="button" id="btnProcurar" aria-label="Procurar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>Procurar</button><button class="btn" type="button" id="btnNovoTab">+ Novo</button></div>
   <div class="user">
     <b id="nextNum" hidden></b>
     <span><span id="liveDot" class="live" aria-hidden="true"></span><span id="userTxt"></span></span>
@@ -1127,6 +1234,12 @@ html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
   <div id="v-hoje" role="tabpanel" aria-labelledby="tab-hoje" hidden>
     <p class="hj-ola" id="hjOla"></p>
     <section class="kpis" id="hjKpis" aria-label="Hoje em números"></section>
+    <section class="kpis hj-dono" id="hjDono" aria-label="O negócio" hidden></section>
+    <section class="hj-fila" aria-labelledby="h-hj-fila">
+      <div class="sec-h"><h2 id="h-hj-fila">A minha fila</h2><span class="count" id="hjFilaCount"></span></div>
+      <div class="chips" id="hjFilaChips" role="group" aria-label="De quem"></div>
+      <div class="panel" id="hjFila"></div>
+    </section>
     <div class="hj-grid">
       <section aria-labelledby="h-hj-env">
         <div class="sec-h"><h2 id="h-hj-env">Enviar hoje</h2><span class="count" id="hjEnvCount"></span></div>
@@ -1529,6 +1642,12 @@ html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
         <div class="row-end" style="margin-top:10px"><button class="btn" id="btnPrazos" type="button" hidden>Guardar prazos</button></div>
       </section>
       <div class="side">
+        <section aria-labelledby="h-disp">
+          <div class="sec-h"><h2 id="h-disp">Neste aparelho</h2></div>
+          <div class="panel" style="padding:14px"><div class="f"><label class="lbl" for="selDisp">Disposição</label>
+            <select id="selDisp"><option value="">Automática</option><option value="tatil">Tátil (tablet)</option><option value="escritorio">Escritório</option></select>
+            <span class="aux">Automática: tátil num ecrã de toque com 640 px ou mais, escritório com rato. Fica só neste aparelho.</span></div></div>
+        </section>
         <section aria-labelledby="h-export">
           <div class="sec-h"><h2 id="h-export">Exportar</h2></div>
           <div class="panel" style="padding:14px;display:flex;flex-direction:column;gap:10px" id="export"></div>
@@ -1604,7 +1723,7 @@ html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
   <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <div class="sheet-h">
       <div style="min-width:0"><h2 id="sheetTitle">Pedido</h2><div class="sub" id="sheetSub"></div></div>
-      <button class="x" type="button" id="btnClose" aria-label="Fechar">×</button>
+      <button class="x" type="button" id="btnClose" aria-label="Fechar"><span class="x-x">×</span><span class="x-volta">‹ Voltar</span></button>
     </div>
     <div class="sheet-b" id="sheetBody"></div>
   </div>
@@ -1613,6 +1732,8 @@ html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
 </div>
 
 <div class="toast" id="toast" role="status" hidden></div>
+<div class="procura" id="procura" role="dialog" aria-modal="true" aria-label="Procurar" hidden><div class="procura-c"><div class="procura-h"><input id="procQ" type="search" placeholder="Nome, telefone, PED, ORC, NIF, localidade" aria-label="Procurar" autocomplete="off" autocorrect="off" spellcheck="false"><button class="btn btn-ghost" type="button" id="procFechar">Fechar</button></div><div class="procura-r" id="procRes"></div></div></div>
+<div class="enviei" id="enviei" role="alertdialog" aria-labelledby="envieiTxt" hidden><span id="envieiTxt"></span><span class="enviei-b"><button class="btn btn-ghost btn-sm" type="button" id="envieiNao">Ainda não</button><button class="btn btn-sm" type="button" id="envieiSim">Sim, enviei</button></span></div>
 
 <script>
 // Safari antigo (iPad com iOS 12 e 13): replaceChildren só chegou no iOS 14. Esta versão faz o mesmo.
@@ -1962,6 +2083,17 @@ if (!Element.prototype.replaceChildren) {
     return `PED${String(max + 1).padStart(4,'0')}_${year}`;
   }
 
+  // Copiar um texto: a área de transferência quando há; no iPad antigo, uma caixa escondida selecionada e «copy» no toque.
+  function copiar(texto, msg) {
+    const velho = () => {
+      const ta = h('textarea',{style:'position:fixed;left:-9999px;top:0', readonly:'readonly'}); ta.value = texto; document.body.appendChild(ta);
+      ta.focus(); ta.setSelectionRange(0, texto.length);
+      let feito = false; try { feito = document.execCommand('copy'); } catch (e) { feito = false; }
+      ta.remove(); toast(feito ? (msg || 'Copiado') : texto);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texto).then(() => toast(msg || 'Copiado'), velho);
+    else velho();
+  }
   const lerFicheiro = f => new Promise((ok, falha) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = () => falha(r.error); r.readAsArrayBuffer(f); });
 
   /* ---------- Separadores ---------- */
@@ -1980,7 +2112,7 @@ if (!Element.prototype.replaceChildren) {
     return true;
   }
   const ultimaVista = {};
-  let tab = 'hoje', porDesenhar = [], desenhoGeracao = 0; // porDesenhar: vistas por desenhar (renderAll)
+  let tab = 'hoje', porDesenhar = [], desenhoGeracao = 0, tabelaNoTablet = false; // porDesenhar: vistas por desenhar (renderAll)
   try { const s = localStorage.getItem('registo-tab'); if (TABS.includes(s)) tab = s; } catch (e) {}
   if (TABS.includes(location.hash.replace('#',''))) tab = location.hash.replace('#','');
   function setTab(t, focus) {
@@ -1995,7 +2127,7 @@ if (!Element.prototype.replaceChildren) {
     });
     const subs = g[2].filter(disponivel);
     F('subnav').hidden = subs.length < 2;
-    fill(F('subnav'), subs.length < 2 ? null : subs.map(v => h('button',{class:'chip', type:'button', role:'tab', id:'sub-' + v, 'aria-selected': String(v === t), 'aria-pressed': String(v === t), onclick:() => setTab(v)}, SUB_NOME[v])));
+    fill(F('subnav'), subs.length < 2 ? null : subs.map(v => h('button',{class:'chip', type:'button', role:'tab', id:'sub-' + v, 'aria-selected': String(v === t), 'aria-pressed': String(v === t), onclick:() => setTab(v)}, v === 'gerir' && tatil() && !tabelaNoTablet ? 'Lista' : SUB_NOME[v])));
     for (const k of TABS) {
       const b = F('tab-' + k);
       b.setAttribute('aria-selected', String(k === t)); b.tabIndex = k === t ? 0 : -1;
@@ -2009,11 +2141,12 @@ if (!Element.prototype.replaceChildren) {
     document.querySelector('.page-h .vista').classList.toggle('so-gerir', t !== 'gerir');
     F('btnNovoTop').classList.toggle('so-gerir', t !== 'gerir');
     if (focus) F('tab-' + t).focus();
+    document.documentElement.classList.toggle('ver-tabela', tabelaNoTablet);
     desenharVista(t);
     if (t === 'contactos' && status === 'ok') renderContactos();
   }
   TABS.forEach(k => { F('tab-' + k).addEventListener('click', () => setTab(k)); });
-  SECOES.forEach(([k, , vs]) => { F('rail-' + k).addEventListener('click', () => setTab(ultimaVista[k] || vs.filter(disponivel)[0] || vs[0])); });
+  SECOES.forEach(([k, , vs]) => { F('rail-' + k).addEventListener('click', () => { tabelaNoTablet = false; setTab(ultimaVista[k] || vs.filter(disponivel)[0] || vs[0]); }); });
   F('tabs').addEventListener('keydown', e => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
     const i = TABS.indexOf(tab), n = TABS.length;
@@ -2320,7 +2453,8 @@ if (!Element.prototype.replaceChildren) {
       h('button',{type:'button', title:'Mudar a próxima ação', 'aria-label':'Mudar a próxima ação', disabled: !(aberto && canWrite), onclick:() => acaoRapida(r.id, 'acao')}, h('span',{class:'q'}, '?')),
       h('button',{type:'button', title:'Fechar como perdido', 'aria-label':'Fechar como perdido', disabled: !(podePerder && canWrite), onclick:() => acaoRapida(r.id, 'perdido')}, svg(ICO.no)));
     const col4 = h('div',{class:'t-btns'}, seg, h('button',{class:'mais', type:'button', title:'Abrir o pedido', 'aria-label':'Abrir o pedido', onclick:() => openSheet(r.id)}, svg(ICO.mais)));
-    return h('div',{class:`t-row u-${pe.p}${aberto ? '' : ' fechado'}`, style: aberto ? '--stripe:var(--u)' : null}, col1, col2, col3, col4);
+    return h('div',{class:`t-row u-${pe.p}${aberto ? '' : ' fechado'}${r.id === currentId && !F('sheetWrap').hidden ? ' aberto' : ''}`, 'data-id':r.id, style: aberto ? '--stripe:var(--u)' : null,
+      onclick: ev => { if (tatil() && !ev.target.closest('button,a,input,select,textarea,label')) openSheet(r.id); }}, col1, col2, col3, col4);
   }
 
   const URG_NOME = {P1:'Urgente', P2:'Alta', P3:'Normal'};
@@ -3713,7 +3847,7 @@ if (!Element.prototype.replaceChildren) {
   function openFicha(k, nomeNovo, base) {
     fichaBase = base || null; fichaKey = k || null; currentId = null; modo = 'ficha'; trans = null; dadosAberto = false;
     if (k && !fichas[k] && nomeNovo) fichas[k] = {nome: nomeNovo, _novo: true};
-    F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); setTimeout(() => F('btnClose').focus(), 30);
+    mostraSheet(true); renderSheet(); setTimeout(() => F('btnClose').focus(), 30);
   }
   function renderFicha() {
     const body = F('sheetBody'); sheetSujo = false;
@@ -4301,7 +4435,7 @@ if (!Element.prototype.replaceChildren) {
     porDesenhar = depois; desenhoGeracao++;
     desenharResto(desenhoGeracao);
     orcSincroniza();
-    F('btnNovoTop').hidden = F('railNovo').hidden = F('btnNovoCliente').hidden = !(canWrite && status === 'ok');
+    F('btnNovoTop').hidden = F('railNovo').hidden = F('btnNovoCliente').hidden = F('btnNovoTab').hidden = !(canWrite && status === 'ok');
     // Não redesenha a folha aberta enquanto há um formulário a meio.
     if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
   }
@@ -4316,7 +4450,7 @@ if (!Element.prototype.replaceChildren) {
   }
   function abreDoEndereco() {
     const m = /^#p\/([A-Za-z0-9_]+)$/.exec(location.hash);
-    if (m && rows.some(r => r.id === m[1])) { if (currentId !== m[1]) openSheet(m[1]); }
+    if (m && rows.some(r => r.id === m[1])) { if (currentId !== m[1] && !openSheet(m[1])) enderecoPara('#p/' + currentId); }
     else if (m) enderecoPara('#' + tab);
   }
   window.addEventListener('popstate', () => {
@@ -4328,8 +4462,26 @@ if (!Element.prototype.replaceChildren) {
     }
     if (TABS.includes(t) && t !== tab) setTab(t);
   });
-  function openSheet(id) { enderecoPara('#p/' + id, true); currentId = id; modo = null; trans = null; dadosAberto = false; F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); setTimeout(() => F('btnClose').focus(), 30); }
-  function closeSheet() { enderecoPara('#' + tab); F('sheetWrap').hidden = true; document.body.style.overflow = ''; currentId = null; modo = null; trans = null; fichaKey = null; sheetSujo = false; sgRespondeu = null; sgEdit = null; if (agAcao && agAcao.onde === 'sheet') agAcao = null; if (status === 'ok') renderAll(); }
+  // No tablet deitado o pedido abre ao lado da lista: tocar noutro pedido troca o que está aberto, e nunca perde o que
+  // se escreveu sem perguntar.
+  function mostraSheet(sim) {
+    F('sheetWrap').hidden = !sim; document.body.style.overflow = sim ? 'hidden' : '';
+    document.documentElement.classList.toggle('com-pedido', sim);
+    marcaAberto();
+  }
+  function tatil() { return /^(largo|estreito)$/.test(document.documentElement.getAttribute('data-disp') || ''); }
+  function marcaAberto() {
+    document.querySelectorAll('.t-row.aberto').forEach(e => e.classList.remove('aberto'));
+    if (currentId && !F('sheetWrap').hidden) document.querySelectorAll('.t-row[data-id="' + currentId + '"]').forEach(e => e.classList.add('aberto'));
+  }
+  function recentes() { try { return JSON.parse(localStorage.getItem('registo-recentes') || '[]'); } catch (e) { return []; } }
+  function lembraRecente(id) { try { localStorage.setItem('registo-recentes', JSON.stringify([id].concat(recentes().filter(x => x !== id)).slice(0, 10))); } catch (e) {} }
+  function openSheet(id) {
+    if (!F('sheetWrap').hidden && id !== currentId && sheetSujo && canWrite && !confirm('Há alterações por guardar. Abrir outro pedido mesmo assim?')) return false;
+    enderecoPara('#p/' + id, true); currentId = id; modo = null; trans = null; dadosAberto = false; sheetSujo = false; mostraSheet(true); renderSheet(); lembraRecente(id);
+    F('sheet').scrollTop = 0; setTimeout(() => F('btnClose').focus(), 30); return true;
+  }
+  function closeSheet() { enderecoPara('#' + tab); mostraSheet(false); currentId = null; modo = null; trans = null; fichaKey = null; sheetSujo = false; sgRespondeu = null; sgEdit = null; if (agAcao && agAcao.onde === 'sheet') agAcao = null; if (status === 'ok') renderAll(); }
   // Fechar a folha com o × , um toque ao lado ou Esc nunca perde o que se escreveu sem perguntar.
   function fecharSheetPedido() { if (sheetSujo && canWrite && !confirm('Há alterações por guardar. Fechar mesmo assim?')) return; closeSheet(); }
   F('btnClose').addEventListener('click', fecharSheetPedido);
@@ -4476,6 +4628,7 @@ if (!Element.prototype.replaceChildren) {
         h('div',{style:'min-width:0'}, h('div',{class:'what'}, r.proximaAcao || 'Sem próxima ação'),
           h('div',{class:'who'}, `${r.dono || 'Sem dono'} · ${r.dataProximaAcao ? (acaoAtrasada ? 'devia ser a ' : 'até ') + ddmm(r.dataProximaAcao) : 'sem data'}`)),
         canWrite ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => abrirTrans({id:'acao', label:'Mudar a próxima ação', para:null, soAcao:true})}, 'Mudar ação') : null));
+      blocos.push(contactoRapido(r));
       if (!segLigado() && r.esperaMotivo === 'decisao' && (r.seguimentos || 0) >= 3) blocos.push(h('p',{class:'hint alert'}, '3 seguimentos sem resposta: fecha como perdido, salvo data dada pelo cliente.'));
       if (semContacto30(r)) blocos.push(h('p',{class:'hint alert'}, 'Sem contacto há 30 dias: fecha como perdido ou dá-lhe uma ação para hoje.'));
     } else {
@@ -4497,7 +4650,7 @@ if (!Element.prototype.replaceChildren) {
       // Os caminhos normais à vista (no máximo três, o primeiro cheio); pausas, fechos e o contacto no «⋯».
       const principais = T.filter(t => !t.fecho && !t.pausa && !t.seguimento).slice(0, 3);
       const resto = T.filter(t => principais.indexOf(t) < 0);
-      if (T.length || aberto) blocos.push(h('div',{class:'block'}, h('h3',null,'Próximo passo'),
+      if (T.length || aberto) blocos.push(h('div',{class:'block passo-bar'}, h('h3',null,'Próximo passo'),
         h('div',{class:'trans'}, principais.map((t, i) => h('button',{class:'btn' + (i ? ' btn-ghost' : ''), type:'button', onclick:() => abrirTrans(t)}, t.label)),
           menu(resto.map(t => [t.label, () => abrirTrans(t), t.fecho ? 'x' : t.pausa ? 'cal' : 'seta', t.fecho && t.para === 'perdido'])
             .concat(aberto ? [['Registar contacto com o cliente', registarContacto, 'telefone']] : []), 'Outras mudanças'))));
@@ -4509,6 +4662,19 @@ if (!Element.prototype.replaceChildren) {
     body.replaceChildren(...blocos);
   }
 
+  // Ligar, WhatsApp e mapa do pedido num toque, com o número e a morada à vista para copiar: o «tel:» do iPad só
+  // liga com um iPhone emparelhado, e o WhatsApp pode não estar instalado.
+  function contactoRapido(r) {
+    const ct = contactosDe(r), f = fichas[chaveCli(r.cliente || '')] || {}, morada = String(f.morada || r.localidade || '').split('\n')[0];
+    if (!ct.telTxt && !ct.email && !morada) return null;
+    const bt = (rot, fn, cls) => h('button',{class:'btn btn-ghost btn-sm' + (cls ? ' ' + cls : ''), type:'button', onclick:fn}, rot);
+    return h('div',{class:'contacto-rapido'},
+      ct.telTxt ? h('a',{class:'btn btn-ghost btn-sm', href:'tel:+' + (ct.tel || ct.telTxt.replace(/\D/g, ''))}, 'Ligar ' + ct.telTxt) : null,
+      ct.tel ? bt('WhatsApp', () => abrirLink('https://wa.me/' + ct.tel)) : null,
+      morada ? bt('Mapa', () => abrirLink(agMapa({localidade: morada}))) : null,
+      menu([ct.telTxt ? ['Copiar o número', () => copiar(ct.telTxt, 'Número copiado')] : null, ct.email ? ['Copiar o email', () => copiar(ct.email, 'Email copiado')] : null,
+        morada ? ['Copiar a morada', () => copiar(morada, 'Morada copiada')] : null], 'Copiar'));
+  }
   function abrirTrans(t) { trans = t; renderSheet(); foca(F('t-acao') || F('t-motivo') || F('t-vis')); }
 
   function formTrans(r) {
@@ -4517,7 +4683,9 @@ if (!Element.prototype.replaceChildren) {
     const fecho = !!t.fecho;
     const para = t.para;
     const extra = {decisao: t.decisao, revisao: t.revisao, acumuladoH: t.retoma ? r.acumuladoPausa : 0};
-    const els = [h('h3',null, t.soAcao ? 'Mudar a próxima ação' : t.seguimento ? t.label : `Passar a ${ESTADOS[para].l}`)];
+    const titulo = t.soAcao ? 'Mudar a próxima ação' : t.seguimento ? t.label : `Passar a ${ESTADOS[para].l}`;
+    const els = [h('div',{class:'t-cab'}, h('button',{class:'btn btn-ghost', type:'button', onclick:() => { trans = null; renderSheet(); }}, 'Cancelar'),
+      h('b',null, titulo), h('button',{class:'btn', type:'button', onclick:confirmarTrans}, 'Confirmar')), h('h3',null, titulo)];
     if (t.ri) els.push(h('div',{class:'fields'}, campo('t-ri','Data do RI', inp('t-ri', today(), {type:'date'})), campo('t-ri-n','N.º do RI (opcional)', inp('t-ri-n', (r.obra && r.obra.riNum) || ''))));
     if (t.fatura) els.push(h('div',{class:'fields'}, campo('t-fat-n','N.º da fatura', inp('t-fat-n', r.fatura || '', {placeholder:'FT 2600/000082'})), campo('t-fat-d','Data da fatura', inp('t-fat-d', today(), {type:'date'})),
       campo('t-fat-v','Valor da fatura (€)', inp('t-fat-v', r.valorFatura != null ? String(r.valorFatura).replace('.',',') : r.valor != null ? String(r.valor).replace('.',',') : '', {inputmode:'decimal'})),
@@ -4574,6 +4742,12 @@ if (!Element.prototype.replaceChildren) {
         campo('t-dono','Dono', donoInput('t-dono', r.dono || meuNome())),
         campo('t-data','Data da próxima ação', inp('t-data', dflt.data, {type:'date'})),
         campo('t-acao','Próxima ação', inp('t-acao', dflt.acao, {placeholder:'O quê, por exemplo «Ligar a confirmar a visita»'}), null, true)));
+      // Tablet: dono e data num toque (os campos continuam lá para o que não está nos chips).
+      const poe = (id, v) => { F(id).value = v; sheetSujo = true; };
+      els.push(h('div',{class:'chips-rap'},
+        h('div',{class:'chips', role:'group', 'aria-label':'Dono'}, donosConhecidos().slice(0, 5).map(d => h('button',{class:'chip', type:'button', onclick:() => poe('t-dono', d)}, d))),
+        h('div',{class:'chips', role:'group', 'aria-label':'Data'}, [['Hoje', today()], ['Amanhã', addDays(today(), 1)], ['+2 úteis', addUteis(today(), 2)]]
+          .map(([l, d]) => h('button',{class:'chip', type:'button', onclick:() => poe('t-data', d)}, l)))));
       if (t.pedeVisita) els.push(h('p',{class:'note'}, 'A data da próxima ação acompanha a da visita, para o pedido ficar amarelo nesse dia; muda-a se for preciso.'));
     }
     if (r.porConfirmar && !t.soAcao && !t.seguimento && !t.remarcar) els.push(h('p',{class:'note'}, 'Ao confirmar, o pedido deixa de estar «por confirmar» e o relógio começa a contar a partir de agora.'));
@@ -6124,11 +6298,21 @@ if (!Element.prototype.replaceChildren) {
       return false;
     } finally { sgBusy = false; }
   }
+  // Abrir o WhatsApp ou o email não quer dizer que a mensagem saiu: só fica enviada quando a pessoa diz «Sim, enviei».
+  let envioPendente = null;
   function segEnviar(x, r) {
     const url = linkEnvio(x, r);
     if (url) abrirLink(url);
-    return segRpc('seg_enviar', {p_id: x.id}, `${x.passo || 'Seguimento'} marcado como enviado`, x.id);
+    envioPendente = x;
+    F('envieiTxt').textContent = `Enviaste a mensagem a ${(r && r.cliente) || x.cliente || x.pedido_id}${x.passo ? ' (' + x.passo + ')' : ''}?`;
+    F('enviei').hidden = false;
+    return Promise.resolve(false);
   }
+  F('envieiSim').addEventListener('click', () => {
+    const x = envioPendente; envioPendente = null; F('enviei').hidden = true;
+    if (x) segRpc('seg_enviar', {p_id: x.id}, `${x.passo || 'Seguimento'} marcado como enviado`, x.id);
+  });
+  F('envieiNao').addEventListener('click', () => { envioPendente = null; F('enviei').hidden = true; });
   async function segAtendeu(x) {
     if (await segRpc('seg_enviar', {p_id: x.id, p_resultado: 'atendeu'})) await segRespondeu(x.pedido_id, 'atendeu o telefone');
   }
@@ -6990,7 +7174,10 @@ if (!Element.prototype.replaceChildren) {
       const passo = x.passo || segRotulo(x.sequencia, x.numero, x.total != null ? x.total : segTotal(x.sequencia, r.prioridade));
       return hjLinha(x.dias_atraso > 0 ? 'bad' : 'warn', r.cliente || x.cliente || x.pedido_id, () => openSheet(x.pedido_id),
         [ico(x.canal), passo, x.dias_atraso > 0 ? h('span',{class:'dias-b', title:`atrasado ${x.dias_atraso} dias`}, `${x.dias_atraso}d`) : null],
-        canWrite ? h('button',{class:'btn btn-sm', type:'button', onclick:() => tel ? (url ? abrirLink(url) : openSheet(x.pedido_id)) : segEnviar(x, r)}, tel ? 'Ligar' : 'Enviar') : null);
+        canWrite ? h('span',{class:'hj-acoes'},
+          h('button',{class:'btn btn-sm', type:'button', onclick:() => tel ? (url ? abrirLink(url) : openSheet(x.pedido_id)) : segEnviar(x, r)}, tel ? 'Ligar' : 'Enviar'),
+          tel ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => segAtendeu(x)}, 'Atendeu') : null,
+          tel ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => segRpc('seg_enviar', {p_id: x.id, p_resultado:'nao_atendeu'}, 'Registado: não atendeu', x.id)}, 'Não atendeu') : null) : null);
     });
     // Visitas de hoje: da agenda, ou da data da visita escrita no pedido
     const hoje = today();
@@ -7025,6 +7212,58 @@ if (!Element.prototype.replaceChildren) {
       tile('Atrasados', verm.length, 'bad', () => irPara('vermelhos')),
       tile('Por marcar', agLigado() ? agPor.length : rows.filter(r => r.estado === 'visita_por_marcar').length, 'warn', () => agLigado() ? setTab('agenda') : irPara('visita_por_marcar')));
     F('hjBadge').textContent = env.length + verm.length ? String(env.length + verm.length) : '';
+    if (tatil()) renderFila(all);
+  }
+  // A fila: os pedidos em aberto pela ordem do trabalho (o mais urgente primeiro), os meus ou os da equipa.
+  // O chefe é o de Seguimentos › Definições; sem chefe escolhido, ninguém vê os números aqui (os técnicos usam o mesmo iPad).
+  const souChefe = () => !!(segCfg().chefe && segCfg().chefe === meuNome());
+  const porPagar60 = () => rows.filter(r => r.estado === 'faturado' && !r.dataPagamento && r.dataFatura && r.dataFatura < addDays(today(), -60));
+  function paraDecidir(all) {
+    const out = [], visto = {};
+    const poe = (x, porque) => { if (!visto[x.r.id]) { visto[x.r.id] = 1; out.push({x, porque}); } };
+    all.forEach(x => { if (ABERTOS.includes(x.r.estado) && (!x.r.dono || !x.r.proximaAcao || !x.r.dataProximaAcao)) poe(x, 'Falta dono, ação ou data'); });
+    all.forEach(x => { if (ABERTOS.includes(x.r.estado) && x.r.porConfirmar) poe(x, 'Dados por confirmar'); });
+    all.forEach(x => { if (x.r.estado === 'espera_cliente' && x.r.esperaMotivo === 'decisao' && (x.r.seguimentos || 0) >= 3) poe(x, '3 seguimentos sem resposta: perdido?'); });
+    all.forEach(x => { if (semContacto30(x.r)) poe(x, 'Sem contacto há 30 dias'); });
+    const p60 = porPagar60().map(r => r.id);
+    all.forEach(x => { if (p60.indexOf(x.r.id) >= 0) poe(x, `Fatura ${x.r.fatura || ''} por pagar desde ${ddmm(x.r.dataFatura)}`); });
+    return out;
+  }
+  function renderDono(all, decidir) {
+    const box = F('hjDono');
+    box.hidden = !souChefe();
+    if (box.hidden) return;
+    const ab = rows.filter(r => ABERTOS.includes(r.estado));
+    const obj = cfgObjetivos || {}, mensal = Number(obj.mensal) || (Number(obj.anual) ? Number(obj.anual) / 12 : 0);
+    const noMes = faturadoMes(today().slice(0, 7)).v, p60 = porPagar60();
+    const verm = all.filter(x => ABERTOS.includes(x.r.estado) && x.sem === 'vermelho').length;
+    const tile = (l, v, tone, fn) => h('button',{class:'kpi' + (tone ? ' t-' + tone : ''), type:'button', onclick:fn}, h('span',{class:'k-l'}, l), h('span',{class:'k-v'}, String(v)));
+    fill(box,
+      tile('Previsão em aberto', kEur(ab.reduce((t, r) => t + previsaoDe(r), 0)), '', () => { tabelaNoTablet = true; setTab('gerir'); tbAgrupar('estado'); }),
+      tile('Faturado no mês', mensal ? `${kEur(noMes)} de ${kEur(mensal)}` : kEur(noMes), '', () => setTab('painel')),
+      tile('Atrasados', verm, verm ? 'bad' : '', () => irPara('vermelhos')),
+      tile('Por pagar +60 dias', p60.length, p60.length ? 'warn' : '', () => irPara('faturado')),
+      tile('Para decidir', decidir.length, decidir.length ? 'warn' : '', () => { try { localStorage.setItem('registo-fila', 'decidir'); } catch (e) {} renderFila(all); }));
+  }
+  function renderFila(all) {
+    let de = 'meus'; try { de = localStorage.getItem('registo-fila') || 'meus'; } catch (e) {}
+    const eu1 = meuNome(), chefe = souChefe(), decidir = chefe ? paraDecidir(all) : [];
+    if (de === 'decidir' && !chefe) de = 'meus';
+    renderDono(all, decidir);
+    fill(F('hjFilaChips'), [['meus', 'Os meus'], ['equipa', 'Equipa']].concat(chefe ? [['decidir', `Para decidir (${decidir.length})`]] : []).map(([k, l]) => h('button',{class:'chip', type:'button', 'aria-pressed': String(k === de),
+      onclick:() => { try { localStorage.setItem('registo-fila', k); } catch (e) {} renderFila(all); }}, l)));
+    F('h-hj-fila').textContent = de === 'meus' ? 'A minha fila' : de === 'decidir' ? 'Para decidir' : 'A fila da equipa';
+    if (de === 'decidir') {
+      hjLista('hjFila', 'hjFilaCount', decidir.map(({x, porque}) => hjLinha('warn', x.r.cliente || x.r.id, () => openSheet(x.r.id),
+        [h('span',{class:'prio p-' + x.pe.p}, x.pe.p), porque], h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => openSheet(x.r.id)}, 'Abrir'))),
+        'Nada à espera de uma decisão.', null, 12);
+      return;
+    }
+    const fila = all.filter(x => ABERTOS.includes(x.r.estado) && (de !== 'meus' || x.r.dono === eu1)).sort(ordem);
+    hjLista('hjFila', 'hjFilaCount', fila.map(x => hjLinha(x.sem === 'vermelho' ? 'bad' : x.sem === 'amarelo' ? 'warn' : 'info', x.r.cliente || x.r.id, () => openSheet(x.r.id),
+      [h('span',{class:'prio p-' + x.pe.p}, x.pe.p), `${x.r.proximaAcao || 'Sem próxima ação'}${de === 'meus' ? '' : ' · ' + (x.r.dono || 'sem dono')}`],
+      canWrite ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { if (openSheet(x.r.id)) abrirTrans({id:'acao', label:'Mudar a próxima ação', para:null, soAcao:true}); }}, 'Mudar') : null)),
+      de === 'meus' ? 'Nada na tua fila.' : 'Nada em aberto.', () => { tabelaNoTablet = false; setTab('gerir'); }, 6);
   }
 
   /* ---------- Dados do pedido ---------- */
@@ -7141,7 +7380,45 @@ if (!Element.prototype.replaceChildren) {
     const canalPelaOrigem = () => { if (!canalMexido) F('d-canal').value = canalDe({origem: val('d-origem'), contacto: val('d-contacto')}); };
     F('d-origem').addEventListener('change', canalPelaOrigem); F('d-contacto').addEventListener('input', canalPelaOrigem);
     atualizarP();
+    if (tatil()) novoCurto();
     foca(F('d-cliente'));
+  }
+  // No tablet: o cliente primeiro, com sugestões dos clientes e pedidos que já existem; escolher um preenche o
+  // contacto, a localidade, o canal e o nome nas mensagens, e avisa se já tem um pedido aberto. O que se usa pouco fica
+  // em «Mais dados».
+  function novoCurto() {
+    const campoDe = id => F(id) && F(id).closest('.f');
+    const raros = ['d-canal','d-cnome','d-dimp','d-dped','d-pasta','d-notas'].map(campoDe).filter(Boolean);
+    const det = h('details',{class:'mais-dados'}, h('summary',null, `Mais dados (${raros.length})`), h('div',{class:'fields'}, raros));
+    const fs = F('d-cliente').closest('.fields'); fs.parentNode.insertBefore(det, fs.nextSibling);
+    const sug = h('div',{class:'sug-cli', hidden:true}), aviso = h('div',{class:'ja-aberto'});
+    const fc = campoDe('d-cliente'); fc.appendChild(sug); fc.appendChild(aviso);
+    const ultimoDe = k => rows.filter(r => chaveCli(r.cliente || '') === k).sort((a, b) => String(b.id).localeCompare(String(a.id)))[0] || null;
+    const avisa = () => {
+      const k = chaveCli(val('d-cliente'));
+      const ab = k ? rows.filter(r => chaveCli(r.cliente || '') === k && ABERTOS.includes(r.estado)) : [];
+      fill(aviso, ab.length ? h('p',{class:'hint alert'}, `Já tem ${ab[0].id} aberto (${(ESTADOS[ab[0].estado] || ESTADOS.novo).l}).`,
+        h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { sheetSujo = false; openSheet(ab[0].id); }}, 'Abrir')) : null);
+    };
+    const escolhe = (k, nome) => {
+      const r = ultimoDe(k), f = fichas[k] || {};
+      F('d-cliente').value = nome;
+      if (!val('d-contacto')) F('d-contacto').value = f.telefone || f.email || (r && r.contacto) || '';
+      if (!val('d-localidade')) F('d-localidade').value = f.morada || (r && r.localidade) || '';
+      if (r && r.canal) F('d-canal').value = r.canal;
+      if (r && r.contactoNome && !val('d-cnome')) F('d-cnome').value = r.contactoNome;
+      sug.hidden = true; avisa(); foca(F('d-tipo'));
+    };
+    let t = null;
+    F('d-cliente').addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => {
+      const q = norm(val('d-cliente')); if (q.length < 2) { sug.hidden = true; avisa(); return; }
+      const nomes = {};
+      rows.forEach(r => { const k = chaveCli(r.cliente || ''); if (k && norm(r.cliente).indexOf(q) >= 0) nomes[k] = nomes[k] || r.cliente; });
+      Object.keys(fichas).forEach(k => { const f = fichas[k]; if (f && f.nome && !nomes[k] && norm(f.nome).indexOf(q) >= 0) nomes[k] = f.nome; });
+      const ks = Object.keys(nomes).slice(0, 6);
+      fill(sug, ks.map(k => { const r = ultimoDe(k); return linhaProcura(nomes[k], r ? [r.id, String(r.localidade || '').split('\n')[0]].filter(Boolean).join(' · ') : 'Ficha de cliente', () => escolhe(k, nomes[k])); }));
+      sug.hidden = !ks.length || (ks.length === 1 && norm(nomes[ks[0]]) === q); avisa();
+    }, 200); });
   }
   async function criar(id) {
     if (rows.some(r => r.id === id)) id = nextPedido();
@@ -7154,8 +7431,82 @@ if (!Element.prototype.replaceChildren) {
       acumuladoH:0, seguimentos:0, escalado:false, porConfirmar:false, num:null, valor:null, ultimoContacto: agora, historico:[nota(`Pedido registado em Novo · ${d}: ${a}`)]});
     if (await gravar(id, doc, `${id} registado`)) { currentId = id; modo = null; renderSheet(); }
   }
-  const abrirNovo = () => { currentId = null; modo = 'novo'; trans = null; F('sheetWrap').hidden = false; document.body.style.overflow = 'hidden'; renderSheet(); };
-  F('btnNovoTop').addEventListener('click', abrirNovo); F('railNovo').addEventListener('click', abrirNovo);
+  const abrirNovo = () => {
+    if (!F('sheetWrap').hidden && sheetSujo && canWrite && !confirm('Há alterações por guardar. Abrir um pedido novo mesmo assim?')) return;
+    currentId = null; modo = 'novo'; trans = null; sheetSujo = false; mostraSheet(true); renderSheet();
+  };
+  F('btnNovoTop').addEventListener('click', abrirNovo); F('railNovo').addEventListener('click', abrirNovo); F('btnNovoTab').addEventListener('click', abrirNovo);
+  // Tablet: «Mais» junta as vistas que não estão na barra (e Definições e Sair).
+  F('rail-mais').addEventListener('click', ev => {
+    ev.stopPropagation();
+    const vistas = [['seguimentos','Seguimentos'],['painel','Números'],['gerir','Tabela'],['pipeline','Quadro'],['contactos','Contactos'],['clientes','A contactar'],['faturacao','Faturação'],['prazos','Definições']]
+      .filter(([t]) => disponivel(t));
+    abrePop(F('rail-mais'), vistas.map(([t, l]) => h('button',{type:'button', role:'menuitem', onclick:() => { fechaPop(); if (t === 'gerir') tabelaNoTablet = true; setTab(t); }}, l))
+      .concat([h('button',{type:'button', role:'menuitem', class:'perigo', onclick:() => { fechaPop(); F('btnSair').click(); }}, 'Sair')]), 'menu');
+  });
+  // Disposição escolhida à mão neste aparelho (o <head> lê-a em registoDisp).
+  try { F('selDisp').value = localStorage.getItem('registo-disp') || ''; } catch (e) {}
+  F('selDisp').addEventListener('change', e => {
+    try { if (e.target.value) localStorage.setItem('registo-disp', e.target.value); else localStorage.removeItem('registo-disp'); } catch (er) {}
+    registoDisp(); if (status === 'ok') { setTab(tab); renderAll(); }
+  });
+  // Procurar (tablet): pedidos e clientes de uma vez. Sem acentos nem maiúsculas; o telefone compara só os dígitos.
+  function procuraTexto(r) {
+    const f = fichas[chaveCli(r.cliente || '')] || {};
+    return norm([r.id, r.num, r.orcamento && r.orcamento.num, r.cliente, r.localidade, r.contacto, r.proximaAcao, r.fatura, f.nif, f.email, f.telefone, f.morada].join(' '));
+  }
+  function procuraDigitos(r) { const f = fichas[chaveCli(r.cliente || '')] || {}; return [r.contacto, f.telefone, f.nif].join(' ').replace(/\D/g, ''); }
+  function linhaProcura(titulo, sub, fn) { return h('button',{class:'pr-l', type:'button', onclick:fn}, h('b',null, titulo), sub ? h('span',null, sub) : null); }
+  function linhaPedidoProcura(r) {
+    const e = ESTADOS[r.estado] || ESTADOS.novo;
+    return linhaProcura(r.cliente || 'Sem nome', [r.num && r.num !== r.id ? r.num : r.id, e.l, String(r.localidade || '').split('\n')[0]].filter(Boolean).join(' · '),
+      () => { fechaProcura(); openSheet(r.id); });
+  }
+  let procT = null;
+  function desenhaProcura() {
+    const qq = F('procQ').value.trim(), q = norm(qq), dig = qq.replace(/\D/g, '');
+    const box = F('procRes');
+    if (!q) {
+      const rec = recentes().map(id => rows.find(r => r.id === id)).filter(Boolean);
+      fill(box, ...(rec.length ? [h('h4',null,'Abertos há pouco'), rec.map(linhaPedidoProcura)] : [h('p',{class:'empty'}, 'Escreve um nome, um telefone, um PED, um ORC ou um NIF.')]));
+      return;
+    }
+    const telefone = dig.length >= 6 && dig.length >= qq.replace(/[\s+().-]/g, '').length - 1;
+    const bate = r => procuraTexto(r).indexOf(q) >= 0 || (dig.length >= 6 && procuraDigitos(r).indexOf(dig) >= 0);
+    const peds = rows.filter(bate).sort((a, b) => (ABERTOS.includes(b.estado) - ABERTOS.includes(a.estado)) || String(b.id).localeCompare(String(a.id)));
+    const cli = {};
+    rows.forEach(r => { const k = chaveCli(r.cliente || ''); if (k && bate(r)) cli[k] = cli[k] || r.cliente; });
+    Object.keys(fichas).forEach(k => { const f = fichas[k]; if (f && f.nome && !cli[k] && (norm([f.nome, f.nif, f.email, f.telefone, f.morada].join(' ')).indexOf(q) >= 0 || (dig.length >= 6 && String([f.telefone, f.nif].join(' ')).replace(/\D/g, '').indexOf(dig) >= 0))) cli[k] = f.nome; });
+    const clis = Object.keys(cli).sort((a, b) => String(cli[a]).localeCompare(String(cli[b]), 'pt'));
+    const out = [];
+    if (peds.length) {
+      out.push(h('h4',null, `Pedidos (${peds.length})`), peds.slice(0, 8).map(linhaPedidoProcura));
+      if (peds.length > 8) out.push(h('button',{class:'btn btn-ghost btn-sm pr-mais', type:'button', onclick:() => { fechaProcura(); query = qq; F('q').value = qq; fEstado = 'todos'; fCli = null; tabelaNoTablet = false; setTab('gerir'); renderAll(); }}, `Ver todos (${peds.length})`));
+    }
+    if (clis.length) out.push(h('h4',null, `Clientes (${clis.length})`), clis.slice(0, 8).map(k => {
+      const ab = rows.filter(r => chaveCli(r.cliente || '') === k && ABERTOS.includes(r.estado)).length;
+      return linhaProcura(cli[k], ab ? `${ab} pedido${ab > 1 ? 's' : ''} em aberto` : 'Sem pedidos em aberto', () => { fechaProcura(); openFicha(k, cli[k]); });
+    }));
+    if (!out.length) out.push(h('p',{class:'empty'}, 'Nada encontrado.'));
+    if (telefone && !peds.length && canWrite) out.push(h('button',{class:'btn pr-novo', type:'button', onclick:() => { fechaProcura(); novoBase = {contacto: qq}; abrirNovo(); }}, '+ Novo pedido para este número'));
+    fill(box, ...out);
+  }
+  function abreProcura() {
+    if (status !== 'ok') return;
+    F('procura').hidden = false; F('procQ').value = ''; desenhaProcura(); foca(F('procQ'));
+  }
+  function fechaProcura() { F('procura').hidden = true; }
+  F('btnProcurar').addEventListener('click', abreProcura);
+  F('procFechar').addEventListener('click', fechaProcura);
+  F('procura').addEventListener('click', e => { if (e.target === F('procura')) fechaProcura(); });
+  F('procQ').addEventListener('input', () => { clearTimeout(procT); procT = setTimeout(desenhaProcura, 200); });
+  // «/» ou Cmd+F só no tablet (no computador o Cmd+F continua a ser o do navegador); Esc fecha a procura primeiro.
+  document.addEventListener('keydown', e => {
+    if (!F('procura').hidden) { if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); fechaProcura(); } return; }
+    if (!tatil() || !sessao) return;
+    const aEscreverAgora = /^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '') || (document.activeElement && document.activeElement.isContentEditable);
+    if ((e.key === '/' && !aEscreverAgora) || ((e.metaKey || e.ctrlKey) && (e.key === 'f' || e.key === 'F'))) { e.preventDefault(); abreProcura(); }
+  }, true);
   // A procura espera que se pare de escrever (no iPad antigo cada tecla redesenhava a lista inteira).
   let qEspera = null;
   F('q').addEventListener('input', e => { query = e.target.value; clearTimeout(qEspera); qEspera = setTimeout(() => renderLista(status === 'ok' ? enriquecidos() : []), 200); });
