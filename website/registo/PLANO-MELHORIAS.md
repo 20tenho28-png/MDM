@@ -45,7 +45,7 @@ Cada passo é um PR pequeno, que se usa logo. A ordem segue o processo interno e
 9. **Portal do cliente.** Uma ligação por pedido para o cliente ver o estado, aceitar o orçamento e marcar a visita.
 10. **Fotos e documentos.** Supabase Storage para fotos da visita, do RI e os PDFs.
 
-**O registo no tablet** (plano à parte, por passos, cada um publicado sozinho): 0. **Feito: fundações** (iPad antigo, ecrã principal, não perder trabalho, endereços, a vista à frente desenhada primeiro). 1. Hoje e o pedido como «Trabalho» ao lado da lista, procura única, pedido novo curto. 2. No local: o dia do técnico, levantamento por divisão com fotos, folha de obra, RI. 3. Com o cliente: o orçamento mostrado num modo fechado, aceite e assinatura. 4. Agenda da semana, clientes, números. 5. O resto.
+**O registo no tablet** (plano à parte, por passos, cada um publicado sozinho): 0. **Feito: fundações** (iPad antigo, ecrã principal, não perder trabalho, endereços, a vista à frente desenhada primeiro). 1. **Feito: Hoje e o pedido como «Trabalho»** ao lado da lista, procura única, pedido novo curto, «Sim, enviei» (por fazer deste passo: o cabeçalho do dono com os números e a lista «Para decidir»). 2. No local: o dia do técnico, levantamento por divisão com fotos, folha de obra, RI. 3. Com o cliente: o orçamento mostrado num modo fechado, aceite e assinatura. 4. Agenda da semana, clientes, números. 5. O resto.
 
 ## Como se liga tudo
 
