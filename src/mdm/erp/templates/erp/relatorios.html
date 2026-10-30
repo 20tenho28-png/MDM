@@ -1,0 +1,21 @@
+{% extends "erp/base.html" %}
+{% block titulo %}Relatórios{% endblock %}
+{% block corpo %}
+<div class="cab"><div><div class="eyebrow">Relatórios de intervenção</div><h1>Relatórios recebidos</h1>
+<p class="meta">Feitos na app FM-TEC-04 e enviados para o escritório. Cada relatório fecha a visita da agenda com a mesma ref. interna (V0012).</p></div>
+<div class="acoes"><a class="bt" href="/erp/relatorios/importar">Receber relatórios</a><a class="bt sec" href="/erp/ri">Abrir a app</a></div></div>
+<form class="pesquisa" method="get" action="/erp/relatorios" style="margin:14px 0">
+  <input type="search" name="q" value="{{ q }}" placeholder="N.º RI, cliente, morada, ORC ou técnico" aria-label="Procurar relatório">
+  <button class="bt">Procurar</button>
+</form>
+<div class="tw"><table><thead><tr><th>Relatório</th><th>Cliente</th><th>Técnico</th><th>Resultado</th><th>Visita</th><th>Estado</th></tr></thead><tbody>
+{% for i in relatorios %}<tr>
+  <td><a href="/erp/relatorios/{{ i.numero }}"><b>{{ i.numero }}</b></a><span class="sub bl">{{ i.data|data_pt }} {{ i.hora_inicio }}–{{ i.hora_fim }}</span></td>
+  <td>{{ i.cliente_nome }}<span class="sub bl">{{ i.morada|truncate(50) }}</span></td>
+  <td>{{ i.tecnico }}</td>
+  <td>{{ i.nome_resultado }}{% if i.houve_gas %}<span class="sub bl">gases fluorados{% if i.refrigerante %} · {{ i.refrigerante }}{% endif %}</span>{% endif %}</td>
+  <td>{% if i.visita %}<a href="/erp/visitas/{{ i.visita.id }}">{{ ref_visita(i.visita) }}</a>{% else %}<span class="et por_marcar">sem visita</span>{% endif %}</td>
+  <td><span class="et {{ 'fechado' if i.estado == 'aceite' and not i.retificado_por else ('cancelada' if i.retificado_por else 'rascunho') }}">{{ i.nome_estado }}</span></td>
+</tr>{% else %}<tr><td colspan="6" class="vazio">{% if q %}Nenhum relatório com «{{ q }}».{% else %}Ainda não chegou nenhum relatório.{% endif %}</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

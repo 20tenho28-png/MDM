@@ -1,0 +1,40 @@
+{% extends "erp/base.html" %}{% from "erp/_macros.html" import prio, estado %}
+{% block titulo %}{{ cliente.nome }}{% endblock %}
+{% block corpo %}
+<div class="cab"><div><div class="eyebrow">Cliente</div><h1>{{ cliente.nome }}</h1>
+<p class="meta">{{ cliente.morada_completa }}</p></div>
+<div class="acoes"><a class="bt" href="/erp/visitas/nova?cliente={{ cliente.id }}">Nova visita</a><a class="bt sec" href="/erp/clientes/{{ cliente.id }}?editar=1">Editar</a></div></div>
+<div class="grelha" style="margin-top:14px">
+<section class="cartao"><h2>Contactos</h2><dl class="dados">
+  <dt>Telefone</dt><dd>{% if cliente.telefone %}<a href="tel:{{ cliente.telefone|replace(' ', '') }}">{{ cliente.telefone }}</a>{% else %}—{% endif %}</dd>
+  <dt>Email</dt><dd>{% if cliente.email %}<a href="mailto:{{ cliente.email }}">{{ cliente.email }}</a>{% else %}—{% endif %}</dd>
+  <dt>NIF</dt><dd>{{ cliente.nif or '—' }}</dd>
+  {% if cliente.notas %}<dt>Notas</dt><dd>{{ cliente.notas }}</dd>{% endif %}
+</dl></section>
+<section class="cartao" id="equipamentos"><h2>Equipamentos</h2>
+  <ul class="lista">{% for e in cliente.equipamentos %}<li><span class="princ"><b>{{ e.descricao }}</b>
+    <span class="sub bl">{% if e.numero_serie %}N.º série {{ e.numero_serie }}{% endif %}{% if e.gas %} · {{ e.gas }}{% if e.carga_kg %} {{ e.carga_kg|num }} kg{% endif %}{% endif %}{% if e.instalado_em %} · instalado {{ e.instalado_em|data_pt }}{% endif %}</span></span></li>
+  {% else %}<li class="vazio">Sem equipamentos registados.</li>{% endfor %}</ul>
+  <details style="margin-top:8px"><summary>Registar equipamento</summary>
+  <form class="ficha" method="post" action="/erp/clientes/{{ cliente.id }}/equipamentos" style="margin-top:8px"><div class="campos">
+    <label>Tipo<input name="tipo" list="tipos-eq" placeholder="Split"></label>
+    <datalist id="tipos-eq"><option>Split</option><option>Multi-split</option><option>Bomba de calor</option><option>VRV / VRF</option><option>Ventilação / recuperador</option><option>Chiller</option><option>Quadro elétrico</option></datalist>
+    <label>Marca<input name="marca" list="marcas-eq"></label>
+    <datalist id="marcas-eq"><option>Daikin</option><option>Mitsubishi Electric</option><option>Midea</option><option>Fujitsu</option><option>LG</option><option>Samsung</option><option>Toshiba</option></datalist>
+    <label>Modelo<input name="modelo"></label><label>N.º de série<input name="numero_serie"></label>
+    <label>Localização<input name="localizacao" placeholder="Sala, quarto 1, cobertura"></label>
+    <label>Gás<input name="gas" placeholder="R32"></label><label>Carga (kg)<input name="carga_kg" inputmode="decimal"></label>
+    <label>Instalado em<input name="instalado_em" type="date"></label>
+  </div><div class="acoes"><button class="bt peq">Registar</button></div></form></details>
+</section>
+</div>
+<h2>Visitas e relatórios</h2>
+<div class="tw"><table><thead><tr><th>Quando</th><th>Visita</th><th>Estado</th><th>Relatório</th></tr></thead><tbody>
+{% for v in visitas %}<tr>
+  <td>{% if v.inicio %}{{ v.inicio.strftime('%d/%m/%Y %H:%M') }}{% else %}<span class="sub">por marcar desde {{ v.criada_em|data_pt }}</span>{% endif %}</td>
+  <td><a href="/erp/visitas/{{ v.id }}">{{ ref_visita(v) }}</a> · {{ v.nome_tipo }} {{ prio(v.prioridade) }}{% if v.referencia %}<span class="sub bl">{{ v.referencia }}</span>{% endif %}</td>
+  <td>{{ estado(v) }}</td>
+  <td>{% for r in v.relatorios %}<a href="/erp/relatorios/{{ r.numero }}">{{ r.numero }}</a>{% if r.retificado_por %} <span class="sub">(retificado)</span>{% endif %}<br>{% else %}—{% endfor %}</td>
+</tr>{% else %}<tr><td colspan="4" class="vazio">Sem visitas.</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

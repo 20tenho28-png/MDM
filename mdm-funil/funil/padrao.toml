@@ -1,0 +1,199 @@
+# Valores por defeito do funil de pedidos MDM.
+# Não alteres este ficheiro: escreve só o que muda num config.toml na pasta do projeto.
+
+[geral]
+# Data de referência para "hoje" (AAAA-MM-DD). Vazio = hoje.
+data_referencia = ""
+# Marca o relatório como dados de exemplo.
+exemplo = false
+
+[empresa]
+# Endereços de email da MDM. Servem para distinguir o que é resposta da MDM.
+emails = ["mdmassistencia@gmail.com"]
+# Telefones da MDM e dos técnicos, para não serem confundidos com clientes (nos grupos de WhatsApp escrevem pela MDM).
+telefones = []
+# Nomes com que a MDM aparece nas conversas de WhatsApp exportadas.
+nomes_whatsapp = ["MDM", "MDM Climatização", "Bernardo"]
+
+[calendario]
+hora_inicio = 9
+hora_fim = 18
+# Feriados municipais ou dias de fecho extra (MM-DD). 06-13 = Santo António (Lisboa).
+feriados_extra = ["06-13"]
+carnaval = false
+
+[pedidos]
+# Contactos do mesmo cliente separados por mais de N dias de silêncio contam como pedido novo.
+dias_novo_pedido = 60
+# Um orçamento sem decisão nem fatura ao fim de N dias conta como perdido.
+dias_decisao = 120
+# Um pedido sem orçamento nem fatura ao fim de N dias conta como perdido antes do orçamento.
+dias_sem_orcamento = 30
+# Uma fatura conta para um pedido se for emitida até N dias depois do orçamento ou do contacto.
+dias_fatura = 180
+# Depois de uma fatura ou de uma recusa, uma mensagem nova do cliente mais de N dias depois abre um pedido novo.
+dias_fechado = 7
+# Taxas de ganho só com pedidos com mais de N dias (o resultado já é quase sempre conhecido). Assim os ganhos,
+# que se veem logo, não pesam mais do que as perdas, que só se confirmam meses depois.
+dias_maturidade = 120
+# Um telefone ou email que aparece com N ou mais nomes diferentes é tratado como contacto da MDM.
+limite_contacto_partilhado = 8
+# Telefones ou emails que o cálculo tratou como partilhados mas que são de um só cliente (ex.: "912 345 678").
+nunca_partilhados = []
+
+[email]
+# Domínios a ignorar (fornecedores, bancos, serviços). `python -m funil remetentes` ajuda a encontrá-los.
+dominios_ignorar = []
+# Remetentes a ignorar (endereço completo).
+remetentes_ignorar = []
+# Endereço que envia as notificações do formulário do site (o cliente vem no Reply-To).
+remetentes_formulario = []
+# Domínios de email pessoal. Os outros domínios contam como empresa.
+dominios_pessoais = ["gmail.com", "googlemail.com", "hotmail.com", "hotmail.pt", "outlook.com", "outlook.pt", "live.com", "live.com.pt", "msn.com", "sapo.pt", "yahoo.com", "yahoo.com.br", "icloud.com", "me.com", "mail.pt", "clix.pt", "netcabo.pt", "aeiou.pt", "iol.pt", "gmx.com", "gmx.net", "protonmail.com", "proton.me"]
+
+[whatsapp]
+# Ordem da data nas exportações: "dmy" (Portugal) ou "mdy" (Estados Unidos).
+ordem_data = "dmy"
+# Início das mensagens automáticas da MDM (saudação e ausência do WhatsApp Business). Não contam como resposta.
+mensagens_automaticas = []
+# Conversas a ignorar (técnicos, fornecedores, família): o nome ou o número como aparece no nome do ficheiro.
+# As conversas com os números de [empresa] telefones e de [chamadas] ignorar também são ignoradas.
+conversas_ignorar = []
+# Uma mensagem da MDM igual em N ou mais conversas e enviada até S segundos depois do cliente conta como automática.
+repeticoes_automaticas = 3
+segundos_automaticas = 90
+
+[chamadas]
+# Números a ignorar (família, fornecedores, serviços).
+ignorar = []
+# Colunas dos ficheiros CSV de chamadas (registo do telemóvel ou fatura detalhada).
+coluna_data = "data"
+coluna_hora = "hora"
+coluna_numero = "numero"
+coluna_tipo = "tipo"
+coluna_duracao = "duracao"
+# Se o ficheiro só tem chamadas efetuadas (é normalmente o caso da fatura detalhada), escreve "saida".
+direcao_fixa = ""
+valores_entrada = ["recebida", "entrada", "incoming", "atendida"]
+valores_saida = ["efetuada", "saida", "outgoing", "realizada", "originada"]
+valores_perdida = ["perdida", "nao atendida", "missed", "rejeitada", "sem resposta"]
+
+[orc]
+# Folhas cujo nome contém este texto não entram na leitura do valor do orçamento.
+folhas_custos = "custo"
+
+[faturas]
+coluna_data = "data"
+coluna_numero = "numero"
+coluna_cliente = "cliente"
+coluna_nif = "nif"
+coluna_valor = "valor"
+coluna_descricao = "descricao"
+coluna_telefone = "telefone"
+coluna_email = "email"
+# Tipo de documento: vem desta coluna ou, se não existir, das letras no início do número (ex.: "FT 2026/12").
+coluna_tipo = "tipo"
+# Documentos que contam como fatura e como nota de crédito. Os outros (recibos RG, pró-formas PF...) são ignorados.
+tipos_fatura = ["FT", "FR", "FS"]
+tipos_credito = ["NC"]
+# true se o valor da coluna inclui IVA.
+valor_com_iva = false
+taxa_iva = 0.23
+
+[site]
+coluna_id = "id"
+coluna_data = "created_at"
+coluna_nome = "nome"
+coluna_email = "email"
+coluna_telefone = "telefone"
+coluna_mensagem = "mensagem"
+coluna_tipo = "tipo"
+coluna_localidade = "localidade"
+
+[palavras]
+# Palavras usadas para reconhecer e classificar pedidos. Escreve-as sem acentos e em minúsculas. Nas decisões dos
+# clientes (aceite, recusa_...) a pontuação é ignorada: "nao obrigado" também apanha "Não, obrigado".
+pedido = ["orcament", "ar condicionado", "ar-condicionado", "climatiza", "split", "inverter", "bomba de calor", "avari", "instala", "manutenc", "limpeza", "aparelho", "maquina", " ac ", "a/c", "aquecimento", "arrefec", "conduta", "vrv", "vrf"]
+avaria = ["avari", "nao funciona", "deixou de funcionar", "nao liga", "nao arrefece", "nao aquece", "pinga", "a pingar", "fuga", "codigo de erro", "da erro", "barulho", "nao da frio", "parou", "estragad", "reparac", "reparar", "assistencia tecnica"]
+obra = ["obra", "empreitada", "remodelac", "construc", "edificio", "caderno de encargos", "mapa de quantidades", "projeto de climatizacao", "fracoes", "moradia nova"]
+manutencao = ["manutenc", "limpeza", "revisao", "higieniza", "desinfec", "mudar os filtros", "trocar os filtros"]
+instalacao = ["instala", "montar", "montagem", "colocar", "novo ar", "comprar", "split", "conduta", "orcamento para"]
+empresa = [" lda", "s.a.", "unipessoal", "empresa", " loja", "restaurante", "escritorio", "hotel", "clinica", "condominio", "armazem", "fabrica", "consultorio", "farmacia", "pastelaria", "ginasio", "escola", "colegio", "lar de", "servidor", "sala tecnica", "construtora", "construcoes", "imobiliaria", "promotora", "empreitada"]
+urgente = ["urgent", "urgencia", "o mais rapido", "o quanto antes", "o mais breve", "imediat", "com muito calor", "sem ar condicionado", "sem frio", "sem aquecimento", "bebe", "idoso", "servidor", "sala tecnica"]
+prazo = ["ate dia", "ate ao dia", "ate o dia", "mudanca", "entrega da obra", "inaugurac", "abertura da loja", "data marcada", "antes do verao", "temos prazo"]
+aceite = ["aceito", "aceitamos", "adjudic", "pode avancar", "podem avancar", "vamos avancar", "avancar convosco", "pode marcar", "podem marcar", "quando podem vir", "quando podem instalar", "quando podem comecar", "quando podem fazer o trabalho", "quando pode vir", "quando pode instalar", "negocio fechado", "esta fechado", "estou de acordo", "estamos de acordo", "concordo", "avancem", "confirmo o orcamento", "pode agendar", "podem agendar", "orcamento aprovado", "aprovado o orcamento", "aprovamos o orcamento", "aprovo o orcamento", "orcamento aceite", "aceite o orcamento", "esta aprovado", "fica combinado", "esta combinado", "entao combinado", "aguardo a marcacao", "aguardar a marcacao", "preferimos o vosso", "preferimos a vossa", "ficamos com o vosso", "ficamos com a vossa", "pode encomendar", "podem encomendar"]
+recusa_concorrencia = ["ja adjudic", "adjudicamos a outr", "avancar com outr", "fechar com outr", "fazer com outr", "ir com outra empresa", "ja contratamos", "ja contratei", "ja temos quem", "optamos por outr", "fomos com outr", "vamos com outr", "avancamos com outr", "fechamos com outr", "ficamos com outr", "seguimos com outr", "escolhemos outr", "decidimos ir com outr", "ja veio outro tecnico", "outra empresa ja", "outra empresa vai fazer"]
+recusa_desistencia = ["desist", "fica para mais tarde", "fica para depois", "fica para outra altura", "fica para outra ocasiao", "fica para o proximo ano", "fica para o ano", "por agora nao", "para ja nao", "nao obrigado", "nao vamos avancar", "nao vou avancar", "nao podemos avancar", "nao vamos poder avancar", "nao conseguimos avancar", "decidimos nao", "vamos adiar", "deixamos para", "ja nao precis", "ja nao e preciso", "ja nao e necessario", "nao vamos precisar", "nao estou interessad", "nao estamos interessad", "sem interesse", "nao aceit", "nao vamos fazer", "nao vou fazer"]
+recusa_preco = ["muito caro", "um pouco caro", "bastante caro", " e caro", "esta caro", "ficou caro", "fica caro", "sai caro", "achei caro", "acho caro", "achamos caro", "caro demais", "demasiado caro", "bocado caro", "acima do", "fora do orcamento", "preco elevado", "valor elevado", "preco alto", "valor alto", "preco esta alto", "preco esta um pouco alto", "preco muito alto", "valor muito alto", "nao compensa", "mais barato", "muito dinheiro"]
+recusa_prazo = ["demora muito", "prazo muito longo", "nao podemos esperar", "tarde demais"]
+# Mensagens em que o cliente cobra uma resposta ("então, já viram?"). Servem para o modo sombra contar as cobranças.
+cobranca = ["entao ja viram", "ja viram o meu", "ja viram o pedido", "ja viram o email", "alguma novidade", "ha novidades", "novidades sobre", "ja tem novidades", "ainda estou a espera", "continuo a espera", "estou a espera de resposta", "estamos a espera de resposta", "aguardo resposta", "aguardo a vossa resposta", "aguardo noticias", "ainda nao recebi", "ainda nao tive resposta", "ainda sem resposta", "ja tem o orcamento", "ja tem o meu orcamento", "para quando o orcamento", "quando recebo o orcamento", "ja enviaram o orcamento", "ninguem me respondeu", "ninguem me disse nada", "volto a insistir", "volto a contactar", "so para relembrar", "venho relembrar", "conseguem dar me uma resposta", "conseguem dizer alguma coisa", "preciso de uma resposta", "ja ha data", "ja tem data", "para quando a instalacao", "quando vem instalar", "quando vem fazer"]
+
+[prioridade]
+# Regras atuais (tabela de decisão: a primeira regra que bate decide).
+# Condições possíveis: tipo, empresa, urgente, data_marcada, unidades (">=3"), canal.
+regras = [
+  { se = { tipo = "avaria" }, prioridade = "P1" },
+  { se = { tipo = "obra" }, prioridade = "P2" },
+  { se = { data_marcada = true }, prioridade = "P2" },
+  { se = { unidades = ">=3" }, prioridade = "P2" },
+]
+padrao = "P3"
+# Características usadas para dividir os pedidos em segmentos no cálculo do custo do atraso.
+segmentar_por = ["tipo", "empresa"]
+# Resposta rápida e resposta lenta, em horas úteis (9 horas úteis = 1 dia útil).
+horas_rapida = 4
+horas_lenta = 18
+# Modelo do efeito da demora (regressão logística com partilha entre segmentos):
+# respostas mais lentas do que limite_horas contam como limite_horas;
+# desvio_nivel e desvio_inclinacao dizem quanto cada segmento se pode afastar da média (escala logit);
+# simulacoes = número de simulações para os intervalos; minimo_modelo = pedidos maduros necessários.
+limite_horas = 45
+desvio_nivel = 1.0
+desvio_inclinacao = 0.5
+simulacoes = 400
+minimo_modelo = 30
+# Fração dos pedidos em P1 e em P1+P2 nas prioridades sugeridas (ajusta à capacidade da equipa).
+quota_p1 = 0.2
+quota_p1p2 = 0.5
+# Segmentos com menos pedidos maduros do que isto ficam marcados como "poucos dados".
+minimo_segmento = 10
+# Fração mais recente dos pedidos já decididos guardada para o teste das regras.
+fracao_teste = 0.3
+
+[semanal]
+# Objetivo de primeira resposta, em horas úteis.
+objetivo_resposta_horas = 4
+# Data em que mudaram o processo (AAAA-MM-DD). As semanas antes servem de base aos limites.
+data_mudanca = ""
+
+[prazos]
+# Prazo de cada estado por P, depois de validado com o chefe. Vazio = o modo sombra propõe a partir do histórico.
+# Unidades: novo em horas úteis; espera_cliente em dias de calendário (é a data de seguimento); os outros em dias
+# úteis. Exemplo: novo = { P1 = 4, P2 = 9, P3 = 18 }
+novo = {}
+orcamento_por_fazer = {}
+espera_cliente = {}
+em_execucao = {}
+# Com a agenda do ERP (dados/agenda/), em dias úteis:
+visita_por_marcar = {}
+visita_marcada = {}
+espera_fornecedor = {}
+# Como o modo sombra propõe os prazos:
+# 1. O prazo de cada estado e P é este percentil do tempo desse P no estado (0.8 = 8 em cada 10 pedidos cumpriam).
+# 2. Ao responder e ao orçamentar, conta o tempo que esse P teria tido se a mesma equipa trabalhasse pela ordem do P
+#    (simulação com os mesmos momentos em que a MDM respondeu e enviou orçamentos). Nos outros estados, o tempo atual.
+percentil = 0.8
+# Na espera do cliente, o prazo é o primeiro seguimento: este percentil do tempo que os clientes levam a decidir
+# (0.5 = quando metade já decidiu, os outros recebem um contacto).
+percentil_seguimento = 0.5
+# 3. Nestes P, o prazo nunca passa do momento em que esta fração dos clientes já cobrou ("então, já viram?").
+limitar_pela_paciencia = ["P1", "P2"]
+fracao_paciencia = 0.2
+# 4. O P1 nunca tem mais tempo do que o P2, nem o P2 do que o P3.
+# Mínimo de pedidos que passaram por um estado para propor um prazo.
+minimo_casos = 8
+# Um pedido perdido ficou vermelho "a tempo" se o aviso apareceu até N dias depois da última mensagem do cliente.
+dias_a_tempo = 7
+# Regra dos 30 dias: sem contacto com o cliente há N dias, o pedido sai da lista (fecha, ou ganha ação para hoje).
+dias_sem_contacto = 30
