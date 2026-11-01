@@ -96,3 +96,20 @@ dialog{padding:0;border:0;width:min(760px,calc(100% - 32px));max-height:calc(100
 
 /* entrada da calculadora na página inicial (antes em calculator.css, que agora carrega depois da primeira pintura) */
 .calc-entry{display:flex;align-items:center;justify-content:space-between;gap:32px;padding-block:32px;margin-bottom:55px;border-block:1px solid var(--line)}.calc-entry h2{font-size:clamp(1.6rem,2.6vw,2.25rem);margin:9px 0}.calc-entry p:not(.eyebrow){color:var(--muted)}.calc-entry .btn{flex-shrink:0}
+/* hero em computador: o pedido rápido fica à direita, visível sem rolar; o título encolhe para caber acima da dobra */
+@media(min-width:901px){
+ .hero-immersive{min-height:0;min-height:max(640px,calc(100svh - 90px));padding-top:48px;padding-bottom:48px;align-items:center}
+ .hero-immersive .hero-copy{width:44%;max-width:560px}
+ .hero-immersive h1{font-size:clamp(3rem,4.3vw,4.3rem);margin:18px 0 16px}
+ .hero-immersive .hero-services{margin:14px 0 0}
+ .hero-immersive .hero-proof{margin-top:22px;padding-top:16px}
+ .hero-immersive .quick-request{position:absolute;right:var(--hero-gutter);top:50%;transform:translateY(-50%);width:400px;max-width:none;margin:0;z-index:3}
+ .hero-immersive .hero-copy{margin-left:0}
+ .hero-immersive .hero-image-frame>img{object-position:40% 56%}
+}
+@media(min-width:901px) and (max-height:820px){
+ .hero-immersive .quick-request{padding:18px 20px;gap:11px}
+ .hero-immersive .quick-note,.hero-immersive .quick-privacy{display:none}
+ .hero-immersive h1{font-size:clamp(2.8rem,3.8vw,3.6rem)}
+}
+@media(max-width:900px){.hero-immersive .quick-request{position:relative;z-index:2;margin:22px 0 0;max-width:620px}}
