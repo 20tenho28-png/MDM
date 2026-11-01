@@ -59,7 +59,7 @@ try {
     return page;
   }
   async function preenche(page, { purpose, service, local = 'Lisboa', nome = 'Carlos Melancia', tel = '912 345 678', email = '', detalhes = '' }) {
-    await page.evaluate(() => document.querySelector('[data-quote]').click());
+    await page.evaluate(() => (document.querySelector('.quick-more') || document.querySelector('[data-quote]')).click());
     await page.waitForSelector('#quote-dialog[open]');
     await page.check(`input[name="purpose"][value="${purpose}"]`, { force: true });
     await page.click('#quote-next');
@@ -130,6 +130,14 @@ try {
   e = await envia(page);
   ok(e && e.campos['form-name'] === 'orcamento' && e.campos.servico === 'Avaria: Bombas de calor' && e.campos.mensagem.includes('Língua do site: inglês')
     && /MDM has received your request|Pedido recebido|Request received/i.test(await page.textContent('#delivery-result')), '4: em inglês envia o mesmo, em português para a equipa', e && e.campos);
+  await page.context().close();
+
+  // 4a. na página inicial o botão «Solicitar manutenção» leva ao pedido rápido com «Manutenção» marcada, sem abrir o diálogo
+  page = await nova('/index.html');
+  await page.click('.maintenance [data-quote="Manutenção"]');
+  await page.waitForTimeout(800);
+  ok(await page.evaluate(() => !document.getElementById('quote-dialog').open && document.querySelector('#quick-form [data-purpose="Manutenção"]').getAttribute('aria-pressed') === 'true'
+    && Math.abs(document.getElementById('quick-form').getBoundingClientRect().top + document.getElementById('quick-form').offsetHeight / 2 - innerHeight / 2) < innerHeight / 2), '4a: os botões da página inicial encaminham para o pedido rápido');
   await page.context().close();
 
   // 4b. o pedido rápido do hero: avaria → «orcamento», só com nome e telefone, com os campos dos formulários Netlify

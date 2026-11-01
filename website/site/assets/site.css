@@ -97,3 +97,4 @@ dialog{padding:0;border:0;width:min(760px,calc(100% - 32px));max-height:calc(100
 /* entrada da calculadora na página inicial (antes em calculator.css, que agora carrega depois da primeira pintura) */
 .calc-entry{display:flex;align-items:center;justify-content:space-between;gap:32px;padding-block:32px;margin-bottom:55px;border-block:1px solid var(--line)}.calc-entry h2{font-size:clamp(1.6rem,2.6vw,2.25rem);margin:9px 0}.calc-entry p:not(.eyebrow){color:var(--muted)}.calc-entry .btn{flex-shrink:0}
 @media(max-width:900px){.hero-immersive .quick-request{position:relative;z-index:2;margin:22px 0 0;max-width:620px}}
+.quick-request.is-hinted{outline:3px solid var(--red);outline-offset:4px;transition:outline-color .6s}
