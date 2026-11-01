@@ -2,6 +2,7 @@
 <title>MDM | Ar condicionado e AVAC na Grande Lisboa</title>
 <meta name="description" content="Ar condicionado, bombas de calor e ventilação para casas e empresas na Grande Lisboa. Instalação, reparação e manutenção desde 1991.">
 <style>[hidden]:not([hidden="until-found" i]){display:none!important}.opt-img{width:48px;height:48px;border-radius:8px;object-fit:cover;flex:none}.opt-t>span{font-size:13px;line-height:1.35}.opt-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+@media(max-width:520px){.logo-t small{display:none}.logo-t b{font-size:18px}.logo img{width:30px;height:31px}.top{flex-wrap:nowrap;min-height:60px}}
 </style>
 <link rel="icon" type="image/svg+xml" href="/assets/img/logo-mdm.svg">
 <link rel="canonical" href="https://www.mdmassist.pt/"><meta property="og:type" content="website"><meta property="og:url" content="https://www.mdmassist.pt/"><meta property="og:site_name" content="MDM Assistência Técnica"><meta property="og:title" content="MDM | Ar condicionado e AVAC na Grande Lisboa"><meta property="og:description" content="Instalação e manutenção de ar condicionado, bombas de calor e ventilação na Grande Lisboa, desde 1991. Peça orçamento sem compromisso."><meta property="og:image" content="https://www.mdmassist.pt/assets/img/foto-28-1600.webp"><meta property="og:locale" content="pt_PT"><meta name="twitter:card" content="summary_large_image"><link rel="alternate" hreflang="pt-PT" href="https://www.mdmassist.pt/"><link rel="alternate" hreflang="en" href="https://www.mdmassist.pt/en/">
@@ -46,7 +47,7 @@
   --font:'Bricolage Grotesque', 'Helvetica Neue', Arial, system-ui, sans-serif;
   --r-card:28px; --r-tile:24px; --r-btn:14px; --r-field:12px;
   --gutter:40px;
-  --sec:112px;
+  --sec:72px;
   --focus:var(--ink);
   --link-hover:var(--blue);
 }
@@ -95,7 +96,7 @@ input,textarea,select,button{font:inherit;color:inherit}
 
 /* ---------- HERO ---------- */
 .on-blue{background:var(--blue);color:var(--on-blue);--focus:var(--on-blue);--link-hover:var(--accent-soft)}
-.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 24px;min-height:92px;padding-block:16px}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 24px;min-height:72px;padding-block:10px}
 .logo{color:var(--on-blue);text-decoration:none;display:flex;align-items:center;gap:10px}.logo img{display:block;width:38px;height:39px;background:#fff;padding:2px;border-radius:4px}.logo-t{display:flex;flex-direction:column;line-height:1.05}.logo-t b{font-size:22px;font-weight:800;letter-spacing:-.04em}.logo-t small{font-size:9px;letter-spacing:.14em;font-weight:600;color:var(--on-blue-soft)}
 .logo span{color:var(--yellow)}
 a.logo:hover{color:var(--on-blue)}
@@ -104,18 +105,18 @@ a.logo:hover{color:var(--on-blue)}
 .top-actions{display:flex;gap:8px;align-items:center;order:2}
 .menu-btn{display:none}
 
-.hero-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(min(100%, 480px), 1fr));gap:56px;align-items:end;padding-block:56px 72px}
-.hero-copy{display:flex;flex-direction:column;gap:28px;min-width:0}
-.h-hero{margin:0;font-size:clamp(60px, 8.6vw, 136px)}
-.lead{margin:0;font-size:21px;max-width:520px;color:var(--on-blue-soft)}
+.hero-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(min(100%, 480px), 1fr));gap:40px;align-items:center;padding-block:24px 36px}
+.hero-copy{display:flex;flex-direction:column;gap:20px;min-width:0}
+.h-hero{margin:0;font-size:clamp(40px, 4.6vw, 72px);line-height:0.95}
+.lead{margin:0;font-size:17px;max-width:480px;color:var(--on-blue-soft)}
 .chips{display:flex;flex-wrap:wrap;gap:10px;font-weight:600;font-size:15px;list-style:none;margin:0;padding:0}
 .chips li{border:1.5px solid var(--blue-line);border-radius:999px;padding:8px 16px}
 .chips a{text-decoration:none}
 
 /* Request card (the live site's 4-step request, in Direção B's card) */
-.quote{background:var(--paper);color:var(--ink);border-radius:var(--r-card);padding:clamp(24px, 3vw, 36px);display:flex;flex-direction:column;gap:20px;min-width:0;--focus:var(--ink);--link-hover:var(--blue)}
+.quote{background:var(--paper);color:var(--ink);border-radius:var(--r-card);padding:clamp(18px, 2vw, 26px);display:flex;flex-direction:column;gap:14px;min-width:0;--focus:var(--ink);--link-hover:var(--blue)}
 .q-head{display:flex;flex-direction:column;gap:4px}
-.q-title{font-size:26px;font-weight:800;letter-spacing:-0.02em;line-height:1.1}
+.q-title{font-size:22px;font-weight:800;letter-spacing:-0.02em;line-height:1.1}
 .q-sub{color:var(--muted)}
 .q-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4, minmax(0,1fr));gap:6px}
 .q-steps li{border-top:3px solid var(--line);padding-top:8px;font-size:13px;font-weight:600;color:var(--muted);display:flex;gap:6px;align-items:baseline;min-width:0}
@@ -195,7 +196,7 @@ a.ph-item:hover{color:var(--ink)}
 .sec{padding-block:var(--sec) 0}
 .sec-last{padding-bottom:var(--sec)}
 .band{padding-block:var(--sec)}
-.h-sec{margin:0;font-size:clamp(48px, 6vw, 96px)}
+.h-sec{margin:0;font-size:clamp(32px, 3.6vw, 52px)}
 .sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:40px}
 .sec-lead{margin:0;font-size:19px;color:var(--ink-2);max-width:440px}
 
@@ -204,7 +205,7 @@ a.ph-item:hover{color:var(--ink)}
 .svc a.row{display:block;text-decoration:none;color:inherit;border-bottom:1.5px solid var(--ink);transition:background .15s,color .15s}
 .row-g{display:grid;grid-template-columns:80px minmax(0,1fr) minmax(0,1fr) 48px;gap:24px;align-items:center;padding-block:30px}
 .row-n{font-weight:600;font-size:15px;font-variant-numeric:tabular-nums}
-.row-t{font-size:clamp(30px, 3.6vw, 52px);line-height:1}
+.row-t{font-size:clamp(22px, 2.2vw, 30px);line-height:1}
 .rowsub{color:var(--muted)}
 .svc a.row:hover{background:var(--blue);color:var(--on-blue)}
 .svc a.row:hover .rowsub{color:var(--on-blue-muted)}
@@ -261,7 +262,7 @@ a.ph-item:hover{color:var(--ink)}
 .maint{background:var(--night);color:var(--paper);border-radius:32px;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit, minmax(min(100%, 440px), 1fr));--focus:var(--paper);--link-hover:var(--yellow)}
 .maint-copy{padding:clamp(32px, 5vw, 64px);display:flex;flex-direction:column;gap:24px;min-width:0}
 .eyebrow-y{color:var(--accent-soft);font-weight:700}
-.h-maint{margin:0;font-size:clamp(42px, 5vw, 76px)}
+.h-maint{margin:0;font-size:clamp(30px, 3.4vw, 46px)}
 .tabs{display:flex;flex-wrap:wrap;gap:8px}
 .tab{min-height:44px;padding:0 18px;border-radius:999px;border:1.5px solid var(--night-line);background:transparent;color:var(--paper);font-weight:600;font-size:15px;cursor:pointer}
 .tab:hover{border-color:var(--paper)}
@@ -299,7 +300,7 @@ a.tile,a.tile:hover{color:var(--paper)}
 .tile-24{background:var(--blue);color:var(--on-blue);border:0;text-align:left;cursor:pointer;font-family:inherit;--focus:var(--ink)}
 .tile-24::after{display:none}
 .tile-24:hover{background:var(--ink)}
-.tile-24 .big{font-size:64px}
+.tile-24 .big{font-size:40px}
 .tile-24 span{font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px}
 .obras-more{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center}
 
@@ -332,7 +333,7 @@ a.tile,a.tile:hover{color:var(--paper)}
 /* Contact */
 .contact{padding-block:var(--sec) 48px}
 .contact .wrap{display:flex;flex-direction:column;gap:56px}
-.h-contact{margin:0;font-size:clamp(56px, 9vw, 150px)}
+.h-contact{margin:0;font-size:clamp(36px, 4.6vw, 64px)}
 .cgrid{display:grid;grid-template-columns:repeat(auto-fit, minmax(min(100%, 240px), 1fr));gap:32px;border-top:1.5px solid var(--blue-line);padding-top:32px}
 .citem{display:flex;flex-direction:column;gap:6px;min-width:0}
 .citem-l{color:var(--on-blue-muted);font-weight:600}
