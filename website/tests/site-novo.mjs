@@ -73,6 +73,26 @@ try {
     await page.click('#quote-next');
     await page.check('#request-consent', { force: true });
   }
+  /* a página inicial tem o pedido de 4 passos no hero (sem diálogo): passos 1 a 4 e o botão «Enviar pedido à MDM» */
+  async function preencheNovo(page, { purpose, service, local = 'Lisboa', nome = 'Carlos Melancia', tel = '912 345 678', email = '', detalhes = '' }) {
+    await page.check(`#pedido input[name="purpose"][value="${purpose}"]`, { force: true });
+    await page.click('#qNext');
+    await page.selectOption('#qServ', service);
+    await page.fill('#qLocal', local);
+    if (detalhes) await page.fill('#qNotas', detalhes);
+    await page.click('#qNext');
+    await page.fill('#qNome', nome);
+    await page.fill('#qTel', tel);
+    if (email) await page.fill('#qEmail', email);
+    await page.click('#qNext');
+    await page.waitForSelector('#qSend', { state: 'visible' });
+  }
+  async function enviaNovo(page) {
+    const antes = envios.length;
+    await page.click('#qSend');
+    await page.waitForFunction(() => document.getElementById('qStatus').textContent.trim() !== '', null, { timeout: 8000 });
+    return envios.length > antes ? envios.at(-1) : null;
+  }
   async function envia(page) {
     const antes = envios.length;
     await page.click('#send-direct');
@@ -82,11 +102,12 @@ try {
   const CAMPOS = ['form-name', 'subject', 'pagina', 'triagem', 'potencia', 'estimativa', 'nome', 'email', 'telefone', 'servico', 'mensagem', 'bot-field'];
   const decl = fs.readFileSync(path.join(PUB, 'formularios.html'), 'utf8');
 
-  // 1. avaria → «orcamento»
+  // 1. avaria → «orcamento», a partir do pedido de 4 passos no hero da página inicial
   let page = await nova('/index.html');
-  await preenche(page, { purpose: 'Avaria', service: 'Ar condicionado', detalhes: 'O ar condicionado da sala não arranca.' });
-  let e = await envia(page);
-  const ref = await page.textContent('#request-reference');
+  await preencheNovo(page, { purpose: 'Avaria', service: 'Ar condicionado', detalhes: 'O ar condicionado da sala não arranca.' });
+  let e = await enviaNovo(page);
+  const estado = await page.textContent('#qStatus');
+  const ref = (estado.match(/Referência (\S+)\./) || [])[1] || '';
   ok(e && e.caminho === '/' && /x-www-form-urlencoded/.test(e.tipo) && e.campos['form-name'] === 'orcamento', '1: uma avaria vai para «orcamento»', e);
   ok(e && CAMPOS.every((c) => c in e.campos) && Object.keys(e.campos).every((c) => CAMPOS.includes(c)), '1: os campos são os dos formulários Netlify', e && Object.keys(e.campos));
   ok(e && CAMPOS.every((c) => decl.includes(`name="${c}"`) || c === 'form-name'), '1: formularios.html declara todos os campos');
@@ -95,8 +116,7 @@ try {
     '1: assunto com a triagem e a referência, contactos, serviço, isco vazio', e && e.campos);
   ok(e && /^\d{6}-\d{4}-[0-9A-F]{4}$/.test(ref) && e.campos.mensagem.includes('Referência: ' + ref) && e.campos.mensagem.includes('Localidade: Lisboa')
     && e.campos.mensagem.includes('O ar condicionado da sala não arranca.'), '1: a mensagem leva a referência, a localidade e os detalhes', e && e.campos.mensagem);
-  ok(!(await page.$eval('#delivery-result', (x) => x.hidden)) && /Pedido recebido/.test(await page.textContent('#send-direct'))
-    && /A MDM irá contactá-lo/.test(await page.textContent('#booking-note')), '1: o painel «Pedido recebido» com a referência');
+  ok(/Pedido recebido/.test(estado) && /Pedido recebido/.test(await page.textContent('#qSend')), '1: «Pedido recebido» com a referência', estado);
   await page.context().close();
 
   // 2. instalação → «orcamento-comercial»; o mesmo pedido outra vez leva a mesma referência; uma falha deixa tentar de novo
@@ -118,8 +138,8 @@ try {
     ['Aconselhamento', 'Ainda não sei', 'orcamento-comercial', '[P5 · Avaliação técnica]'], ['Instalação', 'Bombas de calor', 'orcamento-comercial', '[P1 · Bomba de calor]'],
     ['Avaria', 'Eletricidade', 'orcamento', '[P4 · Avaria elétrica]']]) {
     page = await nova('/index.html');
-    await preenche(page, { purpose, service });
-    e = await envia(page);
+    await preencheNovo(page, { purpose, service });
+    e = await enviaNovo(page);
     ok(e && e.campos['form-name'] === form && e.campos.triagem === tag, `3: ${purpose}, ${service} → ${form} ${tag}`, e && [e.campos['form-name'], e.campos.triagem]);
     await page.context().close();
   }
@@ -132,31 +152,18 @@ try {
     && /MDM has received your request|Pedido recebido|Request received/i.test(await page.textContent('#delivery-result')), '4: em inglês envia o mesmo, em português para a equipa', e && e.campos);
   await page.context().close();
 
-  // 4a. na página inicial o botão «Solicitar manutenção» leva ao pedido rápido com «Manutenção» marcada, sem abrir o diálogo
+  // 4a. na página inicial, «Solicitar manutenção» leva ao pedido com «Manutenção» marcada
   page = await nova('/index.html');
-  await page.click('.maintenance [data-quote="Manutenção"]');
-  await page.waitForTimeout(800);
-  ok(await page.evaluate(() => !document.getElementById('quote-dialog').open && document.querySelector('#quick-form [data-purpose="Manutenção"]').getAttribute('aria-pressed') === 'true'
-    && Math.abs(document.getElementById('quick-form').getBoundingClientRect().top + document.getElementById('quick-form').offsetHeight / 2 - innerHeight / 2) < innerHeight / 2), '4a: os botões da página inicial encaminham para o pedido rápido');
+  await page.click('[data-need="Manutenção"]');
+  await page.waitForTimeout(600);
+  ok(await page.evaluate(() => document.querySelector('#pedido input[name="purpose"][value="Manutenção"]').checked), '4a: os botões da página inicial encaminham para o pedido');
   await page.context().close();
 
-  // 4b. o pedido rápido do hero: avaria → «orcamento», só com nome e telefone, com os campos dos formulários Netlify
-  page = await nova('/index.html');
-  await page.click('#quick-form [data-purpose="Avaria"]');
-  await page.fill('input[name="quick-name"]', 'Ana Melancia');
-  await page.fill('input[name="quick-phone"]', '912 345 678');
-  let antes = envios.length;
-  await page.click('#quick-send');
-  await page.waitForFunction(() => document.getElementById('quick-status').textContent.trim() !== '', null, { timeout: 8000 });
-  e = envios.length > antes ? envios.at(-1) : null;
-  ok(e && e.campos['form-name'] === 'orcamento' && e.campos.triagem === '[P4 · Avaria]' && e.campos.nome === 'Ana Melancia' && e.campos.telefone === '912 345 678'
-    && e.campos['bot-field'] === '' && /Pedido recebido/.test(await page.textContent('#quick-status')), '4b: o pedido rápido envia uma avaria para «orcamento»', e && e.campos);
-  ok(e && CAMPOS.every((c) => c in e.campos) && Object.keys(e.campos).every((c) => CAMPOS.includes(c)), '4b: o pedido rápido usa os campos dos formulários Netlify', e && Object.keys(e.campos));
-  await page.context().close();
+  // 4b. o pedido rápido do hero (página em inglês): só nome e telefone, com os campos dos formulários Netlify
   page = await nova('/en/index.html');
   await page.fill('input[name="quick-name"]', 'John Smith');
   await page.fill('input[name="quick-phone"]', '+44 7911 123456');
-  antes = envios.length;
+  let antes = envios.length;
   await page.click('#quick-send');
   await page.waitForFunction(() => document.getElementById('quick-status').textContent.trim() !== '', null, { timeout: 8000 });
   e = envios.length > antes ? envios.at(-1) : null;
