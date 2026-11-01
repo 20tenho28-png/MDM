@@ -126,3 +126,13 @@ qa('[data-brand-carousel]').forEach(carousel=>{
  syncBrandMotion();
 });
 
+
+/* Perguntas frequentes no telemóvel: as primeiras 4 à vista, o resto atrás de «Mais perguntas». */
+document.querySelectorAll('.faq-more').forEach(function (btn) {
+  var rest = btn.previousElementSibling;
+  btn.addEventListener('click', function () {
+    var open = rest.hidden; rest.hidden = !open;
+    btn.setAttribute('aria-expanded', String(open));
+    btn.textContent = open ? btn.dataset.less : btn.dataset.more;
+  });
+});

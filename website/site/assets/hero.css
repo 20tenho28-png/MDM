@@ -109,3 +109,4 @@
  .hero-heat-pump,.hero-solar-rooftop{padding-top:calc(var(--hero-mobile-photo-height) - 5px)}
  .hero-heat-pump .hero-visual:after,.hero-solar-rooftop .hero-visual:after{background:linear-gradient(180deg,transparent 0px,transparent calc(var(--hero-mobile-photo-height) - 72px),#101b25 calc(var(--hero-mobile-photo-height) - 1px))}
 }
+@media(max-width:760px){.hero-immersive .hero-image-frame>img[src$="hero-bomba-calor-1600.webp"]{object-fit:cover;object-position:center 62%}}
