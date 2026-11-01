@@ -1,7 +1,7 @@
 <!doctype html><html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>MDM | Ar condicionado e AVAC na Grande Lisboa</title>
 <meta name="description" content="Ar condicionado, bombas de calor e ventilação para casas e empresas na Grande Lisboa. Instalação, reparação e manutenção desde 1991.">
-<style>[hidden]:not([hidden="until-found" i]){display:none!important}.opt-img{width:56px;height:56px;border-radius:10px;object-fit:cover;flex:none}.opt-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+<style>[hidden]:not([hidden="until-found" i]){display:none!important}.opt-img{width:48px;height:48px;border-radius:8px;object-fit:cover;flex:none}.opt-t>span{font-size:13px;line-height:1.35}.opt-t{display:flex;flex-direction:column;gap:2px;min-width:0}
 </style>
 <link rel="icon" type="image/svg+xml" href="/assets/img/logo-mdm.svg">
 <link rel="canonical" href="https://www.mdmassist.pt/"><meta property="og:type" content="website"><meta property="og:url" content="https://www.mdmassist.pt/"><meta property="og:site_name" content="MDM Assistência Técnica"><meta property="og:title" content="MDM | Ar condicionado e AVAC na Grande Lisboa"><meta property="og:description" content="Instalação e manutenção de ar condicionado, bombas de calor e ventilação na Grande Lisboa, desde 1991. Peça orçamento sem compromisso."><meta property="og:image" content="https://www.mdmassist.pt/assets/img/foto-28-1600.webp"><meta property="og:locale" content="pt_PT"><meta name="twitter:card" content="summary_large_image"><link rel="alternate" hreflang="pt-PT" href="https://www.mdmassist.pt/"><link rel="alternate" hreflang="en" href="https://www.mdmassist.pt/en/">
@@ -19,12 +19,12 @@
    Photography is MDM's own project record (F-codes). Deliberately single (light) theme: "Bloco claro". */
 :root{
   color-scheme: light;
-  --blue:#1F3BF0;
+  --blue:#101b25;
   --on-blue:#FFFFFF;
-  --on-blue-soft:#E4E8FF;
-  --on-blue-muted:#DCE2FF;
-  --blue-line:#8C9CFF;
-  --yellow:#FFD84D;
+  --on-blue-soft:#d6dfe6;
+  --on-blue-muted:#b8c1c8;
+  --blue-line:#ffffff33;
+  --yellow:#a50b1a; --accent:#a50b1a; --accent-soft:#e58c95;
   --ink:#0A0A0A;
   --ink-2:#3A3A44;
   --muted:#4B4B55;
@@ -75,13 +75,13 @@ input,textarea,select,button{font:inherit;color:inherit}
 .btn-white{background:var(--paper);color:var(--blue)}
 .btn-white:hover{background:var(--on-blue-soft)}
 .btn-white-ink{background:var(--paper);color:var(--ink)}
-.btn-white-ink:hover{background:var(--yellow)}
+.btn-white-ink:hover{background:var(--mist)}
 .btn-ink{background:var(--ink);color:var(--paper)}
 .btn-ink:not([disabled]):hover{background:var(--blue)}
-.btn-blue{background:var(--blue);color:var(--on-blue)}
-.btn-blue:hover{background:var(--ink)}
-.btn-yellow{background:var(--yellow);color:var(--ink)}
-.btn-yellow:hover{background:var(--ink);color:var(--yellow)}
+.btn-blue{background:var(--accent);color:#fff}
+.btn-blue:hover{background:#7f0815}
+.btn-yellow{background:var(--accent);color:#fff}
+.btn-yellow:hover{background:#7f0815;color:#fff}
 .btn-line{background:transparent;color:var(--ink);border-color:var(--line)}
 .btn-line:hover{border-color:var(--ink)}
 .btn-ghost-dark{background:transparent;color:var(--paper);border-color:var(--night-line)}
@@ -94,9 +94,9 @@ input,textarea,select,button{font:inherit;color:inherit}
 .arrow{width:1em;height:1em;flex:none}
 
 /* ---------- HERO ---------- */
-.on-blue{background:var(--blue);color:var(--on-blue);--focus:var(--on-blue);--link-hover:var(--yellow)}
+.on-blue{background:var(--blue);color:var(--on-blue);--focus:var(--on-blue);--link-hover:var(--accent-soft)}
 .top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 24px;min-height:92px;padding-block:16px}
-.logo{color:var(--on-blue);text-decoration:none;font-size:34px}
+.logo{color:var(--on-blue);text-decoration:none;display:flex;align-items:center;gap:10px}.logo img{display:block;width:38px;height:39px;background:#fff;padding:2px;border-radius:4px}.logo-t{display:flex;flex-direction:column;line-height:1.05}.logo-t b{font-size:22px;font-weight:800;letter-spacing:-.04em}.logo-t small{font-size:9px;letter-spacing:.14em;font-weight:600;color:var(--on-blue-soft)}
 .logo span{color:var(--yellow)}
 a.logo:hover{color:var(--on-blue)}
 .navlinks{display:flex;gap:32px;font-weight:600;order:1}
@@ -123,7 +123,7 @@ a.logo:hover{color:var(--on-blue)}
 .q-steps li .q-l{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .q-steps li.done{border-color:var(--ink);color:var(--ink)}
 .q-steps li[aria-current="step"]{border-color:var(--blue);color:var(--blue)}
-.q-est{margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px;background:var(--yellow);border-radius:12px;padding:10px 14px}
+.q-est{margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:15px;background:var(--mist);border-radius:12px;padding:10px 14px}
 .q-body{min-height:var(--q-body-h, 260px)}
 .q-pane{border:0;margin:0;padding:0;min-width:0;display:flex;flex-direction:column;gap:14px}
 .q-pane > legend{font-weight:600;padding:0;margin-bottom:12px}
@@ -182,12 +182,12 @@ a.logo:hover{color:var(--on-blue)}
 .ph-item:hover img,.tile:hover img{transform:scale(1.035)}
 .ph-cap{position:absolute;left:16px;bottom:16px;right:16px;width:max-content;max-width:calc(100% - 32px);font-size:13px;font-weight:600;color:var(--ink);background:var(--paper);border-radius:999px;padding:5px 12px;display:flex;gap:8px}
 .ph-cap b{font-variant-numeric:tabular-nums;color:var(--blue)}
-a.ph-item:hover .ph-cap{background:var(--yellow)}
+a.ph-item:hover .ph-cap{background:var(--accent);color:#fff}
 a.ph-item:hover{color:var(--ink)}
 
 /* ---------- BRANDS ---------- */
 .brands{border-bottom:1.5px solid var(--ink)}
-.brands .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px 40px;padding-block:28px}
+.brands .wrap{display:flex;flex-wrap:nowrap;align-items:center;gap:32px;padding-block:22px}.brands-l{flex:none}.brand-window{flex:1;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}.brand-track{display:flex;width:max-content;animation:brand-drift 26s linear infinite}.brand-window:hover .brand-track{animation-play-state:paused}.brand-group{display:flex;align-items:center;gap:72px;list-style:none;margin:0;padding:0 36px}.brand-group img{display:block;width:auto;max-width:none;filter:grayscale(1);opacity:.75;transition:filter .2s,opacity .2s}.brand-group li:hover img{filter:none;opacity:1}@keyframes brand-drift{to{transform:translateX(-50%)}}@media(prefers-reduced-motion:reduce){.brand-track{animation:none;flex-wrap:wrap}.brand-group[aria-hidden]{display:none}}@media(max-width:700px){.brands .wrap{flex-wrap:wrap}.brands-l{width:100%}.brand-group{gap:40px}}
 .brands-l{font-weight:600;color:var(--muted)}
 .brand-list{display:flex;flex-wrap:wrap;gap:12px 48px;font-size:30px;line-height:1;list-style:none;margin:0;padding:0}
 
@@ -236,7 +236,7 @@ a.ph-item:hover{color:var(--ink)}
 .room-res .muted{font-weight:500;color:var(--muted)}
 .room-res.bad{color:var(--error)}
 .calc-add{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
-.calc-out{background:var(--yellow);color:var(--ink);border-radius:0 0 26px 26px;min-width:0}
+.calc-out{background:var(--mist);color:var(--ink);border-radius:0 0 26px 26px;min-width:0}
 .calc-out-in{padding:clamp(20px, 3.4vw, 44px);display:flex;flex-direction:column;gap:10px}
 .co-l{font-weight:600;font-size:15px}
 .co-kw{font-size:clamp(68px, 8vw, 120px);font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -249,7 +249,7 @@ a.ph-item:hover{color:var(--ink)}
 .co-opt{border:1.5px solid var(--ink);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
 .co-opt b{font-size:17px}
 .co-opt span{font-size:14px;color:var(--ink-2)}
-.co-opt .rec{align-self:flex-start;font-size:12px;font-weight:700;background:var(--ink);color:var(--yellow);border-radius:999px;padding:2px 10px;margin-bottom:4px}
+.co-opt .rec{align-self:flex-start;font-size:12px;font-weight:700;background:var(--accent);color:#fff;border-radius:999px;padding:2px 10px;margin-bottom:4px}
 .co-warn{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--ink-2)}
 .co-warn li{padding-left:14px;border-left:3px solid var(--ink)}
 .calc-out .btn{align-self:flex-start;margin-top:10px}
@@ -260,12 +260,12 @@ a.ph-item:hover{color:var(--ink)}
 /* Maintenance */
 .maint{background:var(--night);color:var(--paper);border-radius:32px;overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit, minmax(min(100%, 440px), 1fr));--focus:var(--paper);--link-hover:var(--yellow)}
 .maint-copy{padding:clamp(32px, 5vw, 64px);display:flex;flex-direction:column;gap:24px;min-width:0}
-.eyebrow-y{color:var(--yellow);font-weight:700}
+.eyebrow-y{color:var(--accent-soft);font-weight:700}
 .h-maint{margin:0;font-size:clamp(42px, 5vw, 76px)}
 .tabs{display:flex;flex-wrap:wrap;gap:8px}
 .tab{min-height:44px;padding:0 18px;border-radius:999px;border:1.5px solid var(--night-line);background:transparent;color:var(--paper);font-weight:600;font-size:15px;cursor:pointer}
 .tab:hover{border-color:var(--paper)}
-.tab[aria-selected="true"]{background:var(--yellow);border-color:var(--yellow);color:var(--ink)}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
 .tabpanel{display:flex;flex-direction:column;gap:18px;min-height:190px}
 .tabpanel p{margin:0;color:var(--night-text);font-size:19px;max-width:480px}
 .ticks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;font-weight:600}
@@ -403,7 +403,7 @@ a.tile,a.tile:hover{color:var(--paper)}
 <!-- HERO -->
 <section class="on-blue" id="topo">
   <header class="wrap top" id="top">
-    <a href="#topo" class="logo big" aria-label="MDM Assistência Técnica, voltar ao início">mdm<span>.</span></a>
+    <a href="#topo" class="logo" aria-label="MDM Assistência Técnica, voltar ao início"><img src="/assets/img/logo-mdm.svg" width="38" height="39" alt=""><span class="logo-t"><b>MDM</b><small>ASSISTÊNCIA TÉCNICA</small></span></a>
     <div class="top-actions">
       <a href="tel:+351218935050" class="btn btn-white btn-sm">Ligar<span class="hide-sm">&nbsp;218 935 050</span></a>
       <button type="button" class="btn btn-ghost-light btn-sm menu-btn" id="menuBtn" aria-expanded="false" aria-controls="nav">Menu</button>
@@ -445,10 +445,10 @@ a.tile,a.tile:hover{color:var(--paper)}
         <fieldset class="q-pane" data-pane="1">
           <legend>Tipo de pedido</legend>
           <div class="opts">
-            <label class="opt"><input type="radio" name="purpose" value="Instalação" id="pInst" checked><span class="opt-b"><img class="opt-img" src="/assets/img/foto-11-600.webp" width="56" height="56" alt="Unidade mural Mitsubishi Electric numa parede clara" loading="lazy" decoding="async"><span class="opt-t"><b>Instalação</b><span>Nova instalação ou substituição</span></span></span></label>
-            <label class="opt"><input type="radio" name="purpose" value="Manutenção" id="pMan"><span class="opt-b"><img class="opt-img" src="/assets/img/foto-16-600.webp" width="56" height="56" alt="Técnico da MDM a rever uma conduta no teto falso" loading="lazy" decoding="async"><span class="opt-t"><b>Manutenção</b><span>Intervenção preventiva ou contrato</span></span></span></label>
-            <label class="opt"><input type="radio" name="purpose" value="Avaria" id="pAv"><span class="opt-b"><img class="opt-img" src="/assets/img/foto-06-600.webp" width="56" height="56" alt="Unidade exterior aberta para diagnóstico" loading="lazy" decoding="async"><span class="opt-t"><b>Avaria</b><span>Diagnóstico e assistência técnica</span></span></span></label>
-            <label class="opt"><input type="radio" name="purpose" value="Aconselhamento" id="pTec"><span class="opt-b"><img class="opt-img" src="/assets/img/foto-30-600.webp" width="56" height="56" alt="Unidade mural num escritório com vista para a ponte" loading="lazy" decoding="async"><span class="opt-t"><b>Avaliação técnica</b><span>Seleção e enquadramento da solução</span></span></span></label>
+            <label class="opt"><input type="radio" name="purpose" value="Instalação" id="pInst" checked><span class="opt-b"><img class="opt-img" src="/assets/img/foto-11-600.webp" width="48" height="48" alt="Unidade mural Mitsubishi Electric numa parede clara" loading="lazy" decoding="async"><span class="opt-t"><b>Instalação</b><span>Nova instalação ou substituição</span></span></span></label>
+            <label class="opt"><input type="radio" name="purpose" value="Manutenção" id="pMan"><span class="opt-b"><img class="opt-img" src="/assets/img/foto-16-600.webp" width="48" height="48" alt="Técnico da MDM a rever uma conduta no teto falso" loading="lazy" decoding="async"><span class="opt-t"><b>Manutenção</b><span>Intervenção preventiva ou contrato</span></span></span></label>
+            <label class="opt"><input type="radio" name="purpose" value="Avaria" id="pAv"><span class="opt-b"><img class="opt-img" src="/assets/img/foto-06-600.webp" width="48" height="48" alt="Unidade exterior aberta para diagnóstico" loading="lazy" decoding="async"><span class="opt-t"><b>Avaria</b><span>Diagnóstico e assistência técnica</span></span></span></label>
+            <label class="opt"><input type="radio" name="purpose" value="Aconselhamento" id="pTec"><span class="opt-b"><img class="opt-img" src="/assets/img/foto-30-600.webp" width="48" height="48" alt="Unidade mural num escritório com vista para a ponte" loading="lazy" decoding="async"><span class="opt-t"><b>Avaliação técnica</b><span>Seleção e enquadramento da solução</span></span></span></label>
           </div>
           <p class="q-hint">Tem uma avaria e prefere falar? Ligue <a href="tel:+351218935050">218 935 050</a>.</p>
         </fieldset>
@@ -539,9 +539,7 @@ a.tile,a.tile:hover{color:var(--paper)}
 <section class="brands" aria-label="Marcas">
   <div class="wrap">
     <span class="brands-l">Instalamos e reparamos</span>
-    <ul class="big brand-list">
-      <li>Midea</li><li>Mitsubishi Electric</li><li>Daikin</li><li>France Air</li>
-    </ul>
+    <div class="brand-window"><div class="brand-track"><ul class="brand-group" aria-label="Marcas que instalamos"><li><img src="/assets/brands/midea.svg" alt="Midea" style="height:40px" loading="lazy" decoding="async"></li><li><img src="/assets/brands/mitsubishi-electric.svg" alt="Mitsubishi Electric" style="height:30px" loading="lazy" decoding="async"></li><li><img src="/assets/brands/daikin.svg" alt="Daikin" style="height:24px" loading="lazy" decoding="async"></li><li><img src="/assets/brands/france-air.webp" alt="France Air" style="height:22px" loading="lazy" decoding="async"></li></ul><ul class="brand-group" aria-hidden="true"><li><img src="/assets/brands/midea.svg" alt="" style="height:40px" loading="lazy" decoding="async"></li><li><img src="/assets/brands/mitsubishi-electric.svg" alt="" style="height:30px" loading="lazy" decoding="async"></li><li><img src="/assets/brands/daikin.svg" alt="" style="height:24px" loading="lazy" decoding="async"></li><li><img src="/assets/brands/france-air.webp" alt="" style="height:22px" loading="lazy" decoding="async"></li></ul></div></div>
   </div>
 </section>
 
@@ -624,25 +622,25 @@ a.tile,a.tile:hover{color:var(--paper)}
         <div class="tabpanel" role="tabpanel" id="p-prev" aria-labelledby="t-prev">
           <p>A manutenção programada permite acompanhar o estado dos equipamentos e identificar anomalias antes de avariarem.</p>
           <ul class="ticks">
-            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFD84D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Visitas programadas, duas por ano</li>
-            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFD84D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Avaliação das condições de funcionamento</li>
-            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFD84D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Para casas e empresas</li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e58c95" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Visitas programadas, duas por ano</li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e58c95" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Avaliação das condições de funcionamento</li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e58c95" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Para casas e empresas</li>
           </ul>
         </div>
         <div class="tabpanel" role="tabpanel" id="p-corr" aria-labelledby="t-corr" hidden>
           <p>Se o equipamento já avariou, fazemos o diagnóstico técnico e a reparação no local.</p>
           <ul class="ticks">
-            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFD84D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Diagnóstico de anomalias e reparação no local</li>
-            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFD84D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Avaria? Envie fotos e o código de erro</li>
-            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFD84D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Fora de horas, respondemos no dia útil seguinte</li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e58c95" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Diagnóstico de anomalias e reparação no local</li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e58c95" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Avaria? Envie fotos e o código de erro</li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e58c95" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Fora de horas, respondemos no dia útil seguinte</li>
           </ul>
         </div>
         <div class="tabpanel" role="tabpanel" id="p-cont" aria-labelledby="t-cont" hidden>
           <p>Planos de manutenção com contrato anual. Indique o tipo e o número de equipamentos para enquadrarmos a proposta.</p>
           <ul class="ticks">
-            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFD84D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Contrato anual para casas e empresas</li>
-            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFD84D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Visitas programadas, duas por ano</li>
-            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFD84D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>A mesma equipa em cada visita</li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e58c95" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Contrato anual para casas e empresas</li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e58c95" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Visitas programadas, duas por ano</li>
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e58c95" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>A mesma equipa em cada visita</li>
           </ul>
         </div>
         <div class="cta-row">
