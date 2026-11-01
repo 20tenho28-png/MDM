@@ -1,7 +1,8 @@
 <!doctype html><html lang="pt-PT"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>MDM | Ar condicionado e AVAC na Grande Lisboa</title>
 <meta name="description" content="Ar condicionado, bombas de calor e ventilação para casas e empresas na Grande Lisboa. Instalação, reparação e manutenção desde 1991.">
-<style>[hidden]:not([hidden="until-found" i]){display:none!important}</style>
+<style>[hidden]:not([hidden="until-found" i]){display:none!important}.opt-img{width:56px;height:56px;border-radius:10px;object-fit:cover;flex:none}.opt-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+</style>
 <link rel="icon" type="image/svg+xml" href="/assets/img/logo-mdm.svg">
 <link rel="canonical" href="https://www.mdmassist.pt/"><meta property="og:type" content="website"><meta property="og:url" content="https://www.mdmassist.pt/"><meta property="og:site_name" content="MDM Assistência Técnica"><meta property="og:title" content="MDM | Ar condicionado e AVAC na Grande Lisboa"><meta property="og:description" content="Instalação e manutenção de ar condicionado, bombas de calor e ventilação na Grande Lisboa, desde 1991. Peça orçamento sem compromisso."><meta property="og:image" content="https://www.mdmassist.pt/assets/img/foto-28-1600.webp"><meta property="og:locale" content="pt_PT"><meta name="twitter:card" content="summary_large_image"><link rel="alternate" hreflang="pt-PT" href="https://www.mdmassist.pt/"><link rel="alternate" hreflang="en" href="https://www.mdmassist.pt/en/">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap"></noscript>
@@ -129,7 +130,7 @@ a.logo:hover{color:var(--on-blue)}
 .opts{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:8px}
 .opt{position:relative;display:block;cursor:pointer}
 .opt input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
-.opt-b{display:flex;flex-direction:column;gap:2px;padding:14px 16px;border:1.5px solid var(--line);border-radius:16px;min-height:80px;transition:background .15s,border-color .15s,color .15s}
+.opt-b{display:flex;flex-direction:row;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--line);border-radius:16px;min-height:80px;transition:background .15s,border-color .15s,color .15s}
 .opt-b b{font-size:16px;font-weight:700;line-height:1.25}
 .opt-b span{font-size:14px;color:var(--muted);line-height:1.35}
 .opt:hover .opt-b{border-color:var(--ink)}
@@ -418,8 +419,8 @@ a.tile,a.tile:hover{color:var(--paper)}
 
   <div class="wrap hero-grid">
     <div class="hero-copy">
-      <h1 class="big h-hero">Ar bom,<br>o ano<br>inteiro.</h1>
-      <p class="lead">Ar condicionado, bombas de calor e ventilação para casas e empresas na Grande Lisboa. Da primeira visita à manutenção, a mesma equipa, desde 1991.</p>
+      <h1 class="big h-hero">Ar condicionado.<br>Instalação.<br>Manutenção.</h1>
+      <p class="lead">Sistemas AVAC para habitação, comércio e edifícios na Grande Lisboa: ar condicionado, bombas de calor, ventilação e instalações elétricas associadas. Avaliação no local, instalação e manutenção pela mesma equipa técnica, desde 1991.</p>
       <ul class="chips">
         <li><a href="https://maps.app.goo.gl/1NTJtEvzcYW6Cra18" target="_blank" rel="noopener">4,4★ no Google, 14 avaliações</a></li>
         <li><a href="#obras">24 obras documentadas</a></li>
@@ -429,8 +430,8 @@ a.tile,a.tile:hover{color:var(--paper)}
 
     <form class="quote" id="pedido" novalidate aria-labelledby="qTitle">
       <div class="q-head">
-        <strong id="qTitle" class="q-title">Ligamos-lhe nós.</strong>
-        <span class="q-sub">Pedido de orçamento sem compromisso. Seg–Sex, 8:00–17:00.</span>
+        <strong id="qTitle" class="q-title">Pedido de orçamento.</strong>
+        <span class="q-sub">Sem compromisso. Resposta no dia útil seguinte. Seg–Sex, 8:00–17:00.</span>
       </div>
       <ol class="q-steps" id="qSteps" aria-label="Passos do pedido">
         <li data-s="1" aria-current="step"><span class="q-n">1</span><span class="q-l">Necessidade</span></li>
@@ -444,10 +445,10 @@ a.tile,a.tile:hover{color:var(--paper)}
         <fieldset class="q-pane" data-pane="1">
           <legend>Tipo de pedido</legend>
           <div class="opts">
-            <label class="opt"><input type="radio" name="purpose" value="Instalação" id="pInst" checked><span class="opt-b"><b>Instalação</b><span>Nova instalação ou substituição</span></span></label>
-            <label class="opt"><input type="radio" name="purpose" value="Manutenção" id="pMan"><span class="opt-b"><b>Manutenção</b><span>Intervenção preventiva ou contrato</span></span></label>
-            <label class="opt"><input type="radio" name="purpose" value="Avaria" id="pAv"><span class="opt-b"><b>Avaria</b><span>Diagnóstico e assistência técnica</span></span></label>
-            <label class="opt"><input type="radio" name="purpose" value="Aconselhamento" id="pTec"><span class="opt-b"><b>Avaliação técnica</b><span>Seleção e enquadramento da solução</span></span></label>
+            <label class="opt"><input type="radio" name="purpose" value="Instalação" id="pInst" checked><span class="opt-b"><img class="opt-img" src="/assets/img/foto-11-600.webp" width="56" height="56" alt="Unidade mural Mitsubishi Electric numa parede clara" loading="lazy" decoding="async"><span class="opt-t"><b>Instalação</b><span>Nova instalação ou substituição</span></span></span></label>
+            <label class="opt"><input type="radio" name="purpose" value="Manutenção" id="pMan"><span class="opt-b"><img class="opt-img" src="/assets/img/foto-16-600.webp" width="56" height="56" alt="Técnico da MDM a rever uma conduta no teto falso" loading="lazy" decoding="async"><span class="opt-t"><b>Manutenção</b><span>Intervenção preventiva ou contrato</span></span></span></label>
+            <label class="opt"><input type="radio" name="purpose" value="Avaria" id="pAv"><span class="opt-b"><img class="opt-img" src="/assets/img/foto-06-600.webp" width="56" height="56" alt="Unidade exterior aberta para diagnóstico" loading="lazy" decoding="async"><span class="opt-t"><b>Avaria</b><span>Diagnóstico e assistência técnica</span></span></span></label>
+            <label class="opt"><input type="radio" name="purpose" value="Aconselhamento" id="pTec"><span class="opt-b"><img class="opt-img" src="/assets/img/foto-30-600.webp" width="56" height="56" alt="Unidade mural num escritório com vista para a ponte" loading="lazy" decoding="async"><span class="opt-t"><b>Avaliação técnica</b><span>Seleção e enquadramento da solução</span></span></span></label>
           </div>
           <p class="q-hint">Tem uma avaria e prefere falar? Ligue <a href="tel:+351218935050">218 935 050</a>.</p>
         </fieldset>
@@ -529,18 +530,9 @@ a.tile,a.tile:hover{color:var(--paper)}
 
 <!-- PHOTO BAND -->
 <section class="photos" aria-label="Fotografias de obras">
-  <a class="ph-item" href="/obras/grupo-de-aspiracao-em-cave.html" target="_blank" rel="noopener">
-    <img src="/assets/img/foto-25-800.webp" srcset="/assets/img/foto-25-600.webp 600w, /assets/img/foto-25-800.webp 800w, /assets/img/foto-25-1600.webp 1600w" sizes="(min-width: 701px) 33vw, 82vw" width="800" height="600" alt="Técnico da MDM a cortar varão roscado com rebarbadora sob um grupo de aspiração, com faíscas." decoding="async">
-    <span class="ph-cap"><b>F25</b>Grupo de aspiração em cave</span>
-  </a>
-  <a class="ph-item" href="/obras/vrf-ao-lado-do-solar-termico.html" target="_blank" rel="noopener">
-    <img src="/assets/img/foto-28-800.webp" srcset="/assets/img/foto-28-600.webp 600w, /assets/img/foto-28-800.webp 800w, /assets/img/foto-28-1600.webp 1600w" sizes="(min-width: 701px) 33vw, 82vw" width="800" height="600" alt="Unidade exterior VRF Midea numa cobertura de Lisboa, ao lado de coletores solares." decoding="async">
-    <span class="ph-cap"><b>F28</b>VRF ao lado do solar térmico</span>
-  </a>
-  <a class="ph-item" href="/obras/central-de-sete-unidades.html" target="_blank" rel="noopener">
-    <img src="/assets/img/foto-03-800.webp" srcset="/assets/img/foto-03-600.webp 600w, /assets/img/foto-03-800.webp 800w, /assets/img/foto-03-1600.webp 1600w" sizes="(min-width: 701px) 33vw, 82vw" width="800" height="600" alt="Sete unidades exteriores de um sistema VRF, alinhadas e sobrepostas numa central técnica em cave." decoding="async">
-    <span class="ph-cap"><b>F03</b>Central de sete unidades</span>
-  </a>
+<a class="ph-item" href="/obras/sala-com-mobiliario-protegido.html"><img src="/assets/img/foto-09-800.webp" srcset="/assets/img/foto-09-600.webp 600w, /assets/img/foto-09-800.webp 800w, /assets/img/foto-09-1600.webp 1600w" sizes="(min-width: 701px) 33vw, 82vw" width="800" height="600" alt="Unidade mural instalada numa sala, por cima de um quadro de moldura dourada, com o sofá coberto de plástico." decoding="async"><span class="ph-cap"><b>F09</b>Sala com mobiliário protegido</span></a>
+<a class="ph-item" href="/obras/escritorio-com-vista-para-a-ponte.html"><img src="/assets/img/foto-30-800.webp" srcset="/assets/img/foto-30-600.webp 600w, /assets/img/foto-30-800.webp 800w, /assets/img/foto-30-1600.webp 1600w" sizes="(min-width: 701px) 33vw, 82vw" width="800" height="600" alt="Unidade mural numa sala com estante de livros e a Ponte Vasco da Gama à janela." decoding="async"><span class="ph-cap"><b>F30</b>Escritório com vista para a ponte</span></a>
+<a class="ph-item" href="/obras/bomba-de-calor-para-moradia.html"><img src="/assets/img/foto-04-800.webp" srcset="/assets/img/foto-04-600.webp 600w, /assets/img/foto-04-800.webp 800w, /assets/img/foto-04-1600.webp 1600w" sizes="(min-width: 701px) 33vw, 82vw" width="800" height="600" alt="Bomba de calor monobloco preta assente em lajetas de betão, no jardim de uma moradia." decoding="async"><span class="ph-cap"><b>F04</b>Bomba de calor para moradia</span></a>
 </section>
 
 <!-- BRANDS -->
@@ -556,7 +548,7 @@ a.tile,a.tile:hover{color:var(--paper)}
 <!-- SERVICES -->
 <section id="solucoes" class="sec">
   <div class="wrap sec-head">
-    <h2 class="big h-sec">O que fazemos</h2>
+    <h2 class="big h-sec">Serviços AVAC</h2>
     <a href="#calculadora" class="btn btn-yellow">Calcular potência</a>
   </div>
   <div class="svc">
@@ -623,7 +615,7 @@ a.tile,a.tile:hover{color:var(--paper)}
     <div class="maint">
       <div class="maint-copy">
         <span class="eyebrow-y">Manutenção preventiva. Assistência corretiva.</span>
-        <h2 class="big h-maint">Antes de avariar.</h2>
+        <h2 class="big h-maint">Manutenção preventiva.</h2>
         <div class="tabs" role="tablist" aria-label="Tipo de manutenção">
           <button type="button" class="tab" role="tab" id="t-prev" aria-selected="true" aria-controls="p-prev">Preventiva</button>
           <button type="button" class="tab" role="tab" id="t-corr" aria-selected="false" aria-controls="p-corr" tabindex="-1">Corretiva</button>
@@ -670,7 +662,7 @@ a.tile,a.tile:hover{color:var(--paper)}
 <section id="obras" class="sec">
   <div class="wrap stack">
     <div class="sec-head">
-      <h2 class="big h-sec">Obras recentes</h2>
+      <h2 class="big h-sec">Obras realizadas</h2>
       <button type="button" class="textlink" id="oAll">Ver as 24 obras</button>
     </div>
     <div class="filters" id="filters" role="group" aria-label="Filtrar obras"></div>
@@ -681,7 +673,7 @@ a.tile,a.tile:hover{color:var(--paper)}
 <!-- PROCESS -->
 <section id="processo" class="sec sec-last">
   <div class="wrap">
-    <h2 class="big h-sec">Como trabalhamos</h2>
+    <h2 class="big h-sec">Método de trabalho</h2>
     <ol class="proc">
       <li><span class="big proc-n">01</span><strong>Ouvimos o que precisa.</strong><p>Começamos pelo espaço, pela utilização e pelo que quer resolver.</p></li>
       <li><span class="big proc-n">02</span><strong>Avaliamos o local.</strong><p>Vemos as condições da instalação e os detalhes que fazem diferença.</p></li>
@@ -695,7 +687,7 @@ a.tile,a.tile:hover{color:var(--paper)}
 <section id="mdm" class="mist band">
   <div class="wrap about">
     <div class="about-copy">
-      <h2 class="big h-sec">Desde<br>1991.</h2>
+      <h2 class="big h-sec">MDM,<br>desde 1991.</h2>
       <p>A MDM Assistência Técnica, sediada no Parque das Nações, atua na Grande Lisboa na instalação, manutenção e assistência de sistemas de climatização, ventilação e instalações elétricas associadas. Da primeira visita à manutenção, a mesma equipa.</p>
       <ul class="facts">
         <li><b>1991</b><span>assistência técnica AVAC</span></li>
@@ -740,7 +732,7 @@ a.tile,a.tile:hover{color:var(--paper)}
 <!-- CONTACT -->
 <section id="contactos" class="on-blue contact">
   <div class="wrap">
-    <h2 class="big h-contact">Fale<br>connosco.</h2>
+    <h2 class="big h-contact">Contactos.</h2>
     <div class="cgrid">
       <div class="citem">
         <span class="citem-l">Telefone</span>
