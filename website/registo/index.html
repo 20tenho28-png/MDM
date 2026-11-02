@@ -21,6 +21,8 @@ function registoDisp() { try {
   var m = w < 640 ? 'telefone' : !tatil ? 'escritorio' : curto < 600 ? 'telefone' : w >= 960 ? 'largo' : 'estreito';
   if (document.documentElement.getAttribute('data-disp') !== m) document.documentElement.setAttribute('data-disp', m);
 } catch (e) {} }
+// Sem rede: a app fica guardada neste aparelho (sw.js); os dados guardam-se na página.
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) { try { navigator.serviceWorker.register('sw.js'); } catch (e) {} }
 registoDisp(); window.addEventListener('resize', registoDisp); window.addEventListener('orientationchange', registoDisp);
 (function () { try { var d = document.createElement('div'); d.style.cssText = 'display:flex;flex-direction:column;row-gap:1px;position:absolute';
   d.appendChild(document.createElement('div')); d.appendChild(document.createElement('div')); document.documentElement.appendChild(d);
@@ -1041,6 +1043,15 @@ html[data-disp=estreito] .sel-bar{bottom:calc(96px + env(safe-area-inset-bottom,
 .lista-sel{margin-left:8px}
 /* Técnico: sem Definições na barra e sem a margem da folha de obra. */
 html.tecnico #rail-prazos,html.tecnico #folhaMargem{display:none!important}
+/* Sem rede: o que se vê é a última leitura; as alterações esperam pela rede. */
+.off-bar{display:flex;flex-wrap:wrap;align-items:center;background:var(--sunk);border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:10px;padding:8px 12px;margin:0 0 14px;font-size:14.5px}
+.off-bar[hidden]{display:none}
+.off-bar.conflito{border-left-color:var(--bad)}
+.off-bar > span{flex:1 1 220px;margin:4px 10px 4px 0}
+.pop.conflitos{width:420px;max-width:calc(100vw - 24px);white-space:normal;font-size:14.5px}
+.pop.conflitos .cf{border-top:1px solid var(--line);padding:8px 0}
+.pop.conflitos .cf:first-of-type{border-top:0}
+.pop.conflitos .cf .btn{margin:6px 8px 0 0}
 /* «Enviaste?»: fica à vista (acima da barra de baixo) até se responder. */
 .enviei{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:61;background:var(--surface);color:var(--ink);border:1px solid var(--accent);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:12px 14px;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;max-width:calc(100% - 32px);box-sizing:border-box;font-size:15px}
 .enviei[hidden]{display:none}
@@ -1186,7 +1197,7 @@ html.sem-gap .dw-gauge{margin-right:auto}
 html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
 /* SEM-GAP-FIM */
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="supabase.min.js"></script>
 </head>
 <body>
 
@@ -1228,6 +1239,7 @@ html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
 </header>
 
 <main class="page">
+  <div class="off-bar" id="offBar" role="status" hidden><span id="offTxt"></span><button class="btn btn-ghost btn-sm" type="button" id="offVer" hidden>Ver</button></div>
   <div class="page-h">
     <label class="vista"><span class="sr-only" style="position:absolute;left:-9999px">Vista</span><select id="fVista" aria-label="Vista">
       <option value="abertos">Pedidos em aberto</option>
@@ -4096,7 +4108,7 @@ if (!Element.prototype.replaceChildren) {
   var PRIO_CURTA = {P1:'Urgente', P2:'Alta', P3:'Normal'};
   function carregarPainel() {
     if (!sb) return Promise.resolve();
-    return Promise.all(VISTAS_PAINEL.map(function (v) {
+    return lerComCache('painel', () => VISTAS_PAINEL.map(function (v) {
       var q = sb.from(v).select('*');
       if (v === 'v_fila_humana') q = q.order('ordem_prioridade', {ascending:true}).order('desde', {ascending:true, nullsFirst:false});
       else if (v === 'v_passos' || v === 'v_tempos' || v === 'v_atrasos') q = q.order('passo');
@@ -4943,6 +4955,15 @@ if (!Element.prototype.replaceChildren) {
     const atual = rows.find(x => x.id === id);
     const versao = atual ? (atual._versao || 0) : 0;
     const ultimo = (doc.historico || []).slice(-1)[0];
+    // Já há alterações deste pedido à espera de rede: esta junta-se a elas (a ordem não pode trocar).
+    if (!navigator.onLine || filaLe().some(x => x.id === id)) {
+      if (enfileira(id, doc, versao, ultimo ? ultimo.texto : null)) {
+        if (!(opts && opts.manter)) { trans = null; modo = null; sheetSujo = false; }
+        toast(navigator.onLine ? (msg || 'Guardado') : 'Sem rede: fica guardado neste aparelho e grava quando houver rede'); renderAll(); saving = false; if (ok) ok.disabled = false;
+        if (navigator.onLine) filaEnvia();
+        return true;
+      }
+    }
     try {
       const {data, error} = await sb.rpc('guardar_pedido', {p_id: id, p_dados: doc, p_versao: versao, p_evento: ultimo ? ultimo.texto : null});
       if (error) throw error;
@@ -4956,6 +4977,11 @@ if (!Element.prototype.replaceChildren) {
       return true;
     } catch (e) {
       const txt = String((e && e.message) || '');
+      if (eRede(e) && enfileira(id, doc, versao, ultimo ? ultimo.texto : null)) {
+        if (!(opts && opts.manter)) { trans = null; modo = null; sheetSujo = false; }
+        toast('Sem rede: fica guardado neste aparelho e grava quando houver rede'); renderAll();
+        return true;
+      }
       let m = 'Não foi possível guardar. Tenta outra vez.';
       if (txt.includes('conflito')) { m = 'Alguém alterou este pedido entretanto. Recarrega e repete.'; carregar(); }
       else if (txt.includes('duplicate key')) m = 'Já existe um pedido com este número.';
@@ -6433,7 +6459,7 @@ if (!Element.prototype.replaceChildren) {
   async function carregarSeg() {
     if (!sb) return;
     try {
-      const res = await Promise.all([
+      const res = await lerComCache('seg', () => [
         sb.from('seguimentos').select('id,pedido_id,sequencia,ciclo,numero,ancora,devido_em,canal,assunto,rascunho,estado,enviado_em,enviado_por,resultado,fechado_em,fecho,criado_em').order('id'),
         sb.from('v_seguimentos_hoje').select('*'),
         sb.from('v_seg_proximo').select('*'),
@@ -6668,7 +6694,7 @@ if (!Element.prototype.replaceChildren) {
     if (!sb) return;
     try {
       const desde = addDays(agSeg(today()), -35), ate = addDays(agSeg(today()), 120);
-      const res = await Promise.all([
+      const res = await lerComCache('agenda', () => [
         sb.from('tecnicos').select('id,nome,cor,telefone,email,competencias,zonas,horario,ativo,ical_token').order('nome'),
         sb.from('v_agenda').select('*').gte('fim', desde).lt('inicio', ate).order('inicio'),
         sb.from('v_agenda_conflitos').select('*'),
@@ -7665,6 +7691,116 @@ if (!Element.prototype.replaceChildren) {
   const F_APP = () => { F('login').hidden = true; F('app').hidden = false; document.body.classList.add('app-on'); };
   function erroLogin(m) { const el = F('l-err'); el.textContent = m || ''; el.hidden = !m; }
 
+  /* ---------- Sem rede ----------
+     A última leitura de cada parte (pedidos, seguimentos, agenda, painel) fica neste aparelho, por conta. Sem rede, a
+     página mostra-a e diz de quando é. As gravações de pedidos (passos, ações, dados, folha, RI, orçamento) ficam numa
+     fila e enviam-se quando a rede volta, com a versão de onde partiram: se outra pessoa mudou o pedido entretanto, a
+     alteração fica em «conflito» para escolher (gravar por cima ou deitar fora). Nada se perde em silêncio. */
+  const REDE_RE = /Failed to fetch|NetworkError|Load failed|network|internet|ERR_INTERNET|ERR_NAME|fetch failed/i;
+  const eRede = e => !!e && REDE_RE.test(String(e.message || e));
+  const chaveLocal = k => 'registo-' + k + ':' + ((eu && eu.email) || '');
+  function localLe(k, def) { try { const v = localStorage.getItem(chaveLocal(k)); return v ? JSON.parse(v) : def; } catch (e) { return def; } }
+  function localGuarda(k, v) { try { localStorage.setItem(chaveLocal(k), JSON.stringify(v)); return true; } catch (e) { return false; } }
+  function localTira(k) { try { localStorage.removeItem(chaveLocal(k)); } catch (e) {} }
+  let semRedeDe = null; // instante da leitura que se está a mostrar sem rede (null: com rede)
+  // Lê com rede e guarda a cópia; sem rede, devolve a cópia (no mesmo formato: [{data, error}]).
+  async function lerComCache(chave, pedidos) {
+    let res = null;
+    try { res = await Promise.all(pedidos()); } catch (e) { res = null; }
+    const falhou = !res || res.some(r => r && r.error && eRede(r.error));
+    if (!falhou) {
+      if (!localGuarda('cache-' + chave, {t: new Date().toISOString(), d: res.map(r => r.error ? null : r.data)})) {
+        // Sem espaço: guarda sem a parte maior (a faturação) em vez de não guardar nada.
+        localGuarda('cache-' + chave, {t: new Date().toISOString(), d: res.map((r, i) => r.error || (chave === 'base' && i === 3) ? null : r.data)});
+      }
+      if (chave === 'base' && semRedeDe) { semRedeDe = null; renderOff(); }
+      return res;
+    }
+    const c = localLe('cache-' + chave, null);
+    if (!c) return res || pedidos().map(() => ({data: null, error: {message: 'Failed to fetch'}}));
+    if (chave === 'base') { semRedeDe = c.t; renderOff(); }
+    return c.d.map(d => d == null ? {data: null, error: {message: 'sem cópia neste aparelho'}} : {data: d, error: null});
+  }
+  const filaLe = () => localLe('fila', []);
+  const filaGuarda = l => localGuarda('fila', l);
+  const conflitosLe = () => localLe('conflitos', []);
+  const conflitosGuarda = l => localGuarda('conflitos', l);
+  // Uma gravação de pedido que não chegou à base de dados: fica na fila (uma por pedido, a mais recente, com a versão de
+  // onde partiu) e o pedido mostra-se já mudado.
+  function enfileira(id, doc, versao, evento) {
+    const l = filaLe(), j = l.findIndex(x => x.id === id);
+    if (j >= 0) { l[j].doc = doc; if (evento) l[j].eventos = (l[j].eventos || []).concat([evento]).slice(-20); l[j].em = new Date().toISOString(); }
+    else l.push({id, doc, versao, eventos: evento ? [evento] : [], em: new Date().toISOString()});
+    if (!filaGuarda(l)) return false;
+    const i = rows.findIndex(x => x.id === id), linha = {id, ...doc, _versao: versao, _pendente: true, _escrita: ++escritas};
+    if (i >= 0) rows[i] = linha; else rows.push(linha);
+    renderOff();
+    return true;
+  }
+  // A fila por cima da leitura: o que ainda não foi enviado continua a ver-se como ficou neste aparelho.
+  function comFila(lista) {
+    filaLe().forEach(x => { const i = lista.findIndex(r => r.id === x.id), linha = {id: x.id, ...x.doc, _versao: x.versao, _pendente: true};
+      if (i >= 0) lista[i] = linha; else lista.push(linha); });
+    return lista;
+  }
+  let filaAEnviar = false;
+  async function filaEnvia() {
+    if (filaAEnviar || !sb || !navigator.onLine || !filaLe().length) return;
+    filaAEnviar = true; let feitos = 0, conf = 0;
+    try {
+      for (const x of filaLe()) {
+        const {data, error} = await sb.rpc('guardar_pedido', {p_id: x.id, p_dados: x.doc, p_versao: x.versao, p_evento: (x.eventos || []).slice(-1)[0] || null});
+        if (error) {
+          const t = String(error.message || '');
+          if (eRede(error)) break;
+          if (/conflito|duplicate key/.test(t)) { conflitosGuarda(conflitosLe().filter(y => y.id !== x.id).concat([{...x, erro: /duplicate/.test(t) ? 'duplicado' : 'conflito'}])); conf++; }
+          else break; // sessão expirada ou sem permissão: fica na fila até se entrar outra vez
+        } else feitos++;
+        filaGuarda(filaLe().filter(y => y.id !== x.id));
+      }
+    } catch (e) {} finally { filaAEnviar = false; }
+    renderOff();
+    if (feitos || conf) {
+      if (feitos) toast(`${feitos} ${feitos === 1 ? 'alteração feita sem rede enviada' : 'alterações feitas sem rede enviadas'}`);
+      carregar();
+    }
+  }
+  function renderOff() {
+    const bar = F('offBar'); if (!bar) return;
+    const n = filaLe().length, c = conflitosLe().length, partes = [];
+    if (semRedeDe) partes.push(`Sem rede: a mostrar os dados de ${quando(new Date(semRedeDe))}`);
+    if (n) partes.push(`${n} ${n === 1 ? 'alteração guardada neste aparelho' : 'alterações guardadas neste aparelho'}, ${navigator.onLine ? 'a enviar' : 'enviam-se quando houver rede'}`);
+    if (c) partes.push(`${c} ${c === 1 ? 'alteração não entrou' : 'alterações não entraram'}: o pedido mudou entretanto`);
+    bar.hidden = !partes.length; bar.classList.toggle('conflito', !!c);
+    F('offTxt').textContent = partes.join(' · '); F('offVer').hidden = !c;
+  }
+  // Conflitos: gravar por cima (lê a versão atual e grava a alteração deste aparelho) ou deitar fora.
+  async function conflitoResolve(x, gravarPorCima) {
+    fechaPop();
+    if (gravarPorCima) {
+      let id = x.id, versao = 0;
+      if (x.erro === 'duplicado') id = nextPedido();
+      else {
+        const {data, error} = await sb.from('pedidos').select('versao').eq('id', x.id).maybeSingle();
+        if (error) { toast(eRede(error) ? 'Sem ligação. Tenta outra vez.' : 'Não foi possível ler o pedido.'); return; }
+        versao = data ? data.versao : 0;
+      }
+      const doc = {...x.doc}; doc.historico = (doc.historico || []).slice(-60).concat([nota('Alteração feita sem rede gravada por cima da versão que entrou entretanto')]);
+      const {error} = await sb.rpc('guardar_pedido', {p_id: id, p_dados: doc, p_versao: versao, p_evento: 'Alteração feita sem rede gravada por cima'});
+      if (error) { toast(eRede(error) ? 'Sem ligação. Tenta outra vez.' : 'Não foi possível gravar: ' + String(error.message || '')); return; }
+      toast(id !== x.id ? `Gravado como ${id}` : 'Gravado');
+    } else toast('Alteração deitada fora');
+    conflitosGuarda(conflitosLe().filter(y => !(y.id === x.id && y.em === x.em)));
+    renderOff(); carregar();
+  }
+  F('offVer').addEventListener('click', ev => abrePop(ev.currentTarget, [h('h4',null,'Alterações que não entraram'),
+    ...conflitosLe().map(x => h('div',{class:'cf'},
+      h('b',null, `${x.doc.cliente || x.id} (${x.id})`), h('div',{class:'hint'}, x.erro === 'duplicado' ? 'Pedido novo feito sem rede com um número que outro aparelho já usou.' : `Feita a ${quando(new Date(x.em))}; outra pessoa mudou o pedido antes de chegar.`),
+      h('button',{class:'btn btn-sm', type:'button', onclick:() => conflitoResolve(x, true)}, x.erro === 'duplicado' ? 'Gravar com outro número' : 'Gravar a minha por cima'),
+      h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { if (confirm('Deitar fora esta alteração feita sem rede?')) conflitoResolve(x, false); }}, 'Deitar fora')))], 'conflitos'));
+  window.addEventListener('online', () => { renderOff(); if (sessao) { filaEnvia(); carregar(); } });
+  window.addEventListener('offline', renderOff);
+
   // Leituras: uma que começou antes de outra e chega depois é deitada fora (e espera pela mais nova); uma linha que esta
   // página gravou depois de a leitura começar fica (a leitura ainda não a tinha).
   let carregarSeq = 0, carregarUltima = null, escritas = 0;
@@ -7673,7 +7809,7 @@ if (!Element.prototype.replaceChildren) {
     if (!sb) return;
     const e0 = escritas;
     try {
-      const [p, c, q, ft, fc] = await Promise.all([
+      const [p, c, q, ft, fc] = await lerComCache('base', () => [
         sb.from('pedidos').select('id,dados,versao').order('id'),
         sb.from('config').select('chave,valor,versao'),
         sb.from('colaboradores').select('email,nome').order('nome'),
@@ -7683,14 +7819,15 @@ if (!Element.prototype.replaceChildren) {
       if (p.error) throw p.error;
       if (seq !== carregarSeq) return carregarUltima;
       const locais = new Map(rows.map(r => [r.id, r]));
-      rows = p.data.map(r => { const l = locais.get(r.id); if (l && l._escrita > e0 && (l._versao || 0) > r.versao) return l; const x = {id: r.id, ...r.dados, _versao: r.versao}; delete x._escrita; return x; });
+      rows = comFila(p.data.map(r => { const l = locais.get(r.id); if (l && l._escrita > e0 && (l._versao || 0) > r.versao) return l; const x = {id: r.id, ...r.dados, _versao: r.versao}; delete x._escrita; return x; }));
       if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') TB_PED.cfg = x.valor || null; if (x.chave === 'colunas_clientes') TB_CLI.cfg = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'orcamento' && x.versao >= cfgOrcVersao) { cfgOrc = x.valor || null; cfgOrcVersao = x.versao; } if (x.chave === 'orcamento_numero' && x.versao >= cfgOrcNumV) { cfgOrcNum = x.valor || null; cfgOrcNumV = x.versao; } if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
       if (ft.error) { if (/relation|does not exist|schema cache/i.test(ft.error.message || '')) fatTabela = false; }
       else { fatTabela = true; const novo = {}; for (const x of ft.data) if (x.dados && x.dados.mes) novo[x.dados.mes] = x.dados; faturacao = novo; if (!faturacao[fatMes]) fatMes = ''; }
       if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) { fichaTabela = false; const novo = {}; for (const id of Object.keys(fichas)) if (fichas[id]._novo) novo[id] = fichas[id]; fichas = novo; } }
       else { fichaTabela = true; const novo = {}; for (const x of fc.data) novo[x.id] = {...x.dados, _versao: x.versao}; fichas = novo; }
       if (!q.error) { equipa = q.data; const m = equipa.find(x => x.email === (eu && eu.email)); if (m && m.nome) eu.nome = m.nome; }
-      status = 'ok'; renderAll(); abreDoEndereco();
+      status = 'ok'; renderAll(); abreDoEndereco(); renderOff();
+      if (!semRedeDe) filaEnvia();
       carregarPainel();
       carregarSeg();
       carregarAgenda();
@@ -7718,7 +7855,9 @@ if (!Element.prototype.replaceChildren) {
     sessao = session; eu = {email: session.user.email, nome: null};
     // Só quem está na tabela colaboradores pode ler e escrever.
     // «*»: o papel só existe depois de supabase/papeis.sql; antes disso todos são «escritorio», como até aqui.
-    const {data, error} = await sb.from('colaboradores').select('*').eq('email', eu.email).maybeSingle();
+    let data = null, error = null;
+    try { ({data, error} = await sb.from('colaboradores').select('*').eq('email', eu.email).maybeSingle()); } catch (e) { error = e; }
+    if (error && eRede(error)) { const c = localLe('eu', null); if (c && c.email === eu.email) { data = c; error = null; } }
     if (error || !data) {
       await sb.auth.signOut();
       F_LOGIN(); erroLogin(error && !String(error.message).includes('permission') ? 'Não foi possível verificar a conta. Tenta outra vez.' : 'Esta conta ainda não tem acesso ao registo. Pede ao Bernardo para juntar o teu email aos colaboradores.');
@@ -7726,6 +7865,8 @@ if (!Element.prototype.replaceChildren) {
     }
     eu.nome = data.nome || eu.email.split('@')[0];
     eu.papel = data.papel || 'escritorio';
+    localGuarda('eu', {email: eu.email, nome: eu.nome, papel: eu.papel});
+    try { localStorage.setItem('registo-ultimo', eu.email); } catch (e) {}
     document.documentElement.classList.toggle('tecnico', eu.papel === 'tecnico');
     canWrite = true;
     F('userTxt').textContent = eu.nome;
@@ -7754,13 +7895,26 @@ if (!Element.prototype.replaceChildren) {
       erroLogin(txt.includes('Invalid login') ? 'Email ou palavra-passe errados.' : txt.includes('Failed to fetch') ? 'Sem ligação. Verifica a internet.' : 'Não foi possível entrar. Tenta outra vez.');
     } finally { F('l-ok').disabled = false; }
   });
-  F('btnSair').addEventListener('click', async () => { if (!confirm('Sair do registo neste aparelho?')) return; await sb.auth.signOut(); sair(); });
+  F('btnSair').addEventListener('click', async () => {
+    const n = filaLe().length;
+    if (!confirm(n ? `Há ${n} ${n === 1 ? 'alteração feita sem rede que ainda não foi enviada' : 'alterações feitas sem rede que ainda não foram enviadas'}. Se saíres, perdem-se. Sair mesmo assim?` : 'Sair do registo neste aparelho?')) return;
+    ['fila', 'conflitos', 'eu', 'cache-base', 'cache-seg', 'cache-agenda', 'cache-painel'].forEach(localTira);
+    try { localStorage.removeItem('registo-ultimo'); } catch (e) {}
+    try { await sb.auth.signOut(); } catch (e) {}
+    sair();
+  });
 
   (async () => {
     if (!window.supabase || !window.supabase.createClient) { F_LOGIN(); erroLogin('Não foi possível carregar a biblioteca da base de dados. Recarrega a página.'); return; }
     sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const {data} = await sb.auth.getSession();
-    if (data && data.session) await entrar(data.session); else F_LOGIN();
+    let sessaoGuardada = null;
+    try { const r = await sb.auth.getSession(); sessaoGuardada = r.data && r.data.session; } catch (e) {}
+    // Sem rede e sem sessão válida (a renovação precisa de rede): entra com a conta que já entrou neste aparelho; os dados
+    // são a última leitura e as gravações esperam pela rede.
+    let ultimo = ''; try { ultimo = localStorage.getItem('registo-ultimo') || ''; } catch (e) {}
+    if (sessaoGuardada) await entrar(sessaoGuardada);
+    else if (!navigator.onLine && ultimo) await entrar({user: {email: ultimo}, semRede: true});
+    else F_LOGIN();
     sb.auth.onAuthStateChange((ev, session) => { if (ev === 'SIGNED_OUT' && sessao) sair(); });
     // Sem tempo real (rede a bloquear websockets), recarrega de minuto a minuto; com ele, confirma a cada 5 minutos.
     // Nem a meio de escrever num campo (Objetivos, Probabilidades, Definições): a página redesenhada apagava o que se escrevia.
