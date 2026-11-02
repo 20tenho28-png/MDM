@@ -1021,6 +1021,26 @@ html[data-disp=largo] .hj-fila,html[data-disp=estreito] .hj-fila{display:block}
 .hj-fila .chips{margin:6px 0 10px}
 html[data-disp=telefone] .hj-dono,html[data-disp=escritorio] .hj-dono{display:none}
 .hj-dono{margin-bottom:18px}
+/* «Mudar» rápido: um popover com dono, ação e data, uma só gravação. */
+.pop.mudar{width:360px;max-width:calc(100vw - 24px);white-space:normal;font-size:15px}
+.pop.mudar h4{font-size:16px;margin:0 0 8px}
+.pop.mudar .chips{margin:6px 0 10px}
+.pop.mudar input[type=text],.pop.mudar input:not([type]),.pop.mudar input[type=date]{width:100%;box-sizing:border-box;min-height:44px;font-size:16px}
+.pop.mudar .check{display:flex;align-items:center;min-height:44px}
+.pop.mudar .check input{margin-right:8px}
+.pop.mudar .row-end{margin-top:10px}
+.pop.mudar .row-end .btn + .btn{margin-left:8px}
+/* Escolher vários pedidos na lista (tablet): tocar marca, a barra de baixo muda o dono ou a data de todos. */
+html.a-selecionar #lista .t-row *{pointer-events:none}
+html.a-selecionar #lista .t-row .t-btns{visibility:hidden}
+#lista .t-row.sel{background:var(--sunk);box-shadow:inset 4px 0 0 var(--accent)}
+.sel-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--surface);border:1px solid var(--accent);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:10px 12px;display:flex;align-items:center;flex-wrap:wrap;max-width:calc(100% - 32px);box-sizing:border-box}
+.sel-bar[hidden]{display:none}
+.sel-bar > *{margin:4px 8px 4px 0}
+html[data-disp=estreito] .sel-bar{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+.lista-sel{margin-left:8px}
+/* Técnico: sem Definições na barra e sem a margem da folha de obra. */
+html.tecnico #rail-prazos,html.tecnico #folhaMargem{display:none!important}
 /* «Enviaste?»: fica à vista (acima da barra de baixo) até se responder. */
 .enviei{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:61;background:var(--surface);color:var(--ink);border:1px solid var(--accent);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:12px 14px;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;max-width:calc(100% - 32px);box-sizing:border-box;font-size:15px}
 .enviei[hidden]{display:none}
@@ -1415,7 +1435,7 @@ html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
       <div class="fbox pesq"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg><input id="q" type="search" placeholder="Pesquisar" aria-label="Pesquisar cliente, localidade, nº ORC" autocomplete="off"></div>
     </div>
     <p id="fCliBox" style="margin:0 0 8px" hidden><button class="f-cli-chip" type="button" id="fCliChip" aria-label="Tirar o filtro do cliente"></button></p>
-    <p class="t-conta" id="listaCount"></p>
+    <p class="t-conta"><span id="listaCount"></span><button class="btn btn-ghost btn-sm lista-sel" type="button" id="btnSelecionar" hidden>Selecionar</button></p>
     <div class="tb-wrap"><div id="tabela"></div></div>
     <div class="tabela" id="lista"></div>
   </div>
@@ -1733,6 +1753,7 @@ html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
 
 <div class="toast" id="toast" role="status" hidden></div>
 <div class="procura" id="procura" role="dialog" aria-modal="true" aria-label="Procurar" hidden><div class="procura-c"><div class="procura-h"><input id="procQ" type="search" placeholder="Nome, telefone, PED, ORC, NIF, localidade" aria-label="Procurar" autocomplete="off" autocorrect="off" spellcheck="false"><button class="btn btn-ghost" type="button" id="procFechar">Fechar</button></div><div class="procura-r" id="procRes"></div></div></div>
+<div class="sel-bar" id="selBar" role="toolbar" aria-label="Pedidos escolhidos" hidden><b id="selConta"></b><button class="btn btn-ghost btn-sm" type="button" id="selDono">Mudar dono</button><button class="btn btn-ghost btn-sm" type="button" id="selData">Mudar data</button><button class="btn btn-ghost btn-sm" type="button" id="selSair">Cancelar</button></div>
 <div class="enviei" id="enviei" role="alertdialog" aria-labelledby="envieiTxt" hidden><span id="envieiTxt"></span><span class="enviei-b"><button class="btn btn-ghost btn-sm" type="button" id="envieiNao">Ainda não</button><button class="btn btn-sm" type="button" id="envieiSim">Sim, enviei</button></span></div>
 
 <script>
@@ -2104,7 +2125,11 @@ if (!Element.prototype.replaceChildren) {
   const SUB_NOME = {hoje:'Hoje', seguimentos:'Seguimentos', painel:'Números', gerir:'Tabela', pipeline:'Quadro', agenda:'Agenda', contactos:'Contactos', clientes:'A contactar', faturacao:'Faturação', prazos:'Definições'};
   const grupoDe = t => SECOES.find(g => g[2].indexOf(t) >= 0) || SECOES[0];
   // Vistas cuja parte da base de dados ainda não foi instalada não aparecem (as variáveis vêm mais abaixo).
+  // O técnico trabalha os pedidos, a agenda e os clientes; os números do negócio e as definições não são para ele
+  // (a faturação e os objetivos também lhe são recusados pela base de dados, em supabase/papeis.sql).
+  function souTecnico() { return !!(eu && eu.papel === 'tecnico'); }
   function disponivel(t) {
+    if (souTecnico() && ['painel', 'faturacao', 'clientes', 'prazos'].indexOf(t) >= 0) return false;
     try {
       if (t === 'seguimentos') return segTabela !== false;
       if (t === 'agenda') return agTabela !== false;
@@ -2453,8 +2478,8 @@ if (!Element.prototype.replaceChildren) {
       h('button',{type:'button', title:'Mudar a próxima ação', 'aria-label':'Mudar a próxima ação', disabled: !(aberto && canWrite), onclick:() => acaoRapida(r.id, 'acao')}, h('span',{class:'q'}, '?')),
       h('button',{type:'button', title:'Fechar como perdido', 'aria-label':'Fechar como perdido', disabled: !(podePerder && canWrite), onclick:() => acaoRapida(r.id, 'perdido')}, svg(ICO.no)));
     const col4 = h('div',{class:'t-btns'}, seg, h('button',{class:'mais', type:'button', title:'Abrir o pedido', 'aria-label':'Abrir o pedido', onclick:() => openSheet(r.id)}, svg(ICO.mais)));
-    return h('div',{class:`t-row u-${pe.p}${aberto ? '' : ' fechado'}${r.id === currentId && !F('sheetWrap').hidden ? ' aberto' : ''}`, 'data-id':r.id, style: aberto ? '--stripe:var(--u)' : null,
-      onclick: ev => { if (tatil() && !ev.target.closest('button,a,input,select,textarea,label')) openSheet(r.id); }}, col1, col2, col3, col4);
+    return h('div',{class:`t-row u-${pe.p}${aberto ? '' : ' fechado'}${r.id === currentId && !F('sheetWrap').hidden ? ' aberto' : ''}${selecao && selecao.indexOf(r.id) >= 0 ? ' sel' : ''}`, 'data-id':r.id, 'aria-selected': selecao ? String(selecao.indexOf(r.id) >= 0) : null, style: aberto ? '--stripe:var(--u)' : null,
+      onclick: ev => { if (selecao) { selToca(r.id, ev.currentTarget); return; } if (tatil() && !ev.target.closest('button,a,input,select,textarea,label')) openSheet(r.id); }}, col1, col2, col3, col4);
   }
 
   const URG_NOME = {P1:'Urgente', P2:'Alta', P3:'Normal'};
@@ -2505,6 +2530,7 @@ if (!Element.prototype.replaceChildren) {
     else if (fOrdem === 'cliente') lista.sort((a, b) => String(a.r.cliente || '').localeCompare(String(b.r.cliente || ''), 'pt'));
     else lista.sort(ordem);
     F('listaCount').textContent = `${lista.length} ${lista.length === 1 ? 'pedido' : 'pedidos'}`;
+    F('btnSelecionar').hidden = !canWrite || !tatil();
     renderTabela(lista);
     const head = h('div',{class:'t-head', role:'row'}, h('span',null,'Cliente'), h('span',null,'O que fazer a seguir'), h('span',null,'Prazo'), h('span',{style:'text-align:right;padding-right:58px'},'Ações'));
     if (!lista.length) { box.replaceChildren(head, h('p',{class:'t-vazio'}, rows.length ? 'Nenhum pedido com estes filtros.' : 'Ainda não há pedidos. Usa «Adicionar pedido» quando chegar o primeiro.')); return; }
@@ -4640,7 +4666,7 @@ if (!Element.prototype.replaceChildren) {
     const bo = blocoOrc(r); if (bo) blocos.push(bo);
     blocos.push(h('div',{class:'acao', style:'--stripe:var(--accent)'},
       h('div',{style:'min-width:0'}, h('div',{class:'what'}, r.folha ? `Folha de obra ${r.folha.num}` : 'Folha de obra'),
-        h('div',{class:'who'}, r.folha && r.folha.totalDebito ? `${eur(r.folha.totalDebito)} a debitar · custo ${eur(r.folha.totalCustos || 0)}`
+        h('div',{class:'who'}, r.folha && r.folha.totalDebito ? `${eur(r.folha.totalDebito)} a debitar${souTecnico() ? '' : ' · custo ' + eur(r.folha.totalCustos || 0)}`
           : r.folha ? `Pronta para a visita${r.folha.guardadaEm ? ' · guardada a ' + ddmm(r.folha.guardadaEm.slice(0, 10)) : ''}`
           : 'Pronta a imprimir para a visita')),
       h('button',{class:'btn btn-sm' + (r.folha ? ' btn-ghost' : ''), type:'button', onclick:() => abrirFolha(r.id)}, r.folha ? 'Abrir' : 'Folha de obra')));
@@ -6308,9 +6334,32 @@ if (!Element.prototype.replaceChildren) {
     F('enviei').hidden = false;
     return Promise.resolve(false);
   }
+  // Sem rede (na casa do cliente), o «Sim, enviei» fica guardado neste aparelho e grava-se quando a ligação voltar.
+  function envFila() { try { return JSON.parse(localStorage.getItem('registo-envios') || '[]'); } catch (e) { return []; } }
+  const envGuarda = l => { try { localStorage.setItem('registo-envios', JSON.stringify(l)); } catch (e) {} };
+  let envAEnviar = false;
+  async function envEnviaFila() {
+    if (envAEnviar || !sb || !navigator.onLine) return;
+    const l = envFila(); if (!l.length) return;
+    envAEnviar = true; let feitos = 0;
+    try {
+      for (const x of l) {
+        const {error} = await sb.rpc('seg_enviar', {p_id: x.id});
+        if (error && /Failed to fetch|NetworkError/i.test(String(error.message || ''))) break;
+        envGuarda(envFila().filter(y => y.id !== x.id)); if (!error) feitos++;
+      }
+    } catch (e) {} finally { envAEnviar = false; }
+    if (feitos) { toast(`${feitos} envio${feitos > 1 ? 's' : ''} sem rede gravado${feitos > 1 ? 's' : ''}`); carregar(); }
+  }
+  window.addEventListener('online', envEnviaFila);
   F('envieiSim').addEventListener('click', () => {
     const x = envioPendente; envioPendente = null; F('enviei').hidden = true;
-    if (x) segRpc('seg_enviar', {p_id: x.id}, `${x.passo || 'Seguimento'} marcado como enviado`, x.id);
+    if (!x) return;
+    if (!navigator.onLine) {
+      envGuarda(envFila().filter(y => y.id !== x.id).concat([{id: x.id, passo: x.passo || '', em: new Date().toISOString()}]));
+      toast('Sem rede: fica marcado como enviado quando a ligação voltar.'); renderInicio(enriquecidos()); return;
+    }
+    segRpc('seg_enviar', {p_id: x.id}, `${x.passo || 'Seguimento'} marcado como enviado`, x.id);
   });
   F('envieiNao').addEventListener('click', () => { envioPendente = null; F('enviei').hidden = true; });
   async function segAtendeu(x) {
@@ -6402,6 +6451,7 @@ if (!Element.prototype.replaceChildren) {
       const grupo = lista => { const o = {}; (lista || []).forEach(x => { (o[x.pedido_id] = o[x.pedido_id] || []).push(x); }); return o; };
       sg = {todos: grupo(s.data), hoje: res[1].data || [], prox: grupo(res[2].data), viol: res[3].data || [], taxa: res[4].data || [], perd: res[5].data || [], pag: res[6].data || []};
       renderSeg(); renderSegCfg(); renderInicio(enriquecidos()); setTab(tab);
+      envEnviaFila();
       if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
       // Se a tarefa das 07:00 ainda não correu hoje (pg_cron desligado ou atrasado), a primeira página aberta corre-a.
       if (canWrite && !sgCorreu && new Date().getHours() >= 7 && (!segMotor || String(segMotor.dia || '') < today())) {
@@ -7167,7 +7217,8 @@ if (!Element.prototype.replaceChildren) {
     if (status !== 'ok') { ['hjEnv','hjVis','hjAl'].forEach(k => fill(F(k), stateMsg())); fill(F('hjKpis')); return; }
     const eu1 = meuNome();
     // Enviar: os rascunhos de hoje (motor de seguimentos), os meus primeiro
-    const env = segLigado() && sg ? sg.hoje.slice().sort((a, b) => ((b.dono === eu1) - (a.dono === eu1)) || (b.dias_atraso - a.dias_atraso)) : [];
+    const naFila = {}; envFila().forEach(x => { naFila[x.id] = 1; });
+    const env = segLigado() && sg ? sg.hoje.filter(x => !naFila[x.id]).sort((a, b) => ((b.dono === eu1) - (a.dono === eu1)) || (b.dias_atraso - a.dias_atraso)) : [];
     const linhasEnv = env.map(x => {
       const r = rows.find(y => y.id === x.pedido_id) || {};
       const url = linkEnvio(x, r), tel = x.canal === 'telefone';
@@ -7214,9 +7265,38 @@ if (!Element.prototype.replaceChildren) {
     F('hjBadge').textContent = env.length + verm.length ? String(env.length + verm.length) : '';
     if (tatil()) renderFila(all);
   }
+  // «Mudar» rápido (tablet): dono, ação e data num popover, mais «Falei agora com o cliente». Uma só gravação, com as
+  // mesmas notas no histórico que o passo «Mudar a próxima ação».
+  function mudarRapido(botao, r) {
+    const err = h('p',{class:'err', hidden:true});
+    const poe = (id, v) => { F(id).value = v; };
+    const conteudo = [h('h4',null, 'Mudar a próxima ação'),
+      h('div',{class:'chips', role:'group', 'aria-label':'Dono'}, donosConhecidos().slice(0, 5).map(d => h('button',{class:'chip', type:'button', onclick:() => poe('mr-dono', d)}, d))),
+      ...donoInput('mr-dono', r.dono || meuNome()),
+      h('label',{class:'lbl', for:'mr-acao', style:'display:block;margin-top:10px'}, 'Próxima ação'), inp('mr-acao', r.proximaAcao || ''),
+      h('div',{class:'chips', role:'group', 'aria-label':'Data'}, [['Hoje', today()], ['Amanhã', addDays(today(), 1)], ['+2 úteis', addUteis(today(), 2)]]
+        .map(([l, d]) => h('button',{class:'chip', type:'button', onclick:() => poe('mr-data', d)}, l))),
+      inp('mr-data', r.dataProximaAcao || today(), {type:'date'}),
+      h('label',{class:'check'}, h('input',{type:'checkbox', id:'mr-falei'}), 'Falei agora com o cliente'),
+      err,
+      h('div',{class:'row-end'}, h('button',{class:'btn btn-ghost', type:'button', onclick:fechaPop}, 'Cancelar'),
+        h('button',{class:'btn', type:'button', onclick: async () => {
+          const d = val('mr-dono'), a = val('mr-acao'), dt = val('mr-data');
+          if (!d || !a || !dt) { err.textContent = 'Precisa de dono, próxima ação e data.'; err.hidden = false; return; }
+          const atual = rows.find(x => x.id === r.id) || r, novo = JSON.parse(JSON.stringify(atual)); delete novo.id;
+          const hist = novo.historico = (novo.historico || []).slice(-60);
+          if (F('mr-falei').checked) { novo.ultimoContacto = new Date().toISOString(); hist.push(nota('Contacto com o cliente')); }
+          novo.dono = d; novo.proximaAcao = a; novo.dataProximaAcao = dt;
+          hist.push(nota(`Próxima ação: ${a} (${d}, ${ddmm(dt)})`));
+          if (await gravar(r.id, novo, 'Ação atualizada', {manter: true, erro: m => { err.textContent = m; err.hidden = false; }})) fechaPop();
+        }}, 'Guardar'))];
+    abrePop(botao, conteudo, 'mudar');
+  }
+  // O técnico com este email (tabela tecnicos), para «O meu dia».
+  const meuTecnico = () => agTec.find(t => eu && t.email && t.email.toLowerCase() === String(eu.email || '').toLowerCase()) || null;
   // A fila: os pedidos em aberto pela ordem do trabalho (o mais urgente primeiro), os meus ou os da equipa.
   // O chefe é o de Seguimentos › Definições; sem chefe escolhido, ninguém vê os números aqui (os técnicos usam o mesmo iPad).
-  const souChefe = () => !!(segCfg().chefe && segCfg().chefe === meuNome());
+  const souChefe = () => !!((eu && eu.papel === 'chefe') || (segCfg().chefe && segCfg().chefe === meuNome()));
   const porPagar60 = () => rows.filter(r => r.estado === 'faturado' && !r.dataPagamento && r.dataFatura && r.dataFatura < addDays(today(), -60));
   function paraDecidir(all) {
     const out = [], visto = {};
@@ -7246,13 +7326,29 @@ if (!Element.prototype.replaceChildren) {
       tile('Para decidir', decidir.length, decidir.length ? 'warn' : '', () => { try { localStorage.setItem('registo-fila', 'decidir'); } catch (e) {} renderFila(all); }));
   }
   function renderFila(all) {
-    let de = 'meus'; try { de = localStorage.getItem('registo-fila') || 'meus'; } catch (e) {}
-    const eu1 = meuNome(), chefe = souChefe(), decidir = chefe ? paraDecidir(all) : [];
+    const eu1 = meuNome(), chefe = souChefe(), decidir = chefe ? paraDecidir(all) : [], tec = meuTecnico();
+    // Sem escolha guardada neste aparelho: o técnico começa no seu dia, o chefe no que espera por ele, os outros na fila.
+    let de = ''; try { de = localStorage.getItem('registo-fila') || ''; } catch (e) {}
+    if (!de) de = tec || souTecnico() ? 'dia' : chefe ? 'decidir' : 'meus';
     if (de === 'decidir' && !chefe) de = 'meus';
     renderDono(all, decidir);
-    fill(F('hjFilaChips'), [['meus', 'Os meus'], ['equipa', 'Equipa']].concat(chefe ? [['decidir', `Para decidir (${decidir.length})`]] : []).map(([k, l]) => h('button',{class:'chip', type:'button', 'aria-pressed': String(k === de),
+    fill(F('hjFilaChips'), [['dia', 'O meu dia'], ['meus', 'Os meus'], ['equipa', 'Equipa']].concat(chefe ? [['decidir', `Para decidir (${decidir.length})`]] : []).map(([k, l]) => h('button',{class:'chip', type:'button', 'aria-pressed': String(k === de),
       onclick:() => { try { localStorage.setItem('registo-fila', k); } catch (e) {} renderFila(all); }}, l)));
-    F('h-hj-fila').textContent = de === 'meus' ? 'A minha fila' : de === 'decidir' ? 'Para decidir' : 'A fila da equipa';
+    F('h-hj-fila').textContent = de === 'meus' ? 'A minha fila' : de === 'decidir' ? 'Para decidir' : de === 'dia' ? 'O meu dia' : 'A fila da equipa';
+    if (de === 'dia') {
+      // As minhas visitas e obras de hoje (agenda, ou a data da visita nos meus pedidos) e o que tenho atrasado ou para hoje.
+      const hoje = today(), linhas = [], vistos = {};
+      const visitas = agLigado() && tec ? agDoDia(hoje, tec.id).map(m => ({id: m.pedido_id, hora: m.tipo === 'instalacao' ? 'obra' : agHora(m.inicio), cliente: m.cliente, loc: m.localidade, feita: m.estado === 'feita'}))
+        : rows.filter(r => r.estado === 'visita_marcada' && r.dataVisita === hoje && r.dono === eu1).map(r => ({id: r.id, hora: r.horaVisita || '', cliente: r.cliente, loc: r.localidade, feita: false}));
+      visitas.forEach(v => { vistos[v.id] = 1; linhas.push(hjLinha(v.feita ? 'good' : 'info', `${v.hora ? v.hora + '  ' : ''}${v.cliente || v.id}`, () => openSheet(v.id),
+        [ico('mapa'), String(v.loc || '').split('\n')[0]], v.loc ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => abrirLink(agMapa({localidade: String(v.loc).split('\n')[0]}))}, 'Mapa') : null)); });
+      all.filter(x => ABERTOS.includes(x.r.estado) && x.r.dono === eu1 && !vistos[x.r.id] && (x.sem === 'vermelho' || (x.r.dataProximaAcao && x.r.dataProximaAcao <= hoje))).sort(ordem)
+        .forEach(x => linhas.push(hjLinha(x.sem === 'vermelho' ? 'bad' : 'warn', x.r.cliente || x.r.id, () => openSheet(x.r.id),
+          [h('span',{class:'prio p-' + x.pe.p}, x.pe.p), x.r.proximaAcao || 'Sem próxima ação'],
+          canWrite ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick: ev => mudarRapido(ev.currentTarget, x.r)}, 'Mudar') : null)));
+      hjLista('hjFila', 'hjFilaCount', linhas, 'Nada para hoje.', null, 12);
+      return;
+    }
     if (de === 'decidir') {
       hjLista('hjFila', 'hjFilaCount', decidir.map(({x, porque}) => hjLinha('warn', x.r.cliente || x.r.id, () => openSheet(x.r.id),
         [h('span',{class:'prio p-' + x.pe.p}, x.pe.p), porque], h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => openSheet(x.r.id)}, 'Abrir'))),
@@ -7262,7 +7358,7 @@ if (!Element.prototype.replaceChildren) {
     const fila = all.filter(x => ABERTOS.includes(x.r.estado) && (de !== 'meus' || x.r.dono === eu1)).sort(ordem);
     hjLista('hjFila', 'hjFilaCount', fila.map(x => hjLinha(x.sem === 'vermelho' ? 'bad' : x.sem === 'amarelo' ? 'warn' : 'info', x.r.cliente || x.r.id, () => openSheet(x.r.id),
       [h('span',{class:'prio p-' + x.pe.p}, x.pe.p), `${x.r.proximaAcao || 'Sem próxima ação'}${de === 'meus' ? '' : ' · ' + (x.r.dono || 'sem dono')}`],
-      canWrite ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { if (openSheet(x.r.id)) abrirTrans({id:'acao', label:'Mudar a próxima ação', para:null, soAcao:true}); }}, 'Mudar') : null)),
+      canWrite ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick: ev => mudarRapido(ev.currentTarget, x.r)}, 'Mudar') : null)),
       de === 'meus' ? 'Nada na tua fila.' : 'Nada em aberto.', () => { tabelaNoTablet = false; setTab('gerir'); }, 6);
   }
 
@@ -7450,6 +7546,42 @@ if (!Element.prototype.replaceChildren) {
     try { if (e.target.value) localStorage.setItem('registo-disp', e.target.value); else localStorage.removeItem('registo-disp'); } catch (er) {}
     registoDisp(); if (status === 'ok') { setTab(tab); renderAll(); }
   });
+  // Vários pedidos de uma vez (tablet, lista de Pedidos): mudar o dono ou a data da próxima ação de todos os escolhidos.
+  // Grava um a um, com versão e nota no histórico, como se fosse à mão.
+  var selecao = null; // var: a lista pode desenhar-se antes desta linha correr
+  function selMostra() {
+    document.documentElement.classList.toggle('a-selecionar', !!selecao);
+    F('selBar').hidden = !selecao; F('btnSelecionar').textContent = selecao ? 'Acabar' : 'Selecionar';
+    if (selecao) F('selConta').textContent = `${selecao.length} ${selecao.length === 1 ? 'pedido' : 'pedidos'}`;
+  }
+  function selToca(id, el) {
+    const i = selecao.indexOf(id);
+    if (i >= 0) selecao.splice(i, 1); else selecao.push(id);
+    el.classList.toggle('sel', i < 0); el.setAttribute('aria-selected', String(i < 0)); selMostra();
+  }
+  function selSai() { selecao = null; selMostra(); renderAll(); }
+  async function selAplica(campo, valor, rotulo) {
+    fechaPop();
+    const ids = (selecao || []).slice(); if (!ids.length) { toast('Escolhe primeiro os pedidos.'); return; }
+    let feitos = 0;
+    for (const id of ids) {
+      const r = rows.find(x => x.id === id); if (!r) continue;
+      const novo = JSON.parse(JSON.stringify(r)); delete novo.id;
+      novo[campo] = valor; novo.historico = (novo.historico || []).slice(-60); novo.historico.push(nota(`${rotulo} (mudado em grupo)`));
+      if (await gravar(id, novo, `${r.cliente || id}: mudado`, {manter: true, erro: m => toast(`${r.cliente || id}: ${m}`)})) feitos++;
+      else break;
+    }
+    toast(`${feitos} de ${ids.length} pedidos mudados`);
+    selSai();
+  }
+  F('btnSelecionar').addEventListener('click', () => { if (selecao) selSai(); else { selecao = []; selMostra(); renderAll(); } });
+  F('selSair').addEventListener('click', selSai);
+  F('selDono').addEventListener('click', ev => abrePop(ev.currentTarget, [h('h4',null,'Novo dono'),
+    h('div',{class:'chips'}, donosConhecidos().map(d => h('button',{class:'chip', type:'button', onclick:() => selAplica('dono', d, `Dono: ${d}`)}, d)))], 'mudar'));
+  F('selData').addEventListener('click', ev => abrePop(ev.currentTarget, [h('h4',null,'Nova data da próxima ação'),
+    h('div',{class:'chips'}, [['Hoje', today()], ['Amanhã', addDays(today(), 1)], ['+2 úteis', addUteis(today(), 2)], ['+5 úteis', addUteis(today(), 5)]]
+      .map(([l, d]) => h('button',{class:'chip', type:'button', onclick:() => selAplica('dataProximaAcao', d, `Data da próxima ação: ${ddmm(d)}`)}, l))),
+    inp('sel-d', '', {type:'date', onchange: e => { if (e.target.value) selAplica('dataProximaAcao', e.target.value, `Data da próxima ação: ${ddmm(e.target.value)}`); }})], 'mudar'));
   // Procurar (tablet): pedidos e clientes de uma vez. Sem acentos nem maiúsculas; o telefone compara só os dígitos.
   function procuraTexto(r) {
     const f = fichas[chaveCli(r.cliente || '')] || {};
@@ -7585,13 +7717,16 @@ if (!Element.prototype.replaceChildren) {
   async function entrar(session) {
     sessao = session; eu = {email: session.user.email, nome: null};
     // Só quem está na tabela colaboradores pode ler e escrever.
-    const {data, error} = await sb.from('colaboradores').select('email,nome').eq('email', eu.email).maybeSingle();
+    // «*»: o papel só existe depois de supabase/papeis.sql; antes disso todos são «escritorio», como até aqui.
+    const {data, error} = await sb.from('colaboradores').select('*').eq('email', eu.email).maybeSingle();
     if (error || !data) {
       await sb.auth.signOut();
       F_LOGIN(); erroLogin(error && !String(error.message).includes('permission') ? 'Não foi possível verificar a conta. Tenta outra vez.' : 'Esta conta ainda não tem acesso ao registo. Pede ao Bernardo para juntar o teu email aos colaboradores.');
       return;
     }
     eu.nome = data.nome || eu.email.split('@')[0];
+    eu.papel = data.papel || 'escritorio';
+    document.documentElement.classList.toggle('tecnico', eu.papel === 'tecnico');
     canWrite = true;
     F('userTxt').textContent = eu.nome;
     F_APP(); status = 'loading'; renderAll();
@@ -7602,6 +7737,7 @@ if (!Element.prototype.replaceChildren) {
     if (canal) { sb.removeChannel(canal); canal = null; }
     if (!F('orcWrap').hidden) fecharOrc(true);
     if (!F('folhaWrap').hidden) fecharFolha(true);
+    document.documentElement.classList.remove('tecnico');
     sessao = null; eu = null; rows = []; faturacao = {}; cfgClientes = {}; fichas = {}; pn = null; sg = null; segTabela = null; cfgSeg = null; segMotor = null; sgCorreu = false; sgEdit = null; agTabela = null; cfgAgenda = null; agTec = []; agMarc = []; agConf = {}; agPor = []; agLinks = {}; agSel = null; agAcao = null; agCfgSujo = false; cfgOrc = null; cfgOrcVersao = 0; cfgOrcNum = null; cfgOrcNumV = 0; ocEd = null; ocSujo = false; canWrite = false; status = 'loading'; ligado = false;
     F_LOGIN(); erroLogin('');
   }
