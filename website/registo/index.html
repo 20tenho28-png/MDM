@@ -164,7 +164,8 @@ main.wrap{padding-block:18px 40px}
 /* No ecrã tátil nenhum campo fica abaixo de 16 px: o Safari do iPad aumenta a página ao tocar num campo mais pequeno.
    A folha de obra é um A4 com o tamanho do papel e fica como está. */
 @media (pointer:coarse){input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px!important}
-  .folha input,.folha textarea,.folha select{font-size:inherit!important}.folha .f-tit input{font-size:13pt!important}}
+  .folha input,.folha textarea,.folha select{font-size:inherit!important}.folha .f-tit input{font-size:13pt!important}
+  #riPg input{font-size:inherit!important}}
 /* Deslizar com inércia no iPad antigo (iOS 12): cada caixa que se desloca sozinha. */
 .tabs,.chips,.tw,.sheet,.chart-w,.board,.col-b,.folha-palco,.pop,.tabs2,.tb-wrap,.panel{-webkit-overflow-scrolling:touch}
 table{border-collapse:collapse;width:100%;font-size:14px}
@@ -1052,6 +1053,97 @@ html.tecnico #rail-prazos,html.tecnico #folhaMargem{display:none!important}
 .pop.conflitos .cf{border-top:1px solid var(--line);padding:8px 0}
 .pop.conflitos .cf:first-of-type{border-top:0}
 .pop.conflitos .cf .btn{margin:6px 8px 0 0}
+/* ===== Relatório de Intervenção (FM-TEC-04 /V06): a folha A4 do formulário em papel, com os campos por cima ===== */
+.ri-wrap .folha-palco{padding:20px 12px 60px}
+.ri-ajuda{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));background:var(--surface);border-bottom:1px solid var(--line);font-size:14px}
+.ri-ajuda label{display:inline-flex;align-items:center;gap:6px}
+.ri-ajuda input{min-height:40px;font-size:16px;padding:0 6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.ri-ajuda input[type=number]{width:64px}
+.ri-pg{--ri-g:#d6d6d6;--ri-red:#93262c;--ri-ink:#123a8c;position:relative;width:210mm;height:296.6mm;margin:0 auto;background:#fff;color:#000;box-shadow:0 3px 18px rgba(0,0,0,.25);overflow:hidden;font-family:Arial,Helvetica,sans-serif}
+.ri-sheet{position:absolute;top:6.5mm;left:14mm;right:9mm;bottom:4.5mm;display:flex;flex-direction:column;gap:1.2mm;font-size:7.4pt;line-height:1.12}
+.ri-side{position:absolute;white-space:nowrap;font-size:6.2pt;letter-spacing:.02em;transform:rotate(-90deg);transform-origin:0 0}
+.ri-side-c{left:9.5mm;top:236mm}.ri-side-k{left:9.5mm;top:288mm;font-weight:700}
+.ri-pg input.rf{border:0;background:transparent;font:inherit;color:var(--ri-ink);width:100%;min-width:0;padding:0 .5mm;outline:none;height:100%;border-radius:0}
+.ri-pg input.rf.rc{text-align:center}
+@media screen{.ri-pg input.rf{background:rgba(20,80,200,.07)}.ri-pg input.rf:focus{background:rgba(255,206,0,.42)}}
+.ri-ln{display:flex;flex:1;min-width:0;border-bottom:1px solid #000;height:3.6mm}
+.ri-pg input[type=checkbox]{-webkit-appearance:none;appearance:none;width:3.3mm;height:3.3mm;border:1px solid #000;background:#fff;margin:0;position:relative;cursor:pointer;flex:0 0 auto;border-radius:0}
+.ri-pg input[type=checkbox]:checked::after{content:"\2714";position:absolute;left:50%;top:50%;transform:translate(-50%,-54%);font-size:3.1mm;line-height:1;font-weight:700;color:var(--ri-ink)}
+.ri-cb{display:inline-flex;align-items:center;gap:1.2mm;white-space:nowrap}
+.ri-box{border:1px solid #000}.ri-grey{background:var(--ri-g)}.ri-b{font-weight:700}
+.ri-hdr{display:flex;align-items:flex-start;gap:3mm;flex:0 0 auto}
+.ri-brand{display:flex;align-items:flex-start;width:66mm;flex:0 0 auto}
+.ri-brand-col{width:24mm;text-align:center}
+.ri-logo{width:20mm;height:20mm;display:block;margin:0 auto}
+.ri-bt2{font-size:4.3pt;font-weight:700;color:var(--ri-red);border-top:.5px solid var(--ri-red);padding-top:.3mm;margin-top:.3mm}
+.ri-bt3{font-size:4.1pt;color:var(--ri-red);line-height:1.25}
+.ri-seal{width:14mm;height:14mm;margin:5mm 0 0 -1mm}
+.ri-hdr-r{flex:1;display:flex;flex-direction:column;gap:2.4mm;padding-top:2.5mm;min-width:0}
+.ri-titulo{text-align:center;font-size:13pt;font-weight:700}
+.ri-folha{display:flex;align-items:flex-end;gap:1.4mm;padding:.8mm 2mm .6mm;font-size:9pt;font-weight:700}
+.ri-folha .ri-ln{height:4mm}.ri-folha .w1{flex:0 0 22mm}.ri-folha .w2{flex:0 0 12mm}.ri-folha .w3{flex:0 0 11mm}.ri-folha .pg{margin-left:4mm}
+.ri-info{display:flex;gap:2.5mm;flex:0 0 auto;height:25mm}
+.ri-info-l{width:47%;display:flex;flex-direction:column}
+.ri-dini{display:flex;align-items:flex-end;gap:1mm;font-size:8.6pt;font-weight:700;padding:0 0 1.4mm 1mm}
+.ri-dini .ri-ln{flex:0 0 11mm}
+.ri-tec{flex:1;padding:1.4mm 2mm;display:flex;flex-direction:column;justify-content:space-around}
+.ri-cli{flex:1;padding:2mm 2.5mm;display:flex;flex-direction:column;justify-content:space-around}
+.ri-row{display:flex;align-items:flex-end;gap:1.4mm}
+.ri-lb{font-weight:700;font-size:8.2pt;white-space:nowrap}
+.ri-tipo{flex:0 0 auto;padding:.7mm 2mm 1.6mm}
+.ri-tipo-lb{font-size:7.6pt;margin-bottom:1.2mm}
+.ri-tipo-row{display:flex;align-items:center;gap:2.4mm;font-size:7.9pt;font-weight:700}
+.ri-tipo-row .other{flex:1;gap:1.5mm}
+.ri-wrapt{min-height:0;overflow:hidden}.ri-wrap-int{flex:10 1 0}.ri-wrap-mat{flex:12 1 0}
+table.ri-t{width:100%;height:100%;border-collapse:collapse;table-layout:fixed;font-size:inherit}
+.ri-t th,.ri-t td{border:1px solid #000;padding:0}
+.ri-t th{background:var(--ri-g);font-size:7.8pt;font-weight:700;text-align:center;padding:.4mm .5mm}
+.ri-t tbody tr{height:4.1mm}
+.ri-t tbody td input:not([type=checkbox]){height:4mm;box-sizing:border-box}
+.ri-t td.g{background:var(--ri-g)}.ri-t td.cx{text-align:center}
+.ri-t td.time{padding:0 .5mm}
+.ri-t tfoot td{height:4.6mm;font-size:7.8pt;font-weight:700}
+.ri-fth{display:flex;align-items:center;height:100%;gap:1.5mm;padding-left:1.5mm}
+.ri-fth .cell{flex:1;height:100%;background:var(--ri-g);border-left:1px solid #000;border-right:1px solid #000;display:flex;align-items:center}
+.ri-ftt{text-align:right;padding-right:2mm}
+.ri-pg input[type=time]{width:100%;border:0;background:transparent;font:inherit;color:var(--ri-ink);text-align:center;padding:0;height:4mm;-webkit-appearance:none;appearance:none;border-radius:0}
+.ri-tp{display:none;text-align:center;color:var(--ri-ink)}
+.ri-obs{flex:0 0 auto;display:flex;flex-direction:column}
+.ri-obs-top{display:flex;align-items:stretch}
+.ri-orc{flex:0 0 58%;display:flex;align-items:center;gap:1.6mm;padding:1.4mm 2mm;font-size:7.9pt;border-right:1px solid #000;border-bottom:1px solid #000}
+.ri-orc .ri-ln{flex:0 0 20mm}
+.ri-obs-r{flex:1;display:flex;flex-direction:column}
+.ri-obs-h{background:var(--ri-g);font-weight:700;font-size:8.1pt;text-align:center;padding:1mm;border-bottom:1px solid #000}
+.ri-oline{border-bottom:1px solid #000;height:5mm;display:flex}
+.ri-oline:last-child{border-bottom:0}
+.ri-bottom{display:flex;gap:2.5mm;flex:0 0 auto}
+.ri-bl{width:41%;display:flex;flex-direction:column;gap:1.5mm}
+.ri-br{flex:1;display:flex;flex-direction:column;gap:1mm}
+.ri-bh{background:var(--ri-g);font-weight:700;font-size:8.1pt;padding:.9mm 2mm;border-bottom:1px solid #000}
+.ri-bp{padding:1.4mm 2mm;display:flex;flex-direction:column;gap:1.6mm}
+.ri-bp .ri-row{font-size:7.9pt}.ri-bp .ri-ln{height:3.4mm}
+.ri-mat .ri-ln{flex:0 0 12mm}
+.ri-sb{justify-content:space-between;padding:0 6mm 0 1mm}
+.ri-sig{text-align:center;font-size:7.9pt;padding-top:.8mm}
+.ri-sig-l{border-bottom:1px solid #000;height:14mm;margin:.6mm 4mm 0;position:relative}
+.ri-bp .ri-ln.ri-sig-c{position:relative;height:14mm;overflow:hidden}
+.ri-pg canvas{position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair;touch-action:none;-ms-touch-action:none}
+.ri-limpar{font-size:6.5pt;padding:0 4px;cursor:pointer;border:1px solid #000;background:#fff;border-radius:2px;color:#000}
+.ri-vald .ri-bp{gap:2.1mm}
+.ri-accept{text-align:center;font-size:6.8pt;padding-top:.6mm}
+.ri-pfoot{flex:0 0 auto;text-align:center;font-size:7.5pt;line-height:1.4;padding-top:1mm}
+html[data-disp=estreito] .ri-pg{zoom:.95}
+@media print{
+  body.a-imprimir-ri{background:#fff}
+  body.a-imprimir-ri > *:not(#riWrap){display:none!important}
+  body.a-imprimir-ri #riWrap{position:static;display:block;background:#fff}
+  body.a-imprimir-ri #riWrap .folha-bar,body.a-imprimir-ri #riWrap .ri-ajuda,body.a-imprimir-ri .ri-limpar{display:none!important}
+  body.a-imprimir-ri #riWrap .folha-palco{padding:0;overflow:visible}
+  body.a-imprimir-ri .ri-pg{box-shadow:none;margin:0;zoom:1!important}
+  body.a-imprimir-ri .ri-pg input.rf{background:transparent!important}
+  body.a-imprimir-ri .ri-pg input[type=time]{display:none}
+  body.a-imprimir-ri .ri-tp{display:block}
+}
 /* «Enviaste?»: fica à vista (acima da barra de baixo) até se responder. */
 .enviei{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:61;background:var(--surface);color:var(--ink);border:1px solid var(--accent);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:12px 14px;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;max-width:calc(100% - 32px);box-sizing:border-box;font-size:15px}
 .enviei[hidden]{display:none}
@@ -1190,11 +1282,31 @@ html.sem-gap .ag-l > *{margin-bottom:6px}html.sem-gap .ag-l > :last-child{margin
 html.sem-gap .ag-lh > *{margin-right:10px}
 html.sem-gap .agt > *{margin-bottom:8px}html.sem-gap .agt > :last-child{margin-bottom:0}
 html.sem-gap .agt-g > *{margin-right:14px}
+html.sem-gap .ri-ajuda > *{margin-right:14px}
+html.sem-gap .ri-ajuda label > *{margin-right:6px}
+html.sem-gap .ri-sheet > *{margin-bottom:1.2mm}html.sem-gap .ri-sheet > :last-child{margin-bottom:0}
+html.sem-gap .ri-cb > *{margin-right:1.2mm}
+html.sem-gap .ri-hdr > *{margin-right:3mm}
+html.sem-gap .ri-hdr-r > *{margin-bottom:2.4mm}html.sem-gap .ri-hdr-r > :last-child{margin-bottom:0}
+html.sem-gap .ri-folha > *{margin-right:1.4mm}
+html.sem-gap .ri-info > *{margin-right:2.5mm}
+html.sem-gap .ri-dini > *{margin-right:1mm}
+html.sem-gap .ri-row > *{margin-right:1.4mm}
+html.sem-gap .ri-tipo-row > *{margin-right:2.4mm}
+html.sem-gap .ri-fth > *{margin-right:1.5mm}
+html.sem-gap .ri-orc > *{margin-right:1.6mm}
+html.sem-gap .ri-bottom > *{margin-right:2.5mm}
+html.sem-gap .ri-bl > *{margin-bottom:1.5mm}html.sem-gap .ri-bl > :last-child{margin-bottom:0}
+html.sem-gap .ri-br > *{margin-bottom:1mm}html.sem-gap .ri-br > :last-child{margin-bottom:0}
+html.sem-gap .ri-bp > *{margin-bottom:1.6mm}html.sem-gap .ri-bp > :last-child{margin-bottom:0}
+html.sem-gap .ri-vald .ri-bp > *{margin-bottom:2.1mm}html.sem-gap .ri-vald .ri-bp > :last-child{margin-bottom:0}
 html.sem-gap .wrap{margin-right:auto}
 html.sem-gap .folha{margin-right:auto}
 html.sem-gap .od-folha{margin-right:auto}
 html.sem-gap .dw-gauge{margin-right:auto}
 html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
+html.sem-gap .ri-pg{margin-right:auto}
+html.sem-gap .ri-logo{margin-right:auto}
 /* SEM-GAP-FIM */
 </style>
 <script src="supabase.min.js"></script>
@@ -1674,6 +1786,10 @@ html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
         <div class="row-end" style="margin-top:10px"><button class="btn" id="btnPrazos" type="button" hidden>Guardar prazos</button></div>
       </section>
       <div class="side">
+        <section aria-labelledby="h-ricfg">
+          <div class="sec-h"><h2 id="h-ricfg">Relatório de intervenção</h2></div>
+          <div class="panel" style="padding:14px" id="riCfgBox"></div>
+        </section>
         <section aria-labelledby="h-disp">
           <div class="sec-h"><h2 id="h-disp">Neste aparelho</h2></div>
           <div class="panel" style="padding:14px"><div class="f"><label class="lbl" for="selDisp">Disposição</label>
@@ -1718,6 +1834,18 @@ html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
 </div>
 
 
+<div class="folha-wrap ri-wrap" id="riWrap" hidden>
+  <div class="folha-bar" role="toolbar" aria-label="Relatório de intervenção">
+    <div class="folha-bar-l"><b id="riBarTitulo">Relatório de intervenção</b><span id="riBarEstado" class="sub"></span></div>
+    <div class="folha-bar-r">
+      <button class="btn btn-ghost btn-sm" type="button" id="riFechar">Fechar</button>
+      <button class="btn btn-ghost btn-sm" type="button" id="riGuardar">Guardar</button>
+      <button class="btn btn-sm" type="button" id="riImprimir">Guardar e imprimir</button>
+    </div>
+  </div>
+  <div class="ri-ajuda" id="riAjuda"></div>
+  <div class="folha-palco"><article class="ri-pg" id="riPg" aria-label="Relatório de intervenção"></article></div>
+</div>
 <div class="folha-wrap" id="folhaWrap" hidden>
   <div class="folha-bar" role="toolbar" aria-label="Folha de obra">
     <div class="folha-bar-l"><b id="folhaBarTitulo">Folha de obra</b><span id="folhaBarEstado" class="sub"></span></div>
@@ -2002,7 +2130,7 @@ if (!Element.prototype.replaceChildren) {
   let cfgPrazos = null, cfgPrazosVersao = 0, ligado = false;
   let dono = '', query = '', fCli = null;
   let currentId = null, modo = null, trans = null, saving = false, delArmed = null;
-  let sheetSujo = false, dadosAberto = false, prazosSujos = false, novoBase = null;
+  let sheetSujo = false, dadosAberto = false, prazosSujos = false, novoBase = null, cfgRi = null;
 
   const prazosAtuais = () => (cfgPrazos && cfgPrazos.valores) || PRAZOS_PADRAO;
   const limiteDono = () => (cfgPrazos && Number(cfgPrazos.limiteDono)) || LIMITE_PADRAO;
@@ -4682,6 +4810,11 @@ if (!Element.prototype.replaceChildren) {
           : r.folha ? `Pronta para a visita${r.folha.guardadaEm ? ' · guardada a ' + ddmm(r.folha.guardadaEm.slice(0, 10)) : ''}`
           : 'Pronta a imprimir para a visita')),
       h('button',{class:'btn btn-sm' + (r.folha ? ' btn-ghost' : ''), type:'button', onclick:() => abrirFolha(r.id)}, r.folha ? 'Abrir' : 'Folha de obra')));
+    if (r.ri || !['novo', 'visita_por_marcar', 'perdido'].includes(r.estado)) blocos.push(h('div',{class:'acao', style:'--stripe:var(--accent)'},
+      h('div',{style:'min-width:0'}, h('div',{class:'what'}, 'Relatório de intervenção'),
+        h('div',{class:'who'}, r.ri ? [r.ri.assCli ? `Assinado pelo cliente${r.ri.assinadoEm ? ' a ' + ddmm(r.ri.assinadoEm.slice(0, 10)) : ''}` : 'Por assinar',
+          r.ri.totalMin ? ` · ${hhmmDe(r.ri.totalMin)} h` : ''].join('') : 'O RI do técnico, para assinar no local')),
+      h('button',{class:'btn btn-sm' + (r.ri ? ' btn-ghost' : ''), type:'button', onclick:() => abrirRI(r.id)}, r.ri ? 'Abrir' : 'Relatório')));
     if (trans) blocos.push(formTrans(r));
     else if (canWrite) {
       const T = transicoes(r), aberto = ABERTOS.includes(r.estado);
@@ -4724,7 +4857,7 @@ if (!Element.prototype.replaceChildren) {
     const titulo = t.soAcao ? 'Mudar a próxima ação' : t.seguimento ? t.label : `Passar a ${ESTADOS[para].l}`;
     const els = [h('div',{class:'t-cab'}, h('button',{class:'btn btn-ghost', type:'button', onclick:() => { trans = null; renderSheet(); }}, 'Cancelar'),
       h('b',null, titulo), h('button',{class:'btn', type:'button', onclick:confirmarTrans}, 'Confirmar')), h('h3',null, titulo)];
-    if (t.ri) els.push(h('div',{class:'fields'}, campo('t-ri','Data do RI', inp('t-ri', today(), {type:'date'})), campo('t-ri-n','N.º do RI (opcional)', inp('t-ri-n', (r.obra && r.obra.riNum) || ''))));
+    if (t.ri) els.push(h('div',{class:'fields'}, campo('t-ri','Data do RI', inp('t-ri', (r.ri && r.ri.dataInicio) || today(), {type:'date'})), campo('t-ri-n','N.º do RI (opcional)', inp('t-ri-n', (r.obra && r.obra.riNum) || (r.ri && r.ri.num) || ''))));
     if (t.fatura) els.push(h('div',{class:'fields'}, campo('t-fat-n','N.º da fatura', inp('t-fat-n', r.fatura || '', {placeholder:'FT 2600/000082'})), campo('t-fat-d','Data da fatura', inp('t-fat-d', today(), {type:'date'})),
       campo('t-fat-v','Valor da fatura (€)', inp('t-fat-v', r.valorFatura != null ? String(r.valorFatura).replace('.',',') : r.valor != null ? String(r.valor).replace('.',',') : '', {inputmode:'decimal'})),
       h('div',{class:'f'}, h('span',{class:'lbl'},'Adiantamento'), h('label',{class:'check'}, h('input',{type:'checkbox', id:'t-fat-a', checked: r.adiantamento ? true : null}), 'O cliente pagou um adiantamento'))));
@@ -5362,6 +5495,302 @@ if (!Element.prototype.replaceChildren) {
   F('folhaModoCustos').addEventListener('click', () => { folModo = 'custos'; renderFolha(); });
   F('folhaModoDebito').addEventListener('click', () => { folModo = 'debito'; renderFolha(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !F('folhaWrap').hidden) { e.stopImmediatePropagation(); fecharFolha(); } }, true);
+
+
+  /* ---------- Relatório de Intervenção (RI, FM-TEC-04 /V06) ----------
+     O formulário em papel no ecrã: abre do pedido já preenchido (cliente, morada e contacto da ficha, folha de obra,
+     técnicos da agenda, descrição), «Preencher horas» divide o dia pelo almoço (12:00-13:00) com uma linha por técnico,
+     a manutenção de AC junta 100 ml de desinfeção e 100 ml de limpeza de alumínios por máquina (Stk), e as assinaturas
+     do técnico e do cliente fazem-se com o dedo. Fica no pedido (r.ri), com versão e histórico; sem rede, na fila.
+     Por omissão (config «ri», em Definições): taxa de deslocação Sim, a matrícula da viatura e os técnicos. Km em branco. */
+  const RI_LINHAS = 10, RI_MATS = 12;
+  const RI_TIPOS = [['contrato','Contrato'], ['ppagamento','PPagamento'], ['pontual','Pontual Crédito'], ['bancada','Trab. Bancada'], ['garFab','Garantia Fabric.'], ['garServ','Garant. Serviço']];
+  let riId = null, riD = null, riSujo = false;
+  const riCfg = () => Object.assign({tecnicos: [], matricula: '', taxa: true}, (cfgRi || {}));
+  const minDe = t => { const m = /^(\d{1,2}):(\d{2})/.exec(t || ''); return m ? Number(m[1]) * 60 + Number(m[2]) : null; };
+  const hhmmDe = m => Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0');
+  // A regra do almoço: um período que atravessa 12:00-13:00 parte-se em manhã e tarde.
+  function riPeriodos(ini, fim) {
+    const a = minDe(ini), b = minDe(fim);
+    if (a == null || b == null || b <= a) return [];
+    if (a < 720 && b > 780) return [[ini, '12:00'], ['13:00', fim]];
+    return [[ini, fim]];
+  }
+  function riTecnicosDe(r) {
+    // Os da marcação do pedido na agenda (a de hoje, senão a mais próxima); senão os de Definições; senão o dono.
+    const ms = (agMarc || []).filter(m => m.pedido_id === r.id && (m.nomes || []).length).sort((x, y) => Math.abs(new Date(x.inicio) - Date.now()) - Math.abs(new Date(y.inicio) - Date.now()));
+    if (ms.length) return ms[0].nomes.slice(0, 3);
+    const c = riCfg().tecnicos.filter(Boolean);
+    return c.length ? c : [r.dono || ''].filter(Boolean);
+  }
+  function riNovo(r) {
+    const f = fichas[chaveCli(r.cliente || '')] || {}, c = riCfg(), tecs = riTecnicosDe(r);
+    const morada = String(f.morada || r.localidade || '').replace(/\n/g, ', '), contacto = f.telefone || r.contacto || f.email || '';
+    const temContrato = f.contrato && f.contrato.tipo && f.contrato.tipo !== 'nenhum' && f.contrato.tipo !== 'garantia';
+    const dia = r.dataVisita && r.dataVisita <= today() ? r.dataVisita : today();
+    const mat = String(c.matricula || '').split('-');
+    return {
+      num: (r.folha && r.folha.num) || '', pag: '1', de: '1', dataInicio: dia,
+      tecResp: tecs[0] || '', outrosTec: tecs.slice(1).join(', '), outrosTec2: '',
+      cliente: r.cliente || '', morada, contacto,
+      tipo: temContrato ? {contrato: true} : {}, tipoOutro: '',
+      linhas: Array.from({length: RI_LINHAS}, () => ({desc: '', tec: '', data: '', ini: '', fim: ''})),
+      horasNormais: '', horasExtras: '',
+      materiais: Array.from({length: RI_MATS}, () => ({desc: '', adq: false, stk: false, cli: false, qtd: '', vun: '', vtot: ''})),
+      orcSim: !!(r.num && r.dataAceite), orcNao: false, orcNum: r.dataAceite && r.num ? r.num : '',
+      obs: ['', '', '', '', '', ''],
+      taxaSim: c.taxa !== false, taxaNao: c.taxa === false, mat1: mat[0] || '', mat2: mat[1] || '', mat3: mat[2] || '', tempo: '', km: '',
+      concluidaNao: false, concluidaSim: false, assTec: '', cliNome: '', assCli: '', cliObs: ['', '', ''],
+      descricao: String(r.descricao || '').split('\n')[0],
+    };
+  }
+  function riDur(l) { const a = minDe(l.ini), b = minDe(l.fim); if (a == null || b == null) return null; let d = b - a; if (d < 0) d += 1440; return d; }
+  function riTotalMin(d) { return d.linhas.reduce((t, l) => t + (riDur(l) || 0), 0); }
+  const numPT = v => { const n = parseFloat(String(v == null ? '' : v).replace(/\s|€/g, '').replace(',', '.')); return isNaN(n) ? null : n; };
+  const eurPT = n => n.toLocaleString('pt-PT', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  function riMatTotal(d) { let t = 0, algum = false; d.materiais.forEach(m => { const v = numPT(m.vtot); if (v != null) { t += v; algum = true; } }); return algum ? eurPT(t) : ''; }
+
+  function abrirRI(id) {
+    const r = rows.find(x => x.id === id); if (!r) return;
+    riId = id; riD = r.ri ? JSON.parse(JSON.stringify(r.ri)) : riNovo(r); riSujo = !r.ri;
+    F('riWrap').hidden = false; document.body.style.overflow = 'hidden';
+    renderRI();
+  }
+  function fecharRI(forcar) {
+    if (!forcar && riSujo && canWrite && !confirm('O relatório tem alterações por guardar. Fechar mesmo assim?')) return;
+    F('riWrap').hidden = true; document.body.style.overflow = F('sheetWrap').hidden ? '' : 'hidden'; riD = null; riId = null;
+  }
+  function riEstado() {
+    const r = rows.find(x => x.id === riId);
+    F('riBarEstado').textContent = riSujo ? (r && r.ri ? 'Alterações por guardar' : 'Ainda não guardado') : (r && r.ri && r.ri.guardadoEm ? `Guardado a ${quando(new Date(r.ri.guardadoEm))}` : '');
+  }
+  const riMuda = () => { riSujo = true; riEstado(); };
+  // Um campo de texto ligado a riD (caminho «chave» ou [lista, índice, chave]).
+  function riIn(obj, k, extra) {
+    const x = extra || {};
+    return h('input',{class:'rf' + (x.c ? ' rc' : ''), type: x.type || null, value: obj[k] == null ? '' : String(obj[k]), inputmode: x.inputmode || null,
+      readonly: x.readonly || !canWrite ? true : null, 'aria-label': x.label || k, id: x.id || null,
+      oninput: ev => { obj[k] = ev.target.value; riMuda(); if (x.depois) x.depois(ev.target); }});
+  }
+  function riCx(obj, k, label, depois) {
+    return h('input',{type:'checkbox', checked: obj[k] ? true : null, disabled: canWrite ? null : true, 'aria-label': label,
+      onchange: ev => { obj[k] = ev.target.checked; riMuda(); if (depois) depois(ev.target.checked); }});
+  }
+  function riCalcHoras() {
+    F('riPg').querySelectorAll('tr[data-i]').forEach(tr => {
+      const l = riD.linhas[Number(tr.dataset.i)], d = riDur(l);
+      tr.querySelector('.dur').value = d == null ? '' : hhmmDe(d);
+      tr.querySelectorAll('.ri-tp').forEach((sp, k) => { sp.textContent = k ? l.fim : l.ini; });
+    });
+    const t = riTotalMin(riD); F('riDurTotal').value = t ? hhmmDe(t) : '';
+  }
+  function riCalcMat(i) {
+    const m = riD.materiais[i], q = numPT(m.qtd), u = numPT(m.vun);
+    if (q != null && u != null) { m.vtot = eurPT(q * u); const el = F('ri-vtot-' + i); if (el) el.value = m.vtot; }
+    F('riMatTotal').value = riMatTotal(riD);
+  }
+  // Assinatura com o dedo ou o rato: toque (iPad antigo, sem pointer events) e rato. Fica em PNG no relatório.
+  function riAssinatura(campo) {
+    const c = h('canvas',{'aria-label': campo === 'assTec' ? 'Assinatura do técnico' : 'Assinatura do cliente'});
+    let ctx = null, desenha = false, ult = null;
+    const prepara = () => {
+      const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+      if (!r.width) return false;
+      c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr);
+      ctx = c.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.lineWidth = 1.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#1a237e';
+      if (riD[campo]) { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0, r.width, r.height); img.src = riD[campo]; }
+      return true;
+    };
+    const pos = e => { const r = c.getBoundingClientRect(), p = e.touches ? e.touches[0] : e; return {x: p.clientX - r.left, y: p.clientY - r.top}; };
+    const ini = e => { if (!canWrite || (!ctx && !prepara())) return; desenha = true; ult = pos(e); e.preventDefault(); };
+    const move = e => { if (!desenha) return; const p = pos(e); ctx.beginPath(); ctx.moveTo(ult.x, ult.y); ctx.lineTo(p.x, p.y); ctx.stroke(); ult = p; e.preventDefault(); };
+    const fim = () => { if (!desenha) return; desenha = false; riD[campo] = c.toDataURL('image/png'); if (campo === 'assCli') riD.assinadoEm = new Date().toISOString(); riMuda(); };
+    c.addEventListener('touchstart', ini); c.addEventListener('touchmove', move); c.addEventListener('touchend', fim);
+    c.addEventListener('mousedown', ini); c.addEventListener('mousemove', move); c.addEventListener('mouseup', fim); c.addEventListener('mouseleave', fim);
+    setTimeout(prepara, 0);
+    c.limpar = () => { if (ctx) ctx.clearRect(0, 0, c.width, c.height); riD[campo] = ''; if (campo === 'assCli') riD.assinadoEm = null; riMuda(); };
+    return c;
+  }
+  // Preencher horas: um período (o dia inteiro é 09:00-17:00), uma linha por técnico e por meio dia, a partir da 1.ª livre.
+  function riPreencher() {
+    const ini = F('riIni').value, fim = F('riFim').value, per = riPeriodos(ini, fim);
+    if (!per.length) { toast('Escolhe o início e o fim (o fim depois do início).'); return; }
+    if (minDe(ini) < 540) { toast('No cliente, nunca antes das 9:00.'); return; }
+    const tecs = [riD.tecResp].concat(String(riD.outrosTec || '').split(/\s*[,;]\s*/)).map(x => String(x || '').trim()).filter(Boolean);
+    const dia = riD.dataInicio ? riD.dataInicio.split('-').reverse().join('/') : '';
+    let k = riD.linhas.findIndex(l => !l.desc && !l.ini && !l.fim && !l.tec);
+    if (k < 0) { toast('As linhas de intervenção estão cheias.'); return; }
+    for (const [a, b] of per) for (const t of (tecs.length ? tecs : [''])) {
+      if (k >= RI_LINHAS) break;
+      riD.linhas[k] = {desc: riD.descricao || '', tec: t, data: dia, ini: a, fim: b}; k++;
+    }
+    riMuda(); renderRI();
+  }
+  // Manutenção de AC: 100 ml de desinfeção e 100 ml de limpeza de alumínios por máquina, de stock.
+  function riManutencao() {
+    const n = parseInt(F('riMaq').value, 10);
+    if (!(n > 0)) { toast('Quantas máquinas?'); return; }
+    const novos = [['Líquido de desinfeção (100 ml/máquina)', 100 * n + ' ml'], ['Líquido de limpeza não agressivo p/ alumínios (100 ml/máquina)', 100 * n + ' ml']];
+    for (const [desc, qtd] of novos) {
+      const k = riD.materiais.findIndex(m => !m.desc && !m.qtd);
+      if (k < 0) { toast('As linhas de materiais estão cheias.'); break; }
+      riD.materiais[k] = {desc, adq: false, stk: true, cli: false, qtd, vun: '', vtot: ''};
+    }
+    riMuda(); renderRI();
+  }
+  function renderRI() {
+    const r = rows.find(x => x.id === riId); if (!r || !riD) return;
+    const d = riD;
+    F('riBarTitulo').textContent = `Relatório de intervenção · ${d.cliente || r.cliente || ''}`;
+    F('riGuardar').hidden = F('riImprimir').hidden = !canWrite;
+    fill(F('riAjuda'), canWrite ? [
+      h('label',null, 'Descrição', h('input',{value: d.descricao || '', style:'width:min(340px,40vw)', 'aria-label':'Descrição para as linhas', oninput: ev => { d.descricao = ev.target.value; riMuda(); }})),
+      h('label',null, 'Das', h('input',{type:'time', id:'riIni', value: '09:00', 'aria-label':'Início'})),
+      h('label',null, 'às', h('input',{type:'time', id:'riFim', value: '17:00', 'aria-label':'Fim'})),
+      h('button',{class:'btn btn-sm', type:'button', onclick: riPreencher}, 'Preencher horas'),
+      h('label',null, 'Manutenção AC:', h('input',{type:'number', id:'riMaq', min:'1', inputmode:'numeric', 'aria-label':'Máquinas'}), 'máquinas'),
+      h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick: riManutencao}, 'Juntar materiais')] : null);
+    const ano = d.dataInicio ? d.dataInicio.slice(0, 4) : '';
+    const [dd, mm, aa] = d.dataInicio ? d.dataInicio.split('-').reverse() : ['', '', ''];
+    const setData = (parte, v) => { const p = (d.dataInicio || '--').split('-'); const i = {d: 2, m: 1, a: 0}[parte]; p[i] = v; d.dataInicio = p.join('-'); riMuda(); };
+    const intRows = d.linhas.map((l, i) => h('tr',{'data-i': i},
+      h('td',null, riIn(l, 'desc', {label:'Descrição'})), h('td',null, riIn(l, 'tec', {c:1, label:'Técnico'})), h('td',null, riIn(l, 'data', {c:1, label:'Data'})),
+      h('td',{class:'time'}, riIn(l, 'ini', {type:'time', label:'Início', depois: riCalcHoras}), h('span',{class:'ri-tp'}, l.ini)),
+      h('td',{class:'time'}, riIn(l, 'fim', {type:'time', label:'Fim', depois: riCalcHoras}), h('span',{class:'ri-tp'}, l.fim)),
+      h('td',{class:'g'}, h('input',{class:'rf rc dur', readonly:true, 'aria-label':'Duração'}))));
+    const matRows = d.materiais.map((m, i) => h('tr',null,
+      h('td',null, riIn(m, 'desc', {label:'Material'})),
+      h('td',{class:'cx'}, riCx(m, 'adq', 'Adquirido')), h('td',{class:'cx'}, riCx(m, 'stk', 'Stock')), h('td',{class:'cx'}, riCx(m, 'cli', 'Cliente')),
+      h('td',null, riIn(m, 'qtd', {c:1, label:'Quantidade', depois: () => riCalcMat(i)})),
+      h('td',{class:'g'}, riIn(m, 'vun', {c:1, inputmode:'decimal', label:'Valor unitário', depois: () => riCalcMat(i)})),
+      h('td',{class:'g'}, riIn(m, 'vtot', {c:1, inputmode:'decimal', label:'Valor total', id:'ri-vtot-' + i, depois: () => { F('riMatTotal').value = riMatTotal(d); }}))));
+    const sigTec = riAssinatura('assTec'), sigCli = riAssinatura('assCli');
+    const tipoOutroObj = d.tipo || (d.tipo = {});
+    fill(F('riPg'),
+      h('div',{class:'ri-side ri-side-c'}, 'ORIGINAL - BRANCA    DUPLICADO - VERDE    TRIPLICADO - AMARELA'),
+      h('div',{class:'ri-side ri-side-k'}, 'FM-TEC-04 /V06'),
+      h('div',{class:'ri-sheet'},
+        h('header',{class:'ri-hdr'},
+          h('div',{class:'ri-brand'},
+            h('div',{class:'ri-brand-col'}, h('img',{class:'ri-logo', src:'logo-ri.jpg', alt:'MDM'}),
+              h('div',{class:'ri-bt2'}, 'Manuel Domingos Melancia, Lda.'), h('div',{class:'ri-bt3'}, 'Manutenção de Edifícios', h('br'), '& Assistência Técnica')),
+            riSelo()),
+          h('div',{class:'ri-hdr-r'},
+            h('div',{class:'ri-titulo'}, 'Relatório de Intervenção'),
+            h('div',{class:'ri-folha ri-grey'},
+              h('span',null, 'Folha de Obra n.º'), h('span',{class:'ri-ln w1'}, riIn(d, 'num', {label:'Folha de obra'})), h('span',null,'|'),
+              h('span',{class:'ri-ln w2'}, h('input',{class:'rf rc', value: ano, readonly:true, 'aria-label':'Ano'})), h('span',null,'/'),
+              h('span',{class:'ri-ln w2'}, h('input',{class:'rf rc', value: '', readonly:true, 'aria-label':'Sem uso'})),
+              h('span',{class:'pg'}, 'Pág.'), h('span',{class:'ri-ln w3'}, riIn(d, 'pag', {c:1, label:'Página'})), h('span',null,'de'), h('span',{class:'ri-ln w3'}, riIn(d, 'de', {c:1, label:'De'}))))),
+        h('section',{class:'ri-info'},
+          h('div',{class:'ri-info-l'},
+            h('div',{class:'ri-dini'}, h('span',null,'Data de Início'),
+              h('span',{class:'ri-ln'}, h('input',{class:'rf rc', value: dd || '', 'aria-label':'Dia', readonly: canWrite ? null : true, oninput: ev => setData('d', ev.target.value.padStart(2, '0'))})), h('span',null,'/'),
+              h('span',{class:'ri-ln'}, h('input',{class:'rf rc', value: mm || '', 'aria-label':'Mês', readonly: canWrite ? null : true, oninput: ev => setData('m', ev.target.value.padStart(2, '0'))})), h('span',null,'/'),
+              h('span',{class:'ri-ln'}, h('input',{class:'rf rc', value: aa || '', 'aria-label':'Ano', readonly: canWrite ? null : true, oninput: ev => setData('a', ev.target.value)}))),
+            h('div',{class:'ri-box ri-tec'},
+              h('div',{class:'ri-row'}, h('span',{class:'ri-lb'}, 'Nome do Técnico Responsável:'), h('span',{class:'ri-ln'}, riIn(d, 'tecResp', {label:'Técnico responsável'}))),
+              h('div',{class:'ri-row'}, h('span',{class:'ri-lb'}, 'Outros Técnicos:'), h('span',{class:'ri-ln'}, riIn(d, 'outrosTec', {label:'Outros técnicos'}))),
+              h('div',{class:'ri-row'}, h('span',{class:'ri-ln'}, riIn(d, 'outrosTec2', {label:'Outros técnicos (2)'}))))),
+          h('div',{class:'ri-box ri-cli'},
+            h('div',{class:'ri-row'}, h('span',{class:'ri-lb'}, 'Cliente'), h('span',{class:'ri-ln'}, riIn(d, 'cliente', {label:'Cliente'}))),
+            h('div',{class:'ri-row'}, h('span',{class:'ri-lb'}, 'Morada'), h('span',{class:'ri-ln'}, riIn(d, 'morada', {label:'Morada'}))),
+            h('div',{class:'ri-row'}, h('span',{class:'ri-lb'}, 'Contacto'), h('span',{class:'ri-ln'}, riIn(d, 'contacto', {label:'Contacto'}))))),
+        h('section',{class:'ri-box ri-tipo'},
+          h('div',{class:'ri-tipo-lb'}, 'Tipo de Intervenção'),
+          h('div',{class:'ri-tipo-row'},
+            RI_TIPOS.map(([k, l]) => h('label',{class:'ri-cb'}, l, riCx(tipoOutroObj, k, l))),
+            h('label',{class:'ri-cb other'}, h('span',{class:'ri-ln'}, riIn(d, 'tipoOutro', {label:'Outro tipo'})), riCx(tipoOutroObj, 'outro', 'Outro')))),
+        h('div',{class:'ri-wrapt ri-wrap-int'}, h('table',{class:'ri-t'},
+          h('colgroup',null, h('col',{style:'width:45%'}), h('col',{style:'width:15%'}), h('col',{style:'width:10%'}), h('col',{style:'width:10%'}), h('col',{style:'width:10%'}), h('col',{style:'width:10%'})),
+          h('thead',null, h('tr',null, ['Descrição da Intervenção/Localização', 'Técnico', 'Data', 'Hr. Início', 'Hr. Fim', 'Duração'].map(t => h('th',null, t)))),
+          h('tbody',null, intRows),
+          h('tfoot',null, h('tr',null,
+            h('td',null, h('div',{class:'ri-fth'}, h('span',null,'Horas a facturar: Normais'), h('span',{class:'cell'}, riIn(d, 'horasNormais', {c:1, label:'Horas normais'})), h('span',null,'Extras'))),
+            h('td',{class:'g'}, riIn(d, 'horasExtras', {c:1, label:'Horas extras'})),
+            h('td',{colspan:'3', class:'ri-ftt'}, 'Duração Total / A Transportar'),
+            h('td',{class:'g'}, h('input',{class:'rf rc', id:'riDurTotal', readonly:true, 'aria-label':'Duração total'})))))),
+        h('div',{class:'ri-wrapt ri-wrap-mat'}, h('table',{class:'ri-t'},
+          h('colgroup',null, h('col',{style:'width:45%'}), h('col',{style:'width:5%'}), h('col',{style:'width:5%'}), h('col',{style:'width:5%'}), h('col',{style:'width:12%'}), h('col',{style:'width:14%'}), h('col',{style:'width:14%'})),
+          h('thead',null, h('tr',null, ['Materiais Utilizados - Designação', 'Adq', 'Stk', 'Cli', 'Quant.', 'Val. Unit.', 'Valor Total'].map(t => h('th',null, t)))),
+          h('tbody',null, matRows),
+          h('tfoot',null, h('tr',null, h('td',{colspan:'6', class:'ri-ftt'}, 'Total / Total a Transportar'), h('td',{class:'g'}, h('input',{class:'rf rc', id:'riMatTotal', readonly:true, value: riMatTotal(d), 'aria-label':'Total de materiais'})))))),
+        h('section',{class:'ri-box ri-obs'},
+          h('div',{class:'ri-obs-top'},
+            h('div',{class:'ri-orc'}, h('span',{class:'ri-b'}, 'Serviço realizado conforme orçamento'),
+              h('label',{class:'ri-cb'}, 'Sim', riCx(d, 'orcSim', 'Conforme orçamento: sim')), h('span',null,'N.º'), h('span',{class:'ri-ln'}, riIn(d, 'orcNum', {c:1, label:'N.º do orçamento'})),
+              h('label',{class:'ri-cb'}, 'Não', riCx(d, 'orcNao', 'Conforme orçamento: não'))),
+            h('div',{class:'ri-obs-r'}, h('div',{class:'ri-obs-h'}, 'Observações do Técnico Responsável'))),
+          d.obs.map((o, i) => h('div',{class:'ri-oline'}, riIn(d.obs, i, {label:'Observações ' + (i + 1)})))),
+        h('section',{class:'ri-bottom'},
+          h('div',{class:'ri-bl'},
+            h('div',{class:'ri-box'}, h('div',{class:'ri-bh'}, 'Deslocação:'),
+              h('div',{class:'ri-bp'},
+                h('div',{class:'ri-row'}, h('span',{class:'ri-b'}, 'Taxa:'), h('label',{class:'ri-cb'}, 'Sim', riCx(d, 'taxaSim', 'Taxa sim')), h('span',{style:'flex:1'}), h('label',{class:'ri-cb'}, 'Não', riCx(d, 'taxaNao', 'Taxa não')), h('span',{style:'flex:0 0 4mm'})),
+                h('div',{class:'ri-row ri-mat'}, h('span',null,'Matrícula da Viatura:'), h('span',{class:'ri-ln'}, riIn(d, 'mat1', {c:1, label:'Matrícula 1'})), h('span',null,'-'), h('span',{class:'ri-ln'}, riIn(d, 'mat2', {c:1, label:'Matrícula 2'})), h('span',null,'-'), h('span',{class:'ri-ln'}, riIn(d, 'mat3', {c:1, label:'Matrícula 3'}))),
+                h('div',{class:'ri-row'}, h('span',null,'Tempo (ida/volta)'), h('span',{class:'ri-ln'}, riIn(d, 'tempo', {c:1, label:'Tempo'})), h('span',null,'Km (ida/volta)'), h('span',{class:'ri-ln'}, riIn(d, 'km', {c:1, label:'Km'}))))),
+            h('div',{class:'ri-box'}, h('div',{class:'ri-bh'}, 'Obra Concluída:'),
+              h('div',{class:'ri-bp'}, h('div',{class:'ri-row ri-sb'}, h('label',{class:'ri-cb'}, 'Não', riCx(d, 'concluidaNao', 'Obra concluída: não')), h('label',{class:'ri-cb'}, 'Sim', riCx(d, 'concluidaSim', 'Obra concluída: sim'))))),
+            h('div',{class:'ri-sig'}, h('div',null, 'Assinatura do Técnico Responsável: ', canWrite ? h('button',{type:'button', class:'ri-limpar', onclick:() => sigTec.limpar()}, 'limpar') : null),
+              h('div',{class:'ri-sig-l'}, sigTec))),
+          h('div',{class:'ri-br'},
+            h('div',{class:'ri-box ri-vald'}, h('div',{class:'ri-bh'}, 'Validação pelo cliente:'),
+              h('div',{class:'ri-bp'},
+                h('div',{class:'ri-row'}, h('span',null,'Nome (legível):'), h('span',{class:'ri-ln'}, riIn(d, 'cliNome', {label:'Nome do cliente'}))),
+                h('div',{class:'ri-row'}, h('span',null,'Assinatura: ', canWrite ? h('button',{type:'button', class:'ri-limpar', onclick:() => sigCli.limpar()}, 'limpar') : null), h('span',{class:'ri-ln ri-sig-c'}, sigCli)),
+                h('div',{class:'ri-row'}, h('span',null,'Observações:'), h('span',{class:'ri-ln'}, riIn(d.cliObs, 0, {label:'Observações do cliente'}))),
+                h('div',{class:'ri-row'}, h('span',{class:'ri-ln'}, riIn(d.cliObs, 1, {label:'Observações do cliente 2'}))),
+                h('div',{class:'ri-row'}, h('span',{class:'ri-ln'}, riIn(d.cliObs, 2, {label:'Observações do cliente 3'}))))),
+            h('div',{class:'ri-accept'}, 'A Assinatura do Cliente determina a aceitação do conteúdo do Relatório, atendendo às Observações'))),
+        h('footer',{class:'ri-pfoot'},
+          h('div',null, 'Soc. Com. por quotas | Capital Social 100.000 € | C.R.C. de Loures N.º 20 423 | N.º Fiscal 502 644 761 | Alvará de Construção N.º 49930'),
+          h('div',null, 'Loja: Edifício Vila do Oriente | Alameda dos Oceanos | N.º 108 A | 1990-426 Lisboa - Telef.: 21 893 50 50 • mdmassist@mdmassist.com'))));
+    riCalcHoras(); riEstado();
+  }
+  function riSelo() {
+    const NS = 'http://www.w3.org/2000/svg', el = (t, a, txt) => { const e = document.createElementNS(NS, t); Object.keys(a || {}).forEach(k => e.setAttribute(k, a[k])); if (txt) e.textContent = txt; return e; };
+    const svg = el('svg', {class:'ri-seal', viewBox:'0 0 120 120'}), defs = el('defs');
+    defs.appendChild(el('path', {id:'riArcT', d:'M 36.5,60 A 23.5,23.5 0 0 1 83.5,60'})); defs.appendChild(el('path', {id:'riArcB', d:'M 29.5,60 A 30.5,30.5 0 0 0 90.5,60'}));
+    svg.appendChild(defs);
+    svg.appendChild(el('circle', {cx:'60', cy:'60', r:'33', fill:'#fff', stroke:'#000', 'stroke-width':'2'}));
+    svg.appendChild(el('circle', {cx:'60', cy:'60', r:'20.5', fill:'none', stroke:'#000', 'stroke-width':'.8'}));
+    const arco = (href, size, txt) => { const t = el('text', {'font-size': size, 'font-weight':'700'}), tp = el('textPath', {href, startOffset:'50%', 'text-anchor':'middle'}, txt); tp.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', href); t.appendChild(tp); return t; };
+    svg.appendChild(arco('#riArcT', '9', 'SERVIÇO')); svg.appendChild(arco('#riArcB', '8.2', 'CERTIFICADO'));
+    svg.appendChild(el('text', {x:'60', y:'65', 'text-anchor':'middle', 'font-family':'Georgia,serif', 'font-size':'13', 'font-weight':'700'}, 'Certif'));
+    svg.appendChild(el('text', {transform:'translate(9,86) rotate(-62)', 'font-size':'6'}, 'REG. (CE) 842/2006'));
+    svg.appendChild(el('text', {transform:'translate(2,62) rotate(-62)', 'font-size':'6'}, 'DEC-LEI 56/2011'));
+    return svg;
+  }
+  async function guardarRI(imprimir) {
+    const r = rows.find(x => x.id === riId); if (!r || !riD) return;
+    if (!canWrite) { if (imprimir) imprimirRI(); return; }
+    const novo = JSON.parse(JSON.stringify(r)); delete novo.id;
+    const primeira = !r.ri, assinado = !!riD.assCli && !(r.ri && r.ri.assCli);
+    novo.ri = {...riD, guardadoEm: new Date().toISOString(), totalMin: riTotalMin(riD)};
+    // O n.º do RI e a data passam para a obra (o passo «Obra concluída» pede-os).
+    novo.obra = Object.assign({}, novo.obra || {}, riD.num ? {riNum: riD.num} : {});
+    novo.historico = (novo.historico || []).slice(-60);
+    novo.historico.push(nota(assinado ? `Relatório de intervenção assinado pelo cliente${riD.cliNome ? ' (' + riD.cliNome + ')' : ''}` : primeira ? 'Relatório de intervenção aberto' : 'Relatório de intervenção atualizado'));
+    if (await gravar(r.id, novo, assinado ? 'Relatório assinado e guardado' : 'Relatório guardado', {manter: true})) {
+      riSujo = false; riEstado();
+      if (imprimir) imprimirRI();
+    }
+  }
+  function imprimirRI() {
+    document.body.classList.add('a-imprimir-ri');
+    const titulo = document.title, d = riD || {};
+    const slug = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '');
+    document.title = `relatorio-intervencao-${d.num ? 'OB' + String(d.num).replace('/', '-') + '-' : ''}${slug(d.cliente)}-${d.dataInicio || today()}`;
+    const fim = () => { document.body.classList.remove('a-imprimir-ri'); document.title = titulo; window.removeEventListener('afterprint', fim); };
+    window.addEventListener('afterprint', fim);
+    setTimeout(() => { window.print(); setTimeout(fim, 1000); }, 50);
+  }
+  document.body.appendChild(F('riWrap'));
+  F('riFechar').addEventListener('click', () => fecharRI());
+  F('riGuardar').addEventListener('click', () => guardarRI(false));
+  F('riImprimir').addEventListener('click', () => guardarRI(true));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !F('riWrap').hidden) { e.stopImmediatePropagation(); fecharRI(); } }, true);
 
   /* ---------- Orçamento: a tabela de preços (Definições, config «orcamento») ----------
      Privada da equipa (RLS autorizado()), preços sem IVA colados da folha de cálculo; nunca vai para o git. O
@@ -7568,6 +7997,23 @@ if (!Element.prototype.replaceChildren) {
   });
   // Disposição escolhida à mão neste aparelho (o <head> lê-a em registoDisp).
   try { F('selDisp').value = localStorage.getItem('registo-disp') || ''; } catch (e) {}
+  // Definições › Relatório de intervenção: o que o RI traz por omissão (config «ri»). Os técnicos só entram quando o
+  // pedido não tem marcação na agenda; a matrícula é a da viatura da equipa.
+  function renderRiCfg() {
+    const box = F('riCfgBox'); if (!box) return;
+    const c = riCfg();
+    fill(box,
+      h('div',{class:'f'}, h('label',{class:'lbl', for:'ric-tec'}, 'Técnicos por omissão'), inp('ric-tec', c.tecnicos.join(', '), {placeholder:'Nome, Nome', readonly: canWrite ? null : true}),
+        h('span',{class:'aux'}, 'Quando o pedido não tem marcação na agenda. O primeiro é o responsável.')),
+      h('div',{class:'f', style:'margin-top:10px'}, h('label',{class:'lbl', for:'ric-mat'}, 'Matrícula da viatura'), inp('ric-mat', c.matricula, {placeholder:'00-AA-00', readonly: canWrite ? null : true})),
+      h('label',{class:'check', style:'margin-top:10px'}, h('input',{type:'checkbox', id:'ric-taxa', checked: c.taxa !== false ? true : null, disabled: canWrite ? null : true}), 'Taxa de deslocação: Sim por omissão'),
+      canWrite ? h('div',{class:'row-end', style:'margin-top:10px'}, h('button',{class:'btn btn-sm', type:'button', onclick: async () => {
+        const novo = {tecnicos: val('ric-tec').split(/\s*[,;]\s*/).filter(Boolean), matricula: val('ric-mat').toUpperCase(), taxa: F('ric-taxa').checked};
+        const {error} = await sb.from('config').upsert({chave:'ri', valor: novo, atualizado_por: eu.email}, {onConflict:'chave'});
+        if (error) { toast(/permiss|row-level/.test(String(error.message)) ? 'A tua conta não tem autorização para isto.' : eRede(error) ? 'Sem ligação. Tenta outra vez.' : 'Não foi possível guardar.'); return; }
+        cfgRi = novo; toast('Guardado');
+      }}, 'Guardar')) : null);
+  }
   F('selDisp').addEventListener('change', e => {
     try { if (e.target.value) localStorage.setItem('registo-disp', e.target.value); else localStorage.removeItem('registo-disp'); } catch (er) {}
     registoDisp(); if (status === 'ok') { setTab(tab); renderAll(); }
@@ -7820,13 +8266,13 @@ if (!Element.prototype.replaceChildren) {
       if (seq !== carregarSeq) return carregarUltima;
       const locais = new Map(rows.map(r => [r.id, r]));
       rows = comFila(p.data.map(r => { const l = locais.get(r.id); if (l && l._escrita > e0 && (l._versao || 0) > r.versao) return l; const x = {id: r.id, ...r.dados, _versao: r.versao}; delete x._escrita; return x; }));
-      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') TB_PED.cfg = x.valor || null; if (x.chave === 'colunas_clientes') TB_CLI.cfg = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'orcamento' && x.versao >= cfgOrcVersao) { cfgOrc = x.valor || null; cfgOrcVersao = x.versao; } if (x.chave === 'orcamento_numero' && x.versao >= cfgOrcNumV) { cfgOrcNum = x.valor || null; cfgOrcNumV = x.versao; } if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
+      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'ri') cfgRi = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') TB_PED.cfg = x.valor || null; if (x.chave === 'colunas_clientes') TB_CLI.cfg = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'orcamento' && x.versao >= cfgOrcVersao) { cfgOrc = x.valor || null; cfgOrcVersao = x.versao; } if (x.chave === 'orcamento_numero' && x.versao >= cfgOrcNumV) { cfgOrcNum = x.valor || null; cfgOrcNumV = x.versao; } if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
       if (ft.error) { if (/relation|does not exist|schema cache/i.test(ft.error.message || '')) fatTabela = false; }
       else { fatTabela = true; const novo = {}; for (const x of ft.data) if (x.dados && x.dados.mes) novo[x.dados.mes] = x.dados; faturacao = novo; if (!faturacao[fatMes]) fatMes = ''; }
       if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) { fichaTabela = false; const novo = {}; for (const id of Object.keys(fichas)) if (fichas[id]._novo) novo[id] = fichas[id]; fichas = novo; } }
       else { fichaTabela = true; const novo = {}; for (const x of fc.data) novo[x.id] = {...x.dados, _versao: x.versao}; fichas = novo; }
       if (!q.error) { equipa = q.data; const m = equipa.find(x => x.email === (eu && eu.email)); if (m && m.nome) eu.nome = m.nome; }
-      status = 'ok'; renderAll(); abreDoEndereco(); renderOff();
+      status = 'ok'; renderAll(); abreDoEndereco(); renderOff(); renderRiCfg();
       if (!semRedeDe) filaEnvia();
       carregarPainel();
       carregarSeg();
