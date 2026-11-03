@@ -1,10 +1,11 @@
 // Registo da MDM sem rede: guarda a própria app (página, logótipos, biblioteca da base de dados, letras) neste aparelho.
 // Os dados não passam por aqui: a página guarda a última leitura e as alterações por enviar (ver «Sem rede» no index.html).
 // A página vem sempre primeiro da rede (para chegar a versão nova logo que haja rede); sem rede, a cópia guardada.
-var VERSAO = 'registo-mdm-1';
+var VERSAO = 'registo-mdm-2';
 // supabase.min.js é a biblioteca da base de dados (@supabase/supabase-js 2.49.1, licença MIT, dist/umd do npm), guardada
 // aqui em vez de vir de um CDN: sem rede a página entra na mesma.
-var BASE = ['./', 'index.html', 'supabase.min.js', 'logo-folha.jpg', 'logo-ri.jpg', 'icone-180.png'];
+// orcamento-motor.js é o motor de orçamentos (só código: os preços vêm da config, com a pessoa que entrou).
+var BASE = ['./', 'index.html', 'supabase.min.js', 'orcamento-motor.js', 'logo-folha.jpg', 'logo-ri.jpg', 'logo-orc.jpg', 'icone-180.png'];
 
 self.addEventListener('install', function (ev) {
   ev.waitUntil(caches.open(VERSAO).then(function (c) { return c.addAll(BASE); }).then(function () { return self.skipWaiting(); }));
