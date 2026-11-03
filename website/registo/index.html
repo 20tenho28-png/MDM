@@ -21,6 +21,8 @@ function registoDisp() { try {
   var m = w < 640 ? 'telefone' : !tatil ? 'escritorio' : curto < 600 ? 'telefone' : w >= 960 ? 'largo' : 'estreito';
   if (document.documentElement.getAttribute('data-disp') !== m) document.documentElement.setAttribute('data-disp', m);
 } catch (e) {} }
+// Sem rede: a app fica guardada neste aparelho (sw.js); os dados guardam-se na página.
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) { try { navigator.serviceWorker.register('sw.js'); } catch (e) {} }
 registoDisp(); window.addEventListener('resize', registoDisp); window.addEventListener('orientationchange', registoDisp);
 (function () { try { var d = document.createElement('div'); d.style.cssText = 'display:flex;flex-direction:column;row-gap:1px;position:absolute';
   d.appendChild(document.createElement('div')); d.appendChild(document.createElement('div')); document.documentElement.appendChild(d);
@@ -162,7 +164,8 @@ main.wrap{padding-block:18px 40px}
 /* No ecrã tátil nenhum campo fica abaixo de 16 px: o Safari do iPad aumenta a página ao tocar num campo mais pequeno.
    A folha de obra é um A4 com o tamanho do papel e fica como está. */
 @media (pointer:coarse){input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px!important}
-  .folha input,.folha textarea,.folha select{font-size:inherit!important}.folha .f-tit input{font-size:13pt!important}}
+  .folha input,.folha textarea,.folha select{font-size:inherit!important}.folha .f-tit input{font-size:13pt!important}
+  #riPg input{font-size:inherit!important}}
 /* Deslizar com inércia no iPad antigo (iOS 12): cada caixa que se desloca sozinha. */
 .tabs,.chips,.tw,.sheet,.chart-w,.board,.col-b,.folha-palco,.pop,.tabs2,.tb-wrap,.panel{-webkit-overflow-scrolling:touch}
 table{border-collapse:collapse;width:100%;font-size:14px}
@@ -548,6 +551,28 @@ p.oe-pot-r{margin:8px 0 0}
   #orcDoc .doc-pot thead{display:table-header-group}
   #orcDoc .doc-sec{break-after:avoid;page-break-after:avoid}
 }
+
+/* ===== Motor de preços no orçamento (orcamento-motor.js e config «orcamento_motor»): só chefe e escritório ===== */
+.oe-mot{margin-top:10px;padding:12px;border:1px dashed var(--line);border-radius:10px;background:var(--bg)}
+.oe-mot h4{margin:0 0 8px;font-size:14.5px}
+.oe-mot-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));grid-gap:8px 10px}
+.oe-mot-sub{margin:12px 0 4px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.oe-mot .oe-tab{min-width:460px}
+.oe-mot .oe-chks{margin-top:8px}
+.oe-mot .oe-chks label.check{margin:0 14px 6px 0}
+.oe-mot-res{margin-top:12px;padding:10px;border-radius:8px;background:var(--surface);border:1px solid var(--line)}
+.oe-mot-res table{width:100%;min-width:460px;border-collapse:collapse;font-size:13px}
+.oe-mot-res th{font-size:12px;font-weight:600;color:var(--ink-2)}
+.oe-mot-res td,.oe-mot-res th{padding:3px 4px;border-top:0;border-bottom:1px solid var(--line);text-align:left}
+.oe-mot-res .num{text-align:right;font-family:var(--font-mono);white-space:nowrap}
+.oe-mot-tot{margin:8px 0 0;font-size:14px;line-height:1.5}
+.oe-mot-tot b{font-family:var(--font-mono);font-weight:600}
+.oe-mot-av{margin:6px 0 0;color:var(--warn);font-size:13px}
+.oe-mot-err{margin:0;color:var(--bad);font-size:13.5px;font-weight:600}
+.oe-mot-email textarea{min-height:240px;font-size:13px}
+.od-folha.o68-folha{padding:12mm 12mm 10mm;min-height:297mm}
+#orcDoc .o68-host{display:block}
+.mot-resumo{margin:0;padding:0 0 0 18px;font-size:13.5px;line-height:1.55}
 
 /* ===== Painel (lê as vistas v_* do Supabase; nenhuma regra de negócio na página) ===== */
 .p12{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
@@ -1041,6 +1066,106 @@ html[data-disp=estreito] .sel-bar{bottom:calc(96px + env(safe-area-inset-bottom,
 .lista-sel{margin-left:8px}
 /* Técnico: sem Definições na barra e sem a margem da folha de obra. */
 html.tecnico #rail-prazos,html.tecnico #folhaMargem{display:none!important}
+/* Sem rede: o que se vê é a última leitura; as alterações esperam pela rede. */
+.off-bar{display:flex;flex-wrap:wrap;align-items:center;background:var(--sunk);border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:10px;padding:8px 12px;margin:0 0 14px;font-size:14.5px}
+.off-bar[hidden]{display:none}
+.off-bar.conflito{border-left-color:var(--bad)}
+.off-bar > span{flex:1 1 220px;margin:4px 10px 4px 0}
+.pop.conflitos{width:420px;max-width:calc(100vw - 24px);white-space:normal;font-size:14.5px}
+.pop.conflitos .cf{border-top:1px solid var(--line);padding:8px 0}
+.pop.conflitos .cf:first-of-type{border-top:0}
+.pop.conflitos .cf .btn{margin:6px 8px 0 0}
+/* ===== Relatório de Intervenção (FM-TEC-04 /V06): a folha A4 do formulário em papel, com os campos por cima ===== */
+.ri-wrap .folha-palco{padding:20px 12px 60px}
+.ri-ajuda{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px));background:var(--surface);border-bottom:1px solid var(--line);font-size:14px}
+.ri-ajuda label{display:inline-flex;align-items:center;gap:6px}
+.ri-ajuda input{min-height:40px;font-size:16px;padding:0 6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.ri-ajuda input[type=number]{width:64px}
+.ri-pg{--ri-g:#d6d6d6;--ri-red:#93262c;--ri-ink:#123a8c;position:relative;width:210mm;height:296.6mm;margin:0 auto;background:#fff;color:#000;box-shadow:0 3px 18px rgba(0,0,0,.25);overflow:hidden;font-family:Arial,Helvetica,sans-serif}
+.ri-sheet{position:absolute;top:6.5mm;left:14mm;right:9mm;bottom:4.5mm;display:flex;flex-direction:column;gap:1.2mm;font-size:7.4pt;line-height:1.12}
+.ri-side{position:absolute;white-space:nowrap;font-size:6.2pt;letter-spacing:.02em;transform:rotate(-90deg);transform-origin:0 0}
+.ri-side-c{left:9.5mm;top:236mm}.ri-side-k{left:9.5mm;top:288mm;font-weight:700}
+.ri-pg input.rf{border:0;background:transparent;font:inherit;color:var(--ri-ink);width:100%;min-width:0;padding:0 .5mm;outline:none;height:100%;border-radius:0}
+.ri-pg input.rf.rc{text-align:center}
+@media screen{.ri-pg input.rf{background:rgba(20,80,200,.07)}.ri-pg input.rf:focus{background:rgba(255,206,0,.42)}}
+.ri-ln{display:flex;flex:1;min-width:0;border-bottom:1px solid #000;height:3.6mm}
+.ri-pg input[type=checkbox]{-webkit-appearance:none;appearance:none;width:3.3mm;height:3.3mm;border:1px solid #000;background:#fff;margin:0;position:relative;cursor:pointer;flex:0 0 auto;border-radius:0}
+.ri-pg input[type=checkbox]:checked::after{content:"\2714";position:absolute;left:50%;top:50%;transform:translate(-50%,-54%);font-size:3.1mm;line-height:1;font-weight:700;color:var(--ri-ink)}
+.ri-cb{display:inline-flex;align-items:center;gap:1.2mm;white-space:nowrap}
+.ri-box{border:1px solid #000}.ri-grey{background:var(--ri-g)}.ri-b{font-weight:700}
+.ri-hdr{display:flex;align-items:flex-start;gap:3mm;flex:0 0 auto}
+.ri-brand{display:flex;align-items:flex-start;width:66mm;flex:0 0 auto}
+.ri-brand-col{width:24mm;text-align:center}
+.ri-logo{width:20mm;height:20mm;display:block;margin:0 auto}
+.ri-bt2{font-size:4.3pt;font-weight:700;color:var(--ri-red);border-top:.5px solid var(--ri-red);padding-top:.3mm;margin-top:.3mm}
+.ri-bt3{font-size:4.1pt;color:var(--ri-red);line-height:1.25}
+.ri-seal{width:14mm;height:14mm;margin:5mm 0 0 -1mm}
+.ri-hdr-r{flex:1;display:flex;flex-direction:column;gap:2.4mm;padding-top:2.5mm;min-width:0}
+.ri-titulo{text-align:center;font-size:13pt;font-weight:700}
+.ri-folha{display:flex;align-items:flex-end;gap:1.4mm;padding:.8mm 2mm .6mm;font-size:9pt;font-weight:700}
+.ri-folha .ri-ln{height:4mm}.ri-folha .w1{flex:0 0 22mm}.ri-folha .w2{flex:0 0 12mm}.ri-folha .w3{flex:0 0 11mm}.ri-folha .pg{margin-left:4mm}
+.ri-info{display:flex;gap:2.5mm;flex:0 0 auto;height:25mm}
+.ri-info-l{width:47%;display:flex;flex-direction:column}
+.ri-dini{display:flex;align-items:flex-end;gap:1mm;font-size:8.6pt;font-weight:700;padding:0 0 1.4mm 1mm}
+.ri-dini .ri-ln{flex:0 0 11mm}
+.ri-tec{flex:1;padding:1.4mm 2mm;display:flex;flex-direction:column;justify-content:space-around}
+.ri-cli{flex:1;padding:2mm 2.5mm;display:flex;flex-direction:column;justify-content:space-around}
+.ri-row{display:flex;align-items:flex-end;gap:1.4mm}
+.ri-lb{font-weight:700;font-size:8.2pt;white-space:nowrap}
+.ri-tipo{flex:0 0 auto;padding:.7mm 2mm 1.6mm}
+.ri-tipo-lb{font-size:7.6pt;margin-bottom:1.2mm}
+.ri-tipo-row{display:flex;align-items:center;gap:2.4mm;font-size:7.9pt;font-weight:700}
+.ri-tipo-row .other{flex:1;gap:1.5mm}
+.ri-wrapt{min-height:0;overflow:hidden}.ri-wrap-int{flex:10 1 0}.ri-wrap-mat{flex:12 1 0}
+table.ri-t{width:100%;height:100%;border-collapse:collapse;table-layout:fixed;font-size:inherit}
+.ri-t th,.ri-t td{border:1px solid #000;padding:0}
+.ri-t th{background:var(--ri-g);font-size:7.8pt;font-weight:700;text-align:center;padding:.4mm .5mm}
+.ri-t tbody tr{height:4.1mm}
+.ri-t tbody td input:not([type=checkbox]){height:4mm;box-sizing:border-box}
+.ri-t td.g{background:var(--ri-g)}.ri-t td.cx{text-align:center}
+.ri-t td.time{padding:0 .5mm}
+.ri-t tfoot td{height:4.6mm;font-size:7.8pt;font-weight:700}
+.ri-fth{display:flex;align-items:center;height:100%;gap:1.5mm;padding-left:1.5mm}
+.ri-fth .cell{flex:1;height:100%;background:var(--ri-g);border-left:1px solid #000;border-right:1px solid #000;display:flex;align-items:center}
+.ri-ftt{text-align:right;padding-right:2mm}
+.ri-pg input[type=time]{width:100%;border:0;background:transparent;font:inherit;color:var(--ri-ink);text-align:center;padding:0;height:4mm;-webkit-appearance:none;appearance:none;border-radius:0}
+.ri-tp{display:none;text-align:center;color:var(--ri-ink)}
+.ri-obs{flex:0 0 auto;display:flex;flex-direction:column}
+.ri-obs-top{display:flex;align-items:stretch}
+.ri-orc{flex:0 0 58%;display:flex;align-items:center;gap:1.6mm;padding:1.4mm 2mm;font-size:7.9pt;border-right:1px solid #000;border-bottom:1px solid #000}
+.ri-orc .ri-ln{flex:0 0 20mm}
+.ri-obs-r{flex:1;display:flex;flex-direction:column}
+.ri-obs-h{background:var(--ri-g);font-weight:700;font-size:8.1pt;text-align:center;padding:1mm;border-bottom:1px solid #000}
+.ri-oline{border-bottom:1px solid #000;height:5mm;display:flex}
+.ri-oline:last-child{border-bottom:0}
+.ri-bottom{display:flex;gap:2.5mm;flex:0 0 auto}
+.ri-bl{width:41%;display:flex;flex-direction:column;gap:1.5mm}
+.ri-br{flex:1;display:flex;flex-direction:column;gap:1mm}
+.ri-bh{background:var(--ri-g);font-weight:700;font-size:8.1pt;padding:.9mm 2mm;border-bottom:1px solid #000}
+.ri-bp{padding:1.4mm 2mm;display:flex;flex-direction:column;gap:1.6mm}
+.ri-bp .ri-row{font-size:7.9pt}.ri-bp .ri-ln{height:3.4mm}
+.ri-mat .ri-ln{flex:0 0 12mm}
+.ri-sb{justify-content:space-between;padding:0 6mm 0 1mm}
+.ri-sig{text-align:center;font-size:7.9pt;padding-top:.8mm}
+.ri-sig-l{border-bottom:1px solid #000;height:14mm;margin:.6mm 4mm 0;position:relative}
+.ri-bp .ri-ln.ri-sig-c{position:relative;height:14mm;overflow:hidden}
+.ri-pg canvas{position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair;touch-action:none;-ms-touch-action:none}
+.ri-limpar{font-size:6.5pt;padding:0 4px;cursor:pointer;border:1px solid #000;background:#fff;border-radius:2px;color:#000}
+.ri-vald .ri-bp{gap:2.1mm}
+.ri-accept{text-align:center;font-size:6.8pt;padding-top:.6mm}
+.ri-pfoot{flex:0 0 auto;text-align:center;font-size:7.5pt;line-height:1.4;padding-top:1mm}
+html[data-disp=estreito] .ri-pg{zoom:.95}
+@media print{
+  body.a-imprimir-ri{background:#fff}
+  body.a-imprimir-ri > *:not(#riWrap){display:none!important}
+  body.a-imprimir-ri #riWrap{position:static;display:block;background:#fff}
+  body.a-imprimir-ri #riWrap .folha-bar,body.a-imprimir-ri #riWrap .ri-ajuda,body.a-imprimir-ri .ri-limpar{display:none!important}
+  body.a-imprimir-ri #riWrap .folha-palco{padding:0;overflow:visible}
+  body.a-imprimir-ri .ri-pg{box-shadow:none;margin:0;zoom:1!important}
+  body.a-imprimir-ri .ri-pg input.rf{background:transparent!important}
+  body.a-imprimir-ri .ri-pg input[type=time]{display:none}
+  body.a-imprimir-ri .ri-tp{display:block}
+}
 /* «Enviaste?»: fica à vista (acima da barra de baixo) até se responder. */
 .enviei{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:61;background:var(--surface);color:var(--ink);border:1px solid var(--accent);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:12px 14px;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;max-width:calc(100% - 32px);box-sizing:border-box;font-size:15px}
 .enviei[hidden]{display:none}
@@ -1179,14 +1304,35 @@ html.sem-gap .ag-l > *{margin-bottom:6px}html.sem-gap .ag-l > :last-child{margin
 html.sem-gap .ag-lh > *{margin-right:10px}
 html.sem-gap .agt > *{margin-bottom:8px}html.sem-gap .agt > :last-child{margin-bottom:0}
 html.sem-gap .agt-g > *{margin-right:14px}
+html.sem-gap .ri-ajuda > *{margin-right:14px}
+html.sem-gap .ri-ajuda label > *{margin-right:6px}
+html.sem-gap .ri-sheet > *{margin-bottom:1.2mm}html.sem-gap .ri-sheet > :last-child{margin-bottom:0}
+html.sem-gap .ri-cb > *{margin-right:1.2mm}
+html.sem-gap .ri-hdr > *{margin-right:3mm}
+html.sem-gap .ri-hdr-r > *{margin-bottom:2.4mm}html.sem-gap .ri-hdr-r > :last-child{margin-bottom:0}
+html.sem-gap .ri-folha > *{margin-right:1.4mm}
+html.sem-gap .ri-info > *{margin-right:2.5mm}
+html.sem-gap .ri-dini > *{margin-right:1mm}
+html.sem-gap .ri-row > *{margin-right:1.4mm}
+html.sem-gap .ri-tipo-row > *{margin-right:2.4mm}
+html.sem-gap .ri-fth > *{margin-right:1.5mm}
+html.sem-gap .ri-orc > *{margin-right:1.6mm}
+html.sem-gap .ri-bottom > *{margin-right:2.5mm}
+html.sem-gap .ri-bl > *{margin-bottom:1.5mm}html.sem-gap .ri-bl > :last-child{margin-bottom:0}
+html.sem-gap .ri-br > *{margin-bottom:1mm}html.sem-gap .ri-br > :last-child{margin-bottom:0}
+html.sem-gap .ri-bp > *{margin-bottom:1.6mm}html.sem-gap .ri-bp > :last-child{margin-bottom:0}
+html.sem-gap .ri-vald .ri-bp > *{margin-bottom:2.1mm}html.sem-gap .ri-vald .ri-bp > :last-child{margin-bottom:0}
 html.sem-gap .wrap{margin-right:auto}
 html.sem-gap .folha{margin-right:auto}
 html.sem-gap .od-folha{margin-right:auto}
 html.sem-gap .dw-gauge{margin-right:auto}
 html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
+html.sem-gap .ri-pg{margin-right:auto}
+html.sem-gap .ri-logo{margin-right:auto}
 /* SEM-GAP-FIM */
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="supabase.min.js"></script>
+<script src="orcamento-motor.js"></script>
 </head>
 <body>
 
@@ -1228,6 +1374,7 @@ html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
 </header>
 
 <main class="page">
+  <div class="off-bar" id="offBar" role="status" hidden><span id="offTxt"></span><button class="btn btn-ghost btn-sm" type="button" id="offVer" hidden>Ver</button></div>
   <div class="page-h">
     <label class="vista"><span class="sr-only" style="position:absolute;left:-9999px">Vista</span><select id="fVista" aria-label="Vista">
       <option value="abertos">Pedidos em aberto</option>
@@ -1662,6 +1809,10 @@ html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
         <div class="row-end" style="margin-top:10px"><button class="btn" id="btnPrazos" type="button" hidden>Guardar prazos</button></div>
       </section>
       <div class="side">
+        <section aria-labelledby="h-ricfg">
+          <div class="sec-h"><h2 id="h-ricfg">Relatório de intervenção</h2></div>
+          <div class="panel" style="padding:14px" id="riCfgBox"></div>
+        </section>
         <section aria-labelledby="h-disp">
           <div class="sec-h"><h2 id="h-disp">Neste aparelho</h2></div>
           <div class="panel" style="padding:14px"><div class="f"><label class="lbl" for="selDisp">Disposição</label>
@@ -1692,6 +1843,10 @@ html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
       <div class="sec-h"><h2 id="h-orccfg">Orçamento: tabela de preços</h2></div>
       <div class="panel sgc" id="orcCfg"></div>
     </section>
+    <section aria-labelledby="h-motcfg" id="motCfgSec" style="margin-top:22px" hidden>
+      <div class="sec-h"><h2 id="h-motcfg">Orçamento: motor de preços</h2></div>
+      <div class="panel sgc" id="motCfg"></div>
+    </section>
     <section aria-labelledby="h-agcfg" id="agCfgSec" style="margin-top:22px" hidden>
       <div class="sec-h"><h2 id="h-agcfg">Agenda</h2></div>
       <div class="panel sgc" id="agCfg"></div>
@@ -1706,6 +1861,18 @@ html.sem-gap .ag-bar .ag-semtxt{margin-right:auto}
 </div>
 
 
+<div class="folha-wrap ri-wrap" id="riWrap" hidden>
+  <div class="folha-bar" role="toolbar" aria-label="Relatório de intervenção">
+    <div class="folha-bar-l"><b id="riBarTitulo">Relatório de intervenção</b><span id="riBarEstado" class="sub"></span></div>
+    <div class="folha-bar-r">
+      <button class="btn btn-ghost btn-sm" type="button" id="riFechar">Fechar</button>
+      <button class="btn btn-ghost btn-sm" type="button" id="riGuardar">Guardar</button>
+      <button class="btn btn-sm" type="button" id="riImprimir">Guardar e imprimir</button>
+    </div>
+  </div>
+  <div class="ri-ajuda" id="riAjuda"></div>
+  <div class="folha-palco"><article class="ri-pg" id="riPg" aria-label="Relatório de intervenção"></article></div>
+</div>
 <div class="folha-wrap" id="folhaWrap" hidden>
   <div class="folha-bar" role="toolbar" aria-label="Folha de obra">
     <div class="folha-bar-l"><b id="folhaBarTitulo">Folha de obra</b><span id="folhaBarEstado" class="sub"></span></div>
@@ -1990,7 +2157,7 @@ if (!Element.prototype.replaceChildren) {
   let cfgPrazos = null, cfgPrazosVersao = 0, ligado = false;
   let dono = '', query = '', fCli = null;
   let currentId = null, modo = null, trans = null, saving = false, delArmed = null;
-  let sheetSujo = false, dadosAberto = false, prazosSujos = false, novoBase = null;
+  let sheetSujo = false, dadosAberto = false, prazosSujos = false, novoBase = null, cfgRi = null;
 
   const prazosAtuais = () => (cfgPrazos && cfgPrazos.valores) || PRAZOS_PADRAO;
   const limiteDono = () => (cfgPrazos && Number(cfgPrazos.limiteDono)) || LIMITE_PADRAO;
@@ -4096,7 +4263,7 @@ if (!Element.prototype.replaceChildren) {
   var PRIO_CURTA = {P1:'Urgente', P2:'Alta', P3:'Normal'};
   function carregarPainel() {
     if (!sb) return Promise.resolve();
-    return Promise.all(VISTAS_PAINEL.map(function (v) {
+    return lerComCache('painel', () => VISTAS_PAINEL.map(function (v) {
       var q = sb.from(v).select('*');
       if (v === 'v_fila_humana') q = q.order('ordem_prioridade', {ascending:true}).order('desde', {ascending:true, nullsFirst:false});
       else if (v === 'v_passos' || v === 'v_tempos' || v === 'v_atrasos') q = q.order('passo');
@@ -4670,6 +4837,11 @@ if (!Element.prototype.replaceChildren) {
           : r.folha ? `Pronta para a visita${r.folha.guardadaEm ? ' · guardada a ' + ddmm(r.folha.guardadaEm.slice(0, 10)) : ''}`
           : 'Pronta a imprimir para a visita')),
       h('button',{class:'btn btn-sm' + (r.folha ? ' btn-ghost' : ''), type:'button', onclick:() => abrirFolha(r.id)}, r.folha ? 'Abrir' : 'Folha de obra')));
+    if (r.ri || !['novo', 'visita_por_marcar', 'perdido'].includes(r.estado)) blocos.push(h('div',{class:'acao', style:'--stripe:var(--accent)'},
+      h('div',{style:'min-width:0'}, h('div',{class:'what'}, 'Relatório de intervenção'),
+        h('div',{class:'who'}, r.ri ? [r.ri.assCli ? `Assinado pelo cliente${r.ri.assinadoEm ? ' a ' + ddmm(r.ri.assinadoEm.slice(0, 10)) : ''}` : 'Por assinar',
+          r.ri.totalMin ? ` · ${hhmmDe(r.ri.totalMin)} h` : ''].join('') : 'O RI do técnico, para assinar no local')),
+      h('button',{class:'btn btn-sm' + (r.ri ? ' btn-ghost' : ''), type:'button', onclick:() => abrirRI(r.id)}, r.ri ? 'Abrir' : 'Relatório')));
     if (trans) blocos.push(formTrans(r));
     else if (canWrite) {
       const T = transicoes(r), aberto = ABERTOS.includes(r.estado);
@@ -4712,7 +4884,7 @@ if (!Element.prototype.replaceChildren) {
     const titulo = t.soAcao ? 'Mudar a próxima ação' : t.seguimento ? t.label : `Passar a ${ESTADOS[para].l}`;
     const els = [h('div',{class:'t-cab'}, h('button',{class:'btn btn-ghost', type:'button', onclick:() => { trans = null; renderSheet(); }}, 'Cancelar'),
       h('b',null, titulo), h('button',{class:'btn', type:'button', onclick:confirmarTrans}, 'Confirmar')), h('h3',null, titulo)];
-    if (t.ri) els.push(h('div',{class:'fields'}, campo('t-ri','Data do RI', inp('t-ri', today(), {type:'date'})), campo('t-ri-n','N.º do RI (opcional)', inp('t-ri-n', (r.obra && r.obra.riNum) || ''))));
+    if (t.ri) els.push(h('div',{class:'fields'}, campo('t-ri','Data do RI', inp('t-ri', (r.ri && r.ri.dataInicio) || today(), {type:'date'})), campo('t-ri-n','N.º do RI (opcional)', inp('t-ri-n', (r.obra && r.obra.riNum) || (r.ri && r.ri.num) || ''))));
     if (t.fatura) els.push(h('div',{class:'fields'}, campo('t-fat-n','N.º da fatura', inp('t-fat-n', r.fatura || '', {placeholder:'FT 2600/000082'})), campo('t-fat-d','Data da fatura', inp('t-fat-d', today(), {type:'date'})),
       campo('t-fat-v','Valor da fatura (€)', inp('t-fat-v', r.valorFatura != null ? String(r.valorFatura).replace('.',',') : r.valor != null ? String(r.valor).replace('.',',') : '', {inputmode:'decimal'})),
       h('div',{class:'f'}, h('span',{class:'lbl'},'Adiantamento'), h('label',{class:'check'}, h('input',{type:'checkbox', id:'t-fat-a', checked: r.adiantamento ? true : null}), 'O cliente pagou um adiantamento'))));
@@ -4943,6 +5115,15 @@ if (!Element.prototype.replaceChildren) {
     const atual = rows.find(x => x.id === id);
     const versao = atual ? (atual._versao || 0) : 0;
     const ultimo = (doc.historico || []).slice(-1)[0];
+    // Já há alterações deste pedido à espera de rede: esta junta-se a elas (a ordem não pode trocar).
+    if (!navigator.onLine || filaLe().some(x => x.id === id)) {
+      if (enfileira(id, doc, versao, ultimo ? ultimo.texto : null)) {
+        if (!(opts && opts.manter)) { trans = null; modo = null; sheetSujo = false; }
+        toast(navigator.onLine ? (msg || 'Guardado') : 'Sem rede: fica guardado neste aparelho e grava quando houver rede'); renderAll(); saving = false; if (ok) ok.disabled = false;
+        if (navigator.onLine) filaEnvia();
+        return true;
+      }
+    }
     try {
       const {data, error} = await sb.rpc('guardar_pedido', {p_id: id, p_dados: doc, p_versao: versao, p_evento: ultimo ? ultimo.texto : null});
       if (error) throw error;
@@ -4956,6 +5137,11 @@ if (!Element.prototype.replaceChildren) {
       return true;
     } catch (e) {
       const txt = String((e && e.message) || '');
+      if (eRede(e) && enfileira(id, doc, versao, ultimo ? ultimo.texto : null)) {
+        if (!(opts && opts.manter)) { trans = null; modo = null; sheetSujo = false; }
+        toast('Sem rede: fica guardado neste aparelho e grava quando houver rede'); renderAll();
+        return true;
+      }
       let m = 'Não foi possível guardar. Tenta outra vez.';
       if (txt.includes('conflito')) { m = 'Alguém alterou este pedido entretanto. Recarrega e repete.'; carregar(); }
       else if (txt.includes('duplicate key')) m = 'Já existe um pedido com este número.';
@@ -5337,6 +5523,302 @@ if (!Element.prototype.replaceChildren) {
   F('folhaModoDebito').addEventListener('click', () => { folModo = 'debito'; renderFolha(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !F('folhaWrap').hidden) { e.stopImmediatePropagation(); fecharFolha(); } }, true);
 
+
+  /* ---------- Relatório de Intervenção (RI, FM-TEC-04 /V06) ----------
+     O formulário em papel no ecrã: abre do pedido já preenchido (cliente, morada e contacto da ficha, folha de obra,
+     técnicos da agenda, descrição), «Preencher horas» divide o dia pelo almoço (12:00-13:00) com uma linha por técnico,
+     a manutenção de AC junta 100 ml de desinfeção e 100 ml de limpeza de alumínios por máquina (Stk), e as assinaturas
+     do técnico e do cliente fazem-se com o dedo. Fica no pedido (r.ri), com versão e histórico; sem rede, na fila.
+     Por omissão (config «ri», em Definições): taxa de deslocação Sim, a matrícula da viatura e os técnicos. Km em branco. */
+  const RI_LINHAS = 10, RI_MATS = 12;
+  const RI_TIPOS = [['contrato','Contrato'], ['ppagamento','PPagamento'], ['pontual','Pontual Crédito'], ['bancada','Trab. Bancada'], ['garFab','Garantia Fabric.'], ['garServ','Garant. Serviço']];
+  let riId = null, riD = null, riSujo = false;
+  const riCfg = () => Object.assign({tecnicos: [], matricula: '', taxa: true}, (cfgRi || {}));
+  const minDe = t => { const m = /^(\d{1,2}):(\d{2})/.exec(t || ''); return m ? Number(m[1]) * 60 + Number(m[2]) : null; };
+  const hhmmDe = m => Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0');
+  // A regra do almoço: um período que atravessa 12:00-13:00 parte-se em manhã e tarde.
+  function riPeriodos(ini, fim) {
+    const a = minDe(ini), b = minDe(fim);
+    if (a == null || b == null || b <= a) return [];
+    if (a < 720 && b > 780) return [[ini, '12:00'], ['13:00', fim]];
+    return [[ini, fim]];
+  }
+  function riTecnicosDe(r) {
+    // Os da marcação do pedido na agenda (a de hoje, senão a mais próxima); senão os de Definições; senão o dono.
+    const ms = (agMarc || []).filter(m => m.pedido_id === r.id && (m.nomes || []).length).sort((x, y) => Math.abs(new Date(x.inicio) - Date.now()) - Math.abs(new Date(y.inicio) - Date.now()));
+    if (ms.length) return ms[0].nomes.slice(0, 3);
+    const c = riCfg().tecnicos.filter(Boolean);
+    return c.length ? c : [r.dono || ''].filter(Boolean);
+  }
+  function riNovo(r) {
+    const f = fichas[chaveCli(r.cliente || '')] || {}, c = riCfg(), tecs = riTecnicosDe(r);
+    const morada = String(f.morada || r.localidade || '').replace(/\n/g, ', '), contacto = f.telefone || r.contacto || f.email || '';
+    const temContrato = f.contrato && f.contrato.tipo && f.contrato.tipo !== 'nenhum' && f.contrato.tipo !== 'garantia';
+    const dia = r.dataVisita && r.dataVisita <= today() ? r.dataVisita : today();
+    const mat = String(c.matricula || '').split('-');
+    return {
+      num: (r.folha && r.folha.num) || '', pag: '1', de: '1', dataInicio: dia,
+      tecResp: tecs[0] || '', outrosTec: tecs.slice(1).join(', '), outrosTec2: '',
+      cliente: r.cliente || '', morada, contacto,
+      tipo: temContrato ? {contrato: true} : {}, tipoOutro: '',
+      linhas: Array.from({length: RI_LINHAS}, () => ({desc: '', tec: '', data: '', ini: '', fim: ''})),
+      horasNormais: '', horasExtras: '',
+      materiais: Array.from({length: RI_MATS}, () => ({desc: '', adq: false, stk: false, cli: false, qtd: '', vun: '', vtot: ''})),
+      orcSim: !!(r.num && r.dataAceite), orcNao: false, orcNum: r.dataAceite && r.num ? r.num : '',
+      obs: ['', '', '', '', '', ''],
+      taxaSim: c.taxa !== false, taxaNao: c.taxa === false, mat1: mat[0] || '', mat2: mat[1] || '', mat3: mat[2] || '', tempo: '', km: '',
+      concluidaNao: false, concluidaSim: false, assTec: '', cliNome: '', assCli: '', cliObs: ['', '', ''],
+      descricao: String(r.descricao || '').split('\n')[0],
+    };
+  }
+  function riDur(l) { const a = minDe(l.ini), b = minDe(l.fim); if (a == null || b == null) return null; let d = b - a; if (d < 0) d += 1440; return d; }
+  function riTotalMin(d) { return d.linhas.reduce((t, l) => t + (riDur(l) || 0), 0); }
+  const numPT = v => { const n = parseFloat(String(v == null ? '' : v).replace(/\s|€/g, '').replace(',', '.')); return isNaN(n) ? null : n; };
+  const eurPT = n => n.toLocaleString('pt-PT', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  function riMatTotal(d) { let t = 0, algum = false; d.materiais.forEach(m => { const v = numPT(m.vtot); if (v != null) { t += v; algum = true; } }); return algum ? eurPT(t) : ''; }
+
+  function abrirRI(id) {
+    const r = rows.find(x => x.id === id); if (!r) return;
+    riId = id; riD = r.ri ? JSON.parse(JSON.stringify(r.ri)) : riNovo(r); riSujo = !r.ri;
+    F('riWrap').hidden = false; document.body.style.overflow = 'hidden';
+    renderRI();
+  }
+  function fecharRI(forcar) {
+    if (!forcar && riSujo && canWrite && !confirm('O relatório tem alterações por guardar. Fechar mesmo assim?')) return;
+    F('riWrap').hidden = true; document.body.style.overflow = F('sheetWrap').hidden ? '' : 'hidden'; riD = null; riId = null;
+  }
+  function riEstado() {
+    const r = rows.find(x => x.id === riId);
+    F('riBarEstado').textContent = riSujo ? (r && r.ri ? 'Alterações por guardar' : 'Ainda não guardado') : (r && r.ri && r.ri.guardadoEm ? `Guardado a ${quando(new Date(r.ri.guardadoEm))}` : '');
+  }
+  const riMuda = () => { riSujo = true; riEstado(); };
+  // Um campo de texto ligado a riD (caminho «chave» ou [lista, índice, chave]).
+  function riIn(obj, k, extra) {
+    const x = extra || {};
+    return h('input',{class:'rf' + (x.c ? ' rc' : ''), type: x.type || null, value: obj[k] == null ? '' : String(obj[k]), inputmode: x.inputmode || null,
+      readonly: x.readonly || !canWrite ? true : null, 'aria-label': x.label || k, id: x.id || null,
+      oninput: ev => { obj[k] = ev.target.value; riMuda(); if (x.depois) x.depois(ev.target); }});
+  }
+  function riCx(obj, k, label, depois) {
+    return h('input',{type:'checkbox', checked: obj[k] ? true : null, disabled: canWrite ? null : true, 'aria-label': label,
+      onchange: ev => { obj[k] = ev.target.checked; riMuda(); if (depois) depois(ev.target.checked); }});
+  }
+  function riCalcHoras() {
+    F('riPg').querySelectorAll('tr[data-i]').forEach(tr => {
+      const l = riD.linhas[Number(tr.dataset.i)], d = riDur(l);
+      tr.querySelector('.dur').value = d == null ? '' : hhmmDe(d);
+      tr.querySelectorAll('.ri-tp').forEach((sp, k) => { sp.textContent = k ? l.fim : l.ini; });
+    });
+    const t = riTotalMin(riD); F('riDurTotal').value = t ? hhmmDe(t) : '';
+  }
+  function riCalcMat(i) {
+    const m = riD.materiais[i], q = numPT(m.qtd), u = numPT(m.vun);
+    if (q != null && u != null) { m.vtot = eurPT(q * u); const el = F('ri-vtot-' + i); if (el) el.value = m.vtot; }
+    F('riMatTotal').value = riMatTotal(riD);
+  }
+  // Assinatura com o dedo ou o rato: toque (iPad antigo, sem pointer events) e rato. Fica em PNG no relatório.
+  function riAssinatura(campo) {
+    const c = h('canvas',{'aria-label': campo === 'assTec' ? 'Assinatura do técnico' : 'Assinatura do cliente'});
+    let ctx = null, desenha = false, ult = null;
+    const prepara = () => {
+      const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+      if (!r.width) return false;
+      c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr);
+      ctx = c.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.lineWidth = 1.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#1a237e';
+      if (riD[campo]) { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0, r.width, r.height); img.src = riD[campo]; }
+      return true;
+    };
+    const pos = e => { const r = c.getBoundingClientRect(), p = e.touches ? e.touches[0] : e; return {x: p.clientX - r.left, y: p.clientY - r.top}; };
+    const ini = e => { if (!canWrite || (!ctx && !prepara())) return; desenha = true; ult = pos(e); e.preventDefault(); };
+    const move = e => { if (!desenha) return; const p = pos(e); ctx.beginPath(); ctx.moveTo(ult.x, ult.y); ctx.lineTo(p.x, p.y); ctx.stroke(); ult = p; e.preventDefault(); };
+    const fim = () => { if (!desenha) return; desenha = false; riD[campo] = c.toDataURL('image/png'); if (campo === 'assCli') riD.assinadoEm = new Date().toISOString(); riMuda(); };
+    c.addEventListener('touchstart', ini); c.addEventListener('touchmove', move); c.addEventListener('touchend', fim);
+    c.addEventListener('mousedown', ini); c.addEventListener('mousemove', move); c.addEventListener('mouseup', fim); c.addEventListener('mouseleave', fim);
+    setTimeout(prepara, 0);
+    c.limpar = () => { if (ctx) ctx.clearRect(0, 0, c.width, c.height); riD[campo] = ''; if (campo === 'assCli') riD.assinadoEm = null; riMuda(); };
+    return c;
+  }
+  // Preencher horas: um período (o dia inteiro é 09:00-17:00), uma linha por técnico e por meio dia, a partir da 1.ª livre.
+  function riPreencher() {
+    const ini = F('riIni').value, fim = F('riFim').value, per = riPeriodos(ini, fim);
+    if (!per.length) { toast('Escolhe o início e o fim (o fim depois do início).'); return; }
+    if (minDe(ini) < 540) { toast('No cliente, nunca antes das 9:00.'); return; }
+    const tecs = [riD.tecResp].concat(String(riD.outrosTec || '').split(/\s*[,;]\s*/)).map(x => String(x || '').trim()).filter(Boolean);
+    const dia = riD.dataInicio ? riD.dataInicio.split('-').reverse().join('/') : '';
+    let k = riD.linhas.findIndex(l => !l.desc && !l.ini && !l.fim && !l.tec);
+    if (k < 0) { toast('As linhas de intervenção estão cheias.'); return; }
+    for (const [a, b] of per) for (const t of (tecs.length ? tecs : [''])) {
+      if (k >= RI_LINHAS) break;
+      riD.linhas[k] = {desc: riD.descricao || '', tec: t, data: dia, ini: a, fim: b}; k++;
+    }
+    riMuda(); renderRI();
+  }
+  // Manutenção de AC: 100 ml de desinfeção e 100 ml de limpeza de alumínios por máquina, de stock.
+  function riManutencao() {
+    const n = parseInt(F('riMaq').value, 10);
+    if (!(n > 0)) { toast('Quantas máquinas?'); return; }
+    const novos = [['Líquido de desinfeção (100 ml/máquina)', 100 * n + ' ml'], ['Líquido de limpeza não agressivo p/ alumínios (100 ml/máquina)', 100 * n + ' ml']];
+    for (const [desc, qtd] of novos) {
+      const k = riD.materiais.findIndex(m => !m.desc && !m.qtd);
+      if (k < 0) { toast('As linhas de materiais estão cheias.'); break; }
+      riD.materiais[k] = {desc, adq: false, stk: true, cli: false, qtd, vun: '', vtot: ''};
+    }
+    riMuda(); renderRI();
+  }
+  function renderRI() {
+    const r = rows.find(x => x.id === riId); if (!r || !riD) return;
+    const d = riD;
+    F('riBarTitulo').textContent = `Relatório de intervenção · ${d.cliente || r.cliente || ''}`;
+    F('riGuardar').hidden = F('riImprimir').hidden = !canWrite;
+    fill(F('riAjuda'), canWrite ? [
+      h('label',null, 'Descrição', h('input',{value: d.descricao || '', style:'width:min(340px,40vw)', 'aria-label':'Descrição para as linhas', oninput: ev => { d.descricao = ev.target.value; riMuda(); }})),
+      h('label',null, 'Das', h('input',{type:'time', id:'riIni', value: '09:00', 'aria-label':'Início'})),
+      h('label',null, 'às', h('input',{type:'time', id:'riFim', value: '17:00', 'aria-label':'Fim'})),
+      h('button',{class:'btn btn-sm', type:'button', onclick: riPreencher}, 'Preencher horas'),
+      h('label',null, 'Manutenção AC:', h('input',{type:'number', id:'riMaq', min:'1', inputmode:'numeric', 'aria-label':'Máquinas'}), 'máquinas'),
+      h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick: riManutencao}, 'Juntar materiais')] : null);
+    const ano = d.dataInicio ? d.dataInicio.slice(0, 4) : '';
+    const [dd, mm, aa] = d.dataInicio ? d.dataInicio.split('-').reverse() : ['', '', ''];
+    const setData = (parte, v) => { const p = (d.dataInicio || '--').split('-'); const i = {d: 2, m: 1, a: 0}[parte]; p[i] = v; d.dataInicio = p.join('-'); riMuda(); };
+    const intRows = d.linhas.map((l, i) => h('tr',{'data-i': i},
+      h('td',null, riIn(l, 'desc', {label:'Descrição'})), h('td',null, riIn(l, 'tec', {c:1, label:'Técnico'})), h('td',null, riIn(l, 'data', {c:1, label:'Data'})),
+      h('td',{class:'time'}, riIn(l, 'ini', {type:'time', label:'Início', depois: riCalcHoras}), h('span',{class:'ri-tp'}, l.ini)),
+      h('td',{class:'time'}, riIn(l, 'fim', {type:'time', label:'Fim', depois: riCalcHoras}), h('span',{class:'ri-tp'}, l.fim)),
+      h('td',{class:'g'}, h('input',{class:'rf rc dur', readonly:true, 'aria-label':'Duração'}))));
+    const matRows = d.materiais.map((m, i) => h('tr',null,
+      h('td',null, riIn(m, 'desc', {label:'Material'})),
+      h('td',{class:'cx'}, riCx(m, 'adq', 'Adquirido')), h('td',{class:'cx'}, riCx(m, 'stk', 'Stock')), h('td',{class:'cx'}, riCx(m, 'cli', 'Cliente')),
+      h('td',null, riIn(m, 'qtd', {c:1, label:'Quantidade', depois: () => riCalcMat(i)})),
+      h('td',{class:'g'}, riIn(m, 'vun', {c:1, inputmode:'decimal', label:'Valor unitário', depois: () => riCalcMat(i)})),
+      h('td',{class:'g'}, riIn(m, 'vtot', {c:1, inputmode:'decimal', label:'Valor total', id:'ri-vtot-' + i, depois: () => { F('riMatTotal').value = riMatTotal(d); }}))));
+    const sigTec = riAssinatura('assTec'), sigCli = riAssinatura('assCli');
+    const tipoOutroObj = d.tipo || (d.tipo = {});
+    fill(F('riPg'),
+      h('div',{class:'ri-side ri-side-c'}, 'ORIGINAL - BRANCA    DUPLICADO - VERDE    TRIPLICADO - AMARELA'),
+      h('div',{class:'ri-side ri-side-k'}, 'FM-TEC-04 /V06'),
+      h('div',{class:'ri-sheet'},
+        h('header',{class:'ri-hdr'},
+          h('div',{class:'ri-brand'},
+            h('div',{class:'ri-brand-col'}, h('img',{class:'ri-logo', src:'logo-ri.jpg', alt:'MDM'}),
+              h('div',{class:'ri-bt2'}, 'Manuel Domingos Melancia, Lda.'), h('div',{class:'ri-bt3'}, 'Manutenção de Edifícios', h('br'), '& Assistência Técnica')),
+            riSelo()),
+          h('div',{class:'ri-hdr-r'},
+            h('div',{class:'ri-titulo'}, 'Relatório de Intervenção'),
+            h('div',{class:'ri-folha ri-grey'},
+              h('span',null, 'Folha de Obra n.º'), h('span',{class:'ri-ln w1'}, riIn(d, 'num', {label:'Folha de obra'})), h('span',null,'|'),
+              h('span',{class:'ri-ln w2'}, h('input',{class:'rf rc', value: ano, readonly:true, 'aria-label':'Ano'})), h('span',null,'/'),
+              h('span',{class:'ri-ln w2'}, h('input',{class:'rf rc', value: '', readonly:true, 'aria-label':'Sem uso'})),
+              h('span',{class:'pg'}, 'Pág.'), h('span',{class:'ri-ln w3'}, riIn(d, 'pag', {c:1, label:'Página'})), h('span',null,'de'), h('span',{class:'ri-ln w3'}, riIn(d, 'de', {c:1, label:'De'}))))),
+        h('section',{class:'ri-info'},
+          h('div',{class:'ri-info-l'},
+            h('div',{class:'ri-dini'}, h('span',null,'Data de Início'),
+              h('span',{class:'ri-ln'}, h('input',{class:'rf rc', value: dd || '', 'aria-label':'Dia', readonly: canWrite ? null : true, oninput: ev => setData('d', ev.target.value.padStart(2, '0'))})), h('span',null,'/'),
+              h('span',{class:'ri-ln'}, h('input',{class:'rf rc', value: mm || '', 'aria-label':'Mês', readonly: canWrite ? null : true, oninput: ev => setData('m', ev.target.value.padStart(2, '0'))})), h('span',null,'/'),
+              h('span',{class:'ri-ln'}, h('input',{class:'rf rc', value: aa || '', 'aria-label':'Ano', readonly: canWrite ? null : true, oninput: ev => setData('a', ev.target.value)}))),
+            h('div',{class:'ri-box ri-tec'},
+              h('div',{class:'ri-row'}, h('span',{class:'ri-lb'}, 'Nome do Técnico Responsável:'), h('span',{class:'ri-ln'}, riIn(d, 'tecResp', {label:'Técnico responsável'}))),
+              h('div',{class:'ri-row'}, h('span',{class:'ri-lb'}, 'Outros Técnicos:'), h('span',{class:'ri-ln'}, riIn(d, 'outrosTec', {label:'Outros técnicos'}))),
+              h('div',{class:'ri-row'}, h('span',{class:'ri-ln'}, riIn(d, 'outrosTec2', {label:'Outros técnicos (2)'}))))),
+          h('div',{class:'ri-box ri-cli'},
+            h('div',{class:'ri-row'}, h('span',{class:'ri-lb'}, 'Cliente'), h('span',{class:'ri-ln'}, riIn(d, 'cliente', {label:'Cliente'}))),
+            h('div',{class:'ri-row'}, h('span',{class:'ri-lb'}, 'Morada'), h('span',{class:'ri-ln'}, riIn(d, 'morada', {label:'Morada'}))),
+            h('div',{class:'ri-row'}, h('span',{class:'ri-lb'}, 'Contacto'), h('span',{class:'ri-ln'}, riIn(d, 'contacto', {label:'Contacto'}))))),
+        h('section',{class:'ri-box ri-tipo'},
+          h('div',{class:'ri-tipo-lb'}, 'Tipo de Intervenção'),
+          h('div',{class:'ri-tipo-row'},
+            RI_TIPOS.map(([k, l]) => h('label',{class:'ri-cb'}, l, riCx(tipoOutroObj, k, l))),
+            h('label',{class:'ri-cb other'}, h('span',{class:'ri-ln'}, riIn(d, 'tipoOutro', {label:'Outro tipo'})), riCx(tipoOutroObj, 'outro', 'Outro')))),
+        h('div',{class:'ri-wrapt ri-wrap-int'}, h('table',{class:'ri-t'},
+          h('colgroup',null, h('col',{style:'width:45%'}), h('col',{style:'width:15%'}), h('col',{style:'width:10%'}), h('col',{style:'width:10%'}), h('col',{style:'width:10%'}), h('col',{style:'width:10%'})),
+          h('thead',null, h('tr',null, ['Descrição da Intervenção/Localização', 'Técnico', 'Data', 'Hr. Início', 'Hr. Fim', 'Duração'].map(t => h('th',null, t)))),
+          h('tbody',null, intRows),
+          h('tfoot',null, h('tr',null,
+            h('td',null, h('div',{class:'ri-fth'}, h('span',null,'Horas a facturar: Normais'), h('span',{class:'cell'}, riIn(d, 'horasNormais', {c:1, label:'Horas normais'})), h('span',null,'Extras'))),
+            h('td',{class:'g'}, riIn(d, 'horasExtras', {c:1, label:'Horas extras'})),
+            h('td',{colspan:'3', class:'ri-ftt'}, 'Duração Total / A Transportar'),
+            h('td',{class:'g'}, h('input',{class:'rf rc', id:'riDurTotal', readonly:true, 'aria-label':'Duração total'})))))),
+        h('div',{class:'ri-wrapt ri-wrap-mat'}, h('table',{class:'ri-t'},
+          h('colgroup',null, h('col',{style:'width:45%'}), h('col',{style:'width:5%'}), h('col',{style:'width:5%'}), h('col',{style:'width:5%'}), h('col',{style:'width:12%'}), h('col',{style:'width:14%'}), h('col',{style:'width:14%'})),
+          h('thead',null, h('tr',null, ['Materiais Utilizados - Designação', 'Adq', 'Stk', 'Cli', 'Quant.', 'Val. Unit.', 'Valor Total'].map(t => h('th',null, t)))),
+          h('tbody',null, matRows),
+          h('tfoot',null, h('tr',null, h('td',{colspan:'6', class:'ri-ftt'}, 'Total / Total a Transportar'), h('td',{class:'g'}, h('input',{class:'rf rc', id:'riMatTotal', readonly:true, value: riMatTotal(d), 'aria-label':'Total de materiais'})))))),
+        h('section',{class:'ri-box ri-obs'},
+          h('div',{class:'ri-obs-top'},
+            h('div',{class:'ri-orc'}, h('span',{class:'ri-b'}, 'Serviço realizado conforme orçamento'),
+              h('label',{class:'ri-cb'}, 'Sim', riCx(d, 'orcSim', 'Conforme orçamento: sim')), h('span',null,'N.º'), h('span',{class:'ri-ln'}, riIn(d, 'orcNum', {c:1, label:'N.º do orçamento'})),
+              h('label',{class:'ri-cb'}, 'Não', riCx(d, 'orcNao', 'Conforme orçamento: não'))),
+            h('div',{class:'ri-obs-r'}, h('div',{class:'ri-obs-h'}, 'Observações do Técnico Responsável'))),
+          d.obs.map((o, i) => h('div',{class:'ri-oline'}, riIn(d.obs, i, {label:'Observações ' + (i + 1)})))),
+        h('section',{class:'ri-bottom'},
+          h('div',{class:'ri-bl'},
+            h('div',{class:'ri-box'}, h('div',{class:'ri-bh'}, 'Deslocação:'),
+              h('div',{class:'ri-bp'},
+                h('div',{class:'ri-row'}, h('span',{class:'ri-b'}, 'Taxa:'), h('label',{class:'ri-cb'}, 'Sim', riCx(d, 'taxaSim', 'Taxa sim')), h('span',{style:'flex:1'}), h('label',{class:'ri-cb'}, 'Não', riCx(d, 'taxaNao', 'Taxa não')), h('span',{style:'flex:0 0 4mm'})),
+                h('div',{class:'ri-row ri-mat'}, h('span',null,'Matrícula da Viatura:'), h('span',{class:'ri-ln'}, riIn(d, 'mat1', {c:1, label:'Matrícula 1'})), h('span',null,'-'), h('span',{class:'ri-ln'}, riIn(d, 'mat2', {c:1, label:'Matrícula 2'})), h('span',null,'-'), h('span',{class:'ri-ln'}, riIn(d, 'mat3', {c:1, label:'Matrícula 3'}))),
+                h('div',{class:'ri-row'}, h('span',null,'Tempo (ida/volta)'), h('span',{class:'ri-ln'}, riIn(d, 'tempo', {c:1, label:'Tempo'})), h('span',null,'Km (ida/volta)'), h('span',{class:'ri-ln'}, riIn(d, 'km', {c:1, label:'Km'}))))),
+            h('div',{class:'ri-box'}, h('div',{class:'ri-bh'}, 'Obra Concluída:'),
+              h('div',{class:'ri-bp'}, h('div',{class:'ri-row ri-sb'}, h('label',{class:'ri-cb'}, 'Não', riCx(d, 'concluidaNao', 'Obra concluída: não')), h('label',{class:'ri-cb'}, 'Sim', riCx(d, 'concluidaSim', 'Obra concluída: sim'))))),
+            h('div',{class:'ri-sig'}, h('div',null, 'Assinatura do Técnico Responsável: ', canWrite ? h('button',{type:'button', class:'ri-limpar', onclick:() => sigTec.limpar()}, 'limpar') : null),
+              h('div',{class:'ri-sig-l'}, sigTec))),
+          h('div',{class:'ri-br'},
+            h('div',{class:'ri-box ri-vald'}, h('div',{class:'ri-bh'}, 'Validação pelo cliente:'),
+              h('div',{class:'ri-bp'},
+                h('div',{class:'ri-row'}, h('span',null,'Nome (legível):'), h('span',{class:'ri-ln'}, riIn(d, 'cliNome', {label:'Nome do cliente'}))),
+                h('div',{class:'ri-row'}, h('span',null,'Assinatura: ', canWrite ? h('button',{type:'button', class:'ri-limpar', onclick:() => sigCli.limpar()}, 'limpar') : null), h('span',{class:'ri-ln ri-sig-c'}, sigCli)),
+                h('div',{class:'ri-row'}, h('span',null,'Observações:'), h('span',{class:'ri-ln'}, riIn(d.cliObs, 0, {label:'Observações do cliente'}))),
+                h('div',{class:'ri-row'}, h('span',{class:'ri-ln'}, riIn(d.cliObs, 1, {label:'Observações do cliente 2'}))),
+                h('div',{class:'ri-row'}, h('span',{class:'ri-ln'}, riIn(d.cliObs, 2, {label:'Observações do cliente 3'}))))),
+            h('div',{class:'ri-accept'}, 'A Assinatura do Cliente determina a aceitação do conteúdo do Relatório, atendendo às Observações'))),
+        h('footer',{class:'ri-pfoot'},
+          h('div',null, 'Soc. Com. por quotas | Capital Social 100.000 € | C.R.C. de Loures N.º 20 423 | N.º Fiscal 502 644 761 | Alvará de Construção N.º 49930'),
+          h('div',null, 'Loja: Edifício Vila do Oriente | Alameda dos Oceanos | N.º 108 A | 1990-426 Lisboa - Telef.: 21 893 50 50 • mdmassist@mdmassist.com'))));
+    riCalcHoras(); riEstado();
+  }
+  function riSelo() {
+    const NS = 'http://www.w3.org/2000/svg', el = (t, a, txt) => { const e = document.createElementNS(NS, t); Object.keys(a || {}).forEach(k => e.setAttribute(k, a[k])); if (txt) e.textContent = txt; return e; };
+    const svg = el('svg', {class:'ri-seal', viewBox:'0 0 120 120'}), defs = el('defs');
+    defs.appendChild(el('path', {id:'riArcT', d:'M 36.5,60 A 23.5,23.5 0 0 1 83.5,60'})); defs.appendChild(el('path', {id:'riArcB', d:'M 29.5,60 A 30.5,30.5 0 0 0 90.5,60'}));
+    svg.appendChild(defs);
+    svg.appendChild(el('circle', {cx:'60', cy:'60', r:'33', fill:'#fff', stroke:'#000', 'stroke-width':'2'}));
+    svg.appendChild(el('circle', {cx:'60', cy:'60', r:'20.5', fill:'none', stroke:'#000', 'stroke-width':'.8'}));
+    const arco = (href, size, txt) => { const t = el('text', {'font-size': size, 'font-weight':'700'}), tp = el('textPath', {href, startOffset:'50%', 'text-anchor':'middle'}, txt); tp.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', href); t.appendChild(tp); return t; };
+    svg.appendChild(arco('#riArcT', '9', 'SERVIÇO')); svg.appendChild(arco('#riArcB', '8.2', 'CERTIFICADO'));
+    svg.appendChild(el('text', {x:'60', y:'65', 'text-anchor':'middle', 'font-family':'Georgia,serif', 'font-size':'13', 'font-weight':'700'}, 'Certif'));
+    svg.appendChild(el('text', {transform:'translate(9,86) rotate(-62)', 'font-size':'6'}, 'REG. (CE) 842/2006'));
+    svg.appendChild(el('text', {transform:'translate(2,62) rotate(-62)', 'font-size':'6'}, 'DEC-LEI 56/2011'));
+    return svg;
+  }
+  async function guardarRI(imprimir) {
+    const r = rows.find(x => x.id === riId); if (!r || !riD) return;
+    if (!canWrite) { if (imprimir) imprimirRI(); return; }
+    const novo = JSON.parse(JSON.stringify(r)); delete novo.id;
+    const primeira = !r.ri, assinado = !!riD.assCli && !(r.ri && r.ri.assCli);
+    novo.ri = {...riD, guardadoEm: new Date().toISOString(), totalMin: riTotalMin(riD)};
+    // O n.º do RI e a data passam para a obra (o passo «Obra concluída» pede-os).
+    novo.obra = Object.assign({}, novo.obra || {}, riD.num ? {riNum: riD.num} : {});
+    novo.historico = (novo.historico || []).slice(-60);
+    novo.historico.push(nota(assinado ? `Relatório de intervenção assinado pelo cliente${riD.cliNome ? ' (' + riD.cliNome + ')' : ''}` : primeira ? 'Relatório de intervenção aberto' : 'Relatório de intervenção atualizado'));
+    if (await gravar(r.id, novo, assinado ? 'Relatório assinado e guardado' : 'Relatório guardado', {manter: true})) {
+      riSujo = false; riEstado();
+      if (imprimir) imprimirRI();
+    }
+  }
+  function imprimirRI() {
+    document.body.classList.add('a-imprimir-ri');
+    const titulo = document.title, d = riD || {};
+    const slug = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '');
+    document.title = `relatorio-intervencao-${d.num ? 'OB' + String(d.num).replace('/', '-') + '-' : ''}${slug(d.cliente)}-${d.dataInicio || today()}`;
+    const fim = () => { document.body.classList.remove('a-imprimir-ri'); document.title = titulo; window.removeEventListener('afterprint', fim); };
+    window.addEventListener('afterprint', fim);
+    setTimeout(() => { window.print(); setTimeout(fim, 1000); }, 50);
+  }
+  document.body.appendChild(F('riWrap'));
+  F('riFechar').addEventListener('click', () => fecharRI());
+  F('riGuardar').addEventListener('click', () => guardarRI(false));
+  F('riImprimir').addEventListener('click', () => guardarRI(true));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !F('riWrap').hidden) { e.stopImmediatePropagation(); fecharRI(); } }, true);
+
   /* ---------- Orçamento: a tabela de preços (Definições, config «orcamento») ----------
      Privada da equipa (RLS autorizado()), preços sem IVA colados da folha de cálculo; nunca vai para o git. O
      data/precos.json continua a ser só do site e da skill. As tarifas da folha de obra são preços de venda e entram como
@@ -5592,12 +6074,12 @@ if (!Element.prototype.replaceChildren) {
   }
   // Para guardar: números em vez do texto dos campos (preço em euros e quantidade, null quando falta).
   function orcParaGuardar(o) {
-    const lin = l => { const c = orcCent(l.preco), q = orcMil(l.qtd), x = {ref: String(l.ref || '').trim(), desc: String(l.desc || '').trim(), qtd: q == null ? null : q / 1000, un: String(l.un || '').trim(), preco: c == null ? null : c / 100, iva: Number(l.iva) || 23}; if (l.g) x.g = l.g; if (l.pot) x.pot = true; return x; };
+    const lin = l => { const c = orcCent(l.preco), q = orcMil(l.qtd), x = {ref: String(l.ref || '').trim(), desc: String(l.desc || '').trim(), qtd: q == null ? null : q / 1000, un: String(l.un || '').trim(), preco: c == null ? null : c / 100, iva: Number(l.iva) || 23}; if (l.g) x.g = l.g; if (l.pot) x.pot = true; if (l.mot) x.mot = true; return x; };
     const n = JSON.parse(JSON.stringify(o)), tr = s => String(s == null ? '' : s).trim();
     n.titulo = tr(o.titulo); n.inclui = tr(o.inclui); n.notas = tr(o.notas); n.pagamento = tr(o.pagamento); n.condicoes = tr(o.condicoes);
     n.validadeDias = Number(o.validadeDias) || 30;
     n.cliente = {nome: tr(o.cliente.nome), nif: tr(o.cliente.nif), contacto: tr(o.cliente.contacto), morada: tr(o.cliente.morada), tipo: o.cliente.tipo || 'particular'};
-    n.opcoes = o.opcoes.map(op => ({k: op.k, titulo: tr(op.titulo), marca: op.marca || '', linhas: op.linhas.map(lin)}));
+    n.opcoes = o.opcoes.map(op => Object.assign({k: op.k, titulo: tr(op.titulo), marca: op.marca || '', linhas: op.linhas.map(lin)}, op.motor ? {motor: JSON.parse(JSON.stringify(op.motor))} : {}));
     n.comuns = o.comuns.map(lin);
     n.divisoes = o.divisoes.map(orcDivCalc).map(d => Object.assign(d, {area: d.area === '' ? null : d.area}));
     return n;
@@ -5659,7 +6141,7 @@ if (!Element.prototype.replaceChildren) {
   function abrirOrc(id) {
     const r = rows.find(x => x.id === id); if (!r) return;
     if (orcAGuardar) { toast('Ainda a guardar o orçamento. Espera um instante.'); return; }
-    orcId = id; orcV = orcVDe(r); orcCriado = r.criado || null;
+    orcId = id; orcV = orcVDe(r); orcCriado = r.criado || null; motFecha();
     orc = orcParaEditar(r.orcamento || orcNovo(r)); orcSujo = false; orcVista = 'editar'; orcEnvio = null;
     // Antes do primeiro PDF o número é o do pedido (enviado fora do registo), mesmo que tenha mudado depois do rascunho,
     // e a revisão de partida conta-se outra vez (a não ser que alguém a tenha escrito à mão).
@@ -5821,6 +6303,344 @@ if (!Element.prototype.replaceChildren) {
     toast(semPreco ? `Posto nas opções. ${semPreco} ${semPreco === 1 ? 'linha sem preço' : 'linhas sem preço'} na tabela: escreve o preço.` : 'Posto nas opções, com os preços da tabela.');
   }
 
+  /* ---------- Motor de preços (pacote «mdm-orcamentos-offline»: motor.js, fluxo.js e documento.js em orcamento-motor.js) ----------
+     As contas são as do motor: custo do equipamento = tabela × fator de desconto da marca, margens por marca, mão de obra
+     por unidade interior, cobre, amortecedor e kit, sopragem a azoto quando a tubagem fica, e a manutenção por zona.
+     Os dados (empresa, fatores, margens, tarifas, catálogo) estão em config «orcamento_motor», que a base de dados só dá
+     ao chefe e ao escritório: um técnico não vê o cálculo nem os custos. Sem rede, a última leitura chega.
+     «Pôr na opção» escreve na opção o equipamento (preço de venda de cada um) e uma linha de instalação (mão de obra,
+     deslocação e material) que fecha no total do motor ao cêntimo. Daí para a frente é um orçamento como os outros: o
+     número, as revisões, o PDF, o envio e o valor do pedido não mudam. Nunca inventa preços: um modelo sem preço no
+     catálogo dá erro («pedir preço ao fornecedor») e um multi-split sem combinação validada dá aviso. */
+  var cfgMotor = null, cfgMotorV = 0, motCfgAGuardar = false; // var: a leitura da config pode chegar antes desta linha
+  const MOT_MARCA = {'Midea': 'MIDEA', 'Mitsubishi Electric': 'MITSUBISHI', 'Daikin': 'DAIKIN', 'France Air': 'FRANCE_AIR'};
+  const MOT_TIPO = {conj: 'conjunto', ext: 'exterior', int: 'interior'};
+  var orcMotAberto = {}; // opções (letra) com o cálculo aberto, só neste ecrã
+  function motFecha() { Object.keys(orcMotAberto).forEach(k => { delete orcMotAberto[k]; }); }
+  function motorOk() { const M = window.MDM; return !!(M && M.motor && M.documento && cfgMotor && cfgMotor.CONFIG && Array.isArray(cfgMotor.CATALOGO)); }
+  // Os dados da config entram em window.MDM, onde o motor os procura, antes de cada conta.
+  function motorPrep() {
+    const M = window.MDM;
+    ['EMPRESA', 'CONFIG', 'CATALOGO', 'COMBINACOES', 'FERIADOS_FIXOS', 'PRAZOS'].forEach(k => { M[k] = cfgMotor[k] || (k === 'CATALOGO' || k === 'FERIADOS_FIXOS' ? [] : {}); });
+    M.LOGO = 'logo-orc.jpg';
+    return M;
+  }
+  const motN = v => { const x = parseNumero(String(v == null ? '' : v).trim()); return x == null || Number.isNaN(x) ? null : x; };
+  const motTxtN = x => String(Math.round(x * 1000) / 1000).replace('.', ',');
+  const motEur = v => orcEur(Math.round((Number(v) || 0) * 100));
+  // A tabela de mão de obra de partida é a do motor (ORC0034). A base de dados não guarda a ordem das chaves: nunca a «primeira».
+  const motTabPad = () => { const t = Object.keys((cfgMotor.CONFIG || {}).tabelasMaoObra || {}).sort(); return t.indexOf('ORC0034') >= 0 ? 'ORC0034' : t[0] || ''; };
+  // Um cálculo novo: instalação, ou manutenção num pedido de manutenção. Os interiores vêm das divisões da potência.
+  function motNovo() {
+    const c = cfgMotor.CONFIG || {}, tipoPed = (rows.find(x => x.id === orcId) || {}).tipo;
+    const x = orc.divisoes.length ? orcPotencia() : null;
+    const ints = x && x.P && !x.erro && x.P.divs ? x.P.divs.map(d => ({btu: String(d.tam), metros: ''})) : [{btu: '9000', metros: ''}];
+    return {tipo: tipoPed === 'manutencao' ? 'manutencao' : 'instalacao', gama: ints.length > 1 ? 'multi' : 'mono', equip: [{ref: '', qtd: '1'}], ints, ext: '', dias: '', reap: false,
+      tabela: motTabPad(), preco: 'tabela', margem: '', alvo: '', extraMO: [], extraMat: [], tirarComuns: true, notaSub: true,
+      zona: Object.keys((c.manutencao || {}).zonas || {}).sort()[0] || '', soTec: false, horas: '1', primeira: '', mats: [], alvoIva: '', equipTxt: '', ingles: false};
+  }
+  // Unidades exteriores: as dos conjuntos e das exteriores escolhidas (o amortecedor conta-se por exterior).
+  function motExteriores(eq) { return eq.reduce((s, x) => { const it = cfgMotor.CATALOGO.find(c => c.ref === x.ref); return s + (it && (it.tipo === 'ext' || it.tipo === 'conj') ? x.qtd : 0); }, 0); }
+  const motLinhasExtra = lista => (lista || []).filter(x => String(x.desc || '').trim()).map(x => ({desc: String(x.desc).trim(), qtd: motN(x.qtd) == null ? 1 : motN(x.qtd), custo: motN(x.custo) || 0}));
+  // As contas do motor com o que está escrito: {r, p} ou {erro}.
+  function motCalc(op) {
+    const m = op.motor, M = motorPrep();
+    try {
+      if (m.tipo === 'manutencao') {
+        const p = {zona: m.zona, soTecnico: !!m.soTec, horas: motN(m.horas) || 1, materiais: motLinhasExtra(m.mats)};
+        if (motN(m.primeira) != null) p.primeiraHora = motN(m.primeira);
+        if (motN(m.alvoIva) != null) p.alvoComIva = motN(m.alvoIva);
+        return {r: M.motor.calcManutencao(p), p};
+      }
+      const marca = MOT_MARCA[op.marca];
+      if (!marca) return {erro: op.marca ? `O motor não tem preços de ${op.marca}.` : 'Escolhe a marca da opção (em cima) para calcular.'};
+      const equipamento = m.equip.filter(x => x.ref).map(x => ({ref: x.ref, qtd: motN(x.qtd) || 1}));
+      const interiores = m.ints.map(x => { const o = {}; if (motN(x.btu)) o.btu = motN(x.btu); if (motN(x.metros) != null) o.metros = motN(x.metros); return o; });
+      if (!interiores.length) return {erro: 'Põe pelo menos um interior: as horas e o material contam-se por interior.'};
+      const p = {marca, gama: m.gama, equipamento, interiores, reaproveitaTubagem: !!m.reap, extraMO: motLinhasExtra(m.extraMO), extraMaterial: motLinhasExtra(m.extraMat)};
+      if (m.tabela) p.tabelaMO = m.tabela;
+      p.exteriores = motN(m.ext) != null ? motN(m.ext) : motExteriores(equipamento);
+      if (motN(m.dias) != null) p.dias = motN(m.dias);
+      if (m.preco === 'margem') { if (motN(m.margem) == null) return {erro: 'Escreve a margem única (por exemplo 23 para × 1,23).'}; p.margemTotal = motN(m.margem) / 100; }
+      if (m.preco === 'alvo') { if (!(motN(m.alvo) > 0)) return {erro: 'Escreve o valor final sem IVA.'}; p.valorAlvoSemIva = motN(m.alvo); }
+      return {r: M.motor.calcInstalacao(p), p};
+    } catch (e) { return {erro: String((e && e.message) || e)}; }
+  }
+  const motDescInst = m => m.reap ? 'Instalação com a tubagem existente (sopragem a azoto, mão de obra, deslocação e material)' : 'Instalação (mão de obra, deslocação e material)';
+  // O nome do equipamento na linha: o modelo, e a referência só quando o modelo ainda não a diz.
+  const motDescEquip = l => l.item && l.item.modelo && l.item.ref && l.item.modelo.indexOf(l.item.ref) >= 0 ? l.item.modelo : l.desc;
+  // «Pôr na opção»: as linhas do cálculo substituem as do cálculo anterior e as da potência; as escritas à mão ficam.
+  function motPor(op) {
+    const x = motCalc(op), m = op.motor;
+    if (x.erro) { orcErro(x.erro + ' Nada foi posto na opção.'); return; }
+    F('orcErr').hidden = true;
+    const r = x.r, r2 = window.MDM.motor.r2, novas = [];
+    if (r.tipo === 'manutencao') {
+      r.linhas.filter(l => l.qtd > 0).forEach(l => novas.push({desc: l.desc, qtd: orcTxtN(l.qtd), un: l.bloco === 'maoObra' && !/^1ª/.test(l.desc) ? 'h' : 'un', preco: orcTxtN(r2(l.custoUnit * l.margem))}));
+    } else {
+      r.linhas.filter(l => l.bloco === 'equipamento').forEach(l => novas.push({desc: motDescEquip(l), qtd: orcTxtN(l.qtd), un: 'un', preco: orcTxtN(r2(l.custoUnit * l.margem))}));
+      novas.push({desc: motDescInst(m), qtd: '1', un: 'un', preco: '', fecho: true});
+    }
+    // Fecha no total do motor ao cêntimo: o que os arredondamentos das linhas deixam vai para a linha de instalação (ou,
+    // na manutenção, para a última linha de quantidade 1).
+    const alvo = Math.round(r.semIva * 100), soma = novas.reduce((s, l) => s + (orcLinha(l) || 0), 0);
+    let fim = novas.filter(l => l.fecho)[0];
+    if (!fim) fim = novas.filter(l => l.qtd === '1').slice(-1)[0];
+    if (fim) fim.preco = orcTxtN(((orcLinha(fim) || 0) + alvo - soma) / 100);
+    const linhas = novas.filter(l => !(l.fecho && orcCent(l.preco) === 0));
+    const iva = orcIvaPad();
+    linhas.forEach(l => { delete l.fecho; l.ref = ''; l.iva = iva; l.mot = true; });
+    op.linhas = linhas.concat(op.linhas.filter(l => !l.mot && !l.pot));
+    const tirou = m.tirarComuns !== false && orc.comuns.length;
+    if (tirou) orc.comuns = [];
+    const T = (cfgMotor.CONFIG || {}).textos || {};
+    if (r.tipo !== 'manutencao' && m.reap && m.notaSub !== false && T.notaSubstituicao) {
+      const nt = String(T.notaSubstituicao).replace(/^\s*Notas?\s*:\s*/i, '').trim();
+      if (nt && String(orc.notas || '').indexOf(nt) < 0) orc.notas = (String(orc.notas || '').trim() ? String(orc.notas).trim() + '\n' : '') + nt;
+    }
+    orcMuda(); renderOrc();
+    const resto = op.linhas.length - linhas.length;
+    toast(`Opção ${op.k}: ${orcEur(alvo)} sem IVA, do cálculo.${tirou ? ' As linhas de «Trabalho e material» saíram (o cálculo já as conta).' : ''}${resto ? ` A opção tem mais ${resto} ${resto === 1 ? 'linha escrita' : 'linhas escritas'} à mão, que se somam.` : ''}`);
+  }
+  // O resultado por baixo dos campos: as linhas com custo, margem e venda, os totais e os avisos do motor.
+  function motResultado(op, box) {
+    if (!box || !orc) return;
+    const x = motCalc(op);
+    if (x.erro) { fill(box, h('p',{class:'oe-mot-err', role:'alert'}, x.erro)); return; }
+    const r = x.r, t = orcTotais([{qtd: 1, preco: r.semIva, iva: orcIvaPad()}], orcAutoliq(orc));
+    fill(box,
+      h('div',{class:'tw'}, h('table',null,
+        h('thead',null, h('tr',null, ['Linha', 'Qtd.', 'Custo un.', 'Margem', 'Venda'].map((c, i) => h('th',{class: i ? 'num' : null}, c)))),
+        h('tbody',null, r.linhas.map(l => h('tr',null, h('td',null, l.bloco === 'equipamento' ? motDescEquip(l) : l.desc), h('td',{class:'num'}, motTxtN(l.qtd)),
+          h('td',{class:'num'}, motEur(l.custoUnit)), h('td',{class:'num'}, '× ' + motTxtN(l.margem)), h('td',{class:'num'}, motEur(l.venda))))))),
+      h('p',{class:'oe-mot-tot'}, 'Custo ', h('b',null, motEur(r.custo)), ' · venda ', h('b',null, orcEur(t.base)), ' sem IVA',
+        orcAutoliq(orc) ? null : [' · ', h('b',null, orcEur(t.comIva)), ' com IVA'],
+        ' · lucro ', h('b',null, motEur(r.lucro)), ` (${motTxtN(r.margemPct)} % sobre o custo)`),
+      r.avisos.map(a => h('p',{class:'oe-mot-av'}, a)));
+  }
+  // O texto das condições de manutenção (email), pronto a copiar: nada parte sozinho.
+  function motEmail(op, box) {
+    const x = motCalc(op), m = op.motor;
+    if (x.erro) { fill(box, h('p',{class:'oe-mot-err', role:'alert'}, x.erro)); return; }
+    const M = window.MDM, morada = orcMoradaTxt(orc.cliente.morada) || '(morada)';
+    const texto = M.documento.emailManutencao({tratamento: String(orc.cliente.nome || '').trim() || 'Cliente', equipamentos: String(m.equipTxt || '').split('\n').map(s => s.trim()).filter(Boolean),
+      primeiraHora: x.r.linhas[0].custoUnit, soTecnico: !!m.soTec, morada, ingles: !!m.ingles});
+    const ta = h('textarea',{readonly:'readonly', 'aria-label':'Texto das condições'}); ta.value = texto;
+    const mail = (/[\w.+-]+@[\w-]+\.[\w.-]+/.exec(orc.cliente.contacto || '') || [''])[0];
+    fill(box, h('div',{class:'oe-mot-email'}, ta, h('div',{class:'oe-acoes'},
+      h('button',{class:'btn btn-sm', type:'button', onclick:() => copiar(texto, 'Texto copiado')}, 'Copiar'),
+      h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => abrirLink(`mailto:${encodeURIComponent(mail)}?subject=${encodeURIComponent(m.ingles ? 'Maintenance conditions' : 'Condições da intervenção')}&body=${encodeURIComponent(texto)}`)}, 'Abrir no email')),
+      h('p',{class:'note'}, 'Nada é enviado sozinho: o email abre com o texto e és tu que o envias.')));
+  }
+  // Os campos do cálculo de uma opção.
+  function motPainel(op) {
+    const m = op.motor, c = cfgMotor.CONFIG || {}, res = h('div',{class:'oe-mot-res', 'aria-live':'polite'}), email = h('div',null);
+    let tm = null;
+    const conta = () => { clearTimeout(tm); tm = setTimeout(() => { motResultado(op, res); if (email.firstChild) motEmail(op, email); }, 150); };
+    const muda = () => { orcMuda(); conta(); };
+    const redesenha = () => { orcMuda(); renderOrc(); };
+    const campo = (rot, k, extra) => oeCampo(rot, h('input', Object.assign({value: m[k] == null ? '' : String(m[k]), oninput: ev => { m[k] = ev.target.value; muda(); }}, extra || {})));
+    const escolha = (rot, k, ops, depois) => { const s = h('select',{onchange: ev => { m[k] = ev.target.value; if (depois) depois(); else muda(); }}, ops.map(([v, l]) => h('option',{value: v}, l))); s.value = String(m[k] == null ? '' : m[k]); return oeCampo(rot, s); };
+    const caixa = (k, rot, padrao) => h('label',{class:'check'}, h('input',{type:'checkbox', checked: (m[k] == null ? padrao : m[k]) ? true : null, onchange: ev => { m[k] = ev.target.checked; muda(); }}), rot);
+    // Uma tabela de linhas (desc, qtd, custo) com «+» e «×».
+    const tabela = (lista, cols, nova, rotMais) => h('div',null,
+      h('div',{class:'tw'}, h('table',{class:'oe-tab'},
+        h('thead',null, h('tr',null, cols.map(([, t, ex]) => h('th',{style: ex && ex.class === 'num' && cols.some(c => !(c[2] && c[2].class === 'num')) ? 'width:7em' : null}, t)).concat([h('th',{style:'width:2.4em'})]))),
+        h('tbody',null, lista.map((l, i) => h('tr',null, cols.map(([k, t, ex]) => h('td',null, typeof ex === 'function' ? ex(l) : h('input', Object.assign({value: l[k] == null ? '' : String(l[k]), 'aria-label': t, oninput: ev => { l[k] = ev.target.value; muda(); }}, ex || {})))),
+          h('td',null, h('button',{class:'oc-x', type:'button', title:'Tirar', 'aria-label':'Tirar', onclick:() => { lista.splice(i, 1); redesenha(); }}, '×'))))))),
+      h('div',{class:'oe-acoes'}, h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { lista.push(nova()); redesenha(); }}, rotMais)));
+    const num = {class:'num', inputmode:'decimal'};
+    let corpo;
+    if (m.tipo === 'manutencao') {
+      const zonas = (c.manutencao || {}).zonas || {};
+      corpo = [
+        h('div',{class:'oe-mot-g'},
+          escolha('Zona (1.ª hora + deslocação)', 'zona', Object.keys(zonas).sort().map(z => [z, `${z} (equipa ${motEur(zonas[z].equipa)}${zonas[z].tecnico != null ? ', técnico ' + motEur(zonas[z].tecnico) : ''})`])),
+          campo('Horas no total (com a 1.ª)', 'horas', num),
+          campo('1.ª hora + deslocação (vazio: a da zona)', 'primeira', num),
+          campo('Total pretendido com IVA (opcional)', 'alvoIva', num)),
+        h('div',{class:'oe-chks'}, caixa('soTec', 'Só um técnico (sem ajudante)', false)),
+        h('p',{class:'oe-mot-sub'}, 'Material (custo; a venda leva a margem do material)'),
+        tabela(m.mats, [['desc', 'Descrição'], ['qtd', 'Qtd.', num], ['custo', 'Custo un.', num]], () => ({desc: '', qtd: '1', custo: ''}), '+ Material'),
+        h('p',{class:'oe-mot-sub'}, 'Texto das condições (email)'),
+        h('div',{class:'oe-g'}, oeCampo('Equipamentos (um por linha)', (() => { const t = h('textarea',{oninput: ev => { m.equipTxt = ev.target.value; muda(); }}); t.value = m.equipTxt || ''; return t; })(), true)),
+        h('div',{class:'oe-chks'}, caixa('ingles', 'Em inglês', false)),
+        h('div',{class:'oe-acoes'}, h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => motEmail(op, email)}, 'Mostrar o texto')),
+        email];
+    } else {
+      const marca = MOT_MARCA[op.marca];
+      const cat = cfgMotor.CATALOGO.filter(it => it.marca === marca && (it.gama === 'any' || it.gama === m.gama));
+      const opsEquip = l => {
+        const lista = cat.slice();
+        const atual = l.ref && !lista.some(it => it.ref === l.ref) ? cfgMotor.CATALOGO.find(it => it.ref === l.ref) : null;
+        if (atual) lista.unshift(atual);
+        const s = h('select',{'aria-label':'Equipamento', onchange: ev => { l.ref = ev.target.value; muda(); }},
+          [h('option',{value:''}, cat.length ? 'Escolher do catálogo' : `Sem modelos de ${op.marca || 'esta marca'} no catálogo`)].concat(lista.map(it => h('option',{value: it.ref},
+            `${it.modelo}${it.modelo.indexOf(it.ref) < 0 ? ' (' + it.ref + ')' : ''} · ${MOT_TIPO[it.tipo] || it.tipo} · ${ORC_POT.btuh(it.btu)}${it.tabela != null ? ' · tabela ' + motEur(it.tabela) : it.custo != null ? ' · custo ' + motEur(it.custo) : ''}`))));
+        s.value = l.ref || '';
+        return s;
+      };
+      const tabs = Object.keys(c.tabelasMaoObra || {}).sort();
+      corpo = [
+        marca ? null : h('p',{class:'oe-mot-err'}, op.marca ? `O motor não tem preços de ${op.marca}.` : 'Escolhe a marca da opção (em cima) para ver o catálogo.'),
+        h('div',{class:'oe-mot-g'},
+          escolha('Gama', 'gama', [['mono', 'Monosplit'], ['multi', 'Multisplit']], () => { orcMuda(); renderOrc(); }),
+          campo('Dias (vazio: um por interior)', 'dias', num),
+          campo('Unidades exteriores (vazio: as escolhidas)', 'ext', num),
+          tabs.length > 1 ? escolha('Tabela de mão de obra', 'tabela', tabs.map(k => [k, `${k} (CM ${motEur(c.tabelasMaoObra[k].cm)}, LF ${motEur(c.tabelasMaoObra[k].lf)}, desloc. ${motEur(c.tabelasMaoObra[k].desloc)})`])) : null,
+          escolha('Preço de venda', 'preco', [['tabela', 'Margens da tabela'], ['margem', 'Margem única em tudo'], ['alvo', 'Valor final fixado']], () => { orcMuda(); renderOrc(); }),
+          m.preco === 'margem' ? campo('Margem única (%)', 'margem', num) : null,
+          m.preco === 'alvo' ? campo('Valor final sem IVA (€)', 'alvo', num) : null),
+        h('div',{class:'oe-chks'}, caixa('reap', 'Substituição: reaproveita a tubagem (sopragem a azoto, sem cobre)', false)),
+        h('p',{class:'oe-mot-sub'}, 'Equipamento'),
+        tabela(m.equip, [['ref', 'Modelo', opsEquip], ['qtd', 'Qtd.', num]], () => ({ref: '', qtd: '1'}), '+ Equipamento'),
+        h('p',{class:'oe-mot-sub'}, m.reap ? 'Interiores' : 'Interiores (metros de tubagem obrigatórios: nunca se assumem)'),
+        tabela(m.ints, [['btu', 'BTU/h', {class:'num', inputmode:'numeric'}], ['metros', 'Metros de tubagem', num]], () => ({btu: '9000', metros: ''}), '+ Interior'),
+        h('p',{class:'oe-mot-sub'}, 'Mão de obra a mais (custo)'),
+        tabela(m.extraMO, [['desc', 'Descrição'], ['qtd', 'Qtd.', num], ['custo', 'Custo un.', num]], () => ({desc: '', qtd: '1', custo: ''}), '+ Mão de obra'),
+        h('p',{class:'oe-mot-sub'}, 'Material a mais (custo)'),
+        tabela(m.extraMat, [['desc', 'Descrição'], ['qtd', 'Qtd.', num], ['custo', 'Custo un.', num]], () => ({desc: '', qtd: '1', custo: ''}), '+ Material')];
+    }
+    const nComuns = orc.comuns.length;
+    const painel = h('div',{class:'oe-mot'},
+      h('h4',null, `Cálculo da opção ${op.k}`),
+      h('div',{class:'oe-mot-g'}, escolha('O que se calcula', 'tipo', [['instalacao', 'Instalação ou substituição'], ['manutencao', 'Manutenção ou intervenção']], () => { orcMuda(); renderOrc(); })),
+      corpo, res,
+      h('div',{class:'oe-chks'},
+        nComuns ? caixa('tirarComuns', `Tirar as ${nComuns} ${nComuns === 1 ? 'linha' : 'linhas'} de «Trabalho e material» (o cálculo já conta a mão de obra, a deslocação e o material)`, true) : null,
+        m.tipo !== 'manutencao' && m.reap && ((c.textos || {}).notaSubstituicao) ? caixa('notaSub', 'Juntar às notas a nota da substituição', true) : null),
+      h('div',{class:'oe-acoes'}, h('button',{class:'btn btn-sm', type:'button', onclick:() => motPor(op)}, `Pôr na opção ${op.k}`)),
+      h('p',{class:'note'}, 'Custos e margens só aparecem aqui (chefe e escritório). Na folha do cliente ficam o equipamento e uma linha de instalação, com o total do cálculo.'));
+    motResultado(op, res);
+    return painel;
+  }
+
+  /* A folha ORC0068 (documento.js do pacote): a mesma revisão, o mesmo número e os mesmos valores do orçamento, no formato
+     da folha do Excel. A opção recomendada fica em cima, com os totais; as outras como «Opção». Só com IVA a 23 % e sem
+     autoliquidação (a folha só tem uma taxa). Fica dentro de uma «shadow root»: as regras da página não lhe tocam. */
+  function orc68Pode(o) {
+    const taxa = Math.round(Number((cfgMotor && cfgMotor.CONFIG && cfgMotor.CONFIG.iva) || 0.23) * 100);
+    return !orcAutoliq(o) && [].concat(...o.opcoes.map(op => op.linhas), o.comuns).every(l => (Number(l.iva) || orcIvaPad()) === taxa);
+  }
+  const orc68Num = o => { const m = /^ORC(\d{4})_(\d{4})$/.exec(o.num || ''); return m ? `${m[1]}/${m[2]}${o.rev && o.rev > 1 ? ' (rev. ' + o.rev + ')' : ''}` : 'Rascunho'; };
+  function orc68Desc(op) {
+    const m = op.motor && op.motor.tipo === 'instalacao' ? op.motor : null;
+    const its = m ? m.equip.filter(x => x.ref).map(x => [cfgMotor.CATALOGO.find(c => c.ref === x.ref), motN(x.qtd) || 1]).filter(x => x[0]) : [];
+    if (!its.length) {
+      const lin = op.linhas.map(l => (l.qtd != null && l.qtd !== 1 ? motTxtN(l.qtd) + ' x ' : '') + l.desc);
+      return {texto: [[op.titulo, op.marca].filter(Boolean).join(' · ')].concat(lin).filter(Boolean).join('\n'),
+        marcaTexto: op.marca || op.titulo || 'Opção ' + op.k, tipoTexto: op.titulo || '', modeloTexto: op.linhas.map(l => l.desc).join(' + ')};
+    }
+    const comKw = its.filter(x => Array.isArray(x[0].kw)), kwIt = comKw.length === 1 ? comKw[0][0] : (comKw.filter(x => x[0].tipo === 'ext')[0] || [])[0];
+    const kwT = v => String(v).replace('.', ',');
+    return {marcaTexto: String(op.marca || '').toUpperCase(), tipoTexto: m.gama === 'multi' ? `MURAL MULTISPLIT (${m.ints.length} UNIDADES INTERIORES)` : m.ints.length > 1 ? `MURAL MONOSPLIT (${m.ints.length} UNIDADES)` : 'MURAL MONOSPLIT',
+      modeloTexto: its.map(([it, q]) => (q > 1 ? q + ' x ' : '') + it.modelo).join(' + '), potenciaTexto: kwIt ? `Arref: ${kwT(kwIt.kw[0])} kW / Aquec: ${kwT(kwIt.kw[1])} kW` : ''};
+  }
+  function orc68Doc(box) {
+    const o = orcParaGuardar(orc), M = motorPrep(), T = (cfgMotor.CONFIG || {}).textos || {}, tipoPed = (rows.find(x => x.id === orcId) || {}).tipo;
+    const calc = op => { const t = orcTotOp(o, op); return {semIva: t.base / 100, iva: t.iva / 100, comIva: t.comIva / 100}; };
+    const rec = orcRec(o), mr = rec.motor && rec.motor.tipo === 'instalacao' ? rec.motor : null, dias = mr ? motN(mr.dias) || mr.ints.length : 0;
+    const doc = {numero: orc68Num(orc), data: orc.data || today(),
+      cliente: {nome: o.cliente.nome || '', morada: String(o.cliente.morada || '').split(/\n+/).map(x => x.trim()).filter(Boolean), nif: o.cliente.nif || ''},
+      proposta: [o.titulo, o.inclui].filter(Boolean).join('\n') || 'Proposta',
+      principal: Object.assign({calc: calc(rec)}, orc68Desc(rec)), opcoes: o.opcoes.filter(op => op !== rec).map(op => Object.assign({calc: calc(op)}, orc68Desc(op))),
+      notas: [o.notas, o.condicoes].filter(Boolean).join('\n'),
+      pagamento: o.pagamento || (tipoPed === 'manutencao' ? T.pagamentoManutencao : T.pagamentoInstalacao),
+      exclusoes: tipoPed === 'manutencao' ? T.exclusoesManutencao : undefined,
+      prazo: dias ? `${motTxtN(dias)} ${dias === 1 ? 'dia' : 'dias'}` : ''};
+    const cfg0 = M.CONFIG;
+    M.CONFIG = Object.assign({}, cfg0, {textos: Object.assign({}, T, {validade: `${o.validadeDias} Dias`})});
+    let html = '';
+    try { html = M.documento.renderORC(doc); } finally { M.CONFIG = cfg0; }
+    const host = h('div',{class:'o68-host'});
+    fill(box, orcPdfPronto() ? null : h('p',{class:'doc-teste'}, orc.num ? 'Rascunho · alterações ainda sem PDF' : 'Rascunho · ainda sem número'), host);
+    orc68Monta(host, html);
+  }
+  // O HTML da folha entra sem scripts nem atributos «on…» (os textos já vêm escapados pelo documento.js).
+  function orc68Monta(host, html) {
+    if (!host.attachShadow) { fill(host, h('p',{class:'doc-teste'}, 'Este aparelho não mostra a folha ORC0068: escolhe a folha MDM.')); return; }
+    const d = new DOMParser().parseFromString(html, 'text/html');
+    Array.prototype.forEach.call(d.querySelectorAll('script,iframe,object,embed,link,meta,base'), x => x.parentNode.removeChild(x));
+    Array.prototype.forEach.call(d.querySelectorAll('*'), el => { Array.prototype.slice.call(el.attributes).forEach(a => { if (/^on/i.test(a.name) || /^\s*javascript:/i.test(a.value)) el.removeAttribute(a.name); }); });
+    const css = Array.prototype.map.call(d.querySelectorAll('style'), x => x.textContent).join('\n').replace(/@page\s*\{[^}]*\}/g, '').replace(/(^|\})\s*body\s*\{/g, '$1.o68b{');
+    const raiz = host.shadowRoot || host.attachShadow({mode: 'open'});
+    while (raiz.firstChild) raiz.removeChild(raiz.firstChild);
+    const st = document.createElement('style'); st.textContent = css; raiz.appendChild(st);
+    const b = document.createElement('div'); b.className = 'o68b';
+    Array.prototype.slice.call(d.body.childNodes).forEach(n => b.appendChild(document.importNode(n, true)));
+    raiz.appendChild(b);
+  }
+
+  /* Definições › Orçamento: motor de preços. Mostra o que está na config e troca-a por um ficheiro JSON (o mesmo formato
+     que «Descarregar» dá: EMPRESA, CONFIG, CATALOGO, COMBINACOES, FERIADOS_FIXOS, PRAZOS), com a versão, como a tabela de
+     preços. Só o chefe e o escritório: a base de dados não dá estes dados a um técnico. */
+  function motValida(v) {
+    const obj = x => x && typeof x === 'object' && !Array.isArray(x), nume = x => typeof x === 'number' && Number.isFinite(x);
+    if (!obj(v)) return 'O ficheiro não é um objeto JSON.';
+    const C = v.CONFIG;
+    if (!obj(C)) return 'Falta CONFIG.';
+    if (!(nume(C.iva) && C.iva > 0 && C.iva < 1)) return 'CONFIG.iva tem de ser como 0.23.';
+    for (const k of ['fatorDesconto', 'margemEquip', 'tabelasMaoObra', 'horasPorMaquina', 'material', 'manutencao']) if (!obj(C[k])) return `Falta CONFIG.${k}.`;
+    if (!(nume(C.margemMaoObra) && nume(C.margemMaterial))) return 'Faltam CONFIG.margemMaoObra e CONFIG.margemMaterial (números, como 1.3).';
+    for (const k of Object.keys(C.tabelasMaoObra)) { const t = C.tabelasMaoObra[k]; if (!(obj(t) && nume(t.cm) && nume(t.lf) && nume(t.desloc))) return `CONFIG.tabelasMaoObra.${k} precisa de cm, lf e desloc.`; }
+    if (!(obj(C.material.cobre) && obj(C.material.amortecedor) && obj(C.material.kit))) return 'CONFIG.material precisa de cobre, amortecedor e kit.';
+    if (!(nume(C.manutencao.horaTecnico) && nume(C.manutencao.horaAjudante) && obj(C.manutencao.zonas))) return 'CONFIG.manutencao precisa de horaTecnico, horaAjudante e zonas.';
+    if (!Array.isArray(v.CATALOGO)) return 'Falta o CATALOGO (uma lista).';
+    for (let i = 0; i < v.CATALOGO.length; i++) {
+      const it = v.CATALOGO[i];
+      if (!(obj(it) && it.marca && it.ref && it.modelo && ['ext', 'int', 'conj'].indexOf(it.tipo) >= 0 && ['mono', 'multi', 'any'].indexOf(it.gama) >= 0)) return `Catálogo, item ${i + 1}: precisa de marca, gama (mono, multi, any), tipo (ext, int, conj), ref e modelo.`;
+      if (!(nume(it.tabela) || nume(it.custo))) return `Catálogo, ${it.ref}: falta o preço («tabela» ou «custo»).`;
+    }
+    if (!obj(v.EMPRESA) || !v.EMPRESA.nome) return 'Falta EMPRESA (com o nome).';
+    const textos = JSON.stringify([v.EMPRESA, C.textos || {}, v.CATALOGO.map(it => it.modelo)]);
+    if (ORC_TRAV.test(textos)) return 'Há travessões nos textos: usa vírgulas ou parênteses.';
+    return null;
+  }
+  function renderMotCfg() {
+    const sec = F('motCfgSec'), box = F('motCfg'); if (!sec || !box) return;
+    sec.hidden = souTecnico() || status !== 'ok';
+    if (sec.hidden) return;
+    const v = cfgMotor, C = v && v.CONFIG;
+    const marcas = {}; ((v && v.CATALOGO) || []).forEach(it => { marcas[it.marca] = (marcas[it.marca] || 0) + 1; });
+    const nomeM = k => Object.keys(MOT_MARCA).filter(n => MOT_MARCA[n] === k)[0] || k;
+    const fator = x => '× ' + motTxtN(x);
+    const resumo = C ? h('ul',{class:'mot-resumo'},
+      h('li',null, `Catálogo: ${v.CATALOGO.length} modelos (${Object.keys(marcas).map(k => `${nomeM(k)} ${marcas[k]}`).join(', ')}).`),
+      h('li',null, `Margem do equipamento: ${Object.keys(C.margemEquip).map(k => `${nomeM(k)} ${fator(C.margemEquip[k])}`).join(', ')}; mão de obra ${fator(C.margemMaoObra)}; material ${fator(C.margemMaterial)}.`),
+      h('li',null, `Mão de obra: ${Object.keys(C.tabelasMaoObra).map(k => `${k} (CM ${motEur(C.tabelasMaoObra[k].cm)}, LF ${motEur(C.tabelasMaoObra[k].lf)}, deslocação ${motEur(C.tabelasMaoObra[k].desloc)})`).join('; ')}.`),
+      h('li',null, `Manutenção: técnico ${motEur(C.manutencao.horaTecnico)}/h, ajudante ${motEur(C.manutencao.horaAjudante)}/h; ${Object.keys(C.manutencao.zonas || {}).map(z => `${z} ${motEur(C.manutencao.zonas[z].equipa)}`).join(', ')} (1.ª hora + deslocação).`))
+      : h('p',{class:'note'}, 'Ainda sem dados do motor. Carrega o ficheiro JSON com a empresa, os fatores, as margens, as tarifas e o catálogo.');
+    const ficheiro = h('input',{type:'file', accept:'application/json,.json', style:'display:none', onchange: async ev => {
+      const f = ev.target.files && ev.target.files[0]; ev.target.value = ''; if (!f) return;
+      let novo = null;
+      try { novo = JSON.parse(await new Promise((ok, mal) => { const rd = new FileReader(); rd.onload = () => ok(String(rd.result || '')); rd.onerror = mal; rd.readAsText(f); })); }
+      catch (e) { toast('O ficheiro não é JSON. Usa o formato de «Descarregar».'); return; }
+      const erro = motValida(novo); if (erro) { toast(erro); return; }
+      if (motCfgAGuardar) return;
+      motCfgAGuardar = true;
+      try {
+        const valor = {EMPRESA: novo.EMPRESA, CONFIG: novo.CONFIG, CATALOGO: novo.CATALOGO, COMBINACOES: novo.COMBINACOES || {}, FERIADOS_FIXOS: novo.FERIADOS_FIXOS || [], PRAZOS: novo.PRAZOS || {}};
+        const r = cfgMotorV
+          ? await sb.from('config').update({valor, versao: cfgMotorV + 1, atualizado_por: eu.email}).eq('chave', 'orcamento_motor').eq('versao', cfgMotorV).select('versao')
+          : await sb.from('config').insert({chave: 'orcamento_motor', valor, atualizado_por: eu.email}).select('versao');
+        if (r.error) throw r.error;
+        if (!(r.data && r.data.length)) { toast('Outra pessoa mudou o motor entretanto. A página vai ler outra vez; tenta de novo.'); carregar(); return; }
+        cfgMotor = valor; cfgMotorV = r.data[0].versao; toast(`Motor de preços guardado (${valor.CATALOGO.length} modelos)`); renderMotCfg();
+      } catch (e) { toast(/permiss|row-level/.test(String(e && e.message)) ? 'A tua conta não tem autorização para isto.' : eRede(e) ? 'Sem rede: o motor só se troca com rede.' : 'Não foi possível guardar o motor.'); }
+      finally { motCfgAGuardar = false; }
+    }});
+    fill(box, resumo,
+      h('p',{class:'note'}, 'Os custos e as margens só aparecem ao chefe e ao escritório: a base de dados não os dá a um técnico. No orçamento, «Calcular preço» em cada opção. Funciona sem rede com a última leitura.'),
+      h('div',{class:'row-end', style:'margin-top:10px'},
+        C ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => {
+          // target: o Safari do iOS 12 não conhece «download» e abriria o ficheiro no lugar da app; assim abre ao lado.
+          const a = h('a',{href: URL.createObjectURL(new Blob([JSON.stringify(v, null, 2)], {type:'application/json'})), download:'orcamento-motor.json', target:'_blank', rel:'noopener'});
+          document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+        }}, 'Descarregar (JSON)') : null,
+        canWrite ? h('button',{class:'btn btn-sm', type:'button', onclick:() => ficheiro.click()}, C ? 'Trocar por um ficheiro' : 'Carregar um ficheiro') : null,
+        ficheiro));
+  }
+
   function renderOrc() {
     if (!orc) return;
     const ro = canWrite ? null : true, o = orc, r = rows.find(x => x.id === orcId) || {};
@@ -5841,7 +6661,10 @@ if (!Element.prototype.replaceChildren) {
         o.num && !o.rev ? oeCampo('O primeiro PDF daqui é a revisão', h('input',{type:'number', min:'1', max:'99', inputmode:'numeric', value: String((Number(o.revBase) || 0) + 1), readonly: ro,
           oninput: ev => { const v = parseInt(ev.target.value, 10); if (v >= 1 && v <= 99) { o.revBase = v - 1; o.revBaseFixo = true; orcMuda(); } }})) : null,
         oeCampo('Morada', oeInp(o.cliente, 'morada', {multi:true}), true),
+        motorOk() ? oeCampo('Folha do PDF', oeSel(o, 'formato', [['', 'MDM (cartões das opções)'], ['orc0068', 'ORC0068 (como a folha do Excel)']], () => { renderOrc(); })) : null,
         o.cliente.tipo === 'empresa' ? h('label',{class:'check oe-largo'}, h('input',{type:'checkbox', checked: o.autoliquidacao ? true : null, disabled: ro, onchange: ev => { o.autoliquidacao = ev.target.checked; orcMuda(); }}), 'Autoliquidação do IVA (serviços de construção para empresas: confirmar com a contabilidade)') : null),
+      o.formato === 'orc0068' ? h('p',{class:'hint'}, !motorOk() ? 'Folha ORC0068: precisa do motor de preços (chefe e escritório). Aqui sai a folha MDM, com os mesmos valores.'
+        : !orc68Pode(o) ? 'A folha ORC0068 só tem uma taxa de IVA (23 %), sem autoliquidação: com este orçamento sai a folha MDM.' : 'Folha ORC0068: os valores são os do orçamento (opção recomendada em cima, as outras como «Opção»).') : null,
       h('p',{class:'note'}, o.num ? `N.º ${o.num}${o.rev ? `, revisão ${o.rev}` : ''}. O número não muda; um PDF com outro conteúdo sai como revisão seguinte.${o.rev ? '' : ' Número de fora do registo: confere a revisão (as versões que o cliente já recebeu, mais uma).'}` : 'O número é dado no primeiro PDF («Guardar e imprimir») e não muda depois.'));
     const tipos = Object.keys(ORC_BTU.tipos), x = o.divisoes.length ? orcPotencia() : null;
     const resDiv = d => { const P = ORC_POT.potencia(ORC_C, [orcDivCalc(d)]); return P.erros && P.erros.length ? '' : P.divs && P.divs[0] ? P.divs[0].texto : ''; };
@@ -5881,7 +6704,9 @@ if (!Element.prototype.replaceChildren) {
         oeLinhas(op.linhas, false),
         ro ? null : h('div',{class:'oe-acoes'},
           h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { op.linhas.push({ref:'', desc:'', qtd:'1', un:'un', preco:'', iva: orcIvaPad()}); orcMuda(); renderOrc(); }}, '+ Linha'),
-          h('button',{class:'btn btn-ghost btn-sm', type:'button', 'aria-haspopup':'menu', 'aria-expanded':'false', onclick: ev => orcEscolher(ev.currentTarget, ['equip', 'mat'], op.marca, it => { op.linhas.push(orcDeItem(it, 1)); orcMuda(); renderOrc(); })}, 'Da tabela')),
+          h('button',{class:'btn btn-ghost btn-sm', type:'button', 'aria-haspopup':'menu', 'aria-expanded':'false', onclick: ev => orcEscolher(ev.currentTarget, ['equip', 'mat'], op.marca, it => { op.linhas.push(orcDeItem(it, 1)); orcMuda(); renderOrc(); })}, 'Da tabela'),
+          motorOk() ? h('button',{class:'btn btn-ghost btn-sm', type:'button', 'aria-expanded': String(!!orcMotAberto[op.k]), onclick:() => { if (!op.motor) op.motor = motNovo(); orcMotAberto[op.k] = !orcMotAberto[op.k]; renderOrc(); }}, orcMotAberto[op.k] ? 'Fechar o cálculo' : 'Calcular preço') : null),
+        !ro && motorOk() && orcMotAberto[op.k] && op.motor ? motPainel(op) : null,
         h('p',{class:'oe-tot', 'data-k': op.k}))),
       ro || o.opcoes.length >= 3 ? null : h('div',{class:'oe-acoes'}, h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => {
         const ult = o.opcoes[o.opcoes.length - 1];
@@ -5922,6 +6747,9 @@ if (!Element.prototype.replaceChildren) {
   // A folha do PDF, com o aspeto da proposta da equipa (equipa/proposta.css). Construída com h(), sem innerHTML.
   function renderOrcDoc() {
     const box = F('orcDoc'); if (!box || !orc) return;
+    const o68 = orc.formato === 'orc0068' && motorOk() && orc68Pode(orc);
+    if (box.parentNode) box.parentNode.classList.toggle('o68-folha', o68);
+    if (o68) { orc68Doc(box); orcEscala(); return; }
     const o = orcParaGuardar(orc), E = ORC_EMPRESA, n = o.opcoes.length, comIva = orcComIva(o), autoliq = orcAutoliq(o);
     const data = orc.data || today(), ate = addDays(data, o.validadeDias), numTxt = o.num ? orcNumTxt(o.num) : '';
     const qtdTxt = l => l.qtd == null ? '' : String(l.qtd).replace('.', ',') + (l.un ? ' ' + l.un : '');
@@ -6123,6 +6951,7 @@ if (!Element.prototype.replaceChildren) {
       }
     } catch (e) {
       orcErro(String(e && e.message) === 'numero' ? 'Não foi possível dar o número (muita gente ao mesmo tempo). Tenta outra vez.'
+        : eRede(e) ? 'Sem rede: o número do orçamento só se dá com rede (dois aparelhos não podem ter o mesmo). «Guardar» guarda o rascunho neste aparelho; o PDF com número sai quando a rede voltar.'
         : /permiss|row-level/.test(String(e && e.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar. Tenta outra vez.');
     } finally { orcAGuardar = false; if (orc) orcMarca(); }
   }
@@ -6433,7 +7262,7 @@ if (!Element.prototype.replaceChildren) {
   async function carregarSeg() {
     if (!sb) return;
     try {
-      const res = await Promise.all([
+      const res = await lerComCache('seg', () => [
         sb.from('seguimentos').select('id,pedido_id,sequencia,ciclo,numero,ancora,devido_em,canal,assunto,rascunho,estado,enviado_em,enviado_por,resultado,fechado_em,fecho,criado_em').order('id'),
         sb.from('v_seguimentos_hoje').select('*'),
         sb.from('v_seg_proximo').select('*'),
@@ -6668,7 +7497,7 @@ if (!Element.prototype.replaceChildren) {
     if (!sb) return;
     try {
       const desde = addDays(agSeg(today()), -35), ate = addDays(agSeg(today()), 120);
-      const res = await Promise.all([
+      const res = await lerComCache('agenda', () => [
         sb.from('tecnicos').select('id,nome,cor,telefone,email,competencias,zonas,horario,ativo,ical_token').order('nome'),
         sb.from('v_agenda').select('*').gte('fim', desde).lt('inicio', ate).order('inicio'),
         sb.from('v_agenda_conflitos').select('*'),
@@ -7542,6 +8371,23 @@ if (!Element.prototype.replaceChildren) {
   });
   // Disposição escolhida à mão neste aparelho (o <head> lê-a em registoDisp).
   try { F('selDisp').value = localStorage.getItem('registo-disp') || ''; } catch (e) {}
+  // Definições › Relatório de intervenção: o que o RI traz por omissão (config «ri»). Os técnicos só entram quando o
+  // pedido não tem marcação na agenda; a matrícula é a da viatura da equipa.
+  function renderRiCfg() {
+    const box = F('riCfgBox'); if (!box) return;
+    const c = riCfg();
+    fill(box,
+      h('div',{class:'f'}, h('label',{class:'lbl', for:'ric-tec'}, 'Técnicos por omissão'), inp('ric-tec', c.tecnicos.join(', '), {placeholder:'Nome, Nome', readonly: canWrite ? null : true}),
+        h('span',{class:'aux'}, 'Quando o pedido não tem marcação na agenda. O primeiro é o responsável.')),
+      h('div',{class:'f', style:'margin-top:10px'}, h('label',{class:'lbl', for:'ric-mat'}, 'Matrícula da viatura'), inp('ric-mat', c.matricula, {placeholder:'00-AA-00', readonly: canWrite ? null : true})),
+      h('label',{class:'check', style:'margin-top:10px'}, h('input',{type:'checkbox', id:'ric-taxa', checked: c.taxa !== false ? true : null, disabled: canWrite ? null : true}), 'Taxa de deslocação: Sim por omissão'),
+      canWrite ? h('div',{class:'row-end', style:'margin-top:10px'}, h('button',{class:'btn btn-sm', type:'button', onclick: async () => {
+        const novo = {tecnicos: val('ric-tec').split(/\s*[,;]\s*/).filter(Boolean), matricula: val('ric-mat').toUpperCase(), taxa: F('ric-taxa').checked};
+        const {error} = await sb.from('config').upsert({chave:'ri', valor: novo, atualizado_por: eu.email}, {onConflict:'chave'});
+        if (error) { toast(/permiss|row-level/.test(String(error.message)) ? 'A tua conta não tem autorização para isto.' : eRede(error) ? 'Sem ligação. Tenta outra vez.' : 'Não foi possível guardar.'); return; }
+        cfgRi = novo; toast('Guardado');
+      }}, 'Guardar')) : null);
+  }
   F('selDisp').addEventListener('change', e => {
     try { if (e.target.value) localStorage.setItem('registo-disp', e.target.value); else localStorage.removeItem('registo-disp'); } catch (er) {}
     registoDisp(); if (status === 'ok') { setTab(tab); renderAll(); }
@@ -7665,6 +8511,116 @@ if (!Element.prototype.replaceChildren) {
   const F_APP = () => { F('login').hidden = true; F('app').hidden = false; document.body.classList.add('app-on'); };
   function erroLogin(m) { const el = F('l-err'); el.textContent = m || ''; el.hidden = !m; }
 
+  /* ---------- Sem rede ----------
+     A última leitura de cada parte (pedidos, seguimentos, agenda, painel) fica neste aparelho, por conta. Sem rede, a
+     página mostra-a e diz de quando é. As gravações de pedidos (passos, ações, dados, folha, RI, orçamento) ficam numa
+     fila e enviam-se quando a rede volta, com a versão de onde partiram: se outra pessoa mudou o pedido entretanto, a
+     alteração fica em «conflito» para escolher (gravar por cima ou deitar fora). Nada se perde em silêncio. */
+  const REDE_RE = /Failed to fetch|NetworkError|Load failed|network|internet|ERR_INTERNET|ERR_NAME|fetch failed/i;
+  const eRede = e => !!e && REDE_RE.test(String(e.message || e));
+  const chaveLocal = k => 'registo-' + k + ':' + ((eu && eu.email) || '');
+  function localLe(k, def) { try { const v = localStorage.getItem(chaveLocal(k)); return v ? JSON.parse(v) : def; } catch (e) { return def; } }
+  function localGuarda(k, v) { try { localStorage.setItem(chaveLocal(k), JSON.stringify(v)); return true; } catch (e) { return false; } }
+  function localTira(k) { try { localStorage.removeItem(chaveLocal(k)); } catch (e) {} }
+  let semRedeDe = null; // instante da leitura que se está a mostrar sem rede (null: com rede)
+  // Lê com rede e guarda a cópia; sem rede, devolve a cópia (no mesmo formato: [{data, error}]).
+  async function lerComCache(chave, pedidos) {
+    let res = null;
+    try { res = await Promise.all(pedidos()); } catch (e) { res = null; }
+    const falhou = !res || res.some(r => r && r.error && eRede(r.error));
+    if (!falhou) {
+      if (!localGuarda('cache-' + chave, {t: new Date().toISOString(), d: res.map(r => r.error ? null : r.data)})) {
+        // Sem espaço: guarda sem a parte maior (a faturação) em vez de não guardar nada.
+        localGuarda('cache-' + chave, {t: new Date().toISOString(), d: res.map((r, i) => r.error || (chave === 'base' && i === 3) ? null : r.data)});
+      }
+      if (chave === 'base' && semRedeDe) { semRedeDe = null; renderOff(); }
+      return res;
+    }
+    const c = localLe('cache-' + chave, null);
+    if (!c) return res || pedidos().map(() => ({data: null, error: {message: 'Failed to fetch'}}));
+    if (chave === 'base') { semRedeDe = c.t; renderOff(); }
+    return c.d.map(d => d == null ? {data: null, error: {message: 'sem cópia neste aparelho'}} : {data: d, error: null});
+  }
+  const filaLe = () => localLe('fila', []);
+  const filaGuarda = l => localGuarda('fila', l);
+  const conflitosLe = () => localLe('conflitos', []);
+  const conflitosGuarda = l => localGuarda('conflitos', l);
+  // Uma gravação de pedido que não chegou à base de dados: fica na fila (uma por pedido, a mais recente, com a versão de
+  // onde partiu) e o pedido mostra-se já mudado.
+  function enfileira(id, doc, versao, evento) {
+    const l = filaLe(), j = l.findIndex(x => x.id === id);
+    if (j >= 0) { l[j].doc = doc; if (evento) l[j].eventos = (l[j].eventos || []).concat([evento]).slice(-20); l[j].em = new Date().toISOString(); }
+    else l.push({id, doc, versao, eventos: evento ? [evento] : [], em: new Date().toISOString()});
+    if (!filaGuarda(l)) return false;
+    const i = rows.findIndex(x => x.id === id), linha = {id, ...doc, _versao: versao, _pendente: true, _escrita: ++escritas};
+    if (i >= 0) rows[i] = linha; else rows.push(linha);
+    renderOff();
+    return true;
+  }
+  // A fila por cima da leitura: o que ainda não foi enviado continua a ver-se como ficou neste aparelho.
+  function comFila(lista) {
+    filaLe().forEach(x => { const i = lista.findIndex(r => r.id === x.id), linha = {id: x.id, ...x.doc, _versao: x.versao, _pendente: true};
+      if (i >= 0) lista[i] = linha; else lista.push(linha); });
+    return lista;
+  }
+  let filaAEnviar = false;
+  async function filaEnvia() {
+    if (filaAEnviar || !sb || !navigator.onLine || !filaLe().length) return;
+    filaAEnviar = true; let feitos = 0, conf = 0;
+    try {
+      for (const x of filaLe()) {
+        const {data, error} = await sb.rpc('guardar_pedido', {p_id: x.id, p_dados: x.doc, p_versao: x.versao, p_evento: (x.eventos || []).slice(-1)[0] || null});
+        if (error) {
+          const t = String(error.message || '');
+          if (eRede(error)) break;
+          if (/conflito|duplicate key/.test(t)) { conflitosGuarda(conflitosLe().filter(y => y.id !== x.id).concat([{...x, erro: /duplicate/.test(t) ? 'duplicado' : 'conflito'}])); conf++; }
+          else break; // sessão expirada ou sem permissão: fica na fila até se entrar outra vez
+        } else feitos++;
+        filaGuarda(filaLe().filter(y => y.id !== x.id));
+      }
+    } catch (e) {} finally { filaAEnviar = false; }
+    renderOff();
+    if (feitos || conf) {
+      if (feitos) toast(`${feitos} ${feitos === 1 ? 'alteração feita sem rede enviada' : 'alterações feitas sem rede enviadas'}`);
+      carregar();
+    }
+  }
+  function renderOff() {
+    const bar = F('offBar'); if (!bar) return;
+    const n = filaLe().length, c = conflitosLe().length, partes = [];
+    if (semRedeDe) partes.push(`Sem rede: a mostrar os dados de ${quando(new Date(semRedeDe))}`);
+    if (n) partes.push(`${n} ${n === 1 ? 'alteração guardada neste aparelho' : 'alterações guardadas neste aparelho'}, ${navigator.onLine ? 'a enviar' : 'enviam-se quando houver rede'}`);
+    if (c) partes.push(`${c} ${c === 1 ? 'alteração não entrou' : 'alterações não entraram'}: o pedido mudou entretanto`);
+    bar.hidden = !partes.length; bar.classList.toggle('conflito', !!c);
+    F('offTxt').textContent = partes.join(' · '); F('offVer').hidden = !c;
+  }
+  // Conflitos: gravar por cima (lê a versão atual e grava a alteração deste aparelho) ou deitar fora.
+  async function conflitoResolve(x, gravarPorCima) {
+    fechaPop();
+    if (gravarPorCima) {
+      let id = x.id, versao = 0;
+      if (x.erro === 'duplicado') id = nextPedido();
+      else {
+        const {data, error} = await sb.from('pedidos').select('versao').eq('id', x.id).maybeSingle();
+        if (error) { toast(eRede(error) ? 'Sem ligação. Tenta outra vez.' : 'Não foi possível ler o pedido.'); return; }
+        versao = data ? data.versao : 0;
+      }
+      const doc = {...x.doc}; doc.historico = (doc.historico || []).slice(-60).concat([nota('Alteração feita sem rede gravada por cima da versão que entrou entretanto')]);
+      const {error} = await sb.rpc('guardar_pedido', {p_id: id, p_dados: doc, p_versao: versao, p_evento: 'Alteração feita sem rede gravada por cima'});
+      if (error) { toast(eRede(error) ? 'Sem ligação. Tenta outra vez.' : 'Não foi possível gravar: ' + String(error.message || '')); return; }
+      toast(id !== x.id ? `Gravado como ${id}` : 'Gravado');
+    } else toast('Alteração deitada fora');
+    conflitosGuarda(conflitosLe().filter(y => !(y.id === x.id && y.em === x.em)));
+    renderOff(); carregar();
+  }
+  F('offVer').addEventListener('click', ev => abrePop(ev.currentTarget, [h('h4',null,'Alterações que não entraram'),
+    ...conflitosLe().map(x => h('div',{class:'cf'},
+      h('b',null, `${x.doc.cliente || x.id} (${x.id})`), h('div',{class:'hint'}, x.erro === 'duplicado' ? 'Pedido novo feito sem rede com um número que outro aparelho já usou.' : `Feita a ${quando(new Date(x.em))}; outra pessoa mudou o pedido antes de chegar.`),
+      h('button',{class:'btn btn-sm', type:'button', onclick:() => conflitoResolve(x, true)}, x.erro === 'duplicado' ? 'Gravar com outro número' : 'Gravar a minha por cima'),
+      h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { if (confirm('Deitar fora esta alteração feita sem rede?')) conflitoResolve(x, false); }}, 'Deitar fora')))], 'conflitos'));
+  window.addEventListener('online', () => { renderOff(); if (sessao) { filaEnvia(); carregar(); } });
+  window.addEventListener('offline', renderOff);
+
   // Leituras: uma que começou antes de outra e chega depois é deitada fora (e espera pela mais nova); uma linha que esta
   // página gravou depois de a leitura começar fica (a leitura ainda não a tinha).
   let carregarSeq = 0, carregarUltima = null, escritas = 0;
@@ -7673,7 +8629,7 @@ if (!Element.prototype.replaceChildren) {
     if (!sb) return;
     const e0 = escritas;
     try {
-      const [p, c, q, ft, fc] = await Promise.all([
+      const [p, c, q, ft, fc] = await lerComCache('base', () => [
         sb.from('pedidos').select('id,dados,versao').order('id'),
         sb.from('config').select('chave,valor,versao'),
         sb.from('colaboradores').select('email,nome').order('nome'),
@@ -7683,14 +8639,16 @@ if (!Element.prototype.replaceChildren) {
       if (p.error) throw p.error;
       if (seq !== carregarSeq) return carregarUltima;
       const locais = new Map(rows.map(r => [r.id, r]));
-      rows = p.data.map(r => { const l = locais.get(r.id); if (l && l._escrita > e0 && (l._versao || 0) > r.versao) return l; const x = {id: r.id, ...r.dados, _versao: r.versao}; delete x._escrita; return x; });
-      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') TB_PED.cfg = x.valor || null; if (x.chave === 'colunas_clientes') TB_CLI.cfg = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'orcamento' && x.versao >= cfgOrcVersao) { cfgOrc = x.valor || null; cfgOrcVersao = x.versao; } if (x.chave === 'orcamento_numero' && x.versao >= cfgOrcNumV) { cfgOrcNum = x.valor || null; cfgOrcNumV = x.versao; } if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
+      rows = comFila(p.data.map(r => { const l = locais.get(r.id); if (l && l._escrita > e0 && (l._versao || 0) > r.versao) return l; const x = {id: r.id, ...r.dados, _versao: r.versao}; delete x._escrita; return x; }));
+      if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'ri') cfgRi = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') TB_PED.cfg = x.valor || null; if (x.chave === 'colunas_clientes') TB_CLI.cfg = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'orcamento' && x.versao >= cfgOrcVersao) { cfgOrc = x.valor || null; cfgOrcVersao = x.versao; } if (x.chave === 'orcamento_numero' && x.versao >= cfgOrcNumV) { cfgOrcNum = x.valor || null; cfgOrcNumV = x.versao; } if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
+      if (!c.error) { const mt = c.data.find(x => x.chave === 'orcamento_motor'); cfgMotor = mt ? mt.valor || null : null; cfgMotorV = mt ? mt.versao : 0; }
       if (ft.error) { if (/relation|does not exist|schema cache/i.test(ft.error.message || '')) fatTabela = false; }
       else { fatTabela = true; const novo = {}; for (const x of ft.data) if (x.dados && x.dados.mes) novo[x.dados.mes] = x.dados; faturacao = novo; if (!faturacao[fatMes]) fatMes = ''; }
       if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) { fichaTabela = false; const novo = {}; for (const id of Object.keys(fichas)) if (fichas[id]._novo) novo[id] = fichas[id]; fichas = novo; } }
       else { fichaTabela = true; const novo = {}; for (const x of fc.data) novo[x.id] = {...x.dados, _versao: x.versao}; fichas = novo; }
       if (!q.error) { equipa = q.data; const m = equipa.find(x => x.email === (eu && eu.email)); if (m && m.nome) eu.nome = m.nome; }
-      status = 'ok'; renderAll(); abreDoEndereco();
+      status = 'ok'; renderAll(); abreDoEndereco(); renderOff(); renderRiCfg(); renderMotCfg();
+      if (!semRedeDe) filaEnvia();
       carregarPainel();
       carregarSeg();
       carregarAgenda();
@@ -7718,7 +8676,9 @@ if (!Element.prototype.replaceChildren) {
     sessao = session; eu = {email: session.user.email, nome: null};
     // Só quem está na tabela colaboradores pode ler e escrever.
     // «*»: o papel só existe depois de supabase/papeis.sql; antes disso todos são «escritorio», como até aqui.
-    const {data, error} = await sb.from('colaboradores').select('*').eq('email', eu.email).maybeSingle();
+    let data = null, error = null;
+    try { ({data, error} = await sb.from('colaboradores').select('*').eq('email', eu.email).maybeSingle()); } catch (e) { error = e; }
+    if (error && eRede(error)) { const c = localLe('eu', null); if (c && c.email === eu.email) { data = c; error = null; } }
     if (error || !data) {
       await sb.auth.signOut();
       F_LOGIN(); erroLogin(error && !String(error.message).includes('permission') ? 'Não foi possível verificar a conta. Tenta outra vez.' : 'Esta conta ainda não tem acesso ao registo. Pede ao Bernardo para juntar o teu email aos colaboradores.');
@@ -7726,6 +8686,8 @@ if (!Element.prototype.replaceChildren) {
     }
     eu.nome = data.nome || eu.email.split('@')[0];
     eu.papel = data.papel || 'escritorio';
+    localGuarda('eu', {email: eu.email, nome: eu.nome, papel: eu.papel});
+    try { localStorage.setItem('registo-ultimo', eu.email); } catch (e) {}
     document.documentElement.classList.toggle('tecnico', eu.papel === 'tecnico');
     canWrite = true;
     F('userTxt').textContent = eu.nome;
@@ -7754,13 +8716,26 @@ if (!Element.prototype.replaceChildren) {
       erroLogin(txt.includes('Invalid login') ? 'Email ou palavra-passe errados.' : txt.includes('Failed to fetch') ? 'Sem ligação. Verifica a internet.' : 'Não foi possível entrar. Tenta outra vez.');
     } finally { F('l-ok').disabled = false; }
   });
-  F('btnSair').addEventListener('click', async () => { if (!confirm('Sair do registo neste aparelho?')) return; await sb.auth.signOut(); sair(); });
+  F('btnSair').addEventListener('click', async () => {
+    const n = filaLe().length;
+    if (!confirm(n ? `Há ${n} ${n === 1 ? 'alteração feita sem rede que ainda não foi enviada' : 'alterações feitas sem rede que ainda não foram enviadas'}. Se saíres, perdem-se. Sair mesmo assim?` : 'Sair do registo neste aparelho?')) return;
+    ['fila', 'conflitos', 'eu', 'cache-base', 'cache-seg', 'cache-agenda', 'cache-painel'].forEach(localTira);
+    try { localStorage.removeItem('registo-ultimo'); } catch (e) {}
+    try { await sb.auth.signOut(); } catch (e) {}
+    sair();
+  });
 
   (async () => {
     if (!window.supabase || !window.supabase.createClient) { F_LOGIN(); erroLogin('Não foi possível carregar a biblioteca da base de dados. Recarrega a página.'); return; }
     sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const {data} = await sb.auth.getSession();
-    if (data && data.session) await entrar(data.session); else F_LOGIN();
+    let sessaoGuardada = null;
+    try { const r = await sb.auth.getSession(); sessaoGuardada = r.data && r.data.session; } catch (e) {}
+    // Sem rede e sem sessão válida (a renovação precisa de rede): entra com a conta que já entrou neste aparelho; os dados
+    // são a última leitura e as gravações esperam pela rede.
+    let ultimo = ''; try { ultimo = localStorage.getItem('registo-ultimo') || ''; } catch (e) {}
+    if (sessaoGuardada) await entrar(sessaoGuardada);
+    else if (!navigator.onLine && ultimo) await entrar({user: {email: ultimo}, semRede: true});
+    else F_LOGIN();
     sb.auth.onAuthStateChange((ev, session) => { if (ev === 'SIGNED_OUT' && sessao) sair(); });
     // Sem tempo real (rede a bloquear websockets), recarrega de minuto a minuto; com ele, confirma a cada 5 minutos.
     // Nem a meio de escrever num campo (Objetivos, Probabilidades, Definições): a página redesenhada apagava o que se escrevia.

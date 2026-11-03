@@ -1425,9 +1425,20 @@ def check_registo():
         antes = css[:m_cm.start() + 1]
         if not re.search(re.escape(m_cm.group(2)) + r"\s*:[^;{}]*;\s*$", antes):
             out.append(f"registo/index.html: «{m_cm.group(2)}: color-mix(...)» sem uma cor de reserva antes (o iOS 12 não conhece color-mix)")
+    # os outros scripts do registo (o motor de orçamentos): também para o iPad antigo; a biblioteca da base de dados fica de fora
+    for js_f in sorted((ROOT / "registo").glob("*.js")):
+        if js_f.name in ("supabase.min.js", "sw.js"):
+            continue
+        src = js_f.read_text(encoding="utf-8")
+        src = re.sub(r"'(?:[^'\\\n]|\\.)*'|\"(?:[^\"\\\n]|\\.)*\"", "''", src)
+        src = re.sub(r"/\*.*?\*/", "", src, flags=re.S)
+        src = re.sub(r"(^|[^:\\])//[^\n]*", r"\1", src)
+        for padrao, nome in ((r"\?\.[A-Za-z_$(\[]", "?."), (r"\?\?", "??"), (r"\(\?<[=!]", "lookbehind (?<= / ?<!)")):
+            if re.search(padrao, src):
+                out.append(f"registo/{js_f.name}: «{nome}» não funciona no Safari do iPad antigo (iOS 12)")
     m = re.search(r"ORC-PURO-INICIO(.*?)ORC-PURO-FIM", text, re.S)
     if not m:
-        return ["registo/index.html: falta o bloco ORC-PURO-INICIO ... ORC-PURO-FIM (contas do orçamento)"]
+        return out + ["registo/index.html: falta o bloco ORC-PURO-INICIO ... ORC-PURO-FIM (contas do orçamento)"]
     bloco = m.group(1)
     so = lambda t: re.sub(r"\s+", "", t)
     calc = (ROOT / "netlify" / "lib" / "calculo.mjs").read_text(encoding="utf-8").split("\n")

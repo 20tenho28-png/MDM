@@ -5,7 +5,8 @@
 -- * colaboradores ganha a coluna «papel». Quem já lá está fica «escritorio», que é o que tem hoje: nada muda até alguém
 --   ser marcado «tecnico».
 -- * Um técnico continua a ler e mudar os pedidos e os clientes (precisa deles na rua), mas a base de dados deixa de lhe
---   dar a faturação (SAF-T) nem, em config, os objetivos de faturação. A tabela de preços do orçamento continua à vista
+--   dar a faturação (SAF-T) nem, em config, os objetivos de faturação e o motor de orçamentos (orcamento_motor: custos de
+--   fornecedor, fatores de desconto e margens). A tabela de preços do orçamento continua à vista
 --   (só tem preços de venda, e o técnico precisa dela para orçamentar no local).
 -- * Mudar as chaves de config (prazos, seguimentos, agenda, objetivos, preços…) fica para o chefe e o escritório; o
 --   técnico só avança o contador dos números de orçamento.
@@ -58,7 +59,7 @@ drop policy if exists "config: mudar" on public.config;
 drop policy if exists "config: apagar" on public.config;
 create policy "config: ler" on public.config
   for select to authenticated
-  using (public.autorizado() and (public.do_escritorio() or chave <> 'objetivos'));
+  using (public.autorizado() and (public.do_escritorio() or chave not in ('objetivos', 'orcamento_motor')));
 -- O contador dos números de orçamento é a exceção: um técnico que faça o PDF de um orçamento no local avança-o.
 create policy "config: escrever" on public.config
   for insert to authenticated with check (public.do_escritorio() or (public.autorizado() and chave = 'orcamento_numero'));
