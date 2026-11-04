@@ -368,6 +368,7 @@ body.app-on .col{background:var(--sunk)}
 .f-logo img{width:30mm;height:auto;display:block}
 .f-tit{display:flex;justify-content:flex-end;align-items:baseline;gap:2mm;font-weight:700;font-size:13pt;margin-top:8mm}
 .f-tit input{width:30mm;font-weight:700;font-size:13pt}
+.f-prov{font-size:8pt;font-weight:700;text-transform:uppercase;letter-spacing:.04em;border:1px solid #000;padding:0 1.5mm;white-space:nowrap}
 .f-emissao{display:flex;justify-content:flex-end;align-items:baseline;gap:2mm;font-size:9pt;margin-top:4mm}
 .f-emissao input{width:30mm}
 .f-cli{display:grid;grid-template-columns:16mm 1fr;gap:1mm 2mm;margin:4mm 0 0 auto;width:118mm;font-size:9.5pt}
@@ -1103,7 +1104,7 @@ html.tecnico #rail-prazos,html.tecnico #folhaMargem{display:none!important}
 .ri-hdr-r{flex:1;display:flex;flex-direction:column;gap:2.4mm;padding-top:2.5mm;min-width:0}
 .ri-titulo{text-align:center;font-size:13pt;font-weight:700}
 .ri-folha{display:flex;align-items:flex-end;gap:1.4mm;padding:.8mm 2mm .6mm;font-size:9pt;font-weight:700}
-.ri-folha .ri-ln{height:4mm}.ri-folha .w1{flex:0 0 22mm}.ri-folha .w2{flex:0 0 12mm}.ri-folha .w3{flex:0 0 11mm}.ri-folha .pg{margin-left:4mm}
+.ri-folha .ri-ln{height:4mm}.ri-folha .w1{flex:0 0 22mm;position:relative}.ri-prov{position:absolute;left:0;bottom:100%;font-size:5.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.04em;line-height:1;white-space:nowrap}.ri-folha .w2{flex:0 0 12mm}.ri-folha .w3{flex:0 0 11mm}.ri-folha .pg{margin-left:4mm}
 .ri-info{display:flex;gap:2.5mm;flex:0 0 auto;height:25mm}
 .ri-info-l{width:47%;display:flex;flex-direction:column}
 .ri-dini{display:flex;align-items:flex-end;gap:1mm;font-size:8.6pt;font-weight:700;padding:0 0 1.4mm 1mm}
@@ -1817,7 +1818,8 @@ html.sem-gap .ri-logo{margin-right:auto}
           <div class="sec-h"><h2 id="h-disp">Neste aparelho</h2></div>
           <div class="panel" style="padding:14px"><div class="f"><label class="lbl" for="selDisp">Disposição</label>
             <select id="selDisp"><option value="">Automática</option><option value="tatil">Tátil (tablet)</option><option value="escritorio">Escritório</option></select>
-            <span class="aux">Automática: tátil num ecrã de toque com 640 px ou mais, escritório com rato. Fica só neste aparelho.</span></div></div>
+            <span class="aux">Automática: tátil num ecrã de toque com 640 px ou mais, escritório com rato. Fica só neste aparelho.</span></div>
+            <p class="hint" id="espacoTxt" style="margin:10px 0 0"></p></div>
         </section>
         <section aria-labelledby="h-export">
           <div class="sec-h"><h2 id="h-export">Exportar</h2></div>
@@ -2882,6 +2884,7 @@ if (!Element.prototype.replaceChildren) {
   // ainda for a mesma, para não apagar a coluna que um colega criou entretanto com a cópia velha desta página.
   const tbCfgDe = (q, v) => ({ocultas: (v && v.ocultas) || q.ocultasPadrao, extra: (v && v.extra) || [], ordem: (v && v.ordem) || []});
   async function tbGuardarCfg(q, muda, msg) {
+    if (!navigator.onLine) { toast('Sem rede: as colunas só se mudam com rede.'); return false; }
     try {
       for (let tent = 0; tent < 3; tent++) {
         const r1 = await sb.from('config').select('valor,versao').eq('chave', q.chaveCfg).maybeSingle();
@@ -2892,17 +2895,21 @@ if (!Element.prototype.replaceChildren) {
           : await sb.from('config').insert({chave: q.chaveCfg, valor: c, atualizado_por: eu.email}).select('versao');
         if (r2.error) { if (!atual && /duplicate|unique|23505/i.test(r2.error.message || '')) continue; throw r2.error; }
         if (!r2.data || !r2.data.length) continue;
-        q.cfg = c; toast(msg); renderAll(); return;
+        q.cfg = c; toast(msg); renderAll(); return true;
       }
       toast('Outra pessoa mudou as colunas ao mesmo tempo. Tenta outra vez.'); carregar();
-    } catch (e) { toast(/permiss|row-level/.test(String(e.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar as colunas.'); }
+    } catch (e) { toast(msgErro(e, 'Sem rede: as colunas só se mudam com rede.', 'Não foi possível guardar as colunas.')); }
+    return false;
   }
   function tbMenuColunas(q, botao) {
     const cols = tbColunas(q);
     const lista = h('div',{class:'tb-cols'}, h('b',null, 'Colunas'),
       cols.filter(c => !c.fixa).map(c => h('label',{class:'check'}, h('input',{type:'checkbox', checked: c.oculta ? null : true, disabled: canWrite ? null : true, onchange: ev => {
-        if (c.extra) tbGuardarCfg(q, cf => ({extra: cf.extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: !ev.target.checked}) : z)}), ev.target.checked ? `«${c.nome}» à vista` : `«${c.nome}» escondida`);
-        else tbGuardarCfg(q, cf => { const o = cf.ocultas.filter(z => z !== c.id); if (!ev.target.checked) o.push(c.id); return {ocultas: o}; }, ev.target.checked ? `«${c.nome}» à vista` : `«${c.nome}» escondida`);
+        const caixa = ev.target, ver = caixa.checked;
+        // Se não gravar (sem rede, por exemplo), a caixa volta ao que estava: não diz uma coisa que não aconteceu.
+        (c.extra ? tbGuardarCfg(q, cf => ({extra: cf.extra.map(z => z.id === c.id ? Object.assign({}, z, {oculta: !ver}) : z)}), ver ? `«${c.nome}» à vista` : `«${c.nome}» escondida`)
+          : tbGuardarCfg(q, cf => { const o = cf.ocultas.filter(z => z !== c.id); if (!ver) o.push(c.id); return {ocultas: o}; }, ver ? `«${c.nome}» à vista` : `«${c.nome}» escondida`))
+          .then(feito => { if (!feito && caixa.isConnected) caixa.checked = !ver; });
       }}), c.nome, c.extra ? h('small',null, ' · ' + (TB_TIPOS_COL.find(t => t[0] === c.tipo) || [0, ''])[1]) : null)),
       canWrite ? h('button',{class:'btn btn-sm', type:'button', onclick:() => { fechaPop(); tbNovaColuna(q, botao); }}, '+ Nova coluna') : null);
     abrePop(botao, lista, 'tb-ed');
@@ -3084,16 +3091,18 @@ if (!Element.prototype.replaceChildren) {
   function renderTabela(lista) { tbRender(TB_PED, lista); }
 
   // Definições: a probabilidade de fecho de cada passo (o «win probability» da folha de Excel do pipeline).
+  let probRascunho = null; // o que se escreveu e não gravou (sem rede): fica no ecrã até gravar
   function renderProb() {
     const box = F('probCfg'); if (!box) return;
-    const p = Object.assign({}, PROB_PADRAO, cfgProb || {});
+    const p = Object.assign({}, PROB_PADRAO, cfgProb || {}, probRascunho || {});
     fill(box, h('div',{class:'fields'}, ABERTOS.map(k => campo('prob-' + k, ESTADOS[k].l, inp('prob-' + k, p[k], {type:'number', min:'0', max:'100', step:'5', inputmode:'numeric'})))),
       canWrite ? h('div',{class:'row-end', style:'margin-top:10px'}, h('button',{class:'btn', type:'button', onclick: async () => {
         const novo = {};
         for (const k of ABERTOS) { const n = Number(val('prob-' + k)); if (!(n >= 0 && n <= 100)) { toast('Cada probabilidade vai de 0 a 100.'); return; } novo[k] = n; }
         novo.resolvido = 100; novo.perdido = 0;
-        const {error} = await sb.from('config').upsert({chave:'probabilidades', valor: novo, atualizado_por: eu.email}, {onConflict:'chave'});
-        if (error) toast('Não foi possível guardar.'); else { cfgProb = novo; toast('Probabilidades guardadas'); renderAll(); }
+        const {error} = !navigator.onLine ? {error: erroRede('Sem rede')} : await sb.from('config').upsert({chave:'probabilidades', valor: novo, atualizado_por: eu.email}, {onConflict:'chave'});
+        if (error) { probRascunho = novo; toast(msgErro(error, 'Sem rede: as probabilidades só se gravam com rede. Ficam no ecrã até lá.', 'Não foi possível guardar.')); }
+        else { probRascunho = null; cfgProb = novo; toast('Probabilidades guardadas'); renderAll(); }
       }}, 'Guardar probabilidades')) : null);
   }
 
@@ -3275,15 +3284,17 @@ if (!Element.prototype.replaceChildren) {
     tbEditor(botao, nome + ' (sem IVA)', input, () => {
       const v = input.value.trim() ? parseValor(input.value) : null;
       if (v != null && (Number.isNaN(v) || v < 0)) return 'Escreve um valor em euros.';
+      if (!navigator.onLine) return 'Sem rede: o objetivo só se grava com rede.';
       dashGuardaObj(Object.assign({}, cfgObjetivos || {}, {[chave]: v}));
       return null;
     }, chave === 'mensal' ? 'Vazio: o objetivo anual a dividir por 12.' : null);
   }
+  // Fecha o editor só depois de gravar: sem rede, o valor escrito fica onde estava (no cartão e em Definições).
+  let objRascunho = null;
   async function dashGuardaObj(novo) {
-    fechaPop();
-    const {error} = await sb.from('config').upsert({chave:'objetivos', valor: novo, atualizado_por: eu.email}, {onConflict:'chave'});
-    if (error) { toast(/permiss|row-level/.test(String(error.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar o objetivo.'); return; }
-    cfgObjetivos = novo; toast('Objetivo guardado'); renderAll();
+    const {error} = !navigator.onLine ? {error: erroRede('Sem rede')} : await sb.from('config').upsert({chave:'objetivos', valor: novo, atualizado_por: eu.email}, {onConflict:'chave'});
+    if (error) { objRascunho = novo; toast(msgErro(error, 'Sem rede: o objetivo só se grava com rede. O que escreveste fica até lá.', 'Não foi possível guardar o objetivo.')); return; }
+    fechaPop(); objRascunho = null; cfgObjetivos = novo; toast('Objetivo guardado'); renderAll();
   }
   // Conta-quilómetros: meia circunferência, arco do valor e ponteiro.
   function dashGauge(v, alvo) {
@@ -3378,7 +3389,7 @@ if (!Element.prototype.replaceChildren) {
   // Definições: objetivos de faturação
   function renderObjCfg() {
     const box = F('objCfg'); if (!box) return;
-    const o = cfgObjetivos || {};
+    const o = objRascunho || cfgObjetivos || {};
     fill(box, h('div',{class:'fields'},
       campo('obj-anual', 'Objetivo anual (sem IVA)', inp('obj-anual', o.anual ? String(o.anual).replace('.', ',') : '', {inputmode:'decimal', placeholder:'por exemplo 150 000'})),
       campo('obj-mensal', 'Objetivo mensal (sem IVA)', inp('obj-mensal', o.mensal ? String(o.mensal).replace('.', ',') : '', {inputmode:'decimal', placeholder:'vazio: anual a dividir por 12'}))),
@@ -3435,7 +3446,10 @@ if (!Element.prototype.replaceChildren) {
     return {mes: de.slice(0, 7), periodo: {de, ate}, ficheiro: nomeFicheiro || '', gerado: t(header, 'DateCreated'), empresa: t(header, 'CompanyName'), docs, recibos, mestres};
   }
 
+  // O SAF-T é da equipa: lê-se e grava-se na base de dados de uma vez. Sem rede não se importa (ficava só neste ecrã,
+  // com ar de feito, e desaparecia na leitura seguinte).
   async function juntarSaft(files) {
+    if (sb && canWrite && fatTabela && !navigator.onLine) { toast('Sem rede: o SAF-T só se importa com rede.'); return; }
     let ok = 0, erros = [];
     for (const f of files) {
       try {
@@ -3446,12 +3460,13 @@ if (!Element.prototype.replaceChildren) {
         let texto; try { texto = new TextDecoder(enc).decode(buf); } catch (e) { texto = new TextDecoder('utf-8').decode(buf); }
         const m = lerSaft(texto, f.name); m.por = eu ? eu.email : null; m.atualizado = new Date().toISOString();
         const mestres = m.mestres || []; delete m.mestres;
-        faturacao[m.mes] = m; ok++;
-        await importarMestres(mestres);
         if (sb && canWrite && fatTabela) {
           const {error} = await sb.from('faturacao').upsert({mes: m.mes, dados: m, atualizado_por: eu.email}, {onConflict: 'mes'});
+          if (error && eRede(error)) { erros.push(`Sem rede: ${mesTxt(m.mes)} não ficou importado. Importa outra vez quando houver rede.`); break; }
           if (error) { if (/relation|does not exist|schema cache/i.test(error.message || '')) fatTabela = false; erros.push(`${m.mes}: lido, mas não ficou guardado para a equipa (${fatTabela ? 'erro ao gravar' : 'falta correr o SQL da tabela faturacao'})`); }
         }
+        faturacao[m.mes] = m; ok++;
+        if (await importarMestres(mestres) === 'rede') { erros.push(`Sem rede: ${mesTxt(m.mes)} ficou importado, mas os contactos dos clientes ficaram por juntar. Importa outra vez quando houver rede.`); break; }
       } catch (e) { erros.push(`${f.name}: ${(e && e.message) || 'não foi possível ler'}`); }
     }
     if (!fatMes || !faturacao[fatMes]) fatMes = Object.keys(faturacao).sort().pop() || '';
@@ -3472,7 +3487,8 @@ if (!Element.prototype.replaceChildren) {
       const k = chaveCli(mdoc.nome); if (!k) continue;
       // Só vai à base de dados quando a cópia local diz que falta alguma coisa; lá dentro volta a ver na cópia atual.
       if (!Object.keys(enche(mdoc)(Object.assign({}, cfgClientes[k] || {}, fichas[k] || {}))).length) continue;
-      try { await gravarCliente(k, enche(mdoc), null, null); } catch (e) { /* segue com os outros clientes */ }
+      // Sem rede, para logo (cada cliente esperava pela rede); outro erro: segue com os outros clientes.
+      try { await gravarCliente(k, enche(mdoc), null, null); } catch (e) { if (eRede(e)) return 'rede'; }
     }
   }
   // Tirar um mês inteiro de faturas pede um segundo toque (o × é pequeno e não há «Desfazer»).
@@ -3484,9 +3500,14 @@ if (!Element.prototype.replaceChildren) {
     }
     apagarMes(mes);
   }
+  // Primeiro na base de dados; só depois sai do ecrã (sem rede, o mês voltava na leitura seguinte).
   async function apagarMes(mes) {
+    if (sb && canWrite && fatTabela) {
+      if (!navigator.onLine) { toast('Sem rede: tirar um mês só com rede.'); return; }
+      const {error} = await sb.from('faturacao').delete().eq('mes', mes);
+      if (error) { toast(msgErro(error, 'Sem rede: tirar um mês só com rede.', 'Não foi possível apagar na base de dados.')); return; }
+    }
     delete faturacao[mes];
-    if (sb && canWrite && fatTabela) { const {error} = await sb.from('faturacao').delete().eq('mes', mes); if (error) toast('Não foi possível apagar na base de dados.'); }
     if (fatMes === mes) fatMes = Object.keys(faturacao).sort().pop() || '';
     renderAll();
   }
@@ -3744,9 +3765,12 @@ if (!Element.prototype.replaceChildren) {
     return doc;
   }
   // patch: {campo: valor} (caminhos como «extra.c1x») ou uma função que o calcula a partir da cópia atual.
-  // vistos: {campo: valor que a pessoa via}. Devolve true, 'conflito' ou lança o erro.
+  // vistos: {campo: valor que a pessoa via}. Um campo que já tem o valor novo não conta como mudado (uma gravação feita
+  // sem rede que entrou, mas cuja resposta se perdeu, não volta como conflito). linha: o texto do histórico, ou uma
+  // lista [{texto, em}] com a hora a que cada mudança foi feita (a fila sem rede). Devolve true, 'conflito' ou lança o erro.
   async function gravarCliente(k, patch, vistos, linha) {
-    const mudou = base => Object.keys(vistos || {}).some(p => cliNorm(cliPega(base, p)) !== cliNorm(vistos[p]));
+    const mudou = base => { const p = typeof patch === 'function' ? null : patch || {};
+      return Object.keys(vistos || {}).some(c => cliNorm(cliPega(base, c)) !== cliNorm(vistos[c]) && !(p && c in p && cliNorm(cliPega(base, c)) === cliNorm(p[c]))); };
     const monta = base => {
       const p = typeof patch === 'function' ? patch(base) : patch;
       if (!p || !Object.keys(p).length) return null;
@@ -3755,7 +3779,7 @@ if (!Element.prototype.replaceChildren) {
       Object.keys(p).forEach(x => { if (x.indexOf('.') < 0 && (p[x] === '' || p[x] == null) && velho[x] != null && velho[x] !== '') doc[x] = null; });
       delete doc._versao; delete doc._novo;
       if (!doc.nome) { const c = clientes().lista.find(x => x.k === k); doc.nome = (c && c.nome) || k; }
-      if (linha) doc.historico = (doc.historico || []).slice(-59).concat([{em: new Date().toISOString(), texto: linha, por: eu.email}]);
+      if (linha) doc.historico = (doc.historico || []).concat((Array.isArray(linha) ? linha : [{texto: linha}]).map(l => ({em: l.em || new Date().toISOString(), texto: l.texto, por: eu.email}))).slice(-60);
       doc.atualizado = new Date().toISOString(); doc.por = eu.email;
       return doc;
     };
@@ -3807,16 +3831,41 @@ if (!Element.prototype.replaceChildren) {
     if (sujo) sheetSujo = true;
   }
   // Para os botões e a ficha: grava, avisa e redesenha. vistos só quando a pessoa via um valor que pode ter mudado.
-  async function guardarCliente(k, patch, msg, vistos, linha) {
+  // Sem rede (ou se a gravação falha por falta dela), a mudança fica na fila de fichas deste aparelho, como os pedidos.
+  // feito: corre antes do redesenho quando a mudança ficou guardada (a ficha deixa de ter alterações por guardar).
+  async function guardarCliente(k, patch, msg, vistos, linha, feito) {
     if (!sb || !canWrite) return false;
+    const naFicha = () => modo === 'ficha' && fichaKey === k && !F('sheetWrap').hidden;
+    const naFila = () => {
+      if (!cliEnfileira(k, patch, vistos, linha)) { toast(ESPACO_FILA); return false; }
+      if (feito) feito();
+      toast('Sem rede: fica guardado neste aparelho e grava quando houver rede');
+      renderClientes(); if (naFicha()) fichaRedesenha();
+      return true;
+    };
+    // A ordem não pode trocar: com mudanças desta ficha à espera, esta junta-se a elas.
+    if (typeof patch !== 'function' && semRede()) return naFila();
+    if (typeof patch !== 'function' && cliFilaLe().some(x => x.k === k)) {
+      if (!cliEnfileira(k, patch, vistos, linha)) { toast(ESPACO_FILA); return false; }
+      if (feito) feito();
+      if (msg) toast(msg);
+      renderClientes(); if (naFicha()) fichaRedesenha();
+      cliFilaEnvia();
+      return true;
+    }
     try {
       const r = await gravarCliente(k, patch, vistos, linha);
-      if (r === 'conflito') { toast(CLI_CONFLITO); await carregar(); if (modo === 'ficha' && fichaKey === k && !F('sheetWrap').hidden) fichaRedesenha(); return false; }
+      // Num conflito a ficha mostra o valor do colega, para o ver e repetir (como sempre); noutro erro fica o que se escreveu.
+      if (r === 'conflito') { toast(CLI_CONFLITO); await carregar(); if (feito) feito(); if (naFicha()) fichaRedesenha(); return false; }
+      if (feito) feito();
       if (msg) toast(msg);
       renderClientes();
-      if (modo === 'ficha' && fichaKey === k && !F('sheetWrap').hidden) fichaRedesenha();
+      if (naFicha()) fichaRedesenha();
       return true;
-    } catch (e) { toast(/permiss|row-level/.test(String(e && e.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar.'); return false; }
+    } catch (e) {
+      if (eRede(e) && typeof patch !== 'function') return naFila();
+      toast(msgErro(e, 'Sem rede: a ficha só se grava com rede.', 'Não foi possível guardar.')); return false;
+    }
   }
   const abrirNovoPara = nome => { novoBase = {cliente: nome}; abrirNovo(); };
 
@@ -3912,9 +3961,17 @@ if (!Element.prototype.replaceChildren) {
     fechaPop();
     if (!sb || !canWrite) return false;
     const campo = alvo.extra ? 'extra.' + alvo.extra : alvo, antes = cliPega(x.cfg, campo);
+    const patch = {[campo]: valor}, vistos = {[campo]: antes == null ? null : antes}, linha = `${rotulo}: ${antesTxt} → ${depoisTxt}${motivo ? ' (' + motivo + ')' : ''}`;
+    // Sem rede: na fila das fichas, como na ficha (o valor escrito não se perde).
+    const naFila = () => { if (!cliEnfileira(x.k, patch, vistos, linha)) { toast(ESPACO_FILA); return false; } toast(`Sem rede: ${rotulo} fica «${depoisTxt}» neste aparelho e grava quando houver rede`); renderClientes(); return true; };
+    if (semRede()) return naFila();
+    if (cliFilaLe().some(y => y.k === x.k)) { // a ordem não pode trocar: junta-se às mudanças desta ficha à espera
+      if (!cliEnfileira(x.k, patch, vistos, linha)) { toast(ESPACO_FILA); return false; }
+      renderClientes(); cliFilaEnvia(); toast(`${rotulo}: ${depoisTxt}`); return true;
+    }
     let r;
-    try { r = await gravarCliente(x.k, {[campo]: valor}, {[campo]: antes == null ? null : antes}, `${rotulo}: ${antesTxt} → ${depoisTxt}${motivo ? ' (' + motivo + ')' : ''}`); }
-    catch (e) { toast(/permiss|row-level/.test(String(e && e.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar.'); return false; }
+    try { r = await gravarCliente(x.k, patch, vistos, linha); }
+    catch (e) { if (eRede(e)) return naFila(); toast(msgErro(e, 'Sem rede: isto só se grava com rede.', `Não foi possível guardar «${depoisTxt}».`)); return false; }
     if (r === 'conflito') { toast(CLI_CONFLITO); carregar(); return false; }
     renderClientes();
     // «Desfazer» parte do valor que esta pessoa escreveu: se um colega o mudou entretanto, recusa.
@@ -4139,8 +4196,8 @@ if (!Element.prototype.replaceChildren) {
       if (['nome', 'contacto', 'morada', 'notas', 'localidade'].some(x => /[—–]/.test(patch[x] || ''))) { toast('Sem travessões: usa vírgulas ou parênteses.'); return; }
       if (!fichaKey) fichaKey = k;
       const nomes = {nome:'Nome', nif:'NIF', tipoCliente:'Tipo', telefone:'Telefone', email:'Email', contacto:'Pessoa de contacto', morada:'Morada', notas:'Notas', contrato:'Contrato', dono:'Dono', prioridade:'Prioridade', proximoContacto:'Próximo contacto', localidade:'Localidade'};
-      sheetSujo = false; // o que se escreveu é o que vai ser gravado: o redesenho mostra-o já gravado
-      await guardarCliente(k, patch, 'Ficha guardada', vistos, novo ? 'Ficha criada' : `Ficha: ${Object.keys(patch).map(x => nomes[x]).join(', ')}`);
+      // Só depois de gravada (ou guardada na fila sem rede) deixa de ter alterações por guardar: se falhar, fechar pergunta.
+      await guardarCliente(k, patch, 'Ficha guardada', vistos, novo ? 'Ficha criada' : `Ficha: ${Object.keys(patch).map(x => nomes[x]).join(', ')}`, () => { sheetSujo = false; });
     };
     fill(body, blocos,
       h('div',{class:'block'}, h('h3',null, 'Dados'), h('fieldset',{disabled: !canWrite}, dados)),
@@ -4271,6 +4328,7 @@ if (!Element.prototype.replaceChildren) {
       else if (v === 'v_tendencia') q = q.order('dia');
       return q;
     })).then(function (res) {
+      if (!res || !sessao) return;
       var falha = null;
       res.forEach(function (r) { if (r.error && !falha) falha = r.error; });
       if (falha) {
@@ -4514,6 +4572,7 @@ if (!Element.prototype.replaceChildren) {
 
   async function guardarPrazos() {
     if (!sb || !canWrite) return;
+    if (!navigator.onLine) { toast('Sem rede: os prazos só se gravam com rede. Ficam no ecrã até lá.'); return; }
     const valores = {};
     for (const k of COM_TABELA) {
       valores[k] = {};
@@ -4534,7 +4593,7 @@ if (!Element.prototype.replaceChildren) {
       if (document.activeElement && F('prazos').contains(document.activeElement)) document.activeElement.blur();
       toast('Prazos guardados');
       renderAll();
-    } catch (e) { toast('Não foi possível guardar os prazos.'); }
+    } catch (e) { toast(msgErro(e, 'Sem rede: os prazos só se gravam com rede. Ficam no ecrã até lá.', 'Não foi possível guardar os prazos.')); }
   }
   F('btnPrazos').addEventListener('click', guardarPrazos);
   F('prazos').addEventListener('input', () => { prazosSujos = true; });
@@ -4542,6 +4601,8 @@ if (!Element.prototype.replaceChildren) {
   function renderExport() {
     const box = F('export');
     const n = rows.length;
+    // Quanto ocupa o que fica neste aparelho para usar sem rede (o Safari dá cerca de 5 MB a cada site).
+    const et = F('espacoTxt'); if (et && eu) { const mb = espacoUsado() * 2 / 1048576; et.textContent = `Guardado neste aparelho para usar sem rede: ${mb.toLocaleString('pt-PT', {maximumFractionDigits: 1})} MB de cerca de 5 MB.${espacoFalta ? ' ' + espacoFalta : ''}`; }
     fill(box,
       h('p',{class:'note', style:'margin:0'}, 'Descarrega todos os pedidos em CSV (abre no Excel e no Google Sheets, separador vírgula, valores com vírgula decimal). Abertos primeiro, pela ordem da triagem; depois os fechados.'),
       h('div',{class:'row-end'}, h('button',{class:'btn', type:'button', disabled: status !== 'ok' || !n, onclick: descarregarCSV}, `Exportar CSV (${n})`),
@@ -4832,7 +4893,7 @@ if (!Element.prototype.replaceChildren) {
     const ba = blocoAgenda(r); if (ba) blocos.push(ba);
     const bo = blocoOrc(r); if (bo) blocos.push(bo);
     blocos.push(h('div',{class:'acao', style:'--stripe:var(--accent)'},
-      h('div',{style:'min-width:0'}, h('div',{class:'what'}, r.folha ? `Folha de obra ${r.folha.num}` : 'Folha de obra'),
+      h('div',{style:'min-width:0'}, h('div',{class:'what'}, r.folha ? `Folha de obra ${r.folha.num}${r.folha.numProv ? ' (provisória)' : ''}` : 'Folha de obra'),
         h('div',{class:'who'}, r.folha && r.folha.totalDebito ? `${eur(r.folha.totalDebito)} a debitar${souTecnico() ? '' : ' · custo ' + eur(r.folha.totalCustos || 0)}`
           : r.folha ? `Pronta para a visita${r.folha.guardadaEm ? ' · guardada a ' + ddmm(r.folha.guardadaEm.slice(0, 10)) : ''}`
           : 'Pronta a imprimir para a visita')),
@@ -5107,22 +5168,27 @@ if (!Element.prototype.replaceChildren) {
   // opts.manter: grava sem fechar o formulário aberto na folha do pedido (o orçamento grava por cima, num ecrã à parte);
   // opts.erro: onde mostrar o erro (senão vai para o formulário aberto ou para baixo).
   async function gravar(id, doc, msg, opts) {
-    if (!sb || saving) return false;
+    if (!sb) return false;
+    // O erro vai para o formulário aberto; sem folha aberta (edição na tabela), aparece em baixo.
+    const erroGrav = m => { if (opts && opts.erro) opts.erro(m); else if (F('t-err') && !F('sheetWrap').hidden) erroT(m); else toast(m); };
+    // Uma gravação de cada vez (com a rede fraca, uma pode esperar até 12 s): a segunda diz porquê, nunca fica calada.
+    if (saving) { erroGrav('Ainda a guardar a alteração anterior. Espera um instante e tenta outra vez.'); return false; }
     saving = true; const ok = F('t-ok'); if (ok) ok.disabled = true;
-    delete doc._versao; delete doc._escrita; // a versão e a marca de escrita são desta página, não dos dados
+    delete doc._versao; delete doc._escrita; delete doc._pendente; // marcas desta página (versão, escrita, por enviar), não dos dados
     doc.atualizado = new Date().toISOString();
     doc.atualizadoPor = eu ? eu.email : null;
     const atual = rows.find(x => x.id === id);
     const versao = atual ? (atual._versao || 0) : 0;
     const ultimo = (doc.historico || []).slice(-1)[0];
-    // Já há alterações deste pedido à espera de rede: esta junta-se a elas (a ordem não pode trocar).
-    if (!navigator.onLine || filaLe().some(x => x.id === id)) {
-      if (enfileira(id, doc, versao, ultimo ? ultimo.texto : null)) {
-        if (!(opts && opts.manter)) { trans = null; modo = null; sheetSujo = false; }
-        toast(navigator.onLine ? (msg || 'Guardado') : 'Sem rede: fica guardado neste aparelho e grava quando houver rede'); renderAll(); saving = false; if (ok) ok.disabled = false;
-        if (navigator.onLine) filaEnvia();
-        return true;
-      }
+    // Sem rede (ou com ela mal), ou já há alterações deste pedido à espera: esta junta-se a elas (a ordem não pode trocar).
+    if (semRede() || filaLe().some(x => x.id === id)) {
+      const fora = semRede();
+      saving = false; if (ok) ok.disabled = false;
+      if (!enfileira(id, doc, versao, ultimo ? ultimo.texto : null)) { erroGrav(ESPACO_FILA); return false; }
+      if (!(opts && opts.manter)) { trans = null; modo = null; sheetSujo = false; }
+      toast(fora ? 'Sem rede: fica guardado neste aparelho e grava quando houver rede' : (msg || 'Guardado')); renderAll();
+      if (!fora) filaEnvia();
+      return true;
     }
     try {
       const {data, error} = await sb.rpc('guardar_pedido', {p_id: id, p_dados: doc, p_versao: versao, p_evento: ultimo ? ultimo.texto : null});
@@ -5137,7 +5203,9 @@ if (!Element.prototype.replaceChildren) {
       return true;
     } catch (e) {
       const txt = String((e && e.message) || '');
-      if (eRede(e) && enfileira(id, doc, versao, ultimo ? ultimo.texto : null)) {
+      // Sem rede, ou sem resposta (rede fraca): fica na fila deste aparelho, como sem rede nenhuma.
+      if (eRede(e)) {
+        if (!enfileira(id, doc, versao, ultimo ? ultimo.texto : null)) { erroGrav(ESPACO_FILA); return false; }
         if (!(opts && opts.manter)) { trans = null; modo = null; sheetSujo = false; }
         toast('Sem rede: fica guardado neste aparelho e grava quando houver rede'); renderAll();
         return true;
@@ -5146,9 +5214,7 @@ if (!Element.prototype.replaceChildren) {
       if (txt.includes('conflito')) { m = 'Alguém alterou este pedido entretanto. Recarrega e repete.'; carregar(); }
       else if (txt.includes('duplicate key')) m = 'Já existe um pedido com este número.';
       else if (txt.includes('row-level security') || txt.includes('permission')) m = 'A tua conta não tem autorização para gravar.';
-      else if (txt.includes('Failed to fetch') || txt.includes('NetworkError')) m = 'Sem ligação. Verifica a internet e tenta outra vez.';
-      // O erro vai para o formulário aberto; sem folha aberta (edição na tabela), aparece em baixo.
-      if (opts && opts.erro) opts.erro(m); else if (F('t-err') && !F('sheetWrap').hidden) erroT(m); else toast(m);
+      erroGrav(m);
       return false;
     } finally { saving = false; if (ok) ok.disabled = false; }
   }
@@ -5311,7 +5377,7 @@ if (!Element.prototype.replaceChildren) {
   };
   const pontos = s => s ? `${s.slice(8, 10)}.${s.slice(5, 7)}.${s.slice(0, 4)}` : '';
   const numDe = v => { const n = parseValor(v); return n == null || Number.isNaN(n) ? 0 : n; };
-  let fol = null, folId = null, folModo = 'visita', folSujo = false;
+  let fol = null, folId = null, folModo = 'visita', folSujo = false, folSugerido = null;
   // Antes da obra, a folha é só para a visita (confirmar o combinado, linhas e totais em branco para o técnico, como o
   // Excel impresso). As versões com preços (Custos e Débito) aparecem a partir de «Em execução», para a fatura; o
   // orçamento faz-se no próprio pedido (Orçamento, mais abaixo).
@@ -5324,10 +5390,72 @@ if (!Element.prototype.replaceChildren) {
     if ((cp && cp >= '1000' && cp <= '1999') || /\blisboa\b/i.test(t) && !cp) return 'Deslocação_Lisboa';
     return 'Deslocação_Arredores';
   }
+  // A sugestão para uma folha nova (provisória até se guardar com rede): o maior deste aparelho, o contador e o ponto de
+  // partida das tarifas, mais um.
   function proximaFolha() {
-    const ano = new Date().getFullYear();
-    const max = rows.reduce((m, r) => { const x = /^(\d+)\/(\d{4})$/.exec((r.folha && r.folha.num) || ''); return x && Number(x[2]) === ano ? Math.max(m, Number(x[1])) : m; }, (cfgTarifas && cfgTarifas.ultimaFolhaAno === ano && Number(cfgTarifas.ultimaFolha)) || 0);
+    const ano = new Date().getFullYear(), f = (cfgOrcNum && cfgOrcNum.folha) || {};
+    const base = Math.max((cfgTarifas && cfgTarifas.ultimaFolhaAno === ano && Number(cfgTarifas.ultimaFolha)) || 0, Number(f.ano) === ano ? Number(f.ultimo) || 0 : 0);
+    const max = rows.reduce((m, r) => { const x = /^(\d+)\/(\d{4})$/.exec((r.folha && r.folha.num) || ''); return x && Number(x[2]) === ano ? Math.max(m, Number(x[1])) : m; }, base);
     return max ? `${max + 1}/${ano}` : '';
+  }
+  // O n.º da folha de obra (o RI leva o mesmo) reserva-se como o do orçamento, com controlo de versão, num contador que
+  // fica na mesma linha de config («orcamento_numero», campo «folha»: é a única chave que um técnico pode avançar,
+  // papeis.sql). O maior entre o contador, o ponto de partida das tarifas (ultimaFolha) e os números definitivos dos
+  // pedidos lidos agora, mais um: dois aparelhos nunca têm o mesmo. Um número escrito à mão (a continuar o Excel) fica,
+  // se estiver livre. Sem rede, a folha leva um número provisório, marcado, que dá lugar ao definitivo quando a rede volta.
+  async function reservarFolha(id, escrito) {
+    const ano = new Date().getFullYear();
+    const de = t => { const m = /^(\d+)\/(\d{4})$/.exec(String(t || '').trim()); return m && Number(m[2]) === ano ? Number(m[1]) : 0; };
+    for (let tent = 0; tent < 6; tent++) {
+      const [c, p] = await Promise.all([
+        sb.from('config').select('valor,versao').eq('chave', 'orcamento_numero').maybeSingle(),
+        sb.from('pedidos').select('id,fnum:dados->folha->>num,fprov:dados->folha->>numProv'),
+      ]);
+      if (c.error) throw c.error;
+      if (p.error) throw p.error;
+      const atual = c.data, v = (atual && atual.valor) || {}, f = v.folha || {};
+      const finais = p.data.concat(rows.map(r => ({id: r.id, fnum: r.folha && r.folha.num, fprov: r.folha && r.folha.numProv ? 'true' : null})))
+        .filter(x => x.id !== id && x.fnum && String(x.fprov) !== 'true');
+      if (escrito && finais.some(x => de(x.fnum) === escrito)) throw new Error('folha-usada');
+      const max = finais.reduce((m, x) => Math.max(m, de(x.fnum)), Math.max(Number(f.ano) === ano ? Number(f.ultimo) || 0 : 0,
+        cfgTarifas && Number(cfgTarifas.ultimaFolhaAno) === ano ? Number(cfgTarifas.ultimaFolha) || 0 : 0));
+      const num = escrito || max + 1, valor = Object.assign({}, v, {folha: {ano, ultimo: Math.max(max, num)}});
+      const w = atual
+        ? await sb.from('config').update({valor, versao: atual.versao + 1, atualizado_por: eu.email}).eq('chave', 'orcamento_numero').eq('versao', atual.versao).select('versao')
+        : await sb.from('config').insert({chave: 'orcamento_numero', valor, atualizado_por: eu.email}).select('versao');
+      if (w.error) { if (!atual && /duplicate|unique|23505/i.test(w.error.message || '')) continue; throw w.error; }
+      if (!w.data || !w.data.length) continue;
+      cfgOrcNum = valor; cfgOrcNumV = w.data[0].versao;
+      return `${num}/${ano}`;
+    }
+    throw new Error('numero');
+  }
+  // Folhas com número provisório feitas sem rede neste aparelho: com rede, o provisório fica definitivo se ainda estiver
+  // livre (é o que está no papel); senão a folha recebe o seguinte, e o RI e a obra que o levavam passam ao novo, com a
+  // nota no histórico. Uma folha ou um RI abertos no ecrã esperam.
+  let folhasAFinalizar = false;
+  async function folhasFinaliza() {
+    if (folhasAFinalizar || !canWrite || !eu || semRede()) return;
+    const pode = r => r && r.folha && r.folha.numProv && r.folha.provPor === eu.email && !r._pendente && r.id !== folId && r.id !== riId;
+    const xs = rows.filter(pode);
+    if (!xs.length) return;
+    folhasAFinalizar = true;
+    try {
+      for (const r0 of xs) {
+        const velho = r0.folha.num, m = /^(\d+)\/(\d{4})$/.exec(String(velho || '')), dele = m && Number(m[2]) === new Date().getFullYear() ? Number(m[1]) : 0;
+        let num;
+        try { num = await reservarFolha(r0.id, dele); }
+        catch (e) { if (String(e && e.message) !== 'folha-usada') throw e; num = await reservarFolha(r0.id, 0); }
+        const r = rows.find(x => x.id === r0.id);
+        if (!pode(r) || r.folha.num !== velho) continue;
+        const novo = JSON.parse(JSON.stringify(r)); delete novo.id;
+        novo.folha = Object.assign({}, novo.folha, {num}); delete novo.folha.numProv; delete novo.folha.provPor;
+        if (novo.ri && novo.ri.num === velho) { novo.ri.num = num; delete novo.ri.numProv; }
+        if (novo.obra && novo.obra.riNum === velho) novo.obra.riNum = num;
+        novo.historico = (novo.historico || []).slice(-60).concat([nota(num === velho ? `Folha de obra ${num}: o n.º provisório (feito sem rede) ficou definitivo` : `Folha de obra: o n.º provisório ${velho} (feito sem rede) passou a ${num}`)]);
+        if (!await gravar(r.id, novo, num === velho ? `Folha de obra ${num}: número confirmado` : `Folha de obra ${num} (era a provisória ${velho})`, {manter: true, erro: () => {}})) break;
+      }
+    } catch (e) {} finally { folhasAFinalizar = false; }
   }
   function folhaNova(r) {
     const f = fichas[chaveCli(r.cliente || '')] || {};
@@ -5338,7 +5466,7 @@ if (!Element.prototype.replaceChildren) {
     const equipa = (r.obra && r.obra.equipa) || r.dono || '';
     const temContrato = f.contrato && f.contrato.tipo && f.contrato.tipo !== 'nenhum' && f.contrato.tipo !== 'garantia';
     return {
-      num: proximaFolha(), emissao: today(), cliente: r.cliente || '', morada,
+      num: proximaFolha(), numProv: true, emissao: today(), cliente: r.cliente || '', morada,
       refInterna: [r.id, r.num].filter(Boolean).join(' · '), pedidoPor: f.contacto ? `Exmo(a). Sr(a). ${contacto}` : contacto,
       local: tarifa('desl', zona)[1], instalacao: '', pat: r.pat || '', fatura: r.fatura || '',
       trabalhos: `Execução dos seguintes trabalhos nas v/Instalações${morada ? ' na ' + morada.replace(/\n/g, ', ') : ''}:` + (linhasDesc.length ? '\n' + linhasDesc.map(x => /^[-•]/.test(x) ? x : '- ' + x).join('\n') : ''),
@@ -5364,6 +5492,7 @@ if (!Element.prototype.replaceChildren) {
   function abrirFolha(id) {
     const r = rows.find(x => x.id === id); if (!r) return;
     folId = id; fol = r.folha ? JSON.parse(JSON.stringify(r.folha)) : folhaNova(r); folSujo = !r.folha; folModo = posVisita(r) ? 'custos' : 'visita';
+    folSugerido = fol.numProv ? fol.num : null; // o provisório: se ficar igual, guardar com rede reserva o definitivo
     F('folhaWrap').hidden = false; document.body.style.overflow = 'hidden';
     renderFolha();
   }
@@ -5431,7 +5560,7 @@ if (!Element.prototype.replaceChildren) {
     F('folhaModoVisita').setAttribute('aria-pressed', String(folModo === 'visita'));
     F('folhaModoCustos').setAttribute('aria-pressed', String(folModo === 'custos')); F('folhaModoDebito').setAttribute('aria-pressed', String(folModo === 'debito'));
     F('folhaModos').hidden = !posVisita(r);
-    F('folhaBarTitulo').textContent = `Folha de obra ${fol.num || ''} · ${fol.cliente || r.cliente || ''}`;
+    F('folhaBarTitulo').textContent = `Folha de obra ${fol.num || ''}${fol.numProv ? ' (provisória)' : ''} · ${fol.cliente || r.cliente || ''}`;
     F('folhaGuardar').hidden = F('folhaImprimir').hidden = !canWrite;
     const corpo = [];
     corpo.push(h('tr',null, h('td',{class:'f-branco'}, ''), h('td',{colspan:'4', class:'f-branco'}, campoF('trabalhos', {multi:true, label:'Trabalhos'}))));
@@ -5451,7 +5580,7 @@ if (!Element.prototype.replaceChildren) {
       h('div',{class:'f-top'},
         h('div',{class:'f-logo'}, h('img',{src:'logo-folha.jpg', alt:'MDM, Manuel Domingos Melancia, Lda.'})),
         h('div',null,
-          h('div',{class:'f-tit'}, 'Folha de Obra Nº', campoF('num', {label:'Número da folha', cls:'auto'})),
+          h('div',{class:'f-tit'}, 'Folha de Obra Nº', campoF('num', {label:'Número da folha', cls:'auto'}), fol.numProv ? h('span',{class:'f-prov', title:'Número provisório: o definitivo dá-se quando houver rede'}, 'Provisório') : null),
           h('div',{class:'f-emissao'}, 'Data de Emissão:', h('input',{type:'date', class:'auto so-ecra', value: fol.emissao || '', 'aria-label':'Data de emissão', disabled: canWrite ? null : true, oninput: ev => { fol.emissao = ev.target.value; F('folhaDataPrint').textContent = pontos(ev.target.value); folSujo = true; marcaEstado(); }}), h('span',{class:'so-print', id:'folhaDataPrint'}, pontos(fol.emissao))),
           h('div',{class:'f-cli'}, h('span',{class:'l'}, 'Cliente:'), h('span',{class:'c'}, campoF('cliente', {label:'Cliente', cls:'auto'})), h('span',{class:'l'}, 'Morada'), campoF('morada', {multi:true, label:'Morada', cls:'auto'})))),
       h('div',{class:'f-dados'},
@@ -5492,24 +5621,45 @@ if (!Element.prototype.replaceChildren) {
   }
 
   async function guardarFolha(imprimir) {
-    const r = rows.find(x => x.id === folId); if (!r || !fol) return;
+    let r = rows.find(x => x.id === folId); if (!r || !fol) return;
     if (!canWrite) { if (imprimir) imprimirFolha(); return; }
-    const num = String(fol.num || '').trim();
+    let num = String(fol.num || '').trim(), prov = !!fol.numProv;
     if (!/^\d+\/\d{4}$/.test(num)) { toast('O número da folha segue o formato 160/2026. Na primeira folha, continua a numeração do Excel.'); return; }
-    if (rows.some(x => x.id !== r.id && x.folha && x.folha.num === num)) { toast(`A folha ${num} já está noutro pedido.`); return; }
+    if (rows.some(x => x.id !== r.id && x.folha && x.folha.num === num && !x.folha.numProv)) { toast(`A folha ${num} já está noutro pedido.`); return; }
+    // O número definitivo reserva-se agora, com rede. Sem rede (ou se ela falha a meio) fica o provisório, marcado na folha.
+    if (prov && !semRede()) {
+      const ano = new Date().getFullYear(), escrito = num !== folSugerido && Number(num.split('/')[1]) === ano ? Number(num.split('/')[0]) : 0;
+      if (num !== folSugerido && !escrito) prov = false; // escrito à mão, de outro ano: fica como está
+      else {
+        const id = r.id; F('folhaBarEstado').textContent = 'A dar o número…';
+        try { num = await reservarFolha(id, escrito); prov = false; }
+        catch (e) {
+          if (folId !== id || !fol) return;
+          if (String(e && e.message) === 'folha-usada') { toast(`A folha ${num} já está noutro pedido.`); marcaEstado(); return; }
+          if (!eRede(e)) { toast(msgErro(e, '', String(e && e.message) === 'numero' ? 'Não foi possível dar o número (muita gente ao mesmo tempo). Tenta outra vez.' : 'Não foi possível dar o número da folha. Tenta outra vez.')); marcaEstado(); return; }
+        }
+        if (folId !== id || !fol) return; // fechou entretanto
+        r = rows.find(x => x.id === id) || r;
+      }
+    }
     const novo = JSON.parse(JSON.stringify(r)); delete novo.id;
     const primeira = !r.folha;
     novo.folha = {...fol, num, guardadaEm: new Date().toISOString(), totalCustos: totaisFolha(fol, 'custos').total, totalDebito: totaisFolha(fol, 'debito').total};
+    if (prov) Object.assign(novo.folha, {numProv: true, provPor: eu ? eu.email : null}); else { delete novo.folha.numProv; delete novo.folha.provPor; }
     novo.historico = (novo.historico || []).slice(-60);
-    novo.historico.push(nota(primeira ? `Folha de obra ${num} aberta` : `Folha de obra ${num} atualizada${novo.folha.totalDebito ? ` (${eur2(novo.folha.totalDebito)} a debitar)` : ''}`));
-    if (await gravar(r.id, novo, primeira ? `Folha de obra ${num} guardada` : 'Folha de obra guardada')) {
-      folSujo = false; fol = JSON.parse(JSON.stringify(novo.folha)); marcaEstado();
+    novo.historico.push(nota(primeira ? `Folha de obra ${num} aberta${prov ? ' (n.º provisório, sem rede)' : ''}` : `Folha de obra ${num} atualizada${novo.folha.totalDebito ? ` (${eur2(novo.folha.totalDebito)} a debitar)` : ''}`));
+    const id0 = r.id;
+    if (await gravar(r.id, novo, primeira ? `Folha de obra ${num} guardada` : 'Folha de obra guardada', {erro: m => toast(m)})) {
+      if (!fol || folId !== id0) return; // a folha fechou entretanto (a sessão acabou, por exemplo)
+      const mudouNum = fol.num !== num || !!fol.numProv !== prov;
+      folSujo = false; fol = JSON.parse(JSON.stringify(novo.folha)); folSugerido = fol.numProv ? fol.num : null;
+      if (mudouNum) renderFolha(); else marcaEstado();
       if (imprimir) imprimirFolha();
-    }
+    } else if (fol && folId === id0) marcaEstado();
   }
   function imprimirFolha() {
     document.body.classList.add('a-imprimir');
-    const titulo = document.title; document.title = `Folha de Obra ${String(fol.num || '').replace('/', '-')} - ${fol.cliente || ''}`;
+    const titulo = document.title; document.title = `Folha de Obra ${String(fol.num || '').replace('/', '-')}${fol.numProv ? ' provisoria' : ''} - ${fol.cliente || ''}`;
     const fim = () => { document.body.classList.remove('a-imprimir'); document.title = titulo; window.removeEventListener('afterprint', fim); };
     window.addEventListener('afterprint', fim);
     setTimeout(() => { window.print(); setTimeout(fim, 1000); }, 50);
@@ -5557,7 +5707,7 @@ if (!Element.prototype.replaceChildren) {
     const dia = r.dataVisita && r.dataVisita <= today() ? r.dataVisita : today();
     const mat = String(c.matricula || '').split('-');
     return {
-      num: (r.folha && r.folha.num) || '', pag: '1', de: '1', dataInicio: dia,
+      num: (r.folha && r.folha.num) || '', numProv: !!(r.folha && r.folha.numProv), pag: '1', de: '1', dataInicio: dia,
       tecResp: tecs[0] || '', outrosTec: tecs.slice(1).join(', '), outrosTec2: '',
       cliente: r.cliente || '', morada, contacto,
       tipo: temContrato ? {contrato: true} : {}, tipoOutro: '',
@@ -5706,7 +5856,7 @@ if (!Element.prototype.replaceChildren) {
           h('div',{class:'ri-hdr-r'},
             h('div',{class:'ri-titulo'}, 'Relatório de Intervenção'),
             h('div',{class:'ri-folha ri-grey'},
-              h('span',null, 'Folha de Obra n.º'), h('span',{class:'ri-ln w1'}, riIn(d, 'num', {label:'Folha de obra'})), h('span',null,'|'),
+              h('span',null, 'Folha de Obra n.º'), h('span',{class:'ri-ln w1'}, riIn(d, 'num', {label:'Folha de obra'}), d.numProv ? h('span',{class:'ri-prov', title:'Número provisório: o definitivo dá-se quando houver rede'}, 'Provisório') : null), h('span',null,'|'),
               h('span',{class:'ri-ln w2'}, h('input',{class:'rf rc', value: ano, readonly:true, 'aria-label':'Ano'})), h('span',null,'/'),
               h('span',{class:'ri-ln w2'}, h('input',{class:'rf rc', value: '', readonly:true, 'aria-label':'Sem uso'})),
               h('span',{class:'pg'}, 'Pág.'), h('span',{class:'ri-ln w3'}, riIn(d, 'pag', {c:1, label:'Página'})), h('span',null,'de'), h('span',{class:'ri-ln w3'}, riIn(d, 'de', {c:1, label:'De'}))))),
@@ -5799,7 +5949,7 @@ if (!Element.prototype.replaceChildren) {
     novo.obra = Object.assign({}, novo.obra || {}, riD.num ? {riNum: riD.num} : {});
     novo.historico = (novo.historico || []).slice(-60);
     novo.historico.push(nota(assinado ? `Relatório de intervenção assinado pelo cliente${riD.cliNome ? ' (' + riD.cliNome + ')' : ''}` : primeira ? 'Relatório de intervenção aberto' : 'Relatório de intervenção atualizado'));
-    if (await gravar(r.id, novo, assinado ? 'Relatório assinado e guardado' : 'Relatório guardado', {manter: true})) {
+    if (await gravar(r.id, novo, assinado ? 'Relatório assinado e guardado' : 'Relatório guardado', {manter: true, erro: m => toast(m)})) {
       riSujo = false; riEstado();
       if (imprimir) imprimirRI();
     }
@@ -5951,6 +6101,7 @@ if (!Element.prototype.replaceChildren) {
   async function guardarOrcCfg() {
     const erro = m => { const e = F('oc-err'); e.textContent = m; e.hidden = false; };
     if (ocAGuardar) return erro('Ainda a guardar a tabela. Espera um instante.');
+    if (!navigator.onLine) return erro('Sem rede: a tabela só se grava com rede. O que mudaste fica no ecrã, por guardar.');
     const ed = ocEd, itens = [], erros = [];
     ed.itens.forEach((x, i) => { if (!x.desc.trim() && !x.ref.trim() && !x.preco.trim()) return; const [it, e] = orcItem(x); if (e) erros.push(`Item ${i + 1}: ${e}.`); else itens.push(it); });
     if (erros.length) return erro(erros.slice(0, 5).join(' '));
@@ -5980,7 +6131,7 @@ if (!Element.prototype.replaceChildren) {
       }
       ocSujo = false;
       toast(`Tabela de preços guardada (${itens.length} ${itens.length === 1 ? 'item' : 'itens'})`); renderOrcCfg();
-    } catch (e) { erro(/permiss|row-level/.test(String(e.message)) ? 'A tua conta não tem autorização para isto.' : 'Não foi possível guardar a tabela.'); }
+    } catch (e) { erro(msgErro(e, 'Sem rede: a tabela só se grava com rede. O que mudaste fica no ecrã, por guardar.', 'Não foi possível guardar a tabela.')); }
     finally { ocAGuardar = false; }
   }
 
@@ -6616,6 +6767,7 @@ if (!Element.prototype.replaceChildren) {
       try { novo = JSON.parse(await new Promise((ok, mal) => { const rd = new FileReader(); rd.onload = () => ok(String(rd.result || '')); rd.onerror = mal; rd.readAsText(f); })); }
       catch (e) { toast('O ficheiro não é JSON. Usa o formato de «Descarregar».'); return; }
       const erro = motValida(novo); if (erro) { toast(erro); return; }
+      if (!navigator.onLine) { toast('Sem rede: o motor só se troca com rede.'); return; }
       if (motCfgAGuardar) return;
       motCfgAGuardar = true;
       try {
@@ -6848,6 +7000,7 @@ if (!Element.prototype.replaceChildren) {
   // base de dados (um colega pode ter dado um há segundos), mais um. Grava o contador só sobre a versão lida: quem chegar
   // depois tenta outra vez e leva o seguinte. Um número reservado e não usado fica por usar (não é uma fatura).
   async function reservarNumero() {
+    if (!navigator.onLine) throw erroRede('Sem rede');
     const ano = new Date().getFullYear();
     const de = s => { const m = /^ORC(\d{4})_(\d{4})$/.exec(s || ''); return m && Number(m[2]) === ano ? Number(m[1]) : 0; };
     for (let tent = 0; tent < 6; tent++) {
@@ -6860,7 +7013,7 @@ if (!Element.prototype.replaceChildren) {
       const atual = c.data, cont = atual && atual.valor && Number(atual.valor.ano) === ano ? Number(atual.valor.ultimo) || 0 : 0;
       // um rascunho (sem revisão) não tem número seu: só contam os números dos pedidos e dos orçamentos com PDF
       const max = p.data.concat(rows.map(r => ({num: r.num, onum: r.orcamento && r.orcamento.num, orev: r.orcamento && r.orcamento.rev}))).reduce((m, x) => Math.max(m, de(x.num), x.orev ? de(x.onum) : 0), cont);
-      const valor = {ano, ultimo: max + 1};
+      const valor = Object.assign({}, atual && atual.valor, {ano, ultimo: max + 1}); // o contador das folhas de obra fica
       const w = atual
         ? await sb.from('config').update({valor, versao: atual.versao + 1, atualizado_por: eu.email}).eq('chave', 'orcamento_numero').eq('versao', atual.versao).select('versao')
         : await sb.from('config').insert({chave: 'orcamento_numero', valor, atualizado_por: eu.email}).select('versao');
@@ -7137,8 +7290,11 @@ if (!Element.prototype.replaceChildren) {
     return c.tel ? `tel:+${c.tel}` : null;
   }
 
-  async function segRpc(nome, args, msg, desfazerId) {
+  // semRedeFn: o que fazer sem rede em vez de avisar (o «Sim, enviei» fica guardado no aparelho).
+  const SEG_SEM_REDE = 'Sem rede: isto só se grava com rede. Tenta outra vez quando houver rede.';
+  async function segRpc(nome, args, msg, desfazerId, semRedeFn) {
     if (!sb || sgBusy) return false;
+    if (!navigator.onLine) { if (semRedeFn) semRedeFn(); else toast(SEG_SEM_REDE); return false; }
     sgBusy = true;
     try {
       const {data, error} = await sb.rpc(nome, args || {});
@@ -7149,7 +7305,8 @@ if (!Element.prototype.replaceChildren) {
       return data === null ? true : data;
     } catch (e) {
       const t = String((e && e.message) || '');
-      toast(/permiss/.test(t) ? 'A tua conta não tem autorização para isto.' : /pendente|desfazer|ativos|silêncio/.test(t) ? t.replace(/^.*?:\s*/, '') : /Failed to fetch/.test(t) ? 'Sem ligação. Tenta outra vez.' : 'Não foi possível gravar. Recarrega e repete.');
+      if (eRede(e) && semRedeFn) { semRedeFn(); return false; }
+      toast(/permiss/.test(t) ? 'A tua conta não tem autorização para isto.' : eRede(e) ? SEG_SEM_REDE : /pendente|desfazer|ativos|silêncio/.test(t) ? t.replace(/^.*?:\s*/, '') : 'Não foi possível gravar. Recarrega e repete.');
       return false;
     } finally { sgBusy = false; }
   }
@@ -7163,32 +7320,45 @@ if (!Element.prototype.replaceChildren) {
     F('enviei').hidden = false;
     return Promise.resolve(false);
   }
-  // Sem rede (na casa do cliente), o «Sim, enviei» fica guardado neste aparelho e grava-se quando a ligação voltar.
-  function envFila() { try { return JSON.parse(localStorage.getItem('registo-envios') || '[]'); } catch (e) { return []; } }
-  const envGuarda = l => { try { localStorage.setItem('registo-envios', JSON.stringify(l)); } catch (e) {} };
+  // Sem rede (na casa do cliente), o «Sim, enviei» fica guardado neste aparelho, na conta de quem o fez, e grava-se
+  // quando a ligação voltar (a data do envio fica a dessa gravação). Também quando a gravação falha por falta de rede.
+  function envFila() { return eu ? localLe('envios', []) : []; }
+  const envGuarda = l => guardaFila('envios', l);
+  function envGuardaUm(x) {
+    if (!envGuarda(envFila().filter(y => y.id !== x.id).concat([{id: x.id, passo: x.passo || '', pedido: x.pedido_id || null, em: new Date().toISOString()}]))) {
+      toast('Sem espaço neste aparelho: o «Sim, enviei» não ficou guardado. Marca-o outra vez quando houver rede.'); return;
+    }
+    toast('Sem rede: fica marcado como enviado quando a ligação voltar.'); renderInicio(enriquecidos()); renderOff();
+  }
   let envAEnviar = false;
   async function envEnviaFila() {
-    if (envAEnviar || !sb || !navigator.onLine) return;
+    if (envAEnviar || !sb || !sessao || semRede()) return;
     const l = envFila(); if (!l.length) return;
-    envAEnviar = true; let feitos = 0;
+    envAEnviar = true; let feitos = 0, jaNao = 0;
     try {
+      const est = await sessaoPronta(6000);
+      if (est === 'saiu') { sessaoAcabou(); return; }
+      if (est !== 'ok') return;
       for (const x of l) {
         const {error} = await sb.rpc('seg_enviar', {p_id: x.id});
-        if (error && /Failed to fetch|NetworkError/i.test(String(error.message || ''))) break;
-        envGuarda(envFila().filter(y => y.id !== x.id)); if (!error) feitos++;
+        // Sem rede, sem permissão ou outro erro: fica guardado. Só sai o que entrou e o que já não estava por enviar.
+        if (error && !/já não está pendente/.test(String(error.message || ''))) break;
+        envGuarda(envFila().filter(y => y.id !== x.id));
+        if (error) jaNao++; else feitos++;
       }
     } catch (e) {} finally { envAEnviar = false; }
-    if (feitos) { toast(`${feitos} envio${feitos > 1 ? 's' : ''} sem rede gravado${feitos > 1 ? 's' : ''}`); carregar(); }
+    renderOff();
+    if (feitos || jaNao) {
+      toast([feitos ? `${feitos} envio${feitos > 1 ? 's' : ''} sem rede gravado${feitos > 1 ? 's' : ''}.` : null,
+        jaNao ? `${jaNao} «Sim, enviei» já não ${jaNao > 1 ? 'estavam' : 'estava'} por enviar (um colega marcou-o ou o pedido mudou).` : null].filter(Boolean).join(' '));
+      carregar();
+    }
   }
-  window.addEventListener('online', envEnviaFila);
   F('envieiSim').addEventListener('click', () => {
     const x = envioPendente; envioPendente = null; F('enviei').hidden = true;
     if (!x) return;
-    if (!navigator.onLine) {
-      envGuarda(envFila().filter(y => y.id !== x.id).concat([{id: x.id, passo: x.passo || '', em: new Date().toISOString()}]));
-      toast('Sem rede: fica marcado como enviado quando a ligação voltar.'); renderInicio(enriquecidos()); return;
-    }
-    segRpc('seg_enviar', {p_id: x.id}, `${x.passo || 'Seguimento'} marcado como enviado`, x.id);
+    if (semRede()) { envGuardaUm(x); return; }
+    segRpc('seg_enviar', {p_id: x.id}, `${x.passo || 'Seguimento'} marcado como enviado`, x.id, () => envGuardaUm(x));
   });
   F('envieiNao').addEventListener('click', () => { envioPendente = null; F('enviei').hidden = true; });
   async function segAtendeu(x) {
@@ -7225,14 +7395,17 @@ if (!Element.prototype.replaceChildren) {
         : h('span',{class:'sg-due', style:'--tone:var(--warn)'}, 'hoje'));
     const meta = h('div',{class:'sg-meta'}, [r.dono || x.dono || 'Sem dono', r.prioridade || 'P3', r.num || null, tel ? (c.telTxt || null) : x.canal === 'email' ? (c.email || null) : (c.telTxt || null), falta || null].filter(Boolean).join(' · '));
     if (editar) {
+      // O que se escreve fica em sgEdit: um redesenho (leitura nova, gravação que falhou sem rede) não o apaga.
+      const ed = sgEdit, canalEd = ed.canal || x.canal;
       return h('div',{class:'sg', style:'--stripe:var(--accent)'}, head, meta, h('div',{class:'sg-ed'},
-        h('label',{class:'sub', for:'sg-canal'}, 'Canal'), sel('sg-canal', Object.entries(CANAIS), x.canal),
-        x.canal === 'email' ? h('input',{id:'sg-assunto', value: x.assunto || '', 'aria-label':'Assunto'}) : null,
-        h('textarea',{id:'sg-texto', 'aria-label':'Texto'}, x.rascunho || ''),
+        h('label',{class:'sub', for:'sg-canal'}, 'Canal'), sel('sg-canal', Object.entries(CANAIS), canalEd),
+        x.canal === 'email' ? h('input',{id:'sg-assunto', value: ed.assunto != null ? ed.assunto : x.assunto || '', 'aria-label':'Assunto', oninput: ev => { ed.assunto = ev.target.value; }}) : null,
+        h('textarea',{id:'sg-texto', 'aria-label':'Texto', oninput: ev => { ed.texto = ev.target.value; }}, ed.texto != null ? ed.texto : x.rascunho || ''),
         h('div',{class:'sg-b'},
           h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { sgEdit = null; renderSeg(); if (currentId) renderSheet(); }}, 'Cancelar'),
           h('button',{class:'btn btn-sm', type:'button', onclick: async () => {
             const canal = val('sg-canal'), texto = F('sg-texto').value, assunto = F('sg-assunto') ? F('sg-assunto').value : null;
+            Object.assign(ed, {canal, texto, assunto});
             if (/[—–]/.test(texto + (assunto || ''))) { toast('Sem travessões: usa vírgulas ou parênteses.'); return; }
             const args = canal !== x.canal && texto === (x.rascunho || '') ? {p_id: x.id, p_canal: canal} : {p_id: x.id, p_texto: texto, p_assunto: assunto, p_canal: canal};
             if (await segRpc('seg_editar', args, canal !== x.canal && !args.p_texto ? 'Canal mudado: texto refeito para esse canal' : 'Rascunho guardado')) sgEdit = null;
@@ -7271,6 +7444,7 @@ if (!Element.prototype.replaceChildren) {
         sb.from('v_perdidos_silencio_lista').select('*'),
         sb.from('v_dias_pagamento').select('*'),
       ]);
+      if (!res || !sessao) return;
       const s = res[0];
       if (s.error) {
         if (/relation|does not exist|schema cache|Could not find/i.test(s.error.message || '')) { segTabela = false; sg = null; renderSeg(); setTab(tab); }
@@ -7283,10 +7457,10 @@ if (!Element.prototype.replaceChildren) {
       envEnviaFila();
       if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
       // Se a tarefa das 07:00 ainda não correu hoje (pg_cron desligado ou atrasado), a primeira página aberta corre-a.
-      if (canWrite && !sgCorreu && new Date().getHours() >= 7 && (!segMotor || String(segMotor.dia || '') < today())) {
+      if (canWrite && !sgCorreu && !semRede() && new Date().getHours() >= 7 && (!segMotor || String(segMotor.dia || '') < today())) {
         sgCorreu = true;
         const {error} = await sb.rpc('seg_correr');
-        if (!error) carregar();
+        if (!error) carregar(); else if (eRede(error)) sgCorreu = false; // sem rede: tenta outra vez quando ela voltar
       }
     } catch (e) { /* sem rede: fica a última leitura */ }
   }
@@ -7435,6 +7609,7 @@ if (!Element.prototype.replaceChildren) {
   }
   async function guardarSegCfg() {
     const erro = m => { const e = F('sgc-err'); e.textContent = m; e.hidden = false; };
+    if (!navigator.onLine) return erro('Sem rede: os seguimentos só se gravam com rede. O que mudaste fica no ecrã, por guardar.');
     const c = JSON.parse(JSON.stringify(cfgSeg || {})), S = c.sequencias || JSON.parse(JSON.stringify(SEG_PADRAO.sequencias)), T = c.textos || {};
     for (const q of ['A','B','C','D']) {
       const dias = val(`sgc-${q}-dias`).split(/[,;\s]+/).filter(Boolean).map(Number), fim = Number(val(`sgc-${q}-fim`));
@@ -7461,7 +7636,7 @@ if (!Element.prototype.replaceChildren) {
       const {error} = await sb.from('config').upsert({chave:'seguimentos', valor: c, atualizado_por: eu.email}, {onConflict:'chave'});
       if (error) throw error;
       cfgSeg = c; sgCfgSujo = false; toast('Seguimentos guardados: valem a partir da próxima corrida das 07:00'); renderSegCfg();
-    } catch (e) { erro('Não foi possível guardar.'); }
+    } catch (e) { erro(msgErro(e, 'Sem rede: os seguimentos só se gravam com rede. O que mudaste fica no ecrã, por guardar.', 'Não foi possível guardar.')); }
   }
   F('sgCfg').addEventListener('input', () => { sgCfgSujo = true; });
 
@@ -7503,6 +7678,7 @@ if (!Element.prototype.replaceChildren) {
         sb.from('v_agenda_conflitos').select('*'),
         sb.from('v_por_marcar').select('*'),
       ]);
+      if (!res || !sessao) return;
       if (res[0].error) {
         if (/relation|does not exist|schema cache|Could not find/i.test(res[0].error.message || '')) { agTabela = false; renderAgenda(); renderAgCfg(); setTab(tab); }
         return;
@@ -7514,9 +7690,15 @@ if (!Element.prototype.replaceChildren) {
       agPor = (res[3].data || []).slice().sort((a, b) => (P[a.prioridade] - P[b.prioridade]) || (b.dias_espera - a.dias_espera));
       // As ligações para o cliente escolher o dia já ficam prontas: «Enviar» abre o WhatsApp no mesmo toque (iOS).
       const ids = rows.filter(r => (r.estado === 'novo' || r.estado === 'visita_por_marcar') && !r.porConfirmar).map(r => r.id);
+      // Também ficam neste aparelho (valem uma semana): sem rede, o primeiro contacto preparado continua a levar a ligação.
       if (ids.length && canWrite) {
-        const l = await sb.rpc('agenda_links_para', {p_pedidos: ids});
-        if (!l.error) { const novo = {}; (l.data || []).forEach(x => { novo[x.pedido_id] = x.url; }); agLinks = novo; }
+        const l = semRede() ? null : await sb.rpc('agenda_links_para', {p_pedidos: ids});
+        if (!sessao) return;
+        if (l && !l.error) { const novo = {}; (l.data || []).forEach(x => { novo[x.pedido_id] = x.url; }); agLinks = novo; localGuarda('links', {t: new Date().toISOString(), l: novo}); }
+        else {
+          const c = localLe('links', null), dias = Math.max(1, (Number(agCfg().validadeLinkDias) || 7) - 1);
+          if (c && c.l && Date.now() - new Date(c.t).getTime() < dias * 864e5) agLinks = Object.assign({}, c.l);
+        }
       }
       renderAgenda(); renderAgCfg(); renderSeg(); renderInicio(enriquecidos());
       if (currentId && !F('sheetWrap').hidden && !modo && !trans && !sheetSujo) renderSheet();
@@ -7531,9 +7713,10 @@ if (!Element.prototype.replaceChildren) {
     return t.split('{link_marcacao}').join(!url ? '' : x.canal === 'email' ? `\n\nPode escolher já o dia aqui: ${url}` : ` Pode escolher já o dia e a hora aqui: ${url}`);
   }
 
+  const AG_SEM_REDE = 'Sem rede: a agenda só se muda com rede. Uma data combinada com o cliente fica já na próxima ação do pedido («Mudar ação»), guardada no aparelho.';
   function agErro(e) {
     const t = String((e && e.message) || '');
-    toast(/permiss/.test(t) ? 'A tua conta não tem autorização para isto.' : /Failed to fetch/.test(t) ? 'Sem ligação. Tenta outra vez.'
+    toast(/permiss/.test(t) ? 'A tua conta não tem autorização para isto.' : eRede(e) ? AG_SEM_REDE
       : /não encontrad|inválido/.test(t) ? t.replace(/^.*?:\s*/, '') : 'Não foi possível gravar. Recarrega e repete.');
   }
   function agRedesenha() { renderAgenda(); if (currentId && !F('sheetWrap').hidden && !modo && !trans) renderSheet(); }
@@ -7550,15 +7733,16 @@ if (!Element.prototype.replaceChildren) {
     agAcao = {onde, chave, pedido, tipo, id: id || null, modo: modoA || 'sug', lista: null};
     agRedesenha();
     if (agAcao.modo !== 'sug') return;
-    const {data, error} = await sb.rpc('agenda_sugerir', {p_pedido: pedido, p_n: 4, p_tipo: tipo, p_ignorar: id || null});
+    const {data, error} = !navigator.onLine ? {data: null, error: {message: 'Sem rede', code: 'REDE'}} : await sb.rpc('agenda_sugerir', {p_pedido: pedido, p_n: 4, p_tipo: tipo, p_ignorar: id || null});
     if (!agAcao || agAcao.chave !== chave) return;
     agAcao.lista = error ? [] : (data || []);
-    agAcao.erro = error ? 'Não foi possível calcular as sugestões.' : null;
+    agAcao.erro = error ? (eRede(error) ? 'Sem rede: as sugestões de horas precisam de rede. Uma data combinada com o cliente fica já na próxima ação do pedido («Mudar ação»).' : 'Não foi possível calcular as sugestões.') : null;
     agRedesenha();
   }
 
   async function agMarcar(pedido, tipo, tecs, inicio, fim, notas, id) {
     if (!sb || agBusy) return false;
+    if (!navigator.onLine) { toast(AG_SEM_REDE); return false; }
     agBusy = true;
     try {
       const {data, error} = await sb.rpc('agenda_marcar', {p_pedido: pedido, p_tipo: tipo, p_tecnicos: tecs, p_inicio: new Date(inicio).toISOString(), p_fim: new Date(fim).toISOString(), p_notas: notas || null, p_id: id || null});
@@ -7575,6 +7759,7 @@ if (!Element.prototype.replaceChildren) {
   }
   async function agCancelar(id, desfazer) {
     if (!sb || agBusy) return;
+    if (!navigator.onLine) { toast(AG_SEM_REDE); return; }
     agBusy = true;
     try {
       const {error} = await sb.rpc('agenda_cancelar', {p_id: id});
@@ -7589,6 +7774,7 @@ if (!Element.prototype.replaceChildren) {
   }
   async function agEstado(id, estado, msg) {
     if (!sb || agBusy) return;
+    if (!navigator.onLine) { toast(AG_SEM_REDE); return; }
     agBusy = true;
     try {
       const {error} = await sb.rpc('agenda_estado', {p_id: id, p_estado: estado});
@@ -7902,6 +8088,7 @@ if (!Element.prototype.replaceChildren) {
   }
   async function guardarAgCfg() {
     const erro = m => { const e = F('agc-err'); e.textContent = m; e.hidden = false; };
+    if (!navigator.onLine) return erro('Sem rede: a agenda só se muda com rede. O que mudaste fica no ecrã, por guardar.');
     const lerT = (id, t) => {
       const p = 'agt-' + (id || 'novo');
       const nome = val(p + '-nome');
@@ -8272,11 +8459,12 @@ if (!Element.prototype.replaceChildren) {
     const b = F('btnDel');
     if (!delArmed) { b.classList.add('armed'); b.textContent = 'Toca outra vez para apagar'; delArmed = setTimeout(disarmDel, 4000); return; }
     disarmDel();
+    if (!navigator.onLine) { toast('Sem rede: apagar um pedido só com rede.'); return; }
     try {
       const {error} = await sb.rpc('apagar_pedido', {p_id: r.id});
       if (error) throw error;
       rows = rows.filter(x => x.id !== r.id); closeSheet(); toast(`${r.id} apagado`);
-    } catch (e) { toast('Não foi possível apagar.'); }
+    } catch (e) { toast(msgErro(e, 'Sem rede: apagar um pedido só com rede.', 'Não foi possível apagar.')); }
   }
 
   /* ---------- Novo pedido ---------- */
@@ -8383,8 +8571,8 @@ if (!Element.prototype.replaceChildren) {
       h('label',{class:'check', style:'margin-top:10px'}, h('input',{type:'checkbox', id:'ric-taxa', checked: c.taxa !== false ? true : null, disabled: canWrite ? null : true}), 'Taxa de deslocação: Sim por omissão'),
       canWrite ? h('div',{class:'row-end', style:'margin-top:10px'}, h('button',{class:'btn btn-sm', type:'button', onclick: async () => {
         const novo = {tecnicos: val('ric-tec').split(/\s*[,;]\s*/).filter(Boolean), matricula: val('ric-mat').toUpperCase(), taxa: F('ric-taxa').checked};
-        const {error} = await sb.from('config').upsert({chave:'ri', valor: novo, atualizado_por: eu.email}, {onConflict:'chave'});
-        if (error) { toast(/permiss|row-level/.test(String(error.message)) ? 'A tua conta não tem autorização para isto.' : eRede(error) ? 'Sem ligação. Tenta outra vez.' : 'Não foi possível guardar.'); return; }
+        const {error} = !navigator.onLine ? {error: erroRede('Sem rede')} : await sb.from('config').upsert({chave:'ri', valor: novo, atualizado_por: eu.email}, {onConflict:'chave'});
+        if (error) { toast(msgErro(error, 'Sem rede: isto só se grava com rede.', 'Não foi possível guardar.')); return; }
         cfgRi = novo; toast('Guardado');
       }}, 'Guardar')) : null);
   }
@@ -8513,45 +8701,221 @@ if (!Element.prototype.replaceChildren) {
 
   /* ---------- Sem rede ----------
      A última leitura de cada parte (pedidos, seguimentos, agenda, painel) fica neste aparelho, por conta. Sem rede, a
-     página mostra-a e diz de quando é. As gravações de pedidos (passos, ações, dados, folha, RI, orçamento) ficam numa
-     fila e enviam-se quando a rede volta, com a versão de onde partiram: se outra pessoa mudou o pedido entretanto, a
-     alteração fica em «conflito» para escolher (gravar por cima ou deitar fora). Nada se perde em silêncio. */
-  const REDE_RE = /Failed to fetch|NetworkError|Load failed|network|internet|ERR_INTERNET|ERR_NAME|fetch failed/i;
-  const eRede = e => !!e && REDE_RE.test(String(e.message || e));
+     página mostra-a e diz de quando é. As gravações de pedidos (passos, ações, dados, folha, RI, orçamento), as fichas
+     dos clientes e o «Sim, enviei» ficam em filas, uma por conta, e enviam-se quando a rede volta, com a versão de onde
+     partiram: se outra pessoa mudou o mesmo entretanto, a alteração fica em «não entrou» para escolher (gravar por cima
+     ou deitar fora). Nada se perde em silêncio.
+     Rede fraca é como sem rede: cada pedido à base de dados tem prazo (fetchComPrazo) e a falha reconhece-se pelo
+     resultado (status 0 ou o código REDE que o prazo põe), não pelas palavras, que no iPad antigo vêm na língua dele
+     («The request timed out.», «A ligação de rede foi perdida.»). As palavras ficam como reserva. */
+  const REDE_RE = /Failed to fetch|NetworkError|Load failed|network|internet|ERR_INTERNET|ERR_NAME|fetch failed|timed out|connection was lost|could not connect|could not be found|hostname|cancell?ed|offline|sem rede|sem resposta da rede|ligar ao servidor|conectar(-se)? ao servidor|liga[çc][ãa]o de rede|conex[ãa]o de rede|pedido expirou|solicita[çc][ãa]o expirou|tempo limite|nome de host|^cancelad[oa]\.?$/i;
+  function eRede(e) {
+    if (!e) return false;
+    if (e.code === 'REDE' || e.status === 0) return true;
+    // Um erro da base de dados (P0001, 42501, PGRST116) ou da entrada (invalid_credentials) traz código: nunca é rede.
+    if (typeof e === 'object' && typeof e.code === 'string' && e.code) return false;
+    const m = String(e.message || e);
+    return /^(TypeError|AbortError|TimeoutError|FetchError)\b/.test(m) || REDE_RE.test(m);
+  }
+  // A mensagem de um erro de gravação: sem autorização, sem rede (o que só se grava com rede) ou outro.
+  const msgErro = (e, semRedeTxt, outro) => /permiss|row-level/.test(String((e && e.message) || '')) ? 'A tua conta não tem autorização para isto.' : eRede(e) ? semRedeTxt : outro;
   const chaveLocal = k => 'registo-' + k + ':' + ((eu && eu.email) || '');
   function localLe(k, def) { try { const v = localStorage.getItem(chaveLocal(k)); return v ? JSON.parse(v) : def; } catch (e) { return def; } }
   function localGuarda(k, v) { try { localStorage.setItem(chaveLocal(k), JSON.stringify(v)); return true; } catch (e) { return false; } }
   function localTira(k) { try { localStorage.removeItem(chaveLocal(k)); } catch (e) {} }
-  let semRedeDe = null; // instante da leitura que se está a mostrar sem rede (null: com rede)
-  // Lê com rede e guarda a cópia; sem rede, devolve a cópia (no mesmo formato: [{data, error}]).
-  async function lerComCache(chave, pedidos) {
-    let res = null;
-    try { res = await Promise.all(pedidos()); } catch (e) { res = null; }
-    const falhou = !res || res.some(r => r && r.error && eRede(r.error));
-    if (!falhou) {
-      if (!localGuarda('cache-' + chave, {t: new Date().toISOString(), d: res.map(r => r.error ? null : r.data)})) {
-        // Sem espaço: guarda sem a parte maior (a faturação) em vez de não guardar nada.
-        localGuarda('cache-' + chave, {t: new Date().toISOString(), d: res.map((r, i) => r.error || (chave === 'base' && i === 3) ? null : r.data)});
-      }
-      if (chave === 'base' && semRedeDe) { semRedeDe = null; renderOff(); }
-      return res;
+
+  // «redeMal»: o último pedido à base de dados ficou sem resposta (sem rede, ou rede fraca que esgotou o prazo); volta a
+  // false com a primeira resposta. Com a rede mal, a página trabalha com a cópia e as filas, sem esperar.
+  let redeMal = false, redeOkEm = 0;
+  const semRede = () => !navigator.onLine || redeMal;
+  const REDE_MS = 12000, AUTH_MS = 8000, ENTRADA_MS = 5000;
+  const ESGOTOU = {esgotou: true};
+  // Espera por p no máximo ms: depois disso devolve ESGOTOU (e p acaba sozinha). Uma falha volta como {error}.
+  const comPrazo = (p, ms) => new Promise(ok => { const t = setTimeout(() => ok(ESGOTOU), ms);
+    Promise.resolve(p).then(v => { clearTimeout(t); ok(v); }, e => { clearTimeout(t); ok({error: e}); }); });
+  // desde: quando começou o pedido que falhou. Se outro começado depois já respondeu, a rede está boa: uma resposta
+  // velha (rede fraca que entretanto voltou) não põe a página sem rede outra vez.
+  function redeFalhou(desde) { if (redeMal || (desde && redeOkEm > desde)) return; redeMal = true; autoRefresh(false); renderOff(); }
+  function redeVoltou() {
+    redeOkEm = Date.now();
+    if (!redeMal) return;
+    redeMal = false; renderOff();
+    if (sessao) setTimeout(() => { autoRefresh(true); enviaFilas(); }, 0);
+  }
+  // A renovação automática da sessão só com rede: sem ela, cada tentativa esperava meio minuto e as leituras ficavam atrás.
+  function autoRefresh(liga) {
+    if (!sb || !sb.auth) return;
+    try { const p = liga ? (sessao && !semRede() && sb.auth.startAutoRefresh ? sb.auth.startAutoRefresh() : null) : (sb.auth.stopAutoRefresh ? sb.auth.stopAutoRefresh() : null); if (p && p.catch) p.catch(() => {}); } catch (e) {}
+  }
+  function erroRede(txt, causa) { const e = new TypeError(txt || String((causa && causa.message) || 'Sem rede')); e.code = 'REDE'; return e; }
+  // O fetch do supabase-js: com prazo (12 s para os dados, 8 s para a sessão) e com o código REDE em cada falha, que o
+  // supabase-js passa ao resultado. O prazo conta até chegar a resposta. O AbortController só existe a partir do iOS
+  // 12.2: sem ele, a página deixa de esperar e o pedido acaba sozinho.
+  function fetchComPrazo(url, opts) {
+    const u = String((url && url.url) || url), ms = /\/auth\/v1\//.test(u) ? AUTH_MS : REDE_MS;
+    let ctl = null;
+    try { if (typeof AbortController === 'function' && !(opts && opts.signal)) ctl = new AbortController(); } catch (e) { ctl = null; }
+    const o = ctl ? Object.assign({}, opts, {signal: ctl.signal}) : opts, desde = Date.now();
+    return new Promise((ok, mal) => {
+      let feito = false;
+      const t = setTimeout(() => {
+        if (feito) return; feito = true; redeFalhou(desde);
+        if (ctl) { try { ctl.abort(); } catch (e) {} }
+        mal(erroRede(`Sem resposta da rede em ${Math.round(ms / 1000)} s`));
+      }, ms);
+      fetch(url, o).then(r => { if (feito) return; feito = true; clearTimeout(t); redeVoltou(); ok(r); },
+        e => { if (feito) return; feito = true; clearTimeout(t); redeFalhou(desde); mal(erroRede(null, e)); });
+    });
+  }
+
+  // A sessão que o supabase-js guardou neste aparelho, lida sem perguntar à biblioteca (sem rede e com o token velho,
+  // ela tentava renová-la durante meio minuto antes de responder).
+  const chaveSessao = () => (sb && sb.auth && sb.auth.storageKey) || 'sb-' + new URL(SUPABASE_URL).hostname.split('.')[0] + '-auth-token';
+  function sessaoLocal() {
+    try { const s = JSON.parse(localStorage.getItem(chaveSessao()) || 'null'); return s && s.refresh_token && s.user && s.user.email ? s : null; } catch (e) { return null; }
+  }
+  function tiraSessaoLocal() { try { const k = chaveSessao(); [k, k + '-code-verifier', k + '-user'].forEach(x => localStorage.removeItem(x)); } catch (e) {} }
+  // Antes de ler ou de enviar, uma sessão a sério: sem ela o supabase-js manda a chave pública e as tabelas respondem
+  // com listas vazias. 'ok'; 'rede' (sem rede ou sem resposta: fica a cópia); 'saiu' (a sessão acabou).
+  async function sessaoPronta(ms) {
+    if (!sessaoLocal()) return 'saiu';
+    const desde = Date.now(), r = await comPrazo(sb.auth.getSession(), ms);
+    if (r === ESGOTOU) { redeFalhou(desde); return 'rede'; }
+    if (r && r.data && r.data.session) return 'ok';
+    if (r && r.error && eRede(r.error)) { redeFalhou(desde); return 'rede'; }
+    return 'saiu';
+  }
+  const pendentes = () => filaLe().length + cliFilaLe().length + envFila().length;
+  // A folha de obra, o RI ou o orçamento abertos com alterações por guardar vão para a fila desta conta antes de a
+  // página sair dela (enviam-se quando a conta entrar outra vez): nada do que se escreveu no cliente se perde.
+  function guardaAbertos() {
+    const antes = redeMal; redeMal = true; // a gravação vai direta para a fila, sem tentar a rede
+    try {
+      if (canWrite && fol && folSujo) guardarFolha(false);
+      if (canWrite && riD && riSujo) guardarRI(false);
+      if (canWrite && orc && orcSujo && !orcAGuardar) guardarOrc(false);
+    } catch (e) {} finally { redeMal = antes; }
+  }
+  // A sessão acabou (renovação recusada, ou saiu-se da conta noutro sítio): volta à entrada sem apagar nada. A cópia e as
+  // filas ficam guardadas por conta e enviam-se quando esta conta entrar outra vez; outra conta não as vê.
+  function sessaoAcabou(motivo) {
+    if (!sessao) return;
+    guardaAbertos();
+    const email = eu && eu.email, n = pendentes();
+    sair();
+    erroLogin((motivo === 'conta' ? 'Não foi possível confirmar a tua conta: entra outra vez.' : 'A sessão neste aparelho acabou: entra outra vez.')
+      + (n ? ` ${n === 1 ? 'A alteração guardada neste aparelho envia-se' : `As ${n} alterações guardadas neste aparelho enviam-se`} depois de entrares.` : ''));
+    if (email) F('l-email').value = email;
+  }
+
+  // Espaço no aparelho (o Safari dá cerca de 5 MB a cada site, contados em UTF-16). As filas têm sempre lugar: sem
+  // espaço, saem primeiro as cópias de leitura de outras contas e depois as desta (voltam a ler-se com rede). As cópias
+  // encolhem antes de falhar. Quando nem assim cabe, avisa: nunca em silêncio.
+  var espacoFalta = '', espacoAvisoEm = 0; // var: Definições (renderExport) pode desenhar-se antes desta linha correr
+  const ESPACO_FILA = 'Sem espaço neste aparelho: a alteração não ficou guardada. Grava-a quando houver rede.';
+  function espacoUsado() { let n = 0; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); n += k.length + (localStorage.getItem(k) || '').length; } } catch (e) {} return n; }
+  function espacoAviso(txt) {
+    espacoFalta = txt; renderOff();
+    if (Date.now() - espacoAvisoEm > 30000) { espacoAvisoEm = Date.now(); toast(txt); }
+  }
+  function espacoOk() { if (espacoFalta) { espacoFalta = ''; renderOff(); } }
+  function tiraCopiasDeOutros() {
+    try {
+      const fim = ':' + ((eu && eu.email) || ''), xs = [];
+      for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (/^registo-(cache-[a-z]+|links):/.test(k) && k.slice(-fim.length) !== fim) xs.push(k); }
+      xs.forEach(k => localStorage.removeItem(k));
+      return xs.length > 0;
+    } catch (e) { return false; }
+  }
+  function guardaFila(k, v) {
+    if (localGuarda(k, v)) return true;
+    if (tiraCopiasDeOutros() && localGuarda(k, v)) return true;
+    for (const c of ['cache-painel', 'cache-agenda', 'cache-seg', 'cache-base']) {
+      localTira(c);
+      if (localGuarda(k, v)) { espacoAviso('Pouco espaço neste aparelho: a cópia para usar sem rede foi apagada para guardar as alterações.'); return true; }
     }
-    const c = localLe('cache-' + chave, null);
-    if (!c) return res || pedidos().map(() => ({data: null, error: {message: 'Failed to fetch'}}));
-    if (chave === 'base') { semRedeDe = c.t; renderOff(); }
+    espacoAviso(ESPACO_FILA);
+    return false;
+  }
+  const fat12 = x => x.slice().sort((a, b) => String(a.mes).localeCompare(String(b.mes))).slice(-12);
+  const abertoOuRecente = r => { const d = (r && r.dados) || {}; return ABERTOS.indexOf(d.estado) >= 0 || String(d.atualizado || '') >= new Date(Date.now() - 90 * 864e5).toISOString(); };
+  function guardaCache(chave, obj) {
+    if (localGuarda('cache-' + chave, obj)) { espacoOk(); return true; }
+    const passos = [o => { tiraCopiasDeOutros(); return o; }, o => { if (chave !== 'painel') localTira('cache-painel'); return o; }];
+    if (chave === 'base') {
+      passos.push(o => ({t: o.t, d: o.d.map((x, i) => i === 3 && x ? fat12(x) : x), parcial: ['fat12']}));
+      passos.push(o => ({t: o.t, d: o.d.map((x, i) => i === 0 && x ? x.filter(abertoOuRecente) : x), parcial: ['pedidos', 'fat12']}));
+      passos.push(o => ({t: o.t, d: o.d.map((x, i) => i === 3 ? null : x), parcial: ['pedidos', 'fat']}));
+      passos.push(o => { localTira('cache-agenda'); localTira('cache-seg'); return o; });
+    }
+    let o = obj;
+    for (const p of passos) { o = p(o); if (localGuarda('cache-' + chave, o)) { espacoOk(); return true; } }
+    espacoAviso('Pouco espaço neste aparelho: a cópia para usar sem rede ficou por atualizar.');
+    return false;
+  }
+  const parcialTxt = p => [p.indexOf('pedidos') >= 0 ? 'só os pedidos em aberto e os dos últimos 90 dias' : null, p.indexOf('fat') >= 0 ? 'sem a faturação' : p.indexOf('fat12') >= 0 ? 'faturação só dos últimos 12 meses' : null].filter(Boolean).join(', ');
+
+  let semRedeDe = null, copiaParcial = null; // a cópia que se está a mostrar sem rede: de quando e o que lhe falta
+  let sondaBase = null; // com a rede mal, uma só leitura à espera de cada vez (não se acumulam)
+  const frescas = {}; // a leitura que essa sonda trouxe, para a página não a repetir logo a seguir
+  const copiaFeita = {}; // o texto de cada cópia escrita nesta página (por conta), para não a reescrever igual
+  // Lê com rede e guarda a cópia; sem rede ou com ela mal, devolve a cópia já (no mesmo formato, [{data, error}]). Uma
+  // leitura que falhou nunca vai por cima da cópia boa: cada parte só muda quando chegou bem. valida(res) recusa uma
+  // leitura que não é desta conta (as listas vazias de quem não entrou). null: leitura velha, a ignorar.
+  async function lerComCache(chave, pedidos, valida) {
+    const f = frescas[chave]; frescas[chave] = null;
+    if (f && Date.now() - f.em < 5000) return f.res;
+    const c = localLe('cache-' + chave, null), hora = localLe('hora-' + chave, null);
+    if (c && hora && hora > c.t) c.t = hora; // a última leitura igual à cópia (que não se reescreveu)
+    if (!navigator.onLine) return daCopia(chave, c, pedidos);
+    if (redeMal && c) {
+      if (chave === 'base' && !sondaBase) sondaBase = lerRede(chave, pedidos, valida, c).then(r => {
+        sondaBase = null;
+        if (r && r.daRede && sessao) { frescas.base = {res: r, em: Date.now()}; carregar(); }
+      }, () => { sondaBase = null; });
+      return daCopia(chave, c, pedidos);
+    }
+    return lerRede(chave, pedidos, valida, c);
+  }
+  async function lerRede(chave, pedidos, valida, c) {
+    const est = await sessaoPronta(redeMal ? 4000 : 10000);
+    if (est === 'saiu') { sessaoAcabou(); return daCopia(chave, c, pedidos); }
+    if (est !== 'ok') return daCopia(chave, c, pedidos);
+    const desde = Date.now(), lendo = Promise.all(pedidos());
+    const res = c ? await comPrazo(lendo, 20000) : await lendo.catch(e => ({error: e}));
+    if (res === ESGOTOU || !Array.isArray(res) || res.some(r => r && (r.status === 0 || (r.error && eRede(r.error))))) {
+      redeFalhou(desde);
+      // Uma leitura velha que falhou quando outra mais nova já respondeu: não muda nada (quem chamou ignora o null).
+      if (!redeMal && redeOkEm > desde) return null;
+      return daCopia(chave, c, pedidos);
+    }
+    if (valida && !valida(res)) { sessaoAcabou('conta'); return daCopia(chave, c, pedidos); }
+    const velho = (c && c.d) || [];
+    const d = res.map((r, i) => r.error ? (velho[i] === undefined ? null : velho[i]) : r.data);
+    // Sem rede não fazem falta os textos dos seguimentos já enviados ou fechados (só os por enviar).
+    if (chave === 'seg' && Array.isArray(d[0])) d[0] = d[0].map(x => x && x.estado !== 'pendente' && (x.rascunho || x.assunto) ? Object.assign({}, x, {rascunho: null, assunto: null}) : x);
+    // Igual à cópia já guardada: só a hora muda (escrever megabytes a cada minuto pesava no iPad antigo).
+    const agora = new Date().toISOString(), txt = JSON.stringify(d), k = chaveLocal('cache-' + chave);
+    if (copiaFeita[k] === txt && c) localGuarda('hora-' + chave, agora);
+    else if (guardaCache(chave, {t: agora, d})) { copiaFeita[k] = txt; localTira('hora-' + chave); }
+    if (chave === 'base' && semRedeDe) { semRedeDe = null; copiaParcial = null; renderOff(); }
+    res.daRede = true;
+    return res;
+  }
+  function daCopia(chave, c, pedidos) {
+    if (chave === 'base') { semRedeDe = c ? c.t : null; copiaParcial = c && c.parcial ? c.parcial : null; renderOff(); }
+    if (!c) return pedidos().map(() => ({data: null, error: {message: 'Sem rede e sem cópia neste aparelho', code: 'REDE'}}));
     return c.d.map(d => d == null ? {data: null, error: {message: 'sem cópia neste aparelho'}} : {data: d, error: null});
   }
-  const filaLe = () => localLe('fila', []);
-  const filaGuarda = l => localGuarda('fila', l);
-  const conflitosLe = () => localLe('conflitos', []);
-  const conflitosGuarda = l => localGuarda('conflitos', l);
+  const filaLe = () => (eu ? localLe('fila', []) : []);
+  const conflitosLe = () => (eu ? localLe('conflitos', []) : []);
   // Uma gravação de pedido que não chegou à base de dados: fica na fila (uma por pedido, a mais recente, com a versão de
-  // onde partiu) e o pedido mostra-se já mudado.
+  // onde partiu, os eventos com a hora a que foram feitos e um contador de mudanças) e o pedido mostra-se já mudado.
   function enfileira(id, doc, versao, evento) {
-    const l = filaLe(), j = l.findIndex(x => x.id === id);
-    if (j >= 0) { l[j].doc = doc; if (evento) l[j].eventos = (l[j].eventos || []).concat([evento]).slice(-20); l[j].em = new Date().toISOString(); }
-    else l.push({id, doc, versao, eventos: evento ? [evento] : [], em: new Date().toISOString()});
-    if (!filaGuarda(l)) return false;
+    const l = filaLe(), j = l.findIndex(x => x.id === id), agora = new Date().toISOString(), ev = evento ? {texto: evento, em: agora} : null;
+    if (j >= 0) { l[j].doc = doc; if (ev) l[j].eventos = (l[j].eventos || []).concat([ev]).slice(-20); l[j].em = agora; l[j].n = (l[j].n || 0) + 1; }
+    else l.push({id, doc, versao, eventos: ev ? [ev] : [], em: agora, n: 1});
+    if (!guardaFila('fila', l)) return false;
     const i = rows.findIndex(x => x.id === id), linha = {id, ...doc, _versao: versao, _pendente: true, _escrita: ++escritas};
     if (i >= 0) rows[i] = linha; else rows.push(linha);
     renderOff();
@@ -8563,20 +8927,59 @@ if (!Element.prototype.replaceChildren) {
       if (i >= 0) lista[i] = linha; else lista.push(linha); });
     return lista;
   }
+  // O registo de eventos da base de dados (tabela eventos) põe a hora da gravação: vão todas as mudanças da fila, e as
+  // que ficaram à espera levam a hora a que foram feitas.
+  function eventoDe(x) {
+    const evs = (x.eventos || []).map(e => typeof e === 'string' ? {texto: e} : e).filter(e => e && e.texto);
+    if (!evs.length) return null;
+    return evs.map(e => e.em && Date.now() - new Date(e.em).getTime() > 120000 ? `${e.texto} (feito a ${quando(new Date(e.em))})` : e.texto).join(' · ');
+  }
+  function enviaFilas() { filaEnvia(); cliFilaEnvia(); envEnviaFila(); }
+  // As marcas desta página nunca vão para a base de dados (uma fila antiga ainda as pode ter no documento).
+  const semMarcas = d => { const o = Object.assign({}, d); delete o._pendente; delete o._versao; delete o._escrita; return o; };
   let filaAEnviar = false;
   async function filaEnvia() {
-    if (filaAEnviar || !sb || !navigator.onLine || !filaLe().length) return;
+    if (filaAEnviar || !sb || !sessao || semRede() || !filaLe().length) return;
     filaAEnviar = true; let feitos = 0, conf = 0;
     try {
-      for (const x of filaLe()) {
-        const {data, error} = await sb.rpc('guardar_pedido', {p_id: x.id, p_dados: x.doc, p_versao: x.versao, p_evento: (x.eventos || []).slice(-1)[0] || null});
+      const est = await sessaoPronta(6000);
+      if (est === 'saiu') { sessaoAcabou(); return; }
+      if (est !== 'ok') return;
+      const vezes = {};
+      for (;;) {
+        const x = filaLe().find(y => (vezes[y.id] || 0) < 3);
+        if (!x) break;
+        vezes[x.id] = (vezes[x.id] || 0) + 1;
+        let {data, error} = await sb.rpc('guardar_pedido', {p_id: x.id, p_dados: semMarcas(x.doc), p_versao: x.versao, p_evento: eventoDe(x)});
+        if (error && eRede(error)) break;
+        const t = String((error && error.message) || '');
+        // Uma resposta que se perdeu pelo caminho: se a base de dados já tem esta versão do pedido, ficou gravada.
+        if (error && /conflito|duplicate key/.test(t)) {
+          const r = await sb.from('pedidos').select('dados,versao').eq('id', x.id).maybeSingle();
+          if (r && !r.error && r.data && cliNorm(semMarcas(r.data.dados)) === cliNorm(semMarcas(x.doc))) { error = null; data = r.data.versao; }
+        }
+        // O que está agora na fila: se o pedido mudou enquanto ia (contador ou hora diferentes), a versão nova fica.
+        const vivo = filaLe(), j = vivo.findIndex(y => y.id === x.id), mudou = j >= 0 && (vivo[j].n !== x.n || vivo[j].em !== x.em);
         if (error) {
-          const t = String(error.message || '');
-          if (eRede(error)) break;
-          if (/conflito|duplicate key/.test(t)) { conflitosGuarda(conflitosLe().filter(y => y.id !== x.id).concat([{...x, erro: /duplicate/.test(t) ? 'duplicado' : 'conflito'}])); conf++; }
-          else break; // sessão expirada ou sem permissão: fica na fila até se entrar outra vez
-        } else feitos++;
-        filaGuarda(filaLe().filter(y => y.id !== x.id));
+          if (!/conflito|duplicate key/.test(t)) break; // sessão expirada ou sem permissão: fica na fila até se entrar outra vez
+          const y = j >= 0 ? vivo[j] : x;
+          if (!guardaFila('conflitos', conflitosLe().filter(z => z.id !== x.id).concat([Object.assign({}, y, {erro: /duplicate/.test(t) ? 'duplicado' : 'conflito'})]))) break;
+          if (j >= 0) { vivo.splice(j, 1); guardaFila('fila', vivo); }
+          conf++; continue;
+        }
+        feitos++;
+        if (j < 0) continue;
+        const nova = Number(data) || x.versao + 1;
+        if (mudou) {
+          // Segue já a versão nova, por cima da que acabou de entrar, só com os eventos que ainda faltam.
+          const ja = (x.eventos || []).map(e => JSON.stringify(e));
+          vivo[j].versao = nova; vivo[j].eventos = (vivo[j].eventos || []).filter(e => ja.indexOf(JSON.stringify(e)) < 0);
+        } else {
+          vivo.splice(j, 1);
+          const i = rows.findIndex(r => r.id === x.id);
+          if (i >= 0 && rows[i]._pendente) { rows[i] = Object.assign({}, rows[i], {_versao: nova}); delete rows[i]._pendente; }
+        }
+        guardaFila('fila', vivo);
       }
     } catch (e) {} finally { filaAEnviar = false; }
     renderOff();
@@ -8585,77 +8988,167 @@ if (!Element.prototype.replaceChildren) {
       carregar();
     }
   }
+
+  // Fichas de clientes mudadas sem rede: como os pedidos, numa fila (uma entrada por cliente, com os campos mudados, os
+  // valores que a pessoa via e as linhas do histórico com a hora a que foram feitas). Ao enviar, gravarCliente faz o
+  // mesmo que com rede: um campo que um colega mudou entretanto não se grava por cima e fica em «não entrou».
+  const cliFilaLe = () => (eu ? localLe('fila-clientes', []) : []);
+  function cliEnfileira(k, patch, vistos, linha) {
+    const l = cliFilaLe(), j = l.findIndex(x => x.k === k), agora = new Date().toISOString(), linhas = linha ? [{texto: linha, em: agora}] : [];
+    if (j >= 0) {
+      const x = l[j], v = Object.assign({}, x.vistos || {});
+      // Um campo que já estava na fila: o que a pessoa via era o valor da fila; conta o que se via antes dele.
+      Object.keys(vistos || {}).forEach(p => { if (!(p in (x.patch || {})) && !(p in v)) v[p] = vistos[p]; });
+      Object.assign(x, {patch: Object.assign({}, x.patch, patch), vistos: v, linhas: (x.linhas || []).concat(linhas).slice(-20), em: agora, n: (x.n || 0) + 1});
+    } else l.push({k, patch, vistos: vistos || {}, linhas, em: agora, n: 1});
+    if (!guardaFila('fila-clientes', l)) return false;
+    cliComFila(); renderOff();
+    return true;
+  }
+  // A fila por cima das fichas lidas: a ficha mostra-se já mudada.
+  function cliComFila() {
+    cliFilaLe().forEach(x => {
+      const base = Object.assign({}, cfgClientes[x.k] || {}, fichas[x.k] || {}), doc = cliAplica(JSON.parse(JSON.stringify(base)), x.patch);
+      delete doc._novo; if (!doc.nome) doc.nome = x.k;
+      fichas[x.k] = Object.assign(doc, {_pendente: true});
+    });
+  }
+  let cliAEnviar = false;
+  async function cliFilaEnvia() {
+    if (cliAEnviar || !sb || !sessao || semRede() || !cliFilaLe().length) return;
+    cliAEnviar = true; let feitos = 0, conf = 0;
+    try {
+      const est = await sessaoPronta(6000);
+      if (est === 'saiu') { sessaoAcabou(); return; }
+      if (est !== 'ok') return;
+      const vezes = {};
+      for (;;) {
+        const x = cliFilaLe().find(y => (vezes[y.k] || 0) < 3);
+        if (!x) break;
+        vezes[x.k] = (vezes[x.k] || 0) + 1;
+        let r;
+        try { r = await gravarCliente(x.k, x.patch, x.vistos, x.linhas); } catch (e) { break; } // sem rede ou sem permissão: fica
+        const vivo = cliFilaLe(), j = vivo.findIndex(y => y.k === x.k), mudou = j >= 0 && (vivo[j].n !== x.n || vivo[j].em !== x.em);
+        if (r === 'conflito') {
+          const y = j >= 0 ? vivo[j] : x, nome = (fichas[x.k] && fichas[x.k].nome) || (cfgClientes[x.k] && cfgClientes[x.k].nome) || x.patch.nome || x.k;
+          if (!guardaFila('conflitos', conflitosLe().filter(z => z.id !== 'cli:' + x.k).concat([{tipo: 'ficha', id: 'cli:' + x.k, k: x.k, nome, patch: y.patch, vistos: y.vistos, linhas: y.linhas, em: y.em, erro: 'conflito'}]))) break;
+          if (j >= 0) { vivo.splice(j, 1); guardaFila('fila-clientes', vivo); }
+          conf++; continue;
+        }
+        feitos++;
+        if (j < 0) continue;
+        if (mudou) {
+          // O que acabou de entrar passa a ser o valor que a mudança seguinte via; as linhas já gravadas saem.
+          const ja = (x.linhas || []).map(l => JSON.stringify(l));
+          Object.keys(x.patch).forEach(p => { if (p in vivo[j].vistos) vivo[j].vistos[p] = x.patch[p]; });
+          vivo[j].linhas = (vivo[j].linhas || []).filter(l => ja.indexOf(JSON.stringify(l)) < 0);
+        } else vivo.splice(j, 1);
+        guardaFila('fila-clientes', vivo);
+      }
+    } finally { cliAEnviar = false; }
+    renderOff();
+    if (feitos || conf) {
+      if (feitos) toast(`${feitos} ${feitos === 1 ? 'ficha mudada sem rede gravada' : 'fichas mudadas sem rede gravadas'}`);
+      carregar();
+    }
+  }
+
   function renderOff() {
     const bar = F('offBar'); if (!bar) return;
-    const n = filaLe().length, c = conflitosLe().length, partes = [];
-    if (semRedeDe) partes.push(`Sem rede: a mostrar os dados de ${quando(new Date(semRedeDe))}`);
-    if (n) partes.push(`${n} ${n === 1 ? 'alteração guardada neste aparelho' : 'alterações guardadas neste aparelho'}, ${navigator.onLine ? 'a enviar' : 'enviam-se quando houver rede'}`);
-    if (c) partes.push(`${c} ${c === 1 ? 'alteração não entrou' : 'alterações não entraram'}: o pedido mudou entretanto`);
-    bar.hidden = !partes.length; bar.classList.toggle('conflito', !!c);
+    const np = filaLe().length, nf = cliFilaLe().length, ne = envFila().length, n = np + nf + ne, cs = conflitosLe(), c = cs.length, partes = [];
+    if (semRedeDe) partes.push(`Sem rede: a mostrar os dados de ${quando(new Date(semRedeDe))}${copiaParcial ? ` (${parcialTxt(copiaParcial)})` : ''}`);
+    else if (sessao && semRede()) partes.push('Sem rede');
+    if (n) {
+      const tipos = [np ? `${np} ${np === 1 ? 'pedido' : 'pedidos'}` : null, nf ? `${nf} ${nf === 1 ? 'ficha' : 'fichas'}` : null, ne ? `${ne} «Sim, enviei»` : null].filter(Boolean);
+      partes.push(`${n} ${n === 1 ? 'alteração guardada neste aparelho' : 'alterações guardadas neste aparelho'}${nf || ne ? ` (${tipos.join(', ')})` : ''}, ${semRede() ? 'enviam-se quando houver rede' : 'a enviar'}`);
+    }
+    if (c) partes.push(`${c} ${c === 1 ? 'alteração não entrou' : 'alterações não entraram'}: ${cs.every(x => x.tipo !== 'ficha') ? (c === 1 ? 'o pedido mudou entretanto' : 'os pedidos mudaram entretanto') : 'um colega mudou o mesmo entretanto'}`);
+    if (espacoFalta) partes.push(espacoFalta);
+    bar.hidden = !partes.length; bar.classList.toggle('conflito', !!c || !!espacoFalta);
     F('offTxt').textContent = partes.join(' · '); F('offVer').hidden = !c;
   }
+  const CLI_CAMPOS = {nome:'nome', nif:'NIF', tipoCliente:'tipo', telefone:'telefone', email:'email', contacto:'pessoa de contacto', morada:'morada', notas:'notas', contrato:'contrato', dono:'dono', prioridade:'prioridade', proximoContacto:'próximo contacto', localidade:'localidade', equipamentos:'equipamentos', contactado:'contactado', ignorar:'ignorar'};
   // Conflitos: gravar por cima (lê a versão atual e grava a alteração deste aparelho) ou deitar fora.
   async function conflitoResolve(x, gravarPorCima) {
     fechaPop();
-    if (gravarPorCima) {
+    if (gravarPorCima && !navigator.onLine) { toast('Sem rede: tenta outra vez quando houver rede.'); return; }
+    if (gravarPorCima && x.tipo === 'ficha') {
+      // A ficha: os mesmos campos, sem comparar com o que se via (é isso que «por cima» quer dizer).
+      let r;
+      try { r = await gravarCliente(x.k, x.patch, null, (x.linhas || []).concat([{texto: 'Alteração feita sem rede gravada por cima'}])); }
+      catch (e) { toast(msgErro(e, 'Sem rede: tenta outra vez quando houver rede.', 'Não foi possível gravar: ' + String((e && e.message) || ''))); return; }
+      if (r === 'conflito') { toast(CLI_CONFLITO); return; }
+      toast('Gravado');
+    } else if (gravarPorCima) {
       let id = x.id, versao = 0;
       if (x.erro === 'duplicado') id = nextPedido();
       else {
         const {data, error} = await sb.from('pedidos').select('versao').eq('id', x.id).maybeSingle();
-        if (error) { toast(eRede(error) ? 'Sem ligação. Tenta outra vez.' : 'Não foi possível ler o pedido.'); return; }
+        if (error) { toast(eRede(error) ? 'Sem rede: tenta outra vez quando houver rede.' : 'Não foi possível ler o pedido.'); return; }
         versao = data ? data.versao : 0;
       }
-      const doc = {...x.doc}; doc.historico = (doc.historico || []).slice(-60).concat([nota('Alteração feita sem rede gravada por cima da versão que entrou entretanto')]);
+      const doc = semMarcas(x.doc); doc.historico = (doc.historico || []).slice(-60).concat([nota('Alteração feita sem rede gravada por cima da versão que entrou entretanto')]);
       const {error} = await sb.rpc('guardar_pedido', {p_id: id, p_dados: doc, p_versao: versao, p_evento: 'Alteração feita sem rede gravada por cima'});
-      if (error) { toast(eRede(error) ? 'Sem ligação. Tenta outra vez.' : 'Não foi possível gravar: ' + String(error.message || '')); return; }
+      if (error) { toast(eRede(error) ? 'Sem rede: tenta outra vez quando houver rede.' : 'Não foi possível gravar: ' + String(error.message || '')); return; }
       toast(id !== x.id ? `Gravado como ${id}` : 'Gravado');
     } else toast('Alteração deitada fora');
-    conflitosGuarda(conflitosLe().filter(y => !(y.id === x.id && y.em === x.em)));
+    guardaFila('conflitos', conflitosLe().filter(y => !(y.id === x.id && y.em === x.em)));
     renderOff(); carregar();
   }
   F('offVer').addEventListener('click', ev => abrePop(ev.currentTarget, [h('h4',null,'Alterações que não entraram'),
     ...conflitosLe().map(x => h('div',{class:'cf'},
-      h('b',null, `${x.doc.cliente || x.id} (${x.id})`), h('div',{class:'hint'}, x.erro === 'duplicado' ? 'Pedido novo feito sem rede com um número que outro aparelho já usou.' : `Feita a ${quando(new Date(x.em))}; outra pessoa mudou o pedido antes de chegar.`),
+      h('b',null, x.tipo === 'ficha' ? `Ficha de ${x.nome || x.k}` : `${x.doc.cliente || x.id} (${x.id})`),
+      h('div',{class:'hint'}, x.tipo === 'ficha' ? `Feita a ${quando(new Date(x.em))}; um colega mudou a ficha antes de chegar (${Object.keys(x.patch || {}).map(k => CLI_CAMPOS[k] || (/^extra\./.test(k) ? 'coluna da equipa' : k)).join(', ')}).`
+        : x.erro === 'duplicado' ? 'Pedido novo feito sem rede com um número que outro aparelho já usou.' : `Feita a ${quando(new Date(x.em))}; outra pessoa mudou o pedido antes de chegar.`),
       h('button',{class:'btn btn-sm', type:'button', onclick:() => conflitoResolve(x, true)}, x.erro === 'duplicado' ? 'Gravar com outro número' : 'Gravar a minha por cima'),
       h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { if (confirm('Deitar fora esta alteração feita sem rede?')) conflitoResolve(x, false); }}, 'Deitar fora')))], 'conflitos'));
-  window.addEventListener('online', () => { renderOff(); if (sessao) { filaEnvia(); carregar(); } });
-  window.addEventListener('offline', renderOff);
+  // A rede voltou (para o iPad): tenta já; a renovação da sessão volta a andar. Foi-se: a renovação para.
+  window.addEventListener('online', () => { redeMal = false; renderOff(); if (sessao) { autoRefresh(true); enviaFilas(); carregar(); } });
+  window.addEventListener('offline', () => { autoRefresh(false); renderOff(); });
 
   // Leituras: uma que começou antes de outra e chega depois é deitada fora (e espera pela mais nova); uma linha que esta
   // página gravou depois de a leitura começar fica (a leitura ainda não a tinha).
   let carregarSeq = 0, carregarUltima = null, escritas = 0;
   function carregar() { const seq = ++carregarSeq; carregarUltima = carregarAgora(seq); return carregarUltima; }
+  // Quem entrou está sempre em colaboradores: uma leitura sem essa linha não é desta conta (a chave pública, sem sessão,
+  // lê listas vazias) e nunca vai por cima da cópia nem do que está no ecrã.
+  function leituraMinha(res) {
+    const q = res[2], em = String((eu && eu.email) || '').toLowerCase();
+    return !q || !!q.error || !Array.isArray(q.data) || q.data.some(x => String(x.email || '').toLowerCase() === em);
+  }
   async function carregarAgora(seq) {
-    if (!sb) return;
+    if (!sb || !sessao) return;
     const e0 = escritas;
     try {
-      const [p, c, q, ft, fc] = await lerComCache('base', () => [
+      const res = await lerComCache('base', () => [
         sb.from('pedidos').select('id,dados,versao').order('id'),
         sb.from('config').select('chave,valor,versao'),
         sb.from('colaboradores').select('email,nome').order('nome'),
         sb.from('faturacao').select('mes,dados'),
         sb.from('clientes').select('id,dados,versao'),
-      ]);
+      ], leituraMinha);
+      if (!res || !sessao) return;
+      const [p, c, q, ft, fc] = res;
       if (p.error) throw p.error;
       if (seq !== carregarSeq) return carregarUltima;
       const locais = new Map(rows.map(r => [r.id, r]));
-      rows = comFila(p.data.map(r => { const l = locais.get(r.id); if (l && l._escrita > e0 && (l._versao || 0) > r.versao) return l; const x = {id: r.id, ...r.dados, _versao: r.versao}; delete x._escrita; return x; }));
+      rows = comFila(p.data.map(r => { const l = locais.get(r.id); if (l && l._escrita > e0 && (l._versao || 0) > r.versao) return l; const x = {id: r.id, ...r.dados, _versao: r.versao}; delete x._escrita; delete x._pendente; return x; }));
       if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'ri') cfgRi = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') TB_PED.cfg = x.valor || null; if (x.chave === 'colunas_clientes') TB_CLI.cfg = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'orcamento' && x.versao >= cfgOrcVersao) { cfgOrc = x.valor || null; cfgOrcVersao = x.versao; } if (x.chave === 'orcamento_numero' && x.versao >= cfgOrcNumV) { cfgOrcNum = x.valor || null; cfgOrcNumV = x.versao; } if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
       if (!c.error) { const mt = c.data.find(x => x.chave === 'orcamento_motor'); cfgMotor = mt ? mt.valor || null : null; cfgMotorV = mt ? mt.versao : 0; }
       if (ft.error) { if (/relation|does not exist|schema cache/i.test(ft.error.message || '')) fatTabela = false; }
       else { fatTabela = true; const novo = {}; for (const x of ft.data) if (x.dados && x.dados.mes) novo[x.dados.mes] = x.dados; faturacao = novo; if (!faturacao[fatMes]) fatMes = ''; }
       if (fc.error) { if (/relation|does not exist|schema cache/i.test(fc.error.message || '')) { fichaTabela = false; const novo = {}; for (const id of Object.keys(fichas)) if (fichas[id]._novo) novo[id] = fichas[id]; fichas = novo; } }
       else { fichaTabela = true; const novo = {}; for (const x of fc.data) novo[x.id] = {...x.dados, _versao: x.versao}; fichas = novo; }
+      cliComFila();
       if (!q.error) { equipa = q.data; const m = equipa.find(x => x.email === (eu && eu.email)); if (m && m.nome) eu.nome = m.nome; }
       status = 'ok'; renderAll(); abreDoEndereco(); renderOff(); renderRiCfg(); renderMotCfg();
-      if (!semRedeDe) filaEnvia();
+      if (!semRedeDe) { enviaFilas(); folhasFinaliza(); }
       carregarPainel();
       carregarSeg();
       carregarAgenda();
     } catch (e) {
-      const txt = String((e && e.message) || '');
       if (status !== 'ok') { status = 'error'; renderAll(); }
-      if (txt.includes('Failed to fetch')) toast('Sem ligação. A mostrar a última leitura.');
+      if (eRede(e)) toast(status === 'ok' ? 'Sem rede: a mostrar a última leitura.' : 'Sem rede e sem cópia neste aparelho: abre o registo uma vez com rede.');
     }
   }
 
@@ -8676,72 +9169,122 @@ if (!Element.prototype.replaceChildren) {
     sessao = session; eu = {email: session.user.email, nome: null};
     // Só quem está na tabela colaboradores pode ler e escrever.
     // «*»: o papel só existe depois de supabase/papeis.sql; antes disso todos são «escritorio», como até aqui.
+    // Sem rede, ou sem resposta em 5 s, entra com a cópia que esta conta deixou neste aparelho quando entrou com rede.
+    const c0 = localLe('eu', null), copia = c0 && c0.email === eu.email ? c0 : null;
     let data = null, error = null;
-    try { ({data, error} = await sb.from('colaboradores').select('*').eq('email', eu.email).maybeSingle()); } catch (e) { error = e; }
-    if (error && eRede(error)) { const c = localLe('eu', null); if (c && c.email === eu.email) { data = c; error = null; } }
+    if (semRede()) error = {message: 'Sem rede', code: 'REDE'};
+    else {
+      const desde = Date.now(), r = await comPrazo(sb.from('colaboradores').select('*').eq('email', eu.email).maybeSingle(), ENTRADA_MS);
+      if (r === ESGOTOU) { redeFalhou(desde); error = {message: 'Sem resposta da rede', code: 'REDE'}; }
+      else ({data, error} = r);
+    }
+    if (error && eRede(error) && copia) { data = copia; error = null; }
     if (error || !data) {
-      await sb.auth.signOut();
-      F_LOGIN(); erroLogin(error && !String(error.message).includes('permission') ? 'Não foi possível verificar a conta. Tenta outra vez.' : 'Esta conta ainda não tem acesso ao registo. Pede ao Bernardo para juntar o teu email aos colaboradores.');
+      sessao = null; eu = null; F_LOGIN();
+      if (error && eRede(error)) { erroLogin('Sem rede: esta conta ainda não entrou neste aparelho com rede. Entra quando houver rede.'); return; }
+      // Sem acesso: sai só deste aparelho. Outro erro: a sessão fica, e recarregar tenta outra vez.
+      if (!error || /permission|row-level/.test(String(error.message || ''))) await sairLocal();
+      erroLogin(error && !/permission|row-level/.test(String(error.message || '')) ? 'Não foi possível verificar a conta. Tenta outra vez.' : 'Esta conta ainda não tem acesso ao registo. Pede ao Bernardo para juntar o teu email aos colaboradores.');
       return;
     }
     eu.nome = data.nome || eu.email.split('@')[0];
     eu.papel = data.papel || 'escritorio';
-    localGuarda('eu', {email: eu.email, nome: eu.nome, papel: eu.papel});
+    guardaFila('eu', {email: eu.email, nome: eu.nome, papel: eu.papel});
     try { localStorage.setItem('registo-ultimo', eu.email); } catch (e) {}
+    // O «Sim, enviei» guardado antes de haver uma fila por conta passa para a conta que entra.
+    try {
+      const velhos = JSON.parse(localStorage.getItem('registo-envios') || '[]');
+      if (!velhos.length || guardaFila('envios', envFila().concat(velhos.filter(x => !envFila().some(y => y.id === x.id))))) localStorage.removeItem('registo-envios');
+    } catch (e) {}
     document.documentElement.classList.toggle('tecnico', eu.papel === 'tecnico');
     canWrite = true;
     F('userTxt').textContent = eu.nome;
     F_APP(); status = 'loading'; renderAll();
+    autoRefresh(true);
     await carregar();
     ligarTempoReal();
+  }
+  // Sair só deste aparelho (os outros continuam com a sessão deles). Sem rede o supabase-js não consegue (avisa o servidor
+  // primeiro) e deixava a sessão guardada, que voltava a entrar na mesma conta: a página tira-a também.
+  let saidaReal = null;
+  async function sairLocal() {
+    autoRefresh(false);
+    if (!semRede()) { try { saidaReal = sb.auth.signOut({scope: 'local'}); await comPrazo(saidaReal, 5000); } catch (e) {} }
+    tiraSessaoLocal();
   }
   function sair() {
     if (canal) { sb.removeChannel(canal); canal = null; }
     if (!F('orcWrap').hidden) fecharOrc(true);
     if (!F('folhaWrap').hidden) fecharFolha(true);
+    if (!F('riWrap').hidden) fecharRI(true);
     document.documentElement.classList.remove('tecnico');
     sessao = null; eu = null; rows = []; faturacao = {}; cfgClientes = {}; fichas = {}; pn = null; sg = null; segTabela = null; cfgSeg = null; segMotor = null; sgCorreu = false; sgEdit = null; agTabela = null; cfgAgenda = null; agTec = []; agMarc = []; agConf = {}; agPor = []; agLinks = {}; agSel = null; agAcao = null; agCfgSujo = false; cfgOrc = null; cfgOrcVersao = 0; cfgOrcNum = null; cfgOrcNumV = 0; ocEd = null; ocSujo = false; canWrite = false; status = 'loading'; ligado = false;
-    F_LOGIN(); erroLogin('');
+    semRedeDe = null; copiaParcial = null; frescas.base = null;
+    F_LOGIN(); erroLogin(''); renderOff();
   }
   F('loginForm').addEventListener('submit', async ev => {
     ev.preventDefault(); erroLogin('');
     const email = F('l-email').value.trim(), password = F('l-pass').value;
     F('l-ok').disabled = true;
     try {
-      const {data, error} = await sb.auth.signInWithPassword({email, password});
-      if (error) throw error;
-      await entrar(data.session);
+      if (!navigator.onLine) throw {message: 'Sem rede', code: 'REDE'};
+      // Um «Sair» com a rede fraca ainda a acabar: espera por ele, para não tirar a sessão que vai entrar.
+      if (saidaReal) { await comPrazo(saidaReal, 15000); saidaReal = null; }
+      const r = await comPrazo(sb.auth.signInWithPassword({email, password}), 15000);
+      if (r === ESGOTOU) throw {message: 'Sem resposta da rede', code: 'REDE'};
+      if (r.error) throw r.error;
+      await entrar(r.data.session);
     } catch (e) {
       const txt = String((e && e.message) || '');
-      erroLogin(txt.includes('Invalid login') ? 'Email ou palavra-passe errados.' : txt.includes('Failed to fetch') ? 'Sem ligação. Verifica a internet.' : 'Não foi possível entrar. Tenta outra vez.');
+      erroLogin(txt.includes('Invalid login') ? 'Email ou palavra-passe errados.' : eRede(e) ? 'Sem ligação: para entrar é preciso rede. Verifica a internet.' : 'Não foi possível entrar. Tenta outra vez.');
     } finally { F('l-ok').disabled = false; }
   });
+  // «Sair» avisa de tudo o que ainda não está na base de dados (as filas desta conta e o que não entrou) antes de o
+  // apagar, e sai mesmo deste aparelho, também sem rede.
   F('btnSair').addEventListener('click', async () => {
-    const n = filaLe().length;
-    if (!confirm(n ? `Há ${n} ${n === 1 ? 'alteração feita sem rede que ainda não foi enviada' : 'alterações feitas sem rede que ainda não foram enviadas'}. Se saíres, perdem-se. Sair mesmo assim?` : 'Sair do registo neste aparelho?')) return;
-    ['fila', 'conflitos', 'eu', 'cache-base', 'cache-seg', 'cache-agenda', 'cache-painel'].forEach(localTira);
-    try { localStorage.removeItem('registo-ultimo'); } catch (e) {}
-    try { await sb.auth.signOut(); } catch (e) {}
+    const np = filaLe().length + cliFilaLe().length, ne = envFila().length, nc = conflitosLe().length, partes = [];
+    if (np) partes.push(`${np} ${np === 1 ? 'alteração feita sem rede que ainda não foi enviada' : 'alterações feitas sem rede que ainda não foram enviadas'}`);
+    if (ne) partes.push(`${ne} «Sim, enviei» por gravar`);
+    if (nc) partes.push(`${nc} ${nc === 1 ? 'alteração que não entrou' : 'alterações que não entraram'} (um colega mudou o mesmo; estão em «Ver», na barra de cima)`);
+    const lista = partes.length > 1 ? partes.slice(0, -1).join(', ') + ' e ' + partes[partes.length - 1] : partes[0];
+    if (!confirm(partes.length ? `Há ${lista}. Se saíres, perdem-se. Sair mesmo assim?` : 'Sair do registo neste aparelho?')) return;
+    ['fila', 'fila-clientes', 'envios', 'conflitos', 'eu', 'links', 'cache-base', 'cache-seg', 'cache-agenda', 'cache-painel', 'hora-base', 'hora-seg', 'hora-agenda', 'hora-painel'].forEach(localTira);
+    try { localStorage.removeItem('registo-ultimo'); localStorage.removeItem('registo-envios'); } catch (e) {}
     sair();
+    await sairLocal();
   });
 
   (async () => {
     if (!window.supabase || !window.supabase.createClient) { F_LOGIN(); erroLogin('Não foi possível carregar a biblioteca da base de dados. Recarrega a página.'); return; }
-    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    let sessaoGuardada = null;
-    try { const r = await sb.auth.getSession(); sessaoGuardada = r.data && r.data.session; } catch (e) {}
-    // Sem rede e sem sessão válida (a renovação precisa de rede): entra com a conta que já entrou neste aparelho; os dados
-    // são a última leitura e as gravações esperam pela rede.
-    let ultimo = ''; try { ultimo = localStorage.getItem('registo-ultimo') || ''; } catch (e) {}
-    if (sessaoGuardada) await entrar(sessaoGuardada);
-    else if (!navigator.onLine && ultimo) await entrar({user: {email: ultimo}, semRede: true});
-    else F_LOGIN();
-    sb.auth.onAuthStateChange((ev, session) => { if (ev === 'SIGNED_OUT' && sessao) sair(); });
+    // A renovação da sessão liga-se e desliga-se aqui (autoRefresh), só com rede: ligada sem rede, a biblioteca tentava
+    // renová-la logo ao abrir, e cada leitura e cada gravação esperava pela tentativa anterior.
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {global: {fetch: fetchComPrazo}, auth: {autoRefreshToken: false}});
+    sb.auth.onAuthStateChange((ev, session) => { if (ev === 'SIGNED_OUT' && sessao) sessaoAcabou(); });
+    // Entrar sem esperar pela rede: a sessão guardada neste aparelho diz quem é. Sem rede, ou sem resposta em 5 s, entra
+    // já com a cópia da conta (as leituras são a última cópia e as gravações esperam pela rede). Sem sessão guardada não
+    // se entra (com rede, as leituras seriam as de quem não entrou, vazias): fica a entrada, e as filas e a cópia ficam
+    // guardadas para essa conta.
+    const guardada = sessaoLocal();
+    if (!guardada) {
+      F_LOGIN();
+      let ultimo = ''; try { ultimo = localStorage.getItem('registo-ultimo') || ''; } catch (e) {}
+      if (ultimo) { F('l-email').value = ultimo; if (!navigator.onLine) erroLogin('Sem rede: para entrar outra vez neste aparelho é preciso rede. O que ficou guardado nele não se perde.'); }
+    } else if (!navigator.onLine) await entrar({user: {email: guardada.user.email}, semRede: true});
+    else {
+      const r = await comPrazo(sb.auth.getSession(), ENTRADA_MS);
+      if (r && r.data && r.data.session) await entrar(r.data.session);
+      else if (r === ESGOTOU || (r && r.error && eRede(r.error))) { redeMal = true; await entrar({user: {email: guardada.user.email}, semRede: true}); }
+      else { F_LOGIN(); erroLogin('A sessão neste aparelho acabou: entra outra vez.'); F('l-email').value = guardada.user.email; }
+    }
     // Sem tempo real (rede a bloquear websockets), recarrega de minuto a minuto; com ele, confirma a cada 5 minutos.
     // Nem a meio de escrever num campo (Objetivos, Probabilidades, Definições): a página redesenhada apagava o que se escrevia.
+    // Sem rede nenhuma não vale a pena (a cópia não muda); com a rede fraca, é isto que vê se ela já voltou.
     const aEscrever = () => { const a = document.activeElement; return !!a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && !a.readOnly; };
-    setInterval(() => { if (sessao && status === 'ok' && !trans && modo !== 'novo' && !sheetSujo && !aEscrever()) carregar(); }, 60000);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden && sessao) carregar(); });
+    setInterval(() => { if (sessao && navigator.onLine && status === 'ok' && !trans && modo !== 'novo' && !sheetSujo && !aEscrever()) carregar(); }, 60000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && sessao && navigator.onLine) carregar(); });
+    // Com a rede mal e um formulário aberto (o recarregar espera), um pedido pequeno vê se ela já voltou; se sim, as filas
+    // seguem (redeVoltou).
+    setInterval(() => { if (sessao && eu && redeMal && navigator.onLine) sb.from('colaboradores').select('email').eq('email', eu.email).maybeSingle().then(() => {}, () => {}); }, 30000);
   })();
 })();
 </script>
