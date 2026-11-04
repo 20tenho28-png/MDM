@@ -5430,9 +5430,22 @@ if (!Element.prototype.replaceChildren) {
     }
     throw new Error('numero');
   }
+  // O definitivo de um provisório já guardado (é o que está no papel): fica, se ainda estiver livre; senão, o seguinte.
+  async function folhaDefinitiva(id, velho) {
+    const m = /^(\d+)\/(\d{4})$/.exec(String(velho || '')), dele = m && Number(m[2]) === new Date().getFullYear() ? Number(m[1]) : 0;
+    try { return await reservarFolha(id, dele); }
+    catch (e) { if (String(e && e.message) !== 'folha-usada') throw e; return reservarFolha(id, 0); }
+  }
+  // O provisório velho deu lugar a num (prov: ainda provisório, mudado à mão sem rede): o RI e a obra que o levavam
+  // acompanham. Devolve o texto para o histórico.
+  function folhaProvPassa(novo, velho, num, prov) {
+    if (novo.ri && novo.ri.num === velho) { novo.ri.num = num; if (prov) novo.ri.numProv = true; else delete novo.ri.numProv; }
+    if (novo.obra && novo.obra.riNum === velho) novo.obra.riNum = num;
+    return num === velho ? 'o n.º provisório (feito sem rede) ficou definitivo' : `o n.º provisório ${velho} (feito sem rede) passou a ${num}${prov ? ', também provisório' : ''}`;
+  }
   // Folhas com número provisório feitas sem rede neste aparelho: com rede, o provisório fica definitivo se ainda estiver
   // livre (é o que está no papel); senão a folha recebe o seguinte, e o RI e a obra que o levavam passam ao novo, com a
-  // nota no histórico. Uma folha ou um RI abertos no ecrã esperam.
+  // nota no histórico. Uma folha ou um RI abertos no ecrã esperam (a folha aberta faz o mesmo ao guardar).
   let folhasAFinalizar = false;
   async function folhasFinaliza() {
     if (folhasAFinalizar || !canWrite || !eu || semRede()) return;
@@ -5442,17 +5455,13 @@ if (!Element.prototype.replaceChildren) {
     folhasAFinalizar = true;
     try {
       for (const r0 of xs) {
-        const velho = r0.folha.num, m = /^(\d+)\/(\d{4})$/.exec(String(velho || '')), dele = m && Number(m[2]) === new Date().getFullYear() ? Number(m[1]) : 0;
-        let num;
-        try { num = await reservarFolha(r0.id, dele); }
-        catch (e) { if (String(e && e.message) !== 'folha-usada') throw e; num = await reservarFolha(r0.id, 0); }
+        const velho = r0.folha.num, num = await folhaDefinitiva(r0.id, velho);
         const r = rows.find(x => x.id === r0.id);
         if (!pode(r) || r.folha.num !== velho) continue;
         const novo = JSON.parse(JSON.stringify(r)); delete novo.id;
         novo.folha = Object.assign({}, novo.folha, {num}); delete novo.folha.numProv; delete novo.folha.provPor;
-        if (novo.ri && novo.ri.num === velho) { novo.ri.num = num; delete novo.ri.numProv; }
-        if (novo.obra && novo.obra.riNum === velho) novo.obra.riNum = num;
-        novo.historico = (novo.historico || []).slice(-60).concat([nota(num === velho ? `Folha de obra ${num}: o n.º provisório (feito sem rede) ficou definitivo` : `Folha de obra: o n.º provisório ${velho} (feito sem rede) passou a ${num}`)]);
+        const passou = folhaProvPassa(novo, velho, num);
+        novo.historico = (novo.historico || []).slice(-60).concat([nota(num === velho ? `Folha de obra ${num}: ${passou}` : `Folha de obra: ${passou}`)]);
         if (!await gravar(r.id, novo, num === velho ? `Folha de obra ${num}: número confirmado` : `Folha de obra ${num} (era a provisória ${velho})`, {manter: true, erro: () => {}})) break;
       }
     } catch (e) {} finally { folhasAFinalizar = false; }
@@ -5499,6 +5508,7 @@ if (!Element.prototype.replaceChildren) {
   function fecharFolha(forcar) {
     if (!forcar && folSujo && canWrite && !confirm('A folha tem alterações por guardar. Fechar mesmo assim?')) return;
     F('folhaWrap').hidden = true; document.body.style.overflow = F('sheetWrap').hidden ? '' : 'hidden'; fol = null; folId = null;
+    if (!forcar) folhasFinaliza(); // um provisório que esperava por esta folha fechada (forcar: a sair da conta)
   }
 
   function campoF(chave, extra) {
@@ -5625,14 +5635,20 @@ if (!Element.prototype.replaceChildren) {
     if (!canWrite) { if (imprimir) imprimirFolha(); return; }
     let num = String(fol.num || '').trim(), prov = !!fol.numProv;
     if (!/^\d+\/\d{4}$/.test(num)) { toast('O número da folha segue o formato 160/2026. Na primeira folha, continua a numeração do Excel.'); return; }
-    if (rows.some(x => x.id !== r.id && x.folha && x.folha.num === num && !x.folha.numProv)) { toast(`A folha ${num} já está noutro pedido.`); return; }
-    // O número definitivo reserva-se agora, com rede. Sem rede (ou se ela falha a meio) fica o provisório, marcado na folha.
+    // O provisório desta folha (o sugerido, ou o que já se guardou sem rede e pode estar no papel) não se compara com os
+    // outros pedidos: com rede dá lugar ao definitivo. Um número escrito à mão tem de estar livre.
+    const doProv = prov && num === folSugerido, velho = r.folha && r.folha.numProv ? String(r.folha.num || '') : null;
+    const usado = rows.some(x => x.id !== r.id && x.folha && x.folha.num === num && !x.folha.numProv);
+    if (usado && !doProv) { toast(`A folha ${num} já está noutro pedido.`); return; }
+    // O número definitivo reserva-se agora, com rede: o provisório já guardado fica se ainda estiver livre, senão o
+    // seguinte (como em folhasFinaliza); um escrito à mão fica se estiver livre; o sugerido de uma folha nova dá lugar ao
+    // seguinte livre. Sem rede (ou se ela falha a meio) fica o provisório, marcado na folha.
     if (prov && !semRede()) {
-      const ano = new Date().getFullYear(), escrito = num !== folSugerido && Number(num.split('/')[1]) === ano ? Number(num.split('/')[0]) : 0;
-      if (num !== folSugerido && !escrito) prov = false; // escrito à mão, de outro ano: fica como está
+      const ano = new Date().getFullYear(), doAno = Number(num.split('/')[1]) === ano;
+      if (!doProv && !doAno) prov = false; // escrito à mão, de outro ano: fica como está
       else {
         const id = r.id; F('folhaBarEstado').textContent = 'A dar o número…';
-        try { num = await reservarFolha(id, escrito); prov = false; }
+        try { num = num === velho ? await folhaDefinitiva(id, num) : await reservarFolha(id, doProv ? 0 : Number(num.split('/')[0])); prov = false; }
         catch (e) {
           if (folId !== id || !fol) return;
           if (String(e && e.message) === 'folha-usada') { toast(`A folha ${num} já está noutro pedido.`); marcaEstado(); return; }
@@ -5646,11 +5662,16 @@ if (!Element.prototype.replaceChildren) {
     const primeira = !r.folha;
     novo.folha = {...fol, num, guardadaEm: new Date().toISOString(), totalCustos: totaisFolha(fol, 'custos').total, totalDebito: totaisFolha(fol, 'debito').total};
     if (prov) Object.assign(novo.folha, {numProv: true, provPor: eu ? eu.email : null}); else { delete novo.folha.numProv; delete novo.folha.provPor; }
+    // O provisório já guardado ficou definitivo, ou deu lugar a outro: o RI e a obra que o levavam acompanham, com a nota
+    // no histórico (como em folhasFinaliza). Sem rede, só se o número mudou à mão (e o RI continua provisório).
+    const passou = velho && (num !== velho || !prov) ? folhaProvPassa(novo, velho, num, prov) : '';
     novo.historico = (novo.historico || []).slice(-60);
-    novo.historico.push(nota(primeira ? `Folha de obra ${num} aberta${prov ? ' (n.º provisório, sem rede)' : ''}` : `Folha de obra ${num} atualizada${novo.folha.totalDebito ? ` (${eur2(novo.folha.totalDebito)} a debitar)` : ''}`));
-    const id0 = r.id;
-    if (await gravar(r.id, novo, primeira ? `Folha de obra ${num} guardada` : 'Folha de obra guardada', {erro: m => toast(m)})) {
+    novo.historico.push(nota(primeira ? `Folha de obra ${num} aberta${prov ? ' (n.º provisório, sem rede)' : ''}` : `Folha de obra ${num} atualizada${novo.folha.totalDebito ? ` (${eur2(novo.folha.totalDebito)} a debitar)` : ''}${passou ? '; ' + passou : ''}`));
+    const id0 = r.id, msg = primeira ? `Folha de obra ${num} guardada` : passou && !prov ? (num === velho ? `Folha de obra ${num}: número confirmado` : `Folha de obra ${num} (era a provisória ${velho})`) : 'Folha de obra guardada';
+    if (await gravar(r.id, novo, msg, {erro: m => toast(m)})) {
       if (!fol || folId !== id0) return; // a folha fechou entretanto (a sessão acabou, por exemplo)
+      // Guardada com o provisório que outro pedido já tem: diz já que o número vai mudar.
+      if (prov && usado) toast(`${semRede() ? 'Sem rede: fica guardada neste aparelho. ' : ''}O n.º ${num} já está noutro pedido: esta folha recebe outro quando houver rede.`);
       const mudouNum = fol.num !== num || !!fol.numProv !== prov;
       folSujo = false; fol = JSON.parse(JSON.stringify(novo.folha)); folSugerido = fol.numProv ? fol.num : null;
       if (mudouNum) renderFolha(); else marcaEstado();
@@ -5736,6 +5757,7 @@ if (!Element.prototype.replaceChildren) {
   function fecharRI(forcar) {
     if (!forcar && riSujo && canWrite && !confirm('O relatório tem alterações por guardar. Fechar mesmo assim?')) return;
     F('riWrap').hidden = true; document.body.style.overflow = F('sheetWrap').hidden ? '' : 'hidden'; riD = null; riId = null;
+    if (!forcar) folhasFinaliza(); // um provisório que esperava por este RI fechado (forcar: a sair da conta)
   }
   function riEstado() {
     const r = rows.find(x => x.id === riId);
@@ -8855,55 +8877,111 @@ if (!Element.prototype.replaceChildren) {
   }
   const parcialTxt = p => [p.indexOf('pedidos') >= 0 ? 'só os pedidos em aberto e os dos últimos 90 dias' : null, p.indexOf('fat') >= 0 ? 'sem a faturação' : p.indexOf('fat12') >= 0 ? 'faturação só dos últimos 12 meses' : null].filter(Boolean).join(', ');
 
-  let semRedeDe = null, copiaParcial = null; // a cópia que se está a mostrar sem rede: de quando e o que lhe falta
+  // A cópia que se está a mostrar em vez da leitura: de quando, o que lhe falta e se é só por a rede estar lenta (a
+  // leitura continua e entra quando chegar).
+  let semRedeDe = null, copiaParcial = null, copiaLenta = false;
   let sondaBase = null; // com a rede mal, uma só leitura à espera de cada vez (não se acumulam)
-  const frescas = {}; // a leitura que essa sonda trouxe, para a página não a repetir logo a seguir
+  // A leitura que essa sonda (ou uma leitura lenta) trouxe, para a página não a repetir logo a seguir: {res, ate}.
+  const frescas = {};
   const copiaFeita = {}; // o texto de cada cópia escrita nesta página (por conta), para não a reescrever igual
-  // Lê com rede e guarda a cópia; sem rede ou com ela mal, devolve a cópia já (no mesmo formato, [{data, error}]). Uma
-  // leitura que falhou nunca vai por cima da cópia boa: cada parte só muda quando chegou bem. valida(res) recusa uma
-  // leitura que não é desta conta (as listas vazias de quem não entrou). null: leitura velha, a ignorar.
-  async function lerComCache(chave, pedidos, valida) {
-    const f = frescas[chave]; frescas[chave] = null;
-    if (f && Date.now() - f.em < 5000) return f.res;
+  const lidaEm = {}; // por parte: quando começou a leitura mais nova que chegou (uma mais velha que acaba depois não conta)
+  const aLer = {}; // por parte: a leitura lenta que passou do prazo e continua a chegar (não se começa outra por cima)
+  let sessaoN = 0; // muda a cada saída da conta: uma leitura de antes não entra depois
+  const LER_PRAZO = 20000, LER_MAX = 120000; // com cópia, a página espera 20 s; a leitura lenta continua até 2 minutos
+  // Quem mostra cada parte (uma leitura lenta entra por ele quando chega) e se já há alguma coisa dela no ecrã.
+  const leitores = {base: () => carregar(), painel: () => carregarPainel(), seg: () => carregarSeg(), agenda: () => carregarAgenda()};
+  const noEcra = {base: () => status === 'ok', painel: () => !!pn, seg: () => !!sg, agenda: () => agTabela === true};
+  const temEcra = chave => !!(noEcra[chave] && noEcra[chave]());
+  // A meio de escrever (um campo com o cursor, um formulário do pedido por gravar): redesenhar apagava o que se escreve.
+  const aEscrever = () => { const a = document.activeElement; return !!a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && !a.readOnly; };
+  const ocupado = () => !!trans || modo === 'novo' || !!sheetSujo || aEscrever();
+  function copiaLe(chave) {
     const c = localLe('cache-' + chave, null), hora = localLe('hora-' + chave, null);
     if (c && hora && hora > c.t) c.t = hora; // a última leitura igual à cópia (que não se reescreveu)
+    return c;
+  }
+  // Lê com rede e guarda a cópia; sem rede ou com ela mal, devolve a cópia já (no mesmo formato, [{data, error}]). Uma
+  // leitura que falhou nunca vai por cima da cópia boa: cada parte só muda quando chegou bem. valida(res) recusa uma
+  // leitura que não é desta conta (as listas vazias de quem não entrou). null: nada a mudar no ecrã (uma leitura velha,
+  // ou uma lenta que ainda vem a caminho e entra sozinha quando chegar).
+  async function lerComCache(chave, pedidos, valida) {
+    const f = frescas[chave]; frescas[chave] = null;
+    if (f && Date.now() < f.ate) return f.res;
+    const c = copiaLe(chave);
     if (!navigator.onLine) return daCopia(chave, c, pedidos);
+    // Rede lenta: a leitura anterior ainda está a chegar e entra quando chegar (outra ao mesmo tempo só a atrasava).
+    if (aLer[chave] && c) return temEcra(chave) ? null : daCopia(chave, c, pedidos, true);
     if (redeMal && c) {
       if (chave === 'base' && !sondaBase) sondaBase = lerRede(chave, pedidos, valida, c).then(r => {
         sondaBase = null;
-        if (r && r.daRede && sessao) { frescas.base = {res: r, em: Date.now()}; carregar(); }
+        if (r && r.daRede && sessao) { frescas.base = {res: r, ate: Date.now() + 5000}; carregar(); }
       }, () => { sondaBase = null; });
       return daCopia(chave, c, pedidos);
     }
     return lerRede(chave, pedidos, valida, c);
   }
   async function lerRede(chave, pedidos, valida, c) {
+    const g = sessaoN, e0 = escritas;
     const est = await sessaoPronta(redeMal ? 4000 : 10000);
+    if (g !== sessaoN) return null; // saiu-se da conta entretanto
     if (est === 'saiu') { sessaoAcabou(); return daCopia(chave, c, pedidos); }
     if (est !== 'ok') return daCopia(chave, c, pedidos);
-    const desde = Date.now(), lendo = Promise.all(pedidos());
-    const res = c ? await comPrazo(lendo, 20000) : await lendo.catch(e => ({error: e}));
-    if (res === ESGOTOU || !Array.isArray(res) || res.some(r => r && (r.status === 0 || (r.error && eRede(r.error))))) {
-      redeFalhou(desde);
-      // Uma leitura velha que falhou quando outra mais nova já respondeu: não muda nada (quem chamou ignora o null).
-      if (!redeMal && redeOkEm > desde) return null;
-      return daCopia(chave, c, pedidos);
-    }
-    if (valida && !valida(res)) { sessaoAcabou('conta'); return daCopia(chave, c, pedidos); }
-    const velho = (c && c.d) || [];
-    const d = res.map((r, i) => r.error ? (velho[i] === undefined ? null : velho[i]) : r.data);
-    // Sem rede não fazem falta os textos dos seguimentos já enviados ou fechados (só os por enviar).
-    if (chave === 'seg' && Array.isArray(d[0])) d[0] = d[0].map(x => x && x.estado !== 'pendente' && (x.rascunho || x.assunto) ? Object.assign({}, x, {rascunho: null, assunto: null}) : x);
-    // Igual à cópia já guardada: só a hora muda (escrever megabytes a cada minuto pesava no iPad antigo).
-    const agora = new Date().toISOString(), txt = JSON.stringify(d), k = chaveLocal('cache-' + chave);
-    if (copiaFeita[k] === txt && c) localGuarda('hora-' + chave, agora);
-    else if (guardaCache(chave, {t: agora, d})) { copiaFeita[k] = txt; localTira('hora-' + chave); }
-    if (chave === 'base' && semRedeDe) { semRedeDe = null; copiaParcial = null; renderOff(); }
-    res.daRede = true;
-    return res;
+    const desde = Date.now(), lendo = Promise.all(pedidos()).catch(e => ({error: e}));
+    const res = c ? await comPrazo(lendo, LER_PRAZO) : await lendo;
+    if (res !== ESGOTOU) return chegou(chave, res, valida, c, desde, g, e0, pedidos);
+    // Rede lenta (passou o prazo com a leitura a meio): não se deita fora. A página mostra já a cópia (ou fica com o que
+    // tem no ecrã) e a leitura continua; quando chega, entra. Ao fim de 2 minutos conta como sem rede.
+    aLer[chave] = desde;
+    comPrazo(lendo, LER_MAX - LER_PRAZO).then(r => {
+      if (aLer[chave] === desde) aLer[chave] = 0;
+      const x = chegou(chave, r === ESGOTOU ? null : r, valida, copiaLe(chave) || c, desde, g, e0, pedidos);
+      if (!x || !x.daRede || !sessao) return;
+      // A meio de escrever, com a parte já no ecrã: fica à espera do recarregar seguinte, que só corre fora disso.
+      const adia = temEcra(chave) && ocupado();
+      frescas[chave] = {res: x, ate: Date.now() + (adia ? 300000 : 5000)};
+      if (!adia) leitores[chave]();
+    });
+    return temEcra(chave) ? null : daCopia(chave, c, pedidos, true);
   }
-  function daCopia(chave, c, pedidos) {
-    if (chave === 'base') { semRedeDe = c ? c.t : null; copiaParcial = c && c.parcial ? c.parcial : null; renderOff(); }
+  // O que chegou de uma leitura (desde: quando começou; g: a sessão; e0: as gravações desta página até aí). Entram as
+  // partes que chegaram; uma que falhou por rede fica a da cópia (as outras partes responderam: a rede está lá, e o
+  // recarregar de minuto a minuto tenta outra vez). Tudo falhado: a cópia. null: leitura velha, a ignorar (saiu-se da
+  // conta, ou outra mais nova desta parte já chegou e está no ecrã). A barra «Sem rede» muda quando entra no ecrã.
+  function chegou(chave, res, valida, c, desde, g, e0, pedidos) {
+    if (g !== sessaoN || !eu) return null;
+    const falhou = r => !!r && (r.status === 0 || (!!r.error && eRede(r.error)));
+    const velha = () => (lidaEm[chave] || 0) > desde;
+    const parcial = Array.isArray(res) && res.some(falhou);
+    // valida: true (desta conta), false (de quem não entrou) ou null (não se sabe: a parte que o diz não chegou).
+    const v = Array.isArray(res) && !res.every(falhou) && valida ? valida(res) : true;
+    if (!Array.isArray(res) || res.every(falhou) || (parcial && v == null)) {
+      redeFalhou(desde);
+      return velha() ? null : daCopia(chave, c, pedidos);
+    }
+    if (velha()) return null;
+    if (v === false) { sessaoAcabou('conta'); return daCopia(chave, c, pedidos); }
+    lidaEm[chave] = desde;
+    const velho = (c && c.d) || [], fresco = !falhou(res[0]);
+    if (fresco) {
+      const d = res.map((r, i) => r.error ? (velho[i] === undefined ? null : velho[i]) : r.data);
+      // Sem rede não fazem falta os textos dos seguimentos já enviados ou fechados (só os por enviar).
+      if (chave === 'seg' && Array.isArray(d[0])) d[0] = d[0].map(x => x && x.estado !== 'pendente' && (x.rascunho || x.assunto) ? Object.assign({}, x, {rascunho: null, assunto: null}) : x);
+      // Uma parte que ficou a da cópia leva o que lhe faltava (encolhida por falta de espaço).
+      const parc = chave === 'base' && c && c.parcial ? c.parcial.filter(x => res[x === 'pedidos' ? 0 : 3].error) : [];
+      // Igual à cópia já guardada: só a hora muda (escrever megabytes a cada minuto pesava no iPad antigo).
+      const agora = new Date().toISOString(), txt = JSON.stringify(d), k = chaveLocal('cache-' + chave);
+      if (copiaFeita[k] === txt && c) localGuarda('hora-' + chave, agora);
+      else if (guardaCache(chave, parc.length ? {t: agora, d, parcial: parc} : {t: agora, d})) { copiaFeita[k] = txt; localTira('hora-' + chave); }
+    }
+    const out = res.map((r, i) => falhou(r) && velho[i] != null ? {data: velho[i], error: null} : r);
+    // Para a barra: de quando são os pedidos, se vêm da cópia (falharam e as outras partes chegaram).
+    const daC = !fresco && velho[0] != null;
+    out.lida = true; out.copiaDe = daC ? c.t : null; out.copiaParcial = daC && c.parcial ? c.parcial : null;
+    out.daRede = fresco; out.e0 = e0;
+    return out;
+  }
+  function daCopia(chave, c, pedidos, lenta) {
+    if (chave === 'base') { semRedeDe = c ? c.t : null; copiaParcial = c && c.parcial ? c.parcial : null; copiaLenta = !!(c && lenta); renderOff(); }
     if (!c) return pedidos().map(() => ({data: null, error: {message: 'Sem rede e sem cópia neste aparelho', code: 'REDE'}}));
     return c.d.map(d => d == null ? {data: null, error: {message: 'sem cópia neste aparelho'}} : {data: d, error: null});
   }
@@ -9056,7 +9134,8 @@ if (!Element.prototype.replaceChildren) {
   function renderOff() {
     const bar = F('offBar'); if (!bar) return;
     const np = filaLe().length, nf = cliFilaLe().length, ne = envFila().length, n = np + nf + ne, cs = conflitosLe(), c = cs.length, partes = [];
-    if (semRedeDe) partes.push(`Sem rede: a mostrar os dados de ${quando(new Date(semRedeDe))}${copiaParcial ? ` (${parcialTxt(copiaParcial)})` : ''}`);
+    const lenta = copiaLenta && !semRede(); // se a rede entretanto se foi, já não é só lenta
+    if (semRedeDe) partes.push(`${lenta ? 'Rede lenta' : 'Sem rede'}: a mostrar os dados de ${quando(new Date(semRedeDe))}${copiaParcial ? ` (${parcialTxt(copiaParcial)})` : ''}${lenta ? ' enquanto chegam os novos' : ''}`);
     else if (sessao && semRede()) partes.push('Sem rede');
     if (n) {
       const tipos = [np ? `${np} ${np === 1 ? 'pedido' : 'pedidos'}` : null, nf ? `${nf} ${nf === 1 ? 'ficha' : 'fichas'}` : null, ne ? `${ne} «Sim, enviei»` : null].filter(Boolean);
@@ -9102,8 +9181,9 @@ if (!Element.prototype.replaceChildren) {
         : x.erro === 'duplicado' ? 'Pedido novo feito sem rede com um número que outro aparelho já usou.' : `Feita a ${quando(new Date(x.em))}; outra pessoa mudou o pedido antes de chegar.`),
       h('button',{class:'btn btn-sm', type:'button', onclick:() => conflitoResolve(x, true)}, x.erro === 'duplicado' ? 'Gravar com outro número' : 'Gravar a minha por cima'),
       h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { if (confirm('Deitar fora esta alteração feita sem rede?')) conflitoResolve(x, false); }}, 'Deitar fora')))], 'conflitos'));
-  // A rede voltou (para o iPad): tenta já; a renovação da sessão volta a andar. Foi-se: a renovação para.
-  window.addEventListener('online', () => { redeMal = false; renderOff(); if (sessao) { autoRefresh(true); enviaFilas(); carregar(); } });
+  // A rede voltou (para o iPad): tenta já (uma leitura lenta de antes pode ter ficado sem ligação: lê-se outra vez); a
+  // renovação da sessão volta a andar. Foi-se: a renovação para.
+  window.addEventListener('online', () => { redeMal = false; Object.keys(aLer).forEach(k => { aLer[k] = 0; }); renderOff(); if (sessao) { autoRefresh(true); enviaFilas(); carregar(); } });
   window.addEventListener('offline', () => { autoRefresh(false); renderOff(); });
 
   // Leituras: uma que começou antes de outra e chega depois é deitada fora (e espera pela mais nova); uma linha que esta
@@ -9111,10 +9191,11 @@ if (!Element.prototype.replaceChildren) {
   let carregarSeq = 0, carregarUltima = null, escritas = 0;
   function carregar() { const seq = ++carregarSeq; carregarUltima = carregarAgora(seq); return carregarUltima; }
   // Quem entrou está sempre em colaboradores: uma leitura sem essa linha não é desta conta (a chave pública, sem sessão,
-  // lê listas vazias) e nunca vai por cima da cópia nem do que está no ecrã.
+  // lê listas vazias) e nunca vai por cima da cópia nem do que está no ecrã. null: não se sabe (essa parte não chegou).
   function leituraMinha(res) {
     const q = res[2], em = String((eu && eu.email) || '').toLowerCase();
-    return !q || !!q.error || !Array.isArray(q.data) || q.data.some(x => String(x.email || '').toLowerCase() === em);
+    if (!q || q.error || !Array.isArray(q.data)) return null;
+    return q.data.some(x => String(x.email || '').toLowerCase() === em);
   }
   async function carregarAgora(seq) {
     if (!sb || !sessao) return;
@@ -9131,8 +9212,12 @@ if (!Element.prototype.replaceChildren) {
       const [p, c, q, ft, fc] = res;
       if (p.error) throw p.error;
       if (seq !== carregarSeq) return carregarUltima;
+      // A barra «Sem rede» acompanha o que entra no ecrã: sai com uma leitura que chegou, fica se os pedidos são da cópia.
+      if (res.lida) { semRedeDe = res.copiaDe; copiaParcial = res.copiaParcial; copiaLenta = false; }
+      // Uma leitura lenta que entrou depois conta as gravações desta página desde que ela começou (não desde agora).
+      const desdeE = typeof res.e0 === 'number' ? Math.min(e0, res.e0) : e0;
       const locais = new Map(rows.map(r => [r.id, r]));
-      rows = comFila(p.data.map(r => { const l = locais.get(r.id); if (l && l._escrita > e0 && (l._versao || 0) > r.versao) return l; const x = {id: r.id, ...r.dados, _versao: r.versao}; delete x._escrita; delete x._pendente; return x; }));
+      rows = comFila(p.data.map(r => { const l = locais.get(r.id); if (l && l._escrita > desdeE && (l._versao || 0) > r.versao) return l; const x = {id: r.id, ...r.dados, _versao: r.versao}; delete x._escrita; delete x._pendente; return x; }));
       if (!c.error) for (const x of c.data) { if (x.chave === 'prazos') { cfgPrazos = x.valor; cfgPrazosVersao = x.versao; } if (x.chave === 'clientes') cfgClientes = x.valor || {}; if (x.chave === 'tarifas') cfgTarifas = x.valor || null; if (x.chave === 'ri') cfgRi = x.valor || null; if (x.chave === 'seguimentos') { cfgSeg = x.valor || null; cfgSegVersao = x.versao; } if (x.chave === 'seguimentos_motor') segMotor = x.valor || null; if (x.chave === 'agenda') cfgAgenda = x.valor || null; if (x.chave === 'colunas') TB_PED.cfg = x.valor || null; if (x.chave === 'colunas_clientes') TB_CLI.cfg = x.valor || null; if (x.chave === 'probabilidades') cfgProb = x.valor || null; if (x.chave === 'orcamento' && x.versao >= cfgOrcVersao) { cfgOrc = x.valor || null; cfgOrcVersao = x.versao; } if (x.chave === 'orcamento_numero' && x.versao >= cfgOrcNumV) { cfgOrcNum = x.valor || null; cfgOrcNumV = x.versao; } if (x.chave === 'objetivos') cfgObjetivos = x.valor || null; }
       if (!c.error) { const mt = c.data.find(x => x.chave === 'orcamento_motor'); cfgMotor = mt ? mt.valor || null : null; cfgMotorV = mt ? mt.versao : 0; }
       if (ft.error) { if (/relation|does not exist|schema cache/i.test(ft.error.message || '')) fatTabela = false; }
@@ -9219,7 +9304,8 @@ if (!Element.prototype.replaceChildren) {
     if (!F('riWrap').hidden) fecharRI(true);
     document.documentElement.classList.remove('tecnico');
     sessao = null; eu = null; rows = []; faturacao = {}; cfgClientes = {}; fichas = {}; pn = null; sg = null; segTabela = null; cfgSeg = null; segMotor = null; sgCorreu = false; sgEdit = null; agTabela = null; cfgAgenda = null; agTec = []; agMarc = []; agConf = {}; agPor = []; agLinks = {}; agSel = null; agAcao = null; agCfgSujo = false; cfgOrc = null; cfgOrcVersao = 0; cfgOrcNum = null; cfgOrcNumV = 0; ocEd = null; ocSujo = false; canWrite = false; status = 'loading'; ligado = false;
-    semRedeDe = null; copiaParcial = null; frescas.base = null;
+    semRedeDe = null; copiaParcial = null; copiaLenta = false; sessaoN++;
+    Object.keys(frescas).forEach(k => { frescas[k] = null; }); Object.keys(aLer).forEach(k => { aLer[k] = 0; });
     F_LOGIN(); erroLogin(''); renderOff();
   }
   F('loginForm').addEventListener('submit', async ev => {
@@ -9279,8 +9365,7 @@ if (!Element.prototype.replaceChildren) {
     // Sem tempo real (rede a bloquear websockets), recarrega de minuto a minuto; com ele, confirma a cada 5 minutos.
     // Nem a meio de escrever num campo (Objetivos, Probabilidades, Definições): a página redesenhada apagava o que se escrevia.
     // Sem rede nenhuma não vale a pena (a cópia não muda); com a rede fraca, é isto que vê se ela já voltou.
-    const aEscrever = () => { const a = document.activeElement; return !!a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && !a.readOnly; };
-    setInterval(() => { if (sessao && navigator.onLine && status === 'ok' && !trans && modo !== 'novo' && !sheetSujo && !aEscrever()) carregar(); }, 60000);
+    setInterval(() => { if (sessao && navigator.onLine && status === 'ok' && !ocupado()) carregar(); }, 60000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden && sessao && navigator.onLine) carregar(); });
     // Com a rede mal e um formulário aberto (o recarregar espera), um pedido pequeno vê se ela já voltou; se sim, as filas
     // seguem (redeVoltou).
