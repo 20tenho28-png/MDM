@@ -54,3 +54,6 @@ dialog{padding:0;border:0;width:min(760px,calc(100% - 32px));max-height:calc(100
 .mdm-mapa{max-height:360px}
 @media(min-width:761px){.faq-rest[hidden]{display:block}.faq-more{display:none}}
 @media(max-width:760px){.hero-services{gap:6px;margin:14px 0 18px}.hero-services a{padding:8px 12px;font-size:.8125rem}.hero-immersive .hero-proof b{font-size:1.25rem}.hero-proof>a.hero-reviews{margin-left:0;width:100%}.featured-grid .project-card:nth-child(n+4){display:none}.team-photo{margin-bottom:28px}.team-photo img{height:260px}.brand-group{justify-content:center;gap:14px 26px}.brand-group img{height:34px;width:auto}.mdm-mapa{max-height:none}}
+
+/* Foto do quadro elétrico inteira, sem corte. */
+.detail-cover img[src$="quadro-eletrico-comando-667.webp"]{object-fit:contain;background:#e4e8eb}
