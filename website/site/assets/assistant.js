@@ -71,4 +71,34 @@
  }
  $('#confirm-booking')?.addEventListener('click',async()=>{if(!reference||!selectedSlot)return;if($('#booking-address').value.trim().length<8){$('#booking-result').textContent=tr('Indique a morada e o código postal da visita.');$('#booking-address').focus();return;}const button=$('#confirm-booking');button.disabled=true;try{const result=await api('/api/bookings',{requestId:reference,id:crypto.randomUUID(),start:selectedSlot.start,address:$('#booking-address').value.trim(),consent:true});$('#booking-result').textContent=tr('Visita confirmada para ')+new Intl.DateTimeFormat(language==='en'?'en-GB':'pt-PT',{timeZone:'Europe/Lisbon',dateStyle:'medium',timeStyle:'short'}).format(result.booking.start)+tr(' (hora de Lisboa).');$('#booking-slots').replaceChildren();button.hidden=true;}catch(e){$('#booking-result').textContent=tr(errors[e.message]||errors.service_unavailable);$('#booking-slots').replaceChildren();await loadSlots();}});
  document.querySelectorAll('.language-switch a').forEach(a=>a.addEventListener('click',()=>{const url=new URL(a.href);url.hash=location.hash;a.href=url.href;try{localStorage.setItem('mdm-language',a.lang)}catch{}}));
+
+ /* pedido rápido no hero (#quick-form): só a necessidade, o nome e o telefone; vai para os mesmos formulários do Netlify,
+    com os mesmos campos, para a equipa ligar ao cliente. Avaria → «orcamento»; o resto → «orcamento-comercial». */
+ const quick=$('#quick-form');
+ if(quick){
+  const chips=[...quick.querySelectorAll('[data-purpose]')];
+  chips.forEach(b=>b.addEventListener('click',()=>chips.forEach(x=>x.setAttribute('aria-pressed',String(x===b)))));
+  const isco2=document.createElement('p');isco2.setAttribute('aria-hidden','true');isco2.style.cssText='position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden';
+  isco2.innerHTML='<label>Não preencher <input name="bot-field" tabindex="-1" autocomplete="off"></label>';quick.append(isco2);
+  quick.addEventListener('submit',async e=>{
+   e.preventDefault();
+   const status=$('#quick-status'),button=$('#quick-send'),nome=quick.elements['quick-name'],tel=quick.elements['quick-phone'];
+   status.className='quick-status';status.textContent='';
+   if(!nome.value.trim()){status.textContent=tr('Indique o seu nome.');nome.focus();return;}
+   if(tel.value.replace(/\D/g,'').length<9){status.textContent=tr('Indique um telefone com 9 dígitos.');tel.focus();return;}
+   const purpose=chips.find(b=>b.getAttribute('aria-pressed')==='true')?.dataset.purpose||'Instalação',service='Ainda não sei',ref=novaReferencia();
+   const mensagem=['Referência: '+ref,'Pedido: '+purpose,'Pedido rápido pelo site: ligar ao cliente','Língua do site: '+(language==='en'?'inglês':'português')].join('\n');
+   const campos={'form-name':comercial(purpose)?'orcamento-comercial':'orcamento',subject:'['+triagem(purpose,service)+'] Pedido rápido '+ref+': '+purpose+' · ligar '+tel.value.trim(),
+    pagina:window.location.pathname,triagem:'['+triagem(purpose,service)+']',potencia:'',estimativa:'',nome:nome.value.trim(),email:'',telefone:tel.value.trim(),
+    servico:purpose+': '+service,mensagem,'bot-field':isco2.querySelector('input').value};
+   button.disabled=true;button.textContent=tr('A enviar…');
+   try{
+    const r=await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(campos).toString(),signal:AbortSignal.timeout(30000)});
+    if(!r.ok)throw Error('service_unavailable');
+    status.classList.add('ok');status.textContent=tr('Pedido recebido. Ligamos-lhe no próximo dia útil. Referência')+' '+ref+'.';
+    button.textContent=tr('Pedido recebido');nome.disabled=true;tel.disabled=true;chips.forEach(b=>b.disabled=true);
+   }
+   catch(e){status.textContent=tr('Não foi possível enviar. Ligue 218 935 050 ou tente de novo.');button.disabled=false;button.textContent=tr('Pedir contacto');}
+  });
+ }
 })();

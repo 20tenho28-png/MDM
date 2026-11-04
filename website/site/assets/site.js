@@ -5,7 +5,7 @@ const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelecto
 const scenes={"casa":{"credit":"Arquivo MDM","author":"MDM","kind":"OBRA MDM","isMdm":true,"src":"/assets/img/hero-bomba-calor-1600.webp","caption":"Bomba de calor para moradia","alt":"Bomba de calor monobloco preta assente em lajetas de betão, no jardim de uma moradia.","source":"/obras/bomba-de-calor-para-moradia.html","label":"Ver bomba de calor na moradia","width":1200,"height":1600,"frame":"heat-pump"},"empresa":{"src":"/assets/img/foto-28-1600.webp","caption":"Midea e solar térmico na cobertura.","alt":"Unidade exterior Midea numa cobertura de Lisboa, junto a painéis solares térmicos","credit":"Ver esta obra MDM","source":"/obras/vrf-ao-lado-do-solar-termico.html","author":"MDM","label":"Ver cobertura Midea com painéis solares","width":1600,"height":1200,"kind":"OBRA MDM","isMdm":true,"frame":"solar-rooftop"},"terraco":{"src":"/assets/img/hero-hvac-pexels-30210086.jpg","caption":"Equipamentos na cobertura.","alt":"Cobertura industrial com unidade de ar condicionado, ventilação e céu azul","credit":"Alexey Baikov / Pexels","source":"https://www.pexels.com/photo/industrial-rooftop-with-hvac-unit-and-ladder-30210086/","author":"Alexey Baikov","label":"Ver instalação exterior de climatização","width":2400,"height":1600}};
 function changeScene(key){
  const scene=scenes[key],image=q('#hero-image');if(!scene||!image)return;
- image.src=scene.src;image.width=scene.width;image.height=scene.height;image.alt=t(scene.alt);
+ image.removeAttribute('srcset');image.removeAttribute('sizes');image.src=scene.src;image.width=scene.width;image.height=scene.height;image.alt=t(scene.alt);
  q('.hero-immersive').classList.toggle('hero-mdm-terrace',!!scene.isMdm);
  q('.hero-immersive').classList.toggle('hero-heat-pump',scene.frame==='heat-pump');
  q('.hero-immersive').classList.toggle('hero-solar-rooftop',scene.frame==='solar-rooftop');
@@ -57,7 +57,18 @@ function openQuote(purpose='',service='',project=''){
  form.dispatchEvent(new Event('mdm:quote-open'));
  if(!dialog.open)dialog.showModal();goStep(0);
 }
-qa('[data-quote]').forEach(b=>b.addEventListener('click',()=>openQuote(b.dataset.quote||'',b.dataset.service||'',b.dataset.project||'')));
+/* um só funil na página inicial: os botões «Pedir orçamento» levam ao pedido rápido do hero, com a necessidade já marcada;
+   só a ligação «pedido completo» dentro do cartão abre o pedido de 4 passos. Nas outras páginas abrem o pedido de 4 passos. */
+const quick=q('#quick-form');
+function goQuick(purpose){
+ const chips=qa('[data-purpose]',quick);if(purpose)chips.forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.purpose===purpose)));
+ quick.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});
+ quick.classList.add('is-hinted');setTimeout(()=>{quick.classList.remove('is-hinted');quick.querySelector('input[name="quick-name"]')?.focus({preventScroll:true});},650);
+}
+qa('[data-quote]').forEach(b=>b.addEventListener('click',()=>{
+ if(quick&&!b.classList.contains('quick-more'))return goQuick(b.dataset.quote||'');
+ openQuote(b.dataset.quote||'',b.dataset.service||'',b.dataset.project||'');
+}));
 document.addEventListener('mdm:calculator-quote',event=>{
  const detail=event.detail;
  if(!form||!detail||typeof detail.summary!=='string'||detail.summary.length>1500||typeof detail.location!=='string'||!/^\d{4}-\d{3}$/.test(detail.location))return;
