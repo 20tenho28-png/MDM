@@ -1,0 +1,18 @@
+<!--meta {"file": "obrigado.html", "title": "Pedido recebido · Melperfaz", "description": "O seu pedido de orçamento chegou à Melperfaz. Se for urgente ou quiser juntar fotografias, ligue ou fale connosco por WhatsApp.", "nav": "", "robots": "noindex", "wa": "pedido", "header": "reduzido", "barra": "nao", "css": ["pag-paginas.css"]} -->
+<!-- Página de agradecimento do formulário (Netlify Forms, action de src/partials/orcamento-form.html). Cabeçalho reduzido,
+     sem barra de ações e sem «Pedir Orçamento» em lado nenhum: as saídas são as fotografias por WhatsApp, ligar e ver as
+     obras. É o único sucesso do pedido: o Netlify mostra-a depois de um envio sem JavaScript e site.js abre-a depois do
+     envio por fetch. Fora do mapa do site (noindex). -->
+{{> page-head icone="enviado" eyebrow="Pedido enviado" titulo="Obrigado. Entraremos em contacto no prazo de um dia útil." intro="Se tiver fotografias do local, envie-as por WhatsApp: ajudam a preparar o orçamento."}}
+
+<section class="sec s-paper sec-junta pag-curta" aria-label="Continuar">
+  <div class="wrap">
+    <div class="acoes">
+      <a class="btn" href="{{wa pedido}}" target="_blank" rel="noopener">Enviar fotografias por WhatsApp</a>
+      <a class="btn btn-ghost" href="{{ site.phoneHref }}">Ligar {{ site.phone }}</a>
+    </div>
+    <nav class="links" aria-label="Continuar no site">
+      <a class="link-seta" href="{{ root }}obras.html">Ver as obras{{icone seta}}</a>
+    </nav>
+  </div>
+</section>

@@ -1,0 +1,38 @@
+<!--meta {"file": "orcamento.html", "title": "Pedir orçamento · Melperfaz, Construção Civil", "description": "Peça o orçamento da sua obra à Melperfaz: respondemos no prazo de um dia útil e marcamos uma visita gratuita e sem compromisso. Ou ligue 961 245 288.", "nav": "orcamento", "barra": "sem-orcamento", "css": ["pag-orcamento.css"], "jsonld": ["breadcrumb"], "breadcrumb": [["Início", ""], ["Pedir Orçamento", "orcamento.html"]]} -->
+<!-- A página do pedido: o único formulário do site (orcamento-form.html), o destino de todos os «Pedir Orçamento».
+     ?tipo=<id do serviço> escolhe o tipo de obra e ?de=<página> diz de onde veio o pedido (site.js). Sem CtaBand: é
+     ela a ação. Abaixo de 980 px o formulário vem primeiro e a lateral depois. -->
+{{> page-head eyebrow="Orçamento gratuito" titulo="Peça o seu orçamento" intro="Respondemos no prazo de um dia útil e marcamos uma visita gratuita e sem compromisso." compacto="1"}}
+
+<section class="sec s-paper sec-junta orc" aria-label="Pedido de orçamento">
+  <div class="wrap orc-grelha">
+    {{> orcamento-form }}
+    <aside class="orc-lateral s-bone" aria-label="Outras formas de pedir e o que acontece a seguir">
+      <div class="orc-bloco">
+        <h2 class="orc-t">Prefere falar já?</h2>
+        <a href="{{ site.phoneHref }}" class="cta-phone"><span class="so-leitor">Ligar </span>{{ site.phone }}</a>{{#se dados.horario}}
+        <span class="cta-phone-l">{{ dados.horario }}</span>{{/se}}
+        <div class="acoes">
+          <a class="btn btn-ghost" href="{{wa fotos}}" target="_blank" rel="noopener">Enviar fotografias por WhatsApp</a>
+        </div>
+      </div>
+      <div class="orc-bloco">
+        <h2 class="orc-t">O que acontece a seguir</h2>
+        <ol class="orc-passos">
+          <li><h3>Consulta</h3><p>Visitamos, ouvimos, medimos e falamos com honestidade sobre âmbito e orçamento antes de gastar um euro.</p></li>
+          <li><h3>Projeto &amp; Orçamento</h3><p>Um orçamento fixo e detalhado e um plano claro. Sem valores vagos, sem custos a crescer a meio da obra.</p></li>
+          <li><h3>Execução</h3><p>A nossa equipa trabalha com calendário definido, mantém a obra limpa e dá-lhe atualizações semanais.</p></li>
+          <li><h3>Entrega</h3><p>Só saímos depois de aprovar cada detalhe, e respondemos pela obra mesmo depois de terminada.</p></li>
+        </ol>
+      </div>
+      <div class="orc-bloco">
+        <h2 class="orc-t">Porque nos escolhem</h2>
+        {{> garantias curta="1"}}
+      </div>
+      <figure class="orc-foto">
+        {{foto 03 sizes="(max-width: 980px) calc(100vw - 32px), 460px" foco="50% 40%"}}
+        <figcaption>Uma das nossas obras</figcaption>
+      </figure>
+    </aside>
+  </div>
+</section>

@@ -1,0 +1,109 @@
+<!--meta {"file": "index.html", "title": "Melperfaz, Construção Civil · Reabilitação de edifícios desde 2001", "description": "Reabilitação de edifícios, espaços comerciais e apartamentos, da estrutura ao acabamento, com equipa própria desde 2001. Orçamento gratuito: 961 245 288.", "nav": "inicio", "css": [], "italico": true, "reencaminha": true} -->
+<!-- A página inicial: Hero › Obras em destaque › Serviços › Porquê Nós › CtaBand. Superfícies paper › ink › paper ›
+     bone › bone (a CtaBand continua o Porquê Nós, com o painel vermelho lá dentro) e o rodapé ink: o vermelho nunca
+     encosta ao verde. Sem formulário (o pedido é em orcamento.html) e sem processo (está ao lado do formulário). -->
+<!-- Hero «split» do design system: o texto à esquerda, a começar na borda da .wrap (como o logótipo), e a fotografia
+     numa moldura 4:3 à direita, com um único cartão «25 anos, desde 2001». No telemóvel: texto, botões e depois a foto. -->
+<section class="hero s-paper" id="top" aria-labelledby="heroT">
+  <div class="wrap hero-grid">
+    <div class="hero-texto">
+      <span class="eyebrow">Reabilitação e construção{{#se dados.zona}} · {{ dados.zona }}{{/se}}</span>
+      <h1 id="heroT">Reabilitamos<br><em>de raiz.</em></h1>
+      <p class="lead">Reabilitação de edifícios, espaços comerciais e apartamentos. Da estrutura ao acabamento, com uma equipa responsável do início ao fim.</p>
+      <div class="acoes">
+        <a href="{{ root }}orcamento.html" class="btn">Pedir Orçamento</a>
+        <a href="{{ site.phoneHref }}" class="btn btn-ghost">Ligar {{ site.phone }}</a>
+      </div>
+      <p class="hero-apoio">Visita e orçamento gratuitos, sem compromisso.</p>
+      {{> prova }}
+    </div>
+    <figure class="hero-visual">
+      <div class="hero-moldura">
+        <div class="frame">{{foto 01 loading="eager" sizes="(max-width: 980px) calc(100vw - 32px), 520px" class="hero-photo" foco="50% 60%"}}</div>
+        <p class="tag-card"><span class="n">{{ anos }}</span><span class="l">anos, desde {{ site.founded }}</span></p>
+      </div>
+      <figcaption class="hero-leg">Carrinha da Melperfaz numa obra de reabilitação</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- as obras em destaque (data/obras.json «destaque»): a prova logo a seguir ao hero; a segunda fica ao alto. «Ver as N
+     obras» vem depois dos cartões (no telemóvel e na ordem do teclado); acima de 980 px sobe para a direita do
+     SectionHead, no espaço que o h2 deixa livre -->
+<section class="sec s-ink" id="obras" aria-labelledby="obrasT">
+  <div class="wrap obras-wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Obras</span>
+      <h2 id="obrasT">Obras nossas, fotografadas no local</h2>
+      <p>Fotografias tiradas durante e no fim de cada trabalho.</p>
+    </div>
+    <div class="photo-grid destaques">
+      {{each obra-foto destaque}}
+    </div>
+    <div class="acoes obras-mais">
+      <a class="btn btn-ghost" href="{{ root }}obras.html">Ver as {{ cat_n.todas }} obras</a>
+    </div>
+  </div>
+</section>
+
+<!-- ServiceList: os serviços de data/site.json «servicos» (o nome e uma frase do texto, «frase»), em linhas sem caixa e sem seta. A linha não é uma ligação:
+     «Ver obras (N)» só quando o serviço tem obras, e «Pedir orçamento» com o tipo já escolhido (?tipo=<id>). A miniatura
+     (64 × 64, a obra em destaque do serviço, com o seu foco) fica à direita do título e o texto contorna-a, a todas as
+     larguras; as duas ligações seguem numa só linha, à largura toda da linha -->
+<section class="sec s-paper" id="servicos" aria-labelledby="servicosT">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">O que fazemos</span>
+      <h2 id="servicosT">Construção e reabilitação, do alicerce ao acabamento</h2>
+    </div>
+    <ul class="svc-lista">{{#cada servicos}}
+      <li class="svc reveal" data-servico="{{ item.id }}">
+        <span class="svc-num" aria-hidden="true">{{ item.n }}</span>
+        <div class="svc-corpo">
+          <div class="svc-txt">{{#se item.miniFoto}}
+            <div class="svc-mini">{{foto {{ item.miniFoto }} sizes="64px" alt="" foco="{{ item.miniFoco }}"}}</div>{{/se}}
+            <h3>{{ item.nome }}</h3>
+            <p>{{ item.frase }}</p>
+          </div>
+          <div class="svc-links">{{#se item.obrasN}}
+            <a class="link-seta" href="{{ root }}{{ item.catAnchor }}">Ver obras ({{ item.obrasN }})<span class="so-leitor"> de {{ item.nome }}</span>{{icone seta}}</a>{{/se}}
+            <a class="link-seta" href="{{ item.orcamentoHref }}" data-tipo="{{ item.id }}">Pedir orçamento<span class="so-leitor"> de {{ item.nome }}</span>{{icone seta}}</a>
+          </div>
+        </div>
+      </li>{{/cada}}
+    </ul>
+  </div>
+</section>
+
+<!-- Porquê Nós: o SectionHead à largura da .wrap (o h2 em duas linhas), e por baixo as quatro garantias em duas colunas
+     (uma no telemóvel) com «Quem somos», ao lado da fotografia da M03 (4:3, a proporção da foto-02, sem corte). No
+     telemóvel a fotografia sai (a prova fotográfica já está nas obras logo acima) -->
+<section class="sec s-bone" id="porque-nos" aria-labelledby="trustT">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Porque nos escolhem</span>
+      <h2 id="trustT">Reputações constroem-se uma obra de cada vez</h2>
+    </div>
+    <div class="trust-grid">
+      <div class="reveal">
+        {{> garantias }}
+        <div class="quem-somos">
+          <h3>Quem somos</h3>
+          <p>A {{ site.legalName }} trabalha desde {{ site.founded }} com equipa própria.{{#se dados.zona}} Trabalhamos em {{ dados.zona }}.{{/se}}{{#se dados.morada}} Sede: {{ dados.morada }}.{{/se}}</p>
+        </div>
+      </div>
+      <!-- uma fotografia real em vez de números: a obra M03, com ligação para a ficha; o perfil do Google quando existir
+           (as avaliações nunca são citadas no site). A coluna tem 360 px acima de 980 px (um terço da .wrap até 1150 px)
+           e a largura toda entre 641 e 980 px -->
+      <figure class="trust-foto reveal">
+        <div class="frame">{{foto 02 sizes="(min-width: 981px) min(360px, calc((100vw - 64px) * .33)), calc(100vw - 64px)" foco="50% 40%"}}</div>
+        <figcaption class="links">
+          <a class="link-seta" href="{{ root }}obras/{{ obrasPorN.03.slug }}.html">Ver a obra<span class="so-leitor">: {{ obrasPorN.03.title }}</span>{{icone seta}}</a>{{#se dados.googleMaps}}
+          <a class="link-seta" href="{{ dados.googleMaps }}" target="_blank" rel="noopener">Ver o perfil e as avaliações no Google{{icone seta}}</a>{{/se}}
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+{{> cta id="contacto" sup="s-bone" junta="1" titulo="Peça o orçamento. A visita é gratuita." texto="Respondemos no prazo de um dia útil e marcamos uma visita sem compromisso."}}

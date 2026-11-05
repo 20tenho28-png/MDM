@@ -1,0 +1,58 @@
+<!-- QuoteForm: o pedido de orçamento, só em orcamento.html. Netlify Forms: o Netlify encontra o formulário «orcamento»
+     no HTML gerado e guarda cada pedido; os avisos por email ligam-se no painel do Netlify (Forms). Sem JavaScript, o
+     envio é normal e o Netlify mostra obrigado.html; com JavaScript, site.js valida, envia e, se correu bem, abre a mesma
+     obrigado.html (um só sucesso). Se falhar, o que se escreveu fica e #formAlerta oferece o telefone e o WhatsApp, com a
+     mensagem site.json «wa.erro» preenchida com o nome e o tipo escritos (data-wa e data-wa-erro).
+     [data-pedido-para] mostra «Pedido para: … · alterar» quando o endereço traz ?tipo= (site.js); o campo escondido
+     «pagina» diz de onde veio o pedido (?de=, por exemplo obras/<slug>). O ?tipo= é o id do serviço (data-tipo), o nome
+     ou um nome de antes do redesenho (data-antigos, site.json «antigos»: «Fachadas / Impermeabilização»), para os
+     endereços antigos continuarem a escolher o tipo. Quem mudar os campos daqui muda também
+     FORM_CAMPOS no build.py. -->
+<div class="form-cartao s-paper" id="pedido">
+  <h2 class="form-t" id="quoteTitle">Pedido de orçamento</h2>
+  <p class="pedido-para" data-pedido-para hidden>Pedido para: <strong data-pedido-nome></strong>&nbsp;· <button class="pedido-alterar" type="button" data-pedido-alterar aria-label="Alterar o tipo de obra">alterar</button></p>
+  <form id="quoteForm" name="orcamento" method="POST" action="/obrigado.html" data-netlify="true" netlify-honeypot="bot-field" aria-labelledby="quoteTitle" data-wa="{{ site.whatsappBase }}" data-wa-erro="{{ site.wa.erro }}">
+    <input type="hidden" name="form-name" value="orcamento">
+    <input type="hidden" name="subject" value="Pedido de orçamento pelo site Melperfaz">
+    <input type="hidden" name="pagina" value="{{ _file }}">
+    <p class="form-legenda" aria-hidden="true"><span class="obrig">*</span> obrigatório</p>
+    <div class="field">
+      <label for="qTipo">Tipo de obra</label>
+      <select id="qTipo" name="tipo_de_obra">
+        <option value="">Escolha uma opção</option>{{#cada servicos}}
+        <option value="{{ item.nome }}" data-tipo="{{ item.id }}"{{#se item.antigosAttr}} data-antigos="{{ item.antigosAttr }}"{{/se}}>{{ item.nome }}</option>{{/cada}}
+        <option value="Outro" data-tipo="outro">Outro</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="qNome">Nome <span class="obrig" aria-hidden="true">*</span></label>
+      <input id="qNome" name="nome" type="text" maxlength="120" autocomplete="name" placeholder="O seu nome" aria-describedby="eNome" required>
+      <p class="field-erro" id="eNome"></p>
+    </div>
+    <div class="field">
+      <label for="qTel">Telefone <span class="obrig" aria-hidden="true">*</span></label>
+      <input id="qTel" name="telefone" type="tel" maxlength="40" inputmode="tel" autocomplete="tel" placeholder="912 345 678" aria-describedby="hTel eTel" required>
+      <p class="field-ajuda" id="hTel">Para combinarmos a visita.</p>
+      <p class="field-erro" id="eTel"></p>
+    </div>
+    <div class="field">
+      <label for="qLocal">Localidade <span class="opcional">(opcional)</span></label>
+      <input id="qLocal" name="localidade" type="text" maxlength="120" autocomplete="address-level2" placeholder="Onde é a obra">
+    </div>
+    <div class="field">
+      <label for="qEmail">Email <span class="opcional">(opcional)</span></label>
+      <input id="qEmail" name="email" type="email" maxlength="254" inputmode="email" autocomplete="email" placeholder="o.seu@email.pt" aria-describedby="eEmail">
+      <p class="field-erro" id="eEmail"></p>
+    </div>
+    <div class="field">
+      <label for="qMsg">Mensagem <span class="opcional">(opcional)</span></label>
+      <textarea id="qMsg" name="mensagem" rows="4" maxlength="3000" placeholder="Descreva a obra: o que quer fazer, onde e para quando."></textarea>
+    </div>
+    <p class="hp" aria-hidden="true"><label for="qGotcha">Não preencher</label><input id="qGotcha" name="bot-field" type="text" tabindex="-1" autocomplete="off"></p>
+    <div class="form-alerta" id="formAlerta" tabindex="-1" hidden></div>
+    <button class="btn" type="submit" id="sendBtn">Enviar pedido de orçamento</button>
+    <p class="form-nota">Usamos os seus dados só para responder a este pedido. <a class="link" href="{{ root }}privacidade.html">Política de privacidade</a>.</p>
+  </form>
+  <!-- a região viva anuncia os erros de validação e o envio («A enviar o pedido.»); fica fora do formulário -->
+  <p class="so-leitor" role="status" aria-live="polite" data-form-voz></p>
+</div>
