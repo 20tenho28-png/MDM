@@ -13,7 +13,8 @@
 ## Before you push
 
 ```bash
-python -m pytest            # ticket wall + simulator tests
+python -m pytest            # ticket wall + ERP + simulator tests
+cd mdm-funil && python -m pytest   # if you touched mdm-funil/
 cd circuit-planner && npm test   # if you touched circuit-planner/
 ```
 

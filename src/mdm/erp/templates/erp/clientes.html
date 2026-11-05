@@ -1,0 +1,19 @@
+{% extends "erp/base.html" %}
+{% block titulo %}Clientes{% endblock %}
+{% block corpo %}
+<div class="cab"><div><div class="eyebrow">Clientes</div><h1>{% if dia %}Visita a {{ dia }}: escolhe o cliente{% else %}Clientes{% endif %}</h1></div>
+<a class="bt" href="/erp/clientes/novo">Novo cliente</a></div>
+<form class="pesquisa" method="get" action="/erp/clientes" style="margin:14px 0">
+  {% if dia %}<input type="hidden" name="dia" value="{{ dia }}">{% endif %}
+  <input type="search" name="q" value="{{ q }}" placeholder="Nome, telefone, NIF, email ou localidade" aria-label="Procurar cliente" autofocus>
+  <button class="bt">Procurar</button>
+</form>
+<div class="tw"><table><thead><tr><th>Cliente</th><th>Contacto</th><th>Local</th><th></th></tr></thead><tbody>
+{% for c in clientes %}<tr>
+  <td><a href="/erp/clientes/{{ c.id }}"><b>{{ c.nome }}</b></a>{% if c.nif %}<span class="sub bl">NIF {{ c.nif }}</span>{% endif %}</td>
+  <td>{{ c.telefone }}{% if c.email %}<span class="sub bl">{{ c.email }}</span>{% endif %}</td>
+  <td>{{ c.localidade or c.morada|truncate(40) }}</td>
+  <td class="n"><a class="bt peq" href="/erp/visitas/nova?cliente={{ c.id }}{% if dia %}&dia={{ dia }}{% endif %}">Nova visita</a></td>
+</tr>{% else %}<tr><td colspan="4" class="vazio">{% if q %}Nenhum cliente com «{{ q }}». <a href="/erp/clientes/novo">Criar</a>.{% else %}Ainda não há clientes. Os relatórios recebidos da app também criam clientes.{% endif %}</td></tr>{% endfor %}
+</tbody></table></div>
+{% endblock %}

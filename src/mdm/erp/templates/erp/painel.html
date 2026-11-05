@@ -1,0 +1,33 @@
+{% extends "erp/base.html" %}{% from "erp/_macros.html" import visita_linha, prio %}
+{% block titulo %}Painel{% endblock %}
+{% block corpo %}
+<div class="cab"><div><div class="eyebrow">MDM · ERP</div><h1>{{ DIAS_SEMANA[hoje.weekday()] }}, {{ hoje|data_pt }}</h1></div>
+<div class="acoes"><a class="bt" href="/erp/clientes">Nova visita</a><a class="bt sec" href="/erp/relatorios/importar">Receber relatórios</a></div></div>
+<div class="numeros">
+  <a class="numero" href="/erp/agenda"><b>{{ de_hoje|length }}</b><span>visitas hoje</span></a>
+  <a class="numero" href="/erp/agenda"><b>{{ semana }}</b><span>visitas esta semana</span></a>
+  <a class="numero {{ 'alerta' if por_marcar }}" href="/erp/por-marcar"><b>{{ por_marcar|length }}</b><span>por marcar</span></a>
+  <a class="numero" href="/erp/por-marcar#pecas"><b>{{ pecas|length }}</b><span>à espera de peça</span></a>
+  <a class="numero {{ 'alerta' if sem_visita }}" href="/erp/relatorios"><b>{{ sem_visita|length }}</b><span>relatórios sem visita</span></a>
+</div>
+<div class="grelha" style="margin-top:14px">
+  <section class="cartao"><h2>Hoje</h2>
+    <ul class="lista">{% for v in de_hoje %}{{ visita_linha(v) }}{% else %}<li class="vazio">Nenhuma visita marcada para hoje.</li>{% endfor %}</ul>
+  </section>
+  <section class="cartao"><h2>Por marcar</h2>
+    <ul class="lista">{% for v in por_marcar[:8] %}{{ visita_linha(v) }}{% else %}<li class="vazio">Nada por marcar.</li>{% endfor %}</ul>
+    {% if por_marcar|length > 8 %}<p><a href="/erp/por-marcar">Ver as {{ por_marcar|length }}</a></p>{% endif %}
+  </section>
+  {% if sem_visita %}<section class="cartao"><h2>Relatórios sem visita</h2>
+    <p class="sub">Chegaram da app sem a ref. interna da visita (V0012) e sem visita marcada nesse dia para o cliente. Associa-os para a agenda e o funil ficarem certos.</p>
+    <ul class="lista">{% for i in sem_visita[:8] %}<li><span class="hora">{{ i.data.strftime('%d/%m') }}</span><span class="princ"><a href="/erp/relatorios/{{ i.numero }}"><b>{{ i.numero }}</b></a> · {{ i.cliente_nome }}</span></li>{% endfor %}</ul>
+  </section>{% endif %}
+  {% if pecas %}<section class="cartao"><h2>À espera de peça</h2>
+    <ul class="lista">{% for i in pecas %}<li><span class="hora">{{ i.data.strftime('%d/%m') }}</span><span class="princ"><a href="/erp/relatorios/{{ i.numero }}"><b>{{ i.cliente_nome }}</b></a><span class="sub bl">{{ i.pendentes|truncate(120) }}</span></span></li>{% endfor %}</ul>
+  </section>{% endif %}
+  {% if previstas %}<section class="cartao"><h2>Próximas visitas previstas</h2>
+    <p class="sub">«Próxima visita» escrita nos relatórios (manutenção, reverificação de fugas) nos próximos 30 dias, sem visita nova na agenda.</p>
+    <ul class="lista">{% for i in previstas %}<li><span class="hora">{{ i.proxima_visita.strftime('%d/%m') }}</span><span class="princ"><b>{{ i.cliente_nome }}</b><span class="sub bl">desde o {{ i.numero }}</span></span>{% if i.cliente_id %}<a class="bt peq sec" href="/erp/visitas/nova?cliente={{ i.cliente_id }}&dia={{ i.proxima_visita.isoformat() }}">Marcar</a>{% endif %}</li>{% endfor %}</ul>
+  </section>{% endif %}
+</div>
+{% endblock %}

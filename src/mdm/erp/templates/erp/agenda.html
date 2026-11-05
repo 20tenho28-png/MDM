@@ -1,0 +1,29 @@
+{% extends "erp/base.html" %}{% from "erp/_macros.html" import prio %}
+{% block titulo %}Agenda{% endblock %}
+{% block corpo %}
+<div class="cab"><div><div class="eyebrow">Agenda</div><h1>Semana de {{ inicio|data_pt }}</h1></div>
+<form class="acoes" method="get" action="/erp/agenda">
+  <a class="bt sec peq" href="/erp/agenda?semana={{ anterior.isoformat() }}{% if tecnico_id %}&tecnico={{ tecnico_id }}{% endif %}">← Anterior</a>
+  <a class="bt sec peq" href="/erp/agenda{% if tecnico_id %}?tecnico={{ tecnico_id }}{% endif %}">Hoje</a>
+  <a class="bt sec peq" href="/erp/agenda?semana={{ seguinte.isoformat() }}{% if tecnico_id %}&tecnico={{ tecnico_id }}{% endif %}">Seguinte →</a>
+  <input type="hidden" name="semana" value="{{ inicio.isoformat() }}">
+  <select name="tecnico" aria-label="Técnico" onchange="this.form.submit()" style="width:auto">
+    <option value="">Todos os técnicos</option>
+    {% for t in tecnicos %}<option value="{{ t.id }}" {{ 'selected' if t.id == tecnico_id }}>{{ t.nome }}</option>{% endfor %}
+  </select>
+</form></div>
+<div class="semana" style="--dias:{{ dias|length }};margin-top:14px">
+{% for d in dias %}
+  <section class="dia {{ 'hoje' if d == hoje }}">
+    <h3><span>{{ DIAS_SEMANA[d.weekday()] }} {{ d.strftime('%d/%m') }}</span><a href="/erp/clientes?dia={{ d.isoformat() }}" title="Marcar visita neste dia" aria-label="Marcar visita a {{ d|data_pt }}">+</a></h3>
+    {% for v in por_dia[d] %}
+      <a class="vis {{ v.estado }} {{ v.prioridade }}" href="/erp/visitas/{{ v.id }}">
+        <b>{{ v.inicio|hora }}{% if v.fim %}–{{ v.fim|hora }}{% endif %}</b> {{ prio(v.prioridade) }} {{ v.cliente.nome }}
+        <span class="sub">{{ v.nome_tipo }}{% if v.tecnico %} · {{ v.tecnico.nome }}{% endif %}{% if v.estado == 'feita' %} · feita{% endif %}</span>
+        {% if v.morada %}<span class="sub">{{ v.morada|truncate(60) }}</span>{% endif %}
+      </a>
+    {% else %}<p class="sub">—</p>{% endfor %}
+  </section>
+{% endfor %}
+</div>
+{% endblock %}
