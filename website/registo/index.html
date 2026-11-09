@@ -5727,7 +5727,7 @@ if (!Element.prototype.replaceChildren) {
      Por omissão (config «ri», em Definições): taxa de deslocação Sim, a matrícula da viatura e os técnicos. Km em branco. */
   const RI_LINHAS = 10, RI_MATS = 12;
   const RI_TIPOS = [['contrato','Contrato'], ['ppagamento','PPagamento'], ['pontual','Pontual Crédito'], ['bancada','Trab. Bancada'], ['garFab','Garantia Fabric.'], ['garServ','Garant. Serviço']];
-  let riId = null, riD = null, riSujo = false, riVista = null;
+  let riId = null, riD = null, riSujo = false, riVista = null, riVer = 0;
   const riCfg = () => Object.assign({tecnicos: [], matricula: '', taxa: true}, (cfgRi || {}));
   const minDe = t => { const m = /^(\d{1,2}):(\d{2})/.exec(t || ''); return m ? Number(m[1]) * 60 + Number(m[2]) : null; };
   const hhmmDe = m => Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0');
@@ -5868,7 +5868,7 @@ if (!Element.prototype.replaceChildren) {
     const g = riGuardado();
     F('riBarEstado').textContent = riVista ? 'Versão assinada (só leitura)' : riSujo ? (g ? 'Alterações por guardar' : 'Ainda não guardado') : (g && g.guardadoEm ? `Guardado a ${quando(new Date(g.guardadoEm))}` : '');
   }
-  const riMuda = () => { riSujo = true; riEstado(); };
+  const riMuda = () => { riSujo = true; riVer++; riEstado(); };
   // Um campo de texto ligado ao RI (caminho «chave» ou [lista, índice, chave]). fixo: calculado, nunca se escreve.
   function riIn(obj, k, extra) {
     const x = extra || {};
@@ -5892,8 +5892,11 @@ if (!Element.prototype.replaceChildren) {
     const t = riTotalMin(d) + pg.transMin; F('riDurTotal').value = t ? hhmmDe(t) : '';
     // Normais e extras: calculados das linhas enquanto ninguém os escreveu à mão (assinado, fica o que se assinou).
     if (riPode() && !d.horasMao) {
-      const ne = riNormaisExtras(d, riHorario(d)), tem = ne.n + ne.x > 0;
-      d.horasNormais = tem ? hhmmDe(ne.n) : ''; d.horasExtras = tem ? hhmmDe(ne.x) : '';
+      const ne = riNormaisExtras(d, riHorario(d)), tem = ne.n + ne.x > 0, nN = tem ? hhmmDe(ne.n) : '', nX = tem ? hhmmDe(ne.x) : '';
+      // Um RI de antes desta regra (sem horasMao) com horas que não batem com as linhas: foram escritas à mão, ficam.
+      const v = k => String(d[k] || '').trim();
+      if (d.horasMao == null && (v('horasNormais') || v('horasExtras')) && (v('horasNormais') !== nN || v('horasExtras') !== nX)) { d.horasMao = true; return; }
+      d.horasMao = false; d.horasNormais = nN; d.horasExtras = nX;
       const a = F('riHorasN'), b = F('riHorasX'); if (a) a.value = d.horasNormais; if (b) b.value = d.horasExtras;
     }
   }
@@ -6210,10 +6213,13 @@ if (!Element.prototype.replaceChildren) {
       ? `${quem} desbloqueado: a assinatura do cliente${v && v.nome ? ' (' + v.nome + ')' : ''}${v && v.assinadoEm ? ' de ' + dmaDe(v.assinadoEm) : ''} foi apagada e a versão assinada fica guardada${assinado ? '; ' + tCli + ' outra vez' : ''}`
       : assinado ? `${quem} ${tCli}` : nova ? `${quem} aberto` : `${quem} atualizado`));
     const msg = (assinado ? 'Relatório assinado e guardado' : 'Relatório guardado') + (ef.falta.length && !imprimir ? `. Em falta: ${ef.falta.join(', ')}.` : '');
-    const id0 = r.id;
+    const id0 = r.id, ver0 = riVer;
     if (await gravar(r.id, novo, msg, {manter: true, erro: m => toast(m)})) {
       if (riId !== id0 || !riD || riD.id !== doc.id) return true; // fechou entretanto
-      riSujo = false; riD = JSON.parse(JSON.stringify(doc));
+      // O mesmo objeto (os campos e as assinaturas no ecrã escrevem nele); o que se escreveu durante a gravação fica por guardar.
+      ['pag', 'de', 'guardadoEm', 'totalMin'].forEach(k => { riD[k] = doc[k]; });
+      delete riD._desbloq;
+      riSujo = riVer !== ver0;
       if (desbloq || nova) renderRI(); else { riEstado(); renderRiAjuda(); }
       if (imprimir) imprimirRI();
       return true;
