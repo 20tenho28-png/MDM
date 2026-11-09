@@ -6257,9 +6257,11 @@ if (!Element.prototype.replaceChildren) {
     ['prazo', 'exclusoes'].forEach(k => { if (o[k] != null) n[k] = tr(o[k]); });
     n.validadeDias = Number(o.validadeDias) || 30;
     n.cliente = {nome: tr(o.cliente.nome), nif: tr(o.cliente.nif), contacto: tr(o.cliente.contacto), morada: tr(o.cliente.morada), tipo: o.cliente.tipo || 'particular'};
-    // O cálculo vai sem os custos e as margens escritos nele (ficam fora do pedido: «Cálculo privado»); com o que a folha
-    // ORC0068 diz do equipamento posto e o texto escrito à mão para ela.
-    n.opcoes = o.opcoes.map(op => Object.assign({k: op.k, titulo: tr(op.titulo), marca: op.marca || '', linhas: op.linhas.map(lin)}, op.motor ? {motor: motSemPriv(op.motor)} : {},
+    // O cálculo vai sem os custos e as margens escritos nele (ficam fora do pedido: «Cálculo privado»), só quando este
+    // aparelho os pode guardar fora (privFora); senão ficam onde estavam, no pedido. Com o que a folha ORC0068 diz do
+    // equipamento posto e o texto escrito à mão para ela.
+    const tira = privFora();
+    n.opcoes = o.opcoes.map(op => Object.assign({k: op.k, titulo: tr(op.titulo), marca: op.marca || '', linhas: op.linhas.map(lin)}, op.motor ? {motor: tira ? motSemPriv(op.motor) : JSON.parse(JSON.stringify(op.motor))} : {},
       op.o68 ? {o68: JSON.parse(JSON.stringify(op.o68))} : {}, tr(op.o68txt) ? {o68txt: tr(op.o68txt)} : {}, tr(op.o68pot) ? {o68pot: tr(op.o68pot)} : {}));
     n.comuns = o.comuns.map(lin);
     n.divisoes = o.divisoes.map(orcDivCalc).map(d => Object.assign(d, {area: d.area === '' ? null : d.area}));
@@ -6896,7 +6898,7 @@ if (!Element.prototype.replaceChildren) {
     const painel = h('div',{class:'oe-mot'},
       h('h4',null, `Cálculo da opção ${op.k}`),
       privFalta ? h('p',{class:'hint'}, 'Ainda sem os custos e as margens guardados deste cálculo (a ler, ou sem rede): o que escreveres fica por cima só dos campos que mudares.') : null,
-      privTabela === false ? h('p',{class:'hint'}, 'Os custos e as margens escritos aqui ficam só neste aparelho: falta correr supabase/orcamento-calculo.sql na base de dados.') : null,
+      privTabela === false ? h('p',{class:'hint'}, 'Os custos e as margens escritos aqui ficam no pedido, que um técnico lê: falta correr supabase/orcamento-calculo.sql na base de dados.') : null,
       h('div',{class:'oe-mot-g'}, escolha('O que se calcula', 'tipo', [['instalacao', 'Instalação ou substituição'], ['manutencao', 'Manutenção ou intervenção']], () => { orcMuda(); renderOrc(); })),
       corpo, res,
       h('div',{class:'oe-chks'},
@@ -6912,13 +6914,17 @@ if (!Element.prototype.replaceChildren) {
      O pedido guarda o cálculo de cada opção sem estes campos (um técnico lê os pedidos). Ficam na tabela
      orcamento_calculo, que a base de dados só dá ao chefe e ao escritório, por pedido e por cálculo (o id de cada um), e
      neste aparelho, por conta, para abrir sem rede. Sem rede, a gravação espera pela rede; sem a tabela (o SQL por
-     correr), ficam só neste aparelho e o cálculo diz porquê. Um campo que ainda não chegou nunca apaga o guardado. */
+     correr), ficam no pedido como estavam e o cálculo diz porquê. Um campo que ainda não chegou nunca apaga o guardado,
+     nem no aparelho nem na tabela (privEnvia junta campo a campo). */
   const MOT_PRIV = ['extraMO', 'extraMat', 'mats', 'equipMan', 'margem', 'alvo', 'alvoIva', 'primeira'];
   var privTabela = null; // null: ainda não se sabe; true; false: a tabela não existe (falta orcamento-calculo.sql)
   const motPriv = m => { const x = {}; MOT_PRIV.forEach(k => { if (m && m[k] !== undefined) x[k] = JSON.parse(JSON.stringify(m[k])); }); return x; };
   const motSemPriv = m => { const x = JSON.parse(JSON.stringify(m)); MOT_PRIV.forEach(k => { delete x[k]; }); return x; };
   const privLocal = () => (eu ? localLe('calc', {}) : {}) || {};
   const privPode = () => !!(sb && sessao && eu && motorOk() && !souTecnico());
+  // Ao guardar, os campos privados saem do pedido só quando vão para outro lado: quem não os pode guardar (um técnico, ou
+  // sem o motor lido) e uma base de dados sem a tabela deixam-nos no pedido, como estavam (nunca se perdem).
+  const privFora = () => privPode() && privTabela !== false;
   const privSemTabela = e => /relation|does not exist|schema cache|PGRST205|42P01/i.test(String((e && e.message) || '') + ' ' + String((e && e.code) || ''));
   // Junta ao orçamento aberto os campos guardados que ele ainda não tem (o que se escreveu entretanto fica). true: juntou.
   function privJunta(o, d) {
@@ -6970,15 +6976,23 @@ if (!Element.prototype.replaceChildren) {
         if (lido === ESGOTOU) break;
         if (lido.error) { if (privSemTabela(lido.error)) privTabela = false; break; }
         privTabela = true;
-        const ja = lido.data && lido.data.dados, maisNovo = ja && (Number(ja.v) || 0) > (Number(x.v) || 0) && (!ja.criado || !x.criado || ja.criado === x.criado);
+        const ja = lido.data && lido.data.dados, mesmo = ja && (!ja.criado || !x.criado || ja.criado === x.criado);
+        const maisNovo = mesmo && (Number(ja.v) || 0) > (Number(x.v) || 0);
+        let dados = null;
         if (!maisNovo) {
-          const dados = {criado: x.criado || null, v: x.v || 0, motores: x.motores || {}};
+          // Campo a campo por cima do que a tabela tem: o que este aparelho não chegou a ler (gravado sem rede, ou antes de
+          // a leitura chegar) fica o guardado.
+          const motores = {}, jm = mesmo && ja.motores ? ja.motores : {};
+          Object.keys(x.motores || {}).forEach(k => { motores[k] = Object.assign({}, jm[k] || {}, x.motores[k]); });
+          dados = {criado: x.criado || null, v: x.v || 0, motores};
           const w = await comPrazo(sb.from('orcamento_calculo').upsert({pedido_id: id, dados, atualizado: new Date().toISOString(), atualizado_por: eu.email}, {onConflict: 'pedido_id'}), 12000);
           if (w === ESGOTOU) break;
           if (w.error) { if (privSemTabela(w.error)) privTabela = false; break; }
         }
         const l2 = privLocal();
-        if (l2[id] && l2[id].em === x.em) { if (maisNovo) l2[id] = Object.assign({}, ja, {pendente: false}); else l2[id].pendente = false; localGuarda('calc', l2); }
+        if (l2[id] && l2[id].em === x.em) { l2[id] = Object.assign({}, maisNovo ? ja : dados, {pendente: false}); localGuarda('calc', l2); }
+        // O orçamento aberto recebe os campos que ainda não tinha.
+        if (orc && orcId === id && privJunta(orc, maisNovo ? ja : dados) && Object.keys(orcMotAberto).some(k => orcMotAberto[k]) && !aEscrever()) renderOrc();
       }
     } finally { privAEnviar = false; }
   }
@@ -7454,7 +7468,7 @@ if (!Element.prototype.replaceChildren) {
     if (pdf && !orcSujo && orc.num && orc.hash === h1) { imprimirOrc(); return; }
     orcAGuardar = true; F('orcBarEstado').textContent = 'A guardar…';
     try {
-      const o = orcParaGuardar(orc);
+      const tirou = privFora(), o = orcParaGuardar(orc); // tirou: os custos do cálculo saíram do pedido (vão para privGuarda)
       // Antes do primeiro PDF, também um rascunho guarda o número do pedido (nunca um que ele já não tem).
       orcNumDoPedido(o, fresco0);
       let nota1 = 'Orçamento guardado (rascunho)', novaRev = false;
@@ -7500,7 +7514,7 @@ if (!Element.prototype.replaceChildren) {
       const ok = await gravar(id, novo, novaRev ? `PDF da revisão ${o.rev} pronto` : 'Orçamento guardado', {manter: true, erro: m => { if (mesmo()) orcErro(m); else toast(m); }});
       if (!ok || !mesmo()) return;
       orcV = o.v;
-      privGuarda(id, orc, o.v); // os custos e as margens do cálculo, fora do pedido
+      if (tirou) privGuarda(id, orc, o.v); // os custos e as margens do cálculo, fora do pedido
       if (JSON.stringify(orc) === antes) { fechaPop(); orc = orcParaEditar(o); orcPrepara(orc, fresco); privJunta(orc, privLocal()[id]); orcSujo = false; } // a lista «Da tabela» era do editor velho
       else {
         // Escreveste durante a gravação: fica o que está no ecrã, com o número, a revisão e a versão que a gravação deu.
@@ -9719,9 +9733,12 @@ if (!Element.prototype.replaceChildren) {
   // apagar, e sai mesmo deste aparelho, também sem rede.
   F('btnSair').addEventListener('click', async () => {
     const np = filaLe().length + cliFilaLe().length, ne = envFila().length, nc = conflitosLe().length, partes = [];
+    // Os custos e as margens de cálculos de orçamento guardados só neste aparelho (sem rede, ou a base de dados não respondeu).
+    const pc = privLocal(), ncalc = Object.keys(pc).filter(k => pc[k] && pc[k].pendente).length;
     if (np) partes.push(`${np} ${np === 1 ? 'alteração feita sem rede que ainda não foi enviada' : 'alterações feitas sem rede que ainda não foram enviadas'}`);
     if (ne) partes.push(`${ne} «Sim, enviei» por gravar`);
     if (nc) partes.push(`${nc} ${nc === 1 ? 'alteração que não entrou' : 'alterações que não entraram'} (um colega mudou o mesmo; estão em «Ver», na barra de cima)`);
+    if (ncalc) partes.push(`custos e margens de ${ncalc === 1 ? '1 orçamento' : ncalc + ' orçamentos'} guardados só neste aparelho (abre o orçamento com rede para os gravar)`);
     const lista = partes.length > 1 ? partes.slice(0, -1).join(', ') + ' e ' + partes[partes.length - 1] : partes[0];
     if (!confirm(partes.length ? `Há ${lista}. Se saíres, perdem-se. Sair mesmo assim?` : 'Sair do registo neste aparelho?')) return;
     ['fila', 'fila-clientes', 'envios', 'conflitos', 'eu', 'links', 'calc', 'cache-base', 'cache-seg', 'cache-agenda', 'cache-painel', 'hora-base', 'hora-seg', 'hora-agenda', 'hora-painel'].forEach(localTira);
