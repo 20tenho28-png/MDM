@@ -122,6 +122,7 @@ if(document.modelContext?.registerTool){
 // Keep all four marks visible without JavaScript or when motion is reduced.
 qa('[data-brand-carousel]').forEach(carousel=>{
  const toggle=q('.brand-toggle',carousel);
+ if(!toggle)return;
  const motionPreference=window.matchMedia('(prefers-reduced-motion: reduce)');
  let paused=false;
  function syncBrandMotion(){
