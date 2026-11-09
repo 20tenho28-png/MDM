@@ -1,6 +1,11 @@
 /* Motor de orçamentos da MDM (motor.js, fluxo.js e documento.js do pacote «mdm-orcamentos-offline»), juntos num ficheiro
    para o registo. O código é o do pacote, só com «a ?? b» escrito à moda antiga (o Safari do iOS 12 não o conhece)
    e sem o nome do cliente que vinha num comentário (este ficheiro publica-se com o site).
+   Mudanças pequenas ao documento.js do pacote (2026-11): o email de manutenção em inglês diz as tarifas da configuração
+   (o pacote tinha as duas tarifas por hora escritas no código); na folha ORC0068 as outras opções também usam o «texto»
+   quando o registo o dá (antes só a principal), e com «bruto» e «desc» no cálculo da principal o desconto fica à vista
+   (V. Unit., Total Ilíquido antes do desconto e Total Desc). O motor.js e o fluxo.js ficam como no pacote.
+   Testes com uma configuração inventada: website/tests/orcamento-motor.mjs (o build.py --check corre-os).
    Sem dados: a empresa, as margens, as tarifas e o catálogo vêm de config «orcamento_motor» (só a equipa os lê) e o
    registo põe-nos em window.MDM antes de calcular. Funciona sem rede (o service worker guarda este ficheiro). */
 
@@ -225,6 +230,8 @@
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const br = (s) => esc(s).replace(/\n/g, '<br>');
   const dataPT = (d) => { const x = d instanceof Date ? d : new Date(d + 'T12:00:00'); return x.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' }); };
+  // Euros à inglesa para o email em inglês: 1,234.56 €
+  const eurEN = (x) => MDM.motor.r2(x).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' €';
 
   /* Bloco "- Marca / - Tipo / - Modelo / - Potência" */
   function blocoEquip(o) {
@@ -237,13 +244,15 @@
        numero: '0082/2026', data: '2026-10-22', cliente: {nome, morada: [linhas], nif},
        proposta: 'Proposta p/ Fornecimento e Montagem ...',
        principal: { calc, marcaTexto, tipoTexto, modeloTexto, potenciaTexto } | { calc, texto },
-       opcoes: [ { calc, marcaTexto, tipoTexto, modeloTexto, potenciaTexto } ],
-       notas, pagamento, exclusoes, prazo } */
+       opcoes: [ { calc, marcaTexto, tipoTexto, modeloTexto, potenciaTexto } | { calc, texto } ],
+       notas, pagamento, exclusoes, prazo }
+     calc: { semIva, iva, comIva } e, com desconto, bruto (antes do desconto) e desc (o desconto, positivo). */
   function renderORC(doc) {
     const E = MDM.EMPRESA, T = MDM.CONFIG.textos, eur = MDM.motor.eur;
     const p = doc.principal, pc = p.calc;
     const descPrincipal = p.texto || blocoEquip(p);
-    const ops = (doc.opcoes || []).map((o) => `<tr><td></td><td class="d">OPÇÃO:<br>${br(blocoEquip(o))}<br><br>Valor Total:&nbsp; ${eur(o.calc.semIva)} + IVA = ${eur(o.calc.comIva)}</td><td class="q">1</td><td></td><td></td></tr>`).join('');
+    const bruto = pc.bruto != null ? pc.bruto : pc.semIva, desc = pc.desc || 0;
+    const ops = (doc.opcoes || []).map((o) => `<tr><td></td><td class="d">OPÇÃO:<br>${br(o.texto || blocoEquip(o))}<br><br>Valor Total:&nbsp; ${eur(o.calc.semIva)} + IVA = ${eur(o.calc.comIva)}${o.calc.desc ? ` (inclui um desconto de ${eur(o.calc.desc)})` : ''}</td><td class="q">1</td><td></td><td></td></tr>`).join('');
     return `<!doctype html><html lang="pt"><head><meta charset="utf-8"><title>Orçamento ${esc(doc.numero)}</title>
 <style>
 @page{size:A4;margin:12mm 12mm 10mm}
@@ -270,14 +279,14 @@ table.it td{vertical-align:top;padding:1.5mm 1mm}.d{white-space:normal}.q{text-a
 <div class="meta"><div class="l"><div><b>Data de Emissão:</b> ${dataPT(doc.data)}</div><div><b>Doc. Emitido por:</b> ${esc(E.emitidoPor)}</div><div>${esc(E.iban)}</div></div>
 <div class="cli"><small>Cliente:</small><br><b>${esc(doc.cliente.nome.toUpperCase())}</b><br><br>${(doc.cliente.morada || []).map(esc).join('<br>')}<br><small>NIF:</small> ${esc(doc.cliente.nif || '')}</div></div>
 <table class="it"><tr><th>Referência</th><th>Descrição</th><th>Quant.</th><th class="v">V. Unit.</th><th class="v">Subtotal</th></tr>
-<tr><td style="width:22mm"></td><td class="d">${br(doc.proposta)}</td><td class="q">1</td><td class="v">${eur(pc.semIva)}</td><td class="v">${eur(pc.semIva)}</td></tr>
+<tr><td style="width:22mm"></td><td class="d">${br(doc.proposta)}</td><td class="q">1</td><td class="v">${eur(bruto)}</td><td class="v">${eur(bruto)}</td></tr>
 <tr><td></td><td class="d">${br(descPrincipal)}</td><td class="q">1</td><td></td><td></td></tr>
 ${ops}
 ${doc.notas ? `<tr><td></td><td class="d">${br(doc.notas)}</td><td></td><td></td><td></td></tr>` : ''}
 </table>
 <div class="esp"></div>
 <div class="tot"><div><b style="font-size:7pt">Taxa de IVA</b><br>${Math.round(MDM.CONFIG.iva * 100)}%</div>
-<table><tr><td class="k">Total Ilíquido</td><td class="v">${eur(pc.semIva)}</td></tr><tr><td class="k">Total Desc</td><td class="v">${eur(0)}</td></tr>
+<table><tr><td class="k">Total Ilíquido</td><td class="v">${eur(bruto)}</td></tr><tr><td class="k">Total Desc</td><td class="v">${eur(desc)}</td></tr>
 <tr><td class="k">Total IVA</td><td class="v">${eur(pc.iva)}</td></tr><tr class="T"><td class="k">Total</td><td class="v">${eur(pc.comIva)}</td></tr></table></div>
 <div class="cond"><b>Prazo de Validade:</b><span><b style="font-size:8.5pt">${esc(T.validade)}</b></span>
 <b>Condições Pagamento:</b><span><b style="font-size:8.5pt;text-decoration:underline">${esc(doc.pagamento || T.pagamentoInstalacao)}</b></span>
@@ -296,7 +305,7 @@ ${doc.notas ? `<tr><td></td><td class="d">${br(doc.notas)}</td><td></td><td></td
   function emailManutencao({ tratamento, equipamentos = [], primeiraHora, soTecnico, morada, desculpa, ingles }) {
     const m = MDM.CONFIG.manutencao, eur = MDM.motor.eur, A = MDM.EMPRESA.assinatura.join('\n');
     const eq = equipamentos.map((e) => '- ' + e).join('\n');
-    if (ingles) return `Dear ${tratamento},\n\n${desculpa ? 'Please accept our apologies for the late response.\n\n' : ''}Following our conversation, please find below our conditions for the maintenance of the equipment installed at ${morada}:\n\n${eq}\n\nOur rates:\n- 1st hour / ${soTecnico ? 'Technician' : 'Technical team'} + travel: ${eur(primeiraHora).replace(',', '.')} + VAT\n- Technician, per hour: 36.20 € + VAT\n${soTecnico ? '' : '- Assistant, per hour: 23.40 € + VAT\n'}\nConditions:\n- The 1st hour is charged in full; after the 1st hour, time is charged in half-hour fractions.\n- Parts and materials used are charged separately.\n- Refrigerant gas charges and any repairs found during the maintenance are not included; if a repair cannot be done on the spot, we will send a separate quote.\n- Payment: on completion, by bank transfer or cash.\n\nTo schedule the visit, please send us:\n- Name of the entity (for the invoice):\n- Billing address:\n- Address of the intervention: ${morada}\n- Tax number (NIF):\n- On-site contact (name and phone):\n\nKind regards,\n\n${A.replace('Tel.: 21', 'Tel.: +351 21').replace('Telemóvel: 9', 'Mobile: +351 9')}`;
+    if (ingles) return `Dear ${tratamento},\n\n${desculpa ? 'Please accept our apologies for the late response.\n\n' : ''}Following our conversation, please find below our conditions for the maintenance of the equipment installed at ${morada}:\n\n${eq}\n\nOur rates:\n- 1st hour / ${soTecnico ? 'Technician' : 'Technical team'} + travel: ${eurEN(primeiraHora)} + VAT\n- Technician, per hour: ${eurEN(m.horaTecnico)} + VAT\n${soTecnico ? '' : `- Assistant, per hour: ${eurEN(m.horaAjudante)} + VAT\n`}\nConditions:\n- The 1st hour is charged in full; after the 1st hour, time is charged in half-hour fractions.\n- Parts and materials used are charged separately.\n- Refrigerant gas charges and any repairs found during the maintenance are not included; if a repair cannot be done on the spot, we will send a separate quote.\n- Payment: on completion, by bank transfer or cash.\n\nTo schedule the visit, please send us:\n- Name of the entity (for the invoice):\n- Billing address:\n- Address of the intervention: ${morada}\n- Tax number (NIF):\n- On-site contact (name and phone):\n\nKind regards,\n\n${A.replace('Tel.: 21', 'Tel.: +351 21').replace('Telemóvel: 9', 'Mobile: +351 9')}`;
     return `Exmo(a). ${tratamento},\n\n${desculpa ? 'Pedimos desculpa pela demora na resposta.\n\n' : ''}No seguimento da nossa conversa, vimos apresentar as nossas condições para a intervenção em ${morada}:\n\n${eq}\n\n- 1ª Hora / ${soTecnico ? 'Técnico' : 'Equipa Técnica'} + Deslocação: ${eur(primeiraHora)} + IVA\n- Hora Técnico: ${eur(m.horaTecnico)} + IVA\n${soTecnico ? '' : `- Hora Ajudante: ${eur(m.horaAjudante)} + IVA\n`}\nCondições:\n- A 1ª hora é faturada por inteiro; após a 1ª hora, a faturação é feita em frações de meia hora.\n- Os materiais e peças aplicados serão faturados à parte.\n- Caso a reparação não seja possível no momento da intervenção, será apresentado orçamento para a mesma.\n- Pagamento: Pronto Pagamento, por transferência bancária ou numerário.\n\nPara agendarmos a intervenção, solicitamos:\n- Nome da Entidade:\n- Morada (faturação):\n- Morada da Intervenção: ${morada}\n- NIF:\n- Contacto no local (nome e telefone):\n\nCom os melhores cumprimentos,\n\n${A}`;
   }
 

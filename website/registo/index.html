@@ -571,6 +571,10 @@ p.oe-pot-r{margin:8px 0 0}
 .oe-mot-av{margin:6px 0 0;color:var(--warn);font-size:13px}
 .oe-mot-err{margin:0;color:var(--bad);font-size:13.5px;font-weight:600}
 .oe-mot-email textarea{min-height:240px;font-size:13px}
+.oe-mot .oe-tab-mao{min-width:640px}
+.oe-mot-int{font-size:13px;line-height:1.35}
+.oe-mot-nota{margin:4px 0 0;font-size:12.5px;color:var(--ink-2)}
+.oe-o68{margin-top:8px}
 .od-folha.o68-folha{padding:12mm 12mm 10mm;min-height:297mm}
 #orcDoc .o68-host{display:block}
 .mot-resumo{margin:0;padding:0 0 0 18px;font-size:13.5px;line-height:1.55}
@@ -4967,7 +4971,7 @@ if (!Element.prototype.replaceChildren) {
         campo('t-ponde','Por onde', sel('t-ponde', Object.entries(POR_ONDE), t.porOnde || r.enviadoPorOnde || 'email')),
         campo('t-epor','Quem enviou', inp('t-epor', meuNome()), 'É a prova do envio: quem, quando e por onde.', true)));
       if (o && !pdf) els.push(h('p',{class:'hint alert'}, 'O orçamento do registo ainda não tem PDF: abre-o e carrega em «Guardar e imprimir» antes de o enviar.'));
-      else if (pdf && orcHash(orcParaEditar(o)) !== o.hash) els.push(h('p',{class:'hint alert'}, 'O orçamento mudou depois do último PDF: abre-o e faz o PDF novo («Guardar e imprimir») antes de o enviar.'));
+      else if (pdf && orcMudouPdf(orcParaEditar(o))) els.push(h('p',{class:'hint alert'}, 'O orçamento mudou depois do último PDF: abre-o e faz o PDF novo («Guardar e imprimir») antes de o enviar.'));
     }
     if (t.ganho && t.revVista == null) t.revVista = orcTemPdf(r) ? orcRevCliente(r.orcamento) || 0 : 0;
     if (t.ganho && orcTemPdf(r) && !orcRevCliente(r.orcamento)) els.push(h('p',{class:'hint'}, `O PDF do registo (revisão ${r.orcamento.rev}) não tem envio registado: o valor do pedido fica o que está (muda-se em «Dados do pedido»).`));
@@ -4976,7 +4980,7 @@ if (!Element.prototype.replaceChildren) {
       const o = r.orcamento, rc = orcRevCliente(o), c = orcDoCliente(o);
       if (c.opcoes.length > 1) els.push(orcOpcaoSel(c, o.aceite && o.aceite.rev === rc ? o.aceite.k : c.recomendada, `O valor do pedido passa a ser o desta opção (PDF da revisão ${rc}).`));
       if (rc !== o.rev) els.push(h('p',{class:'hint'}, `A revisão ${o.rev} ainda não foi enviada: conta a revisão ${rc}, a que o cliente tem.`));
-      else if (orcHash(orcParaEditar(o)) !== o.hash) els.push(h('p',{class:'hint'}, `O orçamento tem alterações depois do último PDF: conta o PDF da revisão ${o.rev}, que é o que o cliente tem.`));
+      else if (orcMudouPdf(orcParaEditar(o))) els.push(h('p',{class:'hint'}, `O orçamento tem alterações depois do último PDF: conta o PDF da revisão ${o.rev}, que é o que o cliente tem.`));
     }
     if (orcEmMao(r, t)) {
       // A revisão que este passo mostra: se sair outro PDF entretanto, o «Confirmar» recusa.
@@ -4985,7 +4989,7 @@ if (!Element.prototype.replaceChildren) {
       els.push(h('p',{class:'hint'}, r.num ? `O PDF da revisão ${o.rev} não tem aceite registado: foi aceite em mão e o valor do pedido passa a ser o da opção aceite.`
         : aceita ? `O orçamento ${o.num} (PDF da revisão ${o.rev}) foi aceite em mão: o pedido fica com este número e o valor da opção aceite.` : `O pedido fica com o número do orçamento, ${o.num}.`));
       if (aceita && c.opcoes.length > 1) els.push(orcOpcaoSel(c, c.recomendada, null));
-      if (orcHash(orcParaEditar(o)) !== o.hash) els.push(h('p',{class:'hint'}, `O orçamento tem alterações depois do último PDF: conta o PDF da revisão ${o.rev}, o que o cliente viu.`));
+      if (orcMudouPdf(orcParaEditar(o))) els.push(h('p',{class:'hint'}, `O orçamento tem alterações depois do último PDF: conta o PDF da revisão ${o.rev}, o que o cliente viu.`));
     }
     if (fecho) els.push(h('div',{class:'fields'}, para === 'perdido'
       ? campo('t-motivo','Motivo', sel('t-motivo', MOTIVOS.map(m => [m,m]), t.motivo || '', 'Escolher…'), null, true)
@@ -6242,17 +6246,21 @@ if (!Element.prototype.replaceChildren) {
         Object.assign(dz ? orcDeItem(dz, 1) : {ref: zona, desc: `Deslocação (${t[1]})`, qtd: '1', un: 'un', preco: orcTxtN(t[2]), iva}, {g: 'desl'}),
       ],
       recomendada: 'A', inclui: '', notas: '', pagamento: c.pagamento || '', condicoes: c.condicoes || '',
-      ultimoPdf: null, anteriores: [],
+      ultimoPdf: null, anteriores: [], tipoPedido: r.tipo || '',
     };
   }
   // Para guardar: números em vez do texto dos campos (preço em euros e quantidade, null quando falta).
   function orcParaGuardar(o) {
-    const lin = l => { const c = orcCent(l.preco), q = orcMil(l.qtd), x = {ref: String(l.ref || '').trim(), desc: String(l.desc || '').trim(), qtd: q == null ? null : q / 1000, un: String(l.un || '').trim(), preco: c == null ? null : c / 100, iva: Number(l.iva) || 23}; if (l.g) x.g = l.g; if (l.pot) x.pot = true; if (l.mot) x.mot = true; return x; };
+    const lin = l => { const c = orcCent(l.preco), q = orcMil(l.qtd), x = {ref: String(l.ref || '').trim(), desc: String(l.desc || '').trim(), qtd: q == null ? null : q / 1000, un: String(l.un || '').trim(), preco: c == null ? null : c / 100, iva: Number(l.iva) || 23}; if (l.g) x.g = l.g; if (l.pot) x.pot = true; if (l.mot) x.mot = true; if (l.com) x.com = true; return x; };
     const n = JSON.parse(JSON.stringify(o)), tr = s => String(s == null ? '' : s).trim();
     n.titulo = tr(o.titulo); n.inclui = tr(o.inclui); n.notas = tr(o.notas); n.pagamento = tr(o.pagamento); n.condicoes = tr(o.condicoes);
+    ['prazo', 'exclusoes'].forEach(k => { if (o[k] != null) n[k] = tr(o[k]); });
     n.validadeDias = Number(o.validadeDias) || 30;
     n.cliente = {nome: tr(o.cliente.nome), nif: tr(o.cliente.nif), contacto: tr(o.cliente.contacto), morada: tr(o.cliente.morada), tipo: o.cliente.tipo || 'particular'};
-    n.opcoes = o.opcoes.map(op => Object.assign({k: op.k, titulo: tr(op.titulo), marca: op.marca || '', linhas: op.linhas.map(lin)}, op.motor ? {motor: JSON.parse(JSON.stringify(op.motor))} : {}));
+    // O cálculo vai sem os custos e as margens escritos nele (ficam fora do pedido: «Cálculo privado»); com o que a folha
+    // ORC0068 diz do equipamento posto e o texto escrito à mão para ela.
+    n.opcoes = o.opcoes.map(op => Object.assign({k: op.k, titulo: tr(op.titulo), marca: op.marca || '', linhas: op.linhas.map(lin)}, op.motor ? {motor: motSemPriv(op.motor)} : {},
+      op.o68 ? {o68: JSON.parse(JSON.stringify(op.o68))} : {}, tr(op.o68txt) ? {o68txt: tr(op.o68txt)} : {}, tr(op.o68pot) ? {o68pot: tr(op.o68pot)} : {}));
     n.comuns = o.comuns.map(lin);
     n.divisoes = o.divisoes.map(orcDivCalc).map(d => Object.assign(d, {area: d.area === '' ? null : d.area}));
     return n;
@@ -6270,6 +6278,8 @@ if (!Element.prototype.replaceChildren) {
   // opções (o cartão não a mostra). Mudar e repor um campo, ou o grupo de uma linha, não faz outra revisão.
   // As divisões são as que a folha mostra (as que a potência aceita), o tipo de cliente conta só como «com IVA» ou não, a
   // morada como a folha a junta e as notas e condições linha a linha. Também é o conteúdo guardado de cada PDF.
+  // Com a folha ORC0068, também tudo o que ela escreve (folha: equipamento, potência, condições, exclusões, prazo,
+  // empresa): uma reimpressão nunca mostra outro texto com o mesmo número e a mesma revisão.
   // A morada na folha e na revisão: cada linha sem espaços a mais, linhas vazias fora, juntas com vírgulas.
   const orcMoradaTxt = s => String(s || '').split(/\n+/).map(x => x.replace(/\s+/g, ' ').trim()).filter(Boolean).join(', ');
   const orcConteudo = o => {
@@ -6283,10 +6293,18 @@ if (!Element.prototype.replaceChildren) {
       cliente: {nome: esp(n.cliente.nome), nif: esp(n.cliente.nif), contacto: esp(n.cliente.contacto), morada: orcMoradaTxt(n.cliente.morada), tipo: orcComIva(n) ? 'particular' : 'empresa'},
       divisoes: P && P.divs ? P.divs.map(d => ({tipo: d.tipo, area: d.area, sol: d.sol, topo: d.topo})) : [],
       opcoes: n.opcoes.map(op => ({k: op.k, titulo: esp(op.titulo), marca: op.marca, linhas: op.linhas.map(l => lin(l, false))})), comuns: n.comuns.map(l => lin(l, true)),
-      recomendada: n.opcoes.length > 1 ? n.recomendada : 'A', inclui: esp(n.inclui), notas: linhas(n.notas), pagamento: esp(n.pagamento), condicoes: linhas(n.condicoes)});
+      recomendada: n.opcoes.length > 1 ? n.recomendada : 'A', inclui: esp(n.inclui), notas: linhas(n.notas), pagamento: esp(n.pagamento), condicoes: linhas(n.condicoes),
+      folha: orc68Ativa(n) ? orc68Dados(n) : undefined});
   };
   const orcHashTxt = s => { let x = 2166136261; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619) >>> 0; } return x.toString(16) + '.' + s.length; };
   const orcHash = o => orcHashTxt(orcConteudo(o));
+  // O orçamento mudou depois do último PDF? Quem não tem o motor de preços não desenha a folha ORC0068: compara-se o resto
+  // (para imprimir, conta o hash inteiro: o que sairia tem de ser o que saiu).
+  function orcMudouPdf(o) {
+    if (orcHash(o) === o.hash) return false;
+    const c = o.ultimoPdf && o.ultimoPdf.conteudo;
+    return !(c && c.folha && !orc68Ativa(o) && orcConteudo(o) === cliNorm(Object.assign({}, c, {folha: undefined})));
+  }
   // Imprimir só o que já é PDF: com número, guardado e igual ao último PDF (senão sairia com o número de outra revisão).
   const orcPdfPronto = () => !!(orc && orc.num && orc.hash && !orcSujo && orcHash(orc) === orc.hash);
   const orcTituloDoc = () => `Orcamento ${orc && orc.num ? orcNumTxt(orc.num).replace('/', '-') : 'rascunho'} ${orc ? orc.cliente.nome : ''}`.replace(/[\\/:*?"<>|]/g, '').trim();
@@ -6316,6 +6334,7 @@ if (!Element.prototype.replaceChildren) {
     if (orcAGuardar) { toast('Ainda a guardar o orçamento. Espera um instante.'); return; }
     orcId = id; orcV = orcVDe(r); orcCriado = r.criado || null; motFecha();
     orc = orcParaEditar(r.orcamento || orcNovo(r)); orcSujo = false; orcVista = 'editar'; orcEnvio = null;
+    orcPrepara(orc, r);
     // Antes do primeiro PDF o número é o do pedido (enviado fora do registo), mesmo que tenha mudado depois do rascunho,
     // e a revisão de partida conta-se outra vez (a não ser que alguém a tenha escrito à mão).
     orcNumDoPedido(orc, r);
@@ -6326,6 +6345,13 @@ if (!Element.prototype.replaceChildren) {
     if (document.fonts && document.fonts.load) ['600 12px Archivo', '700 12px Archivo', '800 12px Archivo', '400 12px Newsreader', '500 12px Newsreader'].forEach(f => document.fonts.load(f).catch(() => {}));
     renderOrc();
     F('orcEd').scrollTop = 0;
+    privLe(id); // os custos e as margens do cálculo (fora do pedido): os deste aparelho já, os da base de dados quando chegarem
+  }
+  // O editor aberto: o tipo do pedido (as condições da folha ORC0068 de um orçamento sem cálculo) e um id em cada cálculo
+  // (os custos e as margens guardam-se por ele).
+  function orcPrepara(o, r) {
+    if ((o.tipoPedido || '') !== ((r && r.tipo) || '')) o.tipoPedido = (r && r.tipo) || '';
+    o.opcoes.forEach(op => { if (op.motor && !op.motor.id) op.motor.id = motId(); });
   }
   function fecharOrc(forcar) {
     if (!forcar && orcAGuardar) { toast('Ainda a guardar o orçamento. Fecha daqui a um instante.'); return; }
@@ -6339,7 +6365,7 @@ if (!Element.prototype.replaceChildren) {
   }
   // Um colega gravou este orçamento (outro PDF, o envio, o aceite): sem nada por guardar, o editor passa à versão nova;
   // com alterações por guardar, fica como está e o «Guardar» avisa do conflito.
-  function orcRecarrega(r) { fechaPop(); orcV = orcVDe(r); orc = orcParaEditar(r.orcamento); orcSujo = false; orcEnvio = null; document.title = orcTituloDoc(); renderOrc(); }
+  function orcRecarrega(r) { fechaPop(); orcV = orcVDe(r); orc = orcParaEditar(r.orcamento); orcPrepara(orc, r); privJunta(orc, privLocal()[orcId]); orcSujo = false; orcEnvio = null; document.title = orcTituloDoc(); renderOrc(); privLe(orcId); }
   // As versões só sobem: uma leitura atrasada (mais velha do que o editor) não o faz voltar atrás.
   // O pedido do editor ainda existe e é o mesmo (um número apagado e reutilizado noutro aparelho é outro pedido)?
   const orcMesmoPedido = r => !!r && (!orcCriado || !r.criado || r.criado === orcCriado);
@@ -6368,7 +6394,7 @@ if (!Element.prototype.replaceChildren) {
     const guardado = !!(rows.find(x => x.id === orcId) || {}).orcamento;
     F('orcBarEstado').textContent = orcSujo ? 'Alterações por guardar' : !orc.num ? 'Rascunho, ainda sem número (sai no primeiro PDF)'
       : !orc.rev ? (guardado ? 'Rascunho guardado, ainda sem PDF do registo' : 'Ainda não guardado, sem PDF do registo')
-      : !orc.hash || orcHash(orc) !== orc.hash ? 'Guardado, com alterações depois do último PDF'
+      : !orc.hash || orcHash(orc) !== orc.hash ? (orcMudouPdf(orc) ? 'Guardado, com alterações depois do último PDF' : `PDF da revisão ${orc.rev} na folha ORC0068: imprime-se com o motor de preços (chefe e escritório)`)
       : `PDF da revisão ${orc.rev} de ${pontos(orc.data)}${orc.enviadoRev === orc.rev ? ', enviado' : ''}`;
     const imp = F('orcImprimir');
     imp.disabled = !pronto;
@@ -6444,6 +6470,7 @@ if (!Element.prototype.replaceChildren) {
   // multi-split com as divisões e a potência total, senão uma máquina por divisão); sem preço na tabela, a linha fica
   // com o preço vazio e assinalada. Nunca inventa preços.
   function orcPotOpcao(op, P) {
+    if (op.linhas.some(l => l.mot)) return 0; // uma opção com o cálculo posto fica com ele (nunca duas máquinas)
     const cat = (orcCfg().itens || []).filter(it => it.g === 'equip' && (!op.marca || it.marca === op.marca));
     const multi = P.n > 1 ? cat.filter(it => it.divisoes === P.n && it.btu >= P.total).sort((a, b) => a.btu - b.btu)[0] : null;
     const linhas = [];
@@ -6471,9 +6498,11 @@ if (!Element.prototype.replaceChildren) {
     if (x.erro) { orcErro(x.erro + ' Nada foi posto nas opções.'); return; }
     F('orcErr').hidden = true;
     let semPreco = 0;
+    const calc = orc.opcoes.filter(op => op.linhas.some(l => l.mot)).map(op => op.k);
     for (const op of orc.opcoes) semPreco += orcPotOpcao(op, x.P);
     orcMuda(); renderOrc();
-    toast(semPreco ? `Posto nas opções. ${semPreco} ${semPreco === 1 ? 'linha sem preço' : 'linhas sem preço'} na tabela: escreve o preço.` : 'Posto nas opções, com os preços da tabela.');
+    const fica = calc.length ? ` ${calc.length === 1 ? `A opção ${calc[0]} ficou` : `As opções ${calc.join(' e ')} ficaram`} com o cálculo (para o refazer, «Pôr na opção»).` : '';
+    toast((semPreco ? `Posto nas opções. ${semPreco} ${semPreco === 1 ? 'linha sem preço' : 'linhas sem preço'} na tabela: escreve o preço.` : 'Posto nas opções, com os preços da tabela.') + fica);
   }
 
   /* ---------- Motor de preços (pacote «mdm-orcamentos-offline»: motor.js, fluxo.js e documento.js em orcamento-motor.js) ----------
@@ -6481,16 +6510,26 @@ if (!Element.prototype.replaceChildren) {
      por unidade interior, cobre, amortecedor e kit, sopragem a azoto quando a tubagem fica, e a manutenção por zona.
      Os dados (empresa, fatores, margens, tarifas, catálogo) estão em config «orcamento_motor», que a base de dados só dá
      ao chefe e ao escritório: um técnico não vê o cálculo nem os custos. Sem rede, a última leitura chega.
+     Os interiores vêm do equipamento escolhido (um por unidade interior, com os BTU/h e o tubo do catálogo); um modelo de
+     outra marca ou gama não se calcula; o equipamento fora do catálogo escreve-se à mão (preço de tabela ou custo).
+     O que se escreve no cálculo e diz custos ou margens (mão de obra e material a mais, material da manutenção, equipamento
+     à mão, margem única, valor fixado, total pretendido, 1.ª hora) não vai para o pedido, que um técnico lê: fica na
+     tabela orcamento_calculo (supabase/orcamento-calculo.sql, só chefe e escritório) e neste aparelho.
      «Pôr na opção» escreve na opção o equipamento (preço de venda de cada um) e uma linha de instalação (mão de obra,
-     deslocação e material) que fecha no total do motor ao cêntimo. Daí para a frente é um orçamento como os outros: o
-     número, as revisões, o PDF, o envio e o valor do pedido não mudam. Nunca inventa preços: um modelo sem preço no
-     catálogo dá erro («pedir preço ao fornecedor») e um multi-split sem combinação validada dá aviso. */
+     deslocação e material) que fecha no total do motor ao cêntimo, e guarda o que a folha ORC0068 diz do equipamento.
+     Daí para a frente é um orçamento como os outros: o número, as revisões, o PDF, o envio e o valor do pedido não mudam.
+     Nunca inventa preços: um modelo sem preço no catálogo dá erro («pedir preço ao fornecedor») e um multi-split sem
+     combinação validada dá aviso. */
   var cfgMotor = null, cfgMotorV = 0, motCfgAGuardar = false; // var: a leitura da config pode chegar antes desta linha
   const MOT_MARCA = {'Midea': 'MIDEA', 'Mitsubishi Electric': 'MITSUBISHI', 'Daikin': 'DAIKIN', 'France Air': 'FRANCE_AIR'};
   const MOT_TIPO = {conj: 'conjunto', ext: 'exterior', int: 'interior'};
+  const MOT_TIPO_MAO = [['conj', 'conjunto'], ['int', 'interior'], ['ext', 'exterior'], ['out', 'outro']];
   var orcMotAberto = {}; // opções (letra) com o cálculo aberto, só neste ecrã
   function motFecha() { Object.keys(orcMotAberto).forEach(k => { delete orcMotAberto[k]; }); }
   function motorOk() { const M = window.MDM; return !!(M && M.motor && M.documento && cfgMotor && cfgMotor.CONFIG && Array.isArray(cfgMotor.CATALOGO)); }
+  // O motor guardado tem tudo o que as contas precisam? Validado uma vez por leitura (um que falha nunca dá NaN na folha).
+  let motCfgVisto = null, motCfgErroTxt = null;
+  function motCfgErro() { if (cfgMotor !== motCfgVisto) { motCfgVisto = cfgMotor; motCfgErroTxt = cfgMotor ? motValida(cfgMotor) : null; } return motCfgErroTxt; }
   // Os dados da config entram em window.MDM, onde o motor os procura, antes de cada conta.
   function motorPrep() {
     const M = window.MDM;
@@ -6501,79 +6540,232 @@ if (!Element.prototype.replaceChildren) {
   const motN = v => { const x = parseNumero(String(v == null ? '' : v).trim()); return x == null || Number.isNaN(x) ? null : x; };
   const motTxtN = x => String(Math.round(x * 1000) / 1000).replace('.', ',');
   const motEur = v => orcEur(Math.round((Number(v) || 0) * 100));
+  const motId = () => 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  const motCat = ref => (ref && cfgMotor && Array.isArray(cfgMotor.CATALOGO) && cfgMotor.CATALOGO.find(c => c.ref === ref)) || null;
+  const motNomeMarca = k => Object.keys(MOT_MARCA).filter(n => MOT_MARCA[n] === k)[0] || k;
+  const motGamaTxt = g => g === 'multi' ? 'multisplit' : g === 'mono' ? 'monosplit' : g;
   // A tabela de mão de obra de partida é a do motor (ORC0034). A base de dados não guarda a ordem das chaves: nunca a «primeira».
   const motTabPad = () => { const t = Object.keys((cfgMotor.CONFIG || {}).tabelasMaoObra || {}).sort(); return t.indexOf('ORC0034') >= 0 ? 'ORC0034' : t[0] || ''; };
-  // Um cálculo novo: instalação, ou manutenção num pedido de manutenção. Os interiores vêm das divisões da potência.
+  // Um cálculo novo: instalação, ou o cálculo à hora num pedido de manutenção ou de reparação (uma intervenção). Os
+  // interiores vêm das divisões da potência até se escolher o equipamento.
   function motNovo() {
     const c = cfgMotor.CONFIG || {}, tipoPed = (rows.find(x => x.id === orcId) || {}).tipo;
     const x = orc.divisoes.length ? orcPotencia() : null;
     const ints = x && x.P && !x.erro && x.P.divs ? x.P.divs.map(d => ({btu: String(d.tam), metros: ''})) : [{btu: '9000', metros: ''}];
-    return {tipo: tipoPed === 'manutencao' ? 'manutencao' : 'instalacao', gama: ints.length > 1 ? 'multi' : 'mono', equip: [{ref: '', qtd: '1'}], ints, ext: '', dias: '', reap: false,
+    return {id: motId(), tipo: tipoPed === 'manutencao' || tipoPed === 'reparacao' ? 'manutencao' : 'instalacao', gama: ints.length > 1 ? 'multi' : 'mono', equip: [{ref: '', qtd: '1'}], equipMan: [], ints, ext: '', dias: '', reap: false,
       tabela: motTabPad(), preco: 'tabela', margem: '', alvo: '', extraMO: [], extraMat: [], tirarComuns: true, notaSub: true,
       zona: Object.keys((c.manutencao || {}).zonas || {}).sort()[0] || '', soTec: false, horas: '1', primeira: '', mats: [], alvoIva: '', equipTxt: '', ingles: false};
   }
-  // Unidades exteriores: as dos conjuntos e das exteriores escolhidas (o amortecedor conta-se por exterior).
-  function motExteriores(eq) { return eq.reduce((s, x) => { const it = cfgMotor.CATALOGO.find(c => c.ref === x.ref); return s + (it && (it.tipo === 'ext' || it.tipo === 'conj') ? x.qtd : 0); }, 0); }
+  // Um modelo do catálogo que não é da marca ou da gama do cálculo (mudou-se depois de o escolher): '' se é.
+  function motForaDe(it, marca, gama) {
+    if (!it) return '';
+    if (it.marca !== marca) return `é da ${motNomeMarca(it.marca)}`;
+    if (it.gama !== 'any' && it.gama !== gama) return `é de ${motGamaTxt(it.gama)}`;
+    return '';
+  }
+  const motMan = m => (m.equipMan || []).filter(x => String(x.desc || '').trim());
+  const motQtd = v => motN(v) || 1;
+  // As unidades interiores do equipamento escolhido: as interiores e os conjuntos do catálogo e as linhas à mão de
+  // interior ou conjunto, uma por unidade, com os BTU/h e o tubo do catálogo.
+  function motUnidadesInt(m) {
+    const lista = [], vezes = v => Math.min(50, Math.max(0, Math.round(motQtd(v))));
+    (m.equip || []).forEach(x => { const it = motCat(x.ref); if (!it || (it.tipo !== 'int' && it.tipo !== 'conj')) return;
+      for (let i = 0; i < vezes(x.qtd); i++) lista.push({ref: it.ref, nome: it.modelo, btu: it.btu, tubo: Array.isArray(it.tubo) ? it.tubo : null}); });
+    motMan(m).forEach((x, j) => { if (x.tipo !== 'int' && x.tipo !== 'conj') return;
+      for (let i = 0; i < vezes(x.qtd); i++) lista.push({ref: 'mao:' + j, nome: String(x.desc).trim(), btu: motN(x.btu), tubo: null}); });
+    return lista;
+  }
+  // Os interiores das contas: um por unidade interior do equipamento (os metros escritos ficam com a mesma unidade); sem
+  // nenhuma no equipamento (só um exterior, ou nenhum equipamento), os escritos à mão.
+  function motInteriores(m) {
+    const un = motUnidadesInt(m), velhos = m.ints || [];
+    if (!un.length) return {deEquip: false, ints: velhos};
+    const vistos = {};
+    return {deEquip: true, ints: un.map((u, i) => {
+      const n = vistos[u.ref] = (vistos[u.ref] || 0) + 1;
+      let v = null, c = 0;
+      for (const x of velhos) if (x.ref === u.ref && ++c === n) { v = x; break; }
+      if (!v && velhos[i] && !velhos[i].ref) v = velhos[i];
+      return {ref: u.ref, btu: u.btu ? String(u.btu) : '', metros: v && v.metros != null ? v.metros : '', nome: u.nome, tubo: u.tubo};
+    })};
+  }
+  // Guarda nos interiores os do equipamento (para os metros ficarem com a unidade certa). true: mudaram.
+  function motIntsSinc(m) {
+    const x = motInteriores(m); if (!x.deEquip) return false;
+    const novos = x.ints.map(u => ({ref: u.ref, btu: u.btu, metros: u.metros}));
+    if (JSON.stringify(novos) === JSON.stringify(m.ints || [])) return false;
+    m.ints = novos; return true;
+  }
+  // Unidades exteriores: as dos conjuntos e das exteriores escolhidas, do catálogo e à mão (o amortecedor conta-se por exterior).
+  function motExteriores(m) {
+    return (m.equip || []).reduce((s, x) => { const it = motCat(x.ref); return s + (it && (it.tipo === 'ext' || it.tipo === 'conj') ? motQtd(x.qtd) : 0); }, 0)
+      + motMan(m).reduce((s, x) => s + (x.tipo === 'ext' || x.tipo === 'conj' ? motQtd(x.qtd) : 0), 0);
+  }
   const motLinhasExtra = lista => (lista || []).filter(x => String(x.desc || '').trim()).map(x => ({desc: String(x.desc).trim(), qtd: motN(x.qtd) == null ? 1 : motN(x.qtd), custo: motN(x.custo) || 0}));
+  const motNumOk = v => typeof v === 'number' && isFinite(v);
   // As contas do motor com o que está escrito: {r, p} ou {erro}.
   function motCalc(op) {
-    const m = op.motor, M = motorPrep();
+    const m = op.motor, ec = motCfgErro();
+    if (ec) return {erro: `O motor de preços guardado tem um problema: ${ec} Troca-o em Definições.`};
+    const M = motorPrep(), C = M.CONFIG;
     try {
+      let x;
       if (m.tipo === 'manutencao') {
         const p = {zona: m.zona, soTecnico: !!m.soTec, horas: motN(m.horas) || 1, materiais: motLinhasExtra(m.mats)};
-        if (motN(m.primeira) != null) p.primeiraHora = motN(m.primeira);
-        if (motN(m.alvoIva) != null) p.alvoComIva = motN(m.alvoIva);
-        return {r: M.motor.calcManutencao(p), p};
+        if (motN(m.primeira) != null) { if (motN(m.primeira) < 0) return {erro: 'A 1.ª hora não pode ser negativa.'}; p.primeiraHora = motN(m.primeira); }
+        if (motN(m.alvoIva) != null) { if (!(motN(m.alvoIva) > 0)) return {erro: 'O total pretendido com IVA tem de ser maior do que zero.'}; p.alvoComIva = motN(m.alvoIva); }
+        const r = M.motor.calcManutencao(p);
+        // Um total pretendido baixo demais deixava a 1.ª hora negativa: nunca vai para a folha nem para o email.
+        if (r.linhas[0].custoUnit < 0) return {erro: `O total pretendido (${motEur(p.alvoComIva)} com IVA) não chega para as horas e o material: a 1.ª hora ficava negativa. Sobe o total ou tira horas.`};
+        x = {r, p};
+      } else {
+        const marca = MOT_MARCA[op.marca];
+        if (!marca) return {erro: op.marca ? `O motor não tem preços de ${op.marca}.` : 'Escolhe a marca da opção (em cima) para calcular.'};
+        for (const e of m.equip || []) {
+          const it = motCat(e.ref), fora = motForaDe(it, marca, m.gama);
+          if (fora) return {erro: it.marca !== marca ? `«${it.modelo}» ${fora} e a opção é ${op.marca}: escolhe um modelo da ${op.marca} ou muda a marca da opção.` : `«${it.modelo}» ${fora} e a gama é ${motGamaTxt(m.gama)}: muda a gama ou escolhe outro modelo.`};
+        }
+        const man = motMan(m);
+        for (const l of man) {
+          const d = String(l.desc).trim(), t = motN(l.tabela), c = motN(l.custo);
+          if (t == null && c == null) return {erro: `«${d}» (à mão): escreve o preço de tabela ou o custo.`};
+          if ((t != null && t < 0) || (c != null && c < 0)) return {erro: `«${d}» (à mão): o preço não pode ser negativo.`};
+          if ((l.tipo === 'int' || l.tipo === 'conj') && !(motN(l.btu) > 0)) return {erro: `«${d}» (à mão): escreve os BTU/h (conta como interior).`};
+        }
+        const equipamento = (m.equip || []).filter(e => e.ref).map(e => ({ref: e.ref, qtd: motQtd(e.qtd)}))
+          .concat(man.map(l => { const o = {desc: String(l.desc).trim(), qtd: motQtd(l.qtd)}; if (motN(l.custo) != null) o.custo = motN(l.custo); else o.tabela = motN(l.tabela); return o; }));
+        // A Daikin (sem modelos no catálogo) calcula-se com linhas à mão: precisa do fator e da margem da marca no motor.
+        if (equipamento.some(l => l.tabela != null) && !(motNumOk(M.motor.fatorDesconto(marca, m.gama)) && M.motor.fatorDesconto(marca, m.gama) > 0))
+          return {erro: `O motor não tem o fator de desconto da ${op.marca}: escreve o custo da linha à mão ou junta o fator ao motor (Definições).`};
+        if (equipamento.length && m.preco === 'tabela' && !(motNumOk((C.margemEquip || {})[marca]) && C.margemEquip[marca] > 0))
+          return {erro: `O motor não tem a margem do equipamento da ${op.marca}: usa a margem única ou junta a margem ao motor (Definições).`};
+        const I = motInteriores(m);
+        if (!I.ints.length) return {erro: 'Põe pelo menos um interior: as horas e o material contam-se por interior.'};
+        const interiores = I.ints.map(u => { const o = {}; if (motN(u.btu)) o.btu = motN(u.btu); if (motN(u.metros) != null) o.metros = motN(u.metros); if (I.deEquip && u.tubo) { o.liq = u.tubo[0]; o.gas = u.tubo[1]; } return o; });
+        if (!m.reap) {
+          // Cada diâmetro de cobre tem de ter preço no motor (senão a linha saía sem preço).
+          const cobre = (C.material || {}).cobre || {};
+          for (const u of interiores) for (const d of [u.liq || '1/4', u.gas || (u.btu >= 18000 ? '1/2' : '3/8')])
+            if (!motNumOk(cobre[d])) return {erro: `O motor não tem o preço do tubo de cobre ${d}: junta-o ao motor (Definições).`};
+        }
+        const p = {marca, gama: m.gama, equipamento, interiores, reaproveitaTubagem: !!m.reap, extraMO: motLinhasExtra(m.extraMO), extraMaterial: motLinhasExtra(m.extraMat)};
+        if (m.tabela) p.tabelaMO = m.tabela;
+        p.exteriores = motN(m.ext) != null ? motN(m.ext) : motExteriores(m);
+        if (motN(m.dias) != null) p.dias = motN(m.dias);
+        if (m.preco === 'margem') { if (motN(m.margem) == null) return {erro: 'Escreve a margem única (por exemplo 23 para × 1,23).'}; p.margemTotal = motN(m.margem) / 100; }
+        if (m.preco === 'alvo') { if (!(motN(m.alvo) > 0)) return {erro: 'Escreve o valor final sem IVA.'}; p.valorAlvoSemIva = motN(m.alvo); }
+        const r = M.motor.calcInstalacao(p);
+        // O equipamento sem nenhuma unidade interior: as contas usam os interiores escritos à mão (diz-se, para conferir).
+        if (!I.deEquip && equipamento.length) r.avisos = r.avisos.concat([`O equipamento escolhido não tem unidades interiores: as contas usam ${I.ints.length === 1 ? 'o interior escrito' : `os ${I.ints.length} interiores escritos`} à mão (confere os BTU/h e os metros).`]);
+        x = {r, p, ints: I};
       }
-      const marca = MOT_MARCA[op.marca];
-      if (!marca) return {erro: op.marca ? `O motor não tem preços de ${op.marca}.` : 'Escolhe a marca da opção (em cima) para calcular.'};
-      const equipamento = m.equip.filter(x => x.ref).map(x => ({ref: x.ref, qtd: motN(x.qtd) || 1}));
-      const interiores = m.ints.map(x => { const o = {}; if (motN(x.btu)) o.btu = motN(x.btu); if (motN(x.metros) != null) o.metros = motN(x.metros); return o; });
-      if (!interiores.length) return {erro: 'Põe pelo menos um interior: as horas e o material contam-se por interior.'};
-      const p = {marca, gama: m.gama, equipamento, interiores, reaproveitaTubagem: !!m.reap, extraMO: motLinhasExtra(m.extraMO), extraMaterial: motLinhasExtra(m.extraMat)};
-      if (m.tabela) p.tabelaMO = m.tabela;
-      p.exteriores = motN(m.ext) != null ? motN(m.ext) : motExteriores(equipamento);
-      if (motN(m.dias) != null) p.dias = motN(m.dias);
-      if (m.preco === 'margem') { if (motN(m.margem) == null) return {erro: 'Escreve a margem única (por exemplo 23 para × 1,23).'}; p.margemTotal = motN(m.margem) / 100; }
-      if (m.preco === 'alvo') { if (!(motN(m.alvo) > 0)) return {erro: 'Escreve o valor final sem IVA.'}; p.valorAlvoSemIva = motN(m.alvo); }
-      return {r: M.motor.calcInstalacao(p), p};
+      // Nada de NaN na folha: um número que faltasse à configuração parava aqui.
+      const r = x.r, mau = v => !motNumOk(v);
+      if (mau(r.semIva) || mau(r.custo) || r.linhas.some(l => mau(l.qtd) || mau(l.custoUnit) || mau(l.margem))) return {erro: 'O motor deu um valor que não é um número (falta um valor na configuração do motor): confere o ficheiro em Definições.'};
+      return x;
     } catch (e) { return {erro: String((e && e.message) || e)}; }
   }
   const motDescInst = m => m.reap ? 'Instalação com a tubagem existente (sopragem a azoto, mão de obra, deslocação e material)' : 'Instalação (mão de obra, deslocação e material)';
   // O nome do equipamento na linha: o modelo, e a referência só quando o modelo ainda não a diz.
   const motDescEquip = l => l.item && l.item.modelo && l.item.ref && l.item.modelo.indexOf(l.item.ref) >= 0 ? l.item.modelo : l.desc;
+  // As linhas da folha a partir do cálculo, a fechar no total do motor ao cêntimo: o equipamento (preço de venda de cada
+  // aparelho, com a referência do catálogo) e a linha da instalação, que leva o que os arredondamentos deixam. Na
+  // manutenção, as horas e o material; o arredondamento vai para um material de quantidade 1, ou para a 1.ª hora, nunca
+  // para as horas de técnico e de ajudante (que ficam as da tabela, como no email).
+  function motVenda(m, r) {
+    const r2 = window.MDM.motor.r2, novas = [];
+    if (r.tipo === 'manutencao') {
+      r.linhas.filter(l => l.qtd > 0).forEach(l => { const h1 = /^1ª/.test(l.desc);
+        novas.push({ref: '', desc: l.desc, qtd: orcTxtN(l.qtd), un: l.bloco === 'maoObra' && !h1 ? 'h' : 'un', preco: orcTxtN(r2(l.custoUnit * l.margem)), _b: l.bloco === 'material' ? 'mat' : h1 ? 'h1' : 'h'}); });
+    } else {
+      r.linhas.filter(l => l.bloco === 'equipamento').forEach(l => novas.push({ref: l.item && l.item.ref ? String(l.item.ref) : '', desc: motDescEquip(l), qtd: orcTxtN(l.qtd), un: 'un', preco: orcTxtN(r2(l.custoUnit * l.margem)), _b: 'eq'}));
+      novas.push({ref: '', desc: motDescInst(m), qtd: '1', un: 'un', preco: '', _b: 'inst'});
+    }
+    const alvo = Math.round(r.semIva * 100), soma = novas.reduce((s, l) => s + (orcLinha(l) || 0), 0);
+    const fim = novas.filter(l => l._b === 'inst')[0] || novas.filter(l => l._b === 'mat' && l.qtd === '1').slice(-1)[0] || novas.filter(l => l._b === 'h1')[0];
+    if (fim) fim.preco = orcTxtN(((orcLinha(fim) || 0) + alvo - soma) / 100);
+    return {alvo, linhas: novas.filter(l => !(l._b === 'inst' && orcCent(l.preco) === 0))};
+  }
+  // As linhas de «Trabalho e material» que o cálculo de uma opção substitui (mão de obra, deslocação e material; um
+  // desconto fica para todas): saem quando todas as opções têm cálculo; com opções ainda sem cálculo, passam para elas
+  // (que as continuam a somar: o total delas não muda). As que já tinham passado para esta opção («com») saem dela.
+  function motComuns(op) {
+    const sub = orc.comuns.filter(l => l.g !== 'div'), proprias = op.linhas.filter(l => l.com).length;
+    const para = orc.opcoes.filter(x => x !== op && !x.linhas.some(l => l.mot));
+    return {sub, para, proprias, n: sub.length + proprias};
+  }
+  const motOpsTxt = l => l.length === 1 ? `a opção ${l[0].k}` : `as opções ${l.map(x => x.k).join(' e ')}`;
+  const motLinTxt = n => n === 1 ? 'a linha' : `as ${n} linhas`;
+  function motComunsTxt(op, tc) {
+    if (tc.sub.length && tc.para.length) return `Passar ${motLinTxt(tc.sub.length)} de «Trabalho e material» para ${motOpsTxt(tc.para)} (o cálculo da ${op.k} já conta a mão de obra, a deslocação e o material; o total ${tc.para.length === 1 ? 'dela' : 'delas'} não muda)`;
+    if (tc.sub.length) return `Tirar ${motLinTxt(tc.sub.length)} de «Trabalho e material» (o cálculo já conta a mão de obra, a deslocação e o material)`;
+    return `Tirar desta opção ${motLinTxt(tc.proprias)} que ${tc.proprias === 1 ? 'veio' : 'vieram'} de «Trabalho e material» (o cálculo já as conta)`;
+  }
+  // A potência na folha ORC0068: a do exterior num multi-split; num monosplit, a de cada conjunto ou de cada par interior
+  // e exterior (a do exterior, ou a do interior se só ele a tem). Sem ela no catálogo para todos, nenhuma (escreve-se à
+  // mão): nunca a de uma só unidade como se fosse a do sistema.
+  const motKwTxt = v => { const s = String(v); return (s.indexOf('.') < 0 ? Number(v).toFixed(1) : s).replace('.', ','); };
+  function motKw(eq, gama) {
+    const tem = it => !!(it && Array.isArray(it.kw) && it.kw.length >= 2 && motNumOk(it.kw[0]) && motNumOk(it.kw[1]));
+    if (!eq.length || eq.some(e => !e.it)) return '';
+    let grupos = [];
+    if (gama === 'multi') {
+      const ext = eq.filter(e => e.it.tipo === 'ext');
+      if (!ext.length || !ext.every(e => tem(e.it))) return '';
+      grupos = ext.map(e => ({kw: e.it.kw, q: e.q}));
+    } else {
+      eq.filter(e => e.it.tipo === 'conj').forEach(e => grupos.push({kw: tem(e.it) ? e.it.kw : null, q: e.q}));
+      const um = tipo => { const l = []; eq.filter(e => e.it.tipo === tipo).forEach(e => { for (let i = 0; i < Math.round(e.q); i++) l.push(e.it); }); return l.sort((a, b) => (a.btu || 0) - (b.btu || 0)); };
+      const ints = um('int'), exts = um('ext');
+      if (ints.length !== exts.length) return '';
+      ints.forEach((it, i) => grupos.push({kw: tem(exts[i]) ? exts[i].kw : tem(it) ? it.kw : null, q: 1}));
+      if (!grupos.length || grupos.some(g => !g.kw)) return '';
+    }
+    const j = [];
+    grupos.forEach(g => { const u = j[j.length - 1]; if (u && u.kw[0] === g.kw[0] && u.kw[1] === g.kw[1]) u.q += g.q; else j.push({kw: g.kw, q: g.q}); });
+    const lado = i => j.map(g => (g.q > 1 ? motTxtN(g.q) + ' x ' : '') + motKwTxt(g.kw[i])).join(' + ');
+    return `Arref: ${lado(0)} kW / Aquec: ${lado(1)} kW`;
+  }
+  // O que a folha ORC0068 diz do equipamento posto («Pôr na opção»): marca, tipo, modelos, potência e dias. Fica na opção
+  // e vale enquanto as linhas do cálculo e a marca da opção forem as mesmas (o cálculo pode mudar sem «Pôr na opção»).
+  function motFolha(op, x) {
+    const r = x.r, m = op.motor, linhas = op.linhas.filter(l => l.mot).map(l => String(l.desc || '').trim());
+    if (r.tipo === 'manutencao') return {tipo: 'manutencao', marcaOp: op.marca || '', linhas, dias: 0};
+    const eq = r.linhas.filter(l => l.bloco === 'equipamento').map(l => ({it: l.item && l.item.ref ? l.item : null, q: l.qtd, nome: motDescEquip(l)}));
+    const nInt = x.p.interiores.length;
+    return {tipo: 'instalacao', marcaOp: op.marca || '', linhas, dias: r.dias > 0 ? r.dias : 0, marca: String(op.marca || '').toUpperCase(),
+      tipoTexto: m.gama === 'multi' ? `MURAL MULTISPLIT (${nInt} UNIDADES INTERIORES)` : nInt > 1 ? `MURAL MONOSPLIT (${nInt} UNIDADES)` : 'MURAL MONOSPLIT',
+      modelo: eq.map(e => (e.q > 1 ? motTxtN(e.q) + ' x ' : '') + (e.it ? e.it.modelo : e.nome)).join(' + '), potencia: motKw(eq, m.gama)};
+  }
+  // As linhas do cálculo de uma opção são de outra marca (mudou-se a marca da opção depois de «Pôr na opção»)?
+  const motMarcaTroca = op => !!(op.o68 && op.linhas.some(l => l.mot) && (op.o68.marcaOp || '') !== (op.marca || ''));
   // «Pôr na opção»: as linhas do cálculo substituem as do cálculo anterior e as da potência; as escritas à mão ficam.
   function motPor(op) {
     const x = motCalc(op), m = op.motor;
     if (x.erro) { orcErro(x.erro + ' Nada foi posto na opção.'); return; }
     F('orcErr').hidden = true;
-    const r = x.r, r2 = window.MDM.motor.r2, novas = [];
-    if (r.tipo === 'manutencao') {
-      r.linhas.filter(l => l.qtd > 0).forEach(l => novas.push({desc: l.desc, qtd: orcTxtN(l.qtd), un: l.bloco === 'maoObra' && !/^1ª/.test(l.desc) ? 'h' : 'un', preco: orcTxtN(r2(l.custoUnit * l.margem))}));
-    } else {
-      r.linhas.filter(l => l.bloco === 'equipamento').forEach(l => novas.push({desc: motDescEquip(l), qtd: orcTxtN(l.qtd), un: 'un', preco: orcTxtN(r2(l.custoUnit * l.margem))}));
-      novas.push({desc: motDescInst(m), qtd: '1', un: 'un', preco: '', fecho: true});
-    }
-    // Fecha no total do motor ao cêntimo: o que os arredondamentos das linhas deixam vai para a linha de instalação (ou,
-    // na manutenção, para a última linha de quantidade 1).
-    const alvo = Math.round(r.semIva * 100), soma = novas.reduce((s, l) => s + (orcLinha(l) || 0), 0);
-    let fim = novas.filter(l => l.fecho)[0];
-    if (!fim) fim = novas.filter(l => l.qtd === '1').slice(-1)[0];
-    if (fim) fim.preco = orcTxtN(((orcLinha(fim) || 0) + alvo - soma) / 100);
-    const linhas = novas.filter(l => !(l.fecho && orcCent(l.preco) === 0));
-    const iva = orcIvaPad();
-    linhas.forEach(l => { delete l.fecho; l.ref = ''; l.iva = iva; l.mot = true; });
-    op.linhas = linhas.concat(op.linhas.filter(l => !l.mot && !l.pot));
-    const tirou = m.tirarComuns !== false && orc.comuns.length;
-    if (tirou) orc.comuns = [];
+    const v = motVenda(m, x.r), iva = orcIvaPad();
+    v.linhas.forEach(l => { delete l._b; l.iva = iva; l.mot = true; });
+    const tc = motComuns(op), tirar = m.tirarComuns !== false && tc.n > 0;
+    op.linhas = v.linhas.concat(op.linhas.filter(l => !l.mot && !l.pot && !(tirar && l.com)));
+    let txtCom = '';
+    if (tirar && tc.sub.length) {
+      const n = tc.sub.length;
+      if (tc.para.length) {
+        tc.para.forEach(o2 => { o2.linhas = o2.linhas.concat(tc.sub.map(l => Object.assign(JSON.parse(JSON.stringify(l)), {com: true}))); });
+        txtCom = ` ${n === 1 ? 'A linha' : `As ${n} linhas`} de «Trabalho e material» ${n === 1 ? 'passou' : 'passaram'} para ${motOpsTxt(tc.para)} (o cálculo da ${op.k} já ${n === 1 ? 'a' : 'as'} conta).`;
+      } else txtCom = ' As linhas de «Trabalho e material» saíram (o cálculo já as conta).';
+      orc.comuns = orc.comuns.filter(l => tc.sub.indexOf(l) < 0);
+    } else if (tirar && tc.proprias) txtCom = ` ${tc.proprias === 1 ? 'Saiu a linha que veio' : `Saíram as ${tc.proprias} linhas que vieram`} de «Trabalho e material» (o cálculo já ${tc.proprias === 1 ? 'a' : 'as'} conta).`;
+    op.o68 = motFolha(op, x);
     const T = (cfgMotor.CONFIG || {}).textos || {};
-    if (r.tipo !== 'manutencao' && m.reap && m.notaSub !== false && T.notaSubstituicao) {
+    if (x.r.tipo !== 'manutencao' && m.reap && m.notaSub !== false && T.notaSubstituicao) {
       const nt = String(T.notaSubstituicao).replace(/^\s*Notas?\s*:\s*/i, '').trim();
       if (nt && String(orc.notas || '').indexOf(nt) < 0) orc.notas = (String(orc.notas || '').trim() ? String(orc.notas).trim() + '\n' : '') + nt;
     }
     orcMuda(); renderOrc();
-    const resto = op.linhas.length - linhas.length;
-    toast(`Opção ${op.k}: ${orcEur(alvo)} sem IVA, do cálculo.${tirou ? ' As linhas de «Trabalho e material» saíram (o cálculo já as conta).' : ''}${resto ? ` A opção tem mais ${resto} ${resto === 1 ? 'linha escrita' : 'linhas escritas'} à mão, que se somam.` : ''}`);
+    const resto = op.linhas.length - v.linhas.length;
+    toast(`Opção ${op.k}: ${orcEur(v.alvo)} sem IVA, do cálculo.${txtCom}${resto ? ` A opção tem mais ${resto} ${resto === 1 ? 'linha escrita' : 'linhas escritas'} à mão, que se somam.` : ''}`);
   }
   // O resultado por baixo dos campos: as linhas com custo, margem e venda, os totais e os avisos do motor.
   function motResultado(op, box) {
@@ -6591,13 +6783,18 @@ if (!Element.prototype.replaceChildren) {
         ' · lucro ', h('b',null, motEur(r.lucro)), ` (${motTxtN(r.margemPct)} % sobre o custo)`),
       r.avisos.map(a => h('p',{class:'oe-mot-av'}, a)));
   }
-  // O texto das condições de manutenção (email), pronto a copiar: nada parte sozinho.
+  // O texto das condições de manutenção (email), pronto a copiar: nada parte sozinho. A 1.ª hora é a da folha (com o
+  // arredondamento, se lhe calhou): o email e o orçamento dizem o mesmo.
   function motEmail(op, box) {
     const x = motCalc(op), m = op.motor;
     if (x.erro) { fill(box, h('p',{class:'oe-mot-err', role:'alert'}, x.erro)); return; }
-    const M = window.MDM, morada = orcMoradaTxt(orc.cliente.morada) || '(morada)';
-    const texto = M.documento.emailManutencao({tratamento: String(orc.cliente.nome || '').trim() || 'Cliente', equipamentos: String(m.equipTxt || '').split('\n').map(s => s.trim()).filter(Boolean),
-      primeiraHora: x.r.linhas[0].custoUnit, soTecnico: !!m.soTec, morada, ingles: !!m.ingles});
+    let texto = '';
+    try {
+      const M = window.MDM, morada = orcMoradaTxt(orc.cliente.morada) || '(morada)';
+      const h1 = motVenda(m, x.r).linhas.filter(l => /^1ª/.test(l.desc))[0];
+      texto = M.documento.emailManutencao({tratamento: String(orc.cliente.nome || '').trim() || 'Cliente', equipamentos: String(m.equipTxt || '').split('\n').map(s => s.trim()).filter(Boolean),
+        primeiraHora: h1 ? parseNumero(h1.preco) : x.r.linhas[0].custoUnit, soTecnico: !!m.soTec, morada, ingles: !!m.ingles});
+    } catch (e) { fill(box, h('p',{class:'oe-mot-err', role:'alert'}, 'Não foi possível escrever o texto: ' + String((e && e.message) || e))); return; }
     const ta = h('textarea',{readonly:'readonly', 'aria-label':'Texto das condições'}); ta.value = texto;
     const mail = (/[\w.+-]+@[\w-]+\.[\w.-]+/.exec(orc.cliente.contacto || '') || [''])[0];
     fill(box, h('div',{class:'oe-mot-email'}, ta, h('div',{class:'oe-acoes'},
@@ -6615,14 +6812,17 @@ if (!Element.prototype.replaceChildren) {
     const campo = (rot, k, extra) => oeCampo(rot, h('input', Object.assign({value: m[k] == null ? '' : String(m[k]), oninput: ev => { m[k] = ev.target.value; muda(); }}, extra || {})));
     const escolha = (rot, k, ops, depois) => { const s = h('select',{onchange: ev => { m[k] = ev.target.value; if (depois) depois(); else muda(); }}, ops.map(([v, l]) => h('option',{value: v}, l))); s.value = String(m[k] == null ? '' : m[k]); return oeCampo(rot, s); };
     const caixa = (k, rot, padrao) => h('label',{class:'check'}, h('input',{type:'checkbox', checked: (m[k] == null ? padrao : m[k]) ? true : null, onchange: ev => { m[k] = ev.target.checked; muda(); }}), rot);
-    // Uma tabela de linhas (desc, qtd, custo) com «+» e «×».
-    const tabela = (lista, cols, nova, rotMais) => h('div',null,
-      h('div',{class:'tw'}, h('table',{class:'oe-tab'},
-        h('thead',null, h('tr',null, cols.map(([, t, ex]) => h('th',{style: ex && ex.class === 'num' && cols.some(c => !(c[2] && c[2].class === 'num')) ? 'width:7em' : null}, t)).concat([h('th',{style:'width:2.4em'})]))),
-        h('tbody',null, lista.map((l, i) => h('tr',null, cols.map(([k, t, ex]) => h('td',null, typeof ex === 'function' ? ex(l) : h('input', Object.assign({value: l[k] == null ? '' : String(l[k]), 'aria-label': t, oninput: ev => { l[k] = ev.target.value; muda(); }}, ex || {})))),
-          h('td',null, h('button',{class:'oc-x', type:'button', title:'Tirar', 'aria-label':'Tirar', onclick:() => { lista.splice(i, 1); redesenha(); }}, '×'))))))),
-      h('div',{class:'oe-acoes'}, h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { lista.push(nova()); redesenha(); }}, rotMais)));
+    // Uma tabela de linhas de m[k] com «+» e «×» (cols: [chave, título, extra ou função da célula, largura]); depois():
+    // o que muda com elas (os interiores, quando é o equipamento). Uma lista ainda por ler (custos de outro aparelho) só
+    // nasce quando se acrescenta uma linha.
+    const tabela = (k, cols, nova, rotMais, depois, cls) => { const lista = m[k] || []; return h('div',null,
+      h('div',{class:'tw'}, h('table',{class: 'oe-tab' + (cls ? ' ' + cls : '')},
+        h('thead',null, h('tr',null, cols.map(([, t, ex, w]) => h('th',{style: w ? 'width:' + w : ex && ex.class === 'num' && cols.some(cc => !(cc[2] && cc[2].class === 'num')) ? 'width:7em' : null}, t)).concat([h('th',{style:'width:2.4em'})]))),
+        h('tbody',null, lista.map((l, i) => h('tr',null, cols.map(([kk, t, ex]) => h('td',null, typeof ex === 'function' ? ex(l) : h('input', Object.assign({value: l[kk] == null ? '' : String(l[kk]), 'aria-label': t, oninput: ev => { l[kk] = ev.target.value; if (depois) depois(); muda(); }}, ex || {})))),
+          h('td',null, h('button',{class:'oc-x', type:'button', title:'Tirar', 'aria-label':'Tirar', onclick:() => { lista.splice(i, 1); if (depois) depois(); redesenha(); }}, '×'))))))),
+      h('div',{class:'oe-acoes'}, h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { (m[k] || (m[k] = [])).push(nova()); if (depois) depois(); redesenha(); }}, rotMais))); };
     const num = {class:'num', inputmode:'decimal'};
+    const privFalta = MOT_PRIV.some(k => m[k] === undefined);
     let corpo;
     if (m.tipo === 'manutencao') {
       const zonas = (c.manutencao || {}).zonas || {};
@@ -6634,7 +6834,7 @@ if (!Element.prototype.replaceChildren) {
           campo('Total pretendido com IVA (opcional)', 'alvoIva', num)),
         h('div',{class:'oe-chks'}, caixa('soTec', 'Só um técnico (sem ajudante)', false)),
         h('p',{class:'oe-mot-sub'}, 'Material (custo; a venda leva a margem do material)'),
-        tabela(m.mats, [['desc', 'Descrição'], ['qtd', 'Qtd.', num], ['custo', 'Custo un.', num]], () => ({desc: '', qtd: '1', custo: ''}), '+ Material'),
+        tabela('mats', [['desc', 'Descrição'], ['qtd', 'Qtd.', num], ['custo', 'Custo un.', num]], () => ({desc: '', qtd: '1', custo: ''}), '+ Material'),
         h('p',{class:'oe-mot-sub'}, 'Texto das condições (email)'),
         h('div',{class:'oe-g'}, oeCampo('Equipamentos (um por linha)', (() => { const t = h('textarea',{oninput: ev => { m.equipTxt = ev.target.value; muda(); }}); t.value = m.equipTxt || ''; return t; })(), true)),
         h('div',{class:'oe-chks'}, caixa('ingles', 'Em inglês', false)),
@@ -6643,17 +6843,32 @@ if (!Element.prototype.replaceChildren) {
     } else {
       const marca = MOT_MARCA[op.marca];
       const cat = cfgMotor.CATALOGO.filter(it => it.marca === marca && (it.gama === 'any' || it.gama === m.gama));
+      const intsBox = h('div',null);
+      // Os interiores: os do equipamento (só os metros se escrevem), ou escritos à mão quando ele não tem nenhum.
+      const desenhaInts = () => {
+        const I = motInteriores(m);
+        if (!I.deEquip) { fill(intsBox, tabela('ints', [['btu', 'BTU/h', {class:'num', inputmode:'numeric'}], ['metros', 'Metros de tubagem', num]], () => ({btu: '9000', metros: ''}), '+ Interior')); return; }
+        fill(intsBox, h('div',{class:'tw'}, h('table',{class:'oe-tab'},
+          h('thead',null, h('tr',null, h('th',null, 'Interior (do equipamento)'), h('th',{style:'width:9.5em'}, 'Metros de tubagem'))),
+          h('tbody',null, I.ints.map((u, i) => h('tr',null,
+            h('td',{class:'oe-mot-int'}, [u.nome, u.btu ? ORC_POT.btuh(Number(u.btu)) : 'sem BTU/h', u.tubo ? 'tubo ' + u.tubo.join(' + ') : null].filter(Boolean).join(' · ')),
+            h('td',null, h('input',{class:'num', inputmode:'decimal', 'aria-label':'Metros de tubagem', value: u.metros == null ? '' : String(u.metros),
+              oninput: ev => { motIntsSinc(m); if (m.ints[i]) m.ints[i].metros = ev.target.value; muda(); }}))))))),
+          h('p',{class:'oe-mot-nota'}, 'Um interior por unidade interior do equipamento, com os BTU/h e o tubo do catálogo: só os metros se escrevem.'));
+      };
+      const sinc = () => { if (motIntsSinc(m)) desenhaInts(); };
       const opsEquip = l => {
-        const lista = cat.slice();
-        const atual = l.ref && !lista.some(it => it.ref === l.ref) ? cfgMotor.CATALOGO.find(it => it.ref === l.ref) : null;
+        const lista = cat.slice(), atual = l.ref && !lista.some(it => it.ref === l.ref) ? motCat(l.ref) : null;
         if (atual) lista.unshift(atual);
-        const s = h('select',{'aria-label':'Equipamento', onchange: ev => { l.ref = ev.target.value; muda(); }},
-          [h('option',{value:''}, cat.length ? 'Escolher do catálogo' : `Sem modelos de ${op.marca || 'esta marca'} no catálogo`)].concat(lista.map(it => h('option',{value: it.ref},
-            `${it.modelo}${it.modelo.indexOf(it.ref) < 0 ? ' (' + it.ref + ')' : ''} · ${MOT_TIPO[it.tipo] || it.tipo} · ${ORC_POT.btuh(it.btu)}${it.tabela != null ? ' · tabela ' + motEur(it.tabela) : it.custo != null ? ' · custo ' + motEur(it.custo) : ''}`))));
+        const s = h('select',{'aria-label':'Equipamento', onchange: ev => { l.ref = ev.target.value; sinc(); muda(); }},
+          [h('option',{value:''}, cat.length ? 'Escolher do catálogo' : `Sem modelos de ${op.marca || 'esta marca'} no catálogo`)].concat(lista.map(it => { const fora = marca ? motForaDe(it, marca, m.gama) : '';
+            return h('option',{value: it.ref}, `${fora ? '(' + fora + ') ' : ''}${it.modelo}${it.modelo.indexOf(it.ref) < 0 ? ' (' + it.ref + ')' : ''} · ${MOT_TIPO[it.tipo] || it.tipo} · ${ORC_POT.btuh(it.btu)}${it.tabela != null ? ' · tabela ' + motEur(it.tabela) : it.custo != null ? ' · custo ' + motEur(it.custo) : ''}`); })));
         s.value = l.ref || '';
         return s;
       };
+      const tipoMao = l => { const s = h('select',{'aria-label':'Tipo', onchange: ev => { l.tipo = ev.target.value; sinc(); muda(); }}, MOT_TIPO_MAO.map(([v, t]) => h('option',{value: v}, t))); s.value = l.tipo || 'conj'; return s; };
       const tabs = Object.keys(c.tabelasMaoObra || {}).sort();
+      motIntsSinc(m); desenhaInts();
       corpo = [
         marca ? null : h('p',{class:'oe-mot-err'}, op.marca ? `O motor não tem preços de ${op.marca}.` : 'Escolhe a marca da opção (em cima) para ver o catálogo.'),
         h('div',{class:'oe-mot-g'},
@@ -6666,68 +6881,173 @@ if (!Element.prototype.replaceChildren) {
           m.preco === 'alvo' ? campo('Valor final sem IVA (€)', 'alvo', num) : null),
         h('div',{class:'oe-chks'}, caixa('reap', 'Substituição: reaproveita a tubagem (sopragem a azoto, sem cobre)', false)),
         h('p',{class:'oe-mot-sub'}, 'Equipamento'),
-        tabela(m.equip, [['ref', 'Modelo', opsEquip], ['qtd', 'Qtd.', num]], () => ({ref: '', qtd: '1'}), '+ Equipamento'),
+        tabela('equip', [['ref', 'Modelo', opsEquip], ['qtd', 'Qtd.', num]], () => ({ref: '', qtd: '1'}), '+ Equipamento', sinc),
+        h('p',{class:'oe-mot-sub'}, 'Equipamento fora do catálogo (à mão: preço de tabela com o fator da marca, ou custo; a margem é a da marca)'),
+        tabela('equipMan', [['desc', 'Descrição'], ['tipo', 'Tipo', tipoMao, '8.2em'], ['btu', 'BTU/h', {class:'num', inputmode:'numeric'}, '6.2em'], ['qtd', 'Qtd.', num, '4.6em'], ['tabela', 'Preço de tabela', num, '7.4em'], ['custo', 'Custo', num, '6.4em']],
+          () => ({desc: '', tipo: 'conj', btu: '', qtd: '1', tabela: '', custo: ''}), '+ Linha à mão', sinc, 'oe-tab-mao'),
         h('p',{class:'oe-mot-sub'}, m.reap ? 'Interiores' : 'Interiores (metros de tubagem obrigatórios: nunca se assumem)'),
-        tabela(m.ints, [['btu', 'BTU/h', {class:'num', inputmode:'numeric'}], ['metros', 'Metros de tubagem', num]], () => ({btu: '9000', metros: ''}), '+ Interior'),
+        intsBox,
         h('p',{class:'oe-mot-sub'}, 'Mão de obra a mais (custo)'),
-        tabela(m.extraMO, [['desc', 'Descrição'], ['qtd', 'Qtd.', num], ['custo', 'Custo un.', num]], () => ({desc: '', qtd: '1', custo: ''}), '+ Mão de obra'),
+        tabela('extraMO', [['desc', 'Descrição'], ['qtd', 'Qtd.', num], ['custo', 'Custo un.', num]], () => ({desc: '', qtd: '1', custo: ''}), '+ Mão de obra'),
         h('p',{class:'oe-mot-sub'}, 'Material a mais (custo)'),
-        tabela(m.extraMat, [['desc', 'Descrição'], ['qtd', 'Qtd.', num], ['custo', 'Custo un.', num]], () => ({desc: '', qtd: '1', custo: ''}), '+ Material')];
+        tabela('extraMat', [['desc', 'Descrição'], ['qtd', 'Qtd.', num], ['custo', 'Custo un.', num]], () => ({desc: '', qtd: '1', custo: ''}), '+ Material')];
     }
-    const nComuns = orc.comuns.length;
+    const tc = motComuns(op);
     const painel = h('div',{class:'oe-mot'},
       h('h4',null, `Cálculo da opção ${op.k}`),
+      privFalta ? h('p',{class:'hint'}, 'Ainda sem os custos e as margens guardados deste cálculo (a ler, ou sem rede): o que escreveres fica por cima só dos campos que mudares.') : null,
+      privTabela === false ? h('p',{class:'hint'}, 'Os custos e as margens escritos aqui ficam só neste aparelho: falta correr supabase/orcamento-calculo.sql na base de dados.') : null,
       h('div',{class:'oe-mot-g'}, escolha('O que se calcula', 'tipo', [['instalacao', 'Instalação ou substituição'], ['manutencao', 'Manutenção ou intervenção']], () => { orcMuda(); renderOrc(); })),
       corpo, res,
       h('div',{class:'oe-chks'},
-        nComuns ? caixa('tirarComuns', `Tirar as ${nComuns} ${nComuns === 1 ? 'linha' : 'linhas'} de «Trabalho e material» (o cálculo já conta a mão de obra, a deslocação e o material)`, true) : null,
+        tc.n ? caixa('tirarComuns', motComunsTxt(op, tc), true) : null,
         m.tipo !== 'manutencao' && m.reap && ((c.textos || {}).notaSubstituicao) ? caixa('notaSub', 'Juntar às notas a nota da substituição', true) : null),
       h('div',{class:'oe-acoes'}, h('button',{class:'btn btn-sm', type:'button', onclick:() => motPor(op)}, `Pôr na opção ${op.k}`)),
-      h('p',{class:'note'}, 'Custos e margens só aparecem aqui (chefe e escritório). Na folha do cliente ficam o equipamento e uma linha de instalação, com o total do cálculo.'));
+      h('p',{class:'note'}, 'Custos e margens só aparecem aqui (chefe e escritório) e não vão para o pedido, que um técnico lê. Na folha do cliente ficam o equipamento e uma linha de instalação, com o total do cálculo.'));
     motResultado(op, res);
     return painel;
   }
 
+  /* ---------- Cálculo privado: o que diz custos ou margens, fora do pedido (tabela orcamento_calculo) ----------
+     O pedido guarda o cálculo de cada opção sem estes campos (um técnico lê os pedidos). Ficam na tabela
+     orcamento_calculo, que a base de dados só dá ao chefe e ao escritório, por pedido e por cálculo (o id de cada um), e
+     neste aparelho, por conta, para abrir sem rede. Sem rede, a gravação espera pela rede; sem a tabela (o SQL por
+     correr), ficam só neste aparelho e o cálculo diz porquê. Um campo que ainda não chegou nunca apaga o guardado. */
+  const MOT_PRIV = ['extraMO', 'extraMat', 'mats', 'equipMan', 'margem', 'alvo', 'alvoIva', 'primeira'];
+  var privTabela = null; // null: ainda não se sabe; true; false: a tabela não existe (falta orcamento-calculo.sql)
+  const motPriv = m => { const x = {}; MOT_PRIV.forEach(k => { if (m && m[k] !== undefined) x[k] = JSON.parse(JSON.stringify(m[k])); }); return x; };
+  const motSemPriv = m => { const x = JSON.parse(JSON.stringify(m)); MOT_PRIV.forEach(k => { delete x[k]; }); return x; };
+  const privLocal = () => (eu ? localLe('calc', {}) : {}) || {};
+  const privPode = () => !!(sb && sessao && eu && motorOk() && !souTecnico());
+  const privSemTabela = e => /relation|does not exist|schema cache|PGRST205|42P01/i.test(String((e && e.message) || '') + ' ' + String((e && e.code) || ''));
+  // Junta ao orçamento aberto os campos guardados que ele ainda não tem (o que se escreveu entretanto fica). true: juntou.
+  function privJunta(o, d) {
+    if (!o || !d || !d.motores || (d.criado && orcCriado && d.criado !== orcCriado)) return false;
+    let mudou = false;
+    o.opcoes.forEach(op => { const m = op.motor, p = m && m.id ? d.motores[m.id] : null; if (!p) return;
+      MOT_PRIV.forEach(k => { if (m[k] === undefined && p[k] !== undefined) { m[k] = JSON.parse(JSON.stringify(p[k])); mudou = true; } }); });
+    return mudou;
+  }
+  // Ao abrir o orçamento: a cópia deste aparelho já, a da base de dados quando chegar.
+  async function privLe(id) {
+    if (!orc || !privPode()) return;
+    privJunta(orc, privLocal()[id]);
+    if (privTabela === false || semRede()) return;
+    privEnvia();
+    const r = await comPrazo(sb.from('orcamento_calculo').select('dados').eq('pedido_id', id).maybeSingle(), 10000);
+    if (r === ESGOTOU || !orc || orcId !== id) return;
+    if (r.error) { if (privSemTabela(r.error)) { privTabela = false; if (!aEscrever()) renderOrc(); } return; }
+    privTabela = true;
+    const d = r.data && r.data.dados;
+    if (!d || !d.motores) return;
+    const l = privLocal();
+    if (!(l[id] && l[id].pendente)) { l[id] = Object.assign({}, d, {pendente: false}); localGuarda('calc', l); }
+    if (privJunta(orc, d) && Object.keys(orcMotAberto).some(k => orcMotAberto[k]) && !aEscrever()) renderOrc();
+  }
+  // Depois de guardar o orçamento: os campos privados de cada cálculo vão para a cópia deste aparelho e para a base de
+  // dados (sem rede, ou com erro de rede, ficam por gravar e seguem quando a rede voltar). Um campo que ainda não chegou
+  // a este ecrã fica o que estava guardado.
+  function privGuarda(id, o, v) {
+    if (!privPode() || !o) return;
+    const l = privLocal(), velho = l[id] && (!l[id].criado || !orcCriado || l[id].criado === orcCriado) ? l[id] : null, motores = {};
+    o.opcoes.forEach(op => { const m = op.motor; if (!m || !m.id) return; motores[m.id] = Object.assign({}, velho && velho.motores && velho.motores[m.id] || {}, motPriv(m)); });
+    if (!Object.keys(motores).length && !velho) return;
+    l[id] = {criado: orcCriado || null, v: v || 0, motores, pendente: true, em: new Date().toISOString()};
+    if (!localGuarda('calc', l)) toast('Sem espaço neste aparelho para os custos do cálculo: grava-os com rede.');
+    privEnvia();
+  }
+  let privAEnviar = false;
+  async function privEnvia() {
+    if (privAEnviar || privTabela === false || !privPode() || semRede()) return;
+    const ids = Object.keys(privLocal()).filter(k => privLocal()[k] && privLocal()[k].pendente);
+    if (!ids.length) return;
+    privAEnviar = true;
+    try {
+      for (const id of ids) {
+        const x = privLocal()[id]; if (!x || !x.pendente) continue;
+        // Uma gravação que ficou à espera não vai por cima de uma mais nova (de outro aparelho, com uma versão do orçamento acima).
+        const lido = await comPrazo(sb.from('orcamento_calculo').select('dados').eq('pedido_id', id).maybeSingle(), 10000);
+        if (lido === ESGOTOU) break;
+        if (lido.error) { if (privSemTabela(lido.error)) privTabela = false; break; }
+        privTabela = true;
+        const ja = lido.data && lido.data.dados, maisNovo = ja && (Number(ja.v) || 0) > (Number(x.v) || 0) && (!ja.criado || !x.criado || ja.criado === x.criado);
+        if (!maisNovo) {
+          const dados = {criado: x.criado || null, v: x.v || 0, motores: x.motores || {}};
+          const w = await comPrazo(sb.from('orcamento_calculo').upsert({pedido_id: id, dados, atualizado: new Date().toISOString(), atualizado_por: eu.email}, {onConflict: 'pedido_id'}), 12000);
+          if (w === ESGOTOU) break;
+          if (w.error) { if (privSemTabela(w.error)) privTabela = false; break; }
+        }
+        const l2 = privLocal();
+        if (l2[id] && l2[id].em === x.em) { if (maisNovo) l2[id] = Object.assign({}, ja, {pendente: false}); else l2[id].pendente = false; localGuarda('calc', l2); }
+      }
+    } finally { privAEnviar = false; }
+  }
+  window.addEventListener('online', () => { setTimeout(privEnvia, 1500); });
+
   /* A folha ORC0068 (documento.js do pacote): a mesma revisão, o mesmo número e os mesmos valores do orçamento, no formato
-     da folha do Excel. A opção recomendada fica em cima, com os totais; as outras como «Opção». Só com IVA a 23 % e sem
-     autoliquidação (a folha só tem uma taxa). Fica dentro de uma «shadow root»: as regras da página não lhe tocam. */
+     da folha do Excel. A opção recomendada fica em cima, com os totais (e o desconto à vista em «Total Desc»); as outras
+     como «Opção». Só com IVA a 23 % e sem autoliquidação (a folha só tem uma taxa). Tudo o que ela escreve (equipamento,
+     potência, condições, exclusões, prazo, empresa) entra no conteúdo da revisão: uma reimpressão nunca mostra outro texto
+     com o mesmo número e a mesma revisão. Fica dentro de uma «shadow root»: as regras da página não lhe tocam. */
   function orc68Pode(o) {
     const taxa = Math.round(Number((cfgMotor && cfgMotor.CONFIG && cfgMotor.CONFIG.iva) || 0.23) * 100);
     return !orcAutoliq(o) && [].concat(...o.opcoes.map(op => op.linhas), o.comuns).every(l => (Number(l.iva) || orcIvaPad()) === taxa);
   }
+  // A folha que sai é a ORC0068? (escolhida, com o motor sem problemas e com uma taxa de IVA só)
+  const orc68Ativa = o => !!(o && o.formato === 'orc0068' && motorOk() && !motCfgErro() && orc68Pode(o));
   const orc68Num = o => { const m = /^ORC(\d{4})_(\d{4})$/.exec(o.num || ''); return m ? `${m[1]}/${m[2]}${o.rev && o.rev > 1 ? ' (rev. ' + o.rev + ')' : ''}` : 'Rascunho'; };
+  const orc68Esp = s => String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
+  const orc68Linhas = s => String(s == null ? '' : s).split(/\n+/).map(orc68Esp).filter(Boolean);
+  // O equipamento posto pelo cálculo ainda é o desta opção? (as linhas do cálculo iguais e a mesma marca)
+  function orc68Posto(op) {
+    const s = op.o68; if (!s || !Array.isArray(s.linhas)) return null;
+    const mot = op.linhas.filter(l => l.mot).map(l => String(l.desc || '').trim());
+    return mot.length && mot.join('\n') === s.linhas.join('\n') && (s.marcaOp || '') === (op.marca || '') ? s : null;
+  }
+  // O que a folha ORC0068 escreve de uma opção (op com os números já guardados): o texto escrito à mão ganha; senão o
+  // equipamento posto pelo cálculo; senão o título, a marca e as linhas da opção. {linhas, pot, texto, tipo, dias}
   function orc68Desc(op) {
-    const m = op.motor && op.motor.tipo === 'instalacao' ? op.motor : null;
-    const its = m ? m.equip.filter(x => x.ref).map(x => [cfgMotor.CATALOGO.find(c => c.ref === x.ref), motN(x.qtd) || 1]).filter(x => x[0]) : [];
-    if (!its.length) {
-      const lin = op.linhas.map(l => (l.qtd != null && l.qtd !== 1 ? motTxtN(l.qtd) + ' x ' : '') + l.desc);
-      return {texto: [[op.titulo, op.marca].filter(Boolean).join(' · ')].concat(lin).filter(Boolean).join('\n'),
-        marcaTexto: op.marca || op.titulo || 'Opção ' + op.k, tipoTexto: op.titulo || '', modeloTexto: op.linhas.map(l => l.desc).join(' + ')};
-    }
-    const comKw = its.filter(x => Array.isArray(x[0].kw)), kwIt = comKw.length === 1 ? comKw[0][0] : (comKw.filter(x => x[0].tipo === 'ext')[0] || [])[0];
-    const kwT = v => String(v).replace('.', ',');
-    return {marcaTexto: String(op.marca || '').toUpperCase(), tipoTexto: m.gama === 'multi' ? `MURAL MULTISPLIT (${m.ints.length} UNIDADES INTERIORES)` : m.ints.length > 1 ? `MURAL MONOSPLIT (${m.ints.length} UNIDADES)` : 'MURAL MONOSPLIT',
-      modeloTexto: its.map(([it, q]) => (q > 1 ? q + ' x ' : '') + it.modelo).join(' + '), potenciaTexto: kwIt ? `Arref: ${kwT(kwIt.kw[0])} kW / Aquec: ${kwT(kwIt.kw[1])} kW` : ''};
+    const s = orc68Posto(op), mao = orc68Linhas(op.o68txt), pot = orc68Esp(op.o68pot) || (s && s.potencia) || '';
+    const L = mao.length ? mao : s && s.tipo === 'instalacao' ? [`- Marca: ${s.marca}`, `- Tipo : ${s.tipoTexto}`, `- Modelo: ${s.modelo}`]
+      : [[orc68Esp(op.titulo), op.marca].filter(Boolean).join(' · ')].concat(op.linhas.map(l => (l.qtd != null && l.qtd !== 1 ? motTxtN(l.qtd) + ' x ' : '') + orc68Esp(l.desc))).filter(Boolean);
+    return {linhas: L, pot, texto: L.concat(pot ? [`- Potência : ${pot}`] : []).join('\n'), tipo: s ? s.tipo : null, dias: s && s.tipo === 'instalacao' ? s.dias || 0 : 0};
+  }
+  // Tudo o que a folha ORC0068 imprime (o: o orçamento com os números já guardados, orcParaGuardar). É com isto que se
+  // desenha a folha e é isto que entra no conteúdo da revisão (orcConteudo). Só com o motor (a empresa e os textos vêm dele).
+  function orc68Dados(o) {
+    const M = motorPrep(), C = M.CONFIG || {}, T = C.textos || {}, E = M.EMPRESA || {};
+    const calc = op => { const ls = op.linhas.concat(o.comuns), t = orcTotais(ls, orcAutoliq(o)), neg = ls.reduce((s, l) => { const c = orcLinha(l); return s + (c != null && c < 0 ? c : 0); }, 0);
+      return {semIva: t.base / 100, iva: t.iva / 100, comIva: t.comIva / 100, bruto: (t.base - neg) / 100, desc: -neg / 100}; };
+    const rec = orcRec(o), outras = o.opcoes.filter(op => op !== rec), dr = orc68Desc(rec), dos = outras.map(orc68Desc);
+    // As condições e as exclusões pelo que foi calculado (na recomendada, senão noutra opção); sem cálculo, pelo tipo do
+    // pedido (manutenção e reparação são intervenções).
+    const tipo = dr.tipo || dos.map(d => d.tipo).filter(Boolean)[0] || (o.tipoPedido === 'manutencao' || o.tipoPedido === 'reparacao' ? 'manutencao' : 'instalacao');
+    const man = tipo === 'manutencao', txt = v => typeof v === 'number' ? String(v) : orc68Esp(v);
+    return {folha: 'orc0068', iva: Math.round(Number(C.iva) * 100),
+      empresa: {nome: txt(E.nome), morada: (E.morada || []).map(txt), nif: txt(E.nif), tel: txt(E.tel), email: txt(E.email), iban: txt(E.iban), rodape: txt(E.rodape), emitidoPor: txt(E.emitidoPor)},
+      cliente: {nome: orc68Esp(o.cliente.nome), morada: orc68Linhas(o.cliente.morada), nif: orc68Esp(o.cliente.nif)},
+      proposta: orc68Linhas([o.titulo, o.inclui].join('\n')).join('\n') || 'Proposta',
+      principal: {calc: calc(rec), texto: dr.texto}, opcoes: outras.map((op, i) => ({calc: calc(op), texto: dos[i].texto})),
+      notas: orc68Linhas([o.notas, o.condicoes].join('\n')).join('\n'),
+      pagamento: orc68Esp(o.pagamento) || orc68Esp(man ? T.pagamentoManutencao : T.pagamentoInstalacao),
+      exclusoes: orc68Esp(o.exclusoes) || orc68Esp(man ? T.exclusoesManutencao : T.exclusoes),
+      prazo: orc68Esp(o.prazo) || (dr.dias ? `${motTxtN(dr.dias)} ${dr.dias === 1 ? 'dia' : 'dias'}` : ''),
+      validade: `${o.validadeDias} Dias`, horario: orc68Esp(T.horario)};
   }
   function orc68Doc(box) {
-    const o = orcParaGuardar(orc), M = motorPrep(), T = (cfgMotor.CONFIG || {}).textos || {}, tipoPed = (rows.find(x => x.id === orcId) || {}).tipo;
-    const calc = op => { const t = orcTotOp(o, op); return {semIva: t.base / 100, iva: t.iva / 100, comIva: t.comIva / 100}; };
-    const rec = orcRec(o), mr = rec.motor && rec.motor.tipo === 'instalacao' ? rec.motor : null, dias = mr ? motN(mr.dias) || mr.ints.length : 0;
-    const doc = {numero: orc68Num(orc), data: orc.data || today(),
-      cliente: {nome: o.cliente.nome || '', morada: String(o.cliente.morada || '').split(/\n+/).map(x => x.trim()).filter(Boolean), nif: o.cliente.nif || ''},
-      proposta: [o.titulo, o.inclui].filter(Boolean).join('\n') || 'Proposta',
-      principal: Object.assign({calc: calc(rec)}, orc68Desc(rec)), opcoes: o.opcoes.filter(op => op !== rec).map(op => Object.assign({calc: calc(op)}, orc68Desc(op))),
-      notas: [o.notas, o.condicoes].filter(Boolean).join('\n'),
-      pagamento: o.pagamento || (tipoPed === 'manutencao' ? T.pagamentoManutencao : T.pagamentoInstalacao),
-      exclusoes: tipoPed === 'manutencao' ? T.exclusoesManutencao : undefined,
-      prazo: dias ? `${motTxtN(dias)} ${dias === 1 ? 'dia' : 'dias'}` : ''};
-    const cfg0 = M.CONFIG;
-    M.CONFIG = Object.assign({}, cfg0, {textos: Object.assign({}, T, {validade: `${o.validadeDias} Dias`})});
+    const f = orc68Dados(orcParaGuardar(orc)), M = motorPrep();
+    const doc = {numero: orc68Num(orc), data: orc.data || today(), cliente: f.cliente, proposta: f.proposta, principal: f.principal, opcoes: f.opcoes,
+      notas: f.notas, pagamento: f.pagamento, exclusoes: f.exclusoes, prazo: f.prazo};
+    // A folha desenha-se só com o que entra no conteúdo da revisão (a empresa e os textos desta leitura do motor).
+    const cfg0 = M.CONFIG, emp0 = M.EMPRESA;
+    M.CONFIG = Object.assign({}, cfg0, {iva: f.iva / 100, textos: {validade: f.validade, horario: f.horario, pagamentoInstalacao: f.pagamento, exclusoes: f.exclusoes}});
+    M.EMPRESA = Object.assign({}, emp0, f.empresa);
     let html = '';
-    try { html = M.documento.renderORC(doc); } finally { M.CONFIG = cfg0; }
+    try { html = M.documento.renderORC(doc); } catch (e) { html = ''; } finally { M.CONFIG = cfg0; M.EMPRESA = emp0; }
     const host = h('div',{class:'o68-host'});
     fill(box, orcPdfPronto() ? null : h('p',{class:'doc-teste'}, orc.num ? 'Rascunho · alterações ainda sem PDF' : 'Rascunho · ainda sem número'), host);
-    orc68Monta(host, html);
+    if (html) orc68Monta(host, html);
+    else fill(host, h('p',{class:'doc-teste'}, 'A folha ORC0068 não se desenhou: confere o motor de preços em Definições.'));
   }
   // O HTML da folha entra sem scripts nem atributos «on…» (os textos já vêm escapados pelo documento.js).
   function orc68Monta(host, html) {
@@ -6743,32 +7063,84 @@ if (!Element.prototype.replaceChildren) {
     Array.prototype.slice.call(d.body.childNodes).forEach(n => b.appendChild(document.importNode(n, true)));
     raiz.appendChild(b);
   }
+  // Por baixo de cada opção, com a folha ORC0068: o texto do equipamento e a potência escritos à mão (vazios: os do cálculo
+  // posto na opção, ou as linhas dela, que aparecem em cinzento).
+  function orc68Campos(op, og) {
+    const ro = canWrite ? null : true, pad = og ? orc68Desc(Object.assign({}, og, {o68txt: '', o68pot: ''})) : {linhas: [], pot: ''};
+    const eq = h('textarea',{readonly: ro, 'aria-label': `Texto da folha ORC0068, opção ${op.k}`, placeholder: pad.linhas.join('\n'), oninput: ev => { op.o68txt = ev.target.value; orcMuda(); }});
+    eq.value = op.o68txt || '';
+    return h('div',{class:'oe-g oe-o68'},
+      oeCampo('Na folha ORC0068: equipamento (vazio: o do cálculo, ou as linhas da opção)', eq, true),
+      oeCampo('Na folha ORC0068: potência (vazio: a do catálogo)', oeInp(op, 'o68pot', {placeholder: pad.pot || 'sem potência no catálogo: escreve-a aqui', 'aria-label': `Potência na folha ORC0068, opção ${op.k}`})));
+  }
 
   /* Definições › Orçamento: motor de preços. Mostra o que está na config e troca-a por um ficheiro JSON (o mesmo formato
      que «Descarregar» dá: EMPRESA, CONFIG, CATALOGO, COMBINACOES, FERIADOS_FIXOS, PRAZOS), com a versão, como a tabela de
-     preços. Só o chefe e o escritório: a base de dados não dá estes dados a um técnico. */
+     preços. Só o chefe e o escritório: a base de dados não dá estes dados a um técnico. O ficheiro só entra com tudo o que
+     as contas e a folha usam (números a sério, fator e margem de cada marca do catálogo, as listas da empresa, os textos):
+     um que falte nunca dá NaN nem uma linha que desaparece. */
   function motValida(v) {
-    const obj = x => x && typeof x === 'object' && !Array.isArray(x), nume = x => typeof x === 'number' && Number.isFinite(x);
+    const obj = x => !!x && typeof x === 'object' && !Array.isArray(x), nume = x => typeof x === 'number' && isFinite(x), pos = x => nume(x) && x >= 0;
+    const txt = x => typeof x === 'string', txtN = x => txt(x) || nume(x);
     if (!obj(v)) return 'O ficheiro não é um objeto JSON.';
     const C = v.CONFIG;
     if (!obj(C)) return 'Falta CONFIG.';
     if (!(nume(C.iva) && C.iva > 0 && C.iva < 1)) return 'CONFIG.iva tem de ser como 0.23.';
     for (const k of ['fatorDesconto', 'margemEquip', 'tabelasMaoObra', 'horasPorMaquina', 'material', 'manutencao']) if (!obj(C[k])) return `Falta CONFIG.${k}.`;
-    if (!(nume(C.margemMaoObra) && nume(C.margemMaterial))) return 'Faltam CONFIG.margemMaoObra e CONFIG.margemMaterial (números, como 1.3).';
-    for (const k of Object.keys(C.tabelasMaoObra)) { const t = C.tabelasMaoObra[k]; if (!(obj(t) && nume(t.cm) && nume(t.lf) && nume(t.desloc))) return `CONFIG.tabelasMaoObra.${k} precisa de cm, lf e desloc.`; }
-    if (!(obj(C.material.cobre) && obj(C.material.amortecedor) && obj(C.material.kit))) return 'CONFIG.material precisa de cobre, amortecedor e kit.';
-    if (!(nume(C.manutencao.horaTecnico) && nume(C.manutencao.horaAjudante) && obj(C.manutencao.zonas))) return 'CONFIG.manutencao precisa de horaTecnico, horaAjudante e zonas.';
+    if (!(nume(C.margemMaoObra) && C.margemMaoObra > 0 && nume(C.margemMaterial) && C.margemMaterial > 0)) return 'Faltam CONFIG.margemMaoObra e CONFIG.margemMaterial (números, como 1.3).';
+    for (const k of Object.keys(C.fatorDesconto)) if (!(nume(C.fatorDesconto[k]) && C.fatorDesconto[k] > 0)) return `CONFIG.fatorDesconto.${k} tem de ser um número maior do que zero (como 0.6).`;
+    for (const k of Object.keys(C.margemEquip)) if (!(nume(C.margemEquip[k]) && C.margemEquip[k] > 0)) return `CONFIG.margemEquip.${k} tem de ser um número maior do que zero (como 1.2).`;
+    const tabs = Object.keys(C.tabelasMaoObra);
+    if (!tabs.length) return 'CONFIG.tabelasMaoObra precisa de pelo menos uma tabela (como ORC0034).';
+    for (const k of tabs) { const t = C.tabelasMaoObra[k]; if (!(obj(t) && pos(t.cm) && pos(t.lf) && pos(t.desloc))) return `CONFIG.tabelasMaoObra.${k} precisa de cm, lf e desloc (números).`; }
+    if (!(pos(C.horasPorMaquina.cm) && pos(C.horasPorMaquina.lf) && pos(C.horasPorMaquina.desloc))) return 'CONFIG.horasPorMaquina precisa de cm, lf e desloc (horas por máquina, números).';
+    if (!pos(C.sopragemAzotoHorasCM)) return 'Falta CONFIG.sopragemAzotoHorasCM (as horas de CM da sopragem a azoto por interior, um número).';
+    const mt = C.material;
+    if (!(obj(mt.cobre) && obj(mt.amortecedor) && obj(mt.kit))) return 'CONFIG.material precisa de cobre, amortecedor e kit.';
+    for (const d of ['1/4', '3/8', '1/2']) if (!pos(mt.cobre[d])) return `CONFIG.material.cobre precisa do preço do tubo ${d} (o motor usa-o quando o catálogo não diz o tubo).`;
+    for (const d of Object.keys(mt.cobre)) if (!pos(mt.cobre[d])) return `CONFIG.material.cobre.${d} tem de ser um número.`;
+    for (const k of ['amortecedor', 'kit']) if (!(txt(mt[k].desc) && mt[k].desc.trim() && pos(mt[k].custo))) return `CONFIG.material.${k} precisa de desc (texto) e custo (número).`;
+    const mn = C.manutencao;
+    if (!(pos(mn.horaTecnico) && pos(mn.horaAjudante) && nume(mn.margemMaterial) && mn.margemMaterial > 0 && obj(mn.zonas))) return 'CONFIG.manutencao precisa de horaTecnico, horaAjudante e margemMaterial (números) e das zonas.';
+    const zonas = Object.keys(mn.zonas);
+    if (!zonas.length) return 'CONFIG.manutencao.zonas precisa de pelo menos uma zona.';
+    for (const z of zonas) { const x = mn.zonas[z]; if (!(obj(x) && pos(x.equipa) && (x.tecnico == null || pos(x.tecnico)))) return `CONFIG.manutencao.zonas.${z} precisa de «equipa» (e, se houver, «tecnico») em números.`; }
+    const T = C.textos;
+    if (!obj(T)) return 'Falta CONFIG.textos (os textos da folha ORC0068).';
+    for (const k of ['pagamentoInstalacao', 'pagamentoManutencao', 'horario', 'exclusoes', 'exclusoesManutencao']) if (!txt(T[k])) return `Falta CONFIG.textos.${k} (um texto).`;
+    for (const k of Object.keys(T)) if (!txt(T[k])) return `CONFIG.textos.${k} tem de ser um texto.`;
     if (!Array.isArray(v.CATALOGO)) return 'Falta o CATALOGO (uma lista).';
+    const marcas = Object.keys(MOT_MARCA).map(n => MOT_MARCA[n]), refs = {};
     for (let i = 0; i < v.CATALOGO.length; i++) {
       const it = v.CATALOGO[i];
-      if (!(obj(it) && it.marca && it.ref && it.modelo && ['ext', 'int', 'conj'].indexOf(it.tipo) >= 0 && ['mono', 'multi', 'any'].indexOf(it.gama) >= 0)) return `Catálogo, item ${i + 1}: precisa de marca, gama (mono, multi, any), tipo (ext, int, conj), ref e modelo.`;
-      if (!(nume(it.tabela) || nume(it.custo))) return `Catálogo, ${it.ref}: falta o preço («tabela» ou «custo»).`;
+      if (!(obj(it) && txt(it.marca) && txt(it.ref) && it.ref.trim() && txt(it.modelo) && it.modelo.trim() && ['ext', 'int', 'conj'].indexOf(it.tipo) >= 0 && ['mono', 'multi', 'any'].indexOf(it.gama) >= 0)) return `Catálogo, item ${i + 1}: precisa de marca, gama (mono, multi, any), tipo (ext, int, conj), ref e modelo.`;
+      if (marcas.indexOf(it.marca) < 0) return `Catálogo, ${it.ref}: a marca «${it.marca}» não é das do registo (${marcas.join(', ')}).`;
+      if (refs[it.ref]) return `Catálogo: a ref ${it.ref} está repetida.`;
+      refs[it.ref] = true;
+      if (!(pos(it.tabela) || pos(it.custo)) || (it.tabela != null && !pos(it.tabela)) || (it.custo != null && !pos(it.custo))) return `Catálogo, ${it.ref}: falta o preço («tabela» ou «custo», um número).`;
+      if ((it.tipo === 'int' || it.tipo === 'conj' || it.btu != null) && !(nume(it.btu) && it.btu > 0)) return `Catálogo, ${it.ref}: falta «btu» (um número; um interior ou um conjunto precisa dele).`;
+      if (it.kw != null && !(Array.isArray(it.kw) && it.kw.length === 2 && it.kw.every(x => nume(x) && x > 0))) return `Catálogo, ${it.ref}: «kw» tem de ser [arrefecimento, aquecimento], em números.`;
+      if (it.tubo != null && !(Array.isArray(it.tubo) && it.tubo.length === 2 && it.tubo.every(d => txt(d) && pos(mt.cobre[d])))) return `Catálogo, ${it.ref}: «tubo» tem de ser [líquido, gás], com diâmetros que estão em CONFIG.material.cobre.`;
+      for (const k of ['saidas', 'saidaMeia']) if (it[k] != null && !(Number.isInteger(it[k]) && it[k] >= 0)) return `Catálogo, ${it.ref}: «${k}» tem de ser um número inteiro.`;
+      const fk = it.marca !== 'MIDEA' ? [it.marca] : it.gama === 'mono' ? ['MIDEA_MONO'] : it.gama === 'multi' ? ['MIDEA_MULTI'] : ['MIDEA_MONO', 'MIDEA_MULTI'];
+      if (it.custo == null) for (const f of fk) if (!(nume(C.fatorDesconto[f]) && C.fatorDesconto[f] > 0)) return `Catálogo, ${it.ref}: falta CONFIG.fatorDesconto.${f} (o fator de desconto da marca).`;
+      if (!(nume(C.margemEquip[it.marca]) && C.margemEquip[it.marca] > 0)) return `Catálogo, ${it.ref}: falta CONFIG.margemEquip.${it.marca} (a margem do equipamento da marca).`;
     }
-    if (!obj(v.EMPRESA) || !v.EMPRESA.nome) return 'Falta EMPRESA (com o nome).';
-    const textos = JSON.stringify([v.EMPRESA, C.textos || {}, v.CATALOGO.map(it => it.modelo)]);
+    if (v.COMBINACOES != null) {
+      if (!obj(v.COMBINACOES)) return 'COMBINACOES tem de ser um objeto (o exterior e as listas de BTU/h dos interiores).';
+      for (const k of Object.keys(v.COMBINACOES)) { const l = v.COMBINACOES[k]; if (!(Array.isArray(l) && l.every(cb => Array.isArray(cb) && cb.length && cb.every(b => nume(b) && b > 0)))) return `COMBINACOES.${k} tem de ser uma lista de combinações de BTU/h (como [[9000, 9000]]).`; }
+    }
+    if (v.FERIADOS_FIXOS != null && !(Array.isArray(v.FERIADOS_FIXOS) && v.FERIADOS_FIXOS.every(x => txt(x) && /^\d\d-\d\d$/.test(x)))) return 'FERIADOS_FIXOS tem de ser uma lista como ["01-01", "12-25"].';
+    if (v.PRAZOS != null && !obj(v.PRAZOS)) return 'PRAZOS tem de ser um objeto.';
+    const E = v.EMPRESA;
+    if (!obj(E) || !txt(E.nome) || !E.nome.trim()) return 'Falta EMPRESA (com o nome).';
+    for (const k of ['nif', 'tel', 'email', 'iban', 'rodape', 'emitidoPor']) if (!txtN(E[k])) return `Falta EMPRESA.${k} (a folha ORC0068 escreve-o).`;
+    for (const k of ['morada', 'assinatura']) if (!(Array.isArray(E[k]) && E[k].length && E[k].every(txt))) return `EMPRESA.${k} tem de ser uma lista de linhas de texto.`;
+    const textos = JSON.stringify([E, T, v.CATALOGO.map(it => it.modelo)]);
     if (ORC_TRAV.test(textos)) return 'Há travessões nos textos: usa vírgulas ou parênteses.';
     return null;
   }
+
   function renderMotCfg() {
     const sec = F('motCfgSec'), box = F('motCfg'); if (!sec || !box) return;
     sec.hidden = souTecnico() || status !== 'ok';
@@ -6777,12 +7149,15 @@ if (!Element.prototype.replaceChildren) {
     const marcas = {}; ((v && v.CATALOGO) || []).forEach(it => { marcas[it.marca] = (marcas[it.marca] || 0) + 1; });
     const nomeM = k => Object.keys(MOT_MARCA).filter(n => MOT_MARCA[n] === k)[0] || k;
     const fator = x => '× ' + motTxtN(x);
-    const resumo = C ? h('ul',{class:'mot-resumo'},
+    const problema = C ? motCfgErro() : null;
+    // Um motor guardado com falhas (mudado à mão na base de dados) não pára a página: diz-se o problema.
+    let resumo = null;
+    try { resumo = C ? h('ul',{class:'mot-resumo'},
       h('li',null, `Catálogo: ${v.CATALOGO.length} modelos (${Object.keys(marcas).map(k => `${nomeM(k)} ${marcas[k]}`).join(', ')}).`),
       h('li',null, `Margem do equipamento: ${Object.keys(C.margemEquip).map(k => `${nomeM(k)} ${fator(C.margemEquip[k])}`).join(', ')}; mão de obra ${fator(C.margemMaoObra)}; material ${fator(C.margemMaterial)}.`),
       h('li',null, `Mão de obra: ${Object.keys(C.tabelasMaoObra).map(k => `${k} (CM ${motEur(C.tabelasMaoObra[k].cm)}, LF ${motEur(C.tabelasMaoObra[k].lf)}, deslocação ${motEur(C.tabelasMaoObra[k].desloc)})`).join('; ')}.`),
       h('li',null, `Manutenção: técnico ${motEur(C.manutencao.horaTecnico)}/h, ajudante ${motEur(C.manutencao.horaAjudante)}/h; ${Object.keys(C.manutencao.zonas || {}).map(z => `${z} ${motEur(C.manutencao.zonas[z].equipa)}`).join(', ')} (1.ª hora + deslocação).`))
-      : h('p',{class:'note'}, 'Ainda sem dados do motor. Carrega o ficheiro JSON com a empresa, os fatores, as margens, as tarifas e o catálogo.');
+      : h('p',{class:'note'}, 'Ainda sem dados do motor. Carrega o ficheiro JSON com a empresa, os fatores, as margens, as tarifas e o catálogo.'); } catch (e) { resumo = null; }
     const ficheiro = h('input',{type:'file', accept:'application/json,.json', style:'display:none', onchange: async ev => {
       const f = ev.target.files && ev.target.files[0]; ev.target.value = ''; if (!f) return;
       let novo = null;
@@ -6804,6 +7179,7 @@ if (!Element.prototype.replaceChildren) {
       finally { motCfgAGuardar = false; }
     }});
     fill(box, resumo,
+      problema ? h('p',{class:'hint alert'}, `O motor guardado tem um problema: ${problema} Até o trocares por um ficheiro certo, o cálculo não dá preços e a folha ORC0068 não sai.`) : null,
       h('p',{class:'note'}, 'Os custos e as margens só aparecem ao chefe e ao escritório: a base de dados não os dá a um técnico. No orçamento, «Calcular preço» em cada opção. Funciona sem rede com a última leitura.'),
       h('div',{class:'row-end', style:'margin-top:10px'},
         C ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => {
@@ -6838,7 +7214,8 @@ if (!Element.prototype.replaceChildren) {
         motorOk() ? oeCampo('Folha do PDF', oeSel(o, 'formato', [['', 'MDM (cartões das opções)'], ['orc0068', 'ORC0068 (como a folha do Excel)']], () => { renderOrc(); })) : null,
         o.cliente.tipo === 'empresa' ? h('label',{class:'check oe-largo'}, h('input',{type:'checkbox', checked: o.autoliquidacao ? true : null, disabled: ro, onchange: ev => { o.autoliquidacao = ev.target.checked; orcMuda(); }}), 'Autoliquidação do IVA (serviços de construção para empresas: confirmar com a contabilidade)') : null),
       o.formato === 'orc0068' ? h('p',{class:'hint'}, !motorOk() ? 'Folha ORC0068: precisa do motor de preços (chefe e escritório). Aqui sai a folha MDM, com os mesmos valores.'
-        : !orc68Pode(o) ? 'A folha ORC0068 só tem uma taxa de IVA (23 %), sem autoliquidação: com este orçamento sai a folha MDM.' : 'Folha ORC0068: os valores são os do orçamento (opção recomendada em cima, as outras como «Opção»).') : null,
+        : motCfgErro() ? `Folha ORC0068: o motor de preços guardado tem um problema (${motCfgErro()}). Aqui sai a folha MDM.`
+        : !orc68Pode(o) ? 'A folha ORC0068 só tem uma taxa de IVA (23 %), sem autoliquidação: com este orçamento sai a folha MDM.' : 'Folha ORC0068: os valores são os do orçamento (opção recomendada em cima, as outras como «Opção»). Por baixo de cada opção, o que a folha escreve do equipamento.') : null,
       h('p',{class:'note'}, o.num ? `N.º ${o.num}${o.rev ? `, revisão ${o.rev}` : ''}. O número não muda; um PDF com outro conteúdo sai como revisão seguinte.${o.rev ? '' : ' Número de fora do registo: confere a revisão (as versões que o cliente já recebeu, mais uma).'}` : 'O número é dado no primeiro PDF («Guardar e imprimir») e não muda depois.'));
     const tipos = Object.keys(ORC_BTU.tipos), x = o.divisoes.length ? orcPotencia() : null;
     const resDiv = d => { const P = ORC_POT.potencia(ORC_C, [orcDivCalc(d)]); return P.erros && P.erros.length ? '' : P.divs && P.divs[0] ? P.divs[0].texto : ''; };
@@ -6862,12 +7239,15 @@ if (!Element.prototype.replaceChildren) {
       ro ? null : h('div',{class:'oe-acoes'},
         h('button',{class:'btn btn-ghost btn-sm', type:'button', disabled: o.divisoes.length >= ORC_BTU.maxDivisoes ? true : null, onclick:() => { o.divisoes.push({tipo: tipos[0], area: '', sol: false, ultimoAndar: false}); orcMuda(); renderOrc(); }}, '+ Divisão'),
         o.divisoes.length ? h('button',{class:'btn btn-sm', type:'button', onclick: orcPorNasOpcoes}, 'Pôr nas opções') : null));
+    // Com a folha ORC0068: os textos que ela escreve, para cada opção (com os números já guardados).
+    const o68c = o.formato === 'orc0068' && motorOk() && !motCfgErro(), og = o68c ? orcParaGuardar(o) : null;
     const opcoes = h('section',{class:'oe-sec'}, h('h3',null, o.opcoes.length > 1 ? 'Opções (lado a lado no PDF)' : 'Equipamento'),
       o.opcoes.map((op, i) => h('div',{class:'oe-op'},
         h('div',{class:'oe-op-h'},
           h('b',null, `Opção ${op.k}`),
           h('input',{value: op.titulo || '', placeholder:'Título (ex.: Gama económica)', 'aria-label':`Título da opção ${op.k}`, readonly: ro, class:'oe-op-t', oninput: ev => { op.titulo = ev.target.value; orcMuda(); }}),
-          oeSel(op, 'marca', [['', 'Sem marca']].concat(ORC_MARCAS.map(m => [m, m])), null, {'aria-label': `Marca da opção ${op.k}`, class:'oe-op-m'}),
+          // Mudar a marca redesenha: o cálculo aberto mostra o catálogo da marca nova e recusa os modelos da outra.
+          oeSel(op, 'marca', [['', 'Sem marca']].concat(ORC_MARCAS.map(m => [m, m])), () => { renderOrc(); }, {'aria-label': `Marca da opção ${op.k}`, class:'oe-op-m'}),
           o.opcoes.length > 1 ? h('label',{class:'check'}, h('input',{type:'radio', name:'oe-rec', checked: o.recomendada === op.k ? true : null, disabled: ro, onchange:() => { o.recomendada = op.k; orcMuda(); }}), 'Recomendada') : null,
           !ro && o.opcoes.length > 1 ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => {
             // A aceite não muda aqui: fica presa ao PDF em que foi aceite. A recomendada segue a sua opção (ou passa à A).
@@ -6880,11 +7260,14 @@ if (!Element.prototype.replaceChildren) {
           h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { op.linhas.push({ref:'', desc:'', qtd:'1', un:'un', preco:'', iva: orcIvaPad()}); orcMuda(); renderOrc(); }}, '+ Linha'),
           h('button',{class:'btn btn-ghost btn-sm', type:'button', 'aria-haspopup':'menu', 'aria-expanded':'false', onclick: ev => orcEscolher(ev.currentTarget, ['equip', 'mat'], op.marca, it => { op.linhas.push(orcDeItem(it, 1)); orcMuda(); renderOrc(); })}, 'Da tabela'),
           motorOk() ? h('button',{class:'btn btn-ghost btn-sm', type:'button', 'aria-expanded': String(!!orcMotAberto[op.k]), onclick:() => { if (!op.motor) op.motor = motNovo(); orcMotAberto[op.k] = !orcMotAberto[op.k]; renderOrc(); }}, orcMotAberto[op.k] ? 'Fechar o cálculo' : 'Calcular preço') : null),
+        motMarcaTroca(op) ? h('p',{class:'hint alert'}, `As linhas do cálculo são da ${op.o68.marcaOp || 'outra marca'} e a opção diz ${op.marca || '«Sem marca»'}: carrega outra vez em «Pôr na opção ${op.k}» (com o equipamento certo) ou volta a marca.`) : null,
+        o68c ? orc68Campos(op, og.opcoes[i]) : null,
         !ro && motorOk() && orcMotAberto[op.k] && op.motor ? motPainel(op) : null,
         h('p',{class:'oe-tot', 'data-k': op.k}))),
       ro || o.opcoes.length >= 3 ? null : h('div',{class:'oe-acoes'}, h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => {
         const ult = o.opcoes[o.opcoes.length - 1];
-        const nova = {k: ORC_LETRAS[o.opcoes.length], titulo: o.opcoes.length === 1 && ult.titulo === 'Gama económica' ? 'Gama superior' : '', marca: ult.marca === 'Midea' ? 'Daikin' : ult.marca, linhas: JSON.parse(JSON.stringify(ult.linhas.filter(l => !l.pot)))};
+        // Copia as linhas escritas à mão; nunca as da potência nem as do cálculo da outra opção (seriam duas máquinas).
+        const nova = {k: ORC_LETRAS[o.opcoes.length], titulo: o.opcoes.length === 1 && ult.titulo === 'Gama económica' ? 'Gama superior' : '', marca: ult.marca === 'Midea' ? 'Daikin' : ult.marca, linhas: JSON.parse(JSON.stringify(ult.linhas.filter(l => !l.pot && !l.mot)))};
         o.opcoes.push(nova);
         // A potência põe também o aparelho da marca nova (com o preço da tabela, ou vazio).
         const y = o.divisoes.length ? orcPotencia() : null;
@@ -6898,13 +7281,18 @@ if (!Element.prototype.replaceChildren) {
         h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { o.comuns.push({g:'mat', ref:'', desc:'', qtd:'1', un:'un', preco:'', iva: orcIvaPad()}); orcMuda(); renderOrc(); }}, '+ Material'),
         h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { o.comuns.push({g:'div', ref:'', desc:'Desconto', qtd:'1', un:'un', preco:'-', iva: orcIvaPad()}); orcMuda(); renderOrc(); }}, '+ Desconto'),
         h('button',{class:'btn btn-ghost btn-sm', type:'button', 'aria-haspopup':'menu', 'aria-expanded':'false', onclick: ev => orcEscolher(ev.currentTarget, ['mo', 'desl', 'mat', 'div'], '', it => { o.comuns.push(Object.assign(orcDeItem(it, it.g === 'mo' ? '' : 1), {g: it.g})); orcMuda(); renderOrc(); })}, 'Da tabela')));
+    // Com a folha ORC0068: o que ela escreve quando o campo fica vazio aparece em cinzento (do motor, pelo que foi calculado).
+    const pad68 = o68c ? orc68Dados(Object.assign({}, og, {pagamento: '', exclusoes: '', prazo: ''})) : null;
     const cond = h('section',{class:'oe-sec'}, h('h3',null, 'Texto e condições'),
       h('div',{class:'oe-g'},
         oeCampo('Inclui', oeInp(o, 'inclui', {multi:true, placeholder:'Ex.: equipamento, instalação, ligações até 3 m, ensaio e arranque.'}), true),
         oeCampo('Notas (uma por linha)', oeInp(o, 'notas', {multi:true}), true),
-        oeCampo('Pagamento (vazio: não aparece)', oeInp(o, 'pagamento', {multi:true})),
-        oeCampo('Outras condições (uma por linha)', oeInp(o, 'condicoes', {multi:true}))),
-      h('p',{class:'note'}, 'O PDF diz sempre que o orçamento não serve de fatura e até quando é válido. Sem travessões: usa vírgulas ou parênteses.'));
+        oeCampo(pad68 ? 'Pagamento (vazio: o do motor)' : 'Pagamento (vazio: não aparece)', oeInp(o, 'pagamento', {multi:true, placeholder: pad68 ? pad68.pagamento : null})),
+        oeCampo('Outras condições (uma por linha)', oeInp(o, 'condicoes', {multi:true})),
+        pad68 ? oeCampo('Exclusões na folha ORC0068 (vazio: as do motor)', oeInp(o, 'exclusoes', {multi:true, placeholder: pad68.exclusoes}), true) : null,
+        pad68 ? oeCampo('Previsão da execução (vazio: os dias do cálculo)', oeInp(o, 'prazo', {placeholder: pad68.prazo || 'por exemplo «2 semanas após a adjudicação»'})) : null),
+      h('p',{class:'note'}, pad68 ? 'A folha ORC0068 diz a validade em dias, as condições de pagamento, as exclusões, a previsão da execução e o horário; não diz que não serve de fatura nem tem o espaço do aceite (a folha MDM tem). Sem travessões: usa vírgulas ou parênteses.'
+        : 'O PDF diz sempre que o orçamento não serve de fatura e até quando é válido. Sem travessões: usa vírgulas ou parênteses.'));
     fill(F('orcEd'), orcEnvio && orcPdfPronto() ? oeEnvio() : null, cab, pot, opcoes, comuns, cond);
     orcMarca(); orcTotaisUI(); renderOrcDoc();
   }
@@ -6921,7 +7309,7 @@ if (!Element.prototype.replaceChildren) {
   // A folha do PDF, com o aspeto da proposta da equipa (equipa/proposta.css). Construída com h(), sem innerHTML.
   function renderOrcDoc() {
     const box = F('orcDoc'); if (!box || !orc) return;
-    const o68 = orc.formato === 'orc0068' && motorOk() && orc68Pode(orc);
+    const o68 = orc68Ativa(orc);
     if (box.parentNode) box.parentNode.classList.toggle('o68-folha', o68);
     if (o68) { orc68Doc(box); orcEscala(); return; }
     const o = orcParaGuardar(orc), E = ORC_EMPRESA, n = o.opcoes.length, comIva = orcComIva(o), autoliq = orcAutoliq(o);
@@ -7010,6 +7398,7 @@ if (!Element.prototype.replaceChildren) {
       if (!String(l.desc || '').trim()) return `${onde}: há uma linha sem descrição.`;
       if (q == null || q <= 0) return `${onde}: «${l.desc}» sem quantidade (tira a linha se não entra).`;
       if (orcCent(l.preco) == null) return `${onde}: «${l.desc}» sem preço.`;
+      if (l.mot && orcCent(l.preco) < 0) return `${onde}: «${l.desc}» com preço negativo: refaz o cálculo e «Pôr na opção».`;
     }
     for (const op of o.opcoes) {
       if (!op.linhas.length && !o.comuns.length) return `Opção ${op.k} sem linhas.`;
@@ -7111,7 +7500,8 @@ if (!Element.prototype.replaceChildren) {
       const ok = await gravar(id, novo, novaRev ? `PDF da revisão ${o.rev} pronto` : 'Orçamento guardado', {manter: true, erro: m => { if (mesmo()) orcErro(m); else toast(m); }});
       if (!ok || !mesmo()) return;
       orcV = o.v;
-      if (JSON.stringify(orc) === antes) { fechaPop(); orc = orcParaEditar(o); orcSujo = false; } // a lista «Da tabela» era do editor velho
+      privGuarda(id, orc, o.v); // os custos e as margens do cálculo, fora do pedido
+      if (JSON.stringify(orc) === antes) { fechaPop(); orc = orcParaEditar(o); orcPrepara(orc, fresco); privJunta(orc, privLocal()[id]); orcSujo = false; } // a lista «Da tabela» era do editor velho
       else {
         // Escreveste durante a gravação: fica o que está no ecrã, com o número, a revisão e a versão que a gravação deu.
         ['num', 'rev', 'revBase', 'revBaseFixo', 'hash', 'data', 'emitidoEm', 'emitidoPor', 'ultimoPdf', 'anteriores', 'aceite'].forEach(k => { if (o[k] !== undefined) orc[k] = JSON.parse(JSON.stringify(o[k])); });
@@ -9334,7 +9724,7 @@ if (!Element.prototype.replaceChildren) {
     if (nc) partes.push(`${nc} ${nc === 1 ? 'alteração que não entrou' : 'alterações que não entraram'} (um colega mudou o mesmo; estão em «Ver», na barra de cima)`);
     const lista = partes.length > 1 ? partes.slice(0, -1).join(', ') + ' e ' + partes[partes.length - 1] : partes[0];
     if (!confirm(partes.length ? `Há ${lista}. Se saíres, perdem-se. Sair mesmo assim?` : 'Sair do registo neste aparelho?')) return;
-    ['fila', 'fila-clientes', 'envios', 'conflitos', 'eu', 'links', 'cache-base', 'cache-seg', 'cache-agenda', 'cache-painel', 'hora-base', 'hora-seg', 'hora-agenda', 'hora-painel'].forEach(localTira);
+    ['fila', 'fila-clientes', 'envios', 'conflitos', 'eu', 'links', 'calc', 'cache-base', 'cache-seg', 'cache-agenda', 'cache-painel', 'hora-base', 'hora-seg', 'hora-agenda', 'hora-painel'].forEach(localTira);
     try { localStorage.removeItem('registo-ultimo'); localStorage.removeItem('registo-envios'); } catch (e) {}
     sair();
     await sairLocal();
