@@ -59,7 +59,7 @@ try {
     return page;
   }
   async function preenche(page, { purpose, service, local = 'Lisboa', nome = 'Carlos Melancia', tel = '912 345 678', email = '', detalhes = '' }) {
-    await page.evaluate(() => document.querySelector('[data-quote]').click());
+    await page.evaluate(() => (document.querySelector('.quick-more') || document.querySelector('[data-quote]')).click());
     await page.waitForSelector('#quote-dialog[open]');
     await page.check(`input[name="purpose"][value="${purpose}"]`, { force: true });
     await page.click('#quote-next');
@@ -73,6 +73,26 @@ try {
     await page.click('#quote-next');
     await page.check('#request-consent', { force: true });
   }
+  /* a página inicial tem o pedido de 4 passos no hero (sem diálogo): passos 1 a 4 e o botão «Enviar pedido à MDM» */
+  async function preencheNovo(page, { purpose, service, local = 'Lisboa', nome = 'Carlos Melancia', tel = '912 345 678', email = '', detalhes = '' }) {
+    await page.check(`#pedido input[name="purpose"][value="${purpose}"]`, { force: true });
+    await page.click('#qNext');
+    await page.selectOption('#qServ', service);
+    await page.fill('#qLocal', local);
+    if (detalhes) await page.fill('#qNotas', detalhes);
+    await page.click('#qNext');
+    await page.fill('#qNome', nome);
+    await page.fill('#qTel', tel);
+    if (email) await page.fill('#qEmail', email);
+    await page.click('#qNext');
+    await page.waitForSelector('#qSend', { state: 'visible' });
+  }
+  async function enviaNovo(page) {
+    const antes = envios.length;
+    await page.click('#qSend');
+    await page.waitForFunction(() => document.getElementById('qStatus').textContent.trim() !== '', null, { timeout: 8000 });
+    return envios.length > antes ? envios.at(-1) : null;
+  }
   async function envia(page) {
     const antes = envios.length;
     await page.click('#send-direct');
@@ -82,11 +102,12 @@ try {
   const CAMPOS = ['form-name', 'subject', 'pagina', 'triagem', 'potencia', 'estimativa', 'nome', 'email', 'telefone', 'servico', 'mensagem', 'bot-field'];
   const decl = fs.readFileSync(path.join(PUB, 'formularios.html'), 'utf8');
 
-  // 1. avaria → «orcamento»
+  // 1. avaria → «orcamento», a partir do pedido de 4 passos no hero da página inicial
   let page = await nova('/index.html');
-  await preenche(page, { purpose: 'Avaria', service: 'Ar condicionado', detalhes: 'O ar condicionado da sala não arranca.' });
-  let e = await envia(page);
-  const ref = await page.textContent('#request-reference');
+  await preencheNovo(page, { purpose: 'Avaria', service: 'Ar condicionado', detalhes: 'O ar condicionado da sala não arranca.' });
+  let e = await enviaNovo(page);
+  const estado = await page.textContent('#qStatus');
+  const ref = (estado.match(/Referência (\S+)\./) || [])[1] || '';
   ok(e && e.caminho === '/' && /x-www-form-urlencoded/.test(e.tipo) && e.campos['form-name'] === 'orcamento', '1: uma avaria vai para «orcamento»', e);
   ok(e && CAMPOS.every((c) => c in e.campos) && Object.keys(e.campos).every((c) => CAMPOS.includes(c)), '1: os campos são os dos formulários Netlify', e && Object.keys(e.campos));
   ok(e && CAMPOS.every((c) => decl.includes(`name="${c}"`) || c === 'form-name'), '1: formularios.html declara todos os campos');
@@ -95,8 +116,7 @@ try {
     '1: assunto com a triagem e a referência, contactos, serviço, isco vazio', e && e.campos);
   ok(e && /^\d{6}-\d{4}-[0-9A-F]{4}$/.test(ref) && e.campos.mensagem.includes('Referência: ' + ref) && e.campos.mensagem.includes('Localidade: Lisboa')
     && e.campos.mensagem.includes('O ar condicionado da sala não arranca.'), '1: a mensagem leva a referência, a localidade e os detalhes', e && e.campos.mensagem);
-  ok(!(await page.$eval('#delivery-result', (x) => x.hidden)) && /Pedido recebido/.test(await page.textContent('#send-direct'))
-    && /A MDM irá contactá-lo/.test(await page.textContent('#booking-note')), '1: o painel «Pedido recebido» com a referência');
+  ok(/Pedido recebido/.test(estado) && /Pedido recebido/.test(await page.textContent('#qSend')), '1: «Pedido recebido» com a referência', estado);
   await page.context().close();
 
   // 2. instalação → «orcamento-comercial»; o mesmo pedido outra vez leva a mesma referência; uma falha deixa tentar de novo
@@ -118,8 +138,8 @@ try {
     ['Aconselhamento', 'Ainda não sei', 'orcamento-comercial', '[P5 · Avaliação técnica]'], ['Instalação', 'Bombas de calor', 'orcamento-comercial', '[P1 · Bomba de calor]'],
     ['Avaria', 'Eletricidade', 'orcamento', '[P4 · Avaria elétrica]']]) {
     page = await nova('/index.html');
-    await preenche(page, { purpose, service });
-    e = await envia(page);
+    await preencheNovo(page, { purpose, service });
+    e = await enviaNovo(page);
     ok(e && e.campos['form-name'] === form && e.campos.triagem === tag, `3: ${purpose}, ${service} → ${form} ${tag}`, e && [e.campos['form-name'], e.campos.triagem]);
     await page.context().close();
   }
@@ -130,6 +150,24 @@ try {
   e = await envia(page);
   ok(e && e.campos['form-name'] === 'orcamento' && e.campos.servico === 'Avaria: Bombas de calor' && e.campos.mensagem.includes('Língua do site: inglês')
     && /MDM has received your request|Pedido recebido|Request received/i.test(await page.textContent('#delivery-result')), '4: em inglês envia o mesmo, em português para a equipa', e && e.campos);
+  await page.context().close();
+
+  // 4a. na página inicial, «Solicitar manutenção» leva ao pedido com «Manutenção» marcada
+  page = await nova('/index.html');
+  await page.click('[data-need="Manutenção"]');
+  await page.waitForTimeout(600);
+  ok(await page.evaluate(() => document.querySelector('#pedido input[name="purpose"][value="Manutenção"]').checked), '4a: os botões da página inicial encaminham para o pedido');
+  await page.context().close();
+
+  // 4b. o pedido rápido do hero (página em inglês): só nome e telefone, com os campos dos formulários Netlify
+  page = await nova('/en/index.html');
+  await page.fill('input[name="quick-name"]', 'John Smith');
+  await page.fill('input[name="quick-phone"]', '+44 7911 123456');
+  let antes = envios.length;
+  await page.click('#quick-send');
+  await page.waitForFunction(() => document.getElementById('quick-status').textContent.trim() !== '', null, { timeout: 8000 });
+  e = envios.length > antes ? envios.at(-1) : null;
+  ok(e && e.campos['form-name'] === 'orcamento-comercial' && e.campos.mensagem.includes('Língua do site: inglês') && /Request received/.test(await page.textContent('#quick-status')), '4b: em inglês, uma instalação vai para «orcamento-comercial»', e && e.campos);
   await page.context().close();
 
   // 5. sem deslize lateral a 390 e 320 px
@@ -150,6 +188,23 @@ try {
   const letras = await page.evaluate(async () => { await document.fonts.ready; return [...document.fonts].filter((f) => f.status === 'loaded').length; });
   ok(!pedidos404.some((p) => !p.startsWith('/api/')) && letras > 0, '6: a página da equipa abre com as letras e o logótipo', { pedidos404, letras });
   await page.context().close();
+
+  // 7. nenhum pedido à Google antes de o visitante pedir o mapa; página de contactos; página inicial com letra própria
+  for (const url of ['/index.html', '/contactos.html', '/en/contactos.html', '/obras.html']) {
+    page = await nova(url);
+    const google = [];
+    page.on('request', (r) => { if (/google|gstatic/.test(new URL(r.url()).hostname)) google.push(r.url()); });
+    await page.reload({ waitUntil: 'networkidle' });
+    ok(google.length === 0, `7: ${url} abre sem pedidos à Google`, google);
+    if (url === '/contactos.html') {
+      ok(await page.locator('h1').textContent() === 'Contactos MDM.' && await page.locator('a[href="tel:+351218935050"]').count() > 0, '7: a página de contactos tem título e telefone');
+      await page.route(/maps\.google\.com/, (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<p>mapa</p>' }));
+      await page.click('.mdm-mapa__btn');
+      ok(await page.locator('.mdm-mapa iframe[src*="maps.google.com"]').count() === 1, '7: o mapa só carrega depois do clique');
+    }
+    if (url === '/obras.html') ok(await page.locator('.footer-bottom a[href="https://www.livroreclamacoes.pt/"]').count() === 1 && await page.locator('nav a[href="/contactos.html"]').count() === 1, '7: rodapé com Livro de Reclamações e menu com a página de contactos');
+    await page.context().close();
+  }
 } finally {
   await browser.close();
   servidor.close();
