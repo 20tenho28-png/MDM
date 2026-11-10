@@ -49,6 +49,7 @@ import html
 import json
 import re
 import shutil
+import subprocess
 import sys
 from datetime import date
 from pathlib import Path
@@ -979,7 +980,7 @@ def check(files):
                     problems.append(f"{f}: referência partida → {r}")
     problems += check_preview()
     problems += check_regras() + check_duracoes() + check_testemunhos() + check_formatos() + check_btu() + check_precos()
-    problems += check_marcas() + check_equipa() + check_registo()
+    problems += check_marcas() + check_equipa() + check_registo() + check_motor_orcamento()
     problems += check_encaminhamento() + check_pedidos() + check_precos_teste()
     # uma imagem com 0 bytes (gravação interrompida) existe para REF_RE mas não aparece; .tmp é uma gravação a meio
     for img in sorted(p for p in (OUT / "assets" / "img").rglob("*") if p.is_file()):
@@ -1479,6 +1480,29 @@ def check_registo():
         if json.dumps(site.get(chave, ""), ensure_ascii=False) not in emp:
             out.append(f"registo/index.html: ORC_EMPRESA não tem o {chave} de data/site.json")
     return out
+
+def check_motor_orcamento():
+    """O motor de orçamentos do registo (registo/orcamento-motor.js) com uma configuração inventada, nunca os preços da
+    MDM: tests/orcamento-motor.mjs, sem rede nem dependências (também confirma que o registo tem as regras do fluxo.js).
+    Corre quando há node; sem ele, avisa e não falha."""
+    teste, motor = ROOT / "tests" / "orcamento-motor.mjs", ROOT / "registo" / "orcamento-motor.js"
+    if not (teste.exists() and motor.exists()):
+        return []
+    node = shutil.which("node")
+    if not node:
+        print("aviso: sem node, o teste do motor de orçamentos (tests/orcamento-motor.mjs) não correu")
+        return []
+    try:
+        r = subprocess.run([node, str(teste)], cwd=str(ROOT), capture_output=True, text=True, timeout=120)
+    except (OSError, subprocess.TimeoutExpired) as e:
+        return [f"tests/orcamento-motor.mjs: não correu ({e})"]
+    linhas = [l for l in (r.stdout + "\n" + r.stderr).splitlines() if l.strip()]
+    if r.returncode != 0:
+        return ["tests/orcamento-motor.mjs (motor de orçamentos do registo) falhou: " + " | ".join(linhas[:8])]
+    if linhas:
+        print(linhas[-1])
+    return []
+
 
 def check_btu():
     """Os números da estimativa de potência (site.json «btu»), que o dono pode mudar: todos positivos e coerentes."""
