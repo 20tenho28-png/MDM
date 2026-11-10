@@ -79,3 +79,7 @@ dialog{padding:0;border:0;width:min(760px,calc(100% - 32px));max-height:calc(100
 .quick-request.is-hinted{outline:3px solid var(--red);outline-offset:4px;transition:outline-color .6s}
 /* foto do quadro elétrico (667×400): mostra-se inteira, sem recorte a preencher a caixa alta */
 .detail-cover img[src$="quadro-eletrico-comando-667.webp"]{object-fit:contain;background:#e4e8eb}
+
+/* Página de contactos */
+.contact-page{padding-bottom:80px}.contact-page .contact-grid{grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);padding-top:32px}.contact-cta{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;margin-top:48px;padding:28px 32px;background:#e9edef;border-radius:4px}.contact-cta h2{font-size:1.7rem;font-weight:500}.contact-cta p{color:var(--muted);margin-top:6px}.contact-sub{font-size:1.4rem;font-weight:500;margin-top:48px}
+@media(max-width:760px){.contact-page{padding-bottom:50px}.contact-page .contact-grid{grid-template-columns:1fr}.contact-cta{padding:22px 20px}.contact-cta .btn{width:100%}}

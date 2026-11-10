@@ -188,6 +188,23 @@ try {
   const letras = await page.evaluate(async () => { await document.fonts.ready; return [...document.fonts].filter((f) => f.status === 'loaded').length; });
   ok(!pedidos404.some((p) => !p.startsWith('/api/')) && letras > 0, '6: a página da equipa abre com as letras e o logótipo', { pedidos404, letras });
   await page.context().close();
+
+  // 7. nenhum pedido à Google antes de o visitante pedir o mapa; página de contactos; página inicial com letra própria
+  for (const url of ['/index.html', '/contactos.html', '/en/contactos.html', '/obras.html']) {
+    page = await nova(url);
+    const google = [];
+    page.on('request', (r) => { if (/google|gstatic/.test(new URL(r.url()).hostname)) google.push(r.url()); });
+    await page.reload({ waitUntil: 'networkidle' });
+    ok(google.length === 0, `7: ${url} abre sem pedidos à Google`, google);
+    if (url === '/contactos.html') {
+      ok(await page.locator('h1').textContent() === 'Contactos MDM.' && await page.locator('a[href="tel:+351218935050"]').count() > 0, '7: a página de contactos tem título e telefone');
+      await page.route(/maps\.google\.com/, (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<p>mapa</p>' }));
+      await page.click('.mdm-mapa__btn');
+      ok(await page.locator('.mdm-mapa iframe[src*="maps.google.com"]').count() === 1, '7: o mapa só carrega depois do clique');
+    }
+    if (url === '/obras.html') ok(await page.locator('.footer-bottom a[href="https://www.livroreclamacoes.pt/"]').count() === 1 && await page.locator('nav a[href="/contactos.html"]').count() === 1, '7: rodapé com Livro de Reclamações e menu com a página de contactos');
+    await page.context().close();
+  }
 } finally {
   await browser.close();
   servidor.close();

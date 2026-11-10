@@ -148,3 +148,12 @@ document.querySelectorAll('.faq-more').forEach(function (btn) {
     btn.textContent = open ? btn.dataset.less : btn.dataset.more;
   });
 });
+
+
+/* Mapa: só carrega o Google Maps quando o visitante o pede (sem pedidos à Google antes disso). */
+qa('.mdm-mapa__btn[data-map-src]').forEach(btn=>btn.addEventListener('click',()=>{
+ const frame=document.createElement('iframe');
+ frame.src=btn.dataset.mapSrc;frame.title=btn.dataset.mapTitle||'Google Maps';
+ frame.loading='lazy';frame.referrerPolicy='no-referrer-when-downgrade';frame.allowFullscreen=true;
+ btn.replaceWith(frame);frame.focus();
+}));
