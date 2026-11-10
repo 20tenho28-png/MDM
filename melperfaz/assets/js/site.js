@@ -1,0 +1,313 @@
+/* Melperfaz: comportamento do site. Sem dependências. O site funciona sem este ficheiro (o formulário envia pelo Netlify
+   para obrigado.html, o comparador fica a meio e mexe-se em toda a fotografia, a página atual já vem marcada no HTML e,
+   nos ecrãs estreitos, a barra de ações e o rodapé levam aos mesmos sítios que o menu). Só o «Pedido para:», o ?de= no
+   campo «pagina» e o reencaminhamento dos endereços antigos (no topo de index.html) dependem dele. O movimento (painel
+   do menu, cabeçalho compacto, entrada ao fazer scroll, fade das fotografias, indicador de envio) é só acabamento: as
+   durações vêm do CSS (--dur-*) e, com movimento reduzido, o CSS põe-nas a 0. */
+(function () {
+  'use strict';
+  var d = document;
+  var qs = function (s, r) { return (r || d).querySelector(s); };
+  var qsa = function (s, r) { return Array.prototype.slice.call((r || d).querySelectorAll(s)); };
+  var reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var TEL = '961 245 288';
+  /* o site.js está a correr: o CSS deixa de precisar da rede de segurança (.js sem .js-pronto mostra tudo ao fim de
+     --espera-js) e as fotografias em lazy load passam a entrar num fade */
+  d.documentElement.classList.add('js-pronto');
+  /* a duração mais longa das transições de um elemento, em ms (o CSS decide: 0 com movimento reduzido) */
+  function duracao(el) {
+    return Math.max.apply(null, getComputedStyle(el).transitionDuration.split(',').map(function (v) {
+      return parseFloat(v) * (/ms$/.test(v.trim()) ? 1 : 1000) || 0;
+    }));
+  }
+
+  /* ═══ Menu nos ecrãs estreitos: o painel por cima de um fundo escurecido, sem a página deslizar por trás. Entra e sai
+     com fade (html.menu-aberto, 250 ms); ao fechar, o hidden só volta no fim da transição ═══ */
+  (function () {
+    var btn = qs('[data-menu]'), painel = qs('#menu-movel'), fundo = qs('[data-menu-fundo]');
+    if (!btn || !painel) return;
+    var aberto = false, esconder = null;
+    function abre() {
+      aberto = true;
+      clearTimeout(esconder);
+      painel.hidden = false;
+      if (fundo) fundo.hidden = false;
+      void painel.offsetWidth;   /* o estado de partida (transparente, 12 px acima) é calculado antes: há transição */
+      d.documentElement.classList.add('menu-aberto');
+      btn.setAttribute('aria-expanded', 'true');
+      btn.setAttribute('aria-label', 'Fechar menu');
+      var primeiro = qs('a', painel);
+      /* preventScroll: o painel e o botão estão no cabeçalho, já à vista; sem isto a página saltava para o topo */
+      if (primeiro) primeiro.focus({ preventScroll: true });
+    }
+    function fecha(foco) {
+      if (!aberto) return;
+      aberto = false;
+      d.documentElement.classList.remove('menu-aberto');
+      var fim = function () { if (!aberto) { painel.hidden = true; if (fundo) fundo.hidden = true; } };
+      var t = duracao(painel);
+      if (t) esconder = setTimeout(fim, t); else fim();
+      btn.setAttribute('aria-expanded', 'false');
+      btn.setAttribute('aria-label', 'Abrir menu');
+      if (foco) btn.focus({ preventScroll: true });
+    }
+    btn.addEventListener('click', function () { if (aberto) fecha(true); else abre(); });
+    d.addEventListener('keydown', function (e) { if (e.key === 'Escape' && aberto) fecha(true); });
+    d.addEventListener('click', function (e) {
+      if (aberto && !painel.contains(e.target) && !btn.contains(e.target)) fecha(false);
+    });
+    qsa('a', painel).forEach(function (a) { a.addEventListener('click', function () { fecha(false); }); });
+    /* o foco saiu do painel pelo teclado (Tab depois da última ligação): fecha-se, para não tapar o elemento focado */
+    painel.addEventListener('focusout', function (e) {
+      if (aberto && e.relatedTarget && !painel.contains(e.relatedTarget) && e.relatedTarget !== btn) fecha(false);
+    });
+    /* ao alargar a janela o menu normal volta: o painel fecha-se */
+    var mm = window.matchMedia ? matchMedia('(min-width: 981px)') : null;
+    if (mm && mm.addEventListener) mm.addEventListener('change', function (e) { if (e.matches) fecha(false); });
+  })();
+
+  /* ═══ Cabeçalho: compacto e com sombra depois de 80 px de scroll (.topo-compacto; a altura não muda) ═══ */
+  (function () {
+    var topo = qs('[data-topo]');
+    if (!topo) return;
+    var pedido = false;
+    function ve() {
+      pedido = false;
+      topo.classList.toggle('topo-compacto', (window.pageYOffset || d.documentElement.scrollTop) > 80);
+    }
+    window.addEventListener('scroll', function () { if (!pedido) { pedido = true; requestAnimationFrame(ve); } }, { passive: true });
+    ve();
+  })();
+
+  /* ═══ Fotografias: a prévia LQIP (o fundo da .foto) dá lugar à fotografia num fade quando ela chega (.carregada).
+     Só as de lazy load; as que já chegaram antes deste script aparecem logo ═══ */
+  qsa('.foto img[loading="lazy"]').forEach(function (img) {
+    function pronta() { img.classList.add('carregada'); }
+    if (img.complete) pronta();
+    else { img.addEventListener('load', pronta); img.addEventListener('error', pronta); }
+  });
+
+  /* ═══ Entrada ao fazer scroll (.reveal ganha .in). Os que entram juntos (uma grelha, uma lista) seguem-se em cascata:
+     --i é a posição no grupo e o CSS atrasa cada um --cascata (80 ms), até ao sexto ═══ */
+  (function () {
+    var els = qsa('.reveal');
+    if (!els.length) return;
+    if (reduceMotion || !('IntersectionObserver' in window)) { els.forEach(function (e) { e.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function (entries) {
+      var i = 0;
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.style.setProperty('--i', String(Math.min(i++, 5)));
+        en.target.classList.add('in');
+        io.unobserve(en.target);
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -5% 0px' });
+    els.forEach(function (e) { io.observe(e); });
+    /* o que já está à vista ao carregar entra logo (sem esperar pelo primeiro scroll) */
+    setTimeout(function () { els.forEach(function (e) { var r = e.getBoundingClientRect(); if (r.top < innerHeight && r.bottom > 0) e.classList.add('in'); }); }, 900);
+  })();
+
+  /* ═══ Comparador antes/depois ═══
+     Sem JavaScript, o range invisível cobre a fotografia toda. Com ele, o range deixa de apanhar o rato e o toque
+     (.ba-js): um toque ou um clique na fotografia põe a linha nesse sítio (WCAG 2.5.7: mexe-se sem arrastar), e só o
+     arrasto fica limitado à pega (a 32 px da linha, para cada lado). O clique só chega quando o gesto não foi um
+     deslize: o deslize vertical continua a mexer a página (touch-action: pan-y) e não salta a linha. O range continua
+     a ser o controlo do teclado (setas) e do leitor de ecrã, com o anel de foco desenhado à volta da pega; o
+     aria-valuetext diz quanto se vê de cada fotografia. */
+  var BA_PEGA = 32, BA_TOQUE = 4;
+  qsa('[data-ba]').forEach(function (slider) {
+    var before = qs('[data-ba-before]', slider), handle = qs('[data-ba-handle]', slider), range = qs('[data-ba-range]', slider);
+    if (!before || !handle || !range) return;
+    function largura() { slider.style.setProperty('--ba-w', slider.clientWidth + 'px'); }
+    function move(v) {
+      before.style.width = v + '%';
+      handle.style.left = v + '%';
+      range.setAttribute('aria-valuetext', 'Demolição ' + v + '%, acabamento ' + (100 - v) + '%');
+    }
+    largura(); move(range.value);
+    range.addEventListener('input', function () { move(range.value); });
+    window.addEventListener('resize', largura);
+    if ('ResizeObserver' in window) new ResizeObserver(largura).observe(slider);
+    if (!window.PointerEvent) return;   /* sem Pointer Events fica o range a cobrir tudo, como sem JavaScript */
+    slider.classList.add('ba-js');
+    var arrasto = null, x0 = null, arrastou = false;
+    function valorEm(x) {
+      var r = slider.getBoundingClientRect();
+      return Math.max(0, Math.min(100, Math.round((x - r.left) / r.width * 100)));
+    }
+    function poe(v) {
+      if (String(v) === range.value) return;
+      range.value = v;
+      move(v);
+      range.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    slider.addEventListener('pointerdown', function (e) {
+      if (e.button !== 0) return;
+      x0 = e.clientX; arrastou = false;   /* para distinguir um toque (põe a linha) de um arrasto */
+      var r = slider.getBoundingClientRect(), linha = r.left + r.width * range.value / 100;
+      if (Math.abs(e.clientX - linha) > BA_PEGA) return;
+      arrasto = e.pointerId;
+      slider.classList.add('ba-a-arrastar');   /* as setas da pega afastam-se (CSS) */
+      if (slider.setPointerCapture) slider.setPointerCapture(e.pointerId);
+      e.preventDefault();   /* sem seleção de texto nem arrasto da imagem */
+    });
+    slider.addEventListener('pointermove', function (e) {
+      if (x0 !== null && Math.abs(e.clientX - x0) > BA_TOQUE) arrastou = true;
+      if (e.pointerId === arrasto) poe(valorEm(e.clientX));
+    });
+    function larga(e) {
+      if (e.type === 'pointercancel') arrastou = true;   /* o browser ficou com o gesto (deslize): não é um toque */
+      x0 = null;
+      if (e.pointerId !== arrasto) return;
+      arrasto = null;
+      slider.classList.remove('ba-a-arrastar');
+    }
+    slider.addEventListener('pointerup', larga);
+    slider.addEventListener('pointercancel', larga);
+    /* o clique (o browser não o manda depois de um deslize nem de um toque que parou a página a deslizar) põe a linha
+       onde se tocou; depois de um arrasto, não */
+    slider.addEventListener('click', function (e) { if (!arrastou && e.detail) poe(valorEm(e.clientX)); });
+  });
+
+  /* ═══ orcamento.html: ?tipo=<id do serviço> escolhe o tipo de obra e mostra «Pedido para: X · alterar»; ?de=<página>
+     vai para o campo escondido «pagina» (de onde veio o pedido, por exemplo obras/<slug>). O id é o de data/site.json
+     «servicos» (data-tipo de cada opção); o nome da opção também serve, e os nomes de antes do redesenho que os endereços
+     antigos trazem (data-antigos, separados por «|»: ?tipo=Fachadas%20/%20Impermeabiliza%C3%A7%C3%A3o) ═══ */
+  var tipoSel = qs('#qTipo');
+  function param(nome) {
+    var m = new RegExp('[?&]' + nome + '=([^&#]*)').exec(location.search);
+    if (!m) return '';
+    try { return decodeURIComponent(m[1].replace(/\+/g, ' ')).trim(); } catch (e) { return ''; }   /* endereço estranho: ignora-se */
+  }
+  function escolheTipo(v) {
+    if (!tipoSel || !v) return false;
+    var op = qsa('option', tipoSel).filter(function (o) {
+      return o.value && (o.getAttribute('data-tipo') === v || o.value === v || (o.getAttribute('data-antigos') || '').split('|').indexOf(v) >= 0);
+    })[0];
+    if (op) tipoSel.value = op.value;
+    return !!op;
+  }
+  (function () {
+    if (!tipoSel) return;
+    var linha = qs('[data-pedido-para]'), nome = qs('[data-pedido-nome]'), alterar = qs('[data-pedido-alterar]');
+    if (escolheTipo(param('tipo')) && linha && nome) {
+      nome.textContent = tipoSel.value;
+      linha.hidden = false;
+      /* a linha acompanha a lista: outro tipo muda o nome, «Escolha uma opção» esconde-a */
+      tipoSel.addEventListener('change', function () {
+        nome.textContent = tipoSel.value;
+        linha.hidden = !tipoSel.value;
+      });
+      if (alterar) alterar.addEventListener('click', function () { tipoSel.focus(); });
+    }
+    /* só um caminho de página do próprio site (letras, algarismos, -, / e .html), nunca um endereço de fora */
+    var de = param('de'), pagina = qs('#quoteForm [name="pagina"]');
+    if (pagina && /^[a-z0-9][a-z0-9\-\/]{0,119}(\.html)?$/.test(de) && de.indexOf('//') < 0) pagina.value = de;
+  })();
+
+  /* ═══ Formulário de pedido (Netlify Forms): valida em português, envia por fetch e, se correu bem, abre obrigado.html
+     (a mesma página do envio sem JavaScript). Se falhar, o que se escreveu fica, e o alerta recebe o foco com o
+     telefone e o WhatsApp (site.json «wa.erro», com o nome e o tipo escritos) ═══ */
+  (function () {
+    var form = qs('#quoteForm');
+    if (!form) return;
+    /* um browser sem estas APIs faz o envio normal (para /obrigado.html, pelo Netlify) */
+    if (!window.fetch || !window.URLSearchParams || !window.FormData || !FormData.prototype.forEach) return;
+    var alerta = qs('#formAlerta'), voz = qs('[data-form-voz]'), btn = qs('#sendBtn');
+    var campos = { nome: qs('#qNome'), telefone: qs('#qTel'), email: qs('#qEmail') };
+    var erros = { nome: qs('#eNome'), telefone: qs('#eTel'), email: qs('#eEmail') };
+    var aEnviar = false, rotulo = btn.textContent;
+    var ENVIO_MS = 20000;   /* sem resposta do Netlify em 20 s, desiste-se e mostra-se o alerta */
+    form.noValidate = true;   /* a validação do browser só serve sem JavaScript; aqui fala-se português */
+
+    function diz(t) { if (voz) { voz.textContent = ''; setTimeout(function () { voz.textContent = t; }, 50); } }
+    function erro(nome, msg) {
+      var el = campos[nome], p = erros[nome];
+      if (!el) return;
+      if (msg) { el.setAttribute('aria-invalid', 'true'); if (p) p.textContent = msg; }
+      else { el.removeAttribute('aria-invalid'); if (p) p.textContent = ''; }
+    }
+    function valida() {
+      var falhas = [];
+      var nome = campos.nome.value.trim(), tel = campos.telefone.value.trim(), email = campos.email ? campos.email.value.trim() : '';
+      erro('nome', nome ? '' : 'Escreva o seu nome.'); if (!nome) falhas.push('nome');
+      var digitos = tel.replace(/\D/g, '');
+      var telOk = digitos.length >= 9 && digitos.length <= 15;
+      erro('telefone', tel ? (telOk ? '' : (digitos.length < 9 ? 'Escreva um telefone com pelo menos 9 algarismos.' : 'Escreva um telefone com 15 algarismos no máximo.')) : 'Escreva o seu telefone.');
+      if (!telOk) falhas.push('telefone');
+      var emailOk = !email || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+      erro('email', emailOk ? '' : 'Este email não parece certo. Confira ou deixe em branco.');
+      if (!emailOk) falhas.push('email');
+      return falhas;
+    }
+    /* a ligação de WhatsApp do alerta: «Olá! Sou {nome} e queria um orçamento para {tipo}. …» */
+    function waErro() {
+      var base = form.getAttribute('data-wa'), msg = form.getAttribute('data-wa-erro');
+      if (!base || !msg) return '';
+      var tipo = tipoSel && tipoSel.value && tipoSel.value !== 'Outro' ? tipoSel.value : 'uma obra';
+      msg = msg.replace('{nome}', campos.nome.value.trim()).replace('{tipo}', tipo);
+      return base + encodeURIComponent(msg);
+    }
+    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+    function mostraAlerta() {
+      if (!alerta) return;
+      var wa = waErro();
+      alerta.innerHTML = 'O pedido não seguiu. Tente outra vez, ligue <a href="tel:+351961245288">' + TEL + '</a>' +
+        (wa ? ' ou <a href="' + esc(wa) + '" target="_blank" rel="noopener" data-wa-erro>envie por WhatsApp</a>.' : '.') +
+        ' O que escreveu fica aqui.';
+      alerta.hidden = false;
+      alerta.focus();   /* o botão ficou desativado com o foco: sem isto o foco caía no body */
+    }
+    function escondeAlerta() { if (alerta) { alerta.hidden = true; alerta.innerHTML = ''; } }
+    ['nome', 'telefone', 'email'].forEach(function (n) {
+      if (campos[n]) campos[n].addEventListener('input', function () { if (campos[n].getAttribute('aria-invalid')) { erro(n, ''); } });
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (aEnviar) return;
+      escondeAlerta();
+      var falhas = valida();
+      if (falhas.length) {
+        campos[falhas[0]].focus();
+        diz('Falta corrigir ' + falhas.length + (falhas.length === 1 ? ' campo.' : ' campos.'));
+        return;
+      }
+      /* a armadilha para robôs: um humano não a vê nem a preenche; se vier cheia, o pedido não segue */
+      var isco = qs('[name="bot-field"]', form);
+      if (isco && isco.value) { mostraAlerta(); return; }
+      ['nome', 'telefone', 'email'].forEach(function (n) { if (campos[n]) campos[n].value = campos[n].value.trim(); });
+      aEnviar = true;
+      btn.disabled = true;
+      btn.textContent = 'A enviar…';
+      btn.classList.add('a-enviar');   /* o indicador de carga (CSS: 40 voltas de 500 ms, o tempo de ENVIO_MS) */
+      diz('A enviar o pedido.');
+      var dados = new URLSearchParams();
+      new FormData(form).forEach(function (v, k) { dados.append(k, v); });
+      var ctl = ('AbortController' in window) ? new AbortController() : null;
+      var tempo = ctl ? setTimeout(function () { ctl.abort(); }, ENVIO_MS) : null;
+      fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: dados.toString(), signal: ctl ? ctl.signal : undefined })
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          if (tempo) clearTimeout(tempo);
+          location.assign('obrigado.html');   /* o botão fica em «A enviar…» até a página mudar */
+        })
+        .catch(function () {
+          if (tempo) clearTimeout(tempo);
+          aEnviar = false;
+          btn.disabled = false;
+          btn.textContent = rotulo;
+          btn.classList.remove('a-enviar');
+          mostraAlerta();
+        });
+    });
+    /* de volta de obrigado.html pelo botão «Voltar» (página guardada pelo browser): o botão volta a enviar */
+    window.addEventListener('pageshow', function (e) {
+      if (!e.persisted || !aEnviar) return;
+      aEnviar = false;
+      btn.disabled = false;
+      btn.textContent = rotulo;
+      btn.classList.remove('a-enviar');
+    });
+  })();
+})();

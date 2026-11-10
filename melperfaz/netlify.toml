@@ -1,0 +1,46 @@
+# Netlify: no painel do site, «Base directory» = melperfaz (este ficheiro é lido a partir daí).
+# O site publicado é o que o build.py gera em public/. Formulário de pedido: Netlify Forms «orcamento», declarado em
+# orcamento.html; a deteção e os avisos por email ligam-se no painel do Netlify (Forms → Form notifications).
+# --check: as mesmas regras que o CI e o npm run build. Um travessão, um email ou NIF mal escritos, uma ligação partida
+# ou o formulário em falta param a publicação, e fica no ar a versão anterior.
+[build]
+  command = "python3 build.py --check"
+  publish = "public"
+
+[build.environment]
+  PYTHON_VERSION = "3.12"
+
+# CSS e JS levam ?v=<versão> no HTML (build.py, pelo conteúdo do ficheiro): uma versão nova é um endereço novo, por
+# isso ficam um ano em cache, como as letras (que não mudam). As imagens não têm versão no endereço e mudam no mesmo
+# nome (o gerar_fotos.py --todas reescreve-as, por exemplo um corte novo de uma fotografia): ficam um dia em cache, e o
+# Netlify responde depois com um 304 barato se nada mudou (/assets/img/* também cobre /assets/img/fotos/).
+[[headers]]
+  for = "/assets/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/assets/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# nenhuma página se mostra dentro de outro site (clickjacking no formulário): frame-ancestors para os browsers atuais,
+# X-Frame-Options para os antigos. Só frame-ancestors: um script-src partia os scripts e o JSON-LD em linha
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Content-Security-Policy = "frame-ancestors 'none'"
+    X-Frame-Options = "DENY"

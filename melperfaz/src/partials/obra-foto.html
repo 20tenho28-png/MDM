@@ -1,0 +1,4 @@
+<figure class="pg{{ revelar }}" data-cat="{{ obra.cat }}" data-orient="{{ obra.orient }}">
+  {{foto {{ obra.foto }} sizes="{{ cartaoSizes }}" loading="{{ loading }}" prioridade="{{ prioridade }}" foco="{{ obra.foco }}"}}
+  <figcaption>{{#se obra.antesDepois}}<span class="pg-tag">Antes e depois</span>{{/se}}{{#se cartaoCat}}<span class="cat">{{ obra.servico.nome }}</span>{{/se}}<h{{ cartaoH }}><a href="{{ root }}obras/{{ obra.slug }}.html">{{ obra.title }}</a></h{{ cartaoH }}><span class="pg-ver" aria-hidden="true">Ver obra{{icone seta}}</span></figcaption>
+</figure>

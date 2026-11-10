@@ -1,0 +1,10 @@
+<!--parametros {"curta": ""} -->
+<!-- TrustList: as quatro garantias da Melperfaz, uma só fonte para a página inicial (Porquê Nós, com a frase de cada uma)
+     e para a lateral de orcamento.html (curta="1": a variante condensada, só os títulos). O alvará e o seguro juntam-se
+     a «Licenciada & segurada» quando a Melperfaz os der (data/dados-melperfaz.json). -->
+<ul class="trust-list{{#se p.curta}} trust-list-curta{{/se}}">
+  <li><span class="tick" aria-hidden="true">{{icone visto}}</span><div><h3>Orçamentos a preço fixo</h3>{{#sem p.curta}}<p>O valor que lhe damos é o valor que paga. Alterações só acontecem com a sua aprovação por escrito.</p>{{/sem}}</div></li>
+  <li><span class="tick" aria-hidden="true">{{icone visto}}</span><div><h3>Equipa própria</h3>{{#sem p.curta}}<p>Os nossos próprios profissionais em obra, não um conjunto rotativo de subcontratados desconhecidos.</p>{{/sem}}</div></li>
+  <li><span class="tick" aria-hidden="true">{{icone visto}}</span><div><h3>Licenciada &amp; segurada</h3>{{#sem p.curta}}<p>Empresa licenciada, segurada e em conformidade com as normas em todas as obras com licença.{{#se dados.alvara}} Alvará n.º&nbsp;{{ dados.alvara }}.{{/se}}{{#se dados.seguro}} Seguro de responsabilidade civil: {{ dados.seguro }}.{{/se}}</p>{{/sem}}{{#se p.curta}}{{#se dados.alvara}}<p>Alvará n.º&nbsp;{{ dados.alvara }}</p>{{/se}}{{#se dados.seguro}}<p>Seguro de responsabilidade civil: {{ dados.seguro }}</p>{{/se}}{{/se}}</div></li>
+  <li><span class="tick" aria-hidden="true">{{icone visto}}</span><div><h3>Garantia de execução</h3>{{#sem p.curta}}<p>Respondemos pelo nosso trabalho durante dois anos além das garantias de materiais dos fabricantes.</p>{{/sem}}</div></li>
+</ul>
