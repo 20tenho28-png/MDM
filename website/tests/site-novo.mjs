@@ -59,7 +59,7 @@ try {
     return page;
   }
   async function preenche(page, { purpose, service, local = 'Lisboa', nome = 'Carlos Melancia', tel = '912 345 678', email = '', detalhes = '' }) {
-    await page.evaluate(() => document.querySelector('[data-quote]').click());
+    await page.evaluate(() => (document.querySelector('.quick-more') || document.querySelector('[data-quote]')).click());
     await page.waitForSelector('#quote-dialog[open]');
     await page.check(`input[name="purpose"][value="${purpose}"]`, { force: true });
     await page.click('#quote-next');
@@ -132,6 +132,37 @@ try {
     && /MDM has received your request|Pedido recebido|Request received/i.test(await page.textContent('#delivery-result')), '4: em inglês envia o mesmo, em português para a equipa', e && e.campos);
   await page.context().close();
 
+  // 4a. na página inicial o botão «Solicitar manutenção» leva ao pedido rápido com «Manutenção» marcada, sem abrir o diálogo
+  page = await nova('/index.html');
+  await page.click('.maintenance [data-quote="Manutenção"]');
+  await page.waitForTimeout(800);
+  ok(await page.evaluate(() => !document.getElementById('quote-dialog').open && document.querySelector('#quick-form [data-purpose="Manutenção"]').getAttribute('aria-pressed') === 'true'
+    && Math.abs(document.getElementById('quick-form').getBoundingClientRect().top + document.getElementById('quick-form').offsetHeight / 2 - innerHeight / 2) < innerHeight / 2), '4a: os botões da página inicial encaminham para o pedido rápido');
+  await page.context().close();
+
+  // 4b. o pedido rápido do hero: avaria → «orcamento», só com nome e telefone, com os campos dos formulários Netlify
+  page = await nova('/index.html');
+  await page.click('#quick-form [data-purpose="Avaria"]');
+  await page.fill('input[name="quick-name"]', 'Ana Melancia');
+  await page.fill('input[name="quick-phone"]', '912 345 678');
+  let antes = envios.length;
+  await page.click('#quick-send');
+  await page.waitForFunction(() => document.getElementById('quick-status').textContent.trim() !== '', null, { timeout: 8000 });
+  e = envios.length > antes ? envios.at(-1) : null;
+  ok(e && e.campos['form-name'] === 'orcamento' && e.campos.triagem === '[P4 · Avaria]' && e.campos.nome === 'Ana Melancia' && e.campos.telefone === '912 345 678'
+    && e.campos['bot-field'] === '' && /Pedido recebido/.test(await page.textContent('#quick-status')), '4b: o pedido rápido envia uma avaria para «orcamento»', e && e.campos);
+  ok(e && CAMPOS.every((c) => c in e.campos) && Object.keys(e.campos).every((c) => CAMPOS.includes(c)), '4b: o pedido rápido usa os campos dos formulários Netlify', e && Object.keys(e.campos));
+  await page.context().close();
+  page = await nova('/en/index.html');
+  await page.fill('input[name="quick-name"]', 'John Smith');
+  await page.fill('input[name="quick-phone"]', '+44 7911 123456');
+  antes = envios.length;
+  await page.click('#quick-send');
+  await page.waitForFunction(() => document.getElementById('quick-status').textContent.trim() !== '', null, { timeout: 8000 });
+  e = envios.length > antes ? envios.at(-1) : null;
+  ok(e && e.campos['form-name'] === 'orcamento-comercial' && e.campos.mensagem.includes('Língua do site: inglês') && /Request received/.test(await page.textContent('#quick-status')), '4b: em inglês, uma instalação vai para «orcamento-comercial»', e && e.campos);
+  await page.context().close();
+
   // 5. sem deslize lateral a 390 e 320 px
   for (const url of ['/index.html', '/obras.html', '/calculadora.html', '/servicos/ar-condicionado.html', '/privacidade.html', '/en/index.html']) {
     for (const largura of [390, 320]) {
@@ -166,7 +197,7 @@ try {
     }
     if (url === '/obras.html') ok(await page.locator('.footer-bottom a[href="https://www.livroreclamacoes.pt/"]').count() === 1 && await page.locator('nav a[href="/contactos.html"]').count() === 1, '7: rodapé com Livro de Reclamações e menu com a página de contactos');
     if (url === '/index.html') {
-      const rotulos = [...new Set(await page.locator('button[data-quote]').allTextContents())].map((x) => x.trim()).sort();
+      const rotulos = [...new Set(await page.locator('button[data-quote]:not(.quick-more)').allTextContents())].map((x) => x.trim()).sort();
       ok(JSON.stringify(rotulos) === JSON.stringify(['Pedir manutenção', 'Pedir orçamento']), '7: a página inicial tem só dois rótulos de pedido', rotulos);
     }
     await page.context().close();
