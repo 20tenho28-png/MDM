@@ -62,3 +62,53 @@ dialog{padding:0;border:0;width:min(760px,calc(100% - 32px));max-height:calc(100
 .contact-page{padding-bottom:80px}.contact-page .contact-grid{grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);padding-top:32px}.contact-cta{display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;margin-top:48px;padding:28px 32px;background:#e9edef;border-radius:4px}.contact-cta h2{font-size:1.7rem;font-weight:500}.contact-cta p{color:var(--muted);margin-top:6px}.contact-sub{font-size:1.4rem;font-weight:500;margin-top:48px}
 @media(max-width:760px){.contact-page{padding-bottom:50px}.contact-page .contact-grid{grid-template-columns:1fr}.contact-cta{padding:22px 20px}.contact-cta .btn{width:100%}}
 .mdm-mapa{width:100%}
+
+/* Pedido curto (um ecrã): o que precisa, nome e telefone. No telemóvel sobe como uma folha alta, com os campos
+   em cima para ficarem à vista com o teclado aberto; no computador é uma caixa ao centro. */
+.short-sheet{width:min(460px,calc(100% - 32px));border-radius:16px;background:#fff}
+.short-sheet form,#short-fields,.short-done{display:flex;flex-direction:column;gap:14px}
+.short-sheet form{padding:20px 24px 24px}
+.short-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.short-head h2{font-size:1.5rem;font-weight:600;letter-spacing:-.03em;line-height:1.15}
+.short-head h2:focus{outline:0}
+.short-close{flex:none;width:44px;height:44px;margin-right:-8px;border:1px solid var(--line);border-radius:50%;background:transparent;font-size:1rem}
+.short-service{font-size:.9375rem;font-weight:600;color:var(--red);margin-top:-8px}
+.short-needs{border:0;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:0}
+.short-needs legend{padding:0;margin-bottom:8px;font-size:.8125rem;font-weight:600;color:var(--muted)}
+.short-needs button{min-height:46px;padding:6px 8px;border:1px solid #aeb7be;border-radius:8px;background:#fff;font-size:.9375rem;font-weight:600;line-height:1.2}
+.short-needs button[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.short-call{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;padding:8px 16px;border:1px solid var(--ink);border-radius:8px;font-weight:600}
+.short-call small{font-size:.8125rem;font-weight:400;color:var(--muted)}
+.short-field{display:flex;flex-direction:column;gap:6px;font-size:.8125rem;font-weight:600;color:var(--muted)}
+.short-field input{width:100%;min-height:50px;padding:0 14px;border:1px solid #aeb7be;border-radius:8px;background:#fff;color:var(--ink);font-size:1rem;font-weight:400}
+.short-field input[aria-invalid=true]{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
+.short-error{font-size:.875rem;line-height:1.5;color:var(--red)}
+.short-error:empty{display:none}
+#short-send{width:100%;min-height:54px;font-size:1rem}
+.short-privacy{font-size:.75rem;line-height:1.5;color:var(--muted)}
+.short-privacy a{text-decoration:underline;text-underline-offset:3px}
+.short-done h3{font-size:1.25rem;font-weight:600}
+.short-done h3:focus{outline:0}
+.short-done p{color:var(--muted);line-height:1.6}
+.short-done b{color:var(--ink);font-variant-numeric:tabular-nums}
+.short-done .btn{align-self:flex-start;margin-top:6px}
+@media(max-width:760px){
+ .short-sheet{width:100%;max-width:100%;max-height:calc(100vh - 28px);max-height:calc(100dvh - 28px);margin:auto 0 0;border-radius:24px 24px 0 0}
+ .short-grip{display:block}
+ .short-sheet form{padding:14px 20px 24px}
+ .short-sheet[open]{animation:short-up .22s ease-out}
+}
+@keyframes short-up{from{transform:translateY(48px);opacity:0}}
+@media(prefers-reduced-motion:reduce){.short-sheet[open]{animation:none}}
+/* Estilo D escolhido pelo dono: folha que sobe de baixo, com pega, título «Ligamos-lhe nós.» e prova junto ao botão. */
+.short-grip{display:block;align-self:center;width:40px;height:4px;border-radius:4px;background:#d5dade;margin-bottom:-4px}
+.short-head{align-items:flex-start}
+.short-sub{font-size:.9375rem;color:var(--muted);margin-top:4px}
+.short-close{border:0;font-size:1.125rem}
+.short-needs button{min-height:48px;border-radius:12px;border-color:#d5dade;border-width:1.5px}
+.short-field input{min-height:54px;border-radius:12px;border-color:#d5dade;border-width:1.5px}
+.short-field input::placeholder{color:#8a939b}
+#short-send{min-height:60px;border-radius:14px;font-size:1.125rem;background:#b30d1e}
+.short-trust{display:flex;align-items:center;justify-content:center;gap:8px;font-size:.8125rem;color:var(--muted)}
+.short-privacy{text-align:center;margin-top:-6px}
+@media(min-width:761px){.short-grip{display:none}}
