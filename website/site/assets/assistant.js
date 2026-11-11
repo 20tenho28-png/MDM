@@ -116,7 +116,7 @@
     window.mdmTrack?.('quote_sent');
    }
    catch{erro.textContent=tr('Não foi possível enviar. Ligue 218 935 050 ou tente de novo.');}
-   finally{send.disabled=false;send.textContent=tr('Enviar pedido');}
+   finally{send.disabled=false;send.textContent=tr('Pedir contacto');}
   });
  }
  document.querySelectorAll('.language-switch a').forEach(a=>a.addEventListener('click',()=>{const url=new URL(a.href);url.hash=location.hash;a.href=url.href;try{localStorage.setItem('mdm-language',a.lang)}catch{}}));
