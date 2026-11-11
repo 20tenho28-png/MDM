@@ -127,7 +127,8 @@
    Decisões do dono (website/DESIGN-BRIEF-TELEMOVEL.md): barra do topo escura e fina, fotografia em cartão,
    linha pequena + título + um só botão vermelho + linha de confiança, pedido curto num ecrã,
    serviços em cartões com fotografia. O computador mantém o desenho anterior até à sua ronda. */
-.home{--bar-bg:#101b25;--bar-ink:#fff;--bar-line:#ffffff24;--bar-cur-bg:#fff;--bar-cur-ink:#101b25;--photo-inset:22px;--photo-radius:var(--radius)}
+/* Versão B: a mesma estrutura com o aspeto de hoje: barra do topo clara, cantos de 4px, fotografia de lado a lado a esbater para o escuro. */
+.home{--bar-bg:#f8f9f9;--bar-ink:#19232c;--bar-line:#dce0e2;--bar-cur-bg:#19232c;--bar-cur-ink:#fff;--photo-inset:0px;--photo-radius:0px}
 .hero-trust,.service-cards,.service-more{display:none}
 
 @media(max-width:900px){
@@ -137,12 +138,12 @@
  .home .header :is(a,button):focus-visible{outline-color:var(--bar-ink)}
  .home .header nav a:hover{color:inherit;text-decoration:underline;text-underline-offset:5px}
  /* primeiro ecrã: a fotografia ocupa o espaço que sobra entre a barra do topo e o texto */
- .home .hero-immersive{--hero-gutter:22px;--chrome:91px;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:10px 0 22px;
+ .home .hero-immersive{--hero-gutter:22px;--chrome:91px;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:0 0 22px;
   min-height:min(calc(100vh - var(--chrome)),calc(120vw + 320px));min-height:min(calc(100svh - var(--chrome)),calc(120vw + 320px))}
  .home .hero-immersive .hero-visual{order:0;position:relative;inset:auto;flex:1 1 150px;min-height:150px;margin:0 var(--photo-inset);border-radius:var(--photo-radius);overflow:hidden}
- .home .hero-immersive .hero-visual:after{content:none}
+ .home .hero-immersive .hero-visual:after{content:'';position:absolute;inset:auto 0 0;height:72px;z-index:1;background:linear-gradient(180deg,#101b2500,#101b25);pointer-events:none}
  .home .hero-immersive .hero-image-frame{position:absolute;inset:0;height:auto}
- .home .hero-immersive .hero-image-frame>img{object-fit:cover;object-position:center 60%}
+ .home .hero-immersive .hero-image-frame>img{object-fit:cover;object-position:center 65%}
  .home .hero-immersive .hero-image-frame>img[src$="foto-28-1600.webp"]{object-position:center}
  .home .hero-immersive .hero-copy{order:1;flex:none;width:auto;max-width:none;margin:0;padding:16px var(--hero-gutter) 0}
  .home .hero-immersive :is(.hero-intro,.hero-services,.audience,.audience-note,.hero-proof),.home .hero-immersive .hero-actions .text-link{display:none}
@@ -155,7 +156,7 @@
 }
 @media(max-width:760px){
  .home .nav{height:56px}
- .home .nav nav{top:56px;background:var(--bar-bg);border-bottom-color:var(--bar-line)}
+ .home .nav nav{top:56px;background:#fff;border-bottom-color:var(--bar-line)}
  .home .header .nav>.brand img{width:32px}
  .home .header .nav>.brand b{font-size:1.4rem}
  /* 56px da barra do topo + 1px de filete + 66px da barra de baixo */
@@ -176,7 +177,7 @@
  .home .service-more{display:flex;flex-wrap:wrap;align-items:center;gap:0 16px;margin-top:14px;padding-top:6px;border-top:1px solid var(--line);font-size:.875rem;color:var(--muted)}
  .service-more a{display:inline-flex;align-items:center;min-height:44px;color:var(--ink);text-decoration:underline;text-underline-offset:5px;text-decoration-color:#aab0b4}
 }
-@media(max-width:360px){.home .hero-immersive{--hero-gutter:18px}.home{--photo-inset:18px}}
+@media(max-width:360px){.home .hero-immersive{--hero-gutter:18px}}
 
 /* Pedido curto (um ecrã): o que precisa, nome e telefone. No telemóvel sobe como uma folha alta, com os campos
    em cima para ficarem à vista com o teclado aberto; no computador é uma caixa ao centro. */
