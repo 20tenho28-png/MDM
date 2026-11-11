@@ -129,3 +129,15 @@
  .hero-immersive .quick-privacy{display:none}
  .hero-immersive .hero-proof{display:none}
 }
+
+/* Telemóvel: a fotografia encolhe com a altura do ecrã para o título caber inteiro no primeiro ecrã
+   (com a barra de endereço do navegador à vista). Corta-se o céu; a máquina fica inteira. */
+@media(max-width:760px){
+ .hero-heat-pump{--hero-mobile-photo-height:clamp(240px,calc(100vh - 400px),120vw)}
+ .hero-solar-rooftop{--hero-mobile-photo-height:clamp(200px,calc(100vh - 400px),75vw)}
+ @supports(height:100svh){
+  .hero-heat-pump{--hero-mobile-photo-height:clamp(240px,calc(100svh - 400px),120vw)}
+  .hero-solar-rooftop{--hero-mobile-photo-height:clamp(200px,calc(100svh - 400px),75vw)}
+ }
+ .hero-immersive .hero-image-frame>img[src$="hero-bomba-calor-1600.webp"]{object-fit:cover;object-position:center 68%}
+}
