@@ -70,54 +70,5 @@
   }catch{note.textContent=tr('Não foi possível consultar os horários. O seu pedido foi recebido e a MDM irá contactá-lo.');}
  }
  $('#confirm-booking')?.addEventListener('click',async()=>{if(!reference||!selectedSlot)return;if($('#booking-address').value.trim().length<8){$('#booking-result').textContent=tr('Indique a morada e o código postal da visita.');$('#booking-address').focus();return;}const button=$('#confirm-booking');button.disabled=true;try{const result=await api('/api/bookings',{requestId:reference,id:crypto.randomUUID(),start:selectedSlot.start,address:$('#booking-address').value.trim(),consent:true});$('#booking-result').textContent=tr('Visita confirmada para ')+new Intl.DateTimeFormat(language==='en'?'en-GB':'pt-PT',{timeZone:'Europe/Lisbon',dateStyle:'medium',timeStyle:'short'}).format(result.booking.start)+tr(' (hora de Lisboa).');$('#booking-slots').replaceChildren();button.hidden=true;}catch(e){$('#booking-result').textContent=tr(errors[e.message]||errors.service_unavailable);$('#booking-slots').replaceChildren();await loadSlots();}});
- /* Pedido curto da página inicial (#short-dialog): o que precisa, nome e telefone, num só ecrã. Vai para os mesmos
-    formulários do Netlify, com os mesmos campos; avaria → «orcamento», o resto → «orcamento-comercial».
-    Com «Avaria» escolhida aparece o botão de ligar, com o horário ao lado. */
- const sheet=$('#short-dialog'),shortForm=$('#short-form');
- if(sheet&&shortForm){
-  const needs=[...shortForm.querySelectorAll('[data-need]')],call=$('#short-call'),erro=$('#short-error'),send=$('#short-send'),chosen=$('#short-service');
-  const nome=shortForm.elements['short-name'],tel=shortForm.elements['short-phone'];
-  let service='',project='',opener=null,ref=null,print='',sent=false;
-  const need=()=>needs.find(b=>b.getAttribute('aria-pressed')==='true')?.dataset.need||'Instalação';
-  const setNeed=v=>{needs.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.need===v)));call.hidden=v!=='Avaria';};
-  needs.forEach(b=>b.addEventListener('click',()=>setNeed(b.dataset.need)));
-  const isco2=document.createElement('p');isco2.setAttribute('aria-hidden','true');isco2.style.cssText='position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden';
-  isco2.innerHTML='<label>Não preencher <input name="bot-field" tabindex="-1" autocomplete="off"></label>';shortForm.append(isco2);
-  window.mdmShort={open(purpose,svc,proj){
-   opener=document.activeElement;
-   if(sent){sent=false;$('#short-done').hidden=true;$('#short-fields').hidden=false;}
-   if(needs.some(b=>b.dataset.need===purpose))setNeed(purpose);
-   service=svc||'';project=proj||'';chosen.textContent=tr(service);chosen.hidden=!service;erro.textContent='';
-   if(!sheet.open)sheet.showModal();
-   sheet.scrollTop=0;$('#short-title').focus();
-  }};
-  shortForm.querySelector('.short-close').addEventListener('click',()=>sheet.close());
-  $('#short-ok').addEventListener('click',()=>sheet.close());
-  sheet.addEventListener('click',e=>{if(e.target===sheet)sheet.close();});
-  sheet.addEventListener('close',()=>opener?.focus?.());
-  shortForm.addEventListener('submit',async e=>{
-   e.preventDefault();erro.textContent='';[nome,tel].forEach(el=>el.removeAttribute('aria-invalid'));
-   const falha=(m,el)=>{erro.textContent=tr(m);el.setAttribute('aria-invalid','true');el.focus();};
-   if(nome.value.trim().length<2)return falha('Indique o seu nome.',nome);
-   if(!/^[+\d\s().-]{9,24}$/.test(tel.value.trim())||tel.value.replace(/\D/g,'').length<9)return falha('Indique um telefone com pelo menos 9 dígitos.',tel);
-   const purpose=need(),svc=service||'Ainda não sei',tag=triagem(purpose,svc);
-   const next=JSON.stringify([purpose,svc,nome.value.trim(),tel.value.trim(),project]);
-   if(next!==print){ref=novaReferencia();print=next;}
-   const mensagem=['Referência: '+ref,'Pedido: '+purpose,'Solução: '+svc,'Pedido curto pelo site: ligar ao cliente','Língua do site: '+(language==='en'?'inglês':'português')]
-    .concat(project?['Obra de referência: '+project]:[]).join('\n');
-   const campos={'form-name':comercial(purpose)?'orcamento-comercial':'orcamento',subject:'['+tag+'] Pedido '+ref+': '+purpose+', '+svc+' · ligar '+tel.value.trim(),
-    pagina:window.location.pathname,triagem:'['+tag+']',potencia:'',estimativa:'',nome:nome.value.trim(),email:'',telefone:tel.value.trim(),
-    servico:purpose+': '+svc,mensagem,'bot-field':isco2.querySelector('input').value};
-   send.disabled=true;send.textContent=tr('A enviar…');
-   try{
-    const r=await fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(campos).toString(),signal:AbortSignal.timeout(30000)});
-    if(!r.ok)throw Error('service_unavailable');
-    sent=true;$('#short-reference').textContent=ref;$('#short-fields').hidden=true;$('#short-done').hidden=false;$('#short-done-title').focus();
-    window.mdmTrack?.('quote_sent');
-   }
-   catch{erro.textContent=tr('Não foi possível enviar. Ligue 218 935 050 ou tente de novo.');}
-   finally{send.disabled=false;send.textContent=tr('Enviar pedido');}
-  });
- }
  document.querySelectorAll('.language-switch a').forEach(a=>a.addEventListener('click',()=>{const url=new URL(a.href);url.hash=location.hash;a.href=url.href;try{localStorage.setItem('mdm-language',a.lang)}catch{}}));
 })();
