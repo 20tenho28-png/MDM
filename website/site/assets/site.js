@@ -5,7 +5,7 @@ const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelecto
 const scenes={"casa":{"credit":"Arquivo MDM","author":"MDM","kind":"OBRA MDM","isMdm":true,"src":"/assets/img/hero-bomba-calor-1600.webp","caption":"Bomba de calor para moradia","alt":"Bomba de calor monobloco preta assente em lajetas de betão, no jardim de uma moradia.","source":"/obras/bomba-de-calor-para-moradia.html","label":"Ver bomba de calor na moradia","width":1200,"height":1600,"frame":"heat-pump"},"empresa":{"src":"/assets/img/foto-28-1600.webp","caption":"Midea e solar térmico na cobertura.","alt":"Unidade exterior Midea numa cobertura de Lisboa, junto a painéis solares térmicos","credit":"Ver esta obra MDM","source":"/obras/vrf-ao-lado-do-solar-termico.html","author":"MDM","label":"Ver cobertura Midea com painéis solares","width":1600,"height":1200,"kind":"OBRA MDM","isMdm":true,"frame":"solar-rooftop"},"terraco":{"src":"/assets/img/hero-hvac-pexels-30210086.jpg","caption":"Equipamentos na cobertura.","alt":"Cobertura industrial com unidade de ar condicionado, ventilação e céu azul","credit":"Alexey Baikov / Pexels","source":"https://www.pexels.com/photo/industrial-rooftop-with-hvac-unit-and-ladder-30210086/","author":"Alexey Baikov","label":"Ver instalação exterior de climatização","width":2400,"height":1600}};
 function changeScene(key){
  const scene=scenes[key],image=q('#hero-image');if(!scene||!image)return;
- image.src=scene.src;image.width=scene.width;image.height=scene.height;image.alt=t(scene.alt);
+  image.removeAttribute('srcset');image.removeAttribute('sizes');image.src=scene.src;image.width=scene.width;image.height=scene.height;image.alt=t(scene.alt);
  q('.hero-immersive').classList.toggle('hero-mdm-terrace',!!scene.isMdm);
  q('.hero-immersive').classList.toggle('hero-heat-pump',scene.frame==='heat-pump');
  q('.hero-immersive').classList.toggle('hero-solar-rooftop',scene.frame==='solar-rooftop');
@@ -48,6 +48,8 @@ function goStep(next){
  q('.copy-status').textContent='';q('[data-step="'+step+'"] h2').focus();dialog.scrollTop=0;
 }
 function openQuote(purpose='',service='',project=''){
+ /* página inicial: o pedido curto de um ecrã (assistant.js) toma o lugar dos 4 passos */
+ if(window.mdmShort){window.mdmShort.open(purpose,service,project);return;}
  if(form?.dataset.sending==='true'){if(!dialog.open)dialog.showModal();return;}
  if(!dialog)return;lastOpener=document.activeElement;projectContext=project;
  if(purpose){const radio=qa('input[name="purpose"]').find(x=>x.value===purpose);if(radio)radio.checked=true;}
@@ -146,3 +148,12 @@ qa('.mdm-mapa__btn[data-map-src]').forEach(btn=>btn.addEventListener('click',()=
  frame.loading='lazy';frame.referrerPolicy='no-referrer-when-downgrade';frame.allowFullscreen=true;
  btn.replaceWith(frame);frame.focus();
 }));
+
+/* Página inicial no telemóvel: ao abrir, o botão vermelho está na página, por baixo do título, e a barra de baixo
+   só tem «Ligar» e «WhatsApp»; quando esse botão sai do ecrã, o vermelho entra na barra. Nunca aparecem dois. */
+(()=>{
+ const bar=q('.mobile-actions[data-cta]'),cta=q('.hero-actions [data-quote]');
+ if(!bar)return;
+ if(!cta||!('IntersectionObserver' in window)){bar.dataset.cta='bar';return;}
+ new IntersectionObserver(entries=>{bar.dataset.cta=entries[entries.length-1].isIntersecting?'page':'bar';},{rootMargin:'-57px 0px -66px 0px'}).observe(cta);
+})();
