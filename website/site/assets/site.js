@@ -57,7 +57,18 @@ function openQuote(purpose='',service='',project=''){
  form.dispatchEvent(new Event('mdm:quote-open'));
  if(!dialog.open)dialog.showModal();goStep(0);
 }
-qa('[data-quote]').forEach(b=>b.addEventListener('click',()=>openQuote(b.dataset.quote||'',b.dataset.service||'',b.dataset.project||'')));
+/* um só funil na página inicial: os botões «Pedir orçamento» levam ao pedido rápido do hero, com a necessidade já marcada;
+   só a ligação «pedido completo» dentro do cartão abre o pedido de 4 passos. Nas outras páginas abrem o pedido de 4 passos. */
+const quick=q('#quick-form');
+function goQuick(purpose){
+ const chips=qa('[data-purpose]',quick);if(purpose)chips.forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.purpose===purpose)));
+ quick.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'center'});
+ quick.classList.add('is-hinted');setTimeout(()=>{quick.classList.remove('is-hinted');quick.querySelector('input[name="quick-name"]')?.focus({preventScroll:true});},650);
+}
+qa('[data-quote]').forEach(b=>b.addEventListener('click',()=>{
+ if(quick&&!b.classList.contains('quick-more'))return goQuick(b.dataset.quote||'');
+ openQuote(b.dataset.quote||'',b.dataset.service||'',b.dataset.project||'');
+}));
 document.addEventListener('mdm:calculator-quote',event=>{
  const detail=event.detail;
  if(!form||!detail||typeof detail.summary!=='string'||detail.summary.length>1500||typeof detail.location!=='string'||!/^\d{4}-\d{3}$/.test(detail.location))return;
