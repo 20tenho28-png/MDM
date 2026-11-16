@@ -1016,6 +1016,30 @@ html[data-disp=largo] .t-row,html[data-disp=estreito] .t-row{cursor:pointer}
 .contacto-rapido > *{margin:0 8px 8px 0}
 html[data-disp=largo] .tform > h3,html[data-disp=estreito] .tform > h3{display:none}
 html[data-disp=largo] .t-cab,html[data-disp=estreito] .t-cab{margin:-12px -12px 0;padding:8px 12px;border-radius:10px 10px 0 0}
+/* Modo simples (Definições › Neste aparelho; ligado por omissão): a barra só com Hoje, Pedidos, A contactar e «Mais».
+   O resto abre-se em «Mais». O técnico não entra neste modo. */
+#rail-contactar{display:none}
+html.simples .rail #rail-contactar{display:grid}
+html.simples[data-disp=largo] .rail #rail-contactar,html.simples[data-disp=estreito] .rail #rail-contactar{display:flex}
+html.simples:not([data-disp=largo]):not([data-disp=estreito]) .rail #rail-mais{display:grid}
+html.simples #rail-agenda,html.simples #rail-clientes,html.simples #rail-prazos,html.simples #btnSair,html.simples #subnav{display:none!important}
+.hj-simples{margin-top:0;margin-bottom:22px}
+html[data-disp=largo].com-pedido .hj-simples{grid-template-columns:minmax(0,1fr)}
+.lk-sec{background:none;border:0;padding:10px 4px;min-height:44px;font:inherit;font-size:13.5px;color:var(--ink-2);text-decoration:underline;cursor:pointer}
+/* «Fechar o trabalho»: resumo, materiais, horas e estado num só passo (alvos de 44 px; sem gap nos flex). */
+.fechar-t .btn,.fc-mais{min-height:44px}
+.fc-mat{display:flex;align-items:center;margin-bottom:8px}
+.fc-mat > *{margin-right:8px;min-width:0}
+.fc-mat > :last-child{margin-right:0}
+.fc-mat input,.fc-mat select{border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);padding:9px 10px;font:inherit;font-size:16px;min-height:44px;box-sizing:border-box}
+.fc-mat .fc-md{flex:1 1 auto;width:40%}
+.fc-mat .fc-mq{flex:0 0 76px;width:76px}
+.fc-mat select{flex:0 0 auto}
+.fc-mat .fc-mx{flex:0 0 44px;width:44px;height:44px;border:1px solid var(--line);border-radius:8px;background:none;color:var(--ink-2);font-size:20px;line-height:1;cursor:pointer}
+@media (max-width:640px){.fc-mat{flex-wrap:wrap}.fc-mat .fc-md{flex:1 1 100%;width:100%;margin:0 0 6px}.fc-mat .fc-mq{flex:1 1 76px}}
+.fc-est .check{min-height:44px;font-size:16px}
+.fc-est .check input{width:22px;height:22px}
+.fc-sub{margin:4px 0 8px 30px}
 /* Pedidos no tablet: a lista de toque; a Tabela fica no «Mais». */
 html[data-disp=largo]:not(.ver-tabela) #v-gerir .tb-wrap,html[data-disp=estreito]:not(.ver-tabela) #v-gerir .tb-wrap,
 html[data-disp=largo]:not(.ver-tabela) #v-gerir .fbox.agrupar,html[data-disp=estreito]:not(.ver-tabela) #v-gerir .fbox.agrupar{display:none}
@@ -1368,8 +1392,9 @@ html.sem-gap .ri-logo{margin-right:auto}
   <button type="button" id="rail-gerir" title="Pedidos" aria-label="Pedidos"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="9.5" y="4" width="5" height="11" rx="1.5"/><rect x="16" y="4" width="5" height="7" rx="1.5"/></svg><span class="r-lab">Pedidos</span></button>
   <button type="button" id="rail-agenda" title="Agenda" aria-label="Agenda"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4M8 14h3M8 17h6"/></svg><span class="r-lab">Agenda</span></button>
   <button type="button" id="rail-clientes" title="Clientes" aria-label="Clientes"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.3c2.5-.2 4.3 1.3 4.8 4.2"/></svg><span class="r-lab">Clientes</span></button>
+  <button type="button" id="rail-contactar" title="A contactar" aria-label="A contactar"><svg viewBox="0 0 24 24"><path d="M6 3h3l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 4 5a2 2 0 0 1 2-2z"/></svg><span class="r-lab">A contactar</span></button>
   <button type="button" id="rail-prazos" title="Definições" aria-label="Definições"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg><span class="r-lab">Definições</span></button>
-  <button type="button" id="rail-mais" class="so-tatil" aria-label="Mais" aria-haspopup="menu"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span class="r-lab">Mais</span></button>
+  <button type="button" id="rail-mais" class="so-tatil" title="Mais" aria-label="Mais" aria-haspopup="menu"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg><span class="r-lab">Mais</span></button>
   <button type="button" class="r-fim" id="btnSair" title="Sair" aria-label="Sair"><svg viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 8l-4 4 4 4M6 12h10"/></svg></button>
   <span hidden><span id="painelBadge"></span><span id="sgBadge"></span><span id="agBadge"></span><span id="redBadge"></span><span id="fugaBadge"></span><span id="cliBadge"></span></span>
 </nav>
@@ -1410,6 +1435,20 @@ html.sem-gap .ri-logo{margin-right:auto}
 
   <div id="v-hoje" role="tabpanel" aria-labelledby="tab-hoje" hidden>
     <p class="hj-ola" id="hjOla"></p>
+    <div class="hj-grid hj-simples" id="hjSimples" hidden>
+      <section aria-labelledby="h-hs-orc">
+        <div class="sec-h"><h2 id="h-hs-orc">Orçamentos</h2><span class="count" id="hsOrcCount"></span></div>
+        <div class="panel" id="hsOrc"></div>
+      </section>
+      <section aria-labelledby="h-hs-fat">
+        <div class="sec-h"><h2 id="h-hs-fat">Por faturar e por receber</h2><span class="count" id="hsFatCount"></span></div>
+        <div class="panel" id="hsFat"></div>
+      </section>
+      <section aria-labelledby="h-hs-ct">
+        <div class="sec-h"><h2 id="h-hs-ct">Contratos este mês</h2><span class="count" id="hsCtCount"></span></div>
+        <div class="panel" id="hsCt"></div>
+      </section>
+    </div>
     <section class="kpis" id="hjKpis" aria-label="Hoje em números"></section>
     <section class="kpis hj-dono" id="hjDono" aria-label="O negócio" hidden></section>
     <section class="hj-fila" aria-labelledby="h-hj-fila">
@@ -1828,6 +1867,8 @@ html.sem-gap .ri-logo{margin-right:auto}
           <div class="panel" style="padding:14px"><div class="f"><label class="lbl" for="selDisp">Disposição</label>
             <select id="selDisp"><option value="">Automática</option><option value="tatil">Tátil (tablet)</option><option value="escritorio">Escritório</option></select>
             <span class="aux">Automática: tátil num ecrã de toque com 640 px ou mais, escritório com rato. Fica só neste aparelho.</span></div>
+            <div id="simplesBox" style="margin-top:8px"><label class="check" style="min-height:44px"><input type="checkbox" id="chkSimples"> Modo simples</label>
+            <p class="hint" style="margin:0">Na barra ficam só Hoje, Pedidos, A contactar e «Mais»; o resto abre-se em «Mais». Fica só neste aparelho.</p></div>
             <p class="hint" id="espacoTxt" style="margin:10px 0 0"></p></div>
         </section>
         <section aria-labelledby="h-export">
@@ -2306,6 +2347,14 @@ if (!Element.prototype.replaceChildren) {
   // O técnico trabalha os pedidos, a agenda e os clientes; os números do negócio e as definições não são para ele
   // (a faturação e os objetivos também lhe são recusados pela base de dados, em supabase/papeis.sql).
   function souTecnico() { return !!(eu && eu.papel === 'tecnico'); }
+  // Modo simples (Definições › «Neste aparelho», guardado neste aparelho; ligado por omissão): a barra só com Hoje,
+  // Pedidos, A contactar e «Mais». Nada se apaga: o resto abre-se em «Mais». O técnico fica como estava.
+  function modoSimples() {
+    if (souTecnico()) return false;
+    try { return localStorage.getItem('registo-simples') !== '0'; } catch (e) { return true; }
+  }
+  // O botão da barra que fica aceso em cada vista, no modo simples.
+  const naBarraSimples = t => t === 'hoje' || t === 'gerir' ? t : t === 'clientes' ? 'contactar' : 'mais';
   function disponivel(t) {
     if (souTecnico() && ['painel', 'faturacao', 'clientes', 'prazos'].indexOf(t) >= 0) return false;
     try {
@@ -2323,11 +2372,14 @@ if (!Element.prototype.replaceChildren) {
     tab = t;
     const g = grupoDe(t);
     ultimaVista[g[0]] = t;
+    const simp = modoSimples(), aceso = simp ? naBarraSimples(t) : g[0];
+    document.documentElement.classList.toggle('simples', simp);
     SECOES.forEach(([k, , vs]) => {
       const rb = F('rail-' + k); if (!rb) return;
-      if (k === g[0]) rb.setAttribute('aria-current', 'page'); else rb.removeAttribute('aria-current');
+      if (k === aceso) rb.setAttribute('aria-current', 'page'); else rb.removeAttribute('aria-current');
       rb.hidden = !vs.some(disponivel);
     });
+    ['contactar', 'mais'].forEach(k => { if (k === aceso) F('rail-' + k).setAttribute('aria-current', 'page'); else F('rail-' + k).removeAttribute('aria-current'); });
     const subs = g[2].filter(disponivel);
     F('subnav').hidden = subs.length < 2;
     fill(F('subnav'), subs.length < 2 ? null : subs.map(v => h('button',{class:'chip', type:'button', role:'tab', id:'sub-' + v, 'aria-selected': String(v === t), 'aria-pressed': String(v === t), onclick:() => setTab(v)}, v === 'gerir' && tatil() && !tabelaNoTablet ? 'Lista' : SUB_NOME[v])));
@@ -2339,7 +2391,7 @@ if (!Element.prototype.replaceChildren) {
     try { localStorage.setItem('registo-tab', t); } catch (e) {}
     if (!currentId && !/^#p\//.test(location.hash)) enderecoPara('#' + t); // #p/… à espera dos dados: abreDoEndereco
     // A escolha «Pedidos em aberto» e «Adicionar pedido» só fazem sentido em Gerir; nos outros, o nome do separador.
-    F('tabTitulo').textContent = g[1];
+    F('tabTitulo').textContent = simp ? SUB_NOME[t] : g[1];
     F('tabTitulo').hidden = t === 'gerir';
     document.querySelector('.page-h .vista').classList.toggle('so-gerir', t !== 'gerir');
     F('btnNovoTop').classList.toggle('so-gerir', t !== 'gerir');
@@ -2349,7 +2401,8 @@ if (!Element.prototype.replaceChildren) {
     if (t === 'contactos' && status === 'ok') renderContactos();
   }
   TABS.forEach(k => { F('tab-' + k).addEventListener('click', () => setTab(k)); });
-  SECOES.forEach(([k, , vs]) => { F('rail-' + k).addEventListener('click', () => { tabelaNoTablet = false; setTab(ultimaVista[k] || vs.filter(disponivel)[0] || vs[0]); }); });
+  SECOES.forEach(([k, , vs]) => { F('rail-' + k).addEventListener('click', () => { tabelaNoTablet = false; setTab(modoSimples() && (k === 'hoje' || k === 'gerir') ? k : ultimaVista[k] || vs.filter(disponivel)[0] || vs[0]); }); });
+  F('rail-contactar').addEventListener('click', () => { tabelaNoTablet = false; setTab('clientes'); });
   F('tabs').addEventListener('keydown', e => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
     const i = TABS.indexOf(tab), n = TABS.length;
@@ -4741,10 +4794,11 @@ if (!Element.prototype.replaceChildren) {
   function lembraRecente(id) { try { localStorage.setItem('registo-recentes', JSON.stringify([id].concat(recentes().filter(x => x !== id)).slice(0, 10))); } catch (e) {} }
   function openSheet(id) {
     if (!F('sheetWrap').hidden && id !== currentId && sheetSujo && canWrite && !confirm('Há alterações por guardar. Abrir outro pedido mesmo assim?')) return false;
+    if (fechoFeito && fechoFeito.id !== id) fechoFeito = null;
     enderecoPara('#p/' + id, true); currentId = id; modo = null; trans = null; dadosAberto = false; sheetSujo = false; mostraSheet(true); renderSheet(); lembraRecente(id);
     F('sheet').scrollTop = 0; setTimeout(() => F('btnClose').focus(), 30); return true;
   }
-  function closeSheet() { enderecoPara('#' + tab); mostraSheet(false); currentId = null; modo = null; trans = null; fichaKey = null; sheetSujo = false; sgRespondeu = null; sgEdit = null; if (agAcao && agAcao.onde === 'sheet') agAcao = null; if (status === 'ok') renderAll(); }
+  function closeSheet() { enderecoPara('#' + tab); mostraSheet(false); currentId = null; modo = null; trans = null; fechoFeito = null; fichaKey = null; sheetSujo = false; sgRespondeu = null; sgEdit = null; if (agAcao && agAcao.onde === 'sheet') agAcao = null; if (status === 'ok') renderAll(); }
   // Fechar a folha com o × , um toque ao lado ou Esc nunca perde o que se escreveu sem perguntar.
   function fecharSheetPedido() { if (sheetSujo && canWrite && !confirm('Há alterações por guardar. Fechar mesmo assim?')) return; closeSheet(); }
   F('btnClose').addEventListener('click', fecharSheetPedido);
@@ -4892,6 +4946,10 @@ if (!Element.prototype.replaceChildren) {
           h('div',{class:'who'}, `${r.dono || 'Sem dono'} · ${r.dataProximaAcao ? (acaoAtrasada ? 'devia ser a ' : 'até ') + ddmm(r.dataProximaAcao) : 'sem data'}`)),
         canWrite ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => abrirTrans({id:'acao', label:'Mudar a próxima ação', para:null, soAcao:true})}, 'Mudar ação') : null));
       blocos.push(contactoRapido(r));
+      if (canWrite && !trans && fecharPode(r)) blocos.push(h('div',{class:'acao fechar-t', style:'--stripe:var(--good)'},
+        h('div',{style:'min-width:0'}, h('div',{class:'what'}, 'O trabalho está feito?'), h('div',{class:'who'}, 'O que foi feito, os materiais, as horas e como ficou, de uma vez')),
+        h('button',{class:'btn', type:'button', id:'btnFecharT', onclick:() => abrirFechar(r.id)}, 'Fechar o trabalho')));
+      const bf = blocoFechado(r); if (bf) blocos.push(bf);
       if (!segLigado() && r.esperaMotivo === 'decisao' && (r.seguimentos || 0) >= 3) blocos.push(h('p',{class:'hint alert'}, '3 seguimentos sem resposta: fecha como perdido, salvo data dada pelo cliente.'));
       if (semContacto30(r)) blocos.push(h('p',{class:'hint alert'}, 'Sem contacto há 30 dias: fecha como perdido ou dá-lhe uma ação para hoje.'));
     } else {
@@ -4908,7 +4966,7 @@ if (!Element.prototype.replaceChildren) {
           : 'Pronta a imprimir para a visita')),
       h('button',{class:'btn btn-sm' + (r.folha ? ' btn-ghost' : ''), type:'button', onclick:() => abrirFolha(r.id)}, r.folha ? 'Abrir' : 'Folha de obra')));
     const bri = blocoRI(r); if (bri) blocos.push(bri);
-    if (trans) blocos.push(formTrans(r));
+    if (trans) blocos.push(trans.fechar ? formFechar(r) : formTrans(r));
     else if (canWrite) {
       const T = transicoes(r), aberto = ABERTOS.includes(r.estado);
       // Os caminhos normais à vista (no máximo três, o primeiro cheio); pausas, fechos e o contacto no «⋯».
@@ -5044,6 +5102,163 @@ if (!Element.prototype.replaceChildren) {
   }
   const nota = (texto) => ({em: new Date().toISOString(), texto});
 
+  // O que qualquer mudança de estado faz ao relógio e à prioridade (o passo normal e o «Fechar o trabalho»).
+  function relogioMuda(r, novo, t, agora, hist) {
+    const p = r.prioridade || 'P3';
+    // Escalada: o estado da MDM que se deixa passou o prazo. Sobe um nível, uma vez só.
+    const rel = relogio(r, agora);
+    if (DA_MDM.includes(r.estado) && atrasadoNaMDM(r, rel) && !r.escalado && !r.porConfirmar && p !== 'P1') {
+      novo.prioridade = up(p); novo.escalado = true; novo.escaladoEm = today();
+      hist.push(nota(`Escalado de ${p} para ${novo.prioridade}: ${ESTADOS[r.estado].l} passou o prazo`));
+    }
+    if (r.porConfirmar) { novo.porConfirmar = false; hist.push(nota('Dados confirmados; o relógio passa a contar')); }
+    // Relógio: pausar numa espera guarda o tempo gasto; voltar ao mesmo estado continua; avançar recomeça.
+    const gastoAqui = !r.porConfirmar && DA_MDM.includes(r.estado) && r.estado !== 'visita_marcada' ? (Number(r.acumuladoH) || 0) + horasUteis(new Date(r.entrouNoEstado || agora), agora) : 0;
+    if (t.pausa) { novo.esperaDe = r.estado; novo.esperaMotivo = 'pausa'; novo.acumuladoPausa = gastoAqui; novo.acumuladoH = 0; }
+    else if (t.decisao) { novo.esperaDe = r.estado; novo.esperaMotivo = 'decisao'; novo.acumuladoPausa = 0; novo.acumuladoH = 0; }
+    else if (t.retoma) { novo.acumuladoH = Number(r.acumuladoPausa) || 0; novo.esperaDe = null; novo.esperaMotivo = null; novo.acumuladoPausa = 0; }
+    else { novo.acumuladoH = 0; if (!ESPERAS.includes(t.para)) { novo.esperaDe = null; novo.esperaMotivo = null; novo.acumuladoPausa = 0; } }
+    if (ESPERAS.includes(t.para) || t.para === 'faturado') { novo.seguimentos = 0; novo.ultimoSeguimento = null; }
+  }
+
+  /* ---------- «Fechar o trabalho»: o técnico (ou o escritório) diz o que fez, os materiais, as horas e como ficou ----------
+     Num pedido com a visita marcada ou em execução. Uma só gravação (gravar: sem rede fica na fila): o relatório de
+     intervenção de hoje (o modelo do RI: observações, materiais com Stk ou Adq, uma linha de horas por técnico), sem a
+     assinatura do cliente; uma nota no histórico; e o passo que já existia: concluído passa a «Por faturar» («Resolvido
+     na visita» ou «Instalação feita», com a data do RI); falta material pausa em «À espera de fornecedor»; voltar passa a
+     «Visita por marcar». Nenhum preço nem custo neste formulário. A seguir, «Pedir assinatura do cliente» abre o RI. */
+  let fechoFeito = null; // {id, ri}: o pedido que se acabou de fechar e o RI que ficou por assinar
+  const fecharPode = r => !!r && (r.estado === 'visita_marcada' || r.estado === 'em_execucao');
+  const FC_ESTADOS = [['concluido', 'Trabalho concluído'], ['falta', 'Falta material ou peça'], ['voltar', 'É preciso voltar']];
+  function abrirFechar(id) {
+    if ((currentId !== id || F('sheetWrap').hidden) && openSheet(id) === false) return;
+    const r = cur(); if (!r || !canWrite || !fecharPode(r)) return;
+    abrirTrans({id:'fechar', label:'Fechar o trabalho', para:null, fechar:true});
+    foca(F('fc-feito'));
+  }
+  // As horas por omissão: as da marcação de hoje na agenda (nunca antes da hora de estar no cliente), senão das 9:00 até agora.
+  function fecharHoras(r) {
+    const hoje = today(), ag = new Date(), min = Math.floor((ag.getHours() * 60 + ag.getMinutes()) / 5) * 5, cli = riHorario(null).cliente;
+    const m = (agMarc || []).find(x => x.pedido_id === r.id && x.estado !== 'cancelada' && agDiaDe(x.inicio) === hoje && agDiaDe(x.fim) === hoje);
+    if (m) return {ini: hhmm2(Math.max(minDe(agHora(m.inicio)), cli)), fim: agHora(m.fim)};
+    const ini = r.dataVisita === hoje && minDe(r.horaVisita) != null && minDe(r.horaVisita) >= cli ? hhmm2(minDe(r.horaVisita)) : hhmm2(cli);
+    return min > minDe(ini) ? {ini, fim: hhmm2(min)} : {ini: '', fim: ''}; // antes da hora de começar: em branco
+  }
+  function fecharMatLinha() {
+    const linha = h('div',{class:'fc-mat'},
+      h('input',{class:'fc-md', type:'text', autocomplete:'off', placeholder:'Material', 'aria-label':'Material'}),
+      h('input',{class:'fc-mq', type:'text', inputmode:'decimal', autocomplete:'off', placeholder:'Qtd.', 'aria-label':'Quantidade'}),
+      h('select',{class:'fc-mo', 'aria-label':'Origem'}, h('option',{value:'stock'}, 'Stock'), h('option',{value:'comprado'}, 'Comprado')),
+      h('button',{class:'fc-mx', type:'button', 'aria-label':'Tirar o material', onclick:() => { linha.remove(); sheetSujo = true; }}, '×'));
+    return linha;
+  }
+  function formFechar(r) {
+    const hs = fecharHoras(r), sair = () => { trans = null; renderSheet(); };
+    const mats = h('div',{id:'fc-mats'}, fecharMatLinha());
+    const sub = (k, filhos) => h('div',{class:'fc-sub fields', id:'fc-sub-' + k, hidden:true}, filhos);
+    const mostra = () => { const v = (document.querySelector('input[name="fc-estado"]:checked') || {}).value;
+      F('fc-sub-falta').hidden = v !== 'falta'; F('fc-sub-voltar').hidden = v !== 'voltar'; foca(v === 'falta' ? F('fc-falta') : v === 'voltar' ? F('fc-porque') : null); };
+    return h('div',{class:'tform', id:'fcForm'},
+      h('div',{class:'t-cab'}, h('button',{class:'btn btn-ghost', type:'button', onclick:sair}, 'Cancelar'), h('b',null, 'Fechar o trabalho'), h('button',{class:'btn', type:'button', onclick:confirmarFechar}, 'Guardar')),
+      h('h3',null, 'Fechar o trabalho'),
+      h('div',{class:'fields'}, campo('fc-feito','O que foi feito', h('textarea',{id:'fc-feito', rows:'4', placeholder:'Por exemplo «Limpeza dos filtros e carga de gás na unidade da sala»'}), null, true)),
+      h('div',{class:'block'}, h('span',{class:'lbl'}, 'Materiais usados'), mats,
+        h('button',{class:'btn btn-ghost btn-sm fc-mais', type:'button', id:'fc-mais', onclick:() => {
+          if (mats.children.length >= RI_MATS) { toast(`O relatório leva no máximo ${RI_MATS} materiais.`); return; }
+          const l = fecharMatLinha(); mats.appendChild(l); foca(l.querySelector('.fc-md')); }}, '+ Material')),
+      h('div',{class:'fields'}, campo('fc-ini','Início', inp('fc-ini', hs.ini, {type:'time'})), campo('fc-fim','Fim', inp('fc-fim', hs.fim, {type:'time'}), 'As horas são opcionais.')),
+      h('div',{class:'block fc-est', role:'radiogroup', 'aria-label':'Estado'}, h('span',{class:'lbl'}, 'Estado'),
+        FC_ESTADOS.map(([k, l]) => h('label',{class:'check'}, h('input',{type:'radio', name:'fc-estado', value:k, onchange:mostra}), l)),
+        sub('falta', campo('fc-falta','O que falta', inp('fc-falta', '', {placeholder:'A peça ou o material'}), null, true)),
+        sub('voltar', [campo('fc-porque','Porquê', inp('fc-porque', ''), null, true), campo('fc-vdata','Quando (opcional)', inp('fc-vdata', '', {type:'date', min: today()}))])),
+      h('p',{class:'err', id:'t-err', hidden:true}),
+      h('div',{class:'row-end'}, h('button',{class:'btn btn-ghost', type:'button', onclick:sair}, 'Voltar'), h('button',{class:'btn', type:'button', id:'t-ok', onclick:confirmarFechar}, 'Guardar')));
+  }
+  // O texto nas linhas livres das observações do RI (o que não couber junta-se à última).
+  function riPoeObs(d, texto) {
+    const ls = []; let l = '';
+    String(texto).replace(/\s+/g, ' ').trim().split(' ').forEach(w => { if (l && (l + ' ' + w).length > 95) { ls.push(l); l = w; } else l = l ? l + ' ' + w : w; });
+    if (l) ls.push(l);
+    const livres = d.obs.map((o, k) => String(o || '').trim() ? -1 : k).filter(k => k >= 0);
+    if (!livres.length) { d.obs[d.obs.length - 1] += ' · ' + ls.join(' '); return; }
+    ls.forEach((x, k) => { if (k < livres.length) d.obs[livres[k]] = x; else d.obs[livres[livres.length - 1]] += ' ' + x; });
+  }
+  async function confirmarFechar() {
+    const r = cur(); if (!r || !trans || !trans.fechar || saving) return;
+    if (!fecharPode(r)) return erroT('O pedido já mudou de estado: volta atrás e confere.');
+    const feito = val('fc-feito');
+    if (!feito) { foca(F('fc-feito')); return erroT('Escreve o que foi feito.'); }
+    const mats = Array.prototype.slice.call(F('fc-mats').querySelectorAll('.fc-mat')).map(el => ({desc: el.querySelector('.fc-md').value.trim(), qtd: el.querySelector('.fc-mq').value.trim(), origem: el.querySelector('.fc-mo').value}))
+      .filter(m => m.desc || m.qtd);
+    if (mats.some(m => !m.desc)) return erroT('Há um material com quantidade e sem descrição.');
+    const ini = val('fc-ini'), fim = val('fc-fim');
+    if ((ini || fim) && !(minDe(ini) != null && minDe(fim) != null && minDe(fim) > minDe(ini))) return erroT('Horas: indica o início e o fim (o fim depois do início), ou deixa as duas em branco.');
+    const est = (document.querySelector('input[name="fc-estado"]:checked') || {}).value;
+    if (!est) return erroT('Escolhe o estado do trabalho.');
+    const falta = val('fc-falta'), porque = val('fc-porque'), vdata = val('fc-vdata');
+    if (est === 'falta' && !falta) { foca(F('fc-falta')); return erroT('Diz o que falta (o material ou a peça).'); }
+    if (est === 'voltar' && !porque) { foca(F('fc-porque')); return erroT('Diz porque é preciso voltar.'); }
+    if (est === 'voltar' && vdata && vdata < today()) return erroT('A data para voltar não pode ser no passado.');
+    const agora = new Date(), hoje = today(), novo = JSON.parse(JSON.stringify(r)); delete novo.id;
+    const hist = novo.historico = (novo.historico || []).slice(-60);
+    // O relatório de hoje deste pedido que ainda não foi assinado; senão, um novo. Só se escreve no que está vazio.
+    const lista = riLista(r).slice(); let i = -1;
+    lista.forEach((x, k) => { if (x.dataInicio === hoje && !x.assCli) i = k; });
+    const d = i >= 0 ? JSON.parse(JSON.stringify(lista[i])) : Object.assign(riNovo(r, lista, null), {dataInicio: hoje});
+    if (!d.tecResp) d.tecResp = (meuTecnico() || {}).nome || meuNome();
+    const livresM = d.materiais.map((m, k) => !m.desc && !m.qtd ? k : -1).filter(k => k >= 0);
+    if (mats.length > livresM.length) return erroT(`O relatório de hoje só leva mais ${livresM.length} ${livresM.length === 1 ? 'material' : 'materiais'}: junta o resto em «O que foi feito».`);
+    if (ini) {
+      const hor = riHorario(d);
+      if (minDe(ini) < hor.cliente) return erroT(`No cliente, nunca antes das ${hhmmDe(hor.cliente)}.`);
+      const novas = riLinhasDe(d, riPeriodos(ini, fim, hor)), vazias = d.linhas.map((l, k) => riLinhaVazia(l) ? k : -1).filter(k => k >= 0);
+      if (novas.length > vazias.length) return erroT('O relatório de hoje já não tem linhas livres para estas horas: abre o relatório e continua numa página seguinte.');
+      novas.forEach((x, k) => { d.linhas[vazias[k]] = x; });
+      if (!d.horasMao) { const ne = riNormaisExtras(d, hor); d.horasMao = false; d.horasNormais = hhmmDe(ne.n); d.horasExtras = hhmmDe(ne.x); }
+    }
+    mats.forEach((m, k) => { d.materiais[livresM[k]] = {desc: m.desc, adq: m.origem === 'comprado', stk: m.origem === 'stock', cli: false, qtd: m.qtd, vun: '', vtot: ''}; });
+    riPoeObs(d, feito + (est === 'falta' ? ` Falta: ${falta}.` : est === 'voltar' ? ` É preciso voltar: ${porque}.` : ''));
+    d.concluidaSim = est === 'concluido'; d.concluidaNao = est !== 'concluido';
+    if (i >= 0) lista[i] = d; else lista.push(d);
+    const pg = riPagina(lista, d);
+    Object.assign(d, {pag: String(pg.pag), de: String(pg.de), guardadoEm: agora.toISOString(), totalMin: riTotalMin(d)});
+    novo.ris = lista; delete novo.ri;
+    if (d.num) novo.obra = Object.assign({}, novo.obra || {}, {riNum: d.num});
+    novo.ultimoContacto = agora.toISOString();
+    const rot = FC_ESTADOS.find(x => x[0] === est)[1], curto = feito.replace(/\s+/g, ' ');
+    hist.push(nota(`Trabalho fechado por ${meuNome()} (${rot.toLowerCase()}${est === 'falta' ? ': ' + falta : est === 'voltar' ? ': ' + porque : ''}), com o relatório de intervenção de ${dmaDe(hoje)} por assinar: ${curto.length > 160 ? curto.slice(0, 157) + '…' : curto}`));
+    // O passo que já existia para cada caso (transicoes): nada de estados novos.
+    const T = transicoes(r), p = r.prioridade || 'P3', visita = r.estado === 'visita_marcada';
+    let t = T.find(x => x.id === (est === 'concluido' ? (visita ? 'f_res' : 'ri') : est === 'falta' ? 'p_forn' : visita ? 'outra' : 'vis')) || null;
+    // O orçamento do registo aceite em mão pede o número e a opção no passo normal: aqui o estado fica e a ação diz o que falta.
+    const emMao = !!(t && orcEmMao(r, t));
+    if (emMao) t = null;
+    const para = t ? t.para : r.estado;
+    let data = t ? dataProposta(para, p, {}) : today();
+    if (est === 'voltar' && vdata && vdata < data) data = vdata;
+    novo.dono = r.dono || meuNome();
+    novo.proximaAcao = est === 'concluido' ? (emMao ? 'Trabalho concluído: confirmar o orçamento aceite e passar a «Por faturar»' : t ? sugestaoAcao(para, {}) : 'Emitir a fatura e registar o número') : est === 'falta' ? `Encomendar ou pedir ao fornecedor: ${falta}` : `Marcar outra visita${vdata ? ' para ' + ddmm(vdata) : ''}: ${porque}`;
+    novo.dataProximaAcao = data;
+    if (t) {
+      if (t.ri) novo.obra = Object.assign({}, novo.obra || {}, {riEm: hoje, riNum: d.num || (r.obra && r.obra.riNum) || null});
+      relogioMuda(r, novo, t, agora, hist);
+      novo.estado = para; novo.entrouNoEstado = agora.toISOString();
+      hist.push(nota(`${ESTADOS[r.estado].l} → ${ESTADOS[para].l} · ${novo.dono}: ${novo.proximaAcao}`));
+    } else hist.push(nota(`Próxima ação: ${novo.proximaAcao} (${novo.dono}, ${ddmm(novo.dataProximaAcao)})`));
+    fechoFeito = {id: r.id, ri: d.id};
+    if (await gravar(r.id, novo, 'Trabalho fechado: relatório guardado')) return true;
+    fechoFeito = null; return false;
+  }
+  // Depois de fechar: o relatório fica por assinar, e o cliente assina no RI completo.
+  function blocoFechado(r) {
+    if (!fechoFeito || fechoFeito.id !== r.id) return null;
+    const k = riLista(r).findIndex(x => x.id === fechoFeito.ri);
+    if (k < 0 || riLista(r)[k].assCli) return null;
+    return h('div',{class:'acao fechar-t', style:'--stripe:var(--good)'},
+      h('div',{style:'min-width:0'}, h('div',{class:'what'}, 'Trabalho fechado'), h('div',{class:'who'}, `Relatório de ${dmaDe(riLista(r)[k].dataInicio)} guardado, por assinar`)),
+      h('button',{class:'btn', type:'button', id:'btnPedirAss', onclick:() => abrirRI(r.id, k)}, 'Pedir assinatura do cliente'));
+  }
+
   async function confirmarTrans() {
     const r = cur(); if (!r || !trans || saving) return;
     const t = trans, agora = new Date(), novo = JSON.parse(JSON.stringify(r));
@@ -5110,20 +5325,7 @@ if (!Element.prototype.replaceChildren) {
       if (!mo) return erroT(t.para === 'perdido' ? 'Escolhe o motivo da perda.' : 'Escreve em poucas palavras como ficou resolvido.');
       novo.motivo = mo; novo.dataFecho = today(); novo.proximaAcao = null; novo.dataProximaAcao = null;
     }
-    // Escalada: o estado da MDM que se deixa passou o prazo. Sobe um nível, uma vez só.
-    const rel = relogio(r, agora);
-    if (DA_MDM.includes(r.estado) && atrasadoNaMDM(r, rel) && !r.escalado && !r.porConfirmar && p !== 'P1') {
-      novo.prioridade = up(p); novo.escalado = true; novo.escaladoEm = today();
-      hist.push(nota(`Escalado de ${p} para ${novo.prioridade}: ${ESTADOS[r.estado].l} passou o prazo`));
-    }
-    if (r.porConfirmar) { novo.porConfirmar = false; hist.push(nota('Dados confirmados; o relógio passa a contar')); }
-    // Relógio: pausar numa espera guarda o tempo gasto; voltar ao mesmo estado continua; avançar recomeça.
-    const gastoAqui = !r.porConfirmar && DA_MDM.includes(r.estado) && r.estado !== 'visita_marcada' ? (Number(r.acumuladoH) || 0) + horasUteis(new Date(r.entrouNoEstado || agora), agora) : 0;
-    if (t.pausa) { novo.esperaDe = r.estado; novo.esperaMotivo = 'pausa'; novo.acumuladoPausa = gastoAqui; novo.acumuladoH = 0; }
-    else if (t.decisao) { novo.esperaDe = r.estado; novo.esperaMotivo = 'decisao'; novo.acumuladoPausa = 0; novo.acumuladoH = 0; }
-    else if (t.retoma) { novo.acumuladoH = Number(r.acumuladoPausa) || 0; novo.esperaDe = null; novo.esperaMotivo = null; novo.acumuladoPausa = 0; }
-    else { novo.acumuladoH = 0; if (!ESPERAS.includes(t.para)) { novo.esperaDe = null; novo.esperaMotivo = null; novo.acumuladoPausa = 0; } }
-    if (ESPERAS.includes(t.para) || t.para === 'faturado') { novo.seguimentos = 0; novo.ultimoSeguimento = null; }
+    relogioMuda(r, novo, t, agora, hist);
     // A revisão pedida fica pendente até ao envio seguinte (conta a revisão de um número de fora do registo).
     if (t.revisao) { novo.revisoes = (r.revisoes || 0) + 1; novo.revisaoPendente = true; }
     if (t.reabrir) { novo.reaberturas = (r.reaberturas || 0) + 1; novo.motivo = null; novo.dataFecho = null; }
@@ -5964,15 +6166,19 @@ if (!Element.prototype.replaceChildren) {
   // Preencher horas: um período (o dia inteiro é 09:00-17:00), uma linha por técnico (o responsável e os das duas
   // linhas de «Outros Técnicos») e por meio dia, só nas linhas vazias. O que não cabe diz-se, e pode seguir numa
   // página seguinte do mesmo dia (com o total «A transportar»).
-  function riPreencher() {
-    const d = riD, hor = riHorario(d), ini = F('riIni').value, fim = F('riFim').value, per = riPeriodos(ini, fim, hor);
-    if (!per.length) { toast('Escolhe o início e o fim (o fim depois do início).'); return; }
-    if (minDe(ini) < hor.cliente) { toast(`No cliente, nunca antes das ${hhmmDe(hor.cliente)}.`); return; }
+  function riLinhasDe(d, per) {
     const parte = s => String(s || '').split(/\s*[,;]\s*/);
     const tecs = [d.tecResp].concat(parte(d.outrosTec), parte(d.outrosTec2)).map(x => String(x || '').trim()).filter(Boolean)
       .filter((x, i, a) => a.indexOf(x) === i);
     const dia = dmaDe(d.dataInicio), novas = [];
     for (const [a, b] of per) for (const t of (tecs.length ? tecs : [''])) novas.push({desc: d.descricao || '', tec: t, data: dia, ini: a, fim: b});
+    return novas;
+  }
+  function riPreencher() {
+    const d = riD, hor = riHorario(d), ini = F('riIni').value, fim = F('riFim').value, per = riPeriodos(ini, fim, hor);
+    if (!per.length) { toast('Escolhe o início e o fim (o fim depois do início).'); return; }
+    if (minDe(ini) < hor.cliente) { toast(`No cliente, nunca antes das ${hhmmDe(hor.cliente)}.`); return; }
+    const novas = riLinhasDe(d, per);
     const vazias = d.linhas.map((l, i) => riLinhaVazia(l) ? i : -1).filter(i => i >= 0), n = Math.min(vazias.length, novas.length);
     for (let i = 0; i < n; i++) d.linhas[vazias[i]] = novas[i];
     const extra = minDe(fim) > hor.fim ? ` Depois das ${hhmmDe(hor.fim)} conta como horas extras.` : '';
@@ -6589,6 +6795,15 @@ if (!Element.prototype.replaceChildren) {
     const base = a ? a.base : o && o.num && o.rev ? orcTotOp(c, orcRec(c)).base : 0;
     const linha = o && o.num && o.rev ? `${o.num} · rev. ${o.rev} · ${n} ${n === 1 ? 'opção' : 'opções'} · ${orcEur(base)} s/IVA${a ? ` (aceite a ${a.k}${a.rev !== o.rev ? ` da rev. ${a.rev}` : ''})` : ''}${o.enviadoRev === o.rev ? ' · enviado' : ''}`
       : o ? 'Rascunho, ainda sem PDF' : r.num ? `${r.num}, feito fora do registo` : 'Ainda por fazer';
+    // Modo simples: o orçamento faz-se fora do registo. O cartão começa por registar o envio (número, valor e data, o passo
+    // «Orçamento enviado») e «Fazer no registo» fica como ligação.
+    if (modoSimples() && !o) {
+      const tEnv = canWrite && r.estado === 'orcamento_por_fazer' ? transicoes(r).find(t => t.id === 'enviado') : null;
+      return h('div',{class:'acao', style:'--stripe:var(--accent)'},
+        h('div',{style:'min-width:0'}, h('div',{class:'what'}, 'Orçamento'), h('div',{class:'who'}, tEnv && !r.num ? 'Feito fora do registo: regista o número, o valor e a data do envio' : linha)),
+        tEnv ? h('button',{class:'btn btn-sm', type:'button', id:'btnOrcEnviado', onclick:() => abrirTrans(tEnv)}, 'Registar orçamento enviado') : null,
+        h('button',{class:'lk-sec', type:'button', onclick:() => abrirOrc(r.id)}, 'Fazer no registo'));
+    }
     return h('div',{class:'acao', style:'--stripe:var(--accent)'},
       h('div',{style:'min-width:0'}, h('div',{class:'what'}, 'Orçamento'), h('div',{class:'who'}, linha)),
       h('button',{class:'btn btn-sm' + (o ? ' btn-ghost' : ''), type:'button', onclick:() => abrirOrc(r.id)}, o ? 'Abrir' : r.num ? 'Fazer no registo' : 'Fazer orçamento'));
@@ -7543,7 +7758,7 @@ if (!Element.prototype.replaceChildren) {
         ro ? null : h('div',{class:'oe-acoes'},
           h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => { op.linhas.push({ref:'', desc:'', qtd:'1', un:'un', preco:'', iva: orcIvaPad()}); orcMuda(); renderOrc(); }}, '+ Linha'),
           h('button',{class:'btn btn-ghost btn-sm', type:'button', 'aria-haspopup':'menu', 'aria-expanded':'false', onclick: ev => orcEscolher(ev.currentTarget, ['equip', 'mat'], op.marca, it => { op.linhas.push(orcDeItem(it, 1)); orcMuda(); renderOrc(); })}, 'Da tabela'),
-          motorOk() ? h('button',{class:'btn btn-ghost btn-sm', type:'button', 'aria-expanded': String(!!orcMotAberto[op.k]), onclick:() => { if (!op.motor) op.motor = motNovo(); orcMotAberto[op.k] = !orcMotAberto[op.k]; renderOrc(); }}, orcMotAberto[op.k] ? 'Fechar o cálculo' : 'Calcular preço') : null),
+          motorOk() ? h('button',{class: modoSimples() ? 'lk-sec' : 'btn btn-ghost btn-sm', type:'button', 'aria-expanded': String(!!orcMotAberto[op.k]), onclick:() => { if (!op.motor) op.motor = motNovo(); orcMotAberto[op.k] = !orcMotAberto[op.k]; renderOrc(); }}, orcMotAberto[op.k] ? 'Fechar o cálculo' : 'Calcular preço') : null),
         motMarcaTroca(op) ? h('p',{class:'hint alert'}, `As linhas do cálculo são da ${op.o68.marcaOp || 'outra marca'} e a opção diz ${op.marca || '«Sem marca»'}: carrega outra vez em «Pôr na opção ${op.k}» (com o equipamento certo) ou volta a marca.`) : null,
         o68c ? orc68Campos(op, og.opcoes[i]) : null,
         !ro && motorOk() && orcMotAberto[op.k] && op.motor ? motPainel(op) : null,
@@ -8922,8 +9137,44 @@ if (!Element.prototype.replaceChildren) {
     fill(F(box), itens.length ? itens.slice(0, max) : h('p',{class:'empty'}, vazio),
       itens.length > max && todos ? h('button',{class:'hj-mais', type:'button', onclick:todos}, `Ver todos (${itens.length})`) : null);
   }
+  // Abre o pedido já no passo pedido (o «Orçamento enviado», a fatura, o pagamento); sem esse passo, fica o pedido aberto.
+  function passoRapido(id, tid) {
+    if (openSheet(id) === false) return;
+    const r = cur(), t = r && canWrite ? transicoes(r).find(x => x.id === tid) : null;
+    if (t) abrirTrans(t);
+  }
+  // Modo simples: o dia do dono e do escritório em três listas curtas, cada linha com uma só ação. Os orçamentos por
+  // fazer e os enviados sem resposta (com o seguimento já devido); o que falta faturar e as faturas por pagar há mais de
+  // 30 dias; e os clientes com contrato e a visita a vencer (a regra de «A contactar» para a manutenção).
+  function renderHojeSimples(all) {
+    const box = F('hjSimples'); if (!box) return;
+    box.hidden = !modoSimples() || status !== 'ok';
+    if (box.hidden) return;
+    const hoje = today();
+    const bt = (rot, fn, cheio) => h('button',{class:'btn btn-sm' + (cheio ? '' : ' btn-ghost'), type:'button', onclick:fn}, rot);
+    const passo = (id, tid, rot) => canWrite ? bt(rot, () => passoRapido(id, tid), true) : bt('Abrir', () => openSheet(id));
+    const tom = x => x.sem === 'vermelho' ? 'bad' : 'warn';
+    const devido = x => (segLigado() && sg && sg.hoje.some(y => y.pedido_id === x.r.id)) || (x.r.dataProximaAcao && x.r.dataProximaAcao <= hoje) || x.sem === 'vermelho';
+    const orc = all.filter(x => x.r.estado === 'orcamento_por_fazer').sort(ordem)
+      .map(x => hjLinha(tom(x), x.r.cliente || x.r.id, () => openSheet(x.r.id), `Por fazer${x.r.revisaoPendente ? ' (revisão pedida)' : ''} · ${x.r.dono || 'sem dono'}`, passo(x.r.id, 'enviado', 'Registar envio')))
+      .concat(all.filter(x => x.r.estado === 'espera_cliente' && x.r.esperaMotivo === 'decisao' && devido(x)).sort(ordem)
+        .map(x => hjLinha(tom(x), x.r.cliente || x.r.id, () => openSheet(x.r.id), `${x.r.num || 'Orçamento'} enviado${x.r.dataEnvio ? ' a ' + ddmm(x.r.dataEnvio) : ''}, sem resposta${x.r.valor ? ' · ' + eur(x.r.valor) : ''}`, passo(x.r.id, 'seg', 'Seguimento'))));
+    const dFat = r => r.dataFatura || String(r.entrouNoEstado || '').slice(0, 10);
+    const fat = all.filter(x => x.r.estado === 'por_faturar').sort(ordem)
+      .map(x => hjLinha(tom(x), x.r.cliente || x.r.id, () => openSheet(x.r.id), `Por faturar${x.r.valor ? ' · ' + eur(x.r.valor) : ''}`, passo(x.r.id, 'fat', 'Registar fatura')))
+      .concat(all.filter(x => x.r.estado === 'faturado' && !x.r.dataPagamento && dFat(x.r) && dFat(x.r) < addDays(hoje, -30)).sort((a, b) => dFat(a.r).localeCompare(dFat(b.r)))
+        .map(x => hjLinha('bad', x.r.cliente || x.r.id, () => openSheet(x.r.id), `${x.r.fatura || 'Fatura'} de ${ddmm(dFat(x.r))}, por receber${x.r.valorFatura != null ? ' · ' + eur(x.r.valorFatura) : ''}`, passo(x.r.id, 'pago', 'Registar pagamento'))));
+    let cts = [];
+    try { cts = clientes().lista.filter(c => c.contrato && c.proxima && c.motivos.indexOf('manutencao') >= 0).sort((a, b) => String(a.proxima).localeCompare(String(b.proxima))); } catch (e) { cts = []; }
+    const ct = cts.map(c => hjLinha(c.proxima < hoje ? 'warn' : 'info', c.nome, () => openFicha(c.k), `Visita prevista a ${ddmmaa(c.proxima)}${c.cadencia ? ` · de ${c.cadencia} em ${c.cadencia} ${c.cadencia === 1 ? 'mês' : 'meses'}` : ''}`,
+      canWrite ? bt('Novo pedido', () => abrirNovoPara(c.nome), true) : bt('Ver ficha', () => openFicha(c.k))));
+    hjLista('hsOrc', 'hsOrcCount', orc, 'Nenhum orçamento à tua espera.', () => irPara('orcamento_por_fazer'), 6);
+    hjLista('hsFat', 'hsFatCount', fat, 'Nada por faturar nem por receber.', () => irPara('por_faturar'), 6);
+    hjLista('hsCt', 'hsCtCount', ct, 'Nenhum contrato com visita a vencer.', () => setTab('clientes'), 6);
+  }
   function renderInicio(all) {
     if (!F('hjEnv')) return;
+    renderHojeSimples(all);
     const d = new Date(), hora = d.getHours();
     F('hjOla').textContent = `${hora < 13 ? 'Bom dia' : hora < 20 ? 'Boa tarde' : 'Boa noite'}${eu && eu.nome ? ', ' + eu.nome : ''}. ${DIA_LONGO[d.getDay()].charAt(0).toUpperCase() + DIA_LONGO[d.getDay()].slice(1)}, ${dataCurta(today())}.`;
     if (status !== 'ok') { ['hjEnv','hjVis','hjAl'].forEach(k => fill(F(k), stateMsg())); fill(F('hjKpis')); return; }
@@ -9053,7 +9304,9 @@ if (!Element.prototype.replaceChildren) {
       const visitas = agLigado() && tec ? agDoDia(hoje, tec.id).map(m => ({id: m.pedido_id, hora: m.tipo === 'instalacao' ? 'obra' : agHora(m.inicio), cliente: m.cliente, loc: m.localidade, feita: m.estado === 'feita'}))
         : rows.filter(r => r.estado === 'visita_marcada' && r.dataVisita === hoje && r.dono === eu1).map(r => ({id: r.id, hora: r.horaVisita || '', cliente: r.cliente, loc: r.localidade, feita: false}));
       visitas.forEach(v => { vistos[v.id] = 1; linhas.push(hjLinha(v.feita ? 'good' : 'info', `${v.hora ? v.hora + '  ' : ''}${v.cliente || v.id}`, () => openSheet(v.id),
-        [ico('mapa'), String(v.loc || '').split('\n')[0]], v.loc ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => abrirLink(agMapa({localidade: String(v.loc).split('\n')[0]}))}, 'Mapa') : null)); });
+        [ico('mapa'), String(v.loc || '').split('\n')[0]], h('span',{class:'hj-acoes'},
+          canWrite && fecharPode(rows.find(x => x.id === v.id)) ? h('button',{class:'btn btn-sm', type:'button', onclick:() => abrirFechar(v.id)}, 'Fechar o trabalho') : null,
+          v.loc ? h('button',{class:'btn btn-ghost btn-sm', type:'button', onclick:() => abrirLink(agMapa({localidade: String(v.loc).split('\n')[0]}))}, 'Mapa') : null))); });
       all.filter(x => ABERTOS.includes(x.r.estado) && x.r.dono === eu1 && !vistos[x.r.id] && (x.sem === 'vermelho' || (x.r.dataProximaAcao && x.r.dataProximaAcao <= hoje))).sort(ordem)
         .forEach(x => linhas.push(hjLinha(x.sem === 'vermelho' ? 'bad' : 'warn', x.r.cliente || x.r.id, () => openSheet(x.r.id),
           [h('span',{class:'prio p-' + x.pe.p}, x.pe.p), x.r.proximaAcao || 'Sem próxima ação'],
@@ -9245,16 +9498,24 @@ if (!Element.prototype.replaceChildren) {
     currentId = null; modo = 'novo'; trans = null; sheetSujo = false; mostraSheet(true); renderSheet();
   };
   F('btnNovoTop').addEventListener('click', abrirNovo); F('railNovo').addEventListener('click', abrirNovo); F('btnNovoTab').addEventListener('click', abrirNovo);
-  // Tablet: «Mais» junta as vistas que não estão na barra (e Definições e Sair).
+  // «Mais» (tablet, e em todo o lado no modo simples) junta as vistas que não estão na barra (e Definições e Sair).
   F('rail-mais').addEventListener('click', ev => {
     ev.stopPropagation();
-    const vistas = [['seguimentos','Seguimentos'],['painel','Números'],['gerir','Tabela'],['pipeline','Quadro'],['contactos','Contactos'],['clientes','A contactar'],['faturacao','Faturação'],['prazos','Definições']]
-      .filter(([t]) => disponivel(t));
+    const simp = modoSimples();
+    const vistas = (simp ? [['agenda','Agenda']] : []).concat([['seguimentos','Seguimentos'],['painel','Números'],['gerir','Tabela'],['pipeline','Quadro'],['contactos','Contactos'],['clientes','A contactar'],['faturacao','Faturação'],['prazos','Definições']])
+      .filter(([t]) => disponivel(t) && !(simp && t === 'clientes'));
     abrePop(F('rail-mais'), vistas.map(([t, l]) => h('button',{type:'button', role:'menuitem', onclick:() => { fechaPop(); if (t === 'gerir') tabelaNoTablet = true; setTab(t); }}, l))
       .concat([h('button',{type:'button', role:'menuitem', class:'perigo', onclick:() => { fechaPop(); F('btnSair').click(); }}, 'Sair')]), 'menu');
   });
   // Disposição escolhida à mão neste aparelho (o <head> lê-a em registoDisp).
   try { F('selDisp').value = localStorage.getItem('registo-disp') || ''; } catch (e) {}
+  // Modo simples neste aparelho: ligado enquanto ninguém o desligar aqui (o técnico não o tem).
+  const simplesMostra = () => { let lig = true; try { lig = localStorage.getItem('registo-simples') !== '0'; } catch (e) {} F('chkSimples').checked = lig; F('simplesBox').hidden = souTecnico(); };
+  simplesMostra();
+  F('chkSimples').addEventListener('change', e => {
+    try { if (e.target.checked) localStorage.removeItem('registo-simples'); else localStorage.setItem('registo-simples', '0'); } catch (er) {}
+    setTab(tab); if (status === 'ok') renderAll();
+  });
   // Definições › Relatório de intervenção: o que o RI traz por omissão (config «ri»). Os técnicos só entram quando o
   // pedido não tem marcação na agenda; a matrícula é a da viatura da equipa.
   function renderRiCfg() {
@@ -9956,6 +10217,7 @@ if (!Element.prototype.replaceChildren) {
       if (!velhos.length || guardaFila('envios', envFila().concat(velhos.filter(x => !envFila().some(y => y.id === x.id))))) localStorage.removeItem('registo-envios');
     } catch (e) {}
     document.documentElement.classList.toggle('tecnico', eu.papel === 'tecnico');
+    document.documentElement.classList.toggle('simples', modoSimples()); simplesMostra();
     canWrite = true;
     F('userTxt').textContent = eu.nome;
     F_APP(); status = 'loading'; renderAll();
