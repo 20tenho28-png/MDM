@@ -1,4 +1,5 @@
-/* O visual novo (site/, publicado por publica.py): o formulário de 4 passos envia pelo Netlify Forms.
+/* O visual novo (site/, publicado por publica.py): o pedido curto de um ecrã (todas as páginas menos a calculadora, que
+   mantém os 4 passos para levar a estimativa) e o formulário de 4 passos enviam pelo Netlify Forms.
    - uma avaria vai para «orcamento» e uma instalação para «orcamento-comercial», com os campos dos formulários
      declarados em formularios.html, a referência no assunto e na mensagem, e o painel «Pedido recebido» com ela;
    - a página em inglês envia o mesmo, com o pedido em português para a equipa;
@@ -83,7 +84,7 @@ try {
   const decl = fs.readFileSync(path.join(PUB, 'formularios.html'), 'utf8');
 
   // 1. avaria → «orcamento»
-  let page = await nova('/index.html');
+  let page = await nova('/calculadora.html');
   await preenche(page, { purpose: 'Avaria', service: 'Ar condicionado', detalhes: 'O ar condicionado da sala não arranca.' });
   let e = await envia(page);
   const ref = await page.textContent('#request-reference');
@@ -91,7 +92,7 @@ try {
   ok(e && CAMPOS.every((c) => c in e.campos) && Object.keys(e.campos).every((c) => CAMPOS.includes(c)), '1: os campos são os dos formulários Netlify', e && Object.keys(e.campos));
   ok(e && CAMPOS.every((c) => decl.includes(`name="${c}"`) || c === 'form-name'), '1: formularios.html declara todos os campos');
   ok(e && e.campos.triagem === '[P4 · Avaria AC]' && e.campos.subject.startsWith('[P4 · Avaria AC] Pedido ' + ref) && e.campos.nome === 'Carlos Melancia'
-    && e.campos.telefone === '912 345 678' && e.campos.servico === 'Avaria: Ar condicionado' && e.campos['bot-field'] === '' && e.campos.pagina === '/index.html',
+    && e.campos.telefone === '912 345 678' && e.campos.servico === 'Avaria: Ar condicionado' && e.campos['bot-field'] === '' && e.campos.pagina === '/calculadora.html',
     '1: assunto com a triagem e a referência, contactos, serviço, isco vazio', e && e.campos);
   ok(e && /^\d{6}-\d{4}-[0-9A-F]{4}$/.test(ref) && e.campos.mensagem.includes('Referência: ' + ref) && e.campos.mensagem.includes('Localidade: Lisboa')
     && e.campos.mensagem.includes('O ar condicionado da sala não arranca.'), '1: a mensagem leva a referência, a localidade e os detalhes', e && e.campos.mensagem);
@@ -100,7 +101,7 @@ try {
   await page.context().close();
 
   // 2. instalação → «orcamento-comercial»; o mesmo pedido outra vez leva a mesma referência; uma falha deixa tentar de novo
-  page = await nova('/servicos/ar-condicionado.html', 390);
+  page = await nova('/calculadora.html', 390);
   await preenche(page, { purpose: 'Instalação', service: 'Ar condicionado', email: 'carlos@exemplo.pt' });
   falhar = true;
   e = await envia(page);
@@ -117,7 +118,7 @@ try {
   for (const [purpose, service, form, tag] of [['Manutenção', 'Manutenção e assistência', 'orcamento-comercial', '[P2 · Manutenção preventiva]'],
     ['Aconselhamento', 'Ainda não sei', 'orcamento-comercial', '[P5 · Avaliação técnica]'], ['Instalação', 'Bombas de calor', 'orcamento-comercial', '[P1 · Bomba de calor]'],
     ['Avaria', 'Eletricidade', 'orcamento', '[P4 · Avaria elétrica]']]) {
-    page = await nova('/index.html');
+    page = await nova('/calculadora.html');
     await preenche(page, { purpose, service });
     e = await envia(page);
     ok(e && e.campos['form-name'] === form && e.campos.triagem === tag, `3: ${purpose}, ${service} → ${form} ${tag}`, e && [e.campos['form-name'], e.campos.triagem]);
@@ -125,7 +126,7 @@ try {
   }
 
   // 4. em inglês: o mesmo envio, o pedido em português para a equipa
-  page = await nova('/en/index.html');
+  page = await nova('/en/calculadora.html');
   await preenche(page, { purpose: 'Avaria', service: 'Bombas de calor', nome: 'John Smith', tel: '+44 7911 123456' });
   e = await envia(page);
   ok(e && e.campos['form-name'] === 'orcamento' && e.campos.servico === 'Avaria: Bombas de calor' && e.campos.mensagem.includes('Língua do site: inglês')
@@ -171,6 +172,61 @@ try {
     }
     await page.context().close();
   }
+
+  // 8. o pedido curto (folha «Ligamos-lhe nós.») toma o lugar dos 4 passos fora da calculadora
+  const curto = async (pg) => {
+    const antes = envios.length;
+    await pg.click('#short-send');
+    await pg.waitForFunction(() => !document.getElementById('short-done').hidden || document.getElementById('short-error').textContent.trim() !== '', null, { timeout: 8000 });
+    return envios.length > antes ? envios.at(-1) : null;
+  };
+  page = await nova('/index.html', 412);
+  await page.click('.mobile-actions > button');
+  await page.waitForSelector('#short-dialog[open]');
+  ok(!(await page.locator('#quote-dialog').evaluate((d) => d.open)) && /Ligamos-lhe nós/.test(await page.textContent('#short-title')) && await page.locator('#short-call').isHidden()
+    && await page.locator('#short-form input[type=checkbox]').count() === 0, '8: «Pedir orçamento» abre a folha «Ligamos-lhe nós.» (não os 4 passos), sem caixa de autorização');
+  await page.waitForTimeout(400);
+  const folha = await page.locator('#short-dialog').boundingBox();
+  ok(folha && folha.x === 0 && folha.width === 412 && Math.round(folha.y + folha.height) === 860, '8: no telemóvel a folha ocupa a largura toda e encosta ao fundo', folha);
+  await page.click('[data-need="Avaria"]');
+  ok(await page.locator('#short-call').isVisible() && await page.getAttribute('#short-call', 'href') === 'tel:+351218935050', '8: com «Avaria» aparece o botão de ligar');
+  e = await curto(page);
+  ok(!e && /Indique o seu nome/.test(await page.textContent('#short-error')), '8: sem nome não envia e diz porquê', e);
+  await page.fill('input[name="short-name"]', 'Carlos Melancia');
+  await page.fill('input[name="short-phone"]', '91234');
+  e = await curto(page);
+  ok(!e && /9 dígitos/.test(await page.textContent('#short-error')), '8: telefone curto não envia e diz porquê', e);
+  await page.fill('input[name="short-phone"]', '912 345 678');
+  falhar = true;
+  e = await curto(page);
+  ok(e && /Não foi possível enviar/.test(await page.textContent('#short-error')) && !(await page.$eval('#short-send', (b) => b.disabled)), '8: um envio que falha mostra o aviso e deixa tentar de novo');
+  falhar = false;
+  const e8 = await curto(page);
+  const ref8 = await page.textContent('#short-reference');
+  ok(e8 && e8.campos['form-name'] === 'orcamento' && CAMPOS.every((c) => c in e8.campos) && Object.keys(e8.campos).every((c) => CAMPOS.includes(c)), '8: a avaria vai para «orcamento» com os campos dos formulários', e8 && e8.campos);
+  ok(e8 && /^\d{6}-\d{4}-[0-9A-F]{4}$/.test(ref8) && e8.campos.triagem === '[P4 · Avaria]' && e8.campos.subject.startsWith('[P4 · Avaria] Pedido ' + ref8) && e8.campos.nome === 'Carlos Melancia'
+    && e8.campos.telefone === '912 345 678' && e8.campos.servico === 'Avaria: Ainda não sei' && e8.campos['bot-field'] === '' && e8.campos.pagina === '/index.html' && e8.campos.mensagem.includes('Referência: ' + ref8),
+    '8: assunto com triagem e referência, contactos, isco vazio', e8 && e8.campos);
+  ok(e && e8 && e.campos.subject === e8.campos.subject && await page.locator('#short-done').isVisible() && /Pedido recebido/.test(await page.textContent('#short-done')), '8: mesma referência ao reenviar; painel «Pedido recebido»');
+  await page.context().close();
+  // página de serviço: o botão traz o serviço escolhido; página de obra: leva a obra de referência
+  page = await nova('/servicos/bombas-de-calor.html');
+  await page.evaluate(() => document.querySelector('main [data-quote][data-service]').click());
+  await page.waitForSelector('#short-dialog[open]');
+  await page.fill('input[name="short-name"]', 'Ana Silva');
+  await page.fill('input[name="short-phone"]', '218 935 050');
+  e = await curto(page);
+  ok(e && e.campos['form-name'] === 'orcamento-comercial' && e.campos.triagem === '[P1 · Bomba de calor]' && e.campos.servico === 'Instalação: Bombas de calor', '8: numa página de serviço o pedido leva o serviço', e && e.campos);
+  await page.context().close();
+  page = await nova('/en/index.html', 412);
+  await page.click('.mobile-actions > button');
+  await page.waitForSelector('#short-dialog[open]');
+  await page.click('[data-need="Manutenção"]');
+  await page.fill('input[name="short-name"]', 'John Smith');
+  await page.fill('input[name="short-phone"]', '+44 7911 123456');
+  e = await curto(page);
+  ok(e && e.campos.triagem === '[P2 · Manutenção preventiva]' && e.campos.mensagem.includes('Língua do site: inglês') && /Request received/.test(await page.textContent('#short-done')), '8: em inglês envia o mesmo, em português para a equipa', e && e.campos);
+  await page.context().close();
 } finally {
   await browser.close();
   servidor.close();

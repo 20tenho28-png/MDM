@@ -48,6 +48,8 @@ function goStep(next){
  q('.copy-status').textContent='';q('[data-step="'+step+'"] h2').focus();dialog.scrollTop=0;
 }
 function openQuote(purpose='',service='',project=''){
+ /* o pedido curto de um ecrã (assistant.js) toma o lugar dos 4 passos onde existir; a calculadora mantém os 4 passos */
+ if(window.mdmShort){window.mdmShort.open(purpose,service,project);return;}
  if(form?.dataset.sending==='true'){if(!dialog.open)dialog.showModal();return;}
  if(!dialog)return;lastOpener=document.activeElement;projectContext=project;
  if(purpose){const radio=qa('input[name="purpose"]').find(x=>x.value===purpose);if(radio)radio.checked=true;}
