@@ -1,0 +1,631 @@
+/* Melperfaz, Construção Civil, Lda.: sistema visual (design system «Melperfaz», tokens.css + components/bundle.css).
+   Verde-floresta (ink) e vermelho (clay), cantos vivos, títulos em Fraunces, texto em Archivo, fotografias reais.
+   Tipos de letra alojados com o site (sem pedidos a terceiros); Fraunces e Archivo em ficheiros variáveis, só latim. */
+
+@font-face { font-family: 'Fraunces'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(../fonts/fraunces-latin-400-700-normal.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Fraunces'; font-style: italic; font-weight: 400 700; font-display: swap; src: url(../fonts/fraunces-latin-400-700-italic.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Archivo'; font-style: normal; font-weight: 100 900; font-display: swap; src: url(../fonts/archivo-latin-variable.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+/* ── Tokens (tokens.json do sistema de desenho) ──
+   Fora deste bloco, o build.py --check só aceita espaços (margin, padding, gap, inset/top/right/bottom/left) em tokens
+   --space-*, tamanhos de letra em --fs-*, @media a 980 e 640 px, durações e curvas em --dur-* e --ease-* e nada
+   «infinite». Exceções: 1px (hairline), env() e 0s. */
+:root {
+  /* verde e vermelho (a pedido do dono): ink é agora verde-floresta e clay é vermelho. Os nomes dos papéis ficam (ink, o
+     escuro principal: texto no claro, superfícies escuras, cabeçalho; clay, o acento: botões, traços, o painel de contacto)
+     e os neutros (paper, bone, line, muted) puxam ao verde. No vermelho o texto é branco (5,9:1), nunca ink (2,2:1) */
+  --ink: #12392b;
+  --bone: #edf2ec;
+  --paper: #f7f9f5;
+  --clay: #c8102e;
+  /* o vermelho do texto sobre o claro (8:1 sobre paper) */
+  --clay-deep: #9b0d24;
+  --sage: #3b5a4a;
+  --line: #d3ddd4;
+  --muted: #56645b;
+  --shadow: rgba(18,57,43,0.14);
+  --white: #ffffff;
+  /* vermelho claro: só texto de acento e foco sobre o verde (5,6:1 sobre ink); nunca sobre o claro (2,2:1) */
+  --amber: #ff8a7a;
+  --ink-deep: #0a2a1f;
+  /* um passo mais escuro do que o #1f5640 da paleta: a legenda dos cartões no telemóvel assenta nele, e o .cat amber
+     ficava a 3,7:1 (agora 4,66:1) */
+  --ink-raised: #194634;
+  --bone-70: rgba(237,242,236,0.7);
+  --bone-60: rgba(237,242,236,0.6);
+  --bone-50: rgba(237,242,236,0.5);
+  --bone-15: rgba(237,242,236,0.15);
+  --bone-07: rgba(237,242,236,0.07);
+  --bone-05: rgba(237,242,236,0.05);
+  /* a faixa da legenda dos cartões: ink-deep a 90% (a 85% o .cat amber sobre uma fotografia branca ficava a 4,2:1) */
+  --overlay: rgba(10,42,31,0.9);
+  --overlay-soft: rgba(10,42,31,0.1);
+  --overlay-menu: rgba(10,42,31,0.5);
+  /* o escurecer do cartão de obra com o rato, por cima do degradê do design system (os dois juntos dão o de antes) */
+  --overlay-hover: linear-gradient(to top, transparent 0%, rgba(10,42,31,0.47) 45%, rgba(10,42,31,0.35) 70%, rgba(10,42,31,0.15) 100%);
+  --whatsapp: #25d366;
+  /* o erro não é o vermelho da marca: mais escuro, só em texto e contorno (nunca um fundo cheio, como os botões) e
+     sempre com o sinal «!» num círculo antes da mensagem (pag-orcamento.css) */
+  --erro: #a3161a;
+  --focus: var(--ink);
+  --focus-on-ink: var(--amber);
+  --focus-on-clay: var(--white);
+  --shadow-tag: 0 20px 50px rgba(18,57,43,0.14);
+  --shadow-badge: 0 14px 36px rgba(18,57,43,0.14);
+  --shadow-knob: 0 4px 14px rgba(0,0,0,0.3);
+  --space-2: 2px; --space-6: 6px; --space-12: 12px; --space-16: 16px; --space-18: 18px; --space-22: 22px; --space-26: 26px;
+  --space-32: 32px; --space-36: 36px; --space-38: 38px; --space-44: 44px; --space-50: 50px; --space-60: 60px; --space-64: 64px;
+  --space-80: 80px; --space-90: 90px; --space-110: 110px;
+  --radius-none: 0; --radius-round: 50%;
+  --border-hairline: 1px; --border-control: 1.5px; --border-rule: 2px; --border-step: 3px; --border-accent: 4px;
+  --container: 1240px; --sec-head-width: 640px; --col-acoes: 360px; --nav-height: 78px; --logo-height: 52px; --logo-height-footer: 64px;
+  --photo-row: 300px; --photo-row-1col: 280px; --mini: 64px; --alvo: 44px; --alvo-menu: 48px; --barra-height: 56px; --wa-icon: 22px;
+  /* os ícones da barra de ações encolhem com o ecrã abaixo de 393 px (a 320 px, 18 px): as três células cabem em terços */
+  --wa-icon-barra: min(22px, 5.6vw);
+  --z-header: 100; --z-menu-fundo: 95; --z-barra: 90; --z-skip: 200; --z-grain: 9999;
+  --font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Archivo', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* os 10 estilos de texto (de 29 tamanhos para 10) e o das etiquetas de formulário; mais nenhum font-size */
+  --fs-display-hero: clamp(2.6rem, 9vw, 5rem);    /* h1 da página inicial, só */
+  --fs-section: clamp(2.2rem, 6vw, 3.4rem);       /* h2 de secção e h1 das páginas interiores */
+  --fs-cta: clamp(2.4rem, 6vw, 3.6rem);           /* h2 da faixa de contacto */
+  --fs-card: 1.5rem;                              /* títulos de cartão, h2 dos grupos de obras */
+  --fs-step: 1.25rem;                             /* passos, títulos da lateral */
+  --fs-list: 1.12rem;                             /* linhas de serviço, lista de confiança */
+  --fs-lead: 1.15rem;                             /* lead do hero e introduções */
+  --fs-body: 1rem;                                /* texto e todos os campos de formulário (16 px: sem zoom no iOS) */
+  --fs-category: .8125rem;                        /* 13 px, maiúsculas: eyebrow, .cat, dt, rodapé, etiquetas, botões */
+  --fs-phone: 2.4rem;                             /* telefone da faixa de contacto e o número do cartão do hero */
+  --fs-label: .875rem;                            /* etiquetas de formulário e notas, sem maiúsculas */
+  /* superfície por omissão (paper): cada .s-* redefine estas variáveis e os componentes só leem estas */
+  --bg: var(--paper); --fg: var(--ink); --fg-2: var(--muted); --fg-cat: var(--muted); --rule: var(--line);
+  --eyebrow-rule: var(--clay); --focus-c: var(--focus);
+  --btn-bg: var(--clay); --btn-fg: var(--white); --btn-bg-h: var(--ink); --btn-fg-h: var(--paper);
+  /* movimento: três durações (nenhuma passa de 500 ms) e duas curvas; só se anima transform, opacity, as cores e o
+     traço dos ícones. --cascata separa os elementos de uma grelha ou de uma lista que entram juntos; --espera-js é
+     quanto a página espera pelo site.js antes de mostrar tudo sem animação (rede lenta, bloqueador) */
+  --dur-1: 150ms; --dur-2: 250ms; --dur-3: 500ms;
+  --ease-out: cubic-bezier(.2,.7,.3,1); --ease-in-out: cubic-bezier(.65,0,.35,1);
+  --cascata: 80ms; --espera-js: 2.5s;
+}
+
+/* ── Superfícies: a superfície decide a cor do texto, do traço do eyebrow, do botão e do foco ──
+   paper e bone: texto ink (verde), foco ink, botão clay (vermelho) com texto branco; ink: texto bone, traço e foco
+   amber (vermelho claro), botão clay com texto branco; clay: texto, traço e foco brancos (5,9:1), nunca ink (2,2:1), e
+   o botão paper com texto ink (o ghost com contorno branco), que com o rato fica branco com texto clay-deep (nunca um
+   bloco verde no vermelho). O clay só existe no painel da CtaBand, numa secção clara: nunca a toda a largura (--check) */
+.s-paper, .s-bone { --fg: var(--ink); --fg-2: var(--muted); --fg-cat: var(--muted); --rule: var(--line); --eyebrow-rule: var(--clay); --focus-c: var(--focus);
+  --btn-bg: var(--clay); --btn-fg: var(--white); --btn-bg-h: var(--ink); --btn-fg-h: var(--paper); color: var(--fg); }
+.s-paper { --bg: var(--paper); background: var(--paper); }
+.s-bone { --bg: var(--bone); background: var(--bone); }
+.s-ink { --bg: var(--ink); --fg: var(--bone); --fg-2: var(--bone-70); --fg-cat: var(--amber); --rule: var(--bone-15); --eyebrow-rule: var(--amber);
+  --focus-c: var(--focus-on-ink); --btn-bg: var(--clay); --btn-fg: var(--white); --btn-bg-h: var(--amber); --btn-fg-h: var(--ink);
+  background: var(--ink); color: var(--fg); }
+.s-clay { --bg: var(--clay); --fg: var(--white); --fg-2: var(--white); --fg-cat: var(--white); --rule: var(--white); --eyebrow-rule: var(--white);
+  --focus-c: var(--focus-on-clay); --btn-bg: var(--paper); --btn-fg: var(--ink); --btn-bg-h: var(--white); --btn-fg-h: var(--clay-deep);
+  background: var(--clay); color: var(--fg); }
+
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
+html { color-scheme: only light; -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--nav-height) + var(--space-16)); }
+/* deslizar suave só sem pedido de movimento reduzido, e só com foco dentro da página (ligações âncora clicadas ou pelo
+   teclado); ao abrir um endereço com #âncora a página salta logo */
+@media (prefers-reduced-motion: no-preference) {
+  html:focus-within { scroll-behavior: smooth; }
+}
+/* overflow-x: clip (hidden só nos browsers antigos) nunca faz do body um contentor de scroll: com o menu aberto
+   (html.menu-aberto, overflow: hidden) o body com hidden passava a deslizar ele próprio, a página saltava para o topo
+   e o cabeçalho perdia o sticky */
+body { font-family: var(--font-sans); font-size: var(--fs-body); background: var(--paper); color: var(--ink); line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; overflow-x: clip; }
+h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 600; line-height: 1.05; letter-spacing: -.01em; }
+/* os títulos partem em linhas equilibradas (nunca uma palavra sozinha, ou um «A» solto, na última linha); só mudam as
+   quebras, nunca o número de linhas, por isso as alturas da página ficam */
+h1, h2 { text-wrap: balance; }
+img, picture, svg { display: block; max-width: 100%; }
+a { color: inherit; }
+button, input, select, textarea { font: inherit; color: inherit; }
+input, select, textarea { font-size: var(--fs-body); }
+main:focus { outline: none; }
+::selection { background: var(--clay); color: var(--white); }
+/* no painel clay a seleção vermelha não se via: lá é ink */
+.s-clay ::selection { background: var(--ink); color: var(--white); }
+/* grão de ruído sobre a página inteira, a 4% (sem eventos de rato) */
+body.grain::before { content: ""; position: fixed; inset: 0; z-index: var(--z-grain); pointer-events: none; opacity: .04; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+/* uma margem esquerda: todo o conteúdo começa na borda da .wrap (32 px; 16 px até 640 px) */
+.wrap { width: 100%; max-width: var(--container); margin: 0 auto; padding: 0 var(--space-32); }
+.so-leitor { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.skip { position: absolute; left: var(--space-12); top: calc(-1 * var(--space-60)); z-index: var(--z-skip); background: var(--ink); color: var(--paper); padding: var(--space-12) var(--space-16); font-weight: 700; text-decoration: none; }
+/* o anel desenha-se por fora, sobre o cabeçalho paper: fica ink (o --focus-c da página), como nos cartões de obra */
+.skip:focus { top: var(--space-12); }
+/* fotografias: a prévia de 16 px (data/lqip.json) por trás enquanto a fotografia descarrega */
+.foto { display: block; background: var(--lqip, none) var(--lqip-pos, 50% 50%) / cover no-repeat; }
+.foto img { width: 100%; height: 100%; object-fit: cover; transition: opacity var(--dur-3) var(--ease-out), transform var(--dur-3) var(--ease-out); }
+/* LQIP: com o site.js a correr (.js-pronto), uma fotografia em lazy load fica transparente sobre a prévia até chegar
+   (.carregada) e entra num fade; as de carregamento imediato (hero, a primeira obra) nunca esperam */
+.js-pronto .foto img[loading="lazy"]:not(.carregada) { opacity: 0; }
+/* moldura de fotografia (hero, Porquê Nós): ink por trás e a grelha de planta (bone a 5%, a cada 39 px) por cima */
+.frame { position: relative; overflow: hidden; background: linear-gradient(145deg, var(--ink), var(--ink-raised)); }
+.frame .foto, .frame img { width: 100%; height: 100%; object-fit: cover; }
+.frame::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, transparent, transparent 38px, var(--bone-05) 38px, var(--bone-05) 39px), repeating-linear-gradient(90deg, transparent, transparent 38px, var(--bone-05) 38px, var(--bone-05) 39px); }
+
+/* ── Ícones (src/partials/icones.svg, {{icone nome}}): traço de 1,75 em currentColor, ao tamanho do texto ── */
+.icone { display: block; width: 1.25em; height: 1.25em; flex-shrink: 0; }
+
+/* ── Foco de teclado: um anel por superfície (ink no claro, amber no ink, branco no clay) ── */
+:focus-visible { outline: 3px solid var(--focus-c); outline-offset: 3px; }
+
+/* ── Cabeçalho: logo, menu (Início, Obras), telefone, WhatsApp e «Pedir Orçamento»; abaixo de 980 px, logo e menu ──
+   fundo paper opaco: a superfície do cabeçalho é sempre paper, também por cima das secções ink (sem vidro translúcido,
+   que ficava cinzento e deixava ver os títulos brancos por trás) */
+.topo { position: sticky; top: 0; z-index: var(--z-header); background: var(--paper); border-bottom: var(--border-hairline) solid var(--line); color: var(--ink); transition: box-shadow var(--dur-2) var(--ease-out); }
+/* depois de 80 px de scroll (site.js, .topo-compacto): sombra e o logótipo mais pequeno. A altura não muda (o conteúdo
+   não salta e o CLS fica em 0): o logótipo encolhe com transform, a partir da esquerda */
+.topo-compacto { box-shadow: var(--shadow-badge); }
+.topo-in { display: flex; align-items: center; gap: var(--space-38); height: var(--nav-height); }
+.logo { display: inline-flex; align-items: center; flex-shrink: 0; }
+.logo-img { height: var(--logo-height); width: auto; }
+.topo .logo-img { transform-origin: left center; transition: transform var(--dur-2) var(--ease-out); }
+.topo-compacto .logo-img { transform: scale(.85); }
+.navlinks { display: flex; gap: var(--space-38); list-style: none; align-items: center; }
+.navlinks a { color: var(--ink); text-decoration: none; font-size: var(--fs-category); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; position: relative; white-space: nowrap; display: inline-flex; align-items: center; min-height: var(--alvo); }
+/* o traço clay por baixo é decoração ao passar o rato; o texto fica sempre ink. Na página atual o traço é o único
+   sinal do estado: fica clay-deep (8:1 sobre paper, acima dos 3:1 de um elemento) */
+.navlinks a::after { content: ""; position: absolute; left: 0; bottom: var(--space-6); width: 100%; height: var(--border-rule); background: var(--clay); transform: scaleX(0); transform-origin: left; transition: transform var(--dur-2) var(--ease-out); }
+.navlinks a:hover::after { transform: none; }
+.navlinks a[aria-current="page"]::after { transform: none; background: var(--clay-deep); }
+.topo-contactos { display: flex; align-items: center; gap: var(--space-22); margin-left: auto; }
+.topo-tel { display: inline-flex; align-items: center; gap: var(--space-6); min-height: var(--alvo); color: var(--ink); text-decoration: none; font-family: var(--font-serif); font-size: var(--fs-step); font-weight: 700; line-height: 1.1; white-space: nowrap; }
+.topo-tel-txt { display: flex; flex-direction: column; justify-content: center; }
+.topo-tel .icone { width: 1em; height: 1em; }
+.topo-tel:hover .topo-tel-txt { text-decoration: underline; text-underline-offset: 3px; }
+/* o telefone abana uma vez ao passar o rato */
+.topo-tel:hover .i-telefone { animation: abana var(--dur-3) var(--ease-in-out); }
+@keyframes abana { 20% { transform: rotate(-14deg); } 40% { transform: rotate(12deg); } 60% { transform: rotate(-8deg); } 80% { transform: rotate(4deg); } }
+.topo-horario { font-family: var(--font-sans); font-size: var(--fs-category); font-weight: 600; color: var(--muted); margin-top: var(--space-2); }
+.topo-wa { display: inline-grid; place-items: center; width: var(--alvo); height: var(--alvo); color: var(--ink); box-shadow: inset 0 0 0 var(--border-control) currentColor; }
+.topo-wa .icone { width: var(--wa-icon); height: var(--wa-icon); }
+.barra-cel .icone { width: var(--wa-icon-barra); height: var(--wa-icon-barra); }
+/* o WhatsApp pulsa duas vezes ao carregar a página e pára (nada infinite) */
+.topo-wa .i-whatsapp, .barra-cel .i-whatsapp { animation: acena var(--dur-3) var(--ease-in-out) var(--dur-3) 2; }
+@keyframes acena { 50% { transform: scale(1.18); } }
+.topo-wa:hover { background: var(--ink); color: var(--paper); }
+.topo-btn { white-space: nowrap; }
+/* em orcamento.html o botão dá lugar ao nome da página atual */
+.topo-atual { display: inline-flex; align-items: center; min-height: 48px; padding: 0 var(--space-12); font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .07em; box-shadow: inset 0 calc(-1 * var(--border-rule)) 0 var(--clay-deep); }
+.topo-reduzido .topo-tel { margin-left: auto; }
+/* o botão do menu: 48 × 48, o ícone «menu» (24 px, traço de 1,75): as três barras viram X com aria-expanded */
+.menu-toggle { display: none; margin-left: auto; background: none; border: var(--border-control) solid var(--ink); color: var(--ink); cursor: pointer; width: var(--alvo-menu); height: var(--alvo-menu); align-items: center; justify-content: center; }
+.menu-toggle .icone { width: 24px; height: 24px; }
+.i-menu path { transform-box: fill-box; transform-origin: center; transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out); }
+.menu-toggle[aria-expanded="true"] .i-menu .b1 { transform: translateY(6px) rotate(45deg); }
+.menu-toggle[aria-expanded="true"] .i-menu .b2 { opacity: 0; }
+.menu-toggle[aria-expanded="true"] .i-menu .b3 { transform: translateY(-6px) rotate(-45deg); }
+/* o painel (ink) e o fundo escurecido entram com fade (e o painel desce 12 px); com o menu aberto a página não
+   desliza (html.menu-aberto, site.js). Ao fechar, site.js só esconde (hidden) no fim da transição */
+html.menu-aberto { overflow: hidden; }
+/* nos browsers sem overflow: clip, o body também não pode virar contentor de scroll com o menu aberto */
+html.menu-aberto body { overflow-x: visible; }
+.menu-fundo { position: fixed; inset: 0; z-index: var(--z-menu-fundo); background: var(--overlay-menu); opacity: 0; transition: opacity var(--dur-2) var(--ease-out); }
+.menu-movel { position: absolute; left: 0; right: 0; top: 100%; max-height: calc(100vh - var(--nav-height)); max-height: calc(100dvh - var(--nav-height)); overflow-y: auto; box-shadow: var(--shadow-badge); opacity: 0; transform: translateY(calc(-1 * var(--space-12))); transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out); }
+html.menu-aberto .menu-fundo, html.menu-aberto .menu-movel { opacity: 1; transform: none; }
+.menu-movel-in { display: flex; flex-direction: column; align-items: stretch; padding-top: var(--space-12); padding-bottom: var(--space-26); }
+.menu-movel-in a { color: var(--fg); text-decoration: none; font-size: var(--fs-category); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; display: flex; align-items: center; min-height: var(--alvo-menu); border-bottom: var(--border-hairline) solid var(--rule); }
+.menu-movel-in a[aria-current="page"] { box-shadow: inset var(--border-step) 0 0 var(--amber); padding-left: var(--space-12); }
+
+/* ── Botões: um primário (.btn) e um secundário (.btn-ghost), com a mesma altura; a cor vem da superfície ── */
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; background: var(--btn-bg); color: var(--btn-fg); padding: var(--space-12) var(--space-26); text-decoration: none; font-family: inherit; font-weight: 700; font-size: var(--fs-category); line-height: 1.3; text-transform: uppercase; letter-spacing: .07em; transition: background-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out); border: none; cursor: pointer; text-align: center; }
+.btn:hover { background: var(--btn-bg-h); color: var(--btn-fg-h); }
+.btn-ghost { background: transparent; color: var(--fg); box-shadow: inset 0 0 0 var(--border-control) currentColor; }
+.btn-ghost:hover { background: var(--fg); color: var(--bg); }
+.btn[disabled] { opacity: .7; cursor: wait; }
+/* em contraste forçado (Windows, alto contraste) o sistema tira os fundos e o box-shadow: uma borda real mantém o
+   contorno dos botões e do WhatsApp do cabeçalho (fora disso, nada muda) */
+@media (forced-colors: active) { .btn, .topo-wa { border: var(--border-control) solid ButtonText; } }
+/* o indicador de carga do envio (site.js põe .a-enviar): um anel que gira durante no máximo 20 s (40 voltas de 500 ms,
+   o mesmo tempo que o site.js espera pelo Netlify antes de desistir); nada infinite */
+.btn.a-enviar::before { content: ""; width: 1.1em; height: 1.1em; margin-right: var(--space-12); border: var(--border-rule) solid currentColor; border-right-color: transparent; border-radius: var(--radius-round); flex-shrink: 0; animation: gira var(--dur-3) var(--ease-in-out) 40; }
+@keyframes gira { to { transform: rotate(360deg); } }
+/* grupo de ações: 12 px entre botões; no telemóvel todos a toda a largura e com a mesma altura (uma grelha de linhas
+   iguais: se um rótulo parte em duas linhas, os outros botões do grupo ficam com a mesma altura) */
+.acoes { display: flex; flex-wrap: wrap; gap: var(--space-12); align-items: center; }
+
+/* ── Ligações: só duas ── */
+.link { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
+.link-seta { display: inline-flex; align-items: center; gap: var(--space-6); min-height: var(--alvo); padding: var(--space-12) 0; color: var(--fg); font-weight: 600; text-decoration: none; }
+.link-seta:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* a seta avança 5 px com o rato e com o foco do teclado */
+.i-seta { width: 1.125em; height: 1.125em; transition: transform var(--dur-1) var(--ease-out); }
+.link-seta:hover .i-seta, .link-seta:focus-visible .i-seta, .pg:hover .pg-ver .i-seta, .pg:has(a:focus-visible) .pg-ver .i-seta { transform: translateX(5px); }
+.links { display: flex; flex-direction: column; align-items: flex-start; }
+
+/* ── Eyebrow: texto da cor da superfície e traço de 34 px (clay no claro, amber no ink, branco no clay) ── */
+.eyebrow { display: inline-flex; align-items: center; gap: var(--space-12); font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .16em; color: var(--fg); margin-bottom: var(--space-26); }
+.eyebrow::before { content: ""; width: 34px; height: var(--border-rule); background: var(--eyebrow-rule); flex-shrink: 0; }
+.cat { display: block; font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--fg-cat); }
+
+/* ── Hero (split do design system) ── */
+.hero { position: relative; padding: var(--space-80) 0 var(--space-90); }
+.hero-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: var(--space-60); align-items: center; }
+/* os filhos da grelha ocupam a coluna inteira: o h1 começa na borda da .wrap, como o logótipo */
+.hero-grid > * { width: 100%; min-width: 0; }
+.hero h1 { font-size: var(--fs-display-hero); margin-bottom: var(--space-26); }
+/* o itálico fica em clay-deep, o vermelho do texto sobre o claro (8:1) */
+.hero h1 em { font-style: italic; color: var(--clay-deep); }
+.hero .lead { font-size: var(--fs-lead); color: var(--fg-2); max-width: 480px; margin-bottom: var(--space-38); }
+.hero-apoio { margin-top: var(--space-18); font-size: var(--fs-label); color: var(--fg-2); }
+.hero .prova { margin-top: var(--space-12); }
+.hero-moldura { position: relative; }
+.hero-moldura .frame { aspect-ratio: 4 / 3; }
+.hero-leg { margin-top: var(--space-12); font-size: var(--fs-label); color: var(--fg-2); }
+/* um só cartão, direito, encostado ao canto da fotografia (em baixo; no telemóvel em cima, ver as quebras) */
+.tag-card { position: absolute; left: 0; bottom: 0; background: var(--paper); color: var(--ink); padding: var(--space-18) var(--space-22); border-left: var(--border-accent) solid var(--clay); box-shadow: var(--shadow-tag); }
+.tag-card .n { display: block; font-family: var(--font-serif); font-size: var(--fs-phone); font-weight: 700; line-height: 1; }
+.tag-card .l { display: block; font-size: var(--fs-category); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-top: var(--space-6); }
+
+/* ── Secções: 80 px em cima e em baixo (50 até 640 px) e 44 px do SectionHead ao conteúdo (38 até 640 px), um passo
+   de token abaixo dos 90 e 50 de antes (o design system tem 110 e 64), para a página inicial caber nos 4.400 px a 1440
+   e nos 6.000 a 390 ── */
+.sec { padding: var(--space-80) 0; }
+.sec-head { max-width: var(--sec-head-width); margin-bottom: var(--space-44); }
+.sec-head .eyebrow { margin-bottom: var(--space-18); }
+.sec-head h1, .sec-head h2 { font-size: var(--fs-section); }
+.sec-head p { color: var(--fg-2); font-size: var(--fs-lead); margin-top: var(--space-18); }
+.lead { font-size: var(--fs-lead); }
+/* as introduções sem uma palavra sozinha na última linha (só mudam as quebras) */
+.sec-head p, .lead { text-wrap: pretty; }
+
+/* ── Serviços (ServiceList): linhas em 2 colunas (1 abaixo de 640 px), separadas por uma linha de 1 px, sem caixas nem
+   setas. A linha não é uma ligação: as ligações ficam em baixo (margin-top: auto), alinhadas entre linhas vizinhas.
+   Em baixo a linha só tem 6 px: as ligações já trazem 12 px de alvo por baixo do texto, e assim o texto fica à mesma
+   distância das linhas de cima e de baixo ── */
+.svc-lista { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--space-60); list-style: none; }
+.svc { display: flex; align-items: baseline; gap: var(--space-18); padding: var(--space-22) 0 var(--space-6); border-top: var(--border-hairline) solid var(--rule); }
+/* o número com uma largura fixa (o Fraunces não traz algarismos tabulares): os títulos de todas as linhas começam no
+   mesmo x, do 01 ao 06. Assenta na linha de base do título (align-items: baseline), com a altura de linha dos títulos:
+   com a de 1,9 de antes ficava 6 px abaixo, e alinhado pela base empurrava a linha para baixo */
+.svc-num { flex-shrink: 0; min-width: 1.3em; font-family: var(--font-serif); font-size: var(--fs-body); font-weight: 600; color: var(--fg-2); line-height: 1.05; }
+.svc-corpo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.svc h3 { font-size: var(--fs-list); margin-bottom: var(--space-6); }
+.svc p { color: var(--fg-2); font-size: var(--fs-body); }
+/* a miniatura (64 × 64, --mini, a do plano) flutua à direita do título e o texto contorna-a, a todas as larguras (a
+   linha «Fachadas e Impermeabilização» mostra o trabalho com corda também no telemóvel); as alturas da página inicial
+   ficam nos alvos (um teste do browser confirma). As duas ligações cabem numa só linha, também a 375 px */
+.svc-txt { display: flow-root; }
+.svc-links { margin-top: auto; padding-top: var(--space-6); display: flex; flex-wrap: wrap; gap: 0 var(--space-22); }
+.svc-mini { float: right; margin-left: var(--space-16); width: var(--mini); height: var(--mini); overflow: hidden; background: var(--ink-raised); }
+.svc-mini .foto { width: 100%; height: 100%; }
+
+/* ── Grelha de obras (ProjectGrid / ProjectCard): 2 colunas, gap 18, linhas de 300 px ── */
+/* as obras em destaque: «Ver as N obras» à direita do SectionHead, alinhado pela base do texto (o h2 só ocupa 640 px);
+   no HTML vem depois dos cartões, e até 980 px fica lá, por baixo deles */
+.obras-wrap { display: grid; grid-template-columns: 1fr auto; column-gap: var(--space-60); align-items: end; }
+.obras-wrap > .photo-grid { grid-column: 1 / -1; grid-row: 2; }
+.obras-wrap > .obras-mais { grid-column: 2; grid-row: 1; margin-bottom: var(--space-44); }
+/* o cartão (obra-foto.html): a fotografia cobre o cartão e a legenda assenta em baixo, na faixa escura. A legenda
+   está em fluxo: com o texto maior (zoom só do texto, letra de 32 px) a linha cresce em vez de a cortar; as linhas têm
+   300 px no mínimo (280 até 980 px, --photo-row-1col, uma coluna). Até 640 px a legenda passa para baixo da fotografia
+   (ver as quebras), menos nas obras em destaque da página inicial */
+.photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); grid-auto-rows: minmax(var(--photo-row), auto); gap: var(--space-18); }
+/* o anel de foco do cartão desenha-se por fora, sobre a superfície à volta: usa o --focus-c dela (ink no paper e no
+   bone, amber no ink), não o do interior escuro do cartão. Por camadas, dentro do cartão (isolation): a fotografia,
+   o escurecer do rato e o degradê por baixo (z-index negativo), a legenda em fluxo por cima e, acima de tudo, a
+   ligação do título, que cobre o cartão inteiro */
+.pg { position: relative; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; background: var(--ink-raised); min-height: 0; --fg-cat: var(--amber); --pg-pad: var(--space-26); color: var(--bone); }
+/* as obras em destaque da página inicial: com três, a segunda ocupa duas linhas (ao alto, ao lado das outras duas) */
+.destaques .pg:nth-child(2):nth-last-child(2) { grid-row: span 2; }
+.pg .foto { position: absolute; inset: 0; z-index: -2; }
+.pg img { width: 100%; height: 100%; object-fit: cover; filter: saturate(1.02); }
+/* o degradê do design system por baixo da legenda; com o rato, um segundo degradê escurece a fotografia (só a
+   opacidade anima) */
+.pg::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to top, var(--overlay) 0%, var(--overlay-soft) 45%, transparent 70%); pointer-events: none; }
+.pg::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--overlay-hover); opacity: 0; pointer-events: none; transition: opacity var(--dur-2) var(--ease-out); }
+.pg:hover::before { opacity: 1; }
+.pg:hover img { transform: scale(1.05); }
+/* a legenda assenta numa faixa --overlay (90% de ink-deep) que sobe 22 px em degradê acima do texto: mesmo sobre a
+   parte mais clara de uma fotografia (branco), o .cat amber fica a 5:1 e o título bone a 10:1. O
+   degradê é um ::before em fluxo, puxado para cima pelas margens (a legenda não é posicionada: assim a ligação do
+   título cobre o cartão inteiro, e não só a legenda) */
+.pg figcaption { padding: var(--pg-pad); background-color: var(--overlay); }
+.pg figcaption::before { content: ""; display: block; height: var(--space-22); margin: calc(-1 * (var(--space-22) + var(--pg-pad))) calc(-1 * var(--pg-pad)) var(--pg-pad); background: linear-gradient(to top, var(--overlay), transparent); pointer-events: none; }
+/* «Antes e depois» na obra que tem o comparador */
+.pg-tag { display: inline-block; margin-bottom: var(--space-6); padding: var(--space-2) var(--space-6); background: var(--clay); color: var(--white); font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
+.pg figcaption h2, .pg figcaption h3 { font-size: var(--fs-card); margin-top: var(--space-6); color: inherit; line-height: 1.15; }
+.pg-ver { display: flex; align-items: center; gap: var(--space-6); margin-top: var(--space-12); font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--amber); opacity: 0; transform: translateY(6px); transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out); }
+.pg:hover .pg-ver, .pg:has(a:focus-visible) .pg-ver { opacity: 1; transform: none; }
+/* com rato, «Ver obra» só ocupa lugar ao passar ou com o foco: em repouso a faixa fica à medida do texto */
+@media (hover: hover) {
+  .pg-ver { max-height: 0; margin-top: 0; overflow: hidden; }
+  .pg:hover .pg-ver, .pg:has(a:focus-visible) .pg-ver { max-height: 2em; margin-top: var(--space-12); }
+}
+/* sem rato (toque), «Ver obra» fica sempre, mais junto ao título */
+@media (hover: none) { .pg-ver { opacity: 1; transform: none; margin-top: var(--space-6); } }
+/* a ligação do título cobre o cartão inteiro (a legenda e o h3 não são posicionados: o ::after mede-se pelo .pg); o
+   anel de foco desenha-se à volta do cartão */
+.pg figcaption a { color: inherit; text-decoration: none; }
+.pg figcaption a::after { content: ""; position: absolute; inset: 0; z-index: 3; }
+.pg:has(a:focus-visible) { outline: 3px solid var(--focus-c); outline-offset: 3px; }
+.pg figcaption a:focus-visible { outline: none; }
+
+/* ── Comparador antes/depois ── */
+.ba-wrap { margin: 0; }
+/* à largura do contentor, sem margem: alinhado com o h1; no máximo 78% da altura do ecrã */
+.ba-slider { position: relative; width: 100%; margin: 0; aspect-ratio: 4 / 3; max-height: 78vh; overflow: hidden; user-select: none; background: var(--ink-deep); touch-action: pan-y; }
+.ba-slider .foto { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ba-slider img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+.ba-before-img { position: absolute; inset: 0; width: 50%; overflow: hidden; z-index: 2; }
+/* o antes tem sempre a largura do comparador: por omissão o dobro do seu contentor a 50%; site.js põe --ba-w em px */
+.ba-before-img .foto { width: var(--ba-w, 200%); max-width: none; }
+.ba-handle { position: absolute; top: 0; bottom: 0; left: 50%; width: var(--border-step); background: var(--white); z-index: 3; transform: translateX(-50%); pointer-events: none; }
+.ba-handle .ba-arrows { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 46px; height: 46px; background: var(--white); color: var(--ink); border-radius: var(--radius-round); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-knob); }
+.ba-arrows .icone { width: 18px; height: 18px; transition: transform var(--dur-1) var(--ease-out); }
+/* ao agarrar a pega (site.js, .ba-a-arrastar) as setas afastam-se */
+.ba-a-arrastar .ba-arrows .i-seta-esq { transform: translateX(-3px); }
+.ba-a-arrastar .ba-arrows .i-seta-dir { transform: translateX(3px); }
+/* cada etiqueta corta-se com a sua fotografia: a do antes vive dentro de .ba-before-img (que a recorta à largura da
+   linha) e a do depois fica por baixo do antes (z-index 1 contra 2), que a tapa quando a linha passa; a linha branca
+   da pega (3) fica sempre por cima das duas */
+.ba-tag { position: absolute; bottom: var(--space-16); font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .1em; padding: var(--space-6) var(--space-12); pointer-events: none; white-space: nowrap; }
+.tag-before { left: var(--space-16); background: var(--ink); color: var(--paper); }
+.tag-after { right: var(--space-16); z-index: 1; background: var(--clay); color: var(--white); }
+/* o range cobre o comparador mas deixa passar o deslize vertical (pan-y); o foco desenha-se à volta da pega. O anel
+   fica sobre uma fotografia, não sobre uma superfície: ink encostado à pega branca e um halo branco por fora, para se
+   ver sobre a parte escura e sobre a clara (a sombra da pega fica) */
+.ba-range { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 5; opacity: 0; cursor: ew-resize; margin: 0; touch-action: pan-y; }
+.ba-slider:has(.ba-range:focus-visible) .ba-arrows { outline: 3px solid var(--focus-c); outline-offset: 0; box-shadow: var(--shadow-knob), 0 0 0 6px var(--white); }
+/* com site.js (.ba-js) o range fica só para o teclado e o leitor de ecrã: um toque ou um clique na fotografia põe a
+   linha nesse sítio (site.js) e arrasta-se a partir da pega, numa faixa de 32 px para cada lado da linha (BA_PEGA) */
+.ba-js .ba-range { pointer-events: none; }
+.ba-js .ba-handle { pointer-events: auto; cursor: ew-resize; touch-action: pan-y; }
+.ba-js .ba-handle::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 64px; transform: translateX(-50%); }
+.ba-js.ba-a-arrastar { cursor: ew-resize; }
+
+/* ── Porquê Nós: o SectionHead à largura da .wrap; por baixo, as garantias (em duas colunas, uma até 640 px) e «Quem
+   somos» à esquerda, e a fotografia 4:3 à direita, com o topo na primeira garantia, a acabar no bordo direito do painel
+   clay logo abaixo e com a largura da coluna das ações dele (360 px, --col-acoes; um terço da .wrap nos ecrãs mais
+   estreitos) ── */
+.trust-grid { display: grid; grid-template-columns: minmax(0, 1fr) min(var(--col-acoes), 33%); gap: var(--space-80); align-items: start; }
+.trust-grid > * { width: 100%; min-width: 0; }
+.trust-list { list-style: none; display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--space-38); }
+.trust-list li { display: flex; gap: var(--space-18); padding: var(--space-22) 0; border-bottom: var(--border-hairline) solid var(--rule); }
+/* a última fila (uma ou duas garantias) sem linha por baixo: a linha seguinte é a de «Quem somos» */
+.trust-list li:last-child, .trust-list li:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+/* a caixa de visto (28 px, borda clay de 2 px) com o ícone «visto» em clay-deep; também na lista «Na obra» das fichas */
+.tick { flex-shrink: 0; width: 28px; height: 28px; border: var(--border-rule) solid var(--clay); display: grid; place-items: center; color: var(--clay-deep); }
+.tick .icone { width: 20px; height: 20px; }
+/* os traços que se desenham têm pathLength="1" (icones.svg); o traço e o intervalo de 1,05 cobrem a junta do fim com o
+   princípio (sem a falha de um píxel que o arredondamento deixava no círculo) */
+.tick path { stroke-dasharray: 1.05; }
+.trust-list .tick { margin-top: var(--space-2); }
+/* os vistos desenham-se quando a lista entra no ecrã (.reveal.in), um a seguir ao outro (--cascata) */
+.trust-list li, .lista-visto li { --i: 0; }
+.trust-list li:nth-child(2), .lista-visto li:nth-child(2) { --i: 1; }
+.trust-list li:nth-child(3), .lista-visto li:nth-child(3) { --i: 2; }
+.trust-list li:nth-child(4), .lista-visto li:nth-child(4) { --i: 3; }
+.trust-list li:nth-child(5), .lista-visto li:nth-child(5) { --i: 4; }
+.trust-list li:nth-child(n+6), .lista-visto li:nth-child(n+6) { --i: 5; }
+.js .reveal .tick path { stroke-dashoffset: 1.05; }
+.js .reveal.in .tick path { stroke-dashoffset: 0; transition: stroke-dashoffset var(--dur-3) var(--ease-out); transition-delay: calc(var(--dur-2) + var(--i) * var(--cascata)); }
+.trust-list h3 { font-size: var(--fs-list); margin-bottom: var(--space-6); }
+.trust-list p { color: var(--fg-2); font-size: var(--fs-body); }
+/* a variante condensada (orcamento.html, partials/garantias.html com curta): só os títulos, numa coluna, uma linha
+   por cima de cada uma, com o visto já desenhado (não está numa .reveal) */
+.trust-list.trust-list-curta { grid-template-columns: 1fr; column-gap: 0; }
+.trust-list-curta li, .trust-list-curta li:nth-last-child(2):nth-child(odd), .trust-list-curta li:last-child { padding: var(--space-12) 0; align-items: center; border-bottom: none; border-top: var(--border-hairline) solid var(--rule); }
+.trust-list-curta .tick { margin-top: 0; }
+.trust-list-curta h3 { margin-bottom: 0; }
+.trust-list-curta p { font-size: var(--fs-label); margin-top: var(--space-2); }
+.quem-somos { padding-top: var(--space-22); border-top: var(--border-hairline) solid var(--rule); }
+.quem-somos h3 { font-size: var(--fs-list); margin-bottom: var(--space-6); }
+.quem-somos p { color: var(--fg-2); }
+/* a foto-02 é 4:3: a moldura tem a mesma proporção, sem corte; o topo alinha com a primeira garantia */
+.trust-foto { margin-top: var(--space-22); }
+.trust-foto .frame { aspect-ratio: 4 / 3; }
+.trust-foto figcaption { margin-top: var(--space-6); }
+
+/* ── Faixa de contacto (CtaBand): um painel vermelho (clay: texto, traços e foco brancos; botão paper com texto ink, ghost
+   com contorno branco) dentro da .wrap, numa secção clara (paper ou bone). O vermelho nunca encosta ao verde: com a
+   faixa a toda a largura entre um grupo de obras ink e o rodapé ink, o ecrã ficava em listas verde e vermelha. Os
+   bordos do painel são os da .wrap (a mesma margem esquerda), o texto fica para dentro ── */
+.cta-painel { position: relative; overflow: hidden; padding: var(--space-64) var(--space-50); }
+.cta-painel::before { content: ""; position: absolute; top: -50%; right: -10%; width: 600px; height: 600px; border: 60px solid var(--bone-07); border-radius: var(--radius-round); pointer-events: none; }
+.cta-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: var(--space-60); align-items: center; position: relative; z-index: 2; }
+.cta-grid > * { width: 100%; min-width: 0; }
+.cta h2 { font-size: var(--fs-cta); }
+.cta-p { margin-top: var(--space-18); font-size: var(--fs-lead); max-width: 420px; }
+/* o telefone em grande: 44 px de alvo, como os outros contactos principais */
+.cta-phone { display: inline-flex; align-items: center; min-height: var(--alvo); margin-top: var(--space-32); font-family: var(--font-serif); font-size: var(--fs-phone); font-weight: 700; line-height: 1.1; color: var(--fg); text-decoration: none; letter-spacing: -.01em; }
+.cta-phone:hover { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; }
+/* o horário da Melperfaz, como ela o escreve («8h–18h»): sem maiúsculas, como no cabeçalho (.topo-horario) */
+.cta-phone-l { display: block; font-size: var(--fs-category); font-weight: 600; margin-top: var(--space-6); color: var(--fg-2); }
+/* a coluna das ações: botões, referência e ProofLine com a mesma largura (até 360 px), encostada à direita */
+.cta-grid > .cta-acoes { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-18); justify-self: end; max-width: var(--col-acoes); }
+/* os botões empilhados, com a mesma largura (no mínimo 280 px; toda a largura no telemóvel) e a mesma altura (uma
+   grelha de linhas iguais, também quando um rótulo parte em duas linhas) */
+.acoes-pilha { display: grid; grid-auto-rows: 1fr; align-items: stretch; min-width: 280px; }
+.cta-ref { font-size: var(--fs-label); }
+/* ProofLine: as garantias em linha, separadas por pontos; a cor vem da superfície */
+.prova { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-12); list-style: none; font-size: var(--fs-label); color: var(--fg-2); }
+/* um quadrado pequeno antes de cada garantia (não um separador): ao partir a linha nada fica solto no início */
+.prova li { display: inline-flex; align-items: center; gap: var(--space-6); }
+.prova li::before { content: ""; width: 6px; height: 6px; background: currentColor; flex-shrink: 0; }
+
+/* ── PageHead (paper): migalhas, eyebrow, h1 e introdução; .sec-junta continua a secção de cima (sem espaço) ── */
+.page-head { padding-top: var(--space-50); padding-bottom: var(--space-64); }
+/* compacto (orcamento.html): 38 px em baixo a todas as larguras (a regra do telemóvel, só .page-head, não a desfaz) */
+.page-head.page-head-compacto { padding-bottom: var(--space-38); }
+.page-head .sec-head { max-width: 760px; margin-bottom: 0; }
+/* o eyebrow com ligação (fichas de obra): o alvo de 44 px desenha-se por fora (::after centrado no texto), sem engordar
+   o eyebrow (como inline-flex de 44 px, que baixava o h1 17 px em relação às outras páginas) */
+.page-head .eyebrow a { position: relative; color: inherit; text-decoration: none; }
+.page-head .eyebrow a::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: var(--alvo); transform: translateY(-50%); }
+.page-head .eyebrow a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.sec.sec-junta { padding-top: 0; }
+/* o ícone do PageHead (obrigado.html: «enviado», um visto desenhado num círculo ao abrir a página) */
+.pag-icone { display: block; color: var(--clay-deep); margin-bottom: var(--space-22); }
+.pag-icone .icone { width: 64px; height: 64px; }
+.pag-icone circle, .pag-icone path { stroke-dasharray: 1.05; animation: desenha var(--dur-3) var(--ease-out) both; }
+.pag-icone path { animation-delay: var(--dur-3); }
+@keyframes desenha { from { stroke-dashoffset: 1.05; } to { stroke-dashoffset: 0; } }
+.migalhas { display: flex; gap: 0 var(--space-6); align-items: center; font-size: var(--fs-label); color: var(--fg-2); margin-bottom: var(--space-22); }
+.migalhas a { color: var(--fg-2); text-decoration: none; display: inline-flex; align-items: center; min-height: var(--alvo); }
+.migalhas a:hover { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
+.migalhas a, .migalhas [aria-hidden] { flex-shrink: 0; }
+/* as migalhas numa linha: o nome da página atual (o h1 logo abaixo repete-o por inteiro) acaba em reticências quando
+   não cabe, em vez de partir para uma segunda linha e baixar o h1 das fichas em relação às outras páginas */
+.migalhas [aria-current] { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--fg); }
+/* páginas curtas (obrigado, 404): o cabeçalho e as ações, sem coluna centrada */
+.pag-curta { min-height: 40vh; }
+.pag-curta .acoes { margin-bottom: var(--space-32); }
+
+/* ── Texto corrido (privacidade, fichas de obra) ── */
+.prosa { max-width: 72ch; }
+.prosa h2 { font-size: var(--fs-card); margin: var(--space-44) 0 var(--space-16); }
+.prosa h2:first-child { margin-top: 0; }
+.prosa h3 { font-size: var(--fs-step); margin: var(--space-32) 0 var(--space-12); }
+.prosa p, .prosa li { color: var(--fg-2); font-size: var(--fs-body); }
+.prosa p + p { margin-top: var(--space-12); }
+.prosa ul { padding-left: 1.2em; }
+.prosa li + li { margin-top: var(--space-6); }
+.prosa a { color: var(--fg); text-underline-offset: 3px; }
+.prosa strong { color: var(--fg); }
+
+/* ── Ficha (fundo bone, dl em 2 colunas) ── */
+.ficha { background: var(--bone); color: var(--ink); padding: var(--space-32); border: var(--border-hairline) solid var(--line); }
+.ficha h2 { font-size: var(--fs-card); margin-bottom: var(--space-22); }
+.ficha dl { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-18) var(--space-22); }
+.ficha dl > div { min-width: 0; }
+.ficha .ficha-largo { grid-column: 1 / -1; }
+.ficha dt { font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: var(--space-6); }
+.ficha dd { font-size: var(--fs-body); overflow-wrap: anywhere; }
+.ficha dd a { color: var(--ink); text-underline-offset: 3px; }
+.prosa .ficha { margin: var(--space-16) 0; }
+
+/* ── Rodapé (ink), 3 colunas; todas as ligações com 44 px de altura ── */
+.rodape { padding: var(--space-64) 0 var(--space-44); }
+.foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: var(--space-50); margin-bottom: var(--space-44); }
+.foot-brand .logo { margin-bottom: var(--space-18); }
+.foot-brand .logo-img { height: var(--logo-height-footer); margin-bottom: var(--space-6); }
+.foot-brand p { color: var(--fg-2); max-width: 360px; font-size: var(--fs-body); }
+.foot-brand p + p { margin-top: var(--space-12); }
+.foot-h { font-size: var(--fs-category); text-transform: uppercase; letter-spacing: .1em; color: var(--amber); font-weight: 700; margin-bottom: var(--space-6); }
+.foot-col a, .foot-bottom a { display: flex; align-items: center; min-height: var(--alvo); color: var(--fg-2); text-decoration: none; font-size: var(--fs-body); transition: color var(--dur-1) var(--ease-out); }
+.foot-col a:hover, .foot-bottom a:hover { color: var(--fg); text-decoration: underline; text-underline-offset: 3px; }
+.foot-txt { display: block; color: var(--fg-2); font-size: var(--fs-body); padding: var(--space-12) 0; }
+.foot-bottom { border-top: var(--border-hairline) solid var(--rule); padding-top: var(--space-18); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-6) var(--space-26); font-size: var(--fs-label); color: var(--fg-2); }
+.foot-bottom a { font-size: var(--fs-label); }
+/* o NIF (nove algarismos) não parte a meio */
+.sem-quebra { white-space: nowrap; }
+
+/* ── Barra de ações (ActionBar): só abaixo de 980 px, fixa em baixo; Ligar e WhatsApp ink, Orçamento clay com texto branco ── */
+.barra { display: none; }
+
+/* ── Entrada ao fazer scroll (site.js põe .in): sobe 16 px em 500 ms; numa grelha, os que entram juntos seguem-se
+   a 80 ms (site.js põe --i, a posição no grupo) ── */
+.js .reveal { opacity: 0; transform: translateY(var(--space-16)); transition: opacity var(--dur-3) var(--ease-out), transform var(--dur-3) var(--ease-out); transition-delay: calc(var(--i, 0) * var(--cascata)); }
+.js .reveal.in { opacity: 1; transform: none; }
+/* se o site.js não chegar a correr (rede, bloqueador: falta .js-pronto), nada fica invisível: ao fim de --espera-js
+   tudo aparece, vistos incluídos. Com o site.js a correr, esta regra deixa de valer e a entrada é a do scroll */
+.js:not(.js-pronto) .reveal, .js:not(.js-pronto) .reveal .tick path { animation: revelaSemJs 0s var(--espera-js) forwards; }
+@keyframes revelaSemJs { to { opacity: 1; transform: none; stroke-dashoffset: 0; } }
+
+/* ── Movimento reduzido: as animações e as transições acabam logo (as mudanças de cor ficam, sem transição) e nada se
+   desloca: a entrada ao fazer scroll, as setas, o logótipo compacto e o painel do menu ficam no sítio. As barras do
+   menu continuam a virar X (é o estado do botão), sem animação ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0s !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: 0s !important; transition-delay: 0s !important; }
+  .js .reveal { opacity: 1; transform: none; }
+  .js .reveal .tick path { stroke-dashoffset: 0; }
+  .pg:hover img, .pg-ver, .i-seta, .ba-arrows .icone, .topo-compacto .logo-img, .menu-movel { transform: none !important; }
+}
+
+/* ── Quebras: só duas (980 px: o cabeçalho colapsa, aparece a barra de ações e as grelhas de 2 colunas empilham;
+   640 px: 1 coluna e menos espaço) ── */
+@media (max-width: 980px) {
+  :root { --nav-height: 64px; }
+  .navlinks, .topo-nav, .topo-contactos { display: none; }
+  .menu-toggle { display: inline-flex; }
+  .hero-grid, .trust-grid, .cta-grid { grid-template-columns: 1fr; }
+  /* empilhada, a foto do Porquê Nós fica por baixo de «Quem somos», à largura toda */
+  .trust-grid { gap: var(--space-44); }
+  .trust-foto { margin-top: 0; }
+  .cta-grid > .cta-acoes { justify-self: start; }
+  .obras-wrap { display: block; }
+  .obras-wrap > .obras-mais { margin: var(--space-44) 0 0; }
+  .photo-grid { grid-template-columns: 1fr; grid-auto-rows: minmax(var(--photo-row-1col), auto); }
+  .destaques .pg:nth-child(2):nth-last-child(2) { grid-row: span 1; }
+  .foot-grid { grid-template-columns: 1fr 1fr; }
+  .foot-brand { grid-column: 1 / -1; }
+  /* a barra: três células de 56 px mais a margem segura do ecrã; o body reserva o mesmo espaço em baixo */
+  /* em terços (minmax(0, 1fr): o conteúdo nunca alarga uma célula nem a barra para lá do ecrã). Abaixo de 360 px o
+     espaço entre letras, o intervalo e o ícone encolhem com o ecrã, para «WhatsApp» e «Fotografias» caberem na sua
+     célula a 320 px; se ainda assim não couberem (espaçamento de texto do utilizador, WCAG 1.4.12), o ícone passa para
+     cima do rótulo e, em último caso, a palavra parte, em vez de sair da célula e do ecrã */
+  .barra { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-barra); background: var(--ink); padding-bottom: env(safe-area-inset-bottom); border-top: var(--border-hairline) solid var(--bone-15); }
+  .barra-cel { display: flex; flex-wrap: wrap; align-items: center; align-content: center; justify-content: center; gap: 0 min(var(--space-6), 1.25vw); min-width: 0; min-height: var(--barra-height); padding: 0 var(--space-2); color: var(--bone); text-decoration: none; font-size: var(--fs-category); font-weight: 700; text-transform: uppercase; letter-spacing: clamp(.02em, calc(.02em + (100vw - 320px) * .01625), .07em); overflow-wrap: anywhere; text-align: center; --focus-c: var(--focus-on-ink); }
+  .barra-cel + .barra-cel { border-left: var(--border-hairline) solid var(--bone-15); }
+  .barra-orc { background: var(--clay); color: var(--white); --focus-c: var(--focus-on-clay); }
+  .barra-cel:focus-visible { outline-offset: -4px; }
+  body.com-barra { padding-bottom: calc(var(--barra-height) + env(safe-area-inset-bottom)); }
+  /* a barra fixa não tapa o foco: ao tabular (e nas âncoras) o browser para o elemento acima dela, como faz com o
+     cabeçalho (scroll-padding-top) */
+  html { scroll-padding-bottom: calc(var(--barra-height) + env(safe-area-inset-bottom) + var(--space-16)); }
+}
+@media (max-width: 640px) {
+  /* só os lados: o painel do menu (.menu-movel-in, também uma .wrap) guarda os 12 px em cima e os 26 px em baixo, e o
+     anel de foco da primeira e da última ligação desenha-se inteiro dentro dele (o overflow-y do painel cortava-o) */
+  .wrap { padding-left: var(--space-16); padding-right: var(--space-16); }
+  .sec { padding: var(--space-50) 0; }
+  .sec-head { margin-bottom: var(--space-38); }
+  .hero { padding: var(--space-50) 0; }
+  .page-head { padding-top: var(--space-26); padding-bottom: var(--space-44); }
+  .svc-lista { grid-template-columns: 1fr; }
+  .svc { padding: var(--space-18) 0 var(--space-6); gap: var(--space-12); }
+  .trust-list { grid-template-columns: 1fr; }
+  .trust-list li { padding: var(--space-18) 0; }
+  .trust-list li:nth-last-child(2):nth-child(odd) { border-bottom: var(--border-hairline) solid var(--rule); }
+  .trust-list li:last-child { border-bottom: none; }
+  .quem-somos { padding-top: var(--space-18); }
+  .ficha dl { grid-template-columns: 1fr; }
+  .acoes { display: grid; grid-auto-rows: 1fr; align-items: stretch; }
+  .acoes .btn { width: 100%; }
+  /* botões com menos folga dos lados: os rótulos longos («Enviar fotografias por WhatsApp», «Enviar pedido de
+     orçamento») ficam numa linha a partir de 360 px */
+  .btn { padding-left: var(--space-16); padding-right: var(--space-16); }
+  /* o cartão «25 anos» sobe para o canto de cima, sobre o prédio vizinho e o céu, e encolhe: em baixo tapava a frente
+     da carrinha da legenda */
+  .tag-card { top: 0; bottom: auto; padding: var(--space-12) var(--space-16); }
+  .tag-card .n { font-size: var(--fs-card); }
+  .cta-grid > .cta-acoes { max-width: none; }
+  /* o painel vermelho no telemóvel: 16 px por dentro dos lados, como a .wrap por fora, 22 em cima e em baixo (com a
+     entrelinha do eyebrow e da ProofLine, cerca de 28 à vista), e o telefone e as ações um passo mais juntos (dentro do
+     painel o vermelho já separa): a página inicial fica abaixo dos 6.000 px a 390 com o texto um pouco mais estreito */
+  .cta-painel { padding: var(--space-22) var(--space-16); }
+  .cta-painel .cta-phone { margin-top: var(--space-22); }
+  .acoes-pilha { min-width: 0; }
+  /* a marca a toda a largura; «Site» e «Contactos» lado a lado */
+  .foot-grid { gap: var(--space-32) var(--space-22); }
+  .foot-col a { overflow-wrap: anywhere; }
+  .hero-grid { gap: var(--space-38); }
+  .cta-grid { gap: var(--space-26); }
+  .obras-wrap > .obras-mais { margin-top: var(--space-32); }
+  /* a foto do Porquê Nós sai no telemóvel (a prova fotográfica já está nas obras logo acima) */
+  .trust-foto { display: none; }
+  .foot-bottom { flex-direction: column; align-items: flex-start; }
+  /* ProjectCard no telemóvel: a legenda passa para baixo da fotografia, que fica numa moldura 4/3 (deitada) ou 4/5 (ao
+     alto), cortada a partir do «foco»; a legenda assenta no ink-raised do cartão, sem faixa nem degradês. As obras em
+     destaque da página inicial ficam com a legenda por cima da fotografia, em linhas de 280 px, e sem «Ver obra» (o
+     cartão inteiro é a ligação): a página inicial cabe nos 6.000 px a 390. A legenda um passo de token mais junta à
+     borda, como a .wrap */
+  .pg { --pg-pad: var(--space-22); }
+  .photo-grid:not(.destaques) { grid-auto-rows: auto; }
+  .photo-grid:not(.destaques) .pg .foto { position: relative; inset: auto; aspect-ratio: 4 / 3; overflow: hidden; }
+  .photo-grid:not(.destaques) .pg[data-orient="portrait"] .foto { aspect-ratio: 4 / 5; }
+  .photo-grid:not(.destaques) .pg::before, .photo-grid:not(.destaques) .pg::after, .photo-grid:not(.destaques) .pg figcaption::before { display: none; }
+  .photo-grid:not(.destaques) .pg figcaption { background-color: var(--ink-raised); }
+  .destaques .pg-ver { display: none; }
+  /* as etiquetas do comparador mais juntas (a 320 px ficavam encostadas uma à outra na linha do meio) */
+  .ba-tag { padding: var(--space-6); letter-spacing: .05em; bottom: var(--space-12); }
+  .tag-before { left: var(--space-12); }
+  .tag-after { right: var(--space-12); }
+}

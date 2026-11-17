@@ -1,0 +1,11 @@
+<!-- Barra de ações (ActionBar), só abaixo de 980 px: fixa em baixo, três células de 56 px mais a margem segura do ecrã.
+     Ligar e WhatsApp em ink, Orçamento em clay (vermelho) com texto branco (com ?tipo= quando a página o conhece). Em orcamento.html
+     (meta barra «sem-orcamento») a terceira célula é «Enviar fotografias», com a mensagem que fala das fotografias
+     (site.json «wa.fotos»: as duas células de WhatsApp não fazem o mesmo); em obrigado.html (barra «nao») não há barra.
+     O body leva .com-barra, que lhe dá um padding-bottom da altura da barra (nada fica tapado). -->
+<nav class="barra" aria-label="Contactos rápidos">
+  <a class="barra-cel" href="{{ site.phoneHref }}" aria-label="Ligar {{ site.phone }}">{{icone telefone}}Ligar</a>
+  <a class="barra-cel" href="{{wa {{ page.wa }}}}" target="_blank" rel="noopener" aria-label="Falar por WhatsApp">{{icone whatsapp}}WhatsApp</a>{{#se barra.orcamento}}
+  <a class="barra-cel barra-orc" href="{{ pedidoHref }}" aria-label="Pedir Orçamento">Orçamento</a>{{/se}}{{#sem barra.orcamento}}
+  <a class="barra-cel barra-orc" href="{{wa fotos}}" target="_blank" rel="noopener" aria-label="Enviar fotografias por WhatsApp">Enviar fotografias</a>{{/sem}}
+</nav>

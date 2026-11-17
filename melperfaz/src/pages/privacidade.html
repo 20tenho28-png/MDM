@@ -1,0 +1,86 @@
+<!--meta {"file": "privacidade.html", "title": "Política de privacidade · Melperfaz", "description": "Que dados a Melperfaz recolhe e para quê: pedidos de orçamento pelo formulário, telefone e WhatsApp. Prazos, quem os trata por nossa conta e os seus direitos.", "nav": "", "jsonld": ["breadcrumb"], "breadcrumb": [["Início", ""], ["Política de privacidade", "privacidade.html"]], "css": ["pag-paginas.css"], "atualizada": "2026-10-23", "atualizadaTexto": "23 de outubro de 2026"} -->
+{{> page-head eyebrow="Privacidade" titulo="Política de privacidade" intro="Que dados recolhemos, para quê, durante quanto tempo, quem os trata por nossa conta e como pode exercer os seus direitos."}}
+
+<section class="sec s-paper sec-junta priv" aria-label="Texto da política de privacidade">
+  <div class="wrap priv-grelha">
+    <nav class="priv-indice" aria-label="Nesta página">
+      <p class="priv-indice-t">Nesta página</p>
+      <ol>
+        <li><a href="#resumo">Em resumo</a></li>
+        <li><a href="#responsavel">Quem é responsável</a></li>
+        <li><a href="#dados">Que dados tratamos e porquê</a></li>
+        <li><a href="#equipamento">O que fica no seu equipamento</a></li>
+        <li><a href="#destinatarios">Quem recebe os dados</a></li>
+        <li><a href="#direitos">Os seus direitos</a></li>
+        <li><a href="#alteracoes">Alterações</a></li>
+      </ol>
+    </nav>
+    <div class="prosa priv-texto">
+      <h2 id="resumo">Em resumo</h2>
+      <ul>
+        <li>Só recebemos os seus dados quando nos faz um pedido: pelo formulário do site, por telefone ou por WhatsApp. Usamo-los para lhe responder e para fazer a obra que nos pedir.</li>
+        <li>O site não usa cookies, não tem estatísticas de visitas e não carrega nada de outros serviços (os tipos de letra estão alojados com o site).</li>
+        <li>Não vendemos nem cedemos dados a ninguém para publicidade ou outros fins comerciais.</li>
+        <li>Para ver, corrigir ou apagar os seus dados, ligue {{ site.phone }}{{#se dados.email}} ou escreva para <a href="mailto:{{ dados.email }}">{{ dados.email }}</a>{{/se}}.</li>
+      </ul>
+
+      <h2 id="responsavel">Quem é responsável</h2>
+      <p>O responsável pelo tratamento dos dados é a empresa:</p>
+      <div class="ficha">
+        <dl aria-label="Responsável pelos dados">
+          <div class="ficha-largo"><dt>Responsável</dt><dd>{{ site.legalName }}</dd></div>{{#se dados.nif}}
+          <div><dt>NIF</dt><dd>{{ dados.nif }}</dd></div>{{/se}}{{#se dados.morada}}
+          <div class="ficha-largo"><dt>Morada</dt><dd>{{ dados.morada }}</dd></div>{{/se}}{{#se dados.email}}
+          <div><dt>Email</dt><dd><a href="mailto:{{ dados.email }}">{{ dados.email }}</a></dd></div>{{/se}}
+        </dl>
+      </div>
+      <p>Para qualquer questão sobre os seus dados, incluindo os direitos descritos <a href="#direitos">mais abaixo</a>, ligue <a href="{{ site.phoneHref }}">{{ site.phone }}</a>{{#se dados.horario}} ({{ dados.horario }}){{/se}}{{#se dados.email}}{{#se dados.morada}},{{/se}}{{#sem dados.morada}} ou{{/sem}} escreva para <a href="mailto:{{ dados.email }}">{{ dados.email }}</a>{{/se}}{{#se dados.morada}} ou {{#sem dados.email}}escreva {{/sem}}para a morada acima{{/se}}. A Melperfaz não designou um encarregado de proteção de dados.</p>
+
+      <h2 id="dados">Que dados tratamos e porquê</h2>
+      <p>Tratamos apenas os dados de que precisamos em cada situação. As alíneas indicadas são do artigo 6.º, n.º 1, do Regulamento Geral sobre a Proteção de Dados (RGPD).</p>
+
+      <h3>Pedido de orçamento pelo formulário</h3>
+      <div class="ficha"><dl>
+        <div class="ficha-largo"><dt>Dados</dt><dd>O seu nome, o telefone, o tipo de obra e, se os escrever, a localidade da obra, o email e a mensagem. Com o pedido segue a página de onde o enviou, e ficam registadas a data e a hora. O serviço de formulários do Netlify, a empresa que aloja o site, regista também o endereço IP do seu equipamento e o browser, que usa para filtrar mensagens automáticas (spam).</dd></div>
+        <div><dt>Para quê</dt><dd>Responder ao pedido, marcar a visita, preparar o orçamento e, se o aceitar, fazer a obra.</dd></div>
+        <div><dt>Fundamento</dt><dd>Diligências pré-contratuais a seu pedido (alínea b).</dd></div>
+        <div><dt>Conservação</dt><dd>Enquanto for preciso para responder e acompanhar o pedido e, depois, só pelo tempo que a lei exigir.</dd></div>
+      </dl></div>
+      <p>Ao carregar em «Enviar pedido de orçamento», o pedido fica guardado no serviço de formulários do Netlify e é-nos enviado por email. Enquanto escreve, o site não guarda nem envia o que escreve.</p>
+
+      <h3>Contacto por telefone ou WhatsApp</h3>
+      <div class="ficha"><dl>
+        <div class="ficha-largo"><dt>Dados</dt><dd>O seu número de telefone, o nome, o que nos escrever ou disser e as fotografias que enviar.</dd></div>
+        <div><dt>Para quê</dt><dd>Atender, perceber o que precisa e responder.</dd></div>
+        <div><dt>Fundamento</dt><dd>Diligências pré-contratuais ou execução do contrato (alínea b).</dd></div>
+        <div><dt>Conservação</dt><dd>Enquanto for preciso para responder e, depois, só pelo tempo que a lei exigir.</dd></div>
+      </dl></div>
+      <p>Os botões de WhatsApp do site não enviam nada: abrem o WhatsApp com uma mensagem já escrita, e a mensagem só nos chega quando a enviar por lá. O WhatsApp é um serviço da WhatsApp Ireland Limited, com a sua própria <a href="https://www.whatsapp.com/legal/privacy-policy-eea" target="_blank" rel="noopener">política de privacidade</a>.</p>
+
+      <h3>Clientes com obra</h3>
+      <div class="ficha"><dl>
+        <div class="ficha-largo"><dt>Dados</dt><dd>Dados de faturação, o contrato, o orçamento e os registos da obra.</dd></div>
+        <div><dt>Para quê</dt><dd>Fazer a obra, faturar e manter os registos que a lei exige.</dd></div>
+        <div><dt>Fundamento</dt><dd>Execução do contrato e cumprimento de obrigações legais (alíneas b e c).</dd></div>
+        <div><dt>Conservação</dt><dd>10 anos para os documentos fiscais. Os documentos da obra, durante os prazos de garantia e de responsabilidade previstos na lei.</dd></div>
+      </dl></div>
+
+      <h2 id="equipamento">O que fica no seu equipamento</h2>
+      <p>Nada. O site não usa cookies nem guarda informação no seu browser, e não tem ferramentas de estatísticas. Os tipos de letra, as imagens e o código vêm do próprio site, sem pedidos a outros serviços.</p>
+
+      <h2 id="destinatarios">Quem recebe os dados</h2>
+      <ul>
+        <li><strong>Netlify, Inc.</strong> (Estados Unidos): aloja o site e guarda os pedidos do formulário. O Netlify trata os dados por nossa conta, ao abrigo de cláusulas contratuais-tipo aprovadas pela Comissão Europeia, e regista os acessos ao site (endereço IP, página, hora) por um período curto, para o funcionamento e a segurança do serviço.</li>
+        <li><strong>O nosso fornecedor de email</strong>: recebe uma cópia de cada pedido do formulário.</li>
+        <li><strong>Fornecedores da obra</strong> (materiais, equipamentos, especialidades que subcontratemos): só os dados necessários para fazer o trabalho, quando houver obra.</li>
+        <li><strong>Autoridades</strong>: quando a lei o exigir.</li>
+      </ul>
+
+      <h2 id="direitos">Os seus direitos</h2>
+      <p>Pode pedir-nos, a qualquer momento, para ver os seus dados, corrigi-los, apagá-los, limitar o seu tratamento, opor-se a ele ou recebê-los num formato de uso corrente. Respondemos no prazo de um mês. Se não ficar satisfeito, pode apresentar queixa à Comissão Nacional de Proteção de Dados (<a href="https://www.cnpd.pt/" target="_blank" rel="noopener">cnpd.pt</a>).</p>
+
+      <h2 id="alteracoes">Alterações</h2>
+      <p>Se mudarmos esta política, a nova versão fica nesta página com a data da atualização no topo.</p>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,35 @@
+<!-- Cabeçalho (paper, fixo ao topo). Uma só lista de páginas (data/site.json «menu»), desenhada duas vezes: na barra
+     (computador) e no painel do menu (ecrãs estreitos, abaixo de 980 px). Em computador: telefone, WhatsApp e «Pedir
+     Orçamento»; abaixo de 980 px esses três vivem na barra de ações (barra-acoes.html) e no painel. A variante «reduzido»
+     (obrigado.html) só tem o logótipo e o telefone. O botão do menu tem o ícone «menu», cujas barras viram X
+     (aria-expanded); depois de 80 px de scroll o cabeçalho fica compacto (site.js, .topo-compacto). -->
+{{#sem page.header}}<div class="menu-fundo" data-menu-fundo hidden></div>
+{{/sem}}<header class="topo{{#se page.header}} topo-reduzido{{/se}}" data-topo>
+  <div class="wrap topo-in">
+    <a href="{{ inicio }}" class="logo"><img src="{{ root }}assets/img/logo-melperfaz.png" alt="Melperfaz, Construção Civil, Lda." class="logo-img" width="400" height="239"></a>{{#se page.header}}
+    <a class="topo-tel" href="{{ site.phoneHref }}">{{icone telefone}}<span class="topo-tel-txt"><span class="so-leitor">Ligar </span>{{ site.phone }}</span></a>{{/se}}{{#sem page.header}}
+    <nav class="topo-nav" aria-label="Principal">
+      <ul class="navlinks">{{#cada menu}}
+        <li><a data-nav-item="{{ item.id }}" href="{{ item.href }}"{{#se item.atual}} aria-current="page"{{/se}}>{{ item.nome }}</a></li>{{/cada}}
+      </ul>
+    </nav>
+    <div class="topo-contactos">
+      <a class="topo-tel" href="{{ site.phoneHref }}">{{icone telefone}}<span class="topo-tel-txt"><span class="so-leitor">Ligar </span>{{ site.phone }}{{#se dados.horario}}<span class="topo-horario">{{ dados.horario }}</span>{{/se}}</span></a>
+      <a class="topo-wa" href="{{wa {{ page.wa }}}}" target="_blank" rel="noopener" aria-label="Falar por WhatsApp">{{icone whatsapp}}</a>{{#sem emOrcamento}}
+      <a href="{{ pedidoHref }}" class="btn topo-btn">Pedir Orçamento</a>{{/sem}}{{#se emOrcamento}}
+      <span class="topo-atual" aria-current="page">Orçamento gratuito</span>{{/se}}
+    </div>
+    <button class="menu-toggle" type="button" data-menu aria-expanded="false" aria-controls="menu-movel" aria-label="Abrir menu">{{icone menu}}</button>{{/sem}}
+  </div>{{#sem page.header}}
+  <!-- o painel do menu (ink) por cima de um fundo escurecido (.menu-fundo, fora do cabeçalho: o blur do cabeçalho
+       prenderia nele um elemento fixo); site.js abre e fecha (Esc, clique fora, o foco volta ao botão). Sem JavaScript
+       fica escondido: a barra de ações e o rodapé levam aos mesmos sítios -->
+  <div class="menu-movel s-ink" id="menu-movel" hidden>
+    <nav class="wrap menu-movel-in" aria-label="Menu">{{#cada menu}}
+      <a href="{{ item.href }}"{{#se item.atual}} aria-current="page"{{/se}}>{{ item.nome }}</a>{{/cada}}
+      <a href="{{ pedidoHref }}"{{#se emOrcamento}} aria-current="page"{{/se}}>Pedir Orçamento</a>
+      <a href="{{ site.phoneHref }}">Ligar {{ site.phone }}</a>
+      <a href="{{wa {{ page.wa }}}}" target="_blank" rel="noopener">Falar por WhatsApp</a>
+    </nav>
+  </div>{{/sem}}
+</header>

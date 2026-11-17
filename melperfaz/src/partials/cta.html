@@ -1,0 +1,32 @@
+<!--parametros {"id": "", "sup": "s-paper", "junta": "", "eyebrow": "Vamos conversar", "titulo": null, "texto": null, "tipo": "", "de": "", "waHref": "", "waRotulo": "Falar por WhatsApp", "ref": ""} -->
+<!-- CtaBand: o fecho de cada página. Um painel vermelho (clay, com texto branco) dentro da .wrap, numa secção clara: o
+     vermelho nunca encosta ao verde (uma faixa vermelha a toda a largura entre secções verdes lia-se como uma bandeira).
+     sup é a superfície da secção à volta, s-paper (por omissão) ou s-bone, e o --check recusa outra; junta (qualquer
+     valor) continua a secção clara de cima, sem o espaço de cima. Um só layout: à esquerda o convite e o telefone em
+     grande (com o horário quando existir), à direita «Pedir Orçamento» (orcamento.html, com ?tipo= e ?de= quando os
+     parâmetros os dão), o WhatsApp (a mensagem de page.wa, ou waHref) e a ProofLine. Parâmetros: titulo e texto
+     (obrigatórios), id da secção, sup, junta, eyebrow, tipo (id do serviço), de (a página de origem), waHref, waRotulo e
+     ref (código da obra). -->
+<section class="sec cta {{ p.sup }}{{#se p.junta}} sec-junta{{/se}}"{{#se p.id}} id="{{ p.id }}"{{/se}} aria-labelledby="ctaT">
+  <div class="wrap">
+    <div class="cta-painel s-clay">
+      <div class="cta-grid">
+        <div class="cta-texto reveal">
+          <span class="eyebrow">{{ p.eyebrow }}</span>
+          <h2 id="ctaT">{{ p.titulo }}</h2>
+          <p class="cta-p">{{ p.texto }}</p>
+          <a href="{{ site.phoneHref }}" class="cta-phone"><span class="so-leitor">Ligar </span>{{ site.phone }}</a>{{#se dados.horario}}
+          <span class="cta-phone-l">{{ dados.horario }}</span>{{/se}}
+        </div>
+        <div class="cta-acoes reveal">
+          <div class="acoes acoes-pilha">
+            <a class="btn" href="{{ root }}orcamento.html{{#se p.tipo}}?tipo={{ p.tipo }}{{#se p.de}}&amp;de={{ p.de }}{{/se}}{{/se}}">Pedir Orçamento</a>
+            <a class="btn btn-ghost" href="{{#se p.waHref}}{{ p.waHref }}{{/se}}{{#sem p.waHref}}{{wa {{ page.wa }}}}{{/sem}}" target="_blank" rel="noopener">{{ p.waRotulo }}</a>
+          </div>{{#se p.ref}}
+          <p class="cta-ref">Referência da obra: {{ p.ref }}</p>{{/se}}
+          {{> prova }}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

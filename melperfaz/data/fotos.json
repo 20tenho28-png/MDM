@@ -1,0 +1,10 @@
+{
+  "_nota": "Fotografias reais das obras da Melperfaz (do sistema de desenho, pasta assets/Fotografia, maio de 2026). O original é assets/img/fotos/foto-NN.jpg; os tamanhos em AVIF e WebP fazem-se com python3 gerar_fotos.py. «w» e «h» são o tamanho do original; «origem» diz de onde veio e o corte feito.",
+  "01": {"w": 1080, "h": 810, "origem": "hero.jpg", "alt": "Carrinha branca da Melperfaz, com o logótipo, o telefone 961 245 288 e a frase Mãos à obra, estacionada em frente a uma obra de reabilitação com a estrutura de betão e tijolo à vista"},
+  "02": {"w": 1080, "h": 810, "origem": "obra1.jpg", "alt": "Fachada de um edifício em reabilitação, coberta por andaime e rede de proteção, com a placa da Melperfaz e o telefone na vedação da obra"},
+  "03": {"w": 1080, "h": 1440, "origem": "obra2.jpg", "alt": "Edifício em reabilitação com a estrutura de betão e as paredes de tijolo à vista, um trabalhador no topo e as placas de obra na vedação"},
+  "04": {"w": 849, "h": 1510, "origem": "obra4.jpg", "alt": "Trabalhador suspenso por corda, com capacete e arnês, a tratar a fachada branca de um edifício em altura, com telhados e o mar ao fundo"},
+  "05": {"w": 1080, "h": 610, "origem": "obra5.jpg, cortada em baixo para tirar um contador de gostos de rede social e em cima para tirar uma faixa preta de 10 px", "alt": "Divisão interior com as paredes e o teto pintados de branco, uma unidade de ar condicionado de cassete no teto e um escadote"},
+  "06": {"w": 958, "h": 800, "origem": "antes-wc.jpg, cortada em baixo para tirar uma faixa preta de 20 px", "alt": "Casa de banho antiga com os azulejos parcialmente arrancados, a parede degradada e os cacos no chão"},
+  "07": {"w": 970, "h": 1621, "origem": "depois-wc.jpg", "alt": "Trabalhador de joelhos a assentar pavimento cerâmico de imitação de madeira sobre cimento-cola, junto a paredes revestidas a cerâmico de imitação de mármore"}
+}

@@ -1,0 +1,14 @@
+{
+  "name": "melperfaz-site",
+  "private": true,
+  "description": "Site da Melperfaz, Construção Civil, Lda. (gerado por build.py, sem dependências). Testes com node:test; os do browser precisam do Playwright.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "python3 build.py --check",
+    "test": "node --test tests/site.test.mjs",
+    "test:browser": "node tests/browser.mjs"
+  }
+}
