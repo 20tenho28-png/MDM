@@ -1,0 +1,34 @@
+{% extends "erp/base.html" %}
+{% block titulo %}Receber relatórios{% endblock %}
+{% block corpo %}
+<div class="cab"><div><div class="eyebrow">Relatórios de intervenção</div><h1>Receber relatórios da app</h1></div></div>
+{% if resumo %}
+<section class="cartao" style="margin:14px 0">
+  <h2>Resultado</h2>
+  <ul>
+    <li>{{ resumo.novos|length }} novo(s){% if resumo.novos %}: {% for n in resumo.novos %}<a href="/erp/relatorios/{{ n }}">{{ n }}</a>{{ ', ' if not loop.last }}{% endfor %}{% endif %}</li>
+    <li>{{ resumo.atualizados|length }} atualizado(s) (validação do cliente, retificação){% if resumo.atualizados %}: {{ resumo.atualizados|join(', ') }}{% endif %}</li>
+    {% if resumo.iguais %}<li>{{ resumo.iguais|length }} já estava(m) no ERP, sem alterações</li>{% endif %}
+    {% if resumo.visitas_seguintes %}<li>{{ resumo.visitas_seguintes }} obra(s) por concluir: a visita seguinte ficou <a href="/erp/por-marcar">por marcar</a></li>{% endif %}
+    {% if resumo.sem_visita %}<li class="aviso">Sem visita na agenda: {% for n in resumo.sem_visita %}<a href="/erp/relatorios/{{ n }}">{{ n }}</a>{{ ', ' if not loop.last }}{% endfor %} (abre-os e associa a visita)</li>{% endif %}
+    {% for m in resumo.ignorados %}<li class="aviso">Não entrou: {{ m }}</li>{% endfor %}
+    {% if resumo.invalidos %}<li class="aviso">{{ resumo.invalidos }} registo(s) que não são relatórios emitidos da app (rascunhos ou outro ficheiro)</li>{% endif %}
+    {% for f in resumo.ilegiveis %}<li class="aviso">{{ f }}: não é um JSON da app</li>{% endfor %}
+  </ul>
+</section>
+{% endif %}
+<div class="grelha" style="margin-top:14px">
+<section class="cartao"><h2>Do telemóvel, com rede</h2>
+  <p>Abre a app a partir do ERP (<a href="/erp/ri">/erp/ri</a>, guarda nos favoritos do telemóvel). Depois de emitir, toca em <b>Enviar para o escritório (ERP)</b>; no ecrã inicial, <b>Enviar todos para o escritório</b> manda os que faltam.</p>
+  <p class="sub">Sem rede, o relatório fica no telemóvel como sempre. Envia-se mais tarde.</p>
+</section>
+<section class="cartao"><h2>Por ficheiro</h2>
+  <p>Na app, <b>Exportar JSON</b> (um relatório) ou <b>Exportar tudo (JSON)</b>. Escolhe aqui os ficheiros:</p>
+  <form method="post" action="/erp/relatorios/importar" enctype="multipart/form-data" class="ficha">
+    <input type="file" name="ficheiros" accept="application/json,.json" multiple required aria-label="Ficheiros JSON da app">
+    <div class="acoes"><button class="bt">Receber</button></div>
+  </form>
+  <p class="sub">Receber o mesmo ficheiro duas vezes não duplica nada. Um relatório já aceite nunca volta a «emitido».</p>
+</section>
+</div>
+{% endblock %}

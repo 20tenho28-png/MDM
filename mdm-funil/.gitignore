@@ -1,0 +1,9 @@
+# Dados de clientes: nunca vão para o repositório.
+dados/
+saida/
+revisao/
+config.toml
+exemplo/
+__pycache__/
+.pytest_cache/
+*.pyc

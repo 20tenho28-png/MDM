@@ -1,0 +1,19 @@
+{% extends "erp/base.html" %}
+{% block titulo %}{{ cliente.nome if cliente else 'Novo cliente' }}{% endblock %}
+{% block corpo %}
+<div class="cab"><div><div class="eyebrow">Clientes</div><h1>{{ cliente.nome if cliente else 'Novo cliente' }}</h1></div></div>
+<form class="ficha" method="post" action="{{ '/erp/clientes/%d'|format(cliente.id) if cliente else '/erp/clientes' }}">
+<fieldset><legend>Cliente</legend><div class="campos">
+  <label class="largo">Nome *<input name="nome" required maxlength="255" value="{{ cliente.nome if cliente }}" placeholder="Pessoa, empresa ou condomínio"></label>
+  <label>Telefone<input name="telefone" type="tel" inputmode="tel" value="{{ cliente.telefone if cliente }}"></label>
+  <label>Email<input name="email" type="email" inputmode="email" value="{{ cliente.email if cliente }}"></label>
+  <label>NIF<input name="nif" inputmode="numeric" maxlength="11" value="{{ cliente.nif if cliente }}"></label>
+  <label class="largo">Morada<input name="morada" value="{{ cliente.morada if cliente }}" placeholder="Rua, n.º, andar"></label>
+  <label>Código postal<input name="codigo_postal" value="{{ cliente.codigo_postal if cliente }}" placeholder="1990-426"></label>
+  <label>Localidade<input name="localidade" value="{{ cliente.localidade if cliente }}"></label>
+  <label class="largo">Notas<textarea name="notas" placeholder="Acesso, horários, pessoa de contacto, contrato">{{ cliente.notas if cliente }}</textarea></label>
+</div></fieldset>
+<p class="sub">Telefone, email e NIF ligam este cliente aos emails, conversas, orçamentos e faturas no funil, e aos relatórios da app.</p>
+<div class="acoes"><button class="bt">Guardar</button><a class="bt sec" href="{{ '/erp/clientes/%d'|format(cliente.id) if cliente else '/erp/clientes' }}">Cancelar</a></div>
+</form>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "erp/base.html" %}
+{% block titulo %}{{ 'Editar visita' if visita else 'Nova visita' }}{% endblock %}
+{% block corpo %}
+{% set v = visita %}
+<div class="cab"><div><div class="eyebrow">{{ cliente.nome }}</div><h1>{{ 'Visita ' ~ ref_visita(v) if v else 'Nova visita' }}</h1>
+<p class="meta">Sem dia, a visita fica <b>por marcar</b>; com dia e hora, fica <b>marcada</b>.</p></div></div>
+<form class="ficha" method="post" action="{{ '/erp/visitas/%d'|format(v.id) if v else '/erp/visitas' }}">
+<input type="hidden" name="cliente_id" value="{{ cliente.id }}">
+<fieldset><legend>O trabalho</legend><div class="campos">
+  <label>Tipo de trabalho<select name="tipo_trabalho">{% for k, n in TIPOS_TRABALHO.items() %}<option value="{{ k }}" {{ 'selected' if v and v.tipo_trabalho == k }}>{{ n }}</option>{% endfor %}</select></label>
+  <label>Prioridade<select name="prioridade"><option value="">—</option>{% for p in PRIORIDADES %}<option {{ 'selected' if v and v.prioridade == p }}>{{ p }}</option>{% endfor %}</select></label>
+  <label>Referência (n.º ORC ou pedido)<input name="referencia" value="{{ v.referencia if v }}" placeholder="ORC0034_2026" style="text-transform:uppercase"></label>
+  <label class="largo">O que há a fazer<textarea name="descricao" placeholder="Avaria relatada, o que ficou combinado, material a levar">{{ v.descricao if v }}</textarea></label>
+  <label class="largo">Morada da visita<input name="morada" value="{{ v.morada if v else cliente.morada_completa }}"></label>
+</div></fieldset>
+<fieldset><legend>Marcação</legend><div class="campos">
+  <label>Dia<input name="dia" type="date" value="{{ v.inicio.date().isoformat() if v and v.inicio else dia }}"></label>
+  <label>Hora<input name="hora" type="time" step="900" value="{{ v.inicio|hora if v and v.inicio else '09:00' }}"></label>
+  <label>Duração (horas)<input name="duracao_horas" inputmode="decimal" value="{{ ((v.fim - v.inicio).total_seconds() / 3600)|num if v and v.inicio and v.fim else '2' }}"></label>
+  <label>Técnico<select name="tecnico_id"><option value="">— por atribuir —</option>{% for t in tecnicos %}<option value="{{ t.id }}" {{ 'selected' if v and v.tecnico_id == t.id }}>{{ t.nome }}</option>{% endfor %}</select></label>
+</div>{% if not tecnicos %}<p class="sub">Ainda não há técnicos: <a href="/erp/tecnicos">acrescenta-os</a>.</p>{% endif %}</fieldset>
+<div class="acoes"><button class="bt">Guardar</button><a class="bt sec" href="{{ '/erp/visitas/%d'|format(v.id) if v else '/erp/clientes/%d'|format(cliente.id) }}">Cancelar</a></div>
+</form>
+{% endblock %}

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#A30711">
+<title>{% block titulo %}ERP{% endblock %} · MDM</title>
+<link rel="icon" href="/erp/static/logo-mdm.svg">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/erp/static/erp.css">
+</head>
+<body>
+{% set sec = request.url.path %}
+<header class="topo"><div class="in">
+  <a class="marca" href="/erp"><img src="/erp/static/logo-mdm.svg" alt="">MDM</a>
+  <nav class="nav" aria-label="ERP">
+    <a href="/erp" class="{{ 'ativo' if sec == '/erp' }}">Painel</a>
+    <a href="/erp/agenda" class="{{ 'ativo' if sec.startswith('/erp/agenda') }}">Agenda</a>
+    <a href="/erp/por-marcar" class="{{ 'ativo' if sec.startswith('/erp/por-marcar') }}">Por marcar</a>
+    <a href="/erp/relatorios" class="{{ 'ativo' if sec.startswith('/erp/relatorios') }}">Relatórios</a>
+    <a href="/erp/clientes" class="{{ 'ativo' if sec.startswith('/erp/clientes') }}">Clientes</a>
+    <a href="/erp/tecnicos" class="{{ 'ativo' if sec.startswith('/erp/tecnicos') }}">Técnicos</a>
+  </nav>
+  <a class="conta" href="/erp/ri">App dos relatórios ↗</a>
+</div></header>
+<main class="wrap">
+{% if erro %}<p class="msg erro" role="alert">{{ erro }}</p>{% endif %}
+{% if aviso %}<p class="msg ok" role="status">{{ aviso }}</p>{% endif %}
+{% block corpo %}{% endblock %}
+<footer class="rodape">{{ empresa.empresa_nome }} · ERP: agenda e relatórios de intervenção · horas de Lisboa ·
+<a href="/erp/exportar/agenda.csv">exportar a agenda para o funil</a></footer>
+</main>
+</body>
+</html>

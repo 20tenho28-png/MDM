@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from mdm.config import get_settings
 from mdm.db import Base
 from mdm import models  # noqa: F401  -- ensure models are imported for autogenerate
+from mdm.erp import models as erp_models  # noqa: F401
 
 config = context.config
 
