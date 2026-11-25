@@ -1068,6 +1068,7 @@ html[data-disp=largo]:not(.ver-tabela) #lista,html[data-disp=estreito]:not(.ver-
 .ja-aberto .btn{margin-left:8px}
 details.mais-dados > summary{cursor:pointer;font-weight:600;min-height:44px;line-height:44px}
 .chips-rap{display:none}
+.n-origem{margin:12px 0 4px}.n-origem .lbl{display:block;margin-bottom:6px;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);font-weight:500}.n-origem .chips{flex-wrap:wrap}.n-origem .chip{min-height:44px;padding:8px 16px;font-size:15px}
 html[data-disp=largo] .chips-rap,html[data-disp=estreito] .chips-rap{display:block}
 .chips-rap .chips{margin-bottom:8px}
 .hj-fila{display:none;margin-bottom:22px}
@@ -2013,7 +2014,9 @@ if (!Element.prototype.replaceChildren) {
   const PRIOS = ['P1','P2','P3'];
   const PRIO_NOME = {P1:'P1 · Urgente', P2:'P2 · Alta', P3:'P3 · Normal'};
   const TIPOS = {instalacao:'Instalação', manutencao:'Manutenção', reparacao:'Avaria / reparação', obra:'Obra'};
-  const ORIGENS = {site:'Site', telefone:'Telefone', email:'Email', whatsapp:'WhatsApp', outro:'Outro'};
+  const ORIGENS = {telefone:'Telefone', whatsapp:'WhatsApp', presencial:'Presencial', site:'Site', email:'Email', outro:'Outro'};
+  // As quatro portas de entrada que a secretária escolhe num toque no pedido novo (o funil por canal lê-as).
+  const ORIGENS_RAPIDAS = ['telefone','whatsapp','presencial','site'];
   const MOTIVOS = ['Foi com outra empresa','Preço','Prazo','Desistiu ou adiou','Sem resposta','Não fazemos este trabalho','Resolvido ao telefone (sem fatura)','Sem fatura (garantia ou contrato)','Outro'];
   const POR_ONDE = {email:'Email', whatsapp:'WhatsApp', em_mao:'Em mão', outro:'Outro'};
   // A chave publicável do Supabase pode estar à vista: quem lê e escreve é decidido pelas regras da base de dados
@@ -8150,7 +8153,7 @@ if (!Element.prototype.replaceChildren) {
   function canalDe(r) {
     if (CANAIS[r.canal]) return r.canal;
     if (r.origem === 'whatsapp') return 'whatsapp';
-    if (r.origem === 'telefone') return 'telefone';
+    if (r.origem === 'telefone' || (r.origem === 'presencial' && !/@/.test(r.contacto || ''))) return 'telefone';
     if (r.origem === 'email' || r.origem === 'site' || /@/.test(r.contacto || '')) return 'email';
     return 'whatsapp';
   }
@@ -9423,6 +9426,9 @@ if (!Element.prototype.replaceChildren) {
     const base = {prioridade:null, dataPedido: today(), ...(novoBase || {})}; novoBase = null;
     F('sheetBody').replaceChildren(
       h('p',{class:'note'}, 'Regista o pedido assim que chega: entra em Novo, com dono, próxima ação e data. O P sai das regras; muda-o só com razão.'),
+      h('div',{class:'n-origem'}, h('span',{class:'lbl'}, 'Como chegou?'),
+        h('div',{class:'chips', role:'group', 'aria-label':'Como chegou o pedido'}, ORIGENS_RAPIDAS.map(o =>
+          h('button',{type:'button', class:'chip', 'data-o':o, 'aria-pressed': String(base.origem === o), onclick:() => { F('d-origem').value = o; F('d-origem').dispatchEvent(new Event('change')); }}, ORIGENS[o])))),
       camposDados(base, true),
       h('div',{class:'fields'},
         campo('n-dono','Dono', donoInput('n-dono', meuNome())),
@@ -9441,6 +9447,8 @@ if (!Element.prototype.replaceChildren) {
     F('d-canal').addEventListener('change', () => { canalMexido = true; });
     const canalPelaOrigem = () => { if (!canalMexido) F('d-canal').value = canalDe({origem: val('d-origem'), contacto: val('d-contacto')}); };
     F('d-origem').addEventListener('change', canalPelaOrigem); F('d-contacto').addEventListener('input', canalPelaOrigem);
+    const marcaOrigem = () => Array.prototype.forEach.call(document.querySelectorAll('.n-origem .chip'), b => b.setAttribute('aria-pressed', String(b.getAttribute('data-o') === val('d-origem'))));
+    F('d-origem').addEventListener('change', marcaOrigem);
     atualizarP();
     if (tatil()) novoCurto();
     foca(F('d-cliente'));
@@ -9487,6 +9495,7 @@ if (!Element.prototype.replaceChildren) {
     const agora = new Date().toISOString();
     const doc = lerDados({});
     if (doc.erro) { const el = F('d-err'); el.textContent = doc.erro; el.hidden = false; return; }
+    if (!doc.origem) { const el = F('d-err'); el.textContent = 'Escolhe como chegou o pedido (Telefone, WhatsApp, Presencial ou Site): é o que mede o funil por canal.'; el.hidden = false; return; }
     const d = val('n-dono'), a = val('n-acao'), dt = val('n-data');
     if (!d || !a || !dt) { const el = F('d-err'); el.textContent = 'Um pedido novo precisa de dono, próxima ação e data.'; el.hidden = false; return; }
     Object.assign(doc, {estado:'novo', entrouNoEstado: agora, criado: agora, dono:d, proximaAcao:a, dataProximaAcao:dt, prioridadeEntrada: doc.prioridade,
