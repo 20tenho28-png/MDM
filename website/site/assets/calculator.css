@@ -13,5 +13,5 @@
 @media print{body:has(#ac-calculator) .mobile-actions{display:none!important}}
 
 /* Telemóvel: nenhum texto abaixo de 13 px (plano SEO e UX, fase 4). */
-@media(max-width:760px){.calc-progress,.calc-progress li,.calc-progress span,.calc-count span,.calc-controls>span,.calc-local-note{font-size:.8125rem}.calc-progress{padding-inline:8px;gap:2px;text-align:center}.calc-progress li{letter-spacing:-.02em}.calc-progress span{margin-inline:auto}}
-@media(max-width:380px){.calc-progress li{letter-spacing:-.045em}}
+@media(max-width:760px){.calc-progress,.calc-progress li,.calc-progress span,.calc-count span,.calc-controls>span,.calc-local-note{font-size:.8125rem}.calc-progress{padding-left:8px;padding-right:8px;gap:2px;text-align:center}.calc-progress li{letter-spacing:-.02em}.calc-progress span{margin-left:auto;margin-right:auto}.calc-controls>span{white-space:nowrap}}
+@media(max-width:380px){.calc-progress{padding-left:4px;padding-right:4px}.calc-progress li{letter-spacing:-.045em}.calc-progress [aria-current]{letter-spacing:-.07em}.calc-count{min-width:0;flex-wrap:wrap}.calc-count button{flex:1 1 30%}.calc-controls{gap:8px}.calc-controls .btn{padding-left:14px;padding-right:14px}}

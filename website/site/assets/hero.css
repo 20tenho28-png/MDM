@@ -122,6 +122,3 @@
  }
  .hero-immersive .hero-image-frame>img[src$="hero-bomba-calor-1600.webp"]{object-fit:cover;object-position:center 68%}
 }
-
-/* Telemóvel: nenhum texto abaixo de 13 px (plano SEO e UX, fase 4). */
-@media(max-width:760px){.hero-immersive .hero-copy>.eyebrow{font-size:.8125rem}}

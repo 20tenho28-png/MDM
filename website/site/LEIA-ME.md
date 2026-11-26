@@ -83,7 +83,13 @@ work from this folder alone until they are connected to a new backend:
   seguinte».
 - `HVACBusiness` carries `hasMap` with the Google Maps link. Update
   `lastmod` in `sitemap.xml` when a page changes.
-- Phones (up to 760 px): no text under 13 px, and links get a 44 px tap
-  area through an invisible `::after` (end of `assets/site.css`), so the
-  look and the spacing stay the same. The hero, its title and the form were
-  not changed (PR 52 was reverted at the owner's request).
+- Phones (up to 760 px), rules at the end of `assets/site.css` and
+  `assets/calculator.css`: text under 13 px raised to 13 px, and the
+  language switch, hero service links, text links, breadcrumbs, contact
+  links and footer links get a 44 px tap area through an invisible `::after`,
+  so the look and the spacing stay the same. Where links sit closer than
+  44 px, neighbours share the space between them. On the calculator, the
+  room buttons go to two rows (3 + 2) up to 380 px so they fit.
+- Left exactly as they were, on purpose: the hero (its small label stays at
+  12 px), the H1, the quote form (`#quote-dialog`, its label stays at 12 px)
+  and the bottom bar (PR 52 was reverted at the owner's request).
