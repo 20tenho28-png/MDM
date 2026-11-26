@@ -72,3 +72,18 @@ work from this folder alone until they are connected to a new backend:
   `.html` form (`/obras.html`), so the site works on any static host. The
   original host served `/obras` and redirected `.html`; this copy no longer
   depends on that.
+
+## SEO and phone rules (November 2026)
+
+- Every indexable page has three hreflang lines: `pt-PT`, `en` and
+  `x-default` (pointing to the Portuguese page), all in the `.html` form.
+  A new page needs the same three lines and an entry in `sitemap.xml`.
+- The owner decided to keep the `.html` form (no switch to addresses without
+  `.html`) and to keep the only response promise «respondemos no dia útil
+  seguinte».
+- `HVACBusiness` carries `hasMap` with the Google Maps link. Update
+  `lastmod` in `sitemap.xml` when a page changes.
+- Phones (up to 760 px): no text under 13 px, and links get a 44 px tap
+  area through an invisible `::after` (end of `assets/site.css`), so the
+  look and the spacing stay the same. The hero, its title and the form were
+  not changed (PR 52 was reverted at the owner's request).

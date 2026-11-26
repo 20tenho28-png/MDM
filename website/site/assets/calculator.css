@@ -11,3 +11,7 @@
 @media print{body:has(#ac-calculator){background:#fff;font-size:10pt}body:has(#ac-calculator)>header,body:has(#ac-calculator)>footer,body:has(#ac-calculator)>dialog,body:has(#ac-calculator) .mobile-cta,body:has(#ac-calculator) .mobile-sticky,body:has(#ac-calculator) .skip,.calc-progress,.calc-aside,.calc-result-actions,.calc-cost button,.calc-edit,#calc-copy-status,.calc-controls{display:none!important}.calc-heading,.calc-shell{width:100%;margin:0;padding:0}.calc-shell{display:block}.calc-main{border:0}#calc-form{padding:20px 0}.calc-heading .breadcrumb{display:none}.calc-heading h1{font-size:24pt}.calc-heading .eyebrow{margin-top:0}.calc-result-grid{grid-template-columns:1fr 1fr}.calc-card,.calc-total,.calc-cost{break-inside:avoid;color:#000;background:#fff;border:1px solid #aaa}.calc-total strong{color:#000}.calc-method{display:none}}
 
 @media print{body:has(#ac-calculator) .mobile-actions{display:none!important}}
+
+/* Telemóvel: nenhum texto abaixo de 13 px (plano SEO e UX, fase 4). */
+@media(max-width:760px){.calc-progress,.calc-progress li,.calc-progress span,.calc-count span,.calc-controls>span,.calc-local-note{font-size:.8125rem}.calc-progress{padding-inline:8px;gap:2px;text-align:center}.calc-progress li{letter-spacing:-.02em}.calc-progress span{margin-inline:auto}}
+@media(max-width:380px){.calc-progress li{letter-spacing:-.045em}}
