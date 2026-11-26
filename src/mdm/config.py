@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     imap_password: str = ""
     imap_inbox_folder: str = "INBOX"
     imap_sent_folder: str = "Sent"
+    imap_timeout_seconds: int = 30
 
     poll_interval_seconds: int = 60
 

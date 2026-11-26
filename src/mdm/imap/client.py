@@ -9,11 +9,15 @@ A `subscribe()` stub is reserved for a future IMAP IDLE implementation.
 """
 from __future__ import annotations
 
+import logging
 from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Protocol
 
 from mdm.config import Settings
+
+
+log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -40,9 +44,23 @@ class ImapToolsClient:
         port = self.settings.imap_port
         user = self.settings.imap_user
         password = self.settings.imap_password
+        timeout = self.settings.imap_timeout_seconds
 
-        with MailBox(host, port=port).login(user, password, initial_folder=folder) as mb:
+        if host == "imap.example.com" or not user or not password:
+            log.warning(
+                "IMAP not configured (host=%s, user set=%s) — skipping poll. "
+                "Edit your .env to point at a real mailbox.",
+                host,
+                bool(user),
+            )
+            return
+
+        log.info("Connecting to IMAP %s:%s as %s (folder=%s)", host, port, user, folder)
+        with MailBox(host, port=port, timeout=timeout).login(
+            user, password, initial_folder=folder
+        ) as mb:
             criteria = AND(uid=f"{since_uid + 1}:*") if since_uid > 0 else "ALL"
+            count = 0
             for mail in mb.fetch(criteria, mark_seen=False, bulk=True):
                 try:
                     uid = int(mail.uid) if mail.uid else 0
@@ -50,8 +68,9 @@ class ImapToolsClient:
                     continue
                 if uid <= since_uid:
                     continue
-                raw = mail.obj.as_bytes()
-                yield FetchedMessage(folder=folder, uid=uid, raw=raw)
+                count += 1
+                yield FetchedMessage(folder=folder, uid=uid, raw=mail.obj.as_bytes())
+            log.info("Polled %s: %d new message(s)", folder, count)
 
     def subscribe(self, folder: str) -> Iterator[FetchedMessage]:  # pragma: no cover
         """Reserved for a future IDLE implementation."""
